@@ -123,7 +123,7 @@ ge_reporting_node = Node(
 )
 ```
 
-Alternatively, you can also make use of a helper function that creates the mapping for you, so you can reuse it across your codebase.
+You can also make use of a helper function that creates the mapping for you, so you can reuse it across your codebase.
 
 ```diff
  from kedro.pipeline import Node
@@ -149,7 +149,7 @@ Alternatively, you can also make use of a helper function that creates the mappi
 
 ## How to tag a node
 
-Tags might be useful to run part of a pipeline without changing the code. For instance, `kedro run --tags=ds` will only run nodes that have a `ds` tag attached.
+Tags might be useful to run part of a pipeline without changing the code. For instance, `kedro run --tags=ds` runs nodes that have a `ds` tag attached.
 
 To tag a node, you can specify the `tags` argument:
 
@@ -165,7 +165,7 @@ To run a pipeline using a tag:
 kedro run --tags=pipeline_tag
 ```
 
-This will run only the nodes found within the pipeline tagged with `pipeline_tag`.
+This runs the nodes found within the pipeline tagged with `pipeline_tag`.
 
 !!! note
     Node or tag names must ONLY contain letters, digits, hyphens, underscores, and periods. Other symbols are not permitted.
@@ -195,7 +195,7 @@ Out[2]: {'sum': 5}
 
 To check the version installed, type `kedro -V` in your terminal window.
 
-[Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255) and are a special kind of function in Python that returns lazy iterators. They are often used for lazy-loading or lazy-saving of data, which can be particularly useful when dealing with large datasets that do not fit entirely into memory. In the context of Kedro, generator functions can be used in nodes to efficiently process and handle such large datasets.
+[Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255) and are a special kind of function in Python that returns lazy iterators. They are often used for lazy-loading or lazy-saving of data, which can be useful when dealing with large datasets that do not fit entirely into memory. In the context of Kedro, generator functions can be used in nodes to efficiently process and handle such large datasets.
 
 ### Set up the project
 
@@ -228,6 +228,7 @@ To use generators to save data lazily, you need do three things:
 
 Copy the following code to `nodes.py`. The main change is to use a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
 
+<!--vale off-->
 ??? example "View code"
     ```python
     import logging
@@ -292,7 +293,7 @@ Copy the following code to `nodes.py`. The main change is to use a new model `De
         logger = logging.getLogger(__name__)
         logger.info("Model has accuracy of %.3f on test data.", accuracy)
     ```
-
+<!--vale on-->
 
 The `ChunkWiseCSVDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
 

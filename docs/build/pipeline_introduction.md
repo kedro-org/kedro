@@ -2,7 +2,7 @@
 
 The [Nodes](./nodes.md) guide introduced nodes as building blocks that represent tasks, and can be combined in a pipeline to build your workflow. A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline resolves dependencies to determine the node execution order, and does *not* necessarily run the nodes in the order in which they are passed in.
 
-To use Kedro's automatic dependency resolution, chain your nodes into a [kedro.pipeline.Pipeline][] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the [kedro.pipeline.Pipeline][] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
+To use Kedro's automatic dependency resolution, chain your nodes into a [`Pipeline`][kedro.pipeline.pipeline.Pipeline] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the [`Pipeline`][kedro.pipeline.pipeline.Pipeline] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
 
 The following sections explain how to create and use Kedro pipelines:
 

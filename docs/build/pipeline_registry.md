@@ -1,6 +1,6 @@
 # The pipeline registry
 
-Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This populates the `pipelines` variable in [`kedro.framework.project`][kedro.framework.project] that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to [`Pipeline`][kedro.pipeline.Pipeline] objects.
+Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This populates the `pipelines` variable in [`kedro.framework.project`][kedro.framework.project] that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to [`Pipeline`][kedro.pipeline.pipeline.Pipeline] objects.
 
 For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipeline_registry.py) defines the following `register_pipelines()` function. It exposes the data processing pipeline, the data science pipeline, and a default pipeline that combines both:
 
@@ -46,11 +46,11 @@ def register_pipelines() -> Dict[str, Pipeline]:
     return pipelines
 ```
 
-Under the hood, the `find_pipelines()` function traverses the `src/<package_name>/pipelines/` directory and returns a mapping from pipeline directory name to [`Pipeline`][kedro.pipeline.Pipeline] object by:
+Under the hood, the `find_pipelines()` function traverses the `src/<package_name>/pipelines/` directory and returns a mapping from pipeline directory name to [`Pipeline`][kedro.pipeline.pipeline.Pipeline] object by:
 
 1. Importing the `<package_name>.pipelines.<pipeline_name>` module
 2. Calling the `create_pipeline()` function exposed by the `<package_name>.pipelines.<pipeline_name>` module
-3. Validating that the constructed object is a [`Pipeline`][kedro.pipeline.Pipeline]
+3. Validating that the constructed object is a [`Pipeline`][kedro.pipeline.pipeline.Pipeline]
 
 By default, if any of these steps fail, `find_pipelines()` (or `find_pipelines(raise_errors=False)`) raises an appropriate warning and skips the current pipeline but continues traversal. During development, this enables you to run your project with some pipelines, even if other pipelines are broken or works in progress.
 

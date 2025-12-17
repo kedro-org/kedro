@@ -640,8 +640,7 @@ def _load_obj(class_path: str) -> tuple[Any | None, str | None]:
             raise DatasetError(
                 f"{exc}. Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"
-                f"https://docs.kedro.org/en/stable/kedro_project_setup/"
-                f"dependencies.html#install-dependencies-related-to-the-data-catalog"
+                f"https://docs.kedro.org/en/stable/getting-started/install/#how-to-manually-install-the-project-dependencies-in-an-environment",
             ) from exc
 
         return (
@@ -653,8 +652,7 @@ def _load_obj(class_path: str) -> tuple[Any | None, str | None]:
         return (
             None,
             f"{exc}. Please install the missing dependencies for {class_path}:\n"
-            f"https://docs.kedro.org/en/stable/kedro_project_setup/"
-            f"dependencies.html#install-dependencies-related-to-the-data-catalog",
+            f"https://docs.kedro.org/en/stable/getting-started/install/#how-to-manually-install-the-project-dependencies-in-an-environment",
         )
 
     return class_obj, None

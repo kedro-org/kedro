@@ -1,3 +1,4 @@
+agentic
 Aneira
 APIs
 Astro
@@ -18,12 +19,16 @@ dataframes
 dbt
 dbx
 Dockerfile
+docstring
+docstrings
 doxenix
 ethanknights
 filepath
 fsspec
+gif
 Globals
 globals
+Grafana
 hyperparameter
 hyperparameters
 ipdb
@@ -35,6 +40,7 @@ Kedro's
 Kedroid
 Kedroids
 Kubeflow
+Langfuse
 matplotlib
 Matplotlib
 Marimo
@@ -49,11 +55,13 @@ namespacing
 networkx
 numpy
 np
+Opik
 Pandera
 Palantir
 parallelisation
 Paramiko
 parameterising
+Pikachu
 pickleable
 Plotly
 pluggy
@@ -68,9 +76,11 @@ Repos
 repo
 reusability
 SQLAlchemy
+serialisable
 Serverless
 serverless
 show_source
+statsd
 Streamlit
 subfolder
 subfolders

@@ -25,9 +25,9 @@ which is installed as one of Kedro’s dependencies.
 - **Python Version:** The version of Python in use.
 - **Operating System:** The operating system on which Kedro is running.
 - **Tools Selected and Example Pipeline:** The tools chosen and example pipeline inclusion during the `kedro new` command execution, if applicable.
-- **Starter:** The starter template used when creating the project. This is only visible if the project was created using one of [the official Kedro starters](https://github.com/kedro-org/kedro-starters).
+- **Starter:** The starter template used when creating the project. This field is visible when the project was created using one of [the official Kedro starters](https://github.com/kedro-org/kedro-starters).
 - **Number of Datasets, Nodes, and Pipelines:** Quantitative data about the project structure.
-- **Dataset Types:** The types of datasets used in the project. The dataset names are only visible if they belong to `kedro.io` or [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets).
+- **Dataset Types:** The types of datasets used in the project. Dataset names are visible when they belong to `kedro.io` or [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets).
 
 For technical information on how the telemetry collection works, you can browse
 [the source code of `kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry).
@@ -45,7 +45,7 @@ To withdraw consent, you have several options:
    ```console
    kedro new --telemetry=no
    ```
-   This will create a new project with a `.telemetry` file in its root folder, containing `consent: false`. This file will be used when executing Kedro commands within that project folder. Note that telemetry data about the execution of the `kedro new` command will still be sent if telemetry has not been disabled using environment variables.
+   This will create a new project with a `.telemetry` file in its root folder, containing `consent: false`. This file will be used when executing Kedro commands within that project folder. **Note**: telemetry data about the execution of the `kedro new` command will still be sent if telemetry has not been disabled using environment variables.
 
 !!! note
     The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.

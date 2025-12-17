@@ -43,11 +43,12 @@ We recommend that you save your notebook in the `notebooks` folder of your Kedro
 
 The `kedro jupyter notebook` command launches a notebook with a customised kernel that has been extended to make the following project variables available:
 
+<!-- vale off -->
 * `catalog` (type [kedro.io.DataCatalog][]): [Data Catalog](../../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type [kedro.framework.context.KedroContext][]): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../../build/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type [kedro.framework.session.session.KedroSession][]): [Kedro session](../../extend/session.md) that orchestrates a pipeline run
-
+<!-- vale on -->
 It also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
 
 !!! note
@@ -301,7 +302,7 @@ The line magic will load your node's inputs, imports, and body:
 ```
 
 ??? example "Click to see an example."
-    ![jupyter_ipython_load_node](../../meta/images/jupyter_ipython_load_node.gif)
+    ![Load a node in Jupyter or IPython](../../meta/images/jupyter_ipython_load_node.gif)
 
 
 
@@ -338,15 +339,15 @@ You can then inspect the value of expressions and arguments, or add breakpoints 
 Here is example debugging workflow after discovering a node in your pipeline is failing:
 1. Inspect the logs to find the name of the failing node. We can see below the problematic node is `split_data_node`.
 
-??? example "Click to the pipeline failure logs"
-    ![pipeline_error_logs](../../meta/images/pipeline_error_logs.png)
+??? example "Click to see the pipeline failure logs"
+    ![Pipeline error logs](../../meta/images/pipeline_error_logs.png)
 
 2. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#kedro-line-magics).
 3. Run the populated cells to examine the node's behaviour in isolation.
 4. If the node fails in error, use `%debug` to launch an interactive debugging session in your notebook.
 
 ??? example "Click to see this workflow in action."
-    ![jupyter_ipython_debug_command](../../meta/images/jupyter_ipython_debug_command.gif)
+    ![Use the %debug line magic in Jupyter or IPython](../../meta/images/jupyter_ipython_debug_command.gif)
 
 
 !!! note
@@ -357,7 +358,7 @@ Here is example debugging workflow after discovering a node in your pipeline is 
 You can also set up the debugger to run automatically when an exception occurs by using the [`%pdb` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behaviour can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
 
 ??? example "Click to see an example"
-    ![jupyter_ipython_pdb_command](../../meta/images/jupyter_ipython_pdb_command.gif)
+    ![Use the %pdb line magic in Jupyter or IPython](../../meta/images/jupyter_ipython_pdb_command.gif)
 
 
 ---

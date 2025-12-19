@@ -443,7 +443,7 @@ In truth, this code is not much more maintainable than previous versions.
 
 Maybe we could do better with a series of smaller functions that map to the Kedro vision of a pipeline of nodes. A node should behave consistently, repeatably, and predictably, so that a given input  to a node always returns the same output. For those in the know, this is the definition of a pure function. Nodes/pure functions should be small single responsibility functions that perform a single specific task.
 
-Let's try this with our code. We'll split it into a set of functions to process the data, which are based on the code in `big_function` but where each function has a single responsibility. Then we'll add a set of data engineering and data science functions which split the model training and evaluation code into three separate functions.
+Let's try this with our code. We'll split it into a set of functions to process the data, which are based on the code in `big_function` but where each function has a single responsibility. Then we'll add a set of data science functions which split the model training and evaluation code into three separate functions.
 
 ```python
 ####################

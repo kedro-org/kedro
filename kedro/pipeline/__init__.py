@@ -2,7 +2,17 @@
 data-driven pipelines.
 """
 
+from .llm_context import LLMContext, llm_context_node, tool
 from .node import GroupedNodes, Node, node
 from .pipeline import Pipeline, pipeline
 
-__all__ = ["node", "pipeline", "Node", "Pipeline", "GroupedNodes"]
+__all__ = [
+    "node",
+    "pipeline",
+    "Node",
+    "Pipeline",
+    "GroupedNodes",
+    "llm_context_node",
+    "LLMContext",
+    "tool",
+]

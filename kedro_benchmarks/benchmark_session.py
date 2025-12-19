@@ -4,13 +4,9 @@
 import logging
 import os
 import shutil
-import sys
 from pathlib import Path
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
+import tomllib
 
 from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.session import KedroSession

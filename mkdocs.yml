@@ -3,6 +3,9 @@ site_url: https://docs.kedro.org/en/stable/
 repo_name: kedro-org/kedro
 repo_url: https://github.com/kedro-org/kedro
 
+hooks:
+  - docs/hooks.py
+
 theme:
   name: material
   custom_dir: docs/overrides/

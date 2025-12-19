@@ -76,7 +76,7 @@ plugins:
               returns_named_value: false
   - llmstxt:
       markdown_description: |
-        Kedro is an open-source Python framework for creating reproducible, maintainable, and modular data science code.
+        Kedro is an open-source Python framework for creating reproducible, maintainable, and modular data engineering and data science code.
         It applies software engineering concepts to machine learning code including modularity, separation of concerns, and versioning.
 
         Key features:

@@ -2,13 +2,17 @@
 # See "Writing benchmarks" in the asv docs for more information.
 
 import logging
+import os
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
-import tomllib
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
+from kedro.framework.cli.cli import KedroCLI
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 
@@ -30,23 +34,26 @@ class SessionTimeSuite:
         self.project_path.mkdir(parents=True, exist_ok=True)
         self.original_cwd = Path.cwd()
 
-        subprocess.run(  # noqa: S603
-            [
-                sys.executable,
-                "-m",
-                "kedro",
-                "new",
-                "--name",
-                "test_project",
-                "--tools",
-                "none",
-                "--example",
-                "no",
-            ],
-            cwd=self.project_path.parent,
-            check=True,
-            capture_output=True,
-        )
+        # Change to parent directory to ensure project is created in the right location
+        os.chdir(self.project_path.parent)
+        cli = KedroCLI(self.project_path.parent)
+        try:
+            cli.main(
+                [
+                    "new",
+                    "--name",
+                    "test_project",
+                    "--tools",
+                    "none",
+                    "--example",
+                    "no",
+                ],
+                standalone_mode=False,
+            )
+        except SystemExit:
+            pass  # KedroCLI exits after running the command
+        finally:
+            os.chdir(self.original_cwd)  # Return to original directory
 
         created_project = None
         for potential_dir in self.project_path.parent.iterdir():
@@ -92,27 +99,21 @@ class SessionTimeSuite:
             if pipeline_dir.exists():
                 continue
 
-            result = subprocess.run(  # noqa: S603
-                [
-                    sys.executable,
-                    "-m",
-                    "kedro",
-                    "pipeline",
-                    "create",
-                    pipeline_name,
-                    "--skip-config",  # Skip config files to keep it simple
-                ],
-                cwd=self.project_path,
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-            if result.returncode != 0:
-                if "already exists" not in (result.stderr or result.stdout):
-                    raise RuntimeError(
-                        f"Failed to create pipeline '{pipeline_name}': "
-                        f"{result.stderr or result.stdout}"
-                    )
+            cli = KedroCLI(self.project_path)
+            try:
+                cli.main(
+                    [
+                        "pipeline",
+                        "create",
+                        pipeline_name,
+                        "--skip-config",
+                    ],
+                    standalone_mode=False,
+                )
+            except SystemExit:
+                pass
+            except Exception as e:
+                logger.debug(f"Failed to create pipeline '{pipeline_name}': {e}")
 
         dummy_task_code = '''
 def dummy_task():

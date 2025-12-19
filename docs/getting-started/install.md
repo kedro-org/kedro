@@ -282,7 +282,7 @@ kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset]>=3
 kedro-telemetry>=0.3.1
 kedro-viz~=6.0 # Visualise pipelines
 
-# For modelling in the data engineering and data science pipeline
+# For modelling in the data science pipeline
 scikit-learn~=1.0
 ```
 

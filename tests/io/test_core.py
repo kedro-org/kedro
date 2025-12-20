@@ -664,6 +664,20 @@ class TestAbstractVersionedDataset:
         ):
             my_versioned_dataset._fetch_latest_load_version()
 
+    def test_list_versions(self, my_versioned_dataset):
+        data = "test"
+
+        versions = ["version1", "version2", "version3"]
+
+        for version in versions:
+            my_versioned_dataset._version = Version(load=None, save=version)
+            my_versioned_dataset.save(data)
+
+        versions.reverse()
+
+        assert versions == my_versioned_dataset.list_versions(full_path=False)
+        assert len(my_versioned_dataset.list_versions()) == 3
+
 
 class MyLegacyDataset(AbstractDataset):
     def __init__(self, filepath="", save_args=None, fs_args=None, var=None):

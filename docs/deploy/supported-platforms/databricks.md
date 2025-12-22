@@ -73,7 +73,7 @@ This option is recommended for **local-first development**, where you run code l
 
 ### Setup steps
 
-#### 1. Install Databricks Connect
+#### 1. Install databricks-connect
 
 ```bash
 pip install databricks-connect
@@ -126,7 +126,7 @@ This option is suitable when you need:
 
 > ⚠️ **Important**
 > This is a **community-maintained plugin**.
-> Databricks permissions, workspace layouts, and runtime versions vary between organisations, so some configuration steps may require adjustment.
+> Databricks permissions, workspace layouts, and runtime versions vary between organisations, so some configuration steps may require updates.
 
 For full setup instructions, see the [plugin documentation.](https://kedro-databricks.readthedocs.io/en/latest/)
 

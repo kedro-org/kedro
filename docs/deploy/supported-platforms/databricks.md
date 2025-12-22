@@ -16,7 +16,7 @@ This option is suitable if you primarily work **inside the Databricks workspace*
 
 ### Typical workflow
 
-1. Push your Kedro project to a Git repository (GitHub, GitLab, Azure DevOps, Bitbucket, etc.).
+1. Push your Kedro project to a Git repository (GitHub, GitLab, Azure DevOps, Bitbucket, and more).
 2. Clone the repository into Databricks using **[Git folders](https://docs.databricks.com/aws/en/repos/repos-setup)**.
 3. Open the cloned repository in Databricks and update your Kedro Data Catalog (`conf/base/catalog.yml`):
    - For all `spark.SparkDatasetV2` datasets, update file paths to point to **Databricks Volumes**, for example:
@@ -54,16 +54,16 @@ with KedroSession.create() as session:
 ### Scheduling
 
 - Create a **Databricks Job** that runs the notebook
-- Suitable for simple, notebook-based schedules
+- Suitable for notebook-based schedules
 
 > ⚠️ **Free tier limitation**
 > Databricks Free tier does not support DBFS. Use Unity Catalog tables instead.
 
 ---
 
-## Local development → Remote Databricks cluster (Databricks Connect)
+## Local development → remote Databricks cluster (Databricks Connect)
 
-This option is recommended for **local-first development**, where you run code locally but execute Spark workloads remotely on a Databricks cluster via Databricks Connect. For more advanced use cases, you can wrap the project in a Docker container and run it on any Docker-compatible runtime.
+This option is recommended for **local-first development**, where you run code locally but execute Spark workloads remotely on a Databricks cluster through Databricks Connect. For more advanced use cases, you can wrap the project in a Docker container and run it on any Docker-compatible runtime.
 
 ### How it works
 
@@ -96,7 +96,7 @@ Non-Spark datasets (for example, Pandas-based datasets) can remain local. They w
 
 #### 4. Run Kedro locally
 
-Once configured, simply run Kedro as usual:
+Once configured, run Kedro as usual:
 
 ```bash
 kedro run
@@ -106,7 +106,7 @@ Your Spark jobs will execute remotely on the Databricks cluster.
 
 ---
 
-## Production-grade deployments via `kedro-databricks`
+## Production-grade deployments through `kedro-databricks`
 
 For **production deployments**, we recommend using the community-maintained
 [`kedro-databricks`](https://github.com/JenspederM/kedro-databricks) plugin.
@@ -134,7 +134,7 @@ For full setup instructions, see the [plugin documentation.](https://kedro-datab
 
 [Kedro-Viz doc](https://docs.kedro.org/projects/kedro-viz/en/stable/) is a tool that enables you to visualise your Kedro pipeline and metrics generated from your data science experiments. It is a standalone web application that runs in a browser and can run on a local machine or in a Databricks notebook.
 
-For Kedro-Viz to run with your Kedro project, you need to ensure that both the packages are installed in the same scope (notebook-scoped vs. cluster library). This means that if you `%pip install kedro` from inside your notebook then you should also `%pip install kedro-viz` from inside your notebook.
+For Kedro-Viz to run with your Kedro project, you need to ensure that both packages are installed in the same scope (notebook-scoped vs. cluster library). This means that if you `%pip install kedro` from inside your notebook then you should also `%pip install kedro-viz` from inside your notebook.
 If your cluster comes with Kedro installed on it as a library already then you should also add Kedro-Viz as a [cluster library](https://docs.microsoft.com/en-us/azure/databricks/libraries/cluster-libraries).
 
 To run Kedro-Viz in a Databricks notebook you must first launch the Kedro IPython extension:

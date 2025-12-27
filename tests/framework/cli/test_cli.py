@@ -761,6 +761,48 @@ class TestRunCommand:
             only_missing_outputs=False,
         )
 
+    def test_run_multiple_pipelines(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipelines", "pipe1,pipe2"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert fake_session.run.call_count == 2
+
+        calls = fake_session.run.call_args_list
+        assert calls[0].kwargs["pipeline_name"] in ["pipe1", "pipe2"]
+        assert calls[1].kwargs["pipeline_name"] in ["pipe1", "pipe2"]
+
+    def test_run_multiple_pipelines_with_duplicate_name(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipelines", "pipe1,pipe1"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert fake_session.run.call_count == 1
+
+        assert fake_session.run.call_args.kwargs["pipeline_name"] == "pipe1"
+
+    def test_pipeline_and_pipelines_mutually_exclusive(
+        self, fake_project_cli, fake_metadata
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipeline", "pipe1", "--pipelines", "pipe2"],
+            obj=fake_metadata,
+        )
+
+        assert result.exit_code != 0
+        assert "cannot be used together" in result.output.lower()
+
     @mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_invalid_config(
         self,

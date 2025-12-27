@@ -25,6 +25,7 @@ from kedro.framework.project import (
 )
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
+from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 
@@ -280,6 +281,7 @@ class KedroSession:
     def run(  # noqa: PLR0913
         self,
         pipeline_name: str | None = None,
+        pipeline_names: list[str] | None = None,
         tags: Iterable[str] | None = None,
         runner: AbstractRunner | None = None,
         node_names: Iterable[str] | None = None,
@@ -295,6 +297,7 @@ class KedroSession:
 
         Args:
             pipeline_name: Name of the pipeline that is being run.
+            pipeline_names: Name of the pipelines that is being run.
             tags: An optional list of node tags which should be used to
                 filter the nodes of the ``Pipeline``. If specified, only the nodes
                 containing *any* of these tags will be run.
@@ -328,6 +331,12 @@ class KedroSession:
         """
         # Report project name
         self._logger.info("Kedro project %s", self._project_path.name)
+        if pipeline_name:
+            self._logger.warning(
+                "`pipeline_name` is deprecated and will be removed in a future release. "
+                "Please use `pipeline_names` instead."
+            )
+            pipeline_names = [pipeline_name]
 
         if self._run_called:
             raise KedroSessionError(
@@ -341,18 +350,19 @@ class KedroSession:
         runtime_params = self.store.get("runtime_params") or {}
         context = self.load_context()
 
-        name = pipeline_name or "__default__"
+        names = pipeline_names or ["__default__"]
+        combined_pipelines = Pipeline([])
+        for name in names:
+            try:
+                combined_pipelines += pipelines[name]
+            except KeyError as exc:
+                raise ValueError(
+                    f"Failed to find the pipeline named '{name}'. "
+                    f"It needs to be generated and returned "
+                    f"by the 'register_pipelines' function."
+                ) from exc
 
-        try:
-            pipeline = pipelines[name]
-        except KeyError as exc:
-            raise ValueError(
-                f"Failed to find the pipeline named '{name}'. "
-                f"It needs to be generated and returned "
-                f"by the 'register_pipelines' function."
-            ) from exc
-
-        filtered_pipeline = pipeline.filter(
+        filtered_pipeline = combined_pipelines.filter(
             tags=tags,
             from_nodes=from_nodes,
             to_nodes=to_nodes,
@@ -375,7 +385,7 @@ class KedroSession:
             "to_outputs": to_outputs,
             "load_versions": load_versions,
             "runtime_params": runtime_params,
-            "pipeline_name": pipeline_name,
+            "pipeline_name": pipeline_names,
             "namespaces": namespaces,
             "runner": getattr(runner, "__name__", str(runner)),
             "only_missing_outputs": only_missing_outputs,

@@ -53,6 +53,9 @@ command arguments from. If command line arguments are provided, they will
 override the loaded ones."""
 PIPELINE_ARG_HELP = """Name of the registered pipeline to run.
 If not set, the '__default__' pipeline is run."""
+PIPELINES_ARG_HELP = """Comma-separated names of registered pipelines to run.
+Example: --pipelines data_engineering,feature_engineering
+If not set, the '__default__' pipeline is run."""
 NAMESPACES_ARG_HELP = """Run only node namespaces with specified names."""
 PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
 to the context initialiser. Items must be separated by comma, keys - by colon or equals sign,
@@ -201,6 +204,9 @@ def package(metadata: ProjectMetadata) -> None:
 )
 @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
 @click.option(
+    "--pipelines", type=str, default="", help=PIPELINES_ARG_HELP, callback=split_string
+)
+@click.option(
     "--namespaces",
     "-ns",
     type=str,
@@ -244,31 +250,40 @@ def run(  # noqa: PLR0913
     to_outputs: str,
     load_versions: dict[str, str] | None,
     pipeline: str,
+    pipelines: list[str],
     config: str,
     conf_source: str,
     params: dict[str, Any],
     namespaces: str,
     only_missing_outputs: bool,
-) -> dict[str, Any]:
+) -> None:
     """Run the pipeline."""
+
+    if pipeline and pipelines:
+        raise click.UsageError(
+            "Options '--pipeline' and '--pipelines' cannot be used together"
+        )
+
+    pipelines_to_run = set(pipelines) or set([pipeline])
 
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)
     tuple_node_names = tuple(node_names)
 
-    with KedroSession.create(
-        env=env, conf_source=conf_source, runtime_params=params
-    ) as session:
-        return session.run(
-            tags=tuple_tags,
-            runner=runner_obj(is_async=is_async),
-            node_names=tuple_node_names,
-            from_nodes=from_nodes,
-            to_nodes=to_nodes,
-            from_inputs=from_inputs,
-            to_outputs=to_outputs,
-            load_versions=load_versions,
-            pipeline_name=pipeline,
-            namespaces=namespaces,
-            only_missing_outputs=only_missing_outputs,
-        )
+    for pipeline_name in pipelines_to_run:
+        with KedroSession.create(
+            env=env, conf_source=conf_source, runtime_params=params
+        ) as session:
+            session.run(
+                tags=tuple_tags,
+                runner=runner_obj(is_async=is_async),
+                node_names=tuple_node_names,
+                from_nodes=from_nodes,
+                to_nodes=to_nodes,
+                from_inputs=from_inputs,
+                to_outputs=to_outputs,
+                load_versions=load_versions,
+                pipeline_name=pipeline_name,
+                namespaces=namespaces,
+                only_missing_outputs=only_missing_outputs,
+            )

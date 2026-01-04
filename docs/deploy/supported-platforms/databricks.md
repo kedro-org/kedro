@@ -56,8 +56,8 @@ with KedroSession.create() as session:
 - Create a **Databricks Job** that runs the notebook
 - Suitable for notebook-based schedules
 
-> ⚠️ **Free tier limitation**
-> Databricks Free tier does not support DBFS. Use Unity Catalog tables instead.
+!!! Free tier limitation
+  Databricks Free tier does not support DBFS. Use Unity Catalog tables instead.
 
 ---
 
@@ -112,6 +112,7 @@ For **production deployments**, we recommend using the community-maintained
 [`kedro-databricks`](https://github.com/JenspederM/kedro-databricks) plugin.
 
 This option is suitable when you need:
+
 - Repeatable deployments
 - CI/CD integration
 - Environment-specific configuration
@@ -124,9 +125,9 @@ This option is suitable when you need:
 - Deploys it as a **Databricks Job**
 - Integrates naturally with CI/CD pipelines
 
-> ⚠️ **Important**
-> This is a **community-maintained plugin**.
-> Databricks permissions, workspace layouts, and runtime versions vary between organisations, so some configuration steps may require updates.
+!!! note
+  This is a **community-maintained plugin**.
+  Databricks permissions, workspace layouts, and runtime versions vary between organisations, so some configuration steps may require updates.
 
 For full setup instructions, see the [plugin documentation.](https://kedro-databricks.readthedocs.io/en/latest/)
 

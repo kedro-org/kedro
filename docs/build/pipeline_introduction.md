@@ -1,8 +1,8 @@
 # Pipeline objects
 
-We previously introduced [Nodes](./nodes.md) as building blocks that represent tasks, and can be combined in a pipeline to build your workflow. A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline resolves dependencies to determine the node execution order, and does *not* necessarily run the nodes in the order in which they are passed in.
+The [Nodes](./nodes.md) guide introduced nodes as building blocks that represent tasks, and can be combined in a pipeline to build your workflow. A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline resolves dependencies to determine the node execution order, and does *not* necessarily run the nodes in the order in which they are passed in.
 
-To benefit from Kedro's automatic dependency resolution, you can chain your nodes into a [`Pipeline`][kedro.pipeline.pipeline.Pipeline] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the [`Pipeline`][kedro.pipeline.pipeline.Pipeline] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
+To use Kedro's automatic dependency resolution, chain your nodes into a [`Pipeline`][kedro.pipeline.pipeline.Pipeline] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the [`Pipeline`][kedro.pipeline.pipeline.Pipeline] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
 
 The following sections explain how to create and use Kedro pipelines:
 
@@ -22,7 +22,7 @@ The following sections explain how to create and use Kedro pipelines:
 
 ## How to build a pipeline
 
-In the following example, we construct a simple pipeline that computes the variance of a set of numbers. In practice, pipelines can use more complicated node definitions, and the variables they use usually correspond to entire datasets:
+In the following example, we construct a small pipeline that computes the variance of a set of numbers. In practice, pipelines can use more complicated node definitions, and the variables they use often correspond to entire datasets:
 
 ```python
 from kedro.pipeline import Pipeline, Node
@@ -50,10 +50,10 @@ variance_pipeline = Pipeline(
 Kedro determines the order of execution of these nodes based on the inputs and outputs specified for each node. In this example:
 1. The first node computes the length of `xs` and outputs it as `n`.
 2. The second node calculates the mean using `xs` and `n`, and outputs it as `m`.
-3. The third node computes the mean sum of squares (mean_sos) using `xs` and `n`, and outputs it as `m2`.
+3. The third node computes the mean sum of squares (`mean_sos`) using `xs` and `n`, and outputs it as `m2`.
 4. The fourth node calculates the variance using the mean (`m`) and mean sum of squares (`m2`), and outputs it as `v`.
 
-Kedro's dependency resolution algorithm ensures that each node runs only after its required inputs are available from the outputs of previous nodes. This way, the nodes are executed in the correct order automatically, based on the defined dependencies.
+Kedro's dependency resolution algorithm ensures that each node runs after its required inputs are available from the outputs of previous nodes. This way, the nodes are executed in the correct order automatically, based on the defined dependencies.
 
 
 ## How to use `describe` to discover what nodes are part of the pipeline
@@ -82,7 +82,7 @@ Outputs: v
 
 ## How to merge multiple pipelines
 
-You can merge multiple pipelines as shown below. Note that, in this case, `pipeline_de` and `pipeline_ds` are expanded to a list of their underlying nodes and these are merged together:
+You can merge multiple pipelines as shown below. **Note**: `pipeline_de` and `pipeline_ds` are expanded to a list of their underlying nodes, and these are merged together:
 
 ```python
 pipeline_de = Pipeline([Node(len, "xs", "n"), Node(mean, ["xs", "n"], "m")])
@@ -174,7 +174,7 @@ Out[8]: {'v'}
 
 ## How to tag a pipeline
 
-You can also tag your pipeline by providing the `tags` argument, which will tag all of the pipeline's nodes. In the following example, both nodes are tagged with `pipeline_tag`.
+You can also tag your pipeline by providing the `tags` argument, which will tag every node in the pipeline. In the following example, both nodes are tagged with `pipeline_tag`.
 
 ```python
 pipeline = Pipeline(
@@ -193,7 +193,7 @@ pipeline = Pipeline(
 
 ## How to avoid creating bad pipelines
 
-A pipelines can usually readily resolve its dependencies. In some cases, resolution is not possible. In this case, the pipeline is not well-formed.
+A pipeline can typically resolve its dependencies. In some cases, resolution is not possible. In these situations, the pipeline is not well-formed.
 
 ### Pipeline with bad nodes
 

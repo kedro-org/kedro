@@ -35,7 +35,7 @@ shuttles:
 The dataset configuration in `catalog.yml` is defined as follows:
 
 1. The top-level key is the dataset name used as a dataset identifier in the catalog - `shuttles`, `weather` in the example below.
-2. The next level includes multiple keys. The first one is the mandatory key - `type` which defines the type of dataset to use.
+2. The next level includes multiple keys. The first mandatory key is `type`, which declares the dataset type to use.
 The rest of the keys are dataset parameters and vary depending on the implementation.
 To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/).and navigate to the `__init__` method of the target dataset.
 3. Some dataset parameters can be further configured depending on the libraries underlying the dataset implementation.
@@ -87,7 +87,7 @@ The following protocols are available:
   using the library s3fs.
 - **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - for example, MinIO, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
-  resource using gcsfs (in development).
+  resource using `gcsfs` (in development).
 - **Azure Blob Storage / Azure Data Lake Storage Gen2**: `abfs://` - Azure Blob Storage, typically used when working on an Azure environment.
 - **HTTP(s)**: ``http://`` or ``https://`` for reading data directly from HTTP web servers.
 

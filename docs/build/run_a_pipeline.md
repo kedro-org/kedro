@@ -30,7 +30,7 @@ kedro run --runner=SequentialRunner
 
 #### Multiprocessing
 
-You can alternatively run the nodes within the pipeline concurrently, using a `ParallelRunner` as follows:
+You can also run the nodes within the pipeline concurrently, using a `ParallelRunner` as follows:
 ```bash
 kedro run --runner=ParallelRunner
 ```
@@ -39,7 +39,7 @@ For the `ParallelRunner`, it is possible to manually select which multiprocessin
 
 - `fork`: The child process is created as a copy of the parent process. This is fast but can cause issues with libraries that use threads or manage internal state. Default on most Unix systems.
 
-- `spawn`: The child process starts fresh, importing the main module and only inheriting necessary resources. This is safer and more compatible with many libraries, but requires all objects to be picklable. Default on Windows and macOS (Python 3.8+).
+- `spawn`: The child process starts fresh, importing the main module and inheriting the necessary resources. This is safer and more compatible with several libraries, but requires all objects to be pickleable. Default on Windows and macOS (Python 3.8+).
 
 To control which multiprocessing start method is going to be used by `ParallelRunner`, you can set the value `spawn` or `fork` to the `KEDRO_MP_CONTEXT` environment variable. If neither of those is set, the runner will use the system's default.
 
@@ -51,14 +51,15 @@ kedro run --runner=ThreadRunner
 ```
 
 !!! note
-    `SparkDataset` doesn't work correctly with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataset`, you must use `ThreadRunner`.
+    `SparkDataset` doesn't work as expected with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataset`, you must use `ThreadRunner`.
 
 For more information on how to maximise concurrency when using Kedro with PySpark, read our guide on [how to build a Kedro pipeline with PySpark](../integrations-and-plugins/pyspark_integration.md).
 
 ## Custom runners
 
-If the built-in Kedro runners do not meet your requirements, you can also define your own runner within your project. For example, you may want to add a dry runner, which lists which nodes would be run without executing them:
+If the built-in Kedro runners do not meet your requirements, you can also define your own runner within your project. For example, you may want to add a dry runner, which lists which nodes would run without executing them:
 
+<!--vale off-->
 ??? example "View code"
     ```python
     # in src/<package_name>/runner.py
@@ -124,7 +125,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
             if missing_inputs:
                 raise KeyError(f"Datasets {missing_inputs} not found.")
     ```
-
+<!--vale on-->
 
 And use it with `kedro run` through the `--runner` flag:
 
@@ -193,7 +194,7 @@ Further information about `kedro run` can be found in the [Kedro CLI documentati
 
 ## Run pipelines with IO
 
-The above definition of pipelines only applies for non-stateful or "pure" pipelines that do not interact with the outside world. In practice, we would like to interact with APIs, databases, files, and other sources of data. By combining IO and pipelines, we can tackle these more complex use cases.
+The above definition of pipelines applies to non-stateful or "pure" pipelines that do not interact with the outside world. In practice, we would like to interact with APIs, databases, files, and other sources of data. By combining IO and pipelines, we can tackle these more complex use cases.
 
 By using `DataCatalog` from the IO module we are still able to write pure functions that work with our data and outsource file saving and loading to `DataCatalog`.
 
@@ -233,7 +234,7 @@ In the below example, we define a `MemoryDataset` called `xs` to store our input
 
 ## Configure `kedro run` arguments
 
-The [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run) lists the available CLI options for `kedro run`. You can alternatively supply a configuration file that contains the arguments to `kedro run`.
+The [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run) lists the available CLI options for `kedro run`. You can also supply a configuration file that contains the arguments to `kedro run`.
 
 Here is an example file named `config.yml`, but you can choose any name for the file:
 
@@ -262,7 +263,7 @@ run:
 
 This is because the configuration file gets parsed by [Click](https://click.palletsprojects.com/en/8.1.x/), a Python package to handle command line interfaces. Click passes the options defined in the configuration file to a Python function. The option names need to match the argument names in that function.
 
-Variable names and arguments in Python may only contain alphanumeric characters and underscores, so it's not possible to have a dash in the option names when using the configuration file.
+Variable names and arguments in Python must contain alphanumeric characters and underscores, so you cannot include a dash in the option names when using the configuration file.
 
 !!! note
     If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.

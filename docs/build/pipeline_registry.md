@@ -1,6 +1,8 @@
 # The pipeline registry
 
-Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This, in turn, populates the `pipelines` variable in [`kedro.framework.project`][kedro.framework.project] that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to [`Pipeline`][kedro.pipeline.pipeline.Pipeline] objects. For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipeline_registry.py) could define the following `register_pipelines()` function that exposes the data processing pipeline, the data science pipeline, and a third, default pipeline that combines both of the aforementioned pipelines:
+Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This populates the `pipelines` variable in [`kedro.framework.project`][kedro.framework.project] that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to [`Pipeline`][kedro.pipeline.pipeline.Pipeline] objects.
+
+For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipeline_registry.py) defines the following `register_pipelines()` function. It exposes the data processing pipeline, the data science pipeline, and a default pipeline that combines both:
 
 ```python
 import spaceflights.pipelines.data_processing as dp
@@ -52,7 +54,7 @@ Under the hood, the `find_pipelines()` function traverses the `src/<package_name
 
 By default, if any of these steps fail, `find_pipelines()` (or `find_pipelines(raise_errors=False)`) raises an appropriate warning and skips the current pipeline but continues traversal. During development, this enables you to run your project with some pipelines, even if other pipelines are broken or works in progress.
 
-If you specify `find_pipelines(raise_errors=True)`, the autodiscovery process will fail upon the first error. In production, this ensures errors are caught up front, and pipelines do not get excluded accidentally.
+If you specify `find_pipelines(raise_errors=True)`, the autodiscovery process will fail upon the first error. In production, this ensures errors are caught up front and prevents pipelines from being excluded.
 
 The mapping returned by `find_pipelines()` can be modified, meaning you are not limited to the pipelines returned by each of the `create_pipeline()` functions found above. For example, to add a data engineering pipeline that isn't part of the default pipeline, add it to the dictionary *after* constructing the default pipeline:
 
@@ -73,7 +75,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
 !!! note
     In the case above, `kedro run --tags data_engineering` will not run the data engineering pipeline, as it is not part of the default pipeline. To run the data engineering pipeline, you need to specify `kedro run --pipeline data_engineering --tags data_engineering`.
 
-On the other hand, you can also change pipelines *before* assigning `pipelines["__default__"] = sum(pipelines.values())` which includes it in the default pipeline. For example, you can update the `data_processing` pipeline with the `data_engineering` tag in the `pipeline_registry.py` and also include this change in the default pipeline:
+You can also change pipelines *before* assigning `pipelines["__default__"] = sum(pipelines.values())`, which includes them in the default pipeline. For example, you can update the `data_processing` pipeline with the `data_engineering` tag in `pipeline_registry.py` and also include this change in the default pipeline:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:

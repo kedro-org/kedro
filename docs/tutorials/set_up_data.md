@@ -18,11 +18,12 @@ The following information about a dataset must be registered before Kedro can lo
 
 * File location (path)
 * Parameters for the given dataset
-* Type of data
+* Dataset type
 * Versioning
 
 Open `conf/base/catalog.yml` for the spaceflights project to inspect the contents. The two `csv` datasets are registered as follows:
 
+<!-- vale off -->
 ??? example "View code"
     ```yaml
     companies:
@@ -44,8 +45,9 @@ Likewise for the `xlsx` dataset:
       load_args:
         engine: openpyxl # Use modern Excel engine (the default since Kedro 0.18.0)
     ```
+<!-- vale on -->
 
-The additional line, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the equivalent output is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
+The additional line, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the corresponding output argument is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
 
 ### Test that Kedro can load the data
 
@@ -62,9 +64,10 @@ companies = catalog.load("companies")
 companies.head()
 ```
 
-* The first command creates a variable (`companies`), which is of type `pandas.DataFrame` and loads the dataset (also named `companies` as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv`.
+* The first command creates a variable (`companies`) of type `pandas.DataFrame`. It loads the dataset (also named `companies` as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv`.
 * The `head` method from `pandas` displays the first five rows of the DataFrame.
 
+<!-- vale off -->
 ??? example "View code"
     ```
     INFO     Loading data from 'companies' (CSVDataset)
@@ -98,6 +101,7 @@ You should see output such as the following:
     3  14035               Barbados      Type V5      Plasma  ...                f                        f  $4,770.0       8238
     4  10036  Sao Tome and Principe      Type V2      Plasma  ...                f                        f  $2,820.0      30342
     ```
+<!-- vale on -->
 
 When you have finished, close `ipython` session with `exit()`.
 
@@ -112,10 +116,10 @@ frameborder="0" allowfullscreen></iframe>
 
 ### Custom data
 
-[Kedro supports numerous datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) out of the box, but you can also add support for any proprietary data format or filesystem.
+[Kedro supports a wide range of datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) out of the box, but you can also add support for any proprietary data format or filesystem.
 
 You can find further information about [how to add support for custom datasets](../extend/how_to_create_a_custom_dataset.md) in specific documentation covering advanced usage.
 
 ### Supported data locations
 
-Kedro uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read data from a variety of data stores including local file systems, network file systems, HDFS, and all of the widely-used cloud object stores.
+Kedro uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read data from a variety of data stores including local file systems, network file systems, HDFS, and widely used cloud object stores.

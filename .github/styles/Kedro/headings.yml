@@ -20,12 +20,16 @@ exceptions:
   - Azure App Service Plan
   - Azure Blob Storage
   - Azure Event Hub
+  - Azure ML
   - CI/CD
   - CLI
   - DataCatalog
   - Data Catalog
+  - DataFrame
   - Databricks
   - Databricks Repo
+  - Delta Lake
+  - Delta tables
   - Docker
   - Docker Compose
   - Docker Swarm
@@ -39,17 +43,20 @@ exceptions:
   - Google Cloud
   - Google Cloud Functions
   - Google Cloud Storage
-  - GraphQL
+  - Great Expectations
   - Hook
   - Hooks
   - IAM
   - Iceberg
   - IDs
   - IO
+  - IPython
   - Jenkins
   - JFrog
   - JFrog Artifactory
   - Jira
+  - Jupyter Notebook
+  - JupyterLab
   - Kafka
   - Kubeflow
   - Kubeflow Pipelines
@@ -59,9 +66,12 @@ exceptions:
   - Kubernetes Service
   - Lambda
   - Linux
+  - Marimo
   - MWAA
   - MySQL
+  - Notebooks
   - Prefect
+  - PyCharm
   - Python
   - PySpark
   - QuantumBlack
@@ -70,9 +80,14 @@ exceptions:
   - Redis
   - SageMaker
   - Slack
+  - SSH
+  - Spark
   - Technical Steering Committee
+  - TSC
   - Ubuntu
   - Unix
   - URLs
   - VertexAI
   - YAML
+  - VS Code
+  - Visual Studio Code

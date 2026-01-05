@@ -56,8 +56,8 @@ with KedroSession.create() as session:
 - Create a **Databricks Job** that runs the notebook
 - Suitable for notebook-based schedules
 
-!!! Free tier limitation
-  Databricks Free tier does not support DBFS. Use Unity Catalog tables instead.
+!!! note
+    Databricks Free tier does not support DBFS. Use Unity Catalog tables instead.
 
 ---
 
@@ -126,8 +126,8 @@ This option is suitable when you need:
 - Integrates naturally with CI/CD pipelines
 
 !!! note
-  This is a **community-maintained plugin**.
-  Databricks permissions, workspace layouts, and runtime versions vary between organisations, so some configuration steps may require updates.
+    This is a **community-maintained plugin**.
+    Databricks permissions, workspace layouts, and runtime versions vary between organisations, so some configuration steps may require updates.
 
 For full setup instructions, see the [plugin documentation.](https://kedro-databricks.readthedocs.io/en/latest/)
 

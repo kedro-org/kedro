@@ -68,7 +68,7 @@ class LLMContext:
 
     context_id: str
     llm: object
-    prompts: dict[str, object] = field(default_factory=dict)
+    prompts: dict[str, Any] = field(default_factory=dict)
     tools: dict[str, object] = field(default_factory=dict)
 
 
@@ -82,9 +82,9 @@ def _get_tool_name(obj: object) -> str:
     4. string representation `str(obj)`
     """
     if hasattr(obj, "__name__"):
-        return obj.__name__
+        return str(obj.__name__)
     if hasattr(obj, "name"):
-        return obj.name
+        return str(obj.name)
     if hasattr(obj, "__class__"):
         return obj.__class__.__name__
     return str(obj)

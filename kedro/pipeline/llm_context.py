@@ -89,6 +89,18 @@ def _get_tool_name(obj: object) -> str:
     return str(obj)
 
 
+def _normalize_outputs(outputs: str | list[str] | dict[str, str]) -> str:
+    """Return a deterministic string representation of node outputs."""
+    if isinstance(outputs, str):
+        return outputs
+    if isinstance(outputs, list):
+        return "__".join(outputs)
+    if isinstance(outputs, dict):
+        # use values (dataset names), not function output keys
+        return "__".join(outputs.values())
+    return str(outputs)
+
+
 @experimental
 def llm_context_node(
     *,
@@ -96,7 +108,7 @@ def llm_context_node(
     llm: str,
     prompts: list[str],
     tools: list[_ToolConfig] | None = None,
-    name: str = "llm_context_node",
+    name: str | None = None,
 ) -> Node:
     """Create a Kedro node that builds an `LLMContext` at runtime.
 
@@ -155,7 +167,7 @@ def llm_context_node(
                 built_tools[_get_tool_name(built_tool)] = built_tool
 
         return LLMContext(
-            context_id=name,
+            context_id=name or f"llm_context_node__{_normalize_outputs(outputs)}",
             llm=llm,
             prompts=prompts_dict,
             tools=built_tools,

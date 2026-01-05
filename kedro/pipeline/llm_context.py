@@ -16,7 +16,7 @@ time and automatically assigned readable names based on the returned objects.
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Generic, NamedTuple, TypeVar
+from typing import Any, NamedTuple, TypeVar
 
 from ..utils import experimental
 from .node import Node, node
@@ -24,7 +24,7 @@ from .node import Node, node
 T = TypeVar("T")
 
 
-class _ToolConfig(Generic[T], NamedTuple):
+class _ToolConfig(NamedTuple):
     """Configuration for a tool builder.
 
     This stores:
@@ -32,12 +32,12 @@ class _ToolConfig(Generic[T], NamedTuple):
     - the Kedro inputs (`inputs`) required by that builder
     """
 
-    func: Callable[..., T]
+    func: Callable[..., object]
     inputs: Sequence[str]
 
 
 @experimental
-def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig[T]:
+def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig:
     """Create a `_ToolConfig` definition for a tool builder.
 
     Args:
@@ -47,7 +47,8 @@ def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig[T]:
         *inputs: Kedro dataset names (including params:* entries) required by `func`.
 
     Returns:
-        A typed configuration object used by `llm_context_node`.
+        A configuration object used by ``llm_context_node`` to construct tools
+        at execution time
     """
     return _ToolConfig(func=func, inputs=list(inputs))
 

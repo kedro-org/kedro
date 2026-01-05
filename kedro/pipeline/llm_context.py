@@ -89,9 +89,6 @@ def _get_tool_name(obj: object) -> str:
     return str(obj)
 
 
-Kwargs = dict[str, Any]
-
-
 @experimental
 def llm_context_node(
     *,
@@ -142,7 +139,7 @@ def llm_context_node(
             for inp in t.inputs:
                 inputs[inp] = inp
 
-    def construct_context(llm: object, **kwargs: Kwargs) -> LLMContext:
+    def construct_context(llm: object, **kwargs: dict[str, Any]) -> LLMContext:
         """Node execution: build an LLMContext using loaded datasets."""
         # Collect prompts
         prompts_dict = {p: kwargs[p] for p in prompts}

@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from typing import Any, NamedTuple, TypeVar
 
 from ..utils import experimental
-from .node import Node, node
+from .node import Node
 
 T = TypeVar("T")
 
@@ -102,6 +102,97 @@ def _normalize_outputs(outputs: str | list[str] | dict[str, str]) -> str:
 
 
 @experimental
+class LLMContextNode(Node):
+    """A Kedro Node that constructs an :class:`LLMContext` at execution time.
+
+    This node assembles a runtime context consisting of:
+    - an LLM instance loaded by Kedro,
+    - one or more prompt datasets,
+    - optionally, dynamically constructed tool objects.
+
+    All required datasets (LLM, prompts, tool inputs) are validated and loaded
+    by Kedro before execution. Tools are instantiated during node execution
+    and assigned readable names derived from the returned tool objects.
+
+    Example:
+    ```python
+    LLMContextNode(
+        name="response_agent_context_node",
+        outputs="response_generation_context",
+        llm="llm",
+        prompts=["tool_prompt", "response_prompt"],
+        tools=[
+            tool(build_get_user_claims, "db_engine"),
+            tool(build_lookup_docs, "docs", "params:docs_matches"),
+            tool(build_create_claim, "db_engine"),
+        ],
+    )
+    ```
+    """
+
+    def __init__(
+        self,
+        *,
+        outputs: str,
+        llm: str,
+        prompts: list[str],
+        tools: list[_ToolConfig] | None = None,
+        name: str | None = None,
+    ):
+        """Create an LLMContextNode.
+
+        Args:
+            outputs: Name of the output dataset that will receive the `LLMContext`.
+            llm: Name of the Kedro dataset containing the LLM instance.
+            prompts: List of dataset names containing prompt content.
+            tools: Optional list of tool configurations created via `tool(...)`.
+            name: Optional node name; also used as the logical context identifier.
+        """
+        inputs = {"llm": llm}
+
+        # Add prompts as validated inputs
+        for p in prompts:
+            inputs[p] = p
+
+        # Add tool inputs (datasets + params)
+        if tools:
+            for t in tools:
+                for inp in t.inputs:
+                    inputs[inp] = inp
+
+        def construct_context(llm: object, **kwargs: dict[str, Any]) -> LLMContext:
+            """Node execution function.
+
+            Collects prompt values, instantiates tools using their declared
+            inputs, and returns an `LLMContext`.
+            """
+            # Collect prompts
+            prompts_dict = {p: kwargs[p] for p in prompts}
+
+            # Build tools
+            built_tools = {}
+            if tools:
+                for t in tools:
+                    tool_inputs = {
+                        inp.replace("params:", ""): kwargs[inp] for inp in t.inputs
+                    }
+                    built_tool = t.func(**tool_inputs)
+                    built_tools[_get_tool_name(built_tool)] = built_tool
+
+            return LLMContext(
+                context_id=name or f"llm_context_node__{_normalize_outputs(outputs)}",
+                llm=llm,
+                prompts=prompts_dict,
+                tools=built_tools,
+            )
+
+        # call the Node constructor with the func, inputs, outputs, name
+        super().__init__(
+            func=construct_context, inputs=inputs, outputs=outputs, name=name
+        )
+
+
+@experimental
 def llm_context_node(
     *,
     outputs: str,
@@ -111,6 +202,9 @@ def llm_context_node(
     name: str | None = None,
 ) -> Node:
     """Create a Kedro node that builds an `LLMContext` at runtime.
+
+    This is a convenience wrapper around `LLMContextNode` that mirrors
+    the standard functional node construction style used in Kedro pipelines.
 
     Args:
         outputs: Name of the output dataset that will receive the `LLMContext`.
@@ -139,38 +233,10 @@ def llm_context_node(
     )
     ```
     """
-    inputs = {"llm": llm}
-
-    # Add prompts as validated inputs
-    for p in prompts:
-        inputs[p] = p
-
-    # Add tool inputs (datasets + params)
-    if tools:
-        for t in tools:
-            for inp in t.inputs:
-                inputs[inp] = inp
-
-    def construct_context(llm: object, **kwargs: dict[str, Any]) -> LLMContext:
-        """Node execution: build an LLMContext using loaded datasets."""
-        # Collect prompts
-        prompts_dict = {p: kwargs[p] for p in prompts}
-
-        # Build tools
-        built_tools = {}
-        if tools:
-            for t in tools:
-                tool_inputs = {
-                    inp.replace("params:", ""): kwargs[inp] for inp in t.inputs
-                }
-                built_tool = t.func(**tool_inputs)
-                built_tools[_get_tool_name(built_tool)] = built_tool
-
-        return LLMContext(
-            context_id=name or f"llm_context_node__{_normalize_outputs(outputs)}",
-            llm=llm,
-            prompts=prompts_dict,
-            tools=built_tools,
-        )
-
-    return node(func=construct_context, inputs=inputs, outputs=outputs, name=name)
+    return LLMContextNode(
+        outputs=outputs,
+        llm=llm,
+        prompts=prompts,
+        tools=tools,
+        name=name,
+    )

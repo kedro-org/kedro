@@ -1,6 +1,6 @@
 # Deploying Kedro on Databricks
 
-[Databricks](https://docs.databricks.com/) is a managed Spark platform that is commonly used to run large-scale data processing workloads in production. Kedro integrates naturally with Databricks, but there is no single “correct” way to work with it – the best setup depends on where your code lives and how you prefer to develop.
+[Databricks](https://docs.databricks.com/) is a managed Spark platform that is commonly used to run large-scale data processing workloads in production. Kedro integrates naturally with Databricks. There is no single “correct” way to work with it, and the best setup depends on where your code lives and how you prefer to develop.
 
 This guide explains the **three supported ways to run Kedro on Databricks**, what actually happens in each setup, and when you should choose one over another:
 
@@ -65,7 +65,7 @@ Then load Kedro's IPython extension and initialise the project:
 %reload_kedro
 ```
 
-This makes the project objects available in the notebook (`catalog`, `context`, `pipelines`, and `session`). You can find more information about kedro [notebook line magics here](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks/#kedro-line-magics). You can now run the pipeline:
+This makes the project objects available in the notebook (`catalog`, `context`, `pipelines`, and `session`). You can find more information about [notebook line magics here](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks/#kedro-line-magics). You can now run the pipeline:
 
 ``` python
 session.run()

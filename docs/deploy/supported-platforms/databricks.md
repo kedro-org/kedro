@@ -10,9 +10,9 @@ This starter differs from the standard *spaceflights* starter in that it uses `S
 
 Once the project is created, there are several ways to work with Databricks:
 
-## Run Kedro *inside* Databricks (Git folders)
+## Run Kedro *within* Databricks (Git folders)
 
-This option is suitable if you primarily work **inside the Databricks workspace**, using notebooks and Databricks Jobs. Databricks provides **Git folders**, which allow you to clone a Git repository directly into the workspace and work with it interactively.
+This option is suitable if you primarily work **within the Databricks workspace**, using notebooks and Databricks Jobs. Databricks provides **Git folders**, which allow you to clone a Git repository directly into the workspace and work with it interactively.
 
 ### Typical workflow
 

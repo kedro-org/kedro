@@ -1,14 +1,37 @@
 # Deploying Kedro on Databricks
 
-## Create a Spark-enabled Kedro project
+[Databricks](https://docs.databricks.com/) is a managed Spark platform that is commonly used to run large-scale data processing workloads in production. Kedro integrates naturally with Databricks, but there is no single “correct” way to work with it – the best setup depends on where your code lives and how you prefer to develop.
 
-```bash
-uvx kedro new --name=my-project --tools=spark --example=y
+This guide explains the **three supported ways to run Kedro on Databricks**, what actually happens in each setup, and when you should choose one over another:
+
+| Option | Where your code runs | Where Spark runs | Best for |
+|-------|----------------------|------------------|----------|
+| [Run within Databricks (Git folders)](#run-kedro-within-databricks-git-folders) | Databricks workspace | Databricks cluster | Notebook-first workflows, analysts and platform teams |
+| [Local + remote Databricks (Databricks Connect)](#local-development-remote-databricks-cluster-databricks-connect) | Your local machine or Docker container | Databricks cluster | Local-first development, tight IDE integration, or cloud-agnostic execution |
+| [Production via `kedro-databricks`](#production-grade-deployments-through-kedro-databricks) | CI/CD pipeline | Databricks Jobs | Repeatable production deployments |
+
+## Prerequisites
+
+Before starting, make sure you have:
+
+- **Python 3.9+** installed locally.
+- **Kedro 1.0+** (installed via `pip` or `uv`).
+- **kedro-datasets** installed (contains `SparkDatasetV2` and other dataset implementations)
+- A **Databricks workspace** with:
+  - Access to a cluster or serverless compute.
+  - Permission to create **Unity Catalog Volumes** (or access to existing ones).
+- A **Databricks personal access token** (required for Databricks Connect and production deployments).
+- Git installed and access to a remote Git repository (GitHub, GitLab, Azure DevOps, etc.).
+
+To follow any of the approaches below, you first need a Spark-enabled Kedro project. Create one using:
+
+``` bash
+uvx kedro new --name=my-project --tools=pyspark --example=y
 ```
 
-This starter differs from the standard *spaceflights* starter in that it uses `SparkDatasetV2` in the `DataCatalog` and implements data transformations using Spark instead of pandas.
+This starter is designed specifically for Databricks: it replaces pandas-based datasets with `SparkDatasetV2` in the `DataCatalog` and implements data transformations using Spark.
 
-Once the project is created, there are several ways to work with Databricks:
+Once the project is created, choose one of the workflows below depending on where you want your code to live and how you prefer to develop.
 
 ## Run Kedro *within* Databricks (Git folders)
 
@@ -27,8 +50,7 @@ This option is suitable if you primarily work **within the Databricks workspace*
    - Non-Spark datasets (for example, pandas-based datasets) can read from and write to the cloned Git folder without changing their file paths.
 4. Open the `notebooks/` folder in the cloned repository and create a new notebook.
 5. Attach the notebook to a Databricks cluster (for example, a serverless cluster).
-
-### Run Kedro from a notebook
+6. Run Kedro from a notebook:
 
 First, install the project dependencies:
 
@@ -53,7 +75,7 @@ with KedroSession.create() as session:
 
 ### Scheduling
 
-- Create a **Databricks Job** that runs the notebook
+- Create a **[Databricks Job](https://docs.databricks.com/aws/en/jobs/configure-job#create-a-new-job)** that runs the notebook
 - Suitable for notebook-based schedules
 
 !!! note
@@ -61,7 +83,7 @@ with KedroSession.create() as session:
 
 ---
 
-## Local development → remote Databricks cluster (Databricks Connect)
+## Local development, remote Databricks cluster (Databricks Connect)
 
 This option is recommended for **local-first development**, where you run code locally but execute Spark workloads remotely on a Databricks cluster through Databricks Connect. For more advanced use cases, you can wrap the project in a Docker container and run it on any Docker-compatible runtime.
 

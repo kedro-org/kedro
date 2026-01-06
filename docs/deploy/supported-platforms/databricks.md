@@ -26,7 +26,7 @@ Before starting, make sure you have:
 To follow any of the approaches below, you first need a Spark-enabled Kedro project. Create one using:
 
 ``` bash
-uvx kedro new --name=my-project --tools=pyspark --example=y
+uvx kedro new --name=spaceflights-databricks --tools=pyspark --example=y
 ```
 
 This starter is designed specifically for Databricks: it replaces pandas-based datasets with `SparkDatasetV2` in the `DataCatalog` and implements data transformations using Spark.
@@ -42,11 +42,11 @@ This option is suitable if you primarily work **within the Databricks workspace*
 1. Push your Kedro project to a Git repository (GitHub, GitLab, Azure DevOps, Bitbucket, and more).
 2. Clone the repository into Databricks using **[Git folders](https://docs.databricks.com/aws/en/repos/repos-setup)**.
 3. Open the cloned repository in Databricks and update your Kedro Data Catalog (`conf/base/catalog.yml`):
-   - For all `spark.SparkDatasetV2` datasets, update file paths to point to **[Databricks Volumes](https://docs.databricks.com/aws/en/volumes/utility-commands)**, for example:
+
+   - For all `spark.SparkDatasetV2` datasets, update file paths to point to **Databricks Volumes**. Make sure the volume exists in Unity Catalog before running the pipeline. You can find instructions on how to create a volume in the [Databricks docs](https://docs.databricks.com/aws/en/volumes/utility-commands), for example:
      ```
      filepath: /Volumes/<catalog_name>/<schema_name>/<volume_name>/...
      ```
-   - Make sure the volume exists in Unity Catalog before running the pipeline.
    - Non-Spark datasets (for example, pandas-based datasets) can read from and write to the cloned Git folder without changing their file paths.
 4. Open the `notebooks/` folder in the cloned repository and create a new notebook.
 5. Attach the notebook to a Databricks cluster (for example, a serverless cluster).
@@ -74,9 +74,7 @@ session.run()
 !!! note
     If you launched the notebook from **outside** the Kedro project directory, pass the project root explicitly:
 
-    ```ipython
     %reload_kedro /Workspace/Users/<databricks_user_name>/<cloned_repo_name>
-    ```
 
 
 ### Scheduling
@@ -186,6 +184,7 @@ Load the Kedro IPython extension:
 
 !!! note
     If you launched the notebook from **outside** the Kedro project directory, pass the project root explicitly:
+
     %reload_kedro /Workspace/Users/<databricks_user_name>/<cloned_repo_name>
 
 
@@ -216,7 +215,3 @@ from kedro_viz.integrations.notebook import NotebookVisualizer
 
 NotebookVisualizer(pipelines["data_science"]).show()
 ```
-
-!!! note
-    To see which pipelines are available:
-    list(pipelines)

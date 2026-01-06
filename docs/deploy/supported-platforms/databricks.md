@@ -203,7 +203,7 @@ Clicking the link opens a new browser tab running Kedro-Viz for your project.
 
 ### Visualise a pipeline directly in the notebook with `NotebookVisualizer`
 
-If you want to inspect a single pipeline without opening the full web application, use `NotebookVisualizer`:
+If you want to inspect a single pipeline without opening the full web application, use [NotebookVisualizer](https://docs.kedro.org/projects/kedro-viz/en/stable/kedro-viz_visualisation/#notebookvisualizer):
 
 ``` python
 from kedro_viz.integrations.notebook import NotebookVisualizer

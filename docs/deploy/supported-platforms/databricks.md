@@ -8,20 +8,20 @@ This guide explains the **three supported ways to run Kedro on Databricks**, wha
 |-------|----------------------|------------------|----------|
 | [Run within Databricks (Git folders)](#run-kedro-within-databricks-git-folders) | Databricks workspace | Databricks cluster | Notebook-first workflows, analysts and platform teams |
 | [Local + remote Databricks (Databricks Connect)](#local-development-remote-databricks-cluster-databricks-connect) | Your local machine or Docker container | Databricks cluster | Local-first development, tight IDE integration, or cloud-agnostic execution |
-| [Production via `kedro-databricks`](#production-grade-deployments-through-kedro-databricks) | CI/CD pipeline | Databricks Jobs | Repeatable production deployments |
+| [Production with `kedro-databricks`](#production-grade-deployments-through-kedro-databricks) | CI/CD pipeline | Databricks Jobs | Repeatable production deployments |
 
 ## Prerequisites
 
 Before starting, make sure you have:
 
 - **Python 3.9+** installed locally.
-- **Kedro 1.0+** (installed via `pip` or `uv`).
+- **Kedro 1.0+** (installed with `pip` or `uv`).
 - **kedro-datasets** installed (contains `SparkDatasetV2` and other dataset implementations)
 - A **Databricks workspace** with:
   - Access to a cluster or serverless compute.
   - Permission to create **Unity Catalog Volumes** (or access to existing ones).
 - A **Databricks personal access token** (required for Databricks Connect and production deployments).
-- Git installed and access to a remote Git repository (GitHub, GitLab, Azure DevOps, etc.).
+- Git installed and access to a remote Git repository (GitHub, GitLab).
 
 To follow any of the approaches below, you first need a Spark-enabled Kedro project. Create one using:
 
@@ -164,7 +164,7 @@ For full setup instructions, see the [plugin documentation.](https://kedro-datab
 [Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/) is a visualisation tool for exploring Kedro pipelines and (optionally) run metadata. In Databricks, you can use it in two ways:
 
 -   **Launch the full Kedro-Viz web app** (opens in a new browser tab, best for full project exploration)
--   **Visualise a pipeline directly in the notebook** with `NotebookVisualizer` (lightweight, great for quick inspection)
+-   **Visualise a pipeline directly in the notebook** with `NotebookVisualizer` (lightweight and suitable for inspecting a single pipeline)
 
 ### Prerequisites
 
@@ -186,10 +186,7 @@ Load the Kedro IPython extension:
 
 !!! note
     If you launched the notebook from **outside** the Kedro project directory, pass the project root explicitly:
-
-    ```ipython
     %reload_kedro /Workspace/Users/<databricks_user_name>/<cloned_repo_name>
-    ```
 
 
 ### Launch the full Kedro-Viz web app
@@ -212,7 +209,7 @@ Clicking the link opens a new browser tab running Kedro-Viz for your project.
 
 ### Visualise a pipeline directly in the notebook with `NotebookVisualizer`
 
-If you want to quickly inspect a single pipeline without opening the full web application, use `NotebookVisualizer`:
+If you want to inspect a single pipeline without opening the full web application, use `NotebookVisualizer`:
 
 ``` python
 from kedro_viz.integrations.notebook import NotebookVisualizer
@@ -222,7 +219,4 @@ NotebookVisualizer(pipelines["data_science"]).show()
 
 !!! note
     To see which pipelines are available:
-
-    ```python
     list(pipelines)
-    ```

@@ -16,12 +16,10 @@ Before starting, make sure you have:
 
 - **Python 3.9+** installed locally.
 - **Kedro 1.0+** (installed with `pip` or `uv`).
-- **kedro-datasets** installed (contains `SparkDatasetV2` and other dataset implementations)
-- A **Databricks workspace** with:
-  - Access to a cluster or serverless compute.
-  - Permission to create **Unity Catalog Volumes** (or access to existing ones).
+- **kedro-datasets 9.1.1+** installed (contains `SparkDatasetV2` and other dataset implementations)
+- A **Databricks workspace** with access to a cluster or serverless compute and permission to create **Unity Catalog Volumes** (or access to existing ones).
 - A **Databricks personal access token** (required for Databricks Connect and production deployments).
-- Git installed and access to a remote Git repository (GitHub, GitLab).
+- Git installed and access to a remote Git repository.
 
 To follow any of the approaches below, you first need a Spark-enabled Kedro project. Create one using:
 

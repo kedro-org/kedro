@@ -19,7 +19,6 @@ Before starting, make sure you have:
 - **kedro-datasets 9.1.1+** installed (contains `SparkDatasetV2` and other dataset implementations)
 - A **Databricks workspace** with access to a cluster or serverless compute and permission to create **Unity Catalog Volumes** (or access to existing ones).
 - A **Databricks personal access token** (required for Databricks Connect and production deployments).
-- Git installed and access to a remote Git repository.
 
 To follow any of the approaches below, you first need a Spark-enabled Kedro project. Create one using:
 
@@ -37,20 +36,24 @@ This option is suitable if you primarily work **within the Databricks workspace*
 
 ### Typical workflow
 
-1. Push your Kedro project to a Git repository (GitHub, GitLab, Azure DevOps, Bitbucket, and more).
-2. Clone the repository into Databricks using **[Git folders](https://docs.databricks.com/aws/en/repos/repos-setup)**.
-3. Open the cloned repository in Databricks and update your Kedro Data Catalog (`conf/base/catalog.yml`):
+Push your Kedro project to a Git repository (GitHub, GitLab, Azure DevOps, Bitbucket, and more).
 
-   - For all `spark.SparkDatasetV2` datasets, update file paths to point to **Databricks Volumes**. Make sure the volume exists in Unity Catalog before running the pipeline. You can find instructions on how to create a volume in the [Databricks docs](https://docs.databricks.com/aws/en/volumes/utility-commands), for example:
+Clone the repository into Databricks using **[Git folders](https://docs.databricks.com/aws/en/repos/repos-setup)**.
+
+Open the cloned repository in Databricks and update your Kedro Data Catalog (`conf/base/catalog.yml`):
+
+   - For all `spark.SparkDatasetV2` datasets, update file paths to point to **Databricks Volumes**, for example:
      ```
      filepath: /Volumes/<catalog_name>/<schema_name>/<volume_name>/...
      ```
+   - Make sure the volume exists in Unity Catalog before running the pipeline. You can find instructions on how to create a volume in the [Databricks docs.](https://docs.databricks.com/aws/en/volumes/utility-commands)
    - Non-Spark datasets (for example, pandas-based datasets) can read from and write to the cloned Git folder without changing their file paths.
-4. Open the `notebooks/` folder in the cloned repository and create a new notebook.
-5. Attach the notebook to a Databricks cluster (for example, a serverless cluster).
-6. Run Kedro from a notebook:
 
-First, install the project dependencies:
+Open the `notebooks/` folder in the cloned repository and create a new notebook.
+
+Attach the notebook to a Databricks cluster (for example, a serverless cluster).
+
+Run Kedro from a notebook. First, install the project dependencies:
 
 ```python
 %pip install -r ../requirements.txt
@@ -69,11 +72,11 @@ This makes the project objects available in the notebook (`catalog`, `context`, 
 session.run()
 ```
 
-!!! note
-    If you launched the notebook from **outside** the Kedro project directory, pass the project root explicitly:
+If you launched the notebook from **outside** the Kedro project directory, pass the project root explicitly:
 
-    %reload_kedro /Workspace/Users/<databricks_user_name>/<cloned_repo_name>
-
+``` python
+%reload_kedro /Workspace/Users/<databricks_user_name>/<cloned_repo_name>
+```
 
 ### Scheduling
 
@@ -97,13 +100,11 @@ This option is recommended for **local-first development**, where you run code l
 
 ### Setup steps
 
-#### 1. Install databricks-connect
+Install databricks-connect:
 
 ```bash
 pip install databricks-connect
 ```
-
-#### 2. Set required environment variables
 
 Databricks Connect requires two environment variables:
 
@@ -112,15 +113,11 @@ export DATABRICKS_HOST="https://<your-workspace>.cloud.databricks.com"
 export DATABRICKS_TOKEN="<your-personal-access-token>"
 ```
 
-#### 3. Configure the Kedro Data Catalog
-
-Spark workloads execute remotely on Databricks and do not have access to your local filesystem. As a result, all `SparkDatasetV2` entries in the Data Catalog must use paths pointing to **Databricks Volumes** or other remote storage.
+Configure the Kedro Data Catalog: Spark workloads execute remotely on Databricks and do not have access to your local filesystem. As a result, all `SparkDatasetV2` entries in the Data Catalog must use paths pointing to **Databricks Volumes** or other remote storage.
 
 Non-Spark datasets (for example, Pandas-based datasets) can remain local. They will be automatically converted to Spark datasets when executed on Databricks.
 
-#### 4. Run Kedro locally
-
-Once configured, run Kedro as usual:
+Once configured, run Kedro locally as usual:
 
 ```bash
 kedro run
@@ -180,11 +177,11 @@ Load the Kedro IPython extension:
 %reload_kedro
 ```
 
-!!! note
-    If you launched the notebook from **outside** the Kedro project directory, pass the project root explicitly:
+If you launched the notebook from **outside** the Kedro project directory, pass the project root explicitly:
 
+``` ipython
     %reload_kedro /Workspace/Users/<databricks_user_name>/<cloned_repo_name>
-
+```
 
 ### Launch the full Kedro-Viz web app
 

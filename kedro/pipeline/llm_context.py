@@ -78,16 +78,15 @@ def _get_tool_name(obj: object) -> str:
     Name resolution priority:
     1. `obj.__name__` (functions, classes)
     2. `obj.name` attribute
-    3. class name (`obj.__class__.__name__`)
-    4. string representation `str(obj)`
+    3. concrete class name (`type(obj).__name__`)
     """
     if hasattr(obj, "__name__"):
         return str(obj.__name__)
+
     if hasattr(obj, "name"):
         return str(obj.name)
-    if hasattr(obj, "__class__"):
-        return obj.__class__.__name__
-    return str(obj)
+
+    return type(obj).__name__
 
 
 def _normalize_outputs(outputs: str | list[str] | dict[str, str]) -> str:

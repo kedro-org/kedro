@@ -435,6 +435,7 @@ nav:
                   - Overview: api/pipeline/kedro.pipeline.md
                   - Node: api/pipeline/kedro.pipeline.node.md
                   - Pipeline: api/pipeline/kedro.pipeline.Pipeline.md
+                  - LLM context node: api/pipeline/kedro.pipeline.llm_context.md
               - kedro.runner:
                   - Overview: api/runner/kedro.runner.md
                   - AbstractRunner: api/runner/kedro.runner.AbstractRunner.md

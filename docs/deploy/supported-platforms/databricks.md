@@ -20,6 +20,9 @@ Before starting, make sure you have:
 - A **Databricks workspace** with access to a cluster or serverless compute and permission to create **Unity Catalog Volumes** (or access to existing ones).
 - A **Databricks personal access token** (required for Databricks Connect and production deployments).
 
+!!! note
+    Databricks Free tier does not support DBFS. Use Unity Catalog tables instead.
+
 To follow any of the approaches below, you first need a Spark-enabled Kedro project. Create one using:
 
 ``` bash
@@ -93,9 +96,6 @@ To schedule execution:
 
 - Create a **[Databricks Job](https://docs.databricks.com/aws/en/jobs/configure-job#create-a-new-job)** that runs the notebook which calls `session.run()`.
 
-!!! note
-    Databricks Free tier does not support DBFS. Use Unity Catalog tables instead.
-
 ---
 
 ## Local development, remote Databricks cluster (Databricks Connect)
@@ -116,6 +116,9 @@ Install databricks-connect:
 pip install databricks-connect
 ```
 
+!!! note
+    Ensure that the installed `databricks-connect` version matches your Databricks Runtime version. You can check [the requirements here](https://docs.databricks.com/aws/en/dev-tools/databricks-connect/requirements#databricks-connect-versions).
+
 Databricks Connect requires two environment variables:
 
 ```bash
@@ -125,7 +128,7 @@ export DATABRICKS_TOKEN="<your-personal-access-token>"
 
 Configure the Kedro Data Catalog: Spark workloads execute remotely on Databricks and do not have access to your local filesystem. As a result, all `SparkDatasetV2` entries in the Data Catalog must use paths pointing to **Databricks Volumes** or other remote storage.
 
-Non-Spark datasets (for example, pandas-based datasets) can remain local. They will be automatically converted to Spark datasets when executed on Databricks.
+Non-Spark datasets (for example, pandas-based datasets) can be stored **anywhere** - locally or in cloud storage - as long as you specify their path in the Data Catalog.
 
 Once configured, run Kedro locally as usual:
 
@@ -133,7 +136,7 @@ Once configured, run Kedro locally as usual:
 kedro run
 ```
 
-Your Spark code will execute remotely on the Databricks cluster, and you will see the execution logs streamed to your local terminal.
+All operations on `SparkDatasetV2` within nodes run remotely on the Databricks cluster, while all other code runs locally in your Python environment, with Spark execution logs streamed to your local terminal.
 
 ---
 

@@ -10,9 +10,9 @@
 LLM context nodes provide a structured way to construct an `LLMContext` inside a Kedro pipeline.
 An `LLMContext` bundles together:
 
-- an LLM instance,
-- one or more prompt datasets,
-- optionally, dynamically constructed tool objects.
+- An LLM instance.
+- One or more prompt datasets.
+- Optionally, dynamically constructed tool objects.
 
 The resulting context is a regular Kedro dataset that can be passed downstream to nodes responsible
 for LLM execution, agent orchestration, or workflow control.
@@ -36,25 +36,22 @@ Use whichever style best fits your pipeline definitions.
 
 Use an LLM Context Node when you want to:
 
-- cleanly separate LLM configuration from execution logic,
-- reuse the same LLM, prompts, or tools across multiple downstream nodes,
-- integrate agent frameworks (for example LangGraph, OpenAI Agents, AutoGen) into a Kedro pipeline,
-- treat LLM setup as a first-class pipeline artifact.
+- Cleanly separate LLM configuration from execution logic.
+- Reuse the same LLM, prompts, or tools across multiple downstream nodes.
+- Integrate agent frameworks (for example LangGraph, OpenAI Agents, AutoGen) into a Kedro pipeline.
+- Treat LLM setup as a first-class pipeline artifact.
 
 LLM context nodes are **not** responsible for:
 
-- managing conversational history or token context windows,
-- executing or calling the LLM,
-- implementing agent control flow.
+- Managing conversational history or token context windows.
+- Executing or calling the LLM.
+- Implementing agent control flow.
 
 ## Basic usage
 
 At runtime, Kedro loads the `llm`, `system_prompt`, and `user_prompt` datasets and produces an `LLMContext` object as the node output.
 
-Tools are declared using the `tool()` helper, which specifies:
-
-- a tool constructor function,
-- the Kedro datasets (including `params:`) required to build the tool.
+Tools are declared using the `tool()` helper, which specifies a tool constructor function and the Kedro datasets (including `params:`) required to build the tool.
 
 ### Functional API
 
@@ -159,11 +156,7 @@ pipeline = Pipeline([
 ])
 ```
 
-This structure keeps:
-
-- configuration in the `LLMContextNode`,
-- execution logic in downstream nodes,
-- data flow fully visible to Kedro.
+This structure keeps configuration in the `LLMContextNode`, execution logic in downstream nodes and data flow fully visible to Kedro.
 
 ## Design notes and limitations
 

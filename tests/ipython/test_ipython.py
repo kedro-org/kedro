@@ -146,7 +146,7 @@ class TestLoadKedroObjects:
 
 class TestLoadIPythonExtension:
     def test_load_ipython_extension(self, ipython):
-        ipython.magic("load_ext kedro.ipython")
+        ipython.run_line_magic("load_ext", "kedro.ipython")
 
     def test_load_extension_missing_dependency(self, mocker):
         mocker.patch("kedro.ipython.reload_kedro", side_effect=ImportError)
@@ -191,7 +191,7 @@ class TestLoadIPythonExtension:
         mock_reload_kedro.assert_called_once()
 
         # Calling the line magic to check if the line magic is available
-        ipython.magic("reload_kedro")
+        ipython.run_line_magic("reload_kedro", "")
         assert mock_reload_kedro.call_count == 2
 
     @pytest.mark.parametrize(
@@ -210,7 +210,7 @@ class TestLoadIPythonExtension:
         mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")
 
-        ipython.magic(f"reload_kedro {args}")
+        ipython.run_line_magic("reload_kedro", args)
 
     def test_line_magic_with_invalid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython.find_kedro_project")
@@ -220,7 +220,7 @@ class TestLoadIPythonExtension:
         with pytest.raises(
             UsageError, match=r"unrecognized arguments: --invalid_arg=dummy"
         ):
-            ipython.magic("reload_kedro --invalid_arg=dummy")
+            ipython.run_line_magic("reload_kedro", "--invalid_arg=dummy")
 
     def test_ipython_kedro_extension_alias(self, mocker, ipython):
         mock_ipython_extension = mocker.patch(
@@ -228,7 +228,7 @@ class TestLoadIPythonExtension:
         )
         # Ensure that `kedro` is not loaded initially
         assert "kedro" not in ipython.extension_manager.loaded
-        ipython.magic("load_ext kedro")
+        ipython.run_line_magic("load_ext", "kedro")
         mock_ipython_extension.assert_called_once_with(ipython)
         # Ensure that `kedro` extension has been loaded
         assert "kedro" in ipython.extension_manager.loaded
@@ -265,7 +265,7 @@ class TestProjectPathResolution:
 
     def test_project_path_unresolvable_warning(self, mocker, caplog, ipython):
         mocker.patch("kedro.ipython.find_kedro_project", return_value=None)
-        ipython.magic("reload_ext kedro.ipython")
+        ipython.run_line_magic("reload_ext", "kedro.ipython")
         log_messages = [record.getMessage() for record in caplog.records]
         expected_message = (
             "Kedro extension was registered but couldn't find a Kedro project. "
@@ -449,7 +449,7 @@ ERROR,
     def test_load_node_magic_with_valid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython._load_node")
-        ipython.magic("load_node dummy_node")
+        ipython.run_line_magic("load_node", "dummy_node")
 
     def test_load_node_with_invalid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython.find_kedro_project")
@@ -459,7 +459,7 @@ ERROR,
         with pytest.raises(
             UsageError, match=r"unrecognized arguments: --invalid_arg=dummy_node"
         ):
-            ipython.magic("load_node --invalid_arg=dummy_node")
+            ipython.run_line_magic("load_node", "--invalid_arg=dummy_node")
 
     def test_load_node_with_jupyter(self, mocker, ipython):
         mocker.patch("kedro.ipython.find_kedro_project")
@@ -469,7 +469,7 @@ ERROR,
         call = mocker.call
 
         load_ipython_extension(ipython)
-        ipython.magic("load_node dummy_node")
+        ipython.run_line_magic("load_node", "dummy_node")
         calls = [call("cell1\n\ncell2")]
         spy.assert_has_calls(calls)
 
@@ -481,7 +481,7 @@ ERROR,
         spy = mocker.spy(kedro.ipython, "_create_cell_with_text")
 
         load_ipython_extension(ipython)
-        ipython.magic("load_node dummy_node")
+        ipython.run_line_magic("load_node", "dummy_node")
         spy.assert_called_once()
 
     @pytest.mark.parametrize(
@@ -503,7 +503,7 @@ ERROR,
         spy = mocker.spy(kedro.ipython, "_print_cells")
 
         load_ipython_extension(ipython)
-        ipython.magic("load_node dummy_node")
+        ipython.run_line_magic("load_node", "dummy_node")
         spy.assert_called_once()
 
 

@@ -170,7 +170,7 @@ For full setup instructions, see the [plugin documentation.](https://kedro-datab
 
 ### Prerequisites
 
-Make sure Kedro and Kedro-Viz are installed in the same scope(notebook-scoped or cluster-scoped). For notebook-scoped installs:
+Make sure Kedro and Kedro-Viz are installed in the same scope (notebook-scoped or cluster-scoped). For notebook-scoped installs:
 
 ``` ipython
 %pip install -r ../requirements.txt

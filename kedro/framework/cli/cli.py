@@ -63,7 +63,7 @@ def info() -> None:
     click.echo(
         "Kedro is a Python framework for\n"
         "creating reproducible, maintainable\n"
-        "and modular data science code."
+        "and modular data engineering and data science code."
     )
 
     plugin_versions = {}

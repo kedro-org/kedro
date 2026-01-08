@@ -19,7 +19,7 @@ This section does not cover:
 
 Kedro expects node functions to be [pure functions](https://realpython.com/python-functional-programming/#what-is-functional-programming); a pure function is one whose output follows solely from its inputs, without any observable side effects. Testing these functions checks that a node will behave as expected - for a given set of input values, a node will produce the expected output. These tests are referred to as unit tests.
 
-Let us explore what this looks like in practice. Consider the node function `split_data` defined in the data science pipeline:
+Let us explore what this looks like in practice. Consider the node function `split_data` defined in the data engineering and data science pipeline:
 
 ??? example "View code"
     ```python
@@ -133,7 +133,7 @@ Using the same steps as above, we can write the following test to validate an er
 
 Writing tests for each node ensures each node will behave as expected when run individually. Though, we must also consider how nodes in a pipeline interact with each other - this is called integration testing. Integration testing combines individual units as a group and checks whether they communicate, share data, and work together as expected. Let us look at this in practice.
 
-Consider the data science pipeline as a whole:
+Consider the data engineering and data science pipeline as a whole:
 
 <!-- vale off -->
 ??? example "View code"
@@ -294,7 +294,7 @@ def test_split_data(dummy_data, dummy_parameters):
 
 ### Pipeline slicing
 
-In the test `test_data_science_pipeline` we check that the data science pipeline, as defined, runs without errors. Though, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../build/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
+In the test `test_data_science_pipeline` we check that the data engineering and data science pipeline, as defined, runs without errors. Though, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../build/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
 
 ```python
 def test_data_science_pipeline(self):

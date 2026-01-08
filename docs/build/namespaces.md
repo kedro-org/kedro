@@ -49,7 +49,7 @@ base_data_science = Pipeline(
                 name="evaluate_model_node",
             ),
         ]
-    )  # Creating a base data science pipeline that will be reused with different model training parameters
+    )  # Creating a base data engineering and data science pipeline that will be reused with different model training parameters
 
 # data_science pipeline creation function
 def create_pipeline(**kwargs) -> Pipeline:

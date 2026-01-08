@@ -12,7 +12,7 @@ Data engineering is the process of wrangling data into a clean and reliable stat
 Data science extracts insights from data by using a combination of domain expertise, programming skills, and knowledge of mathematics and statistics. An old joke: "A data scientist is someone who knows more statistics than a computer scientist and more computer science than a statistician".
 
 ## Kedro
-Kedro is an open-source Python framework for creating reproducible, maintainable, and modular data science code. It applies software engineering best-practices to machine learning code, including modularity, separation of concerns, and versioning.
+Kedro is an open-source Python framework for creating reproducible, maintainable, and modular data engineering and data science code. It applies software engineering best-practices to machine learning code, including modularity, separation of concerns, and versioning.
 
 ## `KedroContext`
 A Python class that holds the configuration and Kedro’s main functionality.

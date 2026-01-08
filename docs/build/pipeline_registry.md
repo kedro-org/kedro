@@ -2,7 +2,7 @@
 
 Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This populates the `pipelines` variable in [`kedro.framework.project`][kedro.framework.project] that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to [`Pipeline`][kedro.pipeline.pipeline.Pipeline] objects.
 
-For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipeline_registry.py) defines the following `register_pipelines()` function. It exposes the data processing pipeline, the data science pipeline, and a default pipeline that combines both:
+For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipeline_registry.py) defines the following `register_pipelines()` function. It exposes the data processing pipeline, the data engineering and data science pipeline, and a default pipeline that combines both:
 
 ```python
 import spaceflights.pipelines.data_processing as dp

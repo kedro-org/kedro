@@ -23,7 +23,7 @@
 
 ## What is Kedro?
 
-Kedro is a toolbox for production-ready data pipelines. It uses software engineering best practices to help you create data engineering and data science pipelines that are reproducible, maintainable, and modular. You can find out more at [kedro.org](https://kedro.org).
+Kedro is a toolbox for production-ready data engineering and data science pipelines. It uses software engineering best practices to help you create data engineering and data science pipelines that are reproducible, maintainable, and modular. You can find out more at [kedro.org](https://kedro.org).
 
 Kedro is an open-source Python framework hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
 

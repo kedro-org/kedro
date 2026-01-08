@@ -1,4 +1,4 @@
-# LLM Context Nodes
+# LLM context nodes
 
 ## Overview
 
@@ -20,7 +20,7 @@ without invoking the model itself.
 
 ## Node interfaces
 
-Two equivalent interfaces are provided:
+Two similar interfaces are provided:
 
 - **Functional API**: `llm_context_node(...)`
 - **Class-based API**: `LLMContextNode(...)`
@@ -36,7 +36,7 @@ Use an LLM Context Node when you want to:
 
 - cleanly separate LLM configuration from execution logic,
 - reuse the same LLM, prompts, or tools across multiple downstream nodes,
-- integrate agent frameworks (e.g. LangGraph, OpenAI Agents, AutoGen) into a Kedro pipeline,
+- integrate agent frameworks (for example LangGraph, OpenAI Agents, AutoGen) into a Kedro pipeline,
 - treat LLM setup as a first-class pipeline artifact.
 
 LLM context nodes are **not** responsible for:
@@ -82,7 +82,7 @@ LLMContextNode(
 
 ### Using tools
 
-Tool instantiation is intentionally lightweight and deterministic. All declared tool inputs are validated and loaded by Kedro before execution. Tool objects are instantiated at node runtime and tool names are automatically derived from the returned objects (e.g. function name).
+Tool instantiation is intentionally lightweight and deterministic. All declared tool inputs are validated and loaded by Kedro before execution. Tool objects are instantiated at node runtime and tool names are automatically derived from the returned objects (for example function name).
 
 ```python
 from kedro.pipeline import llm_context_node, tool
@@ -99,7 +99,7 @@ llm_context_node(
 )
 ```
 
-## Composing and consuming an `LLMContext`
+## Composing and consuming an LLM context
 
 This example shows how `LLMContext` acts as a boundary object between configuration and execution.
 
@@ -125,7 +125,7 @@ This node produces an `LLMContext` dataset containing:
 - `context.prompts` - a mapping of prompt names to prompt content
 - `context.tools` - a mapping of tool names to instantiated tool objects
 
-### 2. Define a node that consumes the LLMContext
+### 2. Define a node that consumes the `LLMContextà
 
 ```python
 from kedro.pipeline import Node
@@ -168,5 +168,3 @@ This structure keeps:
 - Each LLM context node instantiates its tools independently. Tool reuse is achieved by reusing datasets and parameters, not shared runtime objects.
 - All inputs are standard Kedro datasets and are validated before execution.
 - The node returns a standard Kedro `Node` and does not introduce new execution semantics.
-
-This design keeps LLM context nodes predictable, composable, and aligned with Kedro’s core principles.

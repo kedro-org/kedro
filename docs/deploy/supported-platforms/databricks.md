@@ -36,24 +36,27 @@ This option is suitable if you primarily work **within the Databricks workspace*
 
 ### Typical workflow
 
-Push your Kedro project to a Git repository (GitHub, GitLab, Azure DevOps, Bitbucket, and more).
+1. Push your Kedro project to a Git repository (GitHub, GitLab, Azure DevOps, Bitbucket, and more).
 
-Clone the repository into Databricks using **[Git folders](https://docs.databricks.com/aws/en/repos/repos-setup)**.
+2. Clone the repository into Databricks using **[Git folders](https://docs.databricks.com/aws/en/repos/repos-setup)**.
 
-Open the cloned repository in Databricks and update your Kedro Data Catalog (`conf/base/catalog.yml`):
+3. Open the cloned repository in Databricks and update your Kedro Data Catalog (`conf/base/catalog.yml`):
 
    - For all `spark.SparkDatasetV2` datasets, update file paths to point to **Databricks Volumes**, for example:
-     ```
-     filepath: /Volumes/<catalog_name>/<schema_name>/<volume_name>/...
+     ```diff
+     preprocessed_companies:
+     -  filepath: data/02_intermediate/preprocessed_companies.csv
+     +  filepath: /Volumes/<catalog_name>/<schema_name>/<volume_name>/data/02_intermediate/preprocessed_companies.csv
+     type: spark.SparkDatasetV2
      ```
    - Make sure the volume exists in Unity Catalog before running the pipeline. You can find instructions on how to create a volume in the [Databricks docs.](https://docs.databricks.com/aws/en/volumes/utility-commands)
    - Non-Spark datasets (for example, pandas-based datasets) can read from and write to the cloned Git folder without changing their file paths.
 
-Open the `notebooks/` folder in the cloned repository and create a new notebook.
+4. Open the `notebooks/` folder in the cloned repository and create a new notebook.
 
-Attach the notebook to a Databricks cluster (for example, a serverless cluster).
+5. [Attach the notebook to a Databricks cluster](https://docs.databricks.com/aws/en/notebooks/notebook-compute#attach) (for example, a [serverless cluster](https://docs.databricks.com/aws/en/compute/serverless/notebooks#attach-a-notebook-to-serverless-compute)).
 
-Run Kedro from a notebook. First, install the project dependencies:
+6. Run Kedro from a notebook. First, install the project dependencies:
 
 ```python
 %pip install -r ../requirements.txt
@@ -80,8 +83,11 @@ If you launched the notebook from **outside** the Kedro project directory, pass 
 
 ### Scheduling
 
-- Create a **[Databricks Job](https://docs.databricks.com/aws/en/jobs/configure-job#create-a-new-job)** that runs the notebook
-- Suitable for notebook-based schedules
+In this setup, your Kedro pipeline is executed **from a Databricks notebook**. Scheduling is therefore handled by creating a Databricks Job that runs this notebook on a cluster.
+
+To schedule execution:
+
+- Create a **[Databricks Job](https://docs.databricks.com/aws/en/jobs/configure-job#create-a-new-job)** that runs the notebook which calls `session.run()`.
 
 !!! note
     Databricks Free tier does not support DBFS. Use Unity Catalog tables instead.
@@ -115,7 +121,7 @@ export DATABRICKS_TOKEN="<your-personal-access-token>"
 
 Configure the Kedro Data Catalog: Spark workloads execute remotely on Databricks and do not have access to your local filesystem. As a result, all `SparkDatasetV2` entries in the Data Catalog must use paths pointing to **Databricks Volumes** or other remote storage.
 
-Non-Spark datasets (for example, Pandas-based datasets) can remain local. They will be automatically converted to Spark datasets when executed on Databricks.
+Non-Spark datasets (for example, pandas-based datasets) can remain local. They will be automatically converted to Spark datasets when executed on Databricks.
 
 Once configured, run Kedro locally as usual:
 
@@ -123,7 +129,7 @@ Once configured, run Kedro locally as usual:
 kedro run
 ```
 
-Your Spark jobs will execute remotely on the Databricks cluster.
+Your Spark code will execute remotely on the Databricks cluster, and you will see the execution logs streamed to your local terminal.
 
 ---
 
@@ -144,7 +150,6 @@ This option is suitable when you need:
 - Packages a Kedro project
 - Converts it into a **Databricks Asset Bundle**
 - Deploys it as a **Databricks Job**
-- Integrates naturally with CI/CD pipelines
 
 !!! note
     This is a **community-maintained plugin**.

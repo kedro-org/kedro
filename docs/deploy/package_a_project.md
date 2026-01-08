@@ -20,7 +20,7 @@ kedro package
 
 Kedro builds the package into the `dist` folder of the project as a `.whl` file, which is a [Python packaging format for binary distribution](https://packaging.python.org/en/latest/overview/#python-binary-distributions).
 
-The resulting `.whl` packages only contain the Python source code of the Kedro pipeline, not any of the `conf` and `data` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
+The resulting `.whl` packages include the Python source code of the Kedro pipeline, not any of the `conf` and `data` subdirectories. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset, and logging locations.
 
 The project configuration is provided separately in a `tar.gz` file, also inside the `dist` folder. This compressed version of the config files excludes any files inside the `local` directory.
 
@@ -37,16 +37,18 @@ pip install <path-to-wheel-file>
 !!! note
     Once the packaged project is installed, you will need to add:
 
-* a `conf` folder
-* a `data` folder if the pipeline loads/saves local data
+    * a `conf` folder
+    * a `data` folder if the pipeline loads or saves local data
 
-Alternatively, you can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
+You can also use the `OmegaConfigLoader` to run the configuration directly from the compressed `.tar.gz` configuration file by running:
+
+```bash
 kedro run --conf-source <path-to-compressed-config>.tar.gz
 ```
 
 Once your project is installed, it can be run either from the command line or interactively using Python code.
 
-To do a basic run of your installed project from the command line, run `python -m <package_name>`. The packaged project also exposes a command line interface which you can use to modify how your project will be run. To see a list of options, use `python -m <package_name> --help` at the command line.
+To do a basic run of your installed project from the command line, run `python -m <package_name>`. The packaged project also exposes a command line interface that lets you adjust how your project runs. To see a list of options, use `python -m <package_name> --help` at the command line.
 
 To run your packaged project interactively using code, you can import `main` from the project:
 
@@ -58,7 +60,7 @@ main(
 )  # or simply main() if you don't want to provide any arguments
 ```
 
-This is equivalent to `python -m <package_name>` at the command line, and you can pass in all the arguments that correspond to the options described by `python -m <package_name> --help`.
+This mirrors running `python -m <package_name>` at the command line, and you can pass in all the arguments that correspond to the options described by `python -m <package_name> --help`.
 
 !!! note
     If you run the packaged project in the interactive environment like IPython or Databricks you can also consume the output of the `main()`
@@ -74,7 +76,7 @@ def run_kedro_pipeline():
 
 ### Docker, Airflow and other deployment targets
 
-There are various methods to deploy packaged pipelines via Kedro plugins:
+There are various methods to deploy packaged pipelines through Kedro plugins:
 
 * [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
 * [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) to convert your Kedro project into an [Airflow](https://airflow.apache.org/) project.

@@ -6,7 +6,7 @@ This page also explains how to use line magic to display a Kedro-Viz visualisati
 
 ## Example project
 
-The example adds a notebook to experiment with the  [`spaceflight-pandas-viz` starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz). As an alternative, you can follow the example using a different starter or just add a notebook to your own project.
+The example adds a notebook to experiment with the  [`spaceflight-pandas-viz` starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz). As an alternative, you can follow the example using a different starter or add a notebook to your own project.
 
 We will assume the example project is called `spaceflights`, but you can call it whatever you choose.
 
@@ -43,19 +43,20 @@ We recommend that you save your notebook in the `notebooks` folder of your Kedro
 
 The `kedro jupyter notebook` command launches a notebook with a customised kernel that has been extended to make the following project variables available:
 
+<!-- vale off -->
 * `catalog` (type [kedro.io.DataCatalog][]): [Data Catalog](../../catalog-data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type [kedro.framework.context.KedroContext][]): Kedro project context that provides access to Kedro's library components
 * `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../../build/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type [kedro.framework.session.session.KedroSession][]): [Kedro session](../../extend/session.md) that orchestrates a pipeline run
-
-In addition, it also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
+<!-- vale on -->
+It also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
 
 !!! note
     If the Kedro variables are not available within your Jupyter notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook` or run `%load_ext kedro.ipython` in a notebook cell.
 
 ## Loading the project with the `kedro.ipython` extension
 
-A quick way to explore the `catalog`, `context`, `pipelines`, and `session` variables in your project within a IPython compatible environment, such as Databricks notebooks, Google Colab, and more, is to use the `kedro.ipython` extension.
+You can explore the `catalog`, `context`, `pipelines`, and `session` variables in your project within a IPython compatible environment, such as Databricks notebooks, Google Colab, and more, by using the `kedro.ipython` extension.
 This is tool-independent and useful in situations where launching a Jupyter interactive environment is not possible. You can use the [`%load_ext` line magic](https://ipython.readthedocs.io/en/stable/config/extensions/index.html#using-extensions) to explicitly load the Kedro IPython extension:
 ```ipython
 In [1]: %load_ext kedro.ipython
@@ -172,7 +173,7 @@ INFO     Loading data from 'parameters' (MemoryDataset)...
 ```
 
 !!! note
-    If you enable [versioning](../../catalog-data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, e.g. `catalog.load("preprocessed_shuttles", version="2024-06-05T15.08.09.255Z")`.
+    If you enable [versioning](../../catalog-data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, for example, `catalog.load("preprocessed_shuttles", version="2024-06-05T15.08.09.255Z")`.
 
 ### `context`
 
@@ -277,7 +278,7 @@ For more details, run `%reload_kedro?`.
 ### `%load_node` line magic
 
 !!! note
-    This is still an experimental feature and is currently only available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VS Code Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this github issue](https://github.com/kedro-org/kedro/issues/3580).
+    This experimental feature is available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VS Code Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this GitHub issue](https://github.com/kedro-org/kedro/issues/3580).
 
 When using this feature in Jupyter Notebook you will need to have the following requirements and minimum versions installed:
 ```yaml
@@ -292,7 +293,7 @@ You can load the contents of a node in your project into a series of cells using
 The [section about creating nodes with names](../../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../../tutorials/create_a_pipeline.md#preprocessed-data-registration).
 
 !!! note
-    The node name needs to be unique within the pipeline. In the absence of a user defined name, Kedro generates one using a combination of the function name, inputs and outputs.
+    The node name needs to be unique within the pipeline. In the absence of a user-defined name, Kedro generates one using a combination of the function name, inputs, and outputs.
 
 The line magic will load your node's inputs, imports, and body:
 
@@ -301,7 +302,7 @@ The line magic will load your node's inputs, imports, and body:
 ```
 
 ??? example "Click to see an example."
-    ![jupyter_ipython_load_node](../../meta/images/jupyter_ipython_load_node.gif)
+    ![Load a node in Jupyter or IPython](../../meta/images/jupyter_ipython_load_node.gif)
 
 
 
@@ -325,7 +326,7 @@ You can display an interactive visualisation of your pipeline directly in your n
 
 ## Debugging a Kedro project within a notebook
 
-You can use the built-in [`%debug` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint. Alternatively, use the command with no arguments after an error occurs to load the stack trace and begin debugging.
+You can use the built-in [`%debug` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a break point. You can also use the command with no arguments after an error occurs to load the stack trace and begin debugging.
 
 The following sequence occurs when `%debug` runs after an error occurs:
 
@@ -338,26 +339,26 @@ You can then inspect the value of expressions and arguments, or add breakpoints 
 Here is example debugging workflow after discovering a node in your pipeline is failing:
 1. Inspect the logs to find the name of the failing node. We can see below the problematic node is `split_data_node`.
 
-??? example "Click to the pipeline failure logs"
-    ![pipeline_error_logs](../../meta/images/pipeline_error_logs.png)
+??? example "Click to see the pipeline failure logs"
+    ![Pipeline error logs](../../meta/images/pipeline_error_logs.png)
 
 2. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#kedro-line-magics).
 3. Run the populated cells to examine the node's behaviour in isolation.
 4. If the node fails in error, use `%debug` to launch an interactive debugging session in your notebook.
 
 ??? example "Click to see this workflow in action."
-    ![jupyter_ipython_debug_command](../../meta/images/jupyter_ipython_debug_command.gif)
+    ![Use the %debug line magic in Jupyter or IPython](../../meta/images/jupyter_ipython_debug_command.gif)
 
 
 !!! note
-    The `%load_node` line magic is currently only available for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy over the contents from your project files instead of using `%load_node` to automatically populate your node's contents, and continue from step 2.
+    The `%load_node` line magic is available for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy the relevant content from your project files instead of using `%load_node` to populate your node, and continue from step 2.
 
 ---
 
 You can also set up the debugger to run automatically when an exception occurs by using the [`%pdb` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behaviour can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
 
 ??? example "Click to see an example"
-    ![jupyter_ipython_pdb_command](../../meta/images/jupyter_ipython_pdb_command.gif)
+    ![Use the %pdb line magic in Jupyter or IPython](../../meta/images/jupyter_ipython_pdb_command.gif)
 
 
 ---
@@ -375,7 +376,7 @@ Some examples of the possible commands that can be used to interact with the ipd
 | `p(rint)`         | Print variables                                       |
 | `s(tep)`          | Step into a subroutine                                |
 | `r(eturn)`        | Return out of a subroutine                            |
-| `b(reak)`         | Insert a breakpoint                                   |
+| `b(reak)`         | Insert a break point                                  |
 | `a(rgs)`          | Print the argument list of the current function        |
 
 For more information, use the `help` command in the debugger, or take at the [ipdb repository](https://github.com/gotcha/ipdb) for guidance.

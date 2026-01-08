@@ -9,6 +9,10 @@ exceptions:
   - Airflow
   - Amazon
   - Amazon Web Services
+  - API
+  - Argo Workflows
+  - Astro Cloud
+  - AWS Batch
   - AWS Step Functions
   - AWS Systems Manager
   - Azure
@@ -16,41 +20,74 @@ exceptions:
   - Azure App Service Plan
   - Azure Blob Storage
   - Azure Event Hub
+  - Azure ML
   - CI/CD
+  - CLI
   - DataCatalog
   - Data Catalog
+  - DataFrame
+  - Databricks
+  - Databricks Repo
+  - Delta Lake
+  - Delta tables
   - Docker
   - Docker Compose
   - Docker Swarm
   - Dockerfile
+  - EMR Serverless
+  - Excel
   - GitHub
   - GitHub Actions
   - Google
   - Google Analytics
   - Google Cloud
   - Google Cloud Functions
-  - GraphQL
+  - Google Cloud Storage
+  - Great Expectations
   - Hook
   - Hooks
+  - IAM
+  - Iceberg
   - IDs
+  - IO
+  - IPython
   - Jenkins
   - JFrog
   - JFrog Artifactory
   - Jira
+  - Jupyter Notebook
+  - JupyterLab
   - Kafka
+  - Kubeflow
+  - Kubeflow Pipelines
   - Kubernetes
   - Kubernetes Engine
   - Kubernetes Pod
   - Kubernetes Service
   - Lambda
   - Linux
+  - Marimo
+  - MWAA
   - MySQL
+  - Notebooks
+  - Prefect
+  - PyCharm
   - Python
+  - PySpark
   - QuantumBlack
   - QuantumBlack Labs
   - Red Hat
   - Redis
+  - SageMaker
   - Slack
+  - SSH
+  - Spark
+  - Technical Steering Committee
+  - TSC
   - Ubuntu
   - Unix
   - URLs
+  - VertexAI
+  - YAML
+  - VS Code
+  - Visual Studio Code

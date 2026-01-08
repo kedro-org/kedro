@@ -10,6 +10,7 @@ Antony
 Ankita
 Batori
 Braccialli
+Brugman
 Brummitt
 Cano
 Carvalho
@@ -35,6 +36,7 @@ Erins
 Gabriel
 Gundaniya
 Guilherme
+Guillaume
 Hamza
 Hoang
 Holzer
@@ -60,6 +62,7 @@ Khan
 Kirilenko
 Kiyohito
 Klein
+Koh
 Kunii
 Kumar
 Lais
@@ -90,6 +93,7 @@ Oza
 Paricio
 Patel
 Peteris
+Philp
 Pilla
 Puneet
 Rashida
@@ -103,6 +107,7 @@ Susanna
 Sajid
 Stephanie
 Takieddine
+Tauzin
 Theisen
 Tynan
 Tsaousis

@@ -97,7 +97,7 @@ Please update your code and workflows accordingly. Where possible, recommended a
 
 | Deprecated Item           | Type        | Replacement / Notes                                                |
 | ------------------------- | ----------- | ------------------------------------------------------------------ |
-| `catalog._get_dataset()`  | Method      | Internal use only; use `catalog.get()` instead                     |
+| `catalog._get_dataset()`  | Method      | Intended for internal use; use `catalog.get()` instead             |
 | `catalog.add_all()`       | Method      | Prefer explicit catalog construction or use `catalog.add()`        |
 | `catalog.add_feed_dict()` | Method      | Use `catalog["my_dataset"] = ...` (dict-style assignment)          |
 | `catalog.list()`          | Method      | Replaced by `catalog.filter()`                                     |
@@ -217,7 +217,7 @@ In 0.19.0 we renamed dataset and error classes to follow the [Kedro lexicon](htt
 * Dataset classes ending with `DataSet` are replaced by classes that end with `Dataset`.
 * Error classes starting with `DataSet` are replaced by classes that start with `Dataset`.
 
-All the classes below are also importable from `kedro.io`; only the module where they are defined is listed as the location.
+All the classes below are also importable from `kedro.io`; the module where they are defined is listed as the location.
 
 | Type                        | Removed Alias               | Location                       |
 | --------------------------- | --------------------------- | ------------------------------ |
@@ -270,4 +270,4 @@ If you didn't use `CONFIG_LOADER_ARGS` in your code, this change is not needed b
 
 
 ### Logging
-`logging.yml` is now independent of Kedro's run environment and used only if `KEDRO_LOGGING_CONFIG` is set to point to it. The [documentation on logging](https://docs.kedro.org/en/stable/develop/logging/) describes in detail how logging works in Kedro and how it can be customised.
+`logging.yml` is now independent of Kedro's run environment and is used when `KEDRO_LOGGING_CONFIG` is set to point to it. The [documentation on logging](https://docs.kedro.org/en/stable/develop/logging/) describes in detail how logging works in Kedro and how it can be customised.

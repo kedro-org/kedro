@@ -253,6 +253,7 @@ plugins:
           - about/technical_steering_committee.md: Kedro's Technical Steering Committee
           - about/migration.md: Migration guide between Kedro versions
           - about/telemetry.md: Understanding Kedro telemetry
+          - about/experimental.md: Experimental APIs in Kedro
 
 markdown_extensions:
   - attr_list
@@ -430,7 +431,7 @@ nav:
               - kedro.logging: api/kedro.logging.md
               - kedro.pipeline:
                   - Overview: api/pipeline/kedro.pipeline.md
-                  - node: api/pipeline/kedro.pipeline.node.md
+                  - Node: api/pipeline/kedro.pipeline.node.md
                   - Pipeline: api/pipeline/kedro.pipeline.Pipeline.md
               - kedro.runner:
                   - Overview: api/runner/kedro.runner.md
@@ -464,6 +465,7 @@ nav:
             #   - Kedro Wizard: about/community/wizard.md
           - Contributing:
               - Kedro's Technical Steering Committee: about/technical_steering_committee.md
+          - Experimental APIs in Kedro: about/experimental.md
             #   - Kedro Maintainer: about/contributing/maintainer.md
             #   - Contributing on GitHub: about/contributing/github.md
             #   - Contributing documentation: about/contributing/documentation.md

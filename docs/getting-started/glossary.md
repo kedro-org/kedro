@@ -12,7 +12,7 @@ Data engineering is the process of wrangling data into a clean and reliable stat
 Data science extracts insights from data by using a combination of domain expertise, programming skills, and knowledge of mathematics and statistics. An old joke: "A data scientist is someone who knows more statistics than a computer scientist and more computer science than a statistician".
 
 ## Kedro
-Kedro is an open-source Python framework for creating reproducible, maintainable and modular data engineering and data science code. It applies software engineering best-practices to machine learning code, including modularity, separation of concerns and versioning.
+Kedro is an open-source Python framework for creating reproducible, maintainable, and modular data engineering and data science code. It applies software engineering best-practices to machine learning code, including modularity, separation of concerns and versioning.
 
 ## `KedroContext`
 A Python class that holds the configuration and Kedro’s main functionality.
@@ -34,14 +34,14 @@ You can use Kedro-Viz to visualise your Kedro data pipelines:
 [Further information from the Kedro-Viz repository](https://github.com/kedro-org/kedro-viz) and [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/)`.
 
 ## Layers (data engineering convention)
-According to [common data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71), a pipeline can be broken up into different layers according to how data is processed. This convention makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or processing has happened.
+According to [common data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71), a pipeline can be broken up into different layers according to how data is processed. This convention makes it easier to collaborate with other team members because everyone has an idea of which data cleaning or processing steps have happened.
 
-Kedro-Viz makes it easy to visualise these data processing stages by adding a `layer` attribute to the `kedro-viz` section within the `metadata` of the datasets in the Data Catalog.
+Kedro-Viz helps you visualise these data processing stages by adding a `layer` attribute to the `kedro-viz` section within the `metadata` of the datasets in the Data Catalog.
 
 ## Modular pipeline
 _(See also [Pipeline](#pipeline))_
 
-In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, you can create modular pipelines, which are logically isolated and can be reused. Modular pipelines are easier to develop, test and maintain, and are portable so they can be copied and reused between projects.
+In typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, you can create modular pipelines, which are logically isolated and can be reused. Modular pipelines are easier to develop, test, and maintain, and are portable so they can be copied and reused between projects.
 
 [Further information about modular pipelines](../build/modular_pipelines.md)
 
@@ -62,7 +62,7 @@ A Kedro pipeline organises the dependencies and execution order of a collection 
 
 [Further information about pipelines](../build/pipeline_introduction.md)
 
-**_Chonky pipeline_**: _Chonky is generally used to describe animals that are plump, rounded or simply heavier than average. A chonky pipeline is, likewise, a pipeline that is more bulky than usual._
+**_Chonky pipeline_**: _Chonky is generally used to describe animals that are plump, rounded, or heavier than average. A chonky pipeline is, likewise, a pipeline that is more bulky than usual._
 
 ## Pipeline slicing
 This is when you run a subset, or a ‘slice’ of a pipeline’s nodes. You can slice a pipeline in a variety of ways, such as:
@@ -90,7 +90,7 @@ Kedro starters are used to create projects that contain code to run as-is, or to
 [Further information about Kedro starters](../tutorials/settings.md)
 
 ## Tags
-You can apply tags to nodes or pipelines as a means of filtering which are executed.
+You can apply tags to nodes or pipelines to filter which ones are executed.
 
 ## Workflow dependencies
 In Kedro, workflow dependencies are the packages that your project (the data and ML workflow) requires.

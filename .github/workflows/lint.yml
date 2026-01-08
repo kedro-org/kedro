@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ inputs.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.branch }}
       - name: Install the latest version of uv with Python ${{inputs.python-version}}
@@ -28,7 +28,7 @@ jobs:
           python-version: ${{ inputs.python-version }}
           activate-environment: true
       - name: Cache python packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{inputs.os}}-python-${{inputs.python-version}}

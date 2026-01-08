@@ -6,7 +6,7 @@ A Hook consists of a Hook specification, and Hook implementation.
 
 ## Hook specifications
 
-Kedro defines Hook specifications for particular execution points where users can inject additional behaviour. Currently, the following Hook specifications are provided in [kedro.framework.hooks][]:
+Kedro defines Hook specifications for particular execution points where users can inject additional behaviour. The following Hook specifications are provided in [kedro.framework.hooks][]:
 
 * `after_context_created`
 * `after_catalog_created`
@@ -23,8 +23,8 @@ Kedro defines Hook specifications for particular execution points where users ca
 
 The naming convention for non-error Hooks is `<before/after>_<noun>_<past_participle>`, in which:
 
-* `<before/after>` and `<past_participle>` refers to when the Hook executed, e.g. `before <something> was run` or `after <something> was created`.
-* `<noun>` refers to the relevant component in the Kedro execution timeline for which this Hook adds extra behaviour, e.g. `catalog`, `node` and `pipeline`.
+* `<before/after>` and `<past_participle>` refers to when the Hook executed, for example, `before <something> was run` or `after <something> was created`.
+* `<noun>` refers to the relevant component in the Kedro execution timeline for which this Hook adds extra behaviour, for example, `catalog`, `node` and `pipeline`.
 
 The naming convention for error hooks is `on_<noun>_error`, in which:
 
@@ -33,7 +33,7 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 The full specifications for which you can inject additional behaviours by providing an implementation are listed in [kedro.framework.hooks][].
 
 This diagram illustrates the execution order of hooks during `kedro run`:
-![kedro run hook execution order](../../meta/images/kedro_run_lifecycle.png)
+![Kedro run hook execution order](../../meta/images/kedro_run_lifecycle.png)
 
 ### CLI Hooks
 
@@ -48,7 +48,7 @@ This is what the [`kedro-telemetry` plugin](https://github.com/kedro-org/kedro-p
 
 To add Hooks to your Kedro project, you must:
 
-* Create or modify the file `src/<package_name>/hooks.py` to define a Hook implementation for the particular Hook specification that describes the point at which you want to inject additional behaviour
+* Create or update the file `src/<package_name>/hooks.py` to define a Hook implementation for the particular Hook specification that describes the point at which you want to inject additional behaviour
 * Register that Hook implementation in the [`src/<package_name>/settings.py`](../../tutorials/settings.md) file under the `HOOKS` key
 
 ### Define the Hook implementation
@@ -71,7 +71,7 @@ def after_catalog_created(
     pass
 ```
 
-However, if you just want to use this Hook to list the contents of a data catalog after it is created, your Hook implementation can be as simple as:
+If you want to use this Hook to list the contents of a data catalog after it is created, your Hook implementation can look like:
 
 ```python
 # src/<package_name>/hooks.py
@@ -117,12 +117,12 @@ Kedro also has auto-discovery enabled by default. This means that any installed 
     Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
 
 #### Auto-registered Hook with plugin
-You can auto-register a Hook (pip-installable) by creating a [Kedro plugin](https://docs.kedro.org/en/stable/extend/plugins/#hooks). Kedro provides `kedro.hooks` entrypoints to extend this easily.
+You can auto-register a Hook (pip-installable) by creating a [Kedro plugin](https://docs.kedro.org/en/stable/extend/plugins/#hooks). Kedro provides `kedro.hooks` entrypoints to make this extension straightforward.
 
 
 #### Disable auto-registered plugins' Hooks
 
-Auto-registered plugins' Hooks can be disabled via `settings.py` as follows:
+Auto-registered plugins' Hooks can be disabled by using `settings.py` as follows:
 
 ```python
 # src/<package_name>/settings.py
@@ -144,7 +144,7 @@ In general, Hook execution order is not guaranteed and you should not rely on it
 
 ## Under the hood
 
-Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest/) to implement Kedro's Hook mechanism. We recommend reading their documentation to find out more about the underlying implementation.
+Under the hood, we use the [pytest plugin system](https://pluggy.readthedocs.io/en/latest/) to power Kedro's Hook mechanism. We recommend reading their documentation to find out more about the underlying implementation.
 
 ```{note}
 When your project's logging level is set to `DEBUG`, the hooks will use `pluggy`'s tracing feature to log the execution of each hook. This is useful for debugging purposes but can be noisy and slow down the execution of your pipeline. You can disable this feature by [setting the logging level to `INFO` or higher](../logging/index.md#how-to-show-debug-level-messages).

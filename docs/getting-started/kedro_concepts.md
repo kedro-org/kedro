@@ -16,7 +16,7 @@ You may prefer to skip to the next section to [create a Kedro project for hands-
 
 In Kedro, a node is a wrapper for a [pure Python function](../getting-started/glossary.md#node) that names the inputs and outputs of that function. Nodes are the building block of a pipeline, and the output of one node can be the input of another.
 
-Here are two simple nodes as an example:
+Here are two nodes as an example:
 
 ```python
 from kedro.pipeline import Node
@@ -57,11 +57,11 @@ greeting_pipeline = Pipeline([return_greeting_node, join_statements_node])
 
 The Kedro Data Catalog is the registry of all data sources that the project can use to manage loading and saving data. It maps the names of node inputs and outputs as keys in a `DataCatalog`, a Kedro class that can be specialised for different types of data storage.
 
-[Kedro provides different built-in datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) for numerous file types and file systems, so you don’t have to write the logic for reading/writing data.
+[Kedro provides different built-in datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) for several file types and file systems, so you don’t have to write the logic for reading/writing data.
 
 ## Kedro project directory structure
 
-One of the main advantages of working with Kedro projects is that they follow a default template that makes collaboration straightforward. Kedro uses semantic naming to set up a default project with specific folders to store datasets, notebooks, configuration and source code. We advise you to retain the default Kedro project structure to make it easy to share your projects with other Kedro users, although you can adapt the folder structure if you need to.
+One of the main advantages of working with Kedro projects is that they follow a default template that makes collaboration straightforward. Kedro uses semantic naming to set up a default project with specific folders to store datasets, notebooks, configuration, and source code. We recommend keeping the default Kedro project structure because it makes sharing projects with other Kedro users straightforward, although you can adapt the folder structure if you need to.
 
 Starting from Kedro 0.19, when you create a new project with `kedro new`, you can customise the structure by selecting which tools to include. Depending on your choices, the resulting structure may vary. Below, we outline the default project structure when all tools are selected and give an example with no tools selected.
 
@@ -103,8 +103,8 @@ project-dir          # Parent directory of the template
 During `kedro new`, you can select which [tools to include in your project](../create/new_project_tools.md). Each tool adds specific files or folders to the project structure:
 
 - **Lint (Ruff)**: Modifies the `pyproject.toml` file to include Ruff configuration settings for linting. It sets up `ruff` under `[tool.ruff]`, defines options like line length, selected rules, and ignored rules, and includes `ruff` as an optional `dev` dependency.
-- **Test (Pytest)**: Adds a `tests` folder for storing unit and integration tests, helping to maintain code quality and ensuring that changes in the codebase do not introduce bugs. For more information about testing in Kedro, visit the [Automated Testing Guide](../develop/automated_testing.md).
-- **Log**: Allows specific logging configurations by including a `logging.yml` file inside the `conf` folder. For more information about logging customisation in Kedro, visit the [Logging Customisation Guide](../develop/logging.md).
+- **Test (Pytest)**: Adds a `tests` folder for storing unit and integration tests, helping to maintain code quality and ensuring that changes in the codebase do not introduce bugs. For more information about testing in Kedro, see the [Automated Testing Guide](../develop/automated_testing.md).
+- **Log**: Allows specific logging configurations by including a `logging.yml` file inside the `conf` folder. For more information about logging customisation in Kedro, see the [Logging Customisation Guide](../develop/logging.md).
 - **Docs (Sphinx)**: Adds a `docs` folder with a Sphinx documentation setup. This folder is typically used to generate technical documentation for the project.
 - **Data Folder**: Adds a `data` folder structure for managing project data. The `data` folder contains multiple subfolders to store project data. We recommend you put raw data into `raw` and move processed data to other subfolders, as outlined [in this data engineering article](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71).
 - **PySpark**: Adds PySpark-specific configuration files.
@@ -120,7 +120,7 @@ Use the `base` subfolder for project-specific settings to share across different
 The folder contains three files for the example, but you can add others as you require:
 
 -   `catalog.yml` - [Configures the Data Catalog](../catalog-data/data_catalog.md#use-the-data-catalog-within-kedro-configuration) with the file paths and load/save configuration needed for different datasets
--   `logging.yml` - Uses Python's default [`logging`](https://docs.python.org/3/library/logging.html) library to set up logging (only added if the Log tool is selected).
+-   `logging.yml` - Uses Python's default [`logging`](https://docs.python.org/3/library/logging.html) library to set up logging. Kedro adds this file when the Log tool is selected.
 -   `parameters.yml` - Allows you to define parameters for machine learning experiments, for example, train/test split and the number of iterations
 
 #### `conf/local`
@@ -139,6 +139,6 @@ This subfolder contains the project's source code.
 
 While the default Kedro structure is recommended for collaboration and standardisation, it is possible to adapt the folder structure if necessary. This flexibility allows you to tailor the project to your needs while maintaining a consistent and recognisable structure.
 
-The only technical requirement when organising code is that the `pipeline_registry.py` and `settings.py` files must remain in the `<your_project>/src/<your_project>` directory, where they are created by default.
+When you organise code, keep the `pipeline_registry.py` and `settings.py` files in the `<your_project>/src/<your_project>` directory, where they are created by default.
 
 The `pipeline_registry.py` file must include a `register_pipelines()` function that returns a `dict[str, Pipeline]`, which maps pipeline names to their corresponding `Pipeline` objects.

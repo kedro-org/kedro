@@ -6,7 +6,7 @@
 * **git**: You must install `git` onto your machine if you do not already have it. Type `git -v` into your terminal window to confirm it is installed; it will return the version of `git` available or an error message. [You can download `git` from the official website](https://git-scm.com/).
 
 ## Python version support policy
-* The core [Kedro Framework](https://github.com/kedro-org/kedro) supports all Python versions that are actively maintained by the CPython core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from Kedro. This is not considered a breaking change.
+* The core [Kedro Framework](https://github.com/kedro-org/kedro) supports all Python versions that are actively maintained by the `CPython` core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from Kedro. This is not considered a breaking change.
 * The [Kedro Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package follows the [NEP 29](https://numpy.org/neps/nep-0029-deprecation_policy.html) Python version support policy. This means that `kedro-datasets` generally drops Python version support before `kedro`. This is because `kedro-datasets` has a lot of dependencies that follow NEP 29 and the more conservative version support approach of the Kedro Framework makes it hard to manage those dependencies properly.
 
 ## Quickstart
@@ -16,11 +16,14 @@ for example our Spaceflights starter.
 To do that, we recommend using [`uv`](https://docs.astral.sh/uv/),
 a fast, modern Python package and project manager.
 
-First, use `uvx` to seamlessly run `kedro new`:
+First, use `uvx` to run `kedro new`:
 
 ```bash
 uvx kedro new --starter spaceflights-pandas --name spaceflights
 ```
+
+!!! note
+    Using `uvx` lets you run Kedro without installing it into your system or virtual environment. It downloads and runs Kedro in a clean temporary environment each time. If you prefer a standard installation (for example pip + virtual environment), see the [installation guide](#alternative-methods).
 
 The command will create a directory with the contents of your project.
 Navigate to it:
@@ -29,7 +32,10 @@ Navigate to it:
 cd spaceflights
 ```
 
-And finally, verify that everything works:
+!!! note
+    Now that the project exists, you'll work within it using its own virtual environment. The commands below (`uv sync` and `uv run`) create and use the project's environment, rather than the temporary environment that `uvx` used.
+
+Lastly, verify that everything works:
 
 ```bash
 uv run kedro run --pipeline __default__
@@ -58,7 +64,7 @@ You should see an ASCII art graphic and the Kedro version number. For example:
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, check out the [searchable archive of Slack discussions](https://linen-slack.kedro.org/), or post a new query on the [Slack organisation](https://slack.kedro.org).
+If you do not see the graphic displayed, or have any issues with your installation, check the [searchable archive of Slack discussions](https://linen-slack.kedro.org/). You can also post a new query on the [Slack organisation](https://slack.kedro.org).
 
 ## Alternative methods
 
@@ -66,14 +72,15 @@ If you do not see the graphic displayed, or have any issues with your installati
 
 To create a new Kedro project using `kedro new` you will need Kedro installed first.
 The best way to achieve this is to have a "global" installation of Kedro
-that you can use only for this purpose.
+that you reserve for this purpose.
 There are several ways to do it:
 
 === "uv"
 
-    `uvx` is an alias for `uv tool`, a uv feature that allows you to work with "tools"
-    or globally-installed Python packages. After installing `uv`,
-    you can use it to run `kedro new` as follows:
+    `uvx` is an alias for `uv tool run`. It runs commands in temporary, isolated environments,
+    with dependencies handled automatically.
+
+    After installing `uv`, you can use it to run `kedro new` as follows:
 
     ```bash
     uvx kedro new
@@ -82,7 +89,7 @@ There are several ways to do it:
 === "Other native tools"
 
     `pipx` is a tool that allows you to install and run Python applications and tools
-    in isolated environments. After installing it,
+    in isolated environments, with dependencies handled automatically. After installing it,
     you can use it to run `kedro new` as follows:
 
     ```bash
@@ -316,19 +323,19 @@ scikit-learn~=1.0
 ### How to integrate Kedro in your IDE
 Working in an IDE can be a great productivity boost.
 
-For VS Code Users: Check out [Set up Visual Studio Code](../ide/set_up_vscode.md) and [Kedro VS Code Extension](../ide/set_up_vscode.md#kedro-vs-code-extension).
+For VS Code users: Check out [Set up Visual Studio Code](../ide/set_up_vscode.md) and [Kedro VS Code Extension](../ide/set_up_vscode.md#kedro-vs-code-extension).
 
-For PyCharm Users: Checkout [Set up PyCharm](../ide/set_up_pycharm.md).
+For PyCharm users: Check out [Set up PyCharm](../ide/set_up_pycharm.md).
 
 ### How to upgrade Kedro
 
 Kedro follows the [Semantic Versioning](https://semver.org/) paradigm.
-Upgrades between bugfix or patch releases of the same minor series are expected to not require any special user action,
+Upgrades between bug fix or patch releases of the same minor series are expected to not require any special user action,
 otherwise it's considered a bug.
-Upgrades between minor releases of the 0.x series, or major releases after 1.0, can include backwards-incompatible changes
-that may require some user intervention to achieve a clean upgrade.
+Upgrades between minor releases of the 0.x series, or major releases after 1.0, can include backwards-incompatible changes.
+You may need to intervene to achieve a clean upgrade.
 
-The best way to safely upgrade when backwards-incompatible changes are expected
+The best way to upgrade with confidence when backwards-incompatible changes are expected
 is to check our [release notes](https://github.com/kedro-org/kedro/blob/main/RELEASE.md).
 Follow the steps in the migration guide included for that specific release.
 
@@ -349,7 +356,7 @@ kedro --version
 
 * Kedro can be used on Windows, macOS or Linux.
 * Installation prerequisites include a Python 3.9+ and `git`.
-* The simplest way to get started with Kedro is to use create a new project using our starters.
+* The simplest way to get started with Kedro is to create a new project using our starters.
 * `uv` is a great choice for managing Kedro projects, but you can use other tools such as `pip`, `Poetry`, `conda`, and more.
 
 If you encounter any problems as you set up Kedro, ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or review the [searchable archive of Slack discussions](https://linen-slack.kedro.org/).

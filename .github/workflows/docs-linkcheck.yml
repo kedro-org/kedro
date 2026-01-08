@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -44,3 +44,28 @@ jobs:
       - name: Run MkDocs on strict mode.
         run: |
           mkdocs build --strict
+
+      - name: Serve docs locally in background
+        run: |
+          cd site
+          python -m http.server 8000 &
+          echo $! > ../docs_server.pid
+          sleep 5  # Give server time to start
+
+      - name: Check docs.kedro.org links in Python files against local build
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >
+            --extensions py,yml
+            --verbose
+            --no-progress
+            --remap "https://docs.kedro.org/en/stable/ http://localhost:8000/"
+            .
+
+      - name: Stop docs server
+        if: always()
+        run: |
+          if [ -f docs_server.pid ]; then
+            kill $(cat docs_server.pid) || true
+            rm docs_server.pid
+          fi

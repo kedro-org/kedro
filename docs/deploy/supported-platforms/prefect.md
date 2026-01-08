@@ -2,7 +2,7 @@
 
 This page explains how to run your Kedro pipeline using [Prefect 2.0](https://www.prefect.io/opensource), an open-source workflow management system.
 
-The scope of this documentation is the deployment to a self hosted [Prefect Server](https://docs-2.prefect.io/latest/guides/host/), which is an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends Prefect 2.0. We will use an [Agent that dequeues submitted flow runs from a Work Queue](https://docs-2.prefect.io/latest/concepts/deployments/#workers-and-work-pools).
+The scope of this documentation is the deployment to a self hosted [Prefect Server](https://docs-2.prefect.io/latest/guides/host/). Prefect Server is an open-source backend that helps you track and execute your Prefect flows and automatically extends Prefect 2.0. We will use an [Agent that pulls submitted flow runs from a Work Queue](https://docs-2.prefect.io/latest/concepts/deployments/#workers-and-work-pools).
 
 !!! note
     This deployment has been tested using Kedro 0.18.10 with Prefect version 2.10.17. If you want to deploy with Prefect 1.0, we recommend you review [earlier versions of Kedro's Prefect deployment documentation](https://docs.kedro.org/en/stable/deploy/supported-platforms/prefect/).
@@ -249,7 +249,7 @@ python register_prefect_flow.py --work_pool_name <work_pool_name> --work_queue_n
 
 ### Run Prefect flow
 
-Now, having the flow registered, you can use [Prefect Server UI](https://docs-2.prefect.io/latest/guides/host/) to orchestrate and monitor it.
+Now, having the flow registered, you can use [Prefect Server UI](https://docs-2.prefect.io/latest/guides/host/) to orchestrate and track it.
 
 Navigate to http://localhost:4200/deployments to see your registered flow.
 

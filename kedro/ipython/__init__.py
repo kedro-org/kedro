@@ -103,7 +103,7 @@ def magic_reload_kedro(
 ) -> None:
     """
     The `%reload_kedro` IPython line magic.
-    See https://docs.kedro.org/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic
+    See https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks/#reload_kedro-line-magic
     for more.
     """
     args = parse_argstring(magic_reload_kedro, line)

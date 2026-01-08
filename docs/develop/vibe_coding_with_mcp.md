@@ -1,4 +1,4 @@
-# Vibe Coding with Kedro-MCP
+# Vibe coding with Kedro-MCP
 
 If you want to increase the efficiency of your AI coding assistants when working with Kedro, we’ve prepared a dedicated MCP (Model Context Protocol) server.
 
@@ -6,7 +6,7 @@ This server plugs directly into VS Code Copilot or Cursor and provides fresh, cu
 
 ---
 
-## Quick Install
+## Quick install
 
 To enable Kedro MCP tools in your editor, click one of the links below.
 Your editor (VS Code / Cursor) will open automatically and you need to press the Install button.
@@ -27,9 +27,9 @@ Once installed, your AI assistant gains access to Kedro-specific MCP tools.
 
 ---
 
-### Universal configuration (JSON)
+### Universal configuration example
 
-You can also reuse this configuration in any editor or MCP-compatible assistant (e.g. Claude, Cursor, Copilot):
+You can also reuse this JSON configuration in any editor or MCP-compatible assistant (for example, Claude, Cursor, Copilot):
 
 ```json
 {
@@ -50,7 +50,7 @@ You can also reuse this configuration in any editor or MCP-compatible assistant 
 After `kedro-mcp` installation, open Copilot Chat Agent Mode (in VS Code) or the Chat panel (in Cursor).
 Type `/` to see available MCP prompts.
 
-### Convert a Jupyter Notebook into a Kedro Project
+### Convert a Jupyter Notebook into a Kedro project
 
 ```text
 /mcp.Kedro.convert_notebook
@@ -69,11 +69,11 @@ What happens step by step:
 2. It will create a conversion plan (Statement of Work)
    and save it into your working directory as a `.md` file.
 
-3. You’ll be able to review the plan in chat and modify it if needed.
+3. You’ll be able to review the plan in chat and update it if needed.
 
 4. Once you approve the plan, the assistant will:
 
-    - Check that a virtual environment (venv) is active.
+    - Check that a virtual environment (`venv`) is active.
       If not, it will propose creating one.
     - Ensure the latest version of Kedro is installed; install it if missing.
     - Scaffold a Kedro project with `kedro new`.
@@ -82,13 +82,13 @@ What happens step by step:
 
 **Tips:**
 
-- You can edit the prompt itself if you want to specify a particular virtual environment (e.g. `conda`, `uv`, or `venv`).
+- You can edit the prompt itself if you want to specify a particular virtual environment (for example, `conda`, `uv`, or `venv`).
 - If any errors occur during conversion, ask the assistant in chat how to resolve them — it will guide you through fixes.
-- The assistant will only proceed with implementation after you’ve signed off on the plan.
+- The assistant proceeds with implementation after you’ve signed off on the plan.
 
 ---
 
-### Kedro Project Migration
+### Kedro project migration
 
 ```text
 /mcp.Kedro.project_migration
@@ -98,8 +98,8 @@ What happens step by step:
 
 When you run this prompt, the assistant will call the MCP server to guide you through migrating an existing project to the latest Kedro version.
 
-- **Step 1 — Plan:** It analyses your project and suggests a migration plan (e.g. 0.19 → 1.0). Waits for approval.
-- **Step 2 — Build:** After approval, it ensures a virtual environment (venv) is active. If not, it creates one. The assistant will install `Kedro` if missing and then follows the plan.
+- **Step 1 — Plan:** It analyses your project and suggests a migration plan (for example, 0.19 → 1.0). Waits for approval.
+- **Step 2 — Build:** After approval, it ensures a virtual environment (`venv`) is active. If not, it creates one. The assistant will install `Kedro` if missing and then follows the plan.
 
 Use this prompt to get up-to-date migration tips and avoid outdated patterns. If errors appear, ask the assistant in chat how to resolve them.
 
@@ -120,12 +120,12 @@ The MCP server will then provide the assistant with the latest Kedro guidance an
 
 - Keep the header line as is (so the MCP server is explicitly called).
 - Replace the placeholder with your actual request
-  (e.g., *“generate me a sample Kedro project for a sales forecasting pipeline”*).
+  (for example, *“generate a sample Kedro project for a sales forecasting pipeline”*).
 - The assistant will then use the fresh Kedro instructions
-  (e.g., conventions, workflow, catalog setup, parameters, QA rules) to guide you.
+  (for example, conventions, workflow, catalog setup, parameters, QA rules) to guide you.
 
 
 ---
 
 
-With Kedro MCP, Copilot and Cursor become much smarter about Kedro — so you can focus on building pipelines, not fixing AI mistakes.
+With Kedro MCP, Copilot, and Cursor become much smarter about Kedro — so you can focus on building pipelines, not fixing AI mistakes.

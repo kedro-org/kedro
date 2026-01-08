@@ -38,7 +38,11 @@ class _ToolConfig(NamedTuple):
 
 @experimental
 def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig:
-    """Create a `_ToolConfig` definition for a tool builder.
+    """
+     !!! warning "Experimental"
+        This API is experimental and may change in future Kedro releases.
+
+    Create a `_ToolConfig` definition for a tool builder.
 
     Args:
         func: A callable that constructs and returns a tool object.
@@ -56,7 +60,11 @@ def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig:
 @experimental
 @dataclass
 class LLMContext:
-    """Runtime context passed to an LLM execution step.
+    """
+     !!! warning "Experimental"
+        This API is experimental and may change in future Kedro releases.
+
+    Runtime context passed to an LLM execution step.
 
     Args:
         context_id: Logical identifier for the context (usually the node name).
@@ -103,9 +111,14 @@ def _normalize_outputs(outputs: str | list[str] | dict[str, str]) -> str:
 
 @experimental
 class LLMContextNode(Node):
-    """A Kedro Node that constructs an :class:`LLMContext` at execution time.
+    """
+     !!! warning "Experimental"
+        This API is experimental and may change in future Kedro releases.
+
+    A Kedro Node that constructs an `LLMContext` at execution time.
 
     This node assembles a runtime context consisting of:
+
     - an LLM instance loaded by Kedro,
     - one or more prompt datasets,
     - optionally, dynamically constructed tool objects.
@@ -201,7 +214,11 @@ def llm_context_node(
     tools: list[_ToolConfig] | None = None,
     name: str | None = None,
 ) -> Node:
-    """Create a Kedro node that builds an `LLMContext` at runtime.
+    """
+     !!! warning "Experimental"
+        This API is experimental and may change in future Kedro releases.
+
+    Create a Kedro node that builds an `LLMContext` at runtime.
 
     This is a convenience wrapper around `LLMContextNode` that mirrors
     the standard functional node construction style used in Kedro pipelines.

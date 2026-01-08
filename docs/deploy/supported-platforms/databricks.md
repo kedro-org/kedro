@@ -83,7 +83,7 @@ If you launched the notebook from **outside** the Kedro project directory, pass 
 
 ### Scheduling
 
-In this setup, your Kedro pipeline is executed **from a Databricks notebook**. Scheduling is therefore handled by creating a Databricks Job that runs this notebook on a cluster.
+In this setup, your Kedro pipeline is executed **from a Databricks notebook**. Scheduling is handled by creating a Databricks Job that runs this notebook on a cluster.
 
 To schedule execution:
 

@@ -39,7 +39,7 @@ class _ToolConfig(NamedTuple):
 @experimental
 def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig:
     """
-     !!! warning "Experimental"
+    !!! warning "Experimental"
         This API is experimental and may change in future Kedro releases.
 
     Create a `_ToolConfig` definition for a tool builder.
@@ -61,7 +61,7 @@ def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig:
 @dataclass
 class LLMContext:
     """
-     !!! warning "Experimental"
+    !!! warning "Experimental"
         This API is experimental and may change in future Kedro releases.
 
     Runtime context passed to an LLM execution step.
@@ -112,7 +112,7 @@ def _normalize_outputs(outputs: str | list[str] | dict[str, str]) -> str:
 @experimental
 class LLMContextNode(Node):
     """
-     !!! warning "Experimental"
+    !!! warning "Experimental"
         This API is experimental and may change in future Kedro releases.
 
     A Kedro Node that constructs an `LLMContext` at execution time.
@@ -215,7 +215,7 @@ def llm_context_node(
     name: str | None = None,
 ) -> Node:
     """
-     !!! warning "Experimental"
+    !!! warning "Experimental"
         This API is experimental and may change in future Kedro releases.
 
     Create a Kedro node that builds an `LLMContext` at runtime.

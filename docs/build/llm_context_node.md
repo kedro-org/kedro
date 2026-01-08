@@ -1,4 +1,6 @@
+<!-- vale Kedro.headings = NO -->
 # LLM context nodes
+<!-- vale Kedro.headings = YES -->
 
 ## Overview
 

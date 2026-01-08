@@ -4,6 +4,7 @@
 * Added the new `support-agent-langgraph` starter. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 
 ## Bug fixes and other changes
+* Set `raise_errors=True` in `find_pipelines()` calls in the project template's `pipeline_registry.py` to ensure pipeline discovery errors are raised during project runs.
 
 ## Documentation changes
 * Added beginner-friendly notes on `uvx` installation.

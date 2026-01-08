@@ -3,7 +3,7 @@ This documentation aims to explain the essential components of a minimal Kedro p
 
 ## Essential components of a Kedro project
 
-Kedro is a Python framework designed for creating reproducible data science code. A typical Kedro project consists of two parts, the **mandatory structure** and the **opinionated project structure**.
+Kedro is a Python framework designed for creating reproducible data engineering and data science code. A typical Kedro project consists of two parts, the **mandatory structure** and the **opinionated project structure**.
 
 ### 1. Recommended structure
 Kedro projects follow a specific directory structure that promotes best practices for collaboration and maintenance. The default structure includes:

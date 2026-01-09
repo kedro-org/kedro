@@ -105,7 +105,7 @@ def _get_expected_files(tools: str, example_pipeline: str):
         "3": 1,  # If Logging is selected, we add logging.py
         "4": 2,  # If Documentation is selected, we add conf.py and index.rst
         "5": 8,  # If Data Structure is selected, we add 8 .gitkeep files
-        "6": 2,  # If PySpark is selected, we add spark.yml and hooks.py
+        "6": 0,  # # PySpark selection no longer adds extra starter files
     }  # files added to template by each tool
     tools_list = _parse_tools_input(tools)
     example_pipeline_bool = _parse_yes_no_to_bool(example_pipeline)

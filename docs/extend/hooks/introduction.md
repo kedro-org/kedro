@@ -54,6 +54,21 @@ To add Hooks to your Kedro project, you must:
 ### Define the Hook implementation
 The Hook implementation should have the same name as the specification. The Hook must provide a concrete implementation with a subset of the corresponding specification's parameters (you do not need to use them all).
 
+!!! warning "Do not use default argument values in hook implementations"
+    Hook parameters must be defined **without default values**. Due to how [pluggy](https://pluggy.readthedocs.io/en/stable/) (the underlying plugin system) passes arguments, parameters with defaults will receive the default value instead of the actual value passed by Kedro.
+
+```python
+# Wrong: run_params will always be an empty dict
+@hook_impl
+def before_pipeline_run(self, run_params: Dict[str, Any] = {}):
+    print(run_params)  # Prints: {}
+
+# Correct: run_params receives the actual value
+@hook_impl
+def before_pipeline_run(self, run_params: Dict[str, Any]):
+    print(run_params)  # Prints the actual run parameters
+```
+
 To declare a Hook implementation, use the `@hook_impl` decorator.
 
 For example, the full signature of the [`after_catalog_created`][kedro.framework.hooks.specs.DataCatalogSpecs.after_catalog_created] Hook specification is:

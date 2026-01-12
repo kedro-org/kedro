@@ -11,12 +11,15 @@ import logging
 import re
 import warnings
 from collections import Counter
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import cached_property, partial
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 from warnings import warn
 
 from more_itertools import spy, unzip
+
+from kedro import KedroExperimentalWarning
 
 from .transcoding import _strip_transcoding
 
@@ -38,12 +41,29 @@ class GroupedNodes:
     dependencies: list[str] = field(default_factory=list)
 
 
+@dataclass
+class PreviewPayload:
+    """``PreviewPayload`` class represents the structured output that a preview
+    function should return to enable visualization of node execution results in
+    various formats.
+
+    Args:
+        kind: The type of preview content.
+        content: The actual preview content as a string.
+        meta: Optional metadata dictionary. Defaults to None.
+    """
+
+    kind: Literal["mermaid", "json", "text", "image", "plotly", "table", "custom"]
+    content: str
+    meta: dict[str, Any] | None = None
+
+
 class Node:
     """``Node`` is an auxiliary class facilitating the operations required to
     run user-provided functions as part of Kedro pipelines.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0912
         self,
         func: Callable,
         inputs: str | list[str] | dict[str, str] | None,
@@ -53,6 +73,7 @@ class Node:
         tags: str | Iterable[str] | None = None,
         confirms: str | list[str] | None = None,
         namespace: str | None = None,
+        preview_fn: Callable[..., PreviewPayload] | None = None,
     ):
         """Create a node in the pipeline by providing a function to be called
         along with variable names for inputs and/or outputs.
@@ -81,6 +102,8 @@ class Node:
                 Specified dataset names do not necessarily need to be present
                 in the node ``inputs`` or ``outputs``.
             namespace: Optional node namespace.
+            preview_fn: Optional preview function that returns a PreviewPayload.
+                This is an experimental feature.
 
         Raises:
             ValueError: Raised in the following cases:
@@ -170,6 +193,21 @@ class Node:
         self._validate_inputs_dif_than_outputs()
         self._confirms = confirms
 
+        if preview_fn:
+            if not callable(preview_fn):
+                raise ValueError(
+                    _node_error_message(
+                        f"preview_fn must be a function, not '{type(preview_fn).__name__}'."
+                    )
+                )
+            warn(
+                "The 'preview_fn' feature is experimental and may change in future versions.",
+                KedroExperimentalWarning,
+                stacklevel=2,
+            )
+
+        self._preview_fn = preview_fn
+
     def _copy(self, **overwrite_params: Any) -> Node:
         """
         Helper function to copy the node, replacing some values.
@@ -182,6 +220,7 @@ class Node:
             "namespace": self._namespace,
             "tags": self._tags,
             "confirms": self._confirms,
+            "preview_fn": self._preview_fn,
         }
         params.update(overwrite_params)
         return Node(**params)  # type: ignore[arg-type]
@@ -388,6 +427,32 @@ class Node:
             Dataset names to confirm as a list.
         """
         return _to_list(self._confirms)
+
+    def preview(self, *args: Any, **kwargs: Any) -> PreviewPayload | None:
+        """Execute the preview function if available and validate its return type.
+
+        Args:
+            *args: Positional arguments to pass to the preview function.
+            **kwargs: Keyword arguments to pass to the preview function.
+
+        Returns:
+            PreviewPayload if preview_fn is set, None otherwise.
+
+        Raises:
+            ValueError: If the preview function does not return a PreviewPayload instance.
+        """
+        if not self._preview_fn:
+            return None
+
+        result = self._preview_fn(*args, **kwargs)
+
+        if not isinstance(result, PreviewPayload):
+            raise ValueError(
+                f"preview_fn must return a PreviewPayload instance, "
+                f"but got '{type(result).__name__}' instead."
+            )
+
+        return result
 
     def run(self, inputs: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run this node using the provided inputs and return its results
@@ -659,6 +724,7 @@ def node(  # noqa: PLR0913
     tags: str | Iterable[str] | None = None,
     confirms: str | list[str] | None = None,
     namespace: str | None = None,
+    preview_fn: Callable[..., PreviewPayload] | None = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.
@@ -685,6 +751,8 @@ def node(  # noqa: PLR0913
             names do not necessarily need to be present in the node ``inputs``
             or ``outputs``.
         namespace: Optional node namespace.
+        preview_fn: Optional preview function that returns a PreviewPayload.
+            This is an experimental feature.
 
     Returns:
         A Node object with mapped inputs, outputs and function.
@@ -726,6 +794,7 @@ def node(  # noqa: PLR0913
         tags=tags,
         confirms=confirms,
         namespace=namespace,
+        preview_fn=preview_fn,
     )
 
 

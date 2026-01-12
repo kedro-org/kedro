@@ -4,7 +4,9 @@ from functools import partial, update_wrapper, wraps
 
 import pytest
 
+from kedro import KedroExperimentalWarning
 from kedro.pipeline import node
+from kedro.pipeline.node import PreviewPayload
 from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
@@ -567,3 +569,142 @@ class TestNodeInputOutputNameValidation:
                 outputs="other_namespace.output_dataset",
                 namespace="namespace",
             )
+
+
+class TestNodePreviewPayload:
+    def test_init(self):
+        payload = PreviewPayload(kind="json", content='{"key": "value"}')
+        assert payload.kind == "json"
+        assert payload.content == '{"key": "value"}'
+        assert payload.meta is None
+
+    def test_init_with_meta(self):
+        payload = PreviewPayload(
+            kind="json", content='{"key": "value"}', meta={"format": "pretty"}
+        )
+        assert payload.kind == "json"
+        assert payload.content == '{"key": "value"}'
+        assert payload.meta == {"format": "pretty"}
+
+    @pytest.mark.parametrize(
+        "kind",
+        ["mermaid", "json", "text", "image", "plotly", "table", "custom"],
+    )
+    def test_all_valid_kinds(self, kind):
+        payload = PreviewPayload(kind=kind, content="test content")
+        assert payload.kind == kind
+
+
+class TestNodePreviewFunction:
+    def test_node_with_preview_fn_emits_warning(self):
+        def test_json_preview():
+            return PreviewPayload(kind="json", content='{"test": "data"}')
+
+        with pytest.warns(
+            KedroExperimentalWarning,
+            match="The 'preview_fn' feature is experimental and may change in future versions.",
+        ):
+            test_node = node(identity, "input", "output", preview_fn=test_json_preview)
+        assert test_node._preview_fn is test_json_preview
+
+    def test_node_without_preview_fn_no_warning(self):
+        import warnings
+
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+            node(identity, "input", "output")
+        experimental_warnings = [
+            w for w in warning_list if issubclass(w.category, KedroExperimentalWarning)
+        ]
+        assert len(experimental_warnings) == 0
+
+    def test_preview_fn_not_callable_raises_error(self):
+        pattern = r"preview_fn must be a function, not 'str'"
+        with pytest.raises(ValueError, match=pattern):
+            node(identity, "input", "output", preview_fn="not a function")
+
+    def test_preview_returns_none_when_no_preview_fn(self):
+        n = node(identity, "input", "output")
+        result = n.preview()
+        assert result is None
+
+    def test_preview_executes_preview_fn(self):
+        def test_json_preview():
+            return PreviewPayload(kind="json", content='{"key": "value"}')
+
+        with pytest.warns(KedroExperimentalWarning):
+            n = node(identity, "input", "output", preview_fn=test_json_preview)
+
+        result = n.preview()
+
+        assert isinstance(result, PreviewPayload)
+        assert result.kind == "json"
+        assert result.content == '{"key": "value"}'
+
+    def test_preview_with_args_and_kwargs(self):
+        def preview_fn(data, format="json"):
+            return PreviewPayload(kind=format, content=str(data))
+
+        with pytest.warns(KedroExperimentalWarning):
+            n = node(identity, "input", "output", preview_fn=preview_fn)
+
+        result = n.preview({"test": "data"}, format="table")
+
+        assert isinstance(result, PreviewPayload)
+        assert result.kind == "table"
+        assert result.content == "{'test': 'data'}"
+
+    def test_preview_validates_return_type(self):
+        def bad_preview_fn():
+            return "not a PreviewPayload"
+
+        with pytest.warns(KedroExperimentalWarning):
+            n = node(identity, "input", "output", preview_fn=bad_preview_fn)
+
+        pattern = (
+            r"preview_fn must return a PreviewPayload instance, but got 'str' instead"
+        )
+        with pytest.raises(ValueError, match=pattern):
+            n.preview()
+
+    def test_preview_validates_return_type_dict(self):
+        def bad_preview_fn():
+            return {"kind": "json", "content": "test"}
+
+        with pytest.warns(KedroExperimentalWarning):
+            n = node(identity, "input", "output", preview_fn=bad_preview_fn)
+
+        pattern = (
+            r"preview_fn must return a PreviewPayload instance, but got 'dict' instead"
+        )
+        with pytest.raises(ValueError, match=pattern):
+            n.preview()
+
+    def test_preview_fn_preserved_in_copy(self):
+        def preview_fn():
+            return PreviewPayload(kind="text", content="preview")
+
+        with pytest.warns(KedroExperimentalWarning):
+            original = node(identity, "input", "output", preview_fn=preview_fn)
+
+        # _copy creates a new Node, which will emit warning if preview_fn is present
+        with pytest.warns(KedroExperimentalWarning):
+            copied = original._copy(name="new_name")
+        assert copied._preview_fn is preview_fn
+
+    def test_preview_fn_can_be_overwritten_in_copy(self):
+        def preview_fn1():
+            return PreviewPayload(kind="text", content="preview1")
+
+        def preview_fn2():
+            return PreviewPayload(kind="json", content="preview2")
+
+        with pytest.warns(KedroExperimentalWarning):
+            original = node(identity, "input", "output", preview_fn=preview_fn1)
+
+        # When overwriting preview_fn in _copy, a new Node is created which should emit warning
+        with pytest.warns(KedroExperimentalWarning):
+            copied = original._copy(preview_fn=preview_fn2)
+
+        assert original._preview_fn is preview_fn1
+        assert copied._preview_fn is preview_fn2

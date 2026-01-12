@@ -24,9 +24,14 @@ class KedroPythonVersionWarning(UserWarning):
     """Custom class for warnings about incompatibilities with Python versions."""
 
 
+class KedroExperimentalWarning(UserWarning):
+    """Custom class for warnings about experimental Kedro features that may change in future versions."""
+
+
 if not sys.warnoptions:
     warnings.simplefilter("default", KedroDeprecationWarning)
     warnings.simplefilter("error", KedroPythonVersionWarning)
+    warnings.simplefilter("default", KedroExperimentalWarning)
 
 if sys.version_info >= (3, 14):
     warnings.warn(

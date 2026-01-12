@@ -150,6 +150,7 @@ plugins:
           - build/namespaces.md: Reusing pipelines with namespaces
           - build/pipeline_registry.md: Registering and discovering pipelines
           - build/slice_a_pipeline.md: Slicing pipelines for partial execution
+          - build/llm_context_node.md: Using LLM Context Nodes to construct LLMContext
 
         Development Practices:
           - develop/dependencies.md: Managing project dependencies
@@ -346,6 +347,7 @@ nav:
           - Reusing pipelines (namespaces): build/namespaces.md
           - Pipeline registry: build/pipeline_registry.md
           - Slice a pipeline: build/slice_a_pipeline.md
+          - LLM context node (experimental): build/llm_context_node.md
       - Develop:
           - Dependency management: develop/dependencies.md
           - Logging: develop/logging.md
@@ -425,6 +427,7 @@ nav:
                   - Overview: api/pipeline/kedro.pipeline.md
                   - Node: api/pipeline/kedro.pipeline.node.md
                   - Pipeline: api/pipeline/kedro.pipeline.Pipeline.md
+                  - LLM context node: api/pipeline/kedro.pipeline.llm_context.md
               - kedro.runner:
                   - Overview: api/runner/kedro.runner.md
                   - AbstractRunner: api/runner/kedro.runner.AbstractRunner.md

@@ -129,8 +129,6 @@ Under the hood, every Kedro node that performs a Spark action (for example, `sav
 kedro run --runner=ThreadRunner
 ```
 
-To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node an equal share of the Spark cluster by turning on fair sharing. This setting gives nodes a better chance of being executed concurrently.
-
-By default, Spark uses FIFO scheduling, so a job that consumes excessive resources can block other jobs. To enable fair scheduling, configure the `spark.scheduler.mode` option in your local PySpark settings file.
+To further increase the concurrency level, you can enable fair scheduling in Spark ≥ 0.8. This gives each node an equal share of the Spark cluster and increases the chance that jobs run concurrently. By default, Spark uses FIFO scheduling, so a job that consumes excessive resources can block other jobs. To enable fair scheduling, configure the `spark.scheduler.mode` option in your local PySpark settings file.
 
 For more information, see the Spark documentation on [jobs scheduling within an application](https://spark.apache.org/docs/latest/job-scheduling.html#scheduling-within-an-application).

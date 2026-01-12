@@ -79,13 +79,13 @@ LLMContextNode(
 )
 ```
 
-### Using LLMs
+### Using LLM
 
 The `llm` argument of LLM context node must reference a Kedro dataset that returns an initialized LLM or LLM wrapper object.
 
 In practice, this is typically provided by a core LLM dataset, such as
 [kedro_datasets.langchain.ChatOpenAIDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/langchain.ChatOpenAIDataset/),
-which encapsulates all LLM-specific configuration (model name, credentials, timeouts, retries, etc.).
+which encapsulates all LLM-specific configuration (model name, credentials, timeouts, retries, and more).
 
 At runtime, Kedro loads the dataset and passes the resulting LLM object directly
 into the constructed `LLMContext`. The context node does not invoke the LLM itself;
@@ -121,7 +121,7 @@ while allowing different prompt backends to be swapped without changing pipeline
 
 Tools used with `llm_context_node` are defined as builder functions.
 A tool builder is a regular Python function that receives datasets loaded by Kedro
-(e.g. database engines, indexes, or documents) and returns a callable or tool object
+(for example database engines, indexes, or documents) and returns a callable or tool object
 that can be used by an LLM or agent framework.
 
 ````python
@@ -137,8 +137,8 @@ def build_lookup_docs(docs, max_matches: int):
     return lookup
 ````
 
-The arguments passed to the tool’s callable (e.g. `lookup(query: str)`) are not provided by Kedro, but are dynamically injected by the LLM at execution time based on the model’s tool-calling or function-calling mechanism.
-Kedro is only responsible for supplying the builder inputs (datasets and parameters) required to construct the tool, not the arguments used when the tool is called.
+The arguments passed to the tool’s callable (for example `lookup(query: str)`) are not provided by Kedro, but are dynamically injected by the LLM at execution time based on the model’s tool-calling or function-calling mechanism.
+Kedro is responsible for supplying the builder inputs (datasets and parameters) required to construct the tool, not the arguments used when the tool is called.
 
 The tool is then registered in the pipeline using the `tool()` helper:
 

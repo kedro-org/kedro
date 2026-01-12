@@ -79,13 +79,15 @@ LLMContextNode(
 )
 ```
 
-### Using LLM
+<!-- vale Kedro.headings = NO -->
+### Using LLMs
+<!-- vale Kedro.headings = YES -->
 
-The `llm` argument of LLM context node must reference a Kedro dataset that returns an initialized LLM or LLM wrapper object.
+The `llm` argument of LLM context node must reference a Kedro dataset that returns an initialised LLM or LLM wrapper object.
 
 In practice, this is typically provided by a core LLM dataset, such as
-[kedro_datasets.langchain.ChatOpenAIDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/langchain.ChatOpenAIDataset/),
-which encapsulates all LLM-specific configuration (model name, credentials, timeouts, retries, and more).
+[kedro_datasets.langchain.ChatOpenAIDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/langchain.ChatOpenAIDataset/).
+It encapsulates all LLM-specific configuration (model name, credentials, timeouts, retries, and more).
 
 At runtime, Kedro loads the dataset and passes the resulting LLM object directly
 into the constructed `LLMContext`. The context node does not invoke the LLM itself.

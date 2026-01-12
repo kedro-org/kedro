@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 import click
 
 from kedro import __version__ as kedro_version
+from kedro.framework import project as kedro_project
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
@@ -115,7 +116,8 @@ class KedroSession:
         ).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
-        self._package_name = package_name
+        self._package_name = package_name or kedro_project.PACKAGE_NAME
+        self._project_name = self._package_name or self._project_path.name
         self._store = self._init_store()
         self._run_called = False
 
@@ -327,7 +329,7 @@ class KedroSession:
             and values are dataset objects.
         """
         # Report project name
-        self._logger.info("Kedro project %s", self._project_path.name)
+        self._logger.info("Kedro project %s", self._project_name)
 
         if self._run_called:
             raise KedroSessionError(

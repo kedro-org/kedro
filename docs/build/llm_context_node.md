@@ -79,9 +79,68 @@ LLMContextNode(
 )
 ```
 
+### Using LLMs
+
+The `llm` argument of LLM context node must reference a Kedro dataset that returns an initialized LLM or LLM wrapper object.
+
+In practice, this is typically provided by a core LLM dataset, such as
+[kedro_datasets.langchain.ChatOpenAIDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/langchain.ChatOpenAIDataset/),
+which encapsulates all LLM-specific configuration (model name, credentials, timeouts, retries, etc.).
+
+At runtime, Kedro loads the dataset and passes the resulting LLM object directly
+into the constructed `LLMContext`. The context node does not invoke the LLM itself;
+it makes the LLM available to downstream nodes, agents, or execution
+frameworks (for example LangChain, LangGraph, OpenAI Agents, or AutoGen).
+
+### Using prompts
+
+Prompts are treated as datasets, not inline strings.
+
+Each prompt listed in `llm_context_node(prompts=[...])` must correspond to a Kedro
+dataset that returns prompt content when loaded.
+
+For example, prompts can be backed by experimental prompt datasets such as:
+
+- [kedro_datasets_experimental.langchain.LangChainPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets_experimental/langchain.LangChainPromptDataset/)
+- [kedro_datasets_experimental.langfuse.LangfusePromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets_experimental/langfuse.LangfusePromptDataset/)
+- [kedro_datasets_experimental.opik.OpikPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets_experimental/opik.OpikPromptDataset/)
+
+At runtime, all prompt datasets are loaded by Kedro and made available in
+`LLMContext.prompts` as a mapping:
+```python
+{
+    "system_prompt": "...",
+    "tool_prompt": "...",
+}
+```
+
+This keeps prompt management fully declarative and aligned with Kedro’s dataset model,
+while allowing different prompt backends to be swapped without changing pipeline code.
+
 ### Using tools
 
-Tool instantiation is intentionally lightweight and deterministic. All declared tool inputs are validated and loaded by Kedro before execution. Tool objects are instantiated at node runtime and tool names are automatically derived from the returned objects (for example function name).
+Tools used with `llm_context_node` are defined as builder functions.
+A tool builder is a regular Python function that receives datasets loaded by Kedro
+(e.g. database engines, indexes, or documents) and returns a callable or tool object
+that can be used by an LLM or agent framework.
+
+````python
+from langchain_core.tools import tool
+
+def build_lookup_docs(docs, max_matches: int):
+    """Create a document lookup tool from a document store."""
+
+    @tool
+    def lookup(query: str) -> list[str]:
+        return docs.search(query, limit=max_matches)
+
+    return lookup
+````
+
+The arguments passed to the tool’s callable (e.g. `lookup(query: str)`) are not provided by Kedro, but are dynamically injected by the LLM at execution time based on the model’s tool-calling or function-calling mechanism.
+Kedro is only responsible for supplying the builder inputs (datasets and parameters) required to construct the tool, not the arguments used when the tool is called.
+
+The tool is then registered in the pipeline using the `tool()` helper:
 
 ```python
 from kedro.pipeline import llm_context_node, tool
@@ -97,6 +156,11 @@ llm_context_node(
     ],
 )
 ```
+
+Tool instantiation is intentionally lightweight and deterministic.
+All declared tool inputs are validated and loaded by Kedro before execution.
+Tool objects are instantiated at node runtime and tool names are automatically
+derived from the returned objects (for example function name).
 
 ## Composing and consuming an LLM context
 
@@ -124,7 +188,7 @@ This node produces an `LLMContext` dataset containing:
 - `context.prompts` - a mapping of prompt names to prompt content
 - `context.tools` - a mapping of tool names to instantiated tool objects
 
-### 2. Define a node that consumes the `LLMContextà
+### 2. Define a node that consumes the `LLMContext`
 
 ```python
 from kedro.pipeline import Node

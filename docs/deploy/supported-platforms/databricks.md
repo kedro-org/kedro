@@ -128,7 +128,9 @@ export DATABRICKS_TOKEN="<your-personal-access-token>"
 
 Configure the Kedro Data Catalog: Spark workloads execute remotely on Databricks and do not have access to your local filesystem. As a result, all `SparkDatasetV2` entries in the Data Catalog must use paths pointing to **Databricks Volumes** or other remote storage.
 
-Non-Spark datasets (for example, pandas-based datasets) can be stored **anywhere** - locally or in cloud storage - as long as you specify their path in the Data Catalog. If a Spark transformation running on Databricks produces a `SparkDatasetV2` stored on a Databricks Volume and you want to continue processing it locally, you must provide the required credentials in the Data Catalog so your local environment can access that Volume.
+Non-Spark datasets (for example, pandas-based datasets) can be stored **anywhere** - locally or in cloud storage - as long as you specify their path in the Data Catalog.
+
+If a Spark transformation running on Databricks produces a `SparkDatasetV2` on a Databricks Volume, you can continue processing it locally. To do this, provide the required credentials in the Data Catalog so your local environment can access the Volume.
 
 Once configured, run Kedro locally as usual:
 
@@ -220,7 +222,7 @@ Kedro-Viz can be launched in a new browser tab with the `%run_viz` line magic:
 ```
 
 !!! note
-    You may encounter issues running this command on the Databricks Free tier. If that happens, we recommend using the NotebookVisualizer instead.
+    You may encounter issues running this command on the Databricks Free tier. If that happens, we recommend using the `NotebookVisualizer` instead.
 
 This command presents a link to the Kedro-Viz web application.
 

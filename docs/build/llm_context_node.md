@@ -80,7 +80,7 @@ LLMContextNode(
 ```
 
 <!-- vale Kedro.headings = NO -->
-### Using LLMs
+### Using LLM
 <!-- vale Kedro.headings = YES -->
 
 The `llm` argument of LLM context node must reference a Kedro dataset that returns an initialised LLM or LLM wrapper object.
@@ -139,7 +139,7 @@ def build_lookup_docs(docs, max_matches: int):
     return lookup
 ````
 
-The arguments passed to the tool’s callable (for example `lookup(query: str)`) are not provided by Kedro, but are dynamically injected by the LLM at execution time based on the model’s tool-calling or function-calling mechanism.
+The arguments passed to the tool’s callable (for example `lookup(query: str)`) are not provided by Kedro. They are dynamically injected by the LLM at execution time based on the model’s tool-calling or function-calling mechanism.
 
 The tool is then registered in the pipeline using the `tool()` helper:
 

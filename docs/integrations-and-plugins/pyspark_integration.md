@@ -2,7 +2,7 @@
 
 This page outlines some best practices when building a Kedro pipeline with [`PySpark`](https://spark.apache.org/docs/latest/api/python/index.html). It assumes a basic understanding of both Kedro and `PySpark`.
 
-## Get started quickly with the PySpark starter
+## Get started with the PySpark starter
 
 You can use the built-in PySpark starter with the `kedro new` command to create a working Spark-based project:
 
@@ -12,9 +12,9 @@ uvx kedro new --name=spaceflights-databricks --tools=pyspark --example=y
 
 This starter is designed specifically for Spark. It replaces pandas-based datasets with `SparkDatasetV2` in the Data Catalog and implements data transformations using Spark.
 
-The starter supports multiple execution modes, including running [Kedro directly on Databricks](../deploy/supported-platforms/databricks.md#run-kedro-within-databricks-git-folders) and [using a remote Spark cluster from your local machine via Databricks Connect](../deploy/supported-platforms/databricks.md#local-development-remote-databricks-cluster-databricks-connect).
+The starter supports multiple execution modes, including running [Kedro directly on Databricks](../deploy/supported-platforms/databricks.md#run-kedro-within-databricks-git-folders) and [using a remote Spark cluster from your local machine with Databricks Connect](../deploy/supported-platforms/databricks.md#local-development-remote-databricks-cluster-databricks-connect).
 
-If you want to run the project locally, install PySpark first. It is not included in the starter dependencies by default. You can install it via `kedro-datasets`:
+If you want to run the project locally, install PySpark first. It is not included in the starter dependencies by default. You can install it with `kedro-datasets`:
 
 ```bash
 uv pip install kedro-datasets[spark-local]
@@ -129,10 +129,6 @@ Under the hood, every Kedro node that performs a Spark action (for example, `sav
 kedro run --runner=ThreadRunner
 ```
 
-To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node an equal share of the Spark cluster by turning on fair sharing. This setting gives nodes a better chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job uses excessive resources, it could hold up the execution of other jobs. To turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialise a `SparkSession`](#initialise-a-sparksession-using-a-hook) section:
-
-```yaml
-spark.scheduler.mode: FAIR
-```
+To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node an equal share of the Spark cluster by turning on fair sharing. This setting gives nodes a better chance of being executed concurrently. By default, Spark uses FIFO scheduling, so a job that consumes excessive resources can block other jobs. To enable fair scheduling, configure the `spark.scheduler.mode` option in your local PySpark settings file.
 
 For more information, see the Spark documentation on [jobs scheduling within an application](https://spark.apache.org/docs/latest/job-scheduling.html#scheduling-within-an-application).

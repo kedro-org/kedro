@@ -681,14 +681,18 @@ class TestKedroSession:
 
         monkeypatch.setattr(kedro_project, "PACKAGE_NAME", mock_package_name)
 
+        # Create a temporary directory outside of the project
         outside_dir = tmp_path / "outside"
         outside_dir.mkdir()
         pyproject_path = tmp_path / "pyproject.toml"
         if pyproject_path.exists():
             pyproject_path.unlink()
 
+        # Change the current working directory to the outside directory
         monkeypatch.chdir(outside_dir)
 
+        # Create a session and set run called to True - no need to run a full session, we can verify the logging message
+        # from trying to execute a second run in the same session.
         session = KedroSession.create(save_on_close=False)
         session._run_called = True
 

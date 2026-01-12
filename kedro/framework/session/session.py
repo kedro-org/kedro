@@ -117,7 +117,6 @@ class KedroSession:
         self.session_id = session_id
         self.save_on_close = save_on_close
         self._package_name = package_name or kedro_project.PACKAGE_NAME
-        self._project_name = self._package_name or self._project_path.name
         self._store = self._init_store()
         self._run_called = False
 
@@ -329,7 +328,8 @@ class KedroSession:
             and values are dataset objects.
         """
         # Report project name
-        self._logger.info("Kedro project %s", self._project_name)
+        project_name = self._package_name or self._project_path.name
+        self._logger.info("Kedro project %s", project_name)
 
         if self._run_called:
             raise KedroSessionError(

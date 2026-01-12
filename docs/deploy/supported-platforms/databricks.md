@@ -128,7 +128,7 @@ export DATABRICKS_TOKEN="<your-personal-access-token>"
 
 Configure the Kedro Data Catalog: Spark workloads execute remotely on Databricks and do not have access to your local filesystem. As a result, all `SparkDatasetV2` entries in the Data Catalog must use paths pointing to **Databricks Volumes** or other remote storage.
 
-Non-Spark datasets (for example, pandas-based datasets) can be stored **anywhere** - locally or in cloud storage - as long as you specify their path in the Data Catalog.
+Non-Spark datasets (for example, pandas-based datasets) can be stored **anywhere** - locally or in cloud storage - as long as you specify their path in the Data Catalog. If a Spark transformation running on Databricks produces a `SparkDatasetV2` stored on a Databricks Volume and you want to continue processing it locally, you must provide the required credentials in the Data Catalog so your local environment can access that Volume.
 
 Once configured, run Kedro locally as usual:
 
@@ -136,7 +136,13 @@ Once configured, run Kedro locally as usual:
 kedro run
 ```
 
-All operations on `SparkDatasetV2` within nodes run remotely on the Databricks cluster, while all other code runs locally in your Python environment, with Spark execution logs streamed to your local terminal.
+All operations on `SparkDatasetV2` within nodes run remotely on the Databricks cluster, while all other code runs locally in your Python environment, with Spark execution logs streamed to your local terminal:
+
+![](../../meta/images/databricks_connect_log.png)
+
+You can view your intermediate `SparkDatasetV2` datasets in the Databricks Catalog UI:
+
+![](../../meta/images/databricks_volumes_data.png)
 
 ---
 
@@ -168,8 +174,8 @@ For full setup instructions, see the [plugin documentation.](https://kedro-datab
 
 [Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/) is a visualisation tool for exploring Kedro pipelines and (optionally) run metadata. In Databricks, you can use it in two ways:
 
--   **Launch the full Kedro-Viz web app** (opens in a new browser tab, best for full project exploration)
 -   **Visualise a pipeline directly in the notebook** with `NotebookVisualizer` (lightweight and suitable for inspecting a single pipeline)
+-   **Launch the full Kedro-Viz web app** (opens in a new browser tab, best for full project exploration)
 
 ### Prerequisites
 
@@ -195,24 +201,6 @@ If you launched the notebook from **outside** the Kedro project directory, pass 
     %reload_kedro /Workspace/Users/<databricks_user_name>/<cloned_repo_name>
 ```
 
-### Launch the full Kedro-Viz web app
-
-Kedro-Viz can be launched in a new browser tab with the `%run_viz` line magic:
-
-```ipython
-%run_viz
-```
-
-This command presents a link to the Kedro-Viz web application.
-
-![Kedro-Viz link rendered in a Databricks notebook](../../meta/images/databricks_viz_link.png)
-
-Clicking the link opens a new browser tab running Kedro-Viz for your project.
-
-![Kedro-Viz UI displayed from a Databricks notebook link](../../meta/images/databricks_viz_demo.png)
-
-------------------------------------------------------------------------
-
 ### Visualise a pipeline directly in the notebook with `NotebookVisualizer`
 
 If you want to inspect a single pipeline without opening the full web application, use [`NotebookVisualizer`](https://docs.kedro.org/projects/kedro-viz/en/stable/kedro-viz_visualisation/#notebookvisualizer):
@@ -222,3 +210,22 @@ from kedro_viz.integrations.notebook import NotebookVisualizer
 
 NotebookVisualizer(pipelines["data_science"]).show()
 ```
+
+### Launch the full Kedro-Viz web app
+
+Kedro-Viz can be launched in a new browser tab with the `%run_viz` line magic:
+
+```ipython
+%run_viz
+```
+
+!!! note
+    You may encounter issues running this command on the Databricks Free tier. If that happens, we recommend using the NotebookVisualizer instead.
+
+This command presents a link to the Kedro-Viz web application.
+
+![Kedro-Viz link rendered in a Databricks notebook](../../meta/images/databricks_viz_link.png)
+
+Clicking the link opens a new browser tab running Kedro-Viz for your project.
+
+![Kedro-Viz UI displayed from a Databricks notebook link](../../meta/images/databricks_viz_demo.png)

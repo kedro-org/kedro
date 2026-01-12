@@ -88,8 +88,8 @@ In practice, this is typically provided by a core LLM dataset, such as
 which encapsulates all LLM-specific configuration (model name, credentials, timeouts, retries, and more).
 
 At runtime, Kedro loads the dataset and passes the resulting LLM object directly
-into the constructed `LLMContext`. The context node does not invoke the LLM itself;
-it makes the LLM available to downstream nodes, agents, or execution
+into the constructed `LLMContext`. The context node does not invoke the LLM itself.
+It makes the LLM available to downstream nodes, agents, or execution
 frameworks (for example LangChain, LangGraph, OpenAI Agents, or AutoGen).
 
 ### Using prompts
@@ -121,7 +121,7 @@ while allowing different prompt backends to be swapped without changing pipeline
 
 Tools used with `llm_context_node` are defined as builder functions.
 A tool builder is a regular Python function that receives datasets loaded by Kedro
-(for example database engines, indexes, or documents) and returns a callable or tool object
+(for example database engines, indexes, or documents). It also returns a callable or tool object
 that can be used by an LLM or agent framework.
 
 ````python
@@ -138,7 +138,6 @@ def build_lookup_docs(docs, max_matches: int):
 ````
 
 The arguments passed to the tool’s callable (for example `lookup(query: str)`) are not provided by Kedro, but are dynamically injected by the LLM at execution time based on the model’s tool-calling or function-calling mechanism.
-Kedro is responsible for supplying the builder inputs (datasets and parameters) required to construct the tool, not the arguments used when the tool is called.
 
 The tool is then registered in the pipeline using the `tool()` helper:
 

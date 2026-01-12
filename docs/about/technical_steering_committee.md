@@ -135,7 +135,6 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 | [Ivan Danov](https://github.com/idanov)                  | [Palantir](https://www.palantir.com/)                                                   |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Joel Schwarzmann](https://github.com/datajoely)         | [Aneira Health](https://www.aneira.health)                                              |
-| [Juan Luis Cano](https://github.com/astrojuanlu)         | [Canonical](https://www.canonical.com )                                                 |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [Printify, Inc.](https://printify.com/)                                                 |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
@@ -169,6 +168,7 @@ Former core team members with significant contributions include
 [Ignacio Paricio](https://github.com/ignacioparicio),
 [Jannic Holzer](https://github.com/jmholzer),
 [Jo Stichbury](https://github.com/stichbury),
+[Juan Luis Cano](https://github.com/astrojuanlu),
 [Jiri Klein](https://github.com/jiriklein),
 [Kiyohito Kunii](https://github.com/921kiyo),
 [Laís Carvalho](https://github.com/laisbsc),

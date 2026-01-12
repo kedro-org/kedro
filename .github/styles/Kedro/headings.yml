@@ -20,6 +20,7 @@ exceptions:
   - Azure App Service Plan
   - Azure Blob Storage
   - Azure Event Hub
+  - Azure ML
   - CI/CD
   - CLI
   - DataCatalog
@@ -70,6 +71,7 @@ exceptions:
   - MySQL
   - Notebooks
   - Prefect
+  - PyCharm
   - Python
   - PySpark
   - QuantumBlack
@@ -78,6 +80,7 @@ exceptions:
   - Redis
   - SageMaker
   - Slack
+  - SSH
   - Spark
   - Technical Steering Committee
   - TSC
@@ -86,3 +89,5 @@ exceptions:
   - URLs
   - VertexAI
   - YAML
+  - VS Code
+  - Visual Studio Code

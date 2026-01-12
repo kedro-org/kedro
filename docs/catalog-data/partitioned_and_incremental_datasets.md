@@ -48,7 +48,7 @@ my_partitioned_dataset = PartitionedDataset(
 )
 ```
 
-Alternatively, if you need more granular configuration of the underlying dataset, its definition can be provided in full:
+If you need more granular configuration of the underlying dataset, provide its definition in full:
 
 ```yaml
 # conf/base/catalog.yml
@@ -87,7 +87,7 @@ The dataset definition should be passed into the `dataset` argument of the `Part
 
 #### Shorthand notation
 
-Requires you only to specify a class of the underlying dataset either as a string (for example, `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [kedro.io.AbstractDataset][].
+Specify the underlying dataset class either as a string (for example, `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [kedro.io.AbstractDataset][].
 
 #### Full notation
 
@@ -150,7 +150,7 @@ def concat_partitions(partitioned_input: Dict[str, Callable[[], Any]]) -> pd.Dat
     return result
 ```
 
-As you can see from the above example, on load `PartitionedDataset` _does not_ automatically load the data from the located partitions. Instead, `PartitionedDataset` returns a dictionary with partition IDs as keys and the corresponding load functions as values. It allows the node that consumes the `PartitionedDataset` to implement the logic that defines what partitions need to be loaded, and how this data is going to be processed.
+As you can see from the above example, on load `PartitionedDataset` _does not_ automatically load the data from the located partitions. Instead, `PartitionedDataset` returns a dictionary with partition IDs as keys and the corresponding load functions as values. This design lets the consuming node decide which partitions to load and how to process the data.
 
 Partition ID _does not_ represent the whole partition path, but only a part of it that is unique for a given partition _and_ filename suffix:
 
@@ -159,7 +159,7 @@ Partition ID _does not_ represent the whole partition path, but only a part of i
 
 * Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, then its Partition ID is `2019-12-04/data`.
 
-`PartitionedDataset` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataset`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done on purpose to guarantee the consistency of load operations between the nodes and avoid race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
+`PartitionedDataset` caches the load operation, which means that if multiple nodes consume the same `PartitionedDataset`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This behaviour guarantees consistent load operations between nodes and avoids race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
 
 ### Partitioned dataset save
 
@@ -206,7 +206,7 @@ def create_partitions() -> Dict[str, Any]:
 ```
 
 !!! note
-    Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a `PartitionedDataset`. The simplest safety mechanism could be to use partition IDs with a high chance of uniqueness: for example, the current timestamp.
+    Writing to an existing partition may result in its data being overwritten if the underlying dataset implementation does not handle this case. Add checks to ensure that no existing data is lost when writing to a `PartitionedDataset`. The simplest safety mechanism could be to use partition IDs with a high chance of uniqueness, such as the current timestamp.
 
 ### Partitioned dataset lazy saving
 `PartitionedDataset` also supports lazy saving, where the partition's data is not materialised until it is time to write.
@@ -236,10 +236,10 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
     When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../extend/hooks/introduction.md).
 
 !!! note
-    Lazy saving is the default behaviour, meaning that if a `Callable` type is provided, the dataset will be written _after_ the `after_node_run` hook is executed.
+    Lazy saving is enabled by default. When a `Callable` type is provided, the dataset is written _after_ the `after_node_run` hook finishes.
 
-In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (for example, a TensorFlow model) and you do not intend to save it lazily.
-To disable the lazy saving set `save_lazily` parameter to `False`:
+In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (for example, a TensorFlow model) and you prefer to write the data straight away.
+To disable lazy saving, set the `save_lazily` parameter to `False`:
 
 ```yaml
 # conf/base/catalog.yml
@@ -261,7 +261,7 @@ new_partitioned_dataset:
 
 This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataset` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
 
-The checkpoint file is only created _after_ [the partitioned dataset is explicitly confirmed](#incremental-dataset-confirm).
+The checkpoint file is created _after_ [the partitioned dataset is explicitly confirmed](#incremental-dataset-confirm).
 
 ### Incremental dataset loads
 
@@ -292,7 +292,7 @@ Node(
 )
 ```
 
-Alternatively, confirmation can be deferred to one of the nodes downstream, allowing you to implement extra validations before the loaded partitions are considered successfully processed:
+You can defer confirmation to a downstream node to run additional validation before treating the loaded partitions as processed:
 
 ```python
 from kedro.pipeline import Node, Pipeline
@@ -331,7 +331,7 @@ Important notes about the confirmation operation:
 
 ### Checkpoint configuration
 
-`IncrementalDataset` does not require explicit configuration of the checkpoint unless there is a need to deviate from the defaults. To update the checkpoint configuration, add a `checkpoint` key containing the valid dataset configuration. This may be required if, say, the pipeline has read-only permissions to the location of partitions (or write operations are undesirable for any other reason). In such cases, `IncrementalDataset` can be configured to save the checkpoint elsewhere. The `checkpoint` key also supports partial config updates where only some checkpoint attributes are overwritten, while the defaults are kept for the rest:
+`IncrementalDataset` does not require explicit configuration of the checkpoint unless there is a need to deviate from the defaults. To update the checkpoint configuration, add a `checkpoint` key containing the valid dataset configuration. This may be required if, say, the pipeline has read access to the location of partitions without write permissions (or write operations are undesirable for any other reason). In such cases, `IncrementalDataset` can be configured to save the checkpoint elsewhere. The `checkpoint` key also supports partial config updates where a subset of checkpoint attributes is overwritten while the defaults are kept for the rest:
 
 ```yaml
 my_partitioned_dataset:
@@ -348,7 +348,7 @@ my_partitioned_dataset:
 ### Special checkpoint config keys
 
 Along with the standard dataset attributes, `checkpoint` config also accepts two special optional keys:
-* `comparison_func` (defaults to `operator.gt`) - a fully qualified import path to the function that will be used to compare a partition ID with the checkpoint value, to determine whether a partition should be processed. Such functions must accept two positional string arguments - partition ID and checkpoint value - and return `True` if such partition is considered to be past the checkpoint. It might be useful to specify your own `comparison_func` if you need to customise the checkpoint filtration mechanism - for example, you might want to implement windowed loading, where you always want to load the partitions representing the last calendar month. See the example config specifying a custom comparison function:
+* `comparison_func` (defaults to `operator.gt`) - a fully qualified import path to the function that will be used to compare a partition ID with the checkpoint value, to determine whether a partition should be processed. Such functions must accept two positional string arguments - partition ID and checkpoint value - and return `True` if such partition is considered to be past the checkpoint. It might be useful to specify your own `comparison_func` if you need to customise the checkpoint filtration mechanism - for example, you might want to introduce windowed loading, where you always load the partitions representing the last calendar month. See the example config specifying a custom comparison function:
 
 ```yaml
 my_partitioned_dataset:

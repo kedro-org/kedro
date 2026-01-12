@@ -3,6 +3,9 @@
 * Added `@experimental` decorator to mark unstable or early-stage public APIs.
 * Added the new `support-agent-langgraph` starter. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 
+## Experimental features
+* Added experimental `llm_context_node` and `LLMContextNode` for assembling LLMs, prompts, and tools into a runtime `LLMContext` within Kedro pipelines.
+
 ## Bug fixes and other changes
 
 ## Documentation changes

@@ -54,8 +54,10 @@ To add Hooks to your Kedro project, you must:
 ### Define the Hook implementation
 The Hook implementation should have the same name as the specification. The Hook must provide a concrete implementation with a subset of the corresponding specification's parameters (you do not need to use them all).
 
-!!! warning "Do not use default argument values in hook implementations"
-    Hook parameters must be defined **without default values**. Due to how [pluggy](https://pluggy.readthedocs.io/en/stable/) (the underlying plugin system) passes arguments, parameters with defaults will receive the default value instead of the actual value passed by Kedro.
+!!! note 
+    Do not use default argument values in hook implementations
+
+Hook parameters must be defined **without default values**. Due to how [pluggy](https://pluggy.readthedocs.io/en/stable/) (the underlying plugin system) passes arguments, parameters with defaults will receive the default value instead of the actual value passed by Kedro.
 
 ```python
 # Wrong: run_params will always be an empty dict

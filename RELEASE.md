@@ -7,6 +7,7 @@
 * Added experimental `llm_context_node` and `LLMContextNode` for assembling LLMs, prompts, and tools into a runtime `LLMContext` within Kedro pipelines.
 
 ## Bug fixes and other changes
+* Set `raise_errors=True` in `find_pipelines()` calls in the project template's `pipeline_registry.py` to ensure pipeline discovery errors are raised during project runs.
 
 ## Documentation changes
 * Added beginner-friendly notes on `uvx` installation.

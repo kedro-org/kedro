@@ -469,7 +469,7 @@ class Node:
                 preview_fn=preview_data_summary
             )
 
-            # Later, call preview with a data summary dict
+            # Call preview with a data summary dict
             data_summary = {
                 "num_rows": 1000,
                 "num_columns": 5,

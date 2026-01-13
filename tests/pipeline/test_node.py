@@ -4,9 +4,9 @@ from functools import partial, update_wrapper, wraps
 
 import pytest
 
-from kedro import KedroExperimentalWarning
 from kedro.pipeline import node
 from kedro.pipeline.node import PreviewPayload
+from kedro.utils import KedroExperimentalWarning
 from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
@@ -596,16 +596,66 @@ class TestNodePreviewPayload:
 
 
 class TestNodePreviewFunction:
-    def test_node_with_preview_fn_emits_warning(self):
+    @pytest.fixture(autouse=True)
+    def reset_preview_warning_flag(self):
+        """Reset the preview_fn warning flag before and after each test."""
+        from kedro.pipeline.node import Node
+
+        # Remove the flag before the test
+        if hasattr(Node, "__preview_fn_warned__"):
+            delattr(Node, "__preview_fn_warned__")
+
+        yield
+
+        # Clean up after the test
+        if hasattr(Node, "__preview_fn_warned__"):
+            delattr(Node, "__preview_fn_warned__")
+
+    def test_node_with_preview_fn_emits_warning_only_once(self):
+        """Test that the preview_fn warning is only emitted once per session."""
+
         def test_json_preview():
             return PreviewPayload(kind="json", content='{"test": "data"}')
 
-        with pytest.warns(
-            KedroExperimentalWarning,
-            match="The 'preview_fn' feature is experimental and may change in future versions.",
-        ):
-            test_node = node(identity, "input", "output", preview_fn=test_json_preview)
-        assert test_node._preview_fn is test_json_preview
+        def another_preview():
+            return PreviewPayload(kind="text", content="another")
+
+        import warnings
+
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+
+            # Create first node - should warn
+            node1 = node(identity, "input1", "output1", preview_fn=test_json_preview)
+            warnings_after_first = [
+                w
+                for w in warning_list
+                if issubclass(w.category, KedroExperimentalWarning)
+            ]
+            assert len(warnings_after_first) == 1
+            assert "preview_fn" in str(warnings_after_first[0].message)
+
+            # Create second node - should NOT warn (same session)
+            node2 = node(identity, "input2", "output2", preview_fn=another_preview)
+            warnings_after_second = [
+                w
+                for w in warning_list
+                if issubclass(w.category, KedroExperimentalWarning)
+            ]
+            assert len(warnings_after_second) == 1  # No additional warnings
+
+            # Create third node - should NOT warn (same session)
+            node3 = node(identity, "input3", "output3", preview_fn=test_json_preview)
+            warnings_after_third = [
+                w
+                for w in warning_list
+                if issubclass(w.category, KedroExperimentalWarning)
+            ]
+            assert len(warnings_after_third) == 1  # Still only one warning total
+
+        assert node1._preview_fn is test_json_preview
+        assert node2._preview_fn is another_preview
+        assert node3._preview_fn is test_json_preview
 
     def test_node_without_preview_fn_no_warning(self):
         import warnings
@@ -687,9 +737,7 @@ class TestNodePreviewFunction:
         with pytest.warns(KedroExperimentalWarning):
             original = node(identity, "input", "output", preview_fn=preview_fn)
 
-        # _copy creates a new Node, which will emit warning if preview_fn is present
-        with pytest.warns(KedroExperimentalWarning):
-            copied = original._copy(name="new_name")
+        copied = original._copy(name="new_name")
         assert copied._preview_fn is preview_fn
 
     def test_preview_fn_can_be_overwritten_in_copy(self):
@@ -702,9 +750,6 @@ class TestNodePreviewFunction:
         with pytest.warns(KedroExperimentalWarning):
             original = node(identity, "input", "output", preview_fn=preview_fn1)
 
-        # When overwriting preview_fn in _copy, a new Node is created which should emit warning
-        with pytest.warns(KedroExperimentalWarning):
-            copied = original._copy(preview_fn=preview_fn2)
-
+        copied = original._copy(preview_fn=preview_fn2)
         assert original._preview_fn is preview_fn1
         assert copied._preview_fn is preview_fn2

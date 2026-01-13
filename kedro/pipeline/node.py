@@ -19,7 +19,7 @@ from warnings import warn
 
 from more_itertools import spy, unzip
 
-from kedro import KedroExperimentalWarning
+from kedro.utils import KedroExperimentalWarning
 
 from .transcoding import _strip_transcoding
 
@@ -200,11 +200,13 @@ class Node:
                         f"preview_fn must be a function, not '{type(preview_fn).__name__}'."
                     )
                 )
-            warn(
-                "The 'preview_fn' feature is experimental and may change in future versions.",
-                KedroExperimentalWarning,
-                stacklevel=2,
-            )
+            if not getattr(Node, "__preview_fn_warned__", False):
+                warn(
+                    "The 'preview_fn' feature is experimental and may change in future versions.",
+                    category=KedroExperimentalWarning,
+                    stacklevel=2,
+                )
+                setattr(Node, "__preview_fn_warned__", True)
 
         self._preview_fn = preview_fn
 

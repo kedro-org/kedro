@@ -433,8 +433,6 @@ class Node:
     def preview(self) -> PreviewPayload | None:
         """Execute the preview function if available and validate its return type.
 
-
-
         Returns:
             PreviewPayload if preview_fn is set, None otherwise.
 

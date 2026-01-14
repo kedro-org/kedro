@@ -430,17 +430,10 @@ class Node:
         """
         return _to_list(self._confirms)
 
-    def preview(self, *args: Any, **kwargs: Any) -> PreviewPayload | None:
+    def preview(self) -> PreviewPayload | None:
         """Execute the preview function if available and validate its return type.
 
-        The preview function receives simple serializable objects (str, list, dict, etc.)
-        as arguments and returns a PreviewPayload for visualization.
 
-        Args:
-            *args: Positional arguments to pass to the preview function.
-                These should be simple serializable objects like strings, lists, dicts, etc.
-            **kwargs: Keyword arguments to pass to the preview function.
-                These should be simple serializable objects like strings, lists, dicts, etc.
 
         Returns:
             PreviewPayload if preview_fn is set, None otherwise.
@@ -451,11 +444,11 @@ class Node:
         Examples:
             ```python
             # Example 1: Preview function with data summary
-            def preview_data_summary(data: dict) -> PreviewPayload:
+            def preview_data_summary() -> PreviewPayload:
                 summary = {
-                    "num_rows": data["num_rows"],
-                    "num_columns": data["num_columns"],
-                    "columns": data["columns"]
+                    "num_rows": 1000,
+                    "num_columns": 5,
+                    "columns": ["id", "name", "age", "city", "score"]
                 }
                 return PreviewPayload(
                     kind="json",
@@ -469,13 +462,8 @@ class Node:
                 preview_fn=preview_data_summary
             )
 
-            # Call preview with a data summary dict
-            data_summary = {
-                "num_rows": 1000,
-                "num_columns": 5,
-                "columns": ["id", "name", "age", "city", "score"]
-            }
-            payload = my_node.preview(data_summary)
+            # Call preview
+            payload = my_node.preview()
 
             >>> payload
             PreviewPayload(
@@ -485,8 +473,9 @@ class Node:
             )
 
             # Example 2: Preview function with Mermaid diagram
-            def preview_pipeline_flow(steps: list[str]) -> PreviewPayload:
+            def preview_pipeline_flow() -> PreviewPayload:
                 # Generate Mermaid flowchart
+                steps = ["Load", "Validate", "Transform", "Save"]
                 mermaid = "graph LR\\n"
                 for i, step in enumerate(steps):
                     if i < len(steps) - 1:
@@ -501,9 +490,8 @@ class Node:
                 preview_fn=preview_pipeline_flow
             )
 
-            # Call preview with pipeline steps
-            steps = ["Load", "Validate", "Transform", "Save"]
-            payload = my_node.preview(steps)
+            # Call preview
+            payload = my_node.preview()
 
             >>> payload
             PreviewPayload(
@@ -516,7 +504,7 @@ class Node:
         if not self._preview_fn:
             return None
 
-        result = self._preview_fn(*args, **kwargs)
+        result = self._preview_fn()
 
         if not isinstance(result, PreviewPayload):
             raise ValueError(

@@ -691,18 +691,18 @@ class TestNodePreviewFunction:
         assert result.kind == "json"
         assert result.content == '{"key": "value"}'
 
-    def test_preview_with_args_and_kwargs(self):
-        def preview_fn(data, format="json"):
-            return PreviewPayload(kind=format, content=str(data))
+    def test_preview_fn(self):
+        def preview_fn():
+            return PreviewPayload(kind="table", content="test content")
 
         with pytest.warns(KedroExperimentalWarning):
             n = node(identity, "input", "output", preview_fn=preview_fn)
 
-        result = n.preview({"test": "data"}, format="table")
+        result = n.preview()
 
         assert isinstance(result, PreviewPayload)
         assert result.kind == "table"
-        assert result.content == "{'test': 'data'}"
+        assert result.content == "test content"
 
     def test_preview_validates_return_type(self):
         def bad_preview_fn():

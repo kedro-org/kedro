@@ -14,7 +14,7 @@ from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import cached_property, partial
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 from warnings import warn
 
 from more_itertools import spy, unzip
@@ -25,6 +25,8 @@ from .transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable
+
+    from kedro.pipeline.preview_contract import PreviewPayload
 
 
 @dataclass
@@ -39,23 +41,6 @@ class GroupedNodes:
     type: str  # "namespace" or "nodes"
     nodes: list[str] = field(default_factory=list)
     dependencies: list[str] = field(default_factory=list)
-
-
-@dataclass
-class PreviewPayload:
-    """``PreviewPayload`` class represents the structured output that a preview
-    function should return to enable visualization of node execution results in
-    various formats.
-
-    Args:
-        kind: The type of preview content.
-        content: The actual preview content as a string.
-        meta: Optional metadata dictionary. Defaults to None.
-    """
-
-    kind: Literal["mermaid", "json", "text", "image", "plotly", "table", "custom"]
-    content: str
-    meta: dict[str, Any] | None = None
 
 
 class Node:
@@ -441,62 +426,73 @@ class Node:
 
         Examples:
             ```python
-            # Example 1: Preview function with data summary
-            def preview_data_summary() -> PreviewPayload:
-                summary = {
-                    "num_rows": 1000,
-                    "num_columns": 5,
-                    "columns": ["id", "name", "age", "city", "score"]
-                }
-                return PreviewPayload(
+            from kedro.pipeline.preview_contract import (
+                JsonPreview,
+                MermaidPreview,
+                TablePreview,
+                TableContent,
+                PlotlyPreview,
+                ImagePreview,
+                ImageBase64,
+            )
+
+
+            # Example 1: JSON preview
+            def preview_data_summary() -> JsonPreview:
+                return JsonPreview(
                     kind="json",
-                    content=json.dumps(summary, indent=2)
+                    content={
+                        "num_rows": 1000,
+                        "num_columns": 5,
+                        "columns": ["id", "name", "age", "city", "score"],
+                    },
                 )
+
 
             node(
                 func=process_data,
                 inputs="raw_data",
                 outputs="processed_data",
-                preview_fn=preview_data_summary
+                preview_fn=preview_data_summary,
             )
 
             # Call preview
             payload = my_node.preview()
 
-            >>> payload
-            PreviewPayload(
-                kind='json',
-                content='{\n  "num_rows": 1000,\n  "num_columns": 5,\n  "columns": [\n    "id",\n    "name",\n    "age",\n    "city",\n    "score"\n  ]\n}',
-                meta=None
-            )
 
-            # Example 2: Preview function with Mermaid diagram
-            def preview_pipeline_flow() -> PreviewPayload:
-                # Generate Mermaid flowchart
+            # Example 2: Mermaid diagram
+            def preview_pipeline_flow() -> MermaidPreview:
                 steps = ["Load", "Validate", "Transform", "Save"]
                 mermaid = "graph LR\\n"
                 for i, step in enumerate(steps):
                     if i < len(steps) - 1:
                         mermaid += f"    {step} --> {steps[i+1]}\\n"
 
-                return PreviewPayload(kind="mermaid", content=mermaid)
+                return MermaidPreview(kind="mermaid", content=mermaid)
 
-            node(
-                func=run_pipeline,
-                inputs="config",
-                outputs="result",
-                preview_fn=preview_pipeline_flow
-            )
 
-            # Call preview
-            payload = my_node.preview()
+            # Example 3: Table preview with TableContent
+            def preview_table() -> TablePreview:
+                return TablePreview(
+                    kind="table",
+                    content=TableContent(
+                        rows=[
+                            {"name": "Alice", "age": 30, "city": "NYC"},
+                            {"name": "Bob", "age": 25, "city": "LA"},
+                        ]
+                    ),
+                )
 
-            >>> payload
-            PreviewPayload(
-                kind='mermaid',
-                content='graph LR\\n    Load --> Validate\\n    Validate --> Transform\\n    Transform --> Save\\n',
-                meta=None
-            )
+
+            # Example 4: Plotly preview
+            def preview_plotly() -> PlotlyPreview:
+                return PlotlyPreview(
+                    kind="plotly",
+                    content={
+                        "data": [{"x": [1, 2, 3], "y": [2, 4, 6], "type": "scatter"}],
+                        "layout": {"title": "My Plot"},
+                    },
+                )
             ```
         """
         if not self._preview_fn:
@@ -504,9 +500,31 @@ class Node:
 
         result = self._preview_fn()
 
-        if not isinstance(result, PreviewPayload):
+        # Import the specific preview classes for isinstance check
+        from kedro.pipeline.preview_contract import (
+            CustomPreview,
+            ImagePreview,
+            JsonPreview,
+            MermaidPreview,
+            PlotlyPreview,
+            TablePreview,
+            TextPreview,
+        )
+
+        valid_types = (
+            TextPreview,
+            MermaidPreview,
+            JsonPreview,
+            TablePreview,
+            PlotlyPreview,
+            ImagePreview,
+            CustomPreview,
+        )
+
+        if not isinstance(result, valid_types):
             raise ValueError(
-                f"preview_fn must return a PreviewPayload instance, "
+                f"preview_fn must return a PreviewPayload instance "
+                f"(TextPreview, MermaidPreview, JsonPreview, TablePreview, PlotlyPreview, ImagePreview, or CustomPreview), "
                 f"but got '{type(result).__name__}' instead."
             )
 

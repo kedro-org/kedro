@@ -5,7 +5,19 @@ from functools import partial, update_wrapper, wraps
 import pytest
 
 from kedro.pipeline import node
-from kedro.pipeline.node import PreviewPayload
+from kedro.pipeline.preview_contract import (
+    ColumnDef,
+    CustomPreview,
+    ImageBase64,
+    ImagePreview,
+    ImageUrl,
+    JsonPreview,
+    MermaidPreview,
+    PlotlyPreview,
+    TableContent,
+    TablePreview,
+    TextPreview,
+)
 from kedro.utils import KedroExperimentalWarning
 from tests.test_utils import biconcat, constant_output, identity, triconcat
 
@@ -572,27 +584,119 @@ class TestNodeInputOutputNameValidation:
 
 
 class TestNodePreviewPayload:
-    def test_init(self):
-        payload = PreviewPayload(kind="json", content='{"key": "value"}')
+    def test_json_preview_with_dict(self):
+        payload = JsonPreview(kind="json", content={"key": "value"})
         assert payload.kind == "json"
-        assert payload.content == '{"key": "value"}'
+        assert payload.content == {"key": "value"}
         assert payload.meta is None
 
-    def test_init_with_meta(self):
-        payload = PreviewPayload(
-            kind="json", content='{"key": "value"}', meta={"format": "pretty"}
+    def test_json_preview_with_list(self):
+        payload = JsonPreview(kind="json", content=[1, 2, 3])
+        assert payload.kind == "json"
+        assert payload.content == [1, 2, 3]
+        assert payload.meta is None
+
+    def test_json_preview_with_meta(self):
+        payload = JsonPreview(
+            kind="json", content={"key": "value"}, meta={"format": "pretty"}
         )
         assert payload.kind == "json"
-        assert payload.content == '{"key": "value"}'
+        assert payload.content == {"key": "value"}
         assert payload.meta == {"format": "pretty"}
 
-    @pytest.mark.parametrize(
-        "kind",
-        ["mermaid", "json", "text", "image", "plotly", "table", "custom"],
-    )
-    def test_all_valid_kinds(self, kind):
-        payload = PreviewPayload(kind=kind, content="test content")
-        assert payload.kind == kind
+    def test_text_preview(self):
+        payload = TextPreview(kind="text", content="test content")
+        assert payload.kind == "text"
+        assert payload.content == "test content"
+
+    def test_mermaid_preview(self):
+        payload = MermaidPreview(kind="mermaid", content="graph LR\n A --> B")
+        assert payload.kind == "mermaid"
+        assert payload.content == "graph LR\n A --> B"
+
+    def test_table_preview_with_table_content(self):
+        table_content = TableContent(
+            rows=[{"col1": "a", "col2": 1}, {"col1": "b", "col2": 2}]
+        )
+        payload = TablePreview(kind="table", content=table_content)
+        assert payload.kind == "table"
+        assert payload.content.rows == [
+            {"col1": "a", "col2": 1},
+            {"col1": "b", "col2": 2},
+        ]
+
+    def test_table_preview_with_columns(self):
+        table_content = TableContent(
+            rows=[{"name": "Alice", "age": 30}],
+            columns=[
+                ColumnDef(key="name", label="Name", type="string"),
+                ColumnDef(key="age", label="Age", type="number"),
+            ],
+        )
+        payload = TablePreview(kind="table", content=table_content)
+        assert payload.content.columns is not None
+        assert len(payload.content.columns) == 2
+        assert payload.content.columns[0].key == "name"
+
+    def test_plotly_preview(self):
+        payload = PlotlyPreview(kind="plotly", content={"data": [], "layout": {}})
+        assert payload.kind == "plotly"
+        assert payload.content == {"data": [], "layout": {}}
+
+    def test_image_preview_with_url(self):
+        image_url = ImageUrl(source="url", url="https://example.com/image.png")
+        payload = ImagePreview(kind="image", content=image_url)
+        assert payload.kind == "image"
+        assert payload.content.source == "url"
+        assert payload.content.url == "https://example.com/image.png"
+
+    def test_image_preview_with_base64(self):
+        # Valid 1x1 transparent PNG
+        image_b64 = ImageBase64(
+            source="base64",
+            data="iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+            mime="image/png",
+        )
+        payload = ImagePreview(kind="image", content=image_b64)
+        assert payload.kind == "image"
+        assert payload.content.source == "base64"
+        assert payload.content.mime == "image/png"
+
+    def test_custom_preview(self):
+        payload = CustomPreview(
+            kind="custom", renderer_key="my_renderer", content={"custom": "data"}
+        )
+        assert payload.kind == "custom"
+        assert payload.renderer_key == "my_renderer"
+        assert payload.content == {"custom": "data"}
+
+    def test_invalid_content_type_for_text(self):
+        with pytest.raises(TypeError, match="TextPreview.content must be str"):
+            TextPreview(kind="text", content={"invalid": "type"})
+
+    def test_invalid_content_type_for_json(self):
+        with pytest.raises(TypeError, match="value is not JSON-serializable"):
+            JsonPreview(kind="json", content=object())
+
+    def test_invalid_content_type_for_table(self):
+        with pytest.raises(
+            TypeError, match="TablePreview.content must be TableContent"
+        ):
+            TablePreview(kind="table", content={"invalid": "type"})
+
+    def test_table_content_with_non_dict_rows(self):
+        with pytest.raises(TypeError, match="TableContent.rows\\[\\d+\\] must be dict"):
+            TableContent(rows=["not", "dicts"])
+
+    def test_invalid_content_type_for_plotly(self):
+        with pytest.raises(TypeError, match="PlotlyPreview.content must be a dict"):
+            PlotlyPreview(kind="plotly", content="should be dict")
+
+    def test_invalid_custom_preview_missing_renderer_key(self):
+        with pytest.raises(
+            TypeError, match="CustomPreview.renderer_key must be a non-empty str"
+        ):
+            CustomPreview(kind="custom", renderer_key="", content={"data": "value"})
 
 
 class TestNodePreviewFunction:
@@ -615,10 +719,10 @@ class TestNodePreviewFunction:
         """Test that the preview_fn warning is only emitted once per session."""
 
         def test_json_preview():
-            return PreviewPayload(kind="json", content='{"test": "data"}')
+            return JsonPreview(kind="json", content={"test": "data"})
 
         def another_preview():
-            return PreviewPayload(kind="text", content="another")
+            return TextPreview(kind="text", content="another")
 
         import warnings
 
@@ -680,29 +784,31 @@ class TestNodePreviewFunction:
 
     def test_preview_executes_preview_fn(self):
         def test_json_preview():
-            return PreviewPayload(kind="json", content='{"key": "value"}')
+            return JsonPreview(kind="json", content={"key": "value"})
 
         with pytest.warns(KedroExperimentalWarning):
             n = node(identity, "input", "output", preview_fn=test_json_preview)
 
         result = n.preview()
 
-        assert isinstance(result, PreviewPayload)
+        assert isinstance(result, JsonPreview)
         assert result.kind == "json"
-        assert result.content == '{"key": "value"}'
+        assert result.content == {"key": "value"}
 
     def test_preview_fn(self):
         def preview_fn():
-            return PreviewPayload(kind="table", content="test content")
+            return TablePreview(
+                kind="table", content=TableContent(rows=[{"col": "value"}])
+            )
 
         with pytest.warns(KedroExperimentalWarning):
             n = node(identity, "input", "output", preview_fn=preview_fn)
 
         result = n.preview()
 
-        assert isinstance(result, PreviewPayload)
+        assert isinstance(result, TablePreview)
         assert result.kind == "table"
-        assert result.content == "test content"
+        assert result.content.rows == [{"col": "value"}]
 
     def test_preview_validates_return_type(self):
         def bad_preview_fn():
@@ -712,7 +818,7 @@ class TestNodePreviewFunction:
             n = node(identity, "input", "output", preview_fn=bad_preview_fn)
 
         pattern = (
-            r"preview_fn must return a PreviewPayload instance, but got 'str' instead"
+            r"preview_fn must return a PreviewPayload instance.*but got 'str' instead"
         )
         with pytest.raises(ValueError, match=pattern):
             n.preview()
@@ -725,14 +831,14 @@ class TestNodePreviewFunction:
             n = node(identity, "input", "output", preview_fn=bad_preview_fn)
 
         pattern = (
-            r"preview_fn must return a PreviewPayload instance, but got 'dict' instead"
+            r"preview_fn must return a PreviewPayload instance.*but got 'dict' instead"
         )
         with pytest.raises(ValueError, match=pattern):
             n.preview()
 
     def test_preview_fn_preserved_in_copy(self):
         def preview_fn():
-            return PreviewPayload(kind="text", content="preview")
+            return TextPreview(kind="text", content="preview")
 
         with pytest.warns(KedroExperimentalWarning):
             original = node(identity, "input", "output", preview_fn=preview_fn)
@@ -742,10 +848,10 @@ class TestNodePreviewFunction:
 
     def test_preview_fn_can_be_overwritten_in_copy(self):
         def preview_fn1():
-            return PreviewPayload(kind="text", content="preview1")
+            return TextPreview(kind="text", content="preview1")
 
         def preview_fn2():
-            return PreviewPayload(kind="json", content="preview2")
+            return JsonPreview(kind="json", content={"data": "preview2"})
 
         with pytest.warns(KedroExperimentalWarning):
             original = node(identity, "input", "output", preview_fn=preview_fn1)

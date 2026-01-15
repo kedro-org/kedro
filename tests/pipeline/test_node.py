@@ -817,9 +817,7 @@ class TestNodePreviewFunction:
         with pytest.warns(KedroExperimentalWarning):
             n = node(identity, "input", "output", preview_fn=bad_preview_fn)
 
-        pattern = (
-            r"preview_fn must return a PreviewPayload instance.*but got 'str' instead"
-        )
+        pattern = r"preview_fn must return one of the valid preview types.*but got 'str' instead"
         with pytest.raises(ValueError, match=pattern):
             n.preview()
 
@@ -830,9 +828,7 @@ class TestNodePreviewFunction:
         with pytest.warns(KedroExperimentalWarning):
             n = node(identity, "input", "output", preview_fn=bad_preview_fn)
 
-        pattern = (
-            r"preview_fn must return a PreviewPayload instance.*but got 'dict' instead"
-        )
+        pattern = r"preview_fn must return one of the valid preview types.*but got 'dict' instead"
         with pytest.raises(ValueError, match=pattern):
             n.preview()
 

@@ -270,7 +270,7 @@ def _dataclass_to_json_dict(payload: Any) -> JSONObject:
 
     def convert(data: Any) -> JSONValue:
         if _is_json_scalar(data):
-            return data
+            return cast(JSONValue, data)
 
         if isinstance(data, dict):
             out: dict[str, JSONValue] = {}
@@ -286,7 +286,7 @@ def _dataclass_to_json_dict(payload: Any) -> JSONObject:
         if isinstance(data, list | tuple):
             return [convert(value) for value in data]
 
-        if is_dataclass(data):
+        if is_dataclass(data) and not isinstance(data, type):
             return convert(asdict(data))
 
         raise TypeError(f"Not JSON-serializable: {type(data).__name__}")
@@ -300,4 +300,4 @@ def _dataclass_to_json_dict(payload: Any) -> JSONObject:
 
     assert_json_value(serializable_payload, "$")
 
-    return cast(JSONObject, serializable_payload)
+    return serializable_payload

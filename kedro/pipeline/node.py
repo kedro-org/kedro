@@ -87,8 +87,9 @@ class Node:
                 Specified dataset names do not necessarily need to be present
                 in the node ``inputs`` or ``outputs``.
             namespace: Optional node namespace.
-            preview_fn: Optional preview function that returns a PreviewPayload.
-                This is an experimental feature.
+            preview_fn: Optional preview function that returns one of the valid
+                preview types (TextPreview, MermaidPreview, JsonPreview, TablePreview,
+                PlotlyPreview, ImagePreview, or CustomPreview). This is an experimental feature.
 
         Raises:
             ValueError: Raised in the following cases:
@@ -419,10 +420,13 @@ class Node:
         """Execute the preview function if available and validate its return type.
 
         Returns:
-            PreviewPayload if preview_fn is set, None otherwise.
+            A preview payload (one of TextPreview, MermaidPreview, JsonPreview,
+            TablePreview, PlotlyPreview, ImagePreview, or CustomPreview) if
+            preview_fn is set, None otherwise.
 
         Raises:
-            ValueError: If the preview function does not return a PreviewPayload instance.
+            ValueError: If the preview function does not return one of the valid
+                preview types.
 
         Examples:
             ```python
@@ -523,8 +527,9 @@ class Node:
 
         if not isinstance(result, valid_types):
             raise ValueError(
-                f"preview_fn must return a PreviewPayload instance "
-                f"(TextPreview, MermaidPreview, JsonPreview, TablePreview, PlotlyPreview, ImagePreview, or CustomPreview), "
+                f"preview_fn must return one of the valid preview types "
+                f"(TextPreview, MermaidPreview, JsonPreview, TablePreview, "
+                f"PlotlyPreview, ImagePreview, or CustomPreview), "
                 f"but got '{type(result).__name__}' instead."
             )
 
@@ -827,8 +832,9 @@ def node(  # noqa: PLR0913
             names do not necessarily need to be present in the node ``inputs``
             or ``outputs``.
         namespace: Optional node namespace.
-        preview_fn: Optional preview function that returns a PreviewPayload.
-            This is an experimental feature.
+        preview_fn: Optional preview function that returns one of the valid
+            preview types (TextPreview, MermaidPreview, JsonPreview, TablePreview,
+            PlotlyPreview, ImagePreview, or CustomPreview). This is an experimental feature.
 
     Returns:
         A Node object with mapped inputs, outputs and function.

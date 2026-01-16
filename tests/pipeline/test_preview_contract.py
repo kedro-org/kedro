@@ -307,3 +307,15 @@ class TestSerializationEdgeCases:
         assert result["kind"] == "text"
         assert result["content"] == "test"
         assert result["meta"] == {"key": "value"}
+
+    def test_to_dict_on_non_dataclass_raises_error(self):
+        """Test that to_dict() raises error when called on a class instead of instance."""
+        from kedro.pipeline.preview_contract import BasePreview
+
+        # Create a mock non-dataclass object that has to_dict method
+        class NotADataclass(BasePreview):
+            pass
+
+        # Calling to_dict on a class (not an instance) should raise error
+        with pytest.raises(TypeError, match="Not JSON-serializable"):
+            BasePreview.to_dict(NotADataclass)

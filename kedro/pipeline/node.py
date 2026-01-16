@@ -438,6 +438,8 @@ class Node:
                 ImagePreview,
             )
 
+            # Define your preview methods
+
 
             # Example 1: JSON preview
             def preview_data_summary() -> JsonPreview:
@@ -449,17 +451,6 @@ class Node:
                         "columns": ["id", "name", "age", "city", "score"],
                     },
                 )
-
-
-            node(
-                func=process_data,
-                inputs="raw_data",
-                outputs="processed_data",
-                preview_fn=preview_data_summary,
-            )
-
-            # Call preview
-            payload = my_node.preview()
 
 
             # Example 2: Mermaid diagram
@@ -504,7 +495,18 @@ class Node:
                 )
 
 
-            # To serialize for frontend/API use:
+            # Define your node which uses the preview_fn
+            my_node = node(
+                func=process_data,
+                inputs="raw_data",
+                outputs="processed_data",
+                preview_fn=your_preview_function,
+            )
+
+            # Receive the preview payload
+            payload = my_node.preview()
+
+            # Serialize for frontend/API use:
             json_dict = payload.to_dict()  # Returns JSONObject
             ```
         """

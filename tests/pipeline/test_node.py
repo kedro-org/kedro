@@ -6,15 +6,11 @@ import pytest
 
 from kedro.pipeline import node
 from kedro.pipeline.preview_contract import (
-    ColumnDef,
     CustomPreview,
-    ImageBase64,
     ImagePreview,
-    ImageUrl,
     JsonPreview,
     MermaidPreview,
     PlotlyPreview,
-    TableContent,
     TablePreview,
     TextPreview,
 )
@@ -614,29 +610,16 @@ class TestNodePreviewPayload:
         assert payload.kind == "mermaid"
         assert payload.content == "graph LR\n A --> B"
 
-    def test_table_preview_with_table_content(self):
-        table_content = TableContent(
-            rows=[{"col1": "a", "col2": 1}, {"col1": "b", "col2": 2}]
+    def test_table_preview(self):
+        payload = TablePreview(
+            kind="table",
+            content=[{"col1": "a", "col2": 1}, {"col1": "b", "col2": 2}],
         )
-        payload = TablePreview(kind="table", content=table_content)
         assert payload.kind == "table"
-        assert payload.content.rows == [
+        assert payload.content == [
             {"col1": "a", "col2": 1},
             {"col1": "b", "col2": 2},
         ]
-
-    def test_table_preview_with_columns(self):
-        table_content = TableContent(
-            rows=[{"name": "Alice", "age": 30}],
-            columns=[
-                ColumnDef(key="name", label="Name", type="string"),
-                ColumnDef(key="age", label="Age", type="number"),
-            ],
-        )
-        payload = TablePreview(kind="table", content=table_content)
-        assert payload.content.columns is not None
-        assert len(payload.content.columns) == 2
-        assert payload.content.columns[0].key == "name"
 
     def test_plotly_preview(self):
         payload = PlotlyPreview(kind="plotly", content={"data": [], "layout": {}})
@@ -644,23 +627,15 @@ class TestNodePreviewPayload:
         assert payload.content == {"data": [], "layout": {}}
 
     def test_image_preview_with_url(self):
-        image_url = ImageUrl(source="url", url="https://example.com/image.png")
-        payload = ImagePreview(kind="image", content=image_url)
+        payload = ImagePreview(kind="image", content="https://example.com/image.png")
         assert payload.kind == "image"
-        assert payload.content.source == "url"
-        assert payload.content.url == "https://example.com/image.png"
+        assert payload.content == "https://example.com/image.png"
 
-    def test_image_preview_with_base64(self):
-        # Valid 1x1 transparent PNG
-        image_b64 = ImageBase64(
-            source="base64",
-            data="iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-            mime="image/png",
-        )
-        payload = ImagePreview(kind="image", content=image_b64)
+    def test_image_preview_with_data_uri(self):
+        data_uri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+        payload = ImagePreview(kind="image", content=data_uri)
         assert payload.kind == "image"
-        assert payload.content.source == "base64"
-        assert payload.content.mime == "image/png"
+        assert payload.content == data_uri
 
     def test_custom_preview(self):
         payload = CustomPreview(
@@ -679,14 +654,14 @@ class TestNodePreviewPayload:
             JsonPreview(kind="json", content=object())
 
     def test_invalid_content_type_for_table(self):
-        with pytest.raises(
-            TypeError, match="TablePreview.content must be TableContent"
-        ):
+        with pytest.raises(TypeError, match="TablePreview.content must be a list"):
             TablePreview(kind="table", content={"invalid": "type"})
 
     def test_table_content_with_non_dict_rows(self):
-        with pytest.raises(TypeError, match="TableContent.rows\\[\\d+\\] must be dict"):
-            TableContent(rows=["not", "dicts"])
+        with pytest.raises(
+            TypeError, match="TablePreview.content\\[\\d+\\] must be a dict"
+        ):
+            TablePreview(kind="table", content=["not", "dicts"])
 
     def test_invalid_content_type_for_plotly(self):
         with pytest.raises(TypeError, match="PlotlyPreview.content must be a dict"):
@@ -797,9 +772,7 @@ class TestNodePreviewFunction:
 
     def test_preview_fn(self):
         def preview_fn():
-            return TablePreview(
-                kind="table", content=TableContent(rows=[{"col": "value"}])
-            )
+            return TablePreview(kind="table", content=[{"col": "value"}])
 
         with pytest.warns(KedroExperimentalWarning):
             n = node(identity, "input", "output", preview_fn=preview_fn)
@@ -808,7 +781,7 @@ class TestNodePreviewFunction:
 
         assert isinstance(result, TablePreview)
         assert result.kind == "table"
-        assert result.content.rows == [{"col": "value"}]
+        assert result.content == [{"col": "value"}]
 
     def test_preview_validates_return_type(self):
         def bad_preview_fn():

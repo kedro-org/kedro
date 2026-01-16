@@ -434,10 +434,8 @@ class Node:
                 JsonPreview,
                 MermaidPreview,
                 TablePreview,
-                TableContent,
                 PlotlyPreview,
                 ImagePreview,
-                ImageBase64,
             )
 
 
@@ -475,16 +473,14 @@ class Node:
                 return MermaidPreview(kind="mermaid", content=mermaid)
 
 
-            # Example 3: Table preview with TableContent
+            # Example 3: Table preview
             def preview_table() -> TablePreview:
                 return TablePreview(
                     kind="table",
-                    content=TableContent(
-                        rows=[
-                            {"name": "Alice", "age": 30, "city": "NYC"},
-                            {"name": "Bob", "age": 25, "city": "LA"},
-                        ]
-                    ),
+                    content=[
+                        {"name": "Alice", "age": 30, "city": "NYC"},
+                        {"name": "Bob", "age": 25, "city": "LA"},
+                    ],
                 )
 
 
@@ -497,6 +493,19 @@ class Node:
                         "layout": {"title": "My Plot"},
                     },
                 )
+
+
+            # Example 5: Image preview (URL or data URI)
+            def preview_image() -> ImagePreview:
+                return ImagePreview(
+                    kind="image",
+                    content="https://example.com/chart.png",
+                    # or use data URI: "data:image/png;base64,iVBORw0KGgo..."
+                )
+
+
+            # To serialize for frontend/API use:
+            json_dict = payload.to_dict()  # Returns JSONObject
             ```
         """
         if not self._preview_fn:

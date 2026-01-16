@@ -344,3 +344,308 @@ With these changes, when you run `kedro run` in your terminal, you should see `y
                     INFO     Loading data from 'y_pred' (ChunkWiseCSVDataset)...                                                                                    data_catalog.py:475
 ...                                                                              runner.py:105
 ```
+
+## How to add preview functions to nodes
+
+!!! warning
+    This functionality is experimental and may change or be removed in future releases. Experimental features follow the process described in  [`docs/about/experimental.md`](../about/experimental.md).
+
+Preview function enables you to inject a callable which helps in debugging and monitoring. Instead of loading full datasets, preview functions can return lightweight summaries such as JSON metadata, table samples, charts, or diagrams.
+
+### Overview
+
+A preview function is a callable that returns a preview payload. Preview payloads can be:
+
+- **JSON data** for metadata and statistics
+- **Tables** for data samples
+- **Charts** (Plotly) for visualizations
+- **Diagrams** (Mermaid) for relationships and workflows
+- **Images** for plots or visual outputs
+- **Custom formats** with your own renderer
+
+Preview functions are attached to nodes using the `preview_fn` argument and can be called using `node.preview()`.
+
+### Basic usage
+
+```python
+from kedro.pipeline import node
+from kedro.pipeline.preview_contract import JsonPreview
+
+def preview_data_summary() -> JsonPreview:
+    """Generate a JSON preview showing dataset statistics."""
+    return JsonPreview(
+        content={
+            "num_rows": 1000,
+            "num_columns": 5,
+            "columns": ["id", "name", "age", "city", "score"],
+        }
+    )
+
+def process_data(raw_data):
+    # Your data processing logic
+    return processed_data
+
+# Create node with preview function
+data_node = node(
+    func=process_data,
+    inputs="raw_data",
+    outputs="processed_data",
+    preview_fn=preview_data_summary,
+    name="process_data_node"
+)
+
+# Generate preview
+preview = data_node.preview()  # Returns JsonPreview object
+preview_dict = preview.to_dict()  # Serialize for APIs/frontends
+```
+
+### Available preview types
+
+Import the preview types you need:
+
+```python
+from kedro.pipeline.preview_contract import (
+    JsonPreview,
+    TablePreview,
+    PlotlyPreview,
+    MermaidPreview,
+    ImagePreview,
+    TextPreview,
+    CustomPreview,
+)
+```
+
+#### JSON preview
+
+Use for metadata, statistics, or structured data:
+
+```python
+def preview_model_metrics() -> JsonPreview:
+    return JsonPreview(
+        content={
+            "accuracy": 0.95,
+            "precision": 0.93,
+            "recall": 0.94,
+            "f1_score": 0.935,
+        }
+    )
+```
+
+#### Table preview
+
+Use for data samples or tabular summaries:
+
+```python
+def preview_sample_rows() -> TablePreview:
+    return TablePreview(
+        content=[
+            {"name": "Alice", "age": 30, "city": "NYC"},
+            {"name": "Bob", "age": 25, "city": "LA"},
+            {"name": "Charlie", "age": 35, "city": "SF"},
+        ]
+    )
+```
+
+#### Plotly preview
+
+Use for interactive charts and visualizations:
+
+```python
+def preview_distribution() -> PlotlyPreview:
+    return PlotlyPreview(
+        content={
+            "data": [
+                {
+                    "x": ["A", "B", "C"],
+                    "y": [10, 15, 13],
+                    "type": "bar"
+                }
+            ],
+            "layout": {
+                "title": "Category Distribution",
+                "xaxis": {"title": "Category"},
+                "yaxis": {"title": "Count"}
+            }
+        }
+    )
+```
+
+#### Mermaid preview
+
+Use for diagrams, flowcharts, or process visualizations:
+
+```python
+def preview_pipeline_flow() -> MermaidPreview:
+    return MermaidPreview(
+        content="""
+        graph LR
+            A[Load Data] --> B[Clean Data]
+            B --> C[Feature Engineering]
+            C --> D[Train Model]
+            D --> E[Evaluate]
+        """
+    )
+```
+
+#### Image preview
+
+Use for plots, charts, or visual outputs (URL or data URI):
+
+```python
+def preview_correlation_matrix() -> ImagePreview:
+    # Can return a URL
+    return ImagePreview(
+        content="https://example.com/correlation_matrix.png"
+    )
+
+    # Or a data URI for inline images
+    # return ImagePreview(
+    #     content="data:image/png;base64,iVBORw0KGgo..."
+    # )
+```
+
+#### Text preview
+
+Use for simple text summaries or logs:
+
+```python
+def preview_processing_log() -> TextPreview:
+    return TextPreview(
+        content="Processed 1,000 records\nRemoved 50 duplicates\nFilled 23 missing values"
+    )
+```
+
+### Using preview functions with data context
+
+Preview functions don't have access to node inputs or outputs directly. They're independent functions that you define. If you need to generate previews based on actual data, you have two options:
+
+**Option 1: Use closure to capture context**
+
+```python
+def make_preview_fn(data_sample):
+    """Create a preview function with captured context."""
+    def preview_fn() -> TablePreview:
+        return TablePreview(content=data_sample)
+    return preview_fn
+
+# In your pipeline creation
+sample_data = [{"id": 1, "value": 100}, {"id": 2, "value": 200}]
+node(
+    func=process_data,
+    inputs="data",
+    outputs="result",
+    preview_fn=make_preview_fn(sample_data)
+)
+```
+
+**Option 2: Access datasets in preview function**
+
+```python
+from kedro.framework.project import pipelines
+from kedro.framework.session import KedroSession
+
+def preview_with_data_access() -> JsonPreview:
+    """Preview function that loads data from catalog."""
+    with KedroSession.create() as session:
+        context = session.load_context()
+        data = context.catalog.load("my_dataset")
+        return JsonPreview(
+            content={
+                "row_count": len(data),
+                "columns": list(data.columns),
+            }
+        )
+```
+
+### Adding metadata to previews
+
+All preview types support optional metadata via the `meta` parameter:
+
+```python
+def preview_with_metadata() -> JsonPreview:
+    return JsonPreview(
+        content={"accuracy": 0.95},
+        meta={
+            "model_version": "v2.1",
+            "training_date": "2024-01-15",
+            "dataset": "train_split_2024"
+        }
+    )
+```
+
+### Custom preview types
+
+For specialized rendering needs, use `CustomPreview`:
+
+```python
+def preview_custom_visualization() -> CustomPreview:
+    return CustomPreview(
+        renderer_key="my_custom_renderer",
+        content={
+            "type": "network_graph",
+            "nodes": [...],
+            "edges": [...]
+        }
+    )
+```
+
+The `renderer_key` identifies which frontend component should handle rendering this preview.
+
+### Best practices
+
+1. **Keep previews lightweight**: Preview functions should return summaries, not full datasets
+2. **Make previews fast**: Avoid expensive computations in preview functions
+3. **Use appropriate types**: Choose the preview type that best matches your data
+4. **Add metadata**: Include context like timestamps, versions, or data sources
+5. **Handle errors gracefully**: Wrap preview logic in try-except if needed
+6. **Test preview functions**: Ensure they return valid preview objects
+
+### Example: Complete node with preview
+
+```python
+from kedro.pipeline import node, Pipeline
+from kedro.pipeline.preview_contract import TablePreview, JsonPreview
+import pandas as pd
+
+def train_model(training_data: pd.DataFrame) -> dict:
+    """Train a model and return metrics."""
+    # Training logic here
+    return {
+        "accuracy": 0.95,
+        "loss": 0.05,
+        "model_path": "models/model_v1.pkl"
+    }
+
+def preview_training_summary() -> JsonPreview:
+    """Show model training summary."""
+    return JsonPreview(
+        content={
+            "training_samples": 10000,
+            "validation_samples": 2000,
+            "epochs": 10,
+            "status": "completed"
+        },
+        meta={
+            "timestamp": "2024-01-15T10:30:00",
+            "framework": "sklearn"
+        }
+    )
+
+# Create pipeline
+pipeline = Pipeline([
+    node(
+        func=train_model,
+        inputs="training_data",
+        outputs="model_metrics",
+        preview_fn=preview_training_summary,
+        name="train_model_node"
+    )
+])
+
+# Later, generate preview
+training_node = pipeline.nodes[0]
+preview = training_node.preview()
+print(preview.to_dict())
+```
+
+For more details on preview contract types, see the [API documentation][kedro.pipeline.preview_contract].

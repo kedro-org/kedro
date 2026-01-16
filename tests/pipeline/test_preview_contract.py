@@ -162,14 +162,12 @@ class TestTablePreview:
 
     def test_table_preview_non_list_content(self):
         """Test that non-list content is rejected."""
-        with pytest.raises(TypeError, match="TablePreview.content must be a list"):
+        with pytest.raises(TypeError, match="TablePreview.content must be list"):
             TablePreview(content="not a list")
 
     def test_table_preview_non_dict_row(self):
         """Test that non-dict rows are rejected."""
-        with pytest.raises(
-            TypeError, match=r"TablePreview.content\[0\] must be a dict"
-        ):
+        with pytest.raises(TypeError, match=r"TablePreview.content\[0\] must be dict"):
             TablePreview(content=["not a dict"])
 
     def test_table_preview_row_with_non_string_key(self):
@@ -203,7 +201,7 @@ class TestPlotlyPreview:
 
     def test_plotly_preview_invalid_content_type(self):
         """Test that non-dict content is rejected."""
-        with pytest.raises(TypeError, match="PlotlyPreview.content must be a dict"):
+        with pytest.raises(TypeError, match="PlotlyPreview.content must be dict"):
             PlotlyPreview(content="not a dict")
 
     def test_plotly_preview_invalid_content_value(self):
@@ -300,12 +298,11 @@ class TestCustomPreview:
 class TestSerializationEdgeCases:
     """Tests for edge cases in serialization."""
 
-    def test_non_dataclass_raises_error(self):
-        """Test that non-serializable types raise errors."""
-        from kedro.pipeline.preview_contract import _dataclass_to_json_dict
+    def test_to_dict_on_preview_instances(self):
+        """Test that preview instances can be serialized to dict."""
+        preview = TextPreview(content="test", meta={"key": "value"})
+        result = preview.to_dict()
 
-        class NotSerializable:
-            pass
-
-        with pytest.raises(TypeError, match="Not JSON-serializable"):
-            _dataclass_to_json_dict(NotSerializable())
+        assert result["kind"] == "text"
+        assert result["content"] == "test"
+        assert result["meta"] == {"key": "value"}

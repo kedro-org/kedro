@@ -649,17 +649,17 @@ class TestNodePreviewPayload:
             JsonPreview(content=object())
 
     def test_invalid_content_type_for_table(self):
-        with pytest.raises(TypeError, match="TablePreview.content must be a list"):
+        with pytest.raises(TypeError, match="TablePreview.content must be list"):
             TablePreview(content={"invalid": "type"})
 
     def test_table_content_with_non_dict_rows(self):
         with pytest.raises(
-            TypeError, match="TablePreview.content\\[\\d+\\] must be a dict"
+            TypeError, match="TablePreview.content\\[\\d+\\] must be dict"
         ):
             TablePreview(content=["not", "dicts"])
 
     def test_invalid_content_type_for_plotly(self):
-        with pytest.raises(TypeError, match="PlotlyPreview.content must be a dict"):
+        with pytest.raises(TypeError, match="PlotlyPreview.content must be dict"):
             PlotlyPreview(content="should be dict")
 
     def test_invalid_custom_preview_missing_renderer_key(self):

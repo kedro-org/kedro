@@ -73,6 +73,15 @@ def _validate_non_empty_str(value: Any, field_name: str) -> None:
         raise TypeError(f"{field_name} must be a non-empty str")
 
 
+def _validate_table_rows(rows: list[dict[str, JSONValue]], field_name: str) -> None:
+    """Validate that table rows are properly formatted."""
+    for i, row in enumerate(rows):
+        _validate_type(row, dict, f"{field_name}[{i}]")
+        if not all(isinstance(k, str) for k in row.keys()):
+            raise TypeError(f"{field_name}[{i}] keys must be str")
+        assert_json_value(row, path=f"$.content[{i}]")
+
+
 @dataclass(frozen=True)
 class TextPreview(BasePreview):
     content: str
@@ -111,11 +120,7 @@ class TablePreview(BasePreview):
     def __post_init__(self) -> None:
         super().__post_init__()
         _validate_type(self.content, list, "TablePreview.content")
-        for i, row in enumerate(self.content):
-            _validate_type(row, dict, f"TablePreview.content[{i}]")
-            if not all(isinstance(k, str) for k in row.keys()):
-                raise TypeError(f"TablePreview.content[{i}] keys must be str")
-            assert_json_value(row, path=f"$.content[{i}]")
+        _validate_table_rows(self.content, "TablePreview.content")
 
 
 @dataclass(frozen=True)

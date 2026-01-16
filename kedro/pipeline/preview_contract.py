@@ -47,15 +47,15 @@ class BasePreview(ABC):
 
     meta: Meta | None = field(default=None, kw_only=True)
 
-    def __post_init__(self) -> None:
-        """Validate meta field if provided."""
-        if self.meta is not None:
-            assert_json_value(self.meta, "$.meta")
-
     def to_dict(self) -> JSONObject:
         """Convert preview to JSON-serializable dict."""
         if not is_dataclass(self) or isinstance(self, type):
             raise TypeError(f"Not JSON-serializable: {type(self).__name__}")
+
+        # Validate meta only when serializing
+        if self.meta is not None:
+            assert_json_value(self.meta, "$.meta")
+
         return asdict(self)
 
 
@@ -88,7 +88,6 @@ class TextPreview(BasePreview):
     kind: Literal["text"] = field(default="text", init=False)
 
     def __post_init__(self) -> None:
-        super().__post_init__()
         _validate_type(self.content, str, "TextPreview.content")
 
 
@@ -98,7 +97,6 @@ class MermaidPreview(BasePreview):
     kind: Literal["mermaid"] = field(default="mermaid", init=False)
 
     def __post_init__(self) -> None:
-        super().__post_init__()
         _validate_type(self.content, str, "MermaidPreview.content")
 
 
@@ -108,7 +106,6 @@ class JsonPreview(BasePreview):
     kind: Literal["json"] = field(default="json", init=False)
 
     def __post_init__(self) -> None:
-        super().__post_init__()
         assert_json_value(self.content, "$.content")
 
 
@@ -118,7 +115,6 @@ class TablePreview(BasePreview):
     kind: Literal["table"] = field(default="table", init=False)
 
     def __post_init__(self) -> None:
-        super().__post_init__()
         _validate_type(self.content, list, "TablePreview.content")
         _validate_table_rows(self.content, "TablePreview.content")
 
@@ -129,7 +125,6 @@ class PlotlyPreview(BasePreview):
     kind: Literal["plotly"] = field(default="plotly", init=False)
 
     def __post_init__(self) -> None:
-        super().__post_init__()
         _validate_type(self.content, dict, "PlotlyPreview.content")
         assert_json_value(self.content, "$.content")
 
@@ -140,7 +135,6 @@ class ImagePreview(BasePreview):
     kind: Literal["image"] = field(default="image", init=False)
 
     def __post_init__(self) -> None:
-        super().__post_init__()
         _validate_type(self.content, str, "ImagePreview.content")
 
 
@@ -151,7 +145,6 @@ class CustomPreview(BasePreview):
     kind: Literal["custom"] = field(default="custom", init=False)
 
     def __post_init__(self) -> None:
-        super().__post_init__()
         _validate_non_empty_str(self.renderer_key, "CustomPreview.renderer_key")
         _validate_type(self.content, dict, "CustomPreview.content")
         assert_json_value(self.content, "$.content")

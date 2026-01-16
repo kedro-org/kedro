@@ -88,9 +88,10 @@ class TestTextPreview:
             TextPreview(content=123)
 
     def test_text_preview_invalid_meta(self):
-        """Test that non-JSON-serializable meta is rejected."""
+        """Test that non-JSON-serializable meta is rejected during serialization."""
+        preview = TextPreview(content="test", meta={"obj": object()})
         with pytest.raises(TypeError, match="value is not JSON-serializable"):
-            TextPreview(content="test", meta={"obj": object()})
+            preview.to_dict()
 
     def test_text_preview_to_dict(self):
         """Test TextPreview serialization."""

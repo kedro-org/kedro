@@ -361,7 +361,7 @@ def new(  # noqa: PLR0913
     # Cleanup the tmpdir after it's no longer required.
     # Ideally we would want to be able to use tempfile.TemporaryDirectory() context manager
     # but it causes an issue with readonly files on windows
-    # see: https://bugs.python.org/issue26660.
+    # see: https://github.com/python/cpython/issues/70847.
     # So on error, we will attempt to clear the readonly bits and re-attempt the cleanup
     shutil.rmtree(tmpdir, onerror=_remove_readonly)  # type: ignore[arg-type]
 

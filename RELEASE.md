@@ -8,6 +8,7 @@
 
 ## Bug fixes and other changes
 * Set `raise_errors=True` in `find_pipelines()` calls in the project template's `pipeline_registry.py` to ensure pipeline discovery errors are raised during project runs.
+* Fixed packaged runs logging the current working directory name; they now log the installed package name (or project path) instead.
 
 ## Documentation changes
 * Added beginner-friendly notes on `uvx` installation.

@@ -673,6 +673,35 @@ class TestKedroSession:
             catalog=mock_catalog,
         )
 
+    def test_run_logs_package_name_when_outside_project(
+        self, tmp_path, mock_package_name, caplog, monkeypatch
+    ):
+        """Session run should log configured package name, not current directory."""
+        from kedro.framework import project as kedro_project
+
+        monkeypatch.setattr(kedro_project, "PACKAGE_NAME", mock_package_name)
+
+        # Create a temporary directory outside of the project
+        outside_dir = tmp_path / "outside"
+        outside_dir.mkdir()
+        pyproject_path = tmp_path / "pyproject.toml"
+        if pyproject_path.exists():
+            pyproject_path.unlink()
+
+        # Change the current working directory to the outside directory
+        monkeypatch.chdir(outside_dir)
+
+        # Create a session and set run called to True - no need to run a full session, we can verify the logging message
+        # from trying to execute a second run in the same session.
+        session = KedroSession.create(save_on_close=False)
+        session._run_called = True
+
+        caplog.set_level(logging.INFO, logger=SESSION_LOGGER_NAME)
+        with pytest.raises(KedroSessionError):
+            session.run()
+
+        assert f"Kedro project {mock_package_name}" in caplog.text
+
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
     @pytest.mark.parametrize("match_pattern", [True, False])

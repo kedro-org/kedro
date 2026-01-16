@@ -2,6 +2,7 @@ import pytest
 
 from kedro.pipeline.llm_context import (
     LLMContext,
+    LLMContextNode,
     _get_tool_name,
     _normalize_outputs,
     llm_context_node,
@@ -185,3 +186,39 @@ class DummyClass:
 def test_get_tool_name_all_branches(obj, expected_name):
     """_get_tool_name should derive a stable, human-friendly tool name."""
     assert _get_tool_name(obj) == expected_name
+
+
+def test_llm_context_node_sets_tags():
+    """LLMContextNode should propagate tags to the underlying Node."""
+    node_obj = LLMContextNode(
+        outputs="out",
+        llm="llm",
+        prompts=[],
+        tags=["llm", "experimental"],
+    )
+
+    assert node_obj.tags == {"llm", "experimental"}
+
+
+def test_llm_context_node_sets_confirms():
+    """LLMContextNode should propagate confirms to the underlying Node."""
+    node_obj = LLMContextNode(
+        outputs="out",
+        llm="llm",
+        prompts=[],
+        confirms=["llm", "prompt"],
+    )
+
+    assert node_obj.confirms == ["llm", "prompt"]
+
+
+def test_llm_context_node_sets_namespace():
+    """LLMContextNode should propagate namespace to the underlying Node."""
+    node_obj = LLMContextNode(
+        outputs="out",
+        llm="llm",
+        prompts=[],
+        namespace="llm_nodes",
+    )
+
+    assert node_obj.namespace == "llm_nodes"

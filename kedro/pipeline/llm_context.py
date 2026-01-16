@@ -14,7 +14,7 @@ and loaded by Kedro before the node runs. Tools are instantiated at execution
 time and automatically assigned readable names based on the returned objects.
 """
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, NamedTuple, TypeVar
 
@@ -143,7 +143,7 @@ class LLMContextNode(Node):
     ```
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         outputs: str,
@@ -151,6 +151,9 @@ class LLMContextNode(Node):
         prompts: list[str],
         tools: list[_ToolConfig] | None = None,
         name: str | None = None,
+        tags: str | Iterable[str] | None = None,
+        confirms: str | list[str] | None = None,
+        namespace: str | None = None,
     ):
         """Create an LLMContextNode.
 
@@ -160,6 +163,10 @@ class LLMContextNode(Node):
             prompts: List of dataset names containing prompt content.
             tools: Optional list of tool configurations created via `tool(...)`.
             name: Optional node name; also used as the logical context identifier.
+            tags: Optional set of tags to be applied to the node.
+            confirms: Optional name or the list of the names of the datasets
+                that should be confirmed.
+            namespace: Optional node namespace.
         """
         inputs = {"llm": llm}
 
@@ -201,18 +208,27 @@ class LLMContextNode(Node):
 
         # call the Node constructor with the func, inputs, outputs, name
         super().__init__(
-            func=construct_context, inputs=inputs, outputs=outputs, name=name
+            func=construct_context,
+            inputs=inputs,
+            outputs=outputs,
+            name=name,
+            tags=tags,
+            confirms=confirms,
+            namespace=namespace,
         )
 
 
 @experimental
-def llm_context_node(
+def llm_context_node(  # noqa: PLR0913
     *,
     outputs: str,
     llm: str,
     prompts: list[str],
     tools: list[_ToolConfig] | None = None,
     name: str | None = None,
+    tags: str | Iterable[str] | None = None,
+    confirms: str | list[str] | None = None,
+    namespace: str | None = None,
 ) -> Node:
     """
     !!! warning "Experimental"
@@ -229,7 +245,12 @@ def llm_context_node(
         prompts: List of dataset names containing prompt content.
         tools: Optional list of tool configurations created via `tool(...)`.
             Each tool declares the Kedro inputs required to construct it.
-        name: Optional name for the node and for the created context.
+        name: Optional node name; also used as the logical context identifier.
+        tags: Optional set of tags to be applied to the node.
+        confirms: Optional name or the list of the names of the datasets
+            that should be confirmed.
+        namespace: Optional node namespace.
+
 
     Returns:
         A Kedro Node that loads all declared datasets, instantiates tools,
@@ -256,4 +277,7 @@ def llm_context_node(
         prompts=prompts,
         tools=tools,
         name=name,
+        tags=tags,
+        confirms=confirms,
+        namespace=namespace,
     )

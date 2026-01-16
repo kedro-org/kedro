@@ -421,8 +421,8 @@ class Node:
 
         Returns:
             A preview payload (one of TextPreview, MermaidPreview, JsonPreview,
-            TablePreview, PlotlyPreview, ImagePreview, or CustomPreview) if
-            preview_fn is set, None otherwise.
+                TablePreview, PlotlyPreview, ImagePreview, or CustomPreview) if
+                preview_fn is set, None otherwise.
 
         Raises:
             ValueError: If the preview function does not return one of the valid

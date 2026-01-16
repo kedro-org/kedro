@@ -444,7 +444,6 @@ class Node:
             # Example 1: JSON preview
             def preview_data_summary() -> JsonPreview:
                 return JsonPreview(
-                    kind="json",
                     content={
                         "num_rows": 1000,
                         "num_columns": 5,
@@ -461,13 +460,12 @@ class Node:
                     if i < len(steps) - 1:
                         mermaid += f"    {step} --> {steps[i+1]}\\n"
 
-                return MermaidPreview(kind="mermaid", content=mermaid)
+                return MermaidPreview(content=mermaid)
 
 
             # Example 3: Table preview
             def preview_table() -> TablePreview:
                 return TablePreview(
-                    kind="table",
                     content=[
                         {"name": "Alice", "age": 30, "city": "NYC"},
                         {"name": "Bob", "age": 25, "city": "LA"},
@@ -478,7 +476,6 @@ class Node:
             # Example 4: Plotly preview
             def preview_plotly() -> PlotlyPreview:
                 return PlotlyPreview(
-                    kind="plotly",
                     content={
                         "data": [{"x": [1, 2, 3], "y": [2, 4, 6], "type": "scatter"}],
                         "layout": {"title": "My Plot"},
@@ -489,7 +486,6 @@ class Node:
             # Example 5: Image preview (URL or data URI)
             def preview_image() -> ImagePreview:
                 return ImagePreview(
-                    kind="image",
                     content="https://example.com/chart.png",
                     # or use data URI: "data:image/png;base64,iVBORw0KGgo..."
                 )

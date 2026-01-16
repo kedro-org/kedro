@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, is_dataclass
+from dataclasses import asdict, dataclass, field, is_dataclass
 from typing import (
     Any,
     Literal,
@@ -48,9 +48,9 @@ def _validate_meta(meta: Meta | None) -> None:
 
 @dataclass(frozen=True)
 class TextPreview:
-    kind: Literal["text"]
     content: str
     meta: Meta | None = None
+    kind: Literal["text"] = field(default="text", init=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.content, str):
@@ -63,9 +63,9 @@ class TextPreview:
 
 @dataclass(frozen=True)
 class MermaidPreview:
-    kind: Literal["mermaid"]
     content: str
     meta: Meta | None = None
+    kind: Literal["mermaid"] = field(default="mermaid", init=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.content, str):
@@ -78,9 +78,9 @@ class MermaidPreview:
 
 @dataclass(frozen=True)
 class JsonPreview:
-    kind: Literal["json"]
     content: JSONValue
     meta: Meta | None = None
+    kind: Literal["json"] = field(default="json", init=False)
 
     def __post_init__(self) -> None:
         assert_json_value(self.content, "$.content")
@@ -92,9 +92,9 @@ class JsonPreview:
 
 @dataclass(frozen=True)
 class TablePreview:
-    kind: Literal["table"]
     content: list[dict[str, JSONValue]]
     meta: Meta | None = None
+    kind: Literal["table"] = field(default="table", init=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.content, list):
@@ -113,10 +113,9 @@ class TablePreview:
 
 @dataclass(frozen=True)
 class PlotlyPreview:
-    kind: Literal["plotly"]
-    # Plotly figure is JSON object; keep it JSON-safe
     content: JSONObject
     meta: Meta | None = None
+    kind: Literal["plotly"] = field(default="plotly", init=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.content, dict):
@@ -130,9 +129,9 @@ class PlotlyPreview:
 
 @dataclass(frozen=True)
 class ImagePreview:
-    kind: Literal["image"]
     content: str  # URL or data URI (e.g., "data:image/png;base64,...")
     meta: Meta | None = None
+    kind: Literal["image"] = field(default="image", init=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.content, str):
@@ -145,10 +144,10 @@ class ImagePreview:
 
 @dataclass(frozen=True)
 class CustomPreview:
-    kind: Literal["custom"]
     renderer_key: str
     content: JSONObject
     meta: Meta | None = None
+    kind: Literal["custom"] = field(default="custom", init=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.renderer_key, str) or not self.renderer_key:

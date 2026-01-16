@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from abc import ABC
 from dataclasses import asdict, dataclass, field, is_dataclass
 from typing import (
     Any,
@@ -42,7 +41,7 @@ def assert_json_value(data: Any, path: str = "$") -> None:
 
 
 @dataclass(frozen=True)
-class BasePreview(ABC):
+class BasePreview:
     """Base class for all preview types with shared functionality."""
 
     meta: Meta | None = field(default=None, kw_only=True)

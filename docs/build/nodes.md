@@ -544,17 +544,17 @@ node(
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 
-def preview_with_data_access() -> JsonPreview:
+def preview_with_data_access() -> TablePreview:
     """Preview function that loads data from catalog."""
     with KedroSession.create() as session:
         context = session.load_context()
-        data = context.catalog.load("my_dataset")
-        return JsonPreview(
-            content={
-                "row_count": len(data),
-                "columns": list(data.columns),
-            }
-        )
+
+        # For pandas dataframe
+        data = context.catalog.load("my_dataset").to_dict(orient='records')
+
+        # customize data size for TablePreview/JsonPreview
+        # using `meta.limit`
+        return TablePreview(content=data, meta={"limit": 20})
 ```
 
 ### Adding metadata to previews
@@ -569,6 +569,18 @@ def preview_with_metadata() -> JsonPreview:
             "model_version": "v2.1",
             "training_date": "2024-01-15",
             "dataset": "train_split_2024"
+        }
+    )
+```
+
+Customise data (table/json) size limits using meta.limit for plugins like `kedro-viz`:
+
+```python
+def preview_with_limit() -> TablePreview:
+    return TablePreview(
+        content=table_data,
+        meta={
+            "limit": 50
         }
     )
 ```
@@ -604,7 +616,7 @@ The `renderer_key` identifies which frontend component should handle rendering t
 
 ```python
 from kedro.pipeline import node, Pipeline
-from kedro.pipeline.preview_contract import TablePreview, JsonPreview
+from kedro.pipeline.preview_contract import JsonPreview
 import pandas as pd
 
 def train_model(training_data: pd.DataFrame) -> dict:
@@ -627,7 +639,8 @@ def preview_training_summary() -> JsonPreview:
         },
         meta={
             "timestamp": "2024-01-15T10:30:00",
-            "framework": "sklearn"
+            "framework": "sklearn",
+            "limit": 20
         }
     )
 

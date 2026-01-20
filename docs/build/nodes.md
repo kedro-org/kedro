@@ -436,9 +436,9 @@ def preview_model_metrics() -> JsonPreview:
 #### Table preview
 
 Use for data samples or tabular summaries.
-
+<!-- vale off -->
 **Note**: `TablePreview` requires `content` as a `list[dict]`. If you have a pandas or polars DataFrame, convert it first:
-
+<!-- vale on -->
 ```python
 import pandas as pd
 

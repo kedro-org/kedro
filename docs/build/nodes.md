@@ -415,7 +415,7 @@ from kedro.pipeline.preview_contract import (
 )
 ```
 
-#### JSON preview
+#### Json preview
 
 Use for metadata, statistics, or structured data:
 
@@ -506,7 +506,7 @@ def preview_correlation_matrix() -> ImagePreview:
 
 #### Text preview
 
-Use for simple text summaries or logs:
+Use for text summaries or logs:
 
 ```python
 def preview_processing_log() -> TextPreview:
@@ -517,9 +517,9 @@ def preview_processing_log() -> TextPreview:
 
 ### Using preview functions with data context
 
-Preview functions don't have access to node inputs or outputs directly. They're independent functions that you define. If you need to generate previews based on actual data, you have two options:
+Preview functions don't have access to node inputs or outputs directly. They're independent functions that you define. If you need to generate previews based on actual data, you can use closures or access datasets within the preview function.
 
-**Option 1: Use closure to capture context**
+**Use closure to capture context**
 
 ```python
 def make_preview_fn(data_sample):
@@ -538,28 +538,9 @@ node(
 )
 ```
 
-**Option 2: Access datasets in preview function**
-
-```python
-from kedro.framework.project import pipelines
-from kedro.framework.session import KedroSession
-
-def preview_with_data_access() -> TablePreview:
-    """Preview function that loads data from catalog."""
-    with KedroSession.create() as session:
-        context = session.load_context()
-
-        # For pandas dataframe
-        data = context.catalog.load("my_dataset").to_dict(orient='records')
-
-        # customize data size for TablePreview/JsonPreview
-        # using `meta.limit`
-        return TablePreview(content=data, meta={"limit": 20})
-```
-
 ### Adding metadata to previews
 
-All preview types support optional metadata via the `meta` parameter:
+All preview types support optional metadata with `meta` parameter:
 
 ```python
 def preview_with_metadata() -> JsonPreview:
@@ -573,21 +554,9 @@ def preview_with_metadata() -> JsonPreview:
     )
 ```
 
-Customise data (table/json) size limits using meta.limit for plugins like `kedro-viz`:
-
-```python
-def preview_with_limit() -> TablePreview:
-    return TablePreview(
-        content=table_data,
-        meta={
-            "limit": 50
-        }
-    )
-```
-
 ### Custom preview types
 
-For specialized rendering needs, use `CustomPreview`:
+For specialised rendering needs, use `CustomPreview`:
 
 ```python
 def preview_custom_visualization() -> CustomPreview:
@@ -609,54 +578,57 @@ The `renderer_key` identifies which frontend component should handle rendering t
 2. **Make previews fast**: Avoid expensive computations in preview functions
 3. **Use appropriate types**: Choose the preview type that best matches your data
 4. **Add metadata**: Include context like timestamps, versions, or data sources
-5. **Handle errors gracefully**: Wrap preview logic in try-except if needed
+5. **Handle errors**: Wrap preview logic in try-except if needed
 6. **Test preview functions**: Ensure they return valid preview objects
 
 ### Example: Complete node with preview
 
 ```python
 from kedro.pipeline import node, Pipeline
-from kedro.pipeline.preview_contract import JsonPreview
+from kedro.pipeline.preview_contract import MermaidPreview
 import pandas as pd
 
 def train_model(training_data: pd.DataFrame) -> dict:
-    """Train a model and return metrics."""
-    # Training logic here
     return {
         "accuracy": 0.95,
         "loss": 0.05,
         "model_path": "models/model_v1.pkl"
     }
 
-def preview_training_summary() -> JsonPreview:
-    """Show model training summary."""
-    return JsonPreview(
-        content={
-            "training_samples": 10000,
-            "validation_samples": 2000,
-            "epochs": 10,
-            "status": "completed"
-        },
+def preview_training_model() -> MermaidPreview:
+    return MermaidPreview(
+        content="""
+        flowchart TD
+            A[Training Started] --> B[Load Dataset]
+            B --> C[Training Samples: 10,000]
+            B --> D[Validation Samples: 2,000]
+            C --> E[Train Model]
+            D --> E
+            E --> F[Epochs: 10]
+            F --> G[Status: Completed]
+        """,
         meta={
             "timestamp": "2024-01-15T10:30:00",
-            "framework": "sklearn",
-            "limit": 20
+            "framework": "sklearn"
         }
     )
 
-# Create pipeline
-pipeline = Pipeline([
-    node(
-        func=train_model,
-        inputs="training_data",
-        outputs="model_metrics",
-        preview_fn=preview_training_summary,
-        name="train_model_node"
-    )
-])
+pipeline = Pipeline(
+    [
+        node(
+            func=train_model,
+            inputs="training_data",
+            outputs="model_metrics",
+            preview_fn=preview_training_model,
+            name="train_model_node",
+        )
+    ]
+)
 
-# Later, generate preview
-training_node = pipeline.nodes[0]
+# Get the node
+training_node = next(n for n in pipeline.nodes)
+
+# Generate preview
 preview = training_node.preview()
 print(preview.to_dict())
 ```

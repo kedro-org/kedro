@@ -415,7 +415,9 @@ from kedro.pipeline.preview_contract import (
 )
 ```
 
-#### Json preview
+<!-- vale off -->
+#### JSON preview
+<!-- vale on -->
 
 Use for metadata, statistics, or structured data:
 
@@ -433,10 +435,15 @@ def preview_model_metrics() -> JsonPreview:
 
 #### Table preview
 
-Use for data samples or tabular summaries:
+Use for data samples or tabular summaries.
+
+**Note**: `TablePreview` requires `content` as a `list[dict]`. If you have a pandas or polars DataFrame, convert it first:
 
 ```python
+import pandas as pd
+
 def preview_sample_rows() -> TablePreview:
+    # Option 1: Define data directly as list of dicts
     return TablePreview(
         content=[
             {"name": "Alice", "age": 30, "city": "NYC"},
@@ -444,6 +451,14 @@ def preview_sample_rows() -> TablePreview:
             {"name": "Charlie", "age": 35, "city": "SF"},
         ]
     )
+
+def preview_from_dataframe(df: pd.DataFrame) -> TablePreview:
+    # Option 2: Convert pandas DataFrame
+    return TablePreview(content=df.head(5).to_dict(orient="records"))
+
+def preview_from_polars(df) -> TablePreview:
+    # Option 3: Convert polars DataFrame
+    return TablePreview(content=df.head(5).to_dicts())
 ```
 
 #### Plotly preview

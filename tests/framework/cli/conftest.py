@@ -204,7 +204,28 @@ def mock_cookiecutter(mocker):
 
 @pytest.fixture
 def patch_cookiecutter_args(mocker):
-    """Patch cookiecutter args to force checkout to 'main'."""
+    """Patch cookiecutter args to force checkout to 'main' and prevent git cloning."""
+    # Mock determine_repo_dir to return the local template path to avoid git cloning
+    def mock_determine_repo_dir(*args, **kwargs):
+        """Mock determine_repo_dir to return local template path instead of cloning."""
+        # Handle both positional and keyword arguments
+        template = kwargs.get("template", args[0] if args else None)
+        
+        # If template is a git URL, return the local template path instead
+        if template and (str(template).startswith("git+") or "github.com" in str(template)):
+            return str(TEMPLATE_PATH), None
+        # Otherwise, return the template path as-is (for local paths)
+        if template:
+            return str(template), None
+        # Fallback to TEMPLATE_PATH if no template provided
+        return str(TEMPLATE_PATH), None
+    
+    mocker.patch(
+        "cookiecutter.repository.determine_repo_dir",
+        side_effect=mock_determine_repo_dir,
+    )
+    
+    # Mock the args function
     mocker.patch(
         "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
         side_effect=mock_make_cookiecutter_args_and_fetch_template,
@@ -219,11 +240,19 @@ def mock_env_vars(mocker):
 
 # Shared helper functions for starter tests
 def mock_make_cookiecutter_args_and_fetch_template(*args, **kwargs):
-    """Mock function to force checkout to 'main'."""
+    """Mock function to force checkout to 'main' and use local template for git URLs."""
     cookiecutter_args, starter_path = _make_cookiecutter_args_and_fetch_template(
         *args, **kwargs
     )
     cookiecutter_args["checkout"] = "main"  # Force the checkout to be "main"
+    
+    # If starter_path is a git URL, replace it with local template path
+    # and remove directory argument since local template doesn't have starter subdirectories
+    if starter_path.startswith("git+") or "github.com" in starter_path:
+        starter_path = str(TEMPLATE_PATH)
+        # Remove directory argument when using local template
+        cookiecutter_args.pop("directory", None)
+    
     return cookiecutter_args, starter_path
 
 

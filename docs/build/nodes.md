@@ -368,35 +368,54 @@ Preview functions are attached to nodes using the `preview_fn` argument and can 
 ### Basic usage
 
 ```python
-from kedro.pipeline import node
-from kedro.pipeline.preview_contract import JsonPreview
+from kedro.pipeline import node, Pipeline
+from kedro.pipeline.preview_contract import MermaidPreview
+import pandas as pd
 
-def preview_data_summary() -> JsonPreview:
-    """Generate a JSON preview showing dataset statistics."""
-    return JsonPreview(
-        content={
-            "num_rows": 1000,
-            "num_columns": 5,
-            "columns": ["id", "name", "age", "city", "score"],
+def train_model(training_data: pd.DataFrame) -> dict:
+    return {
+        "accuracy": 0.95,
+        "loss": 0.05,
+        "model_path": "models/model_v1.pkl"
+    }
+
+def preview_training_model() -> MermaidPreview:
+    return MermaidPreview(
+        content="""
+        flowchart TD
+            A[Training Started] --> B[Load Dataset]
+            B --> C[Training Samples: 10,000]
+            B --> D[Validation Samples: 2,000]
+            C --> E[Train Model]
+            D --> E
+            E --> F[Epochs: 10]
+            F --> G[Status: Completed]
+        """,
+        meta={
+            "timestamp": "2024-01-15T10:30:00",
+            "framework": "sklearn"
         }
     )
 
-def process_data(raw_data):
-    # Your data processing logic
-    return processed_data
-
-# Create node with preview function
-data_node = node(
-    func=process_data,
-    inputs="raw_data",
-    outputs="processed_data",
-    preview_fn=preview_data_summary,
-    name="process_data_node"
+pipeline = Pipeline(
+    [
+        node(
+            func=train_model,
+            inputs="training_data",
+            outputs="model_metrics",
+            preview_fn=preview_training_model,
+            name="train_model_node",
+        )
+    ]
 )
 
+# Get the node
+training_node = next(n for n in pipeline.nodes)
+
 # Generate preview
-preview = data_node.preview()  # Returns JsonPreview object
-preview_dict = preview.to_dict()  # Serialize for APIs/frontends
+preview = training_node.preview() # Returns MermaidPreview object
+preview_dict = preview.to_dict() # Serialize for APIs/frontends
+
 ```
 
 ### Available preview types
@@ -530,6 +549,40 @@ def preview_processing_log() -> TextPreview:
     )
 ```
 
+#### Custom preview
+
+For specialised rendering needs, use `CustomPreview`:
+
+```python
+def preview_custom_visualization() -> CustomPreview:
+    return CustomPreview(
+        renderer_key="my_custom_renderer",
+        content={
+            "type": "network_graph",
+            "nodes": [...],
+            "edges": [...]
+        }
+    )
+```
+
+The `renderer_key` identifies which frontend component should handle rendering this preview.
+
+### Adding metadata to previews
+
+All preview types support optional metadata with `meta` parameter:
+
+```python
+def preview_with_metadata() -> JsonPreview:
+    return JsonPreview(
+        content={"accuracy": 0.95},
+        meta={
+            "model_version": "v2.1",
+            "training_date": "2024-01-15",
+            "dataset": "train_split_2024"
+        }
+    )
+```
+
 ### Using preview functions with data context
 
 Preview functions don't have access to node inputs or outputs directly. They're independent functions that you define. If you need to generate previews based on actual data, you can use closures or access datasets within the preview function.
@@ -553,40 +606,6 @@ node(
 )
 ```
 
-### Adding metadata to previews
-
-All preview types support optional metadata with `meta` parameter:
-
-```python
-def preview_with_metadata() -> JsonPreview:
-    return JsonPreview(
-        content={"accuracy": 0.95},
-        meta={
-            "model_version": "v2.1",
-            "training_date": "2024-01-15",
-            "dataset": "train_split_2024"
-        }
-    )
-```
-
-### Custom preview types
-
-For specialised rendering needs, use `CustomPreview`:
-
-```python
-def preview_custom_visualization() -> CustomPreview:
-    return CustomPreview(
-        renderer_key="my_custom_renderer",
-        content={
-            "type": "network_graph",
-            "nodes": [...],
-            "edges": [...]
-        }
-    )
-```
-
-The `renderer_key` identifies which frontend component should handle rendering this preview.
-
 ### Best practices
 
 1. **Keep previews lightweight**: Preview functions should return summaries, not full datasets
@@ -595,57 +614,3 @@ The `renderer_key` identifies which frontend component should handle rendering t
 4. **Add metadata**: Include context like timestamps, versions, or data sources
 5. **Handle errors**: Wrap preview logic in try-except if needed
 6. **Test preview functions**: Ensure they return valid preview objects
-
-### Example: Complete node with preview
-
-```python
-from kedro.pipeline import node, Pipeline
-from kedro.pipeline.preview_contract import MermaidPreview
-import pandas as pd
-
-def train_model(training_data: pd.DataFrame) -> dict:
-    return {
-        "accuracy": 0.95,
-        "loss": 0.05,
-        "model_path": "models/model_v1.pkl"
-    }
-
-def preview_training_model() -> MermaidPreview:
-    return MermaidPreview(
-        content="""
-        flowchart TD
-            A[Training Started] --> B[Load Dataset]
-            B --> C[Training Samples: 10,000]
-            B --> D[Validation Samples: 2,000]
-            C --> E[Train Model]
-            D --> E
-            E --> F[Epochs: 10]
-            F --> G[Status: Completed]
-        """,
-        meta={
-            "timestamp": "2024-01-15T10:30:00",
-            "framework": "sklearn"
-        }
-    )
-
-pipeline = Pipeline(
-    [
-        node(
-            func=train_model,
-            inputs="training_data",
-            outputs="model_metrics",
-            preview_fn=preview_training_model,
-            name="train_model_node",
-        )
-    ]
-)
-
-# Get the node
-training_node = next(n for n in pipeline.nodes)
-
-# Generate preview
-preview = training_node.preview()
-print(preview.to_dict())
-```
-
-For more details on preview contract types, see the [API documentation][kedro.pipeline.preview_contract].

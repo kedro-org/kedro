@@ -403,6 +403,7 @@ pipeline = Pipeline(
             func=train_model,
             inputs="training_data",
             outputs="model_metrics",
+            # injecting a node preview callable
             preview_fn=preview_training_model,
             name="train_model_node",
         )

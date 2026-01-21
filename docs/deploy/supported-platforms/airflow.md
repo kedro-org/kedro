@@ -16,7 +16,7 @@ This guide describes how to run a Kedro pipeline on different Airflow platforms.
 
 ## Grouping nodes in Airflow tasks
 
-By default, `kedro airflow create` converts each Kedro node into a separate Airflow task. However, you may want to group multiple nodes into a single task to reduce scheduling overhead or to handle datasets that cannot be shared across distributed workers.
+By default, `kedro airflow create` converts each Kedro node into a separate Airflow task. If you need to group multiple nodes into a single task to reduce scheduling overhead or to handle datasets that cannot be shared across distributed workers.
 
 The `--group-by` option provides two grouping strategies:
 

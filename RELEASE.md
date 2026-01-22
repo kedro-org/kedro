@@ -3,7 +3,13 @@
 * Added `@experimental` decorator to mark unstable or early-stage public APIs.
 * Added the new `support-agent-langgraph` starter. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 
+## Experimental features
+* Added experimental `llm_context_node` and `LLMContextNode` for assembling LLMs, prompts, and tools into a runtime `LLMContext` within Kedro pipelines.
+* Added experimental `preview_fn` argument to `Node` class to add support for user-injectable node preview functions.
+
 ## Bug fixes and other changes
+* Set `raise_errors=True` in `find_pipelines()` calls in the project template's `pipeline_registry.py` to ensure pipeline discovery errors are raised during project runs.
+* Fixed packaged runs logging the current working directory name; they now log the installed package name (or project path) instead.
 
 ## Documentation changes
 * Added beginner-friendly notes on `uvx` installation.

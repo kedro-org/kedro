@@ -33,7 +33,7 @@ The following pages provide information for deployment to, or integration with, 
 - [Azure](./supported-platforms/azure.md)
 - [Dagster](./supported-platforms/dagster.md)
 - [Dask](./supported-platforms/dask.md)
-- [Databricks](./supported-platforms/databricks/index.md)
+- [Databricks](./supported-platforms/databricks.md)
 - [Kubeflow Pipelines](./supported-platforms/kubeflow.md)
 - [Prefect](./supported-platforms/prefect.md)
 - [Vertex AI](./supported-platforms/vertexai.md)

@@ -4,6 +4,7 @@ configure a Kedro project and access its settings."""
 from __future__ import annotations
 
 import importlib.resources
+import inspect
 import logging.config
 import operator
 import os
@@ -197,21 +198,23 @@ class _ProjectPipelines(MutableMapping):
         return register_pipelines
 
     def _load_data(self, requested_pipeline: str | None = None) -> None:
-        """Lazily read pipelines defined in the pipelines registry module.
-
-        Args:
-            requested_pipeline: Optional pipeline name to pass to register_pipelines.
-        """
-
-        # If the pipelines dictionary has not been configured with a pipelines module
-        # or if data has been loaded
         if self._pipelines_module is None or self._is_data_loaded:
             return
 
         register_pipelines = self._get_pipelines_registry_callable(
             self._pipelines_module
         )
-        project_pipelines = register_pipelines(pipeline=requested_pipeline)
+
+        try:
+            sig = inspect.signature(register_pipelines)
+        except (TypeError, ValueError):
+            # Extremely defensive: if signature inspection fails
+            project_pipelines = register_pipelines()
+        else:
+            if "pipeline" in sig.parameters:
+                project_pipelines = register_pipelines(pipeline=requested_pipeline)
+            else:
+                project_pipelines = register_pipelines()
 
         self._content = project_pipelines
         self._is_data_loaded = True

@@ -5,12 +5,16 @@ from kedro.framework.project import find_pipelines
 from kedro.pipeline import Pipeline
 
 
-def register_pipelines() -> dict[str, Pipeline]:
+def register_pipelines(pipeline: str | None = None) -> dict[str, Pipeline]:
     """Register the project's pipelines.
+
+    Args:
+        pipeline: Optional pipeline name for selective loading.
 
     Returns:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
-    pipelines = find_pipelines(raise_errors=True)
+
+    pipelines = find_pipelines(raise_errors=True, name=pipeline)
     pipelines["__default__"] = sum(pipelines.values())
     return pipelines

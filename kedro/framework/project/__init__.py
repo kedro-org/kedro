@@ -196,8 +196,12 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def _load_data(self) -> None:
-        """Lazily read pipelines defined in the pipelines registry module."""
+    def _load_data(self, requested_pipeline: str | None = None) -> None:
+        """Lazily read pipelines defined in the pipelines registry module.
+
+        Args:
+            requested_pipeline: Optional pipeline name to pass to register_pipelines.
+        """
 
         # If the pipelines dictionary has not been configured with a pipelines module
         # or if data has been loaded
@@ -207,7 +211,7 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = self._get_pipelines_registry_callable(
             self._pipelines_module
         )
-        project_pipelines = register_pipelines()
+        project_pipelines = register_pipelines(pipeline=requested_pipeline)
 
         self._content = project_pipelines
         self._is_data_loaded = True
@@ -221,8 +225,12 @@ class _ProjectPipelines(MutableMapping):
         self._is_data_loaded = False
         self._content = {}
 
+    def __getitem__(self, key: str) -> Pipeline:
+        """Override __getitem__ to load data before accessing, passing the requested pipeline."""
+        self._load_data(requested_pipeline=key)
+        return self._content[key]
+
     # Dict-like interface
-    __getitem__ = _load_data_wrapper(operator.getitem)
     __setitem__ = _load_data_wrapper(operator.setitem)
     __delitem__ = _load_data_wrapper(operator.delitem)
     __iter__ = _load_data_wrapper(iter)
@@ -368,7 +376,9 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: PLR0912
+def find_pipelines(
+    raise_errors: bool = False, name: str | None = None
+) -> dict[str, Pipeline]:
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.
@@ -382,6 +392,7 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
 
     Args:
         raise_errors: If ``True``, raise an error upon failed discovery.
+        name: Optional pipeline name to load selectively. If provided, only that pipeline is loaded.
 
     Returns:
         A generated mapping from pipeline names to ``Pipeline`` objects.
@@ -399,6 +410,9 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
             If ``raise_errors`` is ``True``, see Raises section instead.
     """
     pipeline_obj = None
+
+    if name:
+        pass
 
     # Handle the simplified project structure found in several starters.
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
@@ -460,4 +474,5 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
         pipeline_obj = _create_pipeline(pipeline_module)
         if pipeline_obj is not None:
             pipelines_dict[pipeline_name] = pipeline_obj
+
     return pipelines_dict

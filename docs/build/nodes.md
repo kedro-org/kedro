@@ -358,7 +358,7 @@ A preview function is a callable that returns a preview payload. Preview payload
 
 - **JSON data** for metadata and statistics
 - **Tables** for data samples
-- **Charts** (Plotly) for visualizations
+- **Charts** (Plotly) for visualisations
 - **Diagrams** (Mermaid) for relationships and workflows
 - **Images** for plots or visual outputs
 - **Custom formats** with your own renderer
@@ -415,7 +415,7 @@ training_node = next(n for n in pipeline.nodes)
 
 # Generate preview
 preview = training_node.preview() # Returns MermaidPreview object
-preview_dict = preview.to_dict() # Serialize for APIs/frontends
+preview_dict = preview.to_dict() # Serialise for APIs/frontends
 
 ```
 
@@ -483,7 +483,7 @@ def preview_from_polars(df) -> TablePreview:
 
 #### Plotly preview
 
-Use for interactive charts and visualizations:
+Use for interactive charts and visualisations:
 
 ```python
 def preview_distribution() -> PlotlyPreview:
@@ -507,7 +507,7 @@ def preview_distribution() -> PlotlyPreview:
 
 #### Mermaid preview
 
-Use for diagrams, flowcharts, or process visualizations:
+Use for diagrams, flowcharts, or process visualisations:
 
 ```python
 def preview_pipeline_flow() -> MermaidPreview:
@@ -609,7 +609,7 @@ node(
 
 ### Best practices
 
-1. **Keep previews lightweight**: Preview functions should return summaries, not full datasets
+1. **Keep previews lightweight**: Preview functions should return summaries, not full datasets. For dataset previews, use the [dataset preview feature](https://docs.kedro.org/projects/kedro-viz/en/stable/preview_datasets/) instead of node previews.
 2. **Make previews fast**: Avoid expensive computations in preview functions
 3. **Use appropriate types**: Choose the preview type that best matches your data
 4. **Add metadata**: Include context like timestamps, versions, or data sources

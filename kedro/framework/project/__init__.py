@@ -376,7 +376,7 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines(
+def find_pipelines(  # noqa: PLR0912
     raise_errors: bool = False, name: str | None = None
 ) -> dict[str, Pipeline]:
     """Automatically find modular pipelines having a ``create_pipeline``
@@ -411,8 +411,29 @@ def find_pipelines(
     """
     pipeline_obj = None
 
-    if name:
-        pass
+    # If a specific pipeline is requested, load only that one
+    if name is not None and name != "__default__":
+        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{name}"
+        try:
+            pipeline_module = importlib.import_module(pipeline_module_name)
+        except Exception as exc:
+            if raise_errors:
+                raise ImportError(
+                    f"An error occurred while importing the "
+                    f"'{pipeline_module_name}' module."
+                ) from exc
+
+            warnings.warn(
+                IMPORT_ERROR_MESSAGE.format(
+                    module=pipeline_module_name, tb_exc=traceback.format_exc()
+                )
+            )
+
+        pipeline_obj = _create_pipeline(pipeline_module)
+        if pipeline_obj is None:
+            raise KeyError(f"Pipeline '{name}' not found")
+
+        return {name: pipeline_obj}
 
     # Handle the simplified project structure found in several starters.
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"

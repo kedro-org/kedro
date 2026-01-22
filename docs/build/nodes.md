@@ -435,9 +435,7 @@ from kedro.pipeline.preview_contract import (
 )
 ```
 
-<!-- vale off -->
 #### JSON preview
-<!-- vale on -->
 
 Use for metadata, statistics, or structured data:
 

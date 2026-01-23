@@ -344,3 +344,376 @@ With these changes, when you run `kedro run` in your terminal, you should see `y
                     INFO     Loading data from 'y_pred' (ChunkWiseCSVDataset)...                                                                                    data_catalog.py:475
 ...                                                                              runner.py:105
 ```
+
+## How to add preview functions to nodes
+
+!!! warning
+    This functionality is experimental and may change or be removed in future releases. Experimental features follow the process described in  [`docs/about/experimental.md`](../about/experimental.md).
+
+Preview function enables you to inject a callable which helps in debugging and monitoring. Instead of loading full datasets, preview functions can return lightweight summaries such as JSON metadata, table samples, charts, or diagrams.
+
+### Overview
+
+A preview function is a callable that returns a preview payload. Preview payloads can be:
+
+- **JSON data** for metadata and statistics
+- **Tables** for data samples
+- **Charts** (Plotly) for visualisations
+- **Diagrams** (Mermaid) for relationships and workflows
+- **Images** for plots or visual outputs
+- **Custom formats** with your own renderer
+
+Preview functions are attached to nodes using the `preview_fn` argument and can be called using `node.preview()`.
+
+### Basic usage
+
+```python
+from kedro.pipeline import node, Pipeline
+from kedro.pipeline.preview_contract import MermaidPreview
+import pandas as pd
+
+def train_model(training_data: pd.DataFrame) -> dict:
+    return {
+        "accuracy": 0.95,
+        "loss": 0.05,
+        "model_path": "models/model_v1.pkl"
+    }
+
+def preview_training_model() -> MermaidPreview:
+    return MermaidPreview(
+        content="""
+        flowchart TD
+            A[Training Started] --> B[Load Dataset]
+            B --> C[Training Samples: 10,000]
+            B --> D[Validation Samples: 2,000]
+            C --> E[Train Model]
+            D --> E
+            E --> F[Epochs: 10]
+            F --> G[Status: Completed]
+        """,
+        meta={
+            "timestamp": "2024-01-15T10:30:00",
+            "framework": "sklearn"
+        }
+    )
+
+pipeline = Pipeline(
+    [
+        node(
+            func=train_model,
+            inputs="training_data",
+            outputs="model_metrics",
+            # injecting a node preview callable
+            preview_fn=preview_training_model,
+            name="train_model_node",
+        )
+    ]
+)
+
+# Get the node
+training_node = next(n for n in pipeline.nodes)
+
+# Generate preview
+preview = training_node.preview() # Returns MermaidPreview object
+preview_dict = preview.to_dict() # Serialise for APIs/frontends
+
+```
+
+### Available preview types
+
+Import the preview types you need:
+
+```python
+from kedro.pipeline.preview_contract import (
+    JsonPreview,
+    TablePreview,
+    PlotlyPreview,
+    MermaidPreview,
+    ImagePreview,
+    TextPreview,
+    CustomPreview,
+)
+```
+
+#### JSON preview
+
+Use for metadata, statistics, or structured data:
+
+```python
+def preview_model_metrics() -> JsonPreview:
+    return JsonPreview(
+        content={
+            "accuracy": 0.95,
+            "precision": 0.93,
+            "recall": 0.94,
+            "f1_score": 0.935,
+        }
+    )
+```
+
+#### Table preview
+
+Use for data samples or tabular summaries.
+
+**Note**: `TablePreview` requires `content` as a `list[dict]`. If you have a pandas or polars DataFrame, convert it first:
+
+```python
+import pandas as pd
+
+def preview_sample_rows() -> TablePreview:
+    # Option 1: Define data directly as list of dicts
+    return TablePreview(
+        content=[
+            {"name": "Alice", "age": 30, "city": "NYC"},
+            {"name": "Bob", "age": 25, "city": "LA"},
+            {"name": "Charlie", "age": 35, "city": "SF"},
+        ]
+    )
+
+def preview_from_dataframe(df: pd.DataFrame) -> TablePreview:
+    # Option 2: Convert pandas DataFrame
+    return TablePreview(content=df.head(5).to_dict(orient="records"))
+
+def preview_from_polars(df) -> TablePreview:
+    # Option 3: Convert polars DataFrame
+    return TablePreview(content=df.head(5).to_dicts())
+```
+
+#### Plotly preview
+
+Use for interactive charts and visualisations:
+
+```python
+def preview_distribution() -> PlotlyPreview:
+    return PlotlyPreview(
+        content={
+            "data": [
+                {
+                    "x": ["A", "B", "C"],
+                    "y": [10, 15, 13],
+                    "type": "bar"
+                }
+            ],
+            "layout": {
+                "title": "Category Distribution",
+                "xaxis": {"title": "Category"},
+                "yaxis": {"title": "Count"}
+            }
+        }
+    )
+```
+
+#### Mermaid preview
+
+Use for diagrams, flowcharts, or process visualisations:
+
+```python
+def preview_pipeline_flow() -> MermaidPreview:
+    return MermaidPreview(
+        content="""
+        graph LR
+            A[Load Data] --> B[Clean Data]
+            B --> C[Feature Engineering]
+            C --> D[Train Model]
+            D --> E[Evaluate]
+        """
+    )
+```
+
+You can customise how Mermaid diagrams are rendered in Kedro-Viz by providing a configuration object in the `meta` parameter. This allows you to control layout, styling, text wrapping, and other rendering options:
+
+```python
+def generate_mermaid_preview() -> MermaidPreview:
+    """Generate a Mermaid diagram with custom configuration.
+
+    This example demonstrates how to customize both the Mermaid rendering
+    configuration and the text styling for node labels.
+    """
+    diagram = """graph TD
+    A[Raw Data] -->|Ingest| B(Typed Data)
+    B --> C{Quality Check}
+    C -->|Pass| D[Clean Data]
+    C -->|Fail| E[Error Log]
+    D --> F[Feature Engineering]
+    F --> G[Model Training]
+    G --> H[Predictions]
+
+    style A fill:#e1f5ff
+    style D fill:#c8e6c9
+    style E fill:#ffcdd2
+    style H fill:#fff9c4"""
+
+    # Customize Mermaid rendering configuration
+    # NOTE: On Kedro-Viz, this configuration will be
+    # merged with sensible defaults
+    custom_config = {
+        "securityLevel": "strict",  # Security level: 'strict', 'loose', 'antiscript'
+        "flowchart": {
+            "wrappingWidth": 300,   # Text wrapping threshold (default: 250)
+            "nodeSpacing": 60,      # Horizontal space between nodes (default: 50)
+            "rankSpacing": 60,      # Vertical space between levels (default: 50)
+            "curve": "basis",       # Edge curve style: 'basis', 'linear', 'step'
+        },
+        "themeVariables": {
+            "fontSize": "16px",     # Font size for labels (default: '14px')
+        },
+        # CSS styling for text nodes
+        "textStyle": {
+            "padding": "6px",           # Internal padding in nodes (default: '4px')
+            "lineHeight": "1.3",        # Line height for wrapped text (default: '1.2')
+            "textAlign": "center",      # Text alignment (default: 'center')
+        }
+    }
+
+    return MermaidPreview(content=diagram, meta=custom_config)
+
+node(
+    func=process_data,
+    inputs="raw_data",
+    outputs="processed_data",
+    preview_fn=generate_mermaid_preview,
+    name="data_processing_node",
+)
+```
+
+For a complete list of available Mermaid configuration options, see the [Mermaid configuration schema documentation](https://mermaid.js.org/config/schema-docs/config.html).
+
+#### Image preview
+
+Use for plots, charts, or visual outputs (URL or data URI):
+
+```python
+def preview_correlation_matrix() -> ImagePreview:
+    # Can return a URL
+    return ImagePreview(
+        content="https://example.com/correlation_matrix.png"
+    )
+
+    # Or a data URI for inline images
+    # return ImagePreview(
+    #     content="data:image/png;base64,iVBORw0KGgo..."
+    # )
+```
+
+#### Text preview
+
+Use for text summaries or logs:
+
+```python
+def preview_processing_log() -> TextPreview:
+    return TextPreview(
+        content="Processed 1,000 records\nRemoved 50 duplicates\nFilled 23 missing values"
+    )
+```
+
+You can also display code snippets with syntax highlighting in Kedro-Viz by specifying the language in the `meta` parameter:
+
+```python
+def generate_code_preview() -> TextPreview:
+    """Generate a code preview with syntax highlighting."""
+    code = """def calculate_metrics(data):
+    \"\"\"Calculate key performance metrics.\"\"\"
+    import pandas as pd
+
+    metrics = {
+        'mean': data.mean(),
+        'median': data.median(),
+        'std': data.std()
+    }
+
+    return pd.DataFrame(metrics)
+
+# Example usage
+result = calculate_metrics(my_dataframe)
+print(result)"""
+
+    return TextPreview(content=code, meta={"language": "python"})
+
+node(
+    func=calculate_metrics,
+    inputs="data",
+    outputs="metrics",
+    preview_fn=generate_code_preview,
+    name="metrics_calculation_node",
+)
+```
+
+The `meta` parameter accepts a `language` key to specify the programming language for syntax highlighting. Kedro-Viz supports `python`, `javascript`, and `yaml` highlighting.
+
+#### Custom preview
+
+For specialised rendering needs, use `CustomPreview`:
+
+```python
+def preview_custom_visualization() -> CustomPreview:
+    return CustomPreview(
+        renderer_key="my_custom_renderer",
+        content={
+            "type": "network_graph",
+            "nodes": [...],
+            "edges": [...]
+        }
+    )
+```
+
+The `renderer_key` identifies which frontend component should handle rendering this preview.
+
+### Adding metadata to previews
+
+All preview types support optional metadata with `meta` parameter. The `meta` parameter serves two purposes:
+
+1. **General metadata**: Add contextual information like versions, timestamps, or data sources
+2. **Rendering configuration**: Control how previews are displayed in Kedro-Viz (for example, Mermaid diagram layout, syntax highlighting)
+
+**Example: Adding general metadata**
+
+```python
+def preview_with_metadata() -> JsonPreview:
+    return JsonPreview(
+        content={"accuracy": 0.95},
+        meta={
+            "model_version": "v2.1",
+            "training_date": "2024-01-15",
+            "dataset": "train_split_2024"
+        }
+    )
+```
+
+**Example: Rendering configuration**
+
+For specific rendering configurations, see:
+
+- [Mermaid preview](#mermaid-preview) - Customise diagram layout and styling
+- [Text preview](#text-preview) - Enable code syntax highlighting
+
+### Using preview functions with data context
+
+Preview functions don't have access to node inputs or outputs directly. They're independent functions that you define. If you need to generate previews based on actual data, you can use closures or access datasets within the preview function.
+
+**Use closure to capture context**
+
+```python
+def make_preview_fn(data_sample):
+    """Create a preview function with captured context."""
+    def preview_fn() -> TablePreview:
+        return TablePreview(content=data_sample)
+    return preview_fn
+
+# In your pipeline creation
+sample_data = [{"id": 1, "value": 100}, {"id": 2, "value": 200}]
+node(
+    func=process_data,
+    inputs="data",
+    outputs="result",
+    preview_fn=make_preview_fn(sample_data)
+)
+```
+
+### Best practices
+
+1. **Keep previews lightweight**: Preview functions should return summaries, not full datasets. For dataset previews, use the [dataset preview feature](https://docs.kedro.org/projects/kedro-viz/en/stable/preview_datasets/) instead of node previews.
+2. **Make previews fast**: Avoid expensive computations in preview functions
+3. **Use appropriate types**: Choose the preview type that best matches your data
+4. **Add metadata**: Include context like timestamps, versions, or data sources
+5. **Handle errors**: Wrap preview logic in try-except if needed
+6. **Test preview functions**: Ensure they return valid preview objects

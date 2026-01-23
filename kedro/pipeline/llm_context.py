@@ -211,7 +211,7 @@ class LLMContextNode(Node):
                 tools=built_tools,
             )
 
-        # call the Node constructor with the func, inputs, outputs, name
+        # call the Node constructor with required arguments
         super().__init__(
             func=construct_context,
             inputs=inputs,

@@ -520,8 +520,6 @@ def preview_pipeline_flow() -> MermaidPreview:
     )
 ```
 
-##### Configuring mermaid rendering
-
 You can customise how Mermaid diagrams are rendered in Kedro-Viz by providing a configuration object in the `meta` parameter. This allows you to control layout, styling, text wrapping, and other rendering options:
 
 ```python
@@ -608,9 +606,7 @@ def preview_processing_log() -> TextPreview:
     )
 ```
 
-##### Text preview with syntax highlighting
-
-You can display code snippets with syntax highlighting in Kedro-Viz by specifying the language in the `meta` parameter:
+You can also display code snippets with syntax highlighting in Kedro-Viz by specifying the language in the `meta` parameter:
 
 ```python
 def generate_code_preview() -> TextPreview:
@@ -686,8 +682,9 @@ def preview_with_metadata() -> JsonPreview:
 **Example: Rendering configuration**
 
 For specific rendering configurations, see:
-- [Mermaid rendering configuration](#configuring-mermaid-rendering) - Customise diagram layout and styling
-- [Text syntax highlighting](#text-preview-with-syntax-highlighting) - Enable code syntax highlighting
+
+- [Mermaid preview](#mermaid-preview) - Customise diagram layout and styling
+- [Text preview](#text-preview) - Enable code syntax highlighting
 
 ### Using preview functions with data context
 

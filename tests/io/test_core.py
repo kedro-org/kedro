@@ -667,6 +667,10 @@ class TestAbstractVersionedDataset:
     def test_list_versions(self, my_versioned_dataset):
         data = "test"
 
+        # First test no versions at all
+        assert len(my_versioned_dataset.list_versions()) == 0
+
+        # Now test with 3 versions
         versions = ["version1", "version2", "version3"]
 
         for version in versions:
@@ -677,6 +681,8 @@ class TestAbstractVersionedDataset:
 
         assert versions == my_versioned_dataset.list_versions(full_path=False)
         assert len(my_versioned_dataset.list_versions()) == 3
+
+
 
 
 class MyLegacyDataset(AbstractDataset):

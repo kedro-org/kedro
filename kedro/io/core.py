@@ -761,7 +761,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         version_paths = self._get_versions()
 
         most_recent = next(
-            (path for path in version_paths if self._exists_function(path)), None
+            (path for path in version_paths), None
         )
         if not most_recent:
             message = f"Did not find any versions for {self}"
@@ -818,13 +818,17 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
+
+    def _get_version_from_path(self, path: str):
+        return PurePath(path).parent.name
+
     def list_versions(self, full_path: bool = True) -> list:
         version_paths = self._get_versions()
 
         if full_path:
             return version_paths
 
-        return [path.split(os.sep)[-2] for path in version_paths]  # [-2] is version dir
+        return [self._get_version_from_path(path) for path in version_paths]
 
     @classmethod
     def _save_wrapper(

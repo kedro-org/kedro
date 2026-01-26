@@ -2,6 +2,7 @@
 ## Major features and improvements
 * Added `@experimental` decorator to mark unstable or early-stage public APIs.
 * Added the new `support-agent-langgraph` starter. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
+* Added support for running multiple pipelines in a single Kedro session run via the `--pipelines` CLI option and `pipeline_names` argument in `KedroSession.run()` method.
 
 ## Experimental features
 * Added experimental `llm_context_node` and `LLMContextNode` for assembling LLMs, prompts, and tools into a runtime `LLMContext` within Kedro pipelines.
@@ -14,8 +15,9 @@
 ## Documentation changes
 * Added beginner-friendly notes on `uvx` installation.
 
-
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Mohmn](https://github.com/Mohmn)
 
 # Release 1.1.1
 ## Bug fixes and other changes

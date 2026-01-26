@@ -577,6 +577,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -618,6 +619,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -659,6 +661,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -691,6 +694,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=["fake_namespace"],
             only_missing_outputs=False,
         )
@@ -716,6 +720,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -757,9 +762,64 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
+
+    def test_run_multiple_pipelines(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipelines", "pipe1,pipe2"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert fake_session.run.call_count == 1
+        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
+
+        pipelines = fake_session.run.call_args.kwargs["pipeline_names"]
+        assert "pipe1" in pipelines
+        assert "pipe2" in pipelines
+
+    def test_run_multiple_pipelines_with_duplicate_name(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipelines", "pipe1,pipe1"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert fake_session.run.call_count == 1
+        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
+        assert fake_session.run.call_args.kwargs["pipeline_names"] == ["pipe1"]
+
+    def test_pipeline_and_pipelines_mutually_exclusive(
+        self, fake_project_cli, fake_metadata
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipeline", "pipe1", "--pipelines", "pipe2"],
+            obj=fake_metadata,
+        )
+
+        assert result.exit_code != 0
+        assert "cannot be used together" in result.output.lower()
+
+    def test_pipeline_name_deprecation_warning(
+        self, fake_project_cli, fake_metadata, caplog
+    ):
+        CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipeline", "pipe1"],
+            obj=fake_metadata,
+        )
+
+        assert "deprecated" in caplog.text.lower()
 
     @mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_invalid_config(
@@ -823,6 +883,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -938,6 +999,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions=lv_dict,
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -1001,6 +1063,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )

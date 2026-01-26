@@ -149,3 +149,52 @@ def test_pipelines_load_data_backward_compatibility(
     assert "pipeline1" in pipelines._content
     assert "pipeline2" in pipelines._content
     assert "__default__" in pipelines._content
+
+
+@pytest.mark.parametrize("exception_type", [TypeError, ValueError])
+def test_pipelines_load_data_signature_inspection_failure(
+    monkeypatch, tmpdir, exception_type
+):
+    """Test that _load_data falls back to register_pipelines() when signature inspection fails (lines 210-212)."""
+    # Create a package with register_pipelines
+    pipelines_file_path = (
+        tmpdir.mkdir(f"test_sig_fail_{exception_type.__name__}")
+        / "pipeline_registry.py"
+    )
+    pipelines_file_path.write(
+        textwrap.dedent(
+            """
+            from kedro.pipeline import Pipeline
+
+            def register_pipelines():
+                return {"test_pipeline": Pipeline([])}
+            """
+        )
+    )
+    project_path, package_name, _ = str(pipelines_file_path).rpartition(
+        f"test_sig_fail_{exception_type.__name__}"
+    )
+    sys.path.insert(0, project_path)
+
+    try:
+        configure_project(package_name)
+
+        # Reset the state
+        pipelines._is_data_loaded = False
+        pipelines._content = {}
+
+        # Mock inspect.signature to raise exception to trigger the exception handler
+        import inspect as inspect_module
+
+        def mock_signature_raises(*args, **kwargs):
+            raise exception_type("Cannot inspect signature")
+
+        monkeypatch.setattr(inspect_module, "signature", mock_signature_raises)
+
+        # Access a pipeline - this should trigger the exception handler (lines 210-212)
+        result = pipelines["test_pipeline"]
+
+        assert isinstance(result, Pipeline)
+        assert "test_pipeline" in pipelines._content
+    finally:
+        sys.path.pop(0)

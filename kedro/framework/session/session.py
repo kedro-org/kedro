@@ -387,7 +387,7 @@ class KedroSession:
             "to_outputs": to_outputs,
             "load_versions": load_versions,
             "runtime_params": runtime_params,
-            "pipeline_name": pipeline_names,
+            "pipeline_names": pipeline_names,
             "namespaces": namespaces,
             "runner": getattr(runner, "__name__", str(runner)),
             "only_missing_outputs": only_missing_outputs,

@@ -295,21 +295,30 @@ def test_find_pipelines_handles_project_structure_without_pipelines_dir(
             )
         )
 
+    configure_project(mock_package_name_with_pipelines)
+    pipelines = find_pipelines()
+    assert set(pipelines) == {"__default__"}
+    assert sum(pipelines.values()).outputs() == (
+        {"simple_pipeline"} if simplified else set()
+    )
+
 
 @pytest.mark.parametrize(
     "mock_package_name_with_pipelines",
-    [{"my_pipeline"}],
+    [{"pipeline1", "pipeline2", "pipeline3"}],
     indirect=True,
 )
 def test_find_pipelines_with_name_loads_only_requested_pipeline(
     mock_package_name_with_pipelines,
 ):
+    """Test that find_pipelines(name=...) only loads and returns the requested pipeline."""
     configure_project(mock_package_name_with_pipelines)
 
-    pipelines = find_pipelines(name="my_pipeline")
+    pipelines = find_pipelines(name="pipeline2")
 
-    assert set(pipelines.keys()) == {"my_pipeline"}
-    assert sum(pipelines.values()).outputs() == {"my_pipeline"}
+    # Should only return the requested pipeline, not all pipelines
+    assert set(pipelines.keys()) == {"pipeline2"}
+    assert sum(pipelines.values()).outputs() == {"pipeline2"}
 
 
 @pytest.mark.parametrize(
@@ -317,9 +326,10 @@ def test_find_pipelines_with_name_loads_only_requested_pipeline(
     [{"my_pipeline"}],
     indirect=True,
 )
-def test_find_pipelines_named_pipeline_import_error_raises(
+def test_find_pipelines_with_name_raise_errors_true(
     mock_package_name_with_pipelines,
 ):
+    """Test that find_pipelines(name=..., raise_errors=True) raises ImportError when pipeline doesn't exist."""
     configure_project(mock_package_name_with_pipelines)
 
     with pytest.raises(
@@ -328,9 +338,63 @@ def test_find_pipelines_named_pipeline_import_error_raises(
     ):
         find_pipelines(name="does_not_exist", raise_errors=True)
 
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"my_pipeline"}],
+    indirect=True,
+)
+def test_find_pipelines_with_name_raise_errors_false(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines(name=..., raise_errors=False) issues warning when pipeline doesn't exist."""
     configure_project(mock_package_name_with_pipelines)
-    pipelines = find_pipelines()
-    assert set(pipelines) == {"__default__"}
-    assert sum(pipelines.values()).outputs() == (
-        {"simple_pipeline"} if simplified else set()
-    )
+
+    with pytest.warns(
+        UserWarning,
+        match=r"An error occurred while importing the '.*pipelines\.does_not_exist' module.",
+    ):
+        # When raise_errors=False and import fails, pipeline_module will be undefined
+        # and _create_pipeline will raise UnboundLocalError or NameError
+        with pytest.raises((UnboundLocalError, NameError)):
+            find_pipelines(name="does_not_exist", raise_errors=False)
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"my_pipeline"}],
+    indirect=True,
+)
+def test_find_pipelines_with_name_returns_keyerror_when_pipeline_not_found(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines(name=...) raises KeyError when _create_pipeline returns None."""
+    configure_project(mock_package_name_with_pipelines)
+
+    # Create a pipeline module that doesn't have create_pipeline function
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    pipeline_dir = pipelines_dir / "empty_pipeline"
+    pipeline_dir.mkdir()
+    (pipeline_dir / "__init__.py").touch()  # Empty file, no create_pipeline function
+
+    with pytest.raises(KeyError, match="Pipeline 'empty_pipeline' not found"):
+        find_pipelines(name="empty_pipeline", raise_errors=False)
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipeline1", "pipeline2"}],
+    indirect=True,
+)
+def test_find_pipelines_with_default_name_loads_all_pipelines(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines(name='__default__') loads all pipelines, not selective."""
+    configure_project(mock_package_name_with_pipelines)
+
+    pipelines = find_pipelines(name="__default__")
+
+    # Should load all pipelines, not just one
+    assert "__default__" in pipelines
+    assert "pipeline1" in pipelines
+    assert "pipeline2" in pipelines

@@ -7,6 +7,7 @@ from __future__ import annotations
 import abc
 import copy
 import logging
+import os
 import pprint
 import sys
 import warnings
@@ -43,7 +44,6 @@ from kedro.utils import (  # noqa: F401
 )
 
 if TYPE_CHECKING:
-    import os
     from multiprocessing.managers import SyncManager
 
 
@@ -737,13 +737,9 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         # 1 entry for load version, 1 for save version
         self._version_cache = Cache(maxsize=2)  # type: Cache
 
-    # 'key' is set to prevent cache key overlapping for load and save:
-    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
-    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "load"))
-    def _fetch_latest_load_version(self) -> str:
-        # When load version is unpinned, fetch the most recent existing
-        # version from the given path.
+    def _get_versions(self) -> list:
         pattern = str(self._get_versioned_path("*"))
+
         try:
             version_paths = sorted(self._glob_function(pattern), reverse=True)
         except Exception as exc:
@@ -752,8 +748,20 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                 f"due to insufficient permission. Exception: {exc}"
             )
             raise VersionNotFoundError(message) from exc
+
+        return [path for path in version_paths if self._exists_function(path)]
+
+    # 'key' is set to prevent cache key overlapping for load and save:
+    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
+    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "load"))
+    def _fetch_latest_load_version(self) -> str:
+        # When load version is unpinned, fetch the most recent existing
+        # version from the given path.
+
+        version_paths = self._get_versions()
+
         most_recent = next(
-            (path for path in version_paths if self._exists_function(path)), None
+            (path for path in version_paths), None
         )
         if not most_recent:
             message = f"Did not find any versions for {self}"
@@ -809,6 +817,18 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
+
+
+    def _get_version_from_path(self, path: str):
+        return PurePath(path).parent.name
+
+    def list_versions(self, full_path: bool = True) -> list:
+        version_paths = self._get_versions()
+
+        if full_path:
+            return version_paths
+
+        return [self._get_version_from_path(path) for path in version_paths]
 
     @classmethod
     def _save_wrapper(

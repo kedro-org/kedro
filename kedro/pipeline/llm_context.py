@@ -20,6 +20,7 @@ from typing import Any, NamedTuple, TypeVar
 
 from ..utils import experimental
 from .node import Node
+from .preview_contract import PreviewPayload
 
 T = TypeVar("T")
 
@@ -154,6 +155,7 @@ class LLMContextNode(Node):
         tags: str | Iterable[str] | None = None,
         confirms: str | list[str] | None = None,
         namespace: str | None = None,
+        preview_fn: Callable[..., PreviewPayload] | None = None,
     ):
         """Create an LLMContextNode.
 
@@ -167,6 +169,9 @@ class LLMContextNode(Node):
             confirms: Optional name or the list of the names of the datasets
                 that should be confirmed.
             namespace: Optional node namespace.
+            preview_fn: Optional preview function that returns one of the valid
+                preview types (TextPreview, MermaidPreview, JsonPreview, TablePreview,
+                PlotlyPreview, ImagePreview, or CustomPreview). This is an experimental feature.
         """
         inputs = {"llm": llm}
 
@@ -206,7 +211,7 @@ class LLMContextNode(Node):
                 tools=built_tools,
             )
 
-        # call the Node constructor with the func, inputs, outputs, name
+        # call the Node constructor with required arguments
         super().__init__(
             func=construct_context,
             inputs=inputs,
@@ -215,6 +220,7 @@ class LLMContextNode(Node):
             tags=tags,
             confirms=confirms,
             namespace=namespace,
+            preview_fn=preview_fn,
         )
 
 
@@ -229,6 +235,7 @@ def llm_context_node(  # noqa: PLR0913
     tags: str | Iterable[str] | None = None,
     confirms: str | list[str] | None = None,
     namespace: str | None = None,
+    preview_fn: Callable[..., PreviewPayload] | None = None,
 ) -> Node:
     """
     !!! warning "Experimental"
@@ -250,7 +257,9 @@ def llm_context_node(  # noqa: PLR0913
         confirms: Optional name or the list of the names of the datasets
             that should be confirmed.
         namespace: Optional node namespace.
-
+        preview_fn: Optional preview function that returns one of the valid
+            preview types (TextPreview, MermaidPreview, JsonPreview, TablePreview,
+            PlotlyPreview, ImagePreview, or CustomPreview). This is an experimental feature.
 
     Returns:
         A Kedro Node that loads all declared datasets, instantiates tools,
@@ -280,4 +289,5 @@ def llm_context_node(  # noqa: PLR0913
         tags=tags,
         confirms=confirms,
         namespace=namespace,
+        preview_fn=preview_fn,
     )

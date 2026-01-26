@@ -66,6 +66,7 @@ pickleable
 Plotly
 pluggy
 Polars
+polars
 Printify
 Pylint
 pyenv

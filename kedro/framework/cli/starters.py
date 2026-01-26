@@ -13,6 +13,7 @@ import stat
 import sys
 import tempfile
 import warnings
+from importlib.util import find_spec
 from itertools import groupby
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -324,6 +325,21 @@ def new(  # noqa: PLR0913
 
     _validate_flag_inputs(flag_inputs)
     starters_dict = _get_starters_dict()
+
+    if find_spec("cookiecutter") is None or find_spec("git") is None:
+        uvx_path = shutil.which("uvx")
+        if not uvx_path:
+            raise KedroCliError(
+                "Creating a new Kedro project requires `uvx` or `kedro[new]`. Please install one to continue."
+            )
+        uvx_command = [
+            uvx_path,
+            "--from",
+            f"kedro[new]@{version}",
+            "kedro",
+            *sys.argv[1:],
+        ]
+        os.execv(uvx_path, uvx_command)  # noqa: S606
 
     if starter_alias in starters_dict:
         if directory:

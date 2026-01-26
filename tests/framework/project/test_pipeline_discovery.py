@@ -295,6 +295,39 @@ def test_find_pipelines_handles_project_structure_without_pipelines_dir(
             )
         )
 
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"my_pipeline"}],
+    indirect=True,
+)
+def test_find_pipelines_with_name_loads_only_requested_pipeline(
+    mock_package_name_with_pipelines,
+):
+    configure_project(mock_package_name_with_pipelines)
+
+    pipelines = find_pipelines(name="my_pipeline")
+
+    assert set(pipelines.keys()) == {"my_pipeline"}
+    assert sum(pipelines.values()).outputs() == {"my_pipeline"}
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"my_pipeline"}],
+    indirect=True,
+)
+def test_find_pipelines_named_pipeline_import_error_raises(
+    mock_package_name_with_pipelines,
+):
+    configure_project(mock_package_name_with_pipelines)
+
+    with pytest.raises(
+        ImportError,
+        match=r"An error occurred while importing the '.*pipelines\.does_not_exist' module.",
+    ):
+        find_pipelines(name="does_not_exist", raise_errors=True)
+
     configure_project(mock_package_name_with_pipelines)
     pipelines = find_pipelines()
     assert set(pipelines) == {"__default__"}

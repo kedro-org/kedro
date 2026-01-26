@@ -191,10 +191,51 @@ def test_pipelines_load_data_signature_inspection_failure(
 
         monkeypatch.setattr(inspect_module, "signature", mock_signature_raises)
 
-        # Access a pipeline - this should trigger the exception handler (lines 210-212)
         result = pipelines["test_pipeline"]
 
         assert isinstance(result, Pipeline)
         assert "test_pipeline" in pipelines._content
     finally:
         sys.path.pop(0)
+
+
+@pytest.fixture
+def selective_registry_package(tmpdir):
+    """Minimal package to test passing `requested_pipeline` to register_pipelines."""
+    pipelines_file = tmpdir.mkdir("test_selective_registry") / "pipeline_registry.py"
+    pipelines_file.write(
+        textwrap.dedent(
+            """
+            from kedro.pipeline import Pipeline
+
+            def register_pipelines(pipeline=None):
+                if pipeline is None:
+                    return {"__default__": Pipeline([])}
+                return {
+                    pipeline: Pipeline([]),
+                    "__default__": Pipeline([]),
+                }
+            """
+        )
+    )
+
+    project_path, package_name, _ = str(pipelines_file).rpartition(
+        "test_selective_registry"
+    )
+    sys.path.insert(0, project_path)
+    yield package_name
+    sys.path.pop(0)
+
+
+def test_pipelines_load_data_passes_requested_pipeline_to_register_pipelines(
+    selective_registry_package,
+):
+    configure_project(selective_registry_package)
+
+    # Force a clean load
+    pipelines._is_data_loaded = False
+    pipelines._content = {}
+
+    _ = pipelines["my_pipeline"]
+
+    assert set(pipelines._content) == {"my_pipeline", "__default__"}

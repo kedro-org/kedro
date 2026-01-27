@@ -15,6 +15,10 @@ def register_pipelines(pipeline: str | None = None) -> dict[str, Pipeline]:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
 
-    pipelines = find_pipelines(raise_errors=True, name=pipeline)
-    pipelines["__default__"] = sum(pipelines.values())
+    pipelines = find_pipelines(name=pipeline, raise_errors=True)
+    if pipeline is None and "__default__" in pipelines:
+        named_pipelines = {k: v for k, v in pipelines.items() if k != "__default__"}
+        if named_pipelines:
+            pipelines["__default__"] = sum(named_pipelines.values())
+
     return pipelines

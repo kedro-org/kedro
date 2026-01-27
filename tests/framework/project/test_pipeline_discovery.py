@@ -354,10 +354,9 @@ def test_find_pipelines_with_name_raise_errors_false(
         UserWarning,
         match=r"An error occurred while importing the '.*pipelines\.does_not_exist' module.",
     ):
-        # When raise_errors=False and import fails, pipeline_module will be undefined
-        # and _create_pipeline will raise UnboundLocalError or NameError
-        with pytest.raises((UnboundLocalError, NameError)):
-            find_pipelines(name="does_not_exist", raise_errors=False)
+        pipelines = find_pipelines(name="does_not_exist", raise_errors=False)
+        # Should return empty dict (the pipeline is not loaded)
+        assert "does_not_exist" not in pipelines
 
 
 @pytest.mark.parametrize(
@@ -365,10 +364,11 @@ def test_find_pipelines_with_name_raise_errors_false(
     [{"my_pipeline"}],
     indirect=True,
 )
-def test_find_pipelines_with_name_returns_keyerror_when_pipeline_not_found(
+def test_find_pipelines_with_name_warns_when_pipeline_has_no_create_function(
     mock_package_name_with_pipelines,
 ):
-    """Test that find_pipelines(name=...) raises KeyError when _create_pipeline returns None."""
+    """Test that find_pipelines(name=..., raise_errors=False) issues warning when
+    pipeline module exists but has no create_pipeline function."""
     configure_project(mock_package_name_with_pipelines)
 
     # Create a pipeline module that doesn't have create_pipeline function
@@ -377,8 +377,36 @@ def test_find_pipelines_with_name_returns_keyerror_when_pipeline_not_found(
     pipeline_dir.mkdir()
     (pipeline_dir / "__init__.py").touch()  # Empty file, no create_pipeline function
 
+    # With raise_errors=False, should warn but not raise
+    with pytest.warns(
+        UserWarning, match="module does not expose a 'create_pipeline' function"
+    ):
+        pipelines = find_pipelines(name="empty_pipeline", raise_errors=False)
+        # The pipeline should not be in the results
+        assert "empty_pipeline" not in pipelines
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"my_pipeline"}],
+    indirect=True,
+)
+def test_find_pipelines_with_name_raises_keyerror_when_pipeline_has_no_create_function(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines(name=..., raise_errors=True) raises KeyError when
+    pipeline module exists but has no create_pipeline function."""
+    configure_project(mock_package_name_with_pipelines)
+
+    # Create a pipeline module that doesn't have create_pipeline function
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    pipeline_dir = pipelines_dir / "empty_pipeline"
+    pipeline_dir.mkdir()
+    (pipeline_dir / "__init__.py").touch()  # Empty file, no create_pipeline function
+
+    # With raise_errors=True, should raise KeyError
     with pytest.raises(KeyError, match="Pipeline 'empty_pipeline' not found"):
-        find_pipelines(name="empty_pipeline", raise_errors=False)
+        find_pipelines(name="empty_pipeline", raise_errors=True)
 
 
 @pytest.mark.parametrize(
@@ -395,6 +423,122 @@ def test_find_pipelines_with_default_name_loads_all_pipelines(
     pipelines = find_pipelines(name="__default__")
 
     # Should load all pipelines, not just one
+    assert "__default__" in pipelines
+    assert "pipeline1" in pipelines
+    assert "pipeline2" in pipelines
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipeline1", "pipeline2", "pipeline3"}],
+    indirect=True,
+)
+def test_find_pipelines_with_multiple_names_loads_only_requested_pipelines(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines(name='p1,p2') loads only the requested pipelines."""
+    configure_project(mock_package_name_with_pipelines)
+
+    pipelines = find_pipelines(name="pipeline1,pipeline3")
+
+    # Should only return the requested pipelines, not all pipelines
+    assert set(pipelines.keys()) == {"pipeline1", "pipeline3"}
+    assert "pipeline2" not in pipelines
+    assert "__default__" not in pipelines
+    assert sum(pipelines.values()).outputs() == {"pipeline1", "pipeline3"}
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipeline1", "pipeline2", "pipeline3"}],
+    indirect=True,
+)
+def test_find_pipelines_with_multiple_names_no_default(
+    mock_package_name_with_pipelines,
+):
+    """Test that __default__ is not included when specific pipelines are requested."""
+    configure_project(mock_package_name_with_pipelines)
+
+    pipelines = find_pipelines(name="pipeline1,pipeline2")
+
+    # __default__ should NOT be in the result
+    assert "__default__" not in pipelines
+    assert set(pipelines.keys()) == {"pipeline1", "pipeline2"}
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipeline1", "pipeline2"}],
+    indirect=True,
+)
+def test_find_pipelines_with_multiple_names_one_missing_raise_errors_true(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines raises ImportError when one of multiple requested pipelines doesn't exist."""
+    configure_project(mock_package_name_with_pipelines)
+
+    with pytest.raises(
+        ImportError,
+        match=r"An error occurred while importing the '.*pipelines\.does_not_exist' module.",
+    ):
+        find_pipelines(name="pipeline1,does_not_exist", raise_errors=True)
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipeline1", "pipeline2"}],
+    indirect=True,
+)
+def test_find_pipelines_with_multiple_names_one_missing_raise_errors_false(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines issues warning and returns valid pipelines when one doesn't exist."""
+    configure_project(mock_package_name_with_pipelines)
+
+    with pytest.warns(
+        UserWarning,
+        match=r"An error occurred while importing the '.*pipelines\.does_not_exist' module.",
+    ):
+        pipelines = find_pipelines(name="pipeline1,does_not_exist", raise_errors=False)
+
+    # Should still return the valid pipeline
+    assert "pipeline1" in pipelines
+    assert "does_not_exist" not in pipelines
+    assert "__default__" not in pipelines
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipeline1", "pipeline2", "pipeline3"}],
+    indirect=True,
+)
+def test_find_pipelines_with_whitespace_in_names(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines handles whitespace in pipeline names correctly."""
+    configure_project(mock_package_name_with_pipelines)
+
+    # Test with various whitespace patterns
+    pipelines = find_pipelines(name="pipeline1, pipeline2 , pipeline3")
+
+    assert set(pipelines.keys()) == {"pipeline1", "pipeline2", "pipeline3"}
+    assert "__default__" not in pipelines
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipeline1", "pipeline2"}],
+    indirect=True,
+)
+def test_find_pipelines_empty_string_loads_all(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines(name='') loads all pipelines (treats empty as None)."""
+    configure_project(mock_package_name_with_pipelines)
+
+    pipelines = find_pipelines(name="")
+
+    # Empty string should be treated as None (load all)
     assert "__default__" in pipelines
     assert "pipeline1" in pipelines
     assert "pipeline2" in pipelines

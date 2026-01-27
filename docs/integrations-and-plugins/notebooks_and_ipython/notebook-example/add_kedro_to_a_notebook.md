@@ -339,7 +339,7 @@ catalog = DataCatalog.from_config(conf_catalog)
 ...
 ```
 
-It's also possible to use Kedro's `OmegaConfigLoader`configuration loader to initialise the Data Catalog.
+It's also possible to use Kedro's `OmegaConfigLoader` configuration loader to initialise the Data Catalog.
 
 To load `catalog.yml` the code is as follows:
 

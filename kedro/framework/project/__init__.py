@@ -514,6 +514,8 @@ def find_pipelines(  # noqa: PLR0915, PLR0912
 
         if pipeline_name == "__pycache__":
             continue
+
+        # Prevent imports of hidden directories/files
         if pipeline_name.startswith("."):
             continue
 

@@ -542,3 +542,91 @@ def test_find_pipelines_empty_string_loads_all(
     assert "__default__" in pipelines
     assert "pipeline1" in pipelines
     assert "pipeline2" in pipelines
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [set()],  # Start with empty set (no pipelines)
+    indirect=True,
+)
+def test_find_pipelines_when_pipelines_dir_missing_raise_errors_true(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines raises KeyError when specific pipeline requested but pipelines dir doesn't exist."""
+    configure_project(mock_package_name_with_pipelines)
+
+    # Delete the pipelines directory to simulate a project without it
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    shutil.rmtree(pipelines_dir)
+
+    # Request a specific pipeline when no pipelines directory exists
+    with pytest.raises(KeyError, match=r"Pipeline\(s\) not found: my_pipeline"):
+        find_pipelines(name="my_pipeline", raise_errors=True)
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [set()],  # Start with empty set (no pipelines)
+    indirect=True,
+)
+def test_find_pipelines_when_pipelines_dir_missing_raise_errors_false(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines warns when specific pipeline requested but pipelines dir doesn't exist."""
+    configure_project(mock_package_name_with_pipelines)
+
+    # Delete the pipelines directory to simulate a project without it
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    shutil.rmtree(pipelines_dir)
+
+    # Request a specific pipeline when no pipelines directory exists
+    with pytest.warns(UserWarning, match=r"Pipeline\(s\) not found: my_pipeline"):
+        pipelines = find_pipelines(name="my_pipeline", raise_errors=False)
+        # Should return empty dict (no pipelines loaded)
+        assert pipelines == {}
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [set()],  # Start with empty set (no pipelines)
+    indirect=True,
+)
+def test_find_multiple_pipelines_when_pipelines_dir_missing_raise_errors_true(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines raises KeyError when multiple pipelines requested but pipelines dir doesn't exist."""
+    configure_project(mock_package_name_with_pipelines)
+
+    # Delete the pipelines directory to simulate a project without it
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    shutil.rmtree(pipelines_dir)
+
+    # Request multiple pipelines when no pipelines directory exists
+    with pytest.raises(
+        KeyError, match=r"Pipeline\(s\) not found: pipeline1, pipeline2"
+    ):
+        find_pipelines(name="pipeline1,pipeline2", raise_errors=True)
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [set()],  # Start with empty set (no pipelines)
+    indirect=True,
+)
+def test_find_multiple_pipelines_when_pipelines_dir_missing_raise_errors_false(
+    mock_package_name_with_pipelines,
+):
+    """Test that find_pipelines warns when multiple pipelines requested but pipelines dir doesn't exist."""
+    configure_project(mock_package_name_with_pipelines)
+
+    # Delete the pipelines directory to simulate a project without it
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    shutil.rmtree(pipelines_dir)
+
+    # Request multiple pipelines when no pipelines directory exists
+    with pytest.warns(
+        UserWarning, match=r"Pipeline\(s\) not found: pipeline1, pipeline2"
+    ):
+        pipelines = find_pipelines(name="pipeline1,pipeline2", raise_errors=False)
+        # Should return empty dict (no pipelines loaded)
+        assert pipelines == {}

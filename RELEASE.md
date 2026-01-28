@@ -12,7 +12,7 @@
 ## Experimental features
 * Added experimental `llm_context_node` and `LLMContextNode` for assembling LLMs, prompts, and tools into a runtime `LLMContext` within Kedro pipelines.
 * Added experimental `preview_fn` argument to `Node` class to add support for user-injectable node preview functions.
-* Added the new experimental `support-agent-langgraph` starter, which supports the above experimental features. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
+* Added new experimental `support-agent-langgraph` starter, which supports the above experimental features. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 
 ## Bug fixes and other changes
 * Set `raise_errors=True` in `find_pipelines()` calls in the project template's `pipeline_registry.py` to ensure pipeline discovery errors are raised during project runs.

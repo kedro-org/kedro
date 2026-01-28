@@ -369,4 +369,3 @@ This is useful when:
 Nodes without a namespace will each be converted to individual Airflow tasks.
 
 For more information about node grouping strategies in Kedro, see the [node grouping guide](../nodes_grouping.md).
-

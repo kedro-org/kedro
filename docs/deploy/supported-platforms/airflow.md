@@ -39,6 +39,7 @@ kedro airflow create --group-by namespace
 ```
 
 This is useful when:
+
 * You have logically grouped nodes using namespaces and want to execute them together
 * You want to reduce the number of Airflow tasks while maintaining the namespace structure
 * Your namespaced nodes share intermediate data that doesn't need to be persisted between tasks

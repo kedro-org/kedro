@@ -170,8 +170,8 @@ class LLMContextNode(Node):
                 that should be confirmed.
             namespace: Optional node namespace.
             preview_fn: Optional preview function that returns one of the valid
-                preview types (TextPreview, MermaidPreview, JsonPreview, TablePreview,
-                PlotlyPreview, ImagePreview, or CustomPreview). This is an experimental feature.
+                preview types (TextPreview, MermaidPreview, ImagePreview, or CustomPreview).
+                This is an experimental feature.
         """
         inputs = {"llm": llm}
 
@@ -258,8 +258,8 @@ def llm_context_node(  # noqa: PLR0913
             that should be confirmed.
         namespace: Optional node namespace.
         preview_fn: Optional preview function that returns one of the valid
-            preview types (TextPreview, MermaidPreview, JsonPreview, TablePreview,
-            PlotlyPreview, ImagePreview, or CustomPreview). This is an experimental feature.
+            preview types (TextPreview, MermaidPreview, ImagePreview, or CustomPreview).
+            This is an experimental feature.
 
     Returns:
         A Kedro Node that loads all declared datasets, instantiates tools,

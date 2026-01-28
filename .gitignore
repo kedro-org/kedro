@@ -175,3 +175,6 @@ kedro/datasets/*
 # Mise
 .mise.toml
 mise.toml
+
+# uv
+uv.lock

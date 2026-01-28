@@ -14,40 +14,6 @@ This guide describes how to run a Kedro pipeline on different Airflow platforms.
 - [Amazon AWS Managed Workflows for Apache Airflow (MWAA)](#how-to-run-a-kedro-pipeline-on-amazon-aws-managed-workflows-for-apache-airflow-mwaa)
 - [Apache Airflow using a Kubernetes cluster](#how-to-run-a-kedro-pipeline-on-apache-airflow-using-a-kubernetes-cluster)
 
-## Grouping nodes in Airflow tasks
-
-By default, `kedro airflow create` converts each Kedro node into a separate Airflow task. If you need to group multiple nodes into a single task to reduce scheduling overhead or to handle datasets that cannot be shared across distributed workers.
-
-The `--group-by` option provides two grouping strategies:
-
-### Grouping by memory
-
-When running Kedro nodes using Airflow, `MemoryDatasets` are not shared across operators, which can cause the DAG run to fail. Nodes connected through  can be grouped together using the `--group-by memory` flag:
-
-```bash
-kedro airflow create --group-by memory
-```
-
-This combines nodes that share `MemoryDatasets` into single Airflow tasks, preserving the logical separation in Kedro while avoiding data persistence issues.
-
-### Grouping by namespace
-
-If your Kedro pipeline uses [namespaces](https://docs.kedro.org/en/stable/build/namespaces/) to organise nodes, you can group all nodes within the same namespace into a single Airflow task:
-
-```bash
-kedro airflow create --group-by namespace
-```
-
-This is useful when:
-
-* You have logically grouped nodes using namespaces and want to execute them together
-* You want to reduce the number of Airflow tasks while maintaining the namespace structure
-* Your namespaced nodes share intermediate data that doesn't need to be persisted between tasks
-
-Nodes without a namespace will each be converted to individual Airflow tasks.
-
-For more information about node grouping strategies in Kedro, see the [node grouping guide](../nodes_grouping.md).
-
 ## How to run a Kedro pipeline on Apache Airflow with Astronomer
 
 The following tutorial shows how to deploy an example [Spaceflights Kedro project](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial/) on [Apache Airflow](https://airflow.apache.org/) with the [Astro CLI](https://docs.astronomer.io/astro/cli/overview). This command-line tool, created by [Astronomer](https://www.astronomer.io/), streamlines the creation of local Airflow projects. You will deploy it locally first, then transition to Astro Cloud.
@@ -369,3 +335,38 @@ tasks["preprocess-companies-and-shuttles"] >> tasks["create-model-input-table-no
 ```
 
 This ordering ensures that the `create-model-input-table-node` task runs after `preprocess-companies-and-shuttles` has completed.
+
+## Grouping nodes in Airflow tasks
+
+By default, `kedro airflow create` converts each Kedro node into a separate Airflow task. If you need to group multiple nodes into a single task to reduce scheduling overhead or to handle datasets that cannot be shared across distributed workers.
+
+The `--group-by` option provides two grouping strategies:
+
+### Grouping by memory
+
+When running Kedro nodes using Airflow, `MemoryDatasets` are not shared across operators, which can cause the DAG run to fail. Nodes connected through  can be grouped together using the `--group-by memory` flag:
+
+```bash
+kedro airflow create --group-by memory
+```
+
+This combines nodes that share `MemoryDatasets` into single Airflow tasks, preserving the logical separation in Kedro while avoiding data persistence issues.
+
+### Grouping by namespace
+
+If your Kedro pipeline uses [namespaces](https://docs.kedro.org/en/stable/build/namespaces/) to organise nodes, you can group all nodes within the same namespace into a single Airflow task:
+
+```bash
+kedro airflow create --group-by namespace
+```
+
+This is useful when:
+
+* You have logically grouped nodes using namespaces and want to execute them together
+* You want to reduce the number of Airflow tasks while maintaining the namespace structure
+* Your namespaced nodes share intermediate data that doesn't need to be persisted between tasks
+
+Nodes without a namespace will each be converted to individual Airflow tasks.
+
+For more information about node grouping strategies in Kedro, see the [node grouping guide](../nodes_grouping.md).
+

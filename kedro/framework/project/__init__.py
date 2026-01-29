@@ -201,7 +201,11 @@ class _ProjectPipelines(MutableMapping):
         if self._pipelines_module is None:
             return
 
-        if self._is_data_loaded:
+        # Check if this specific pipeline is already loaded
+        if requested_pipeline is not None and requested_pipeline in self._content:
+            return
+
+        if requested_pipeline is None and self._is_data_loaded:
             return
 
         register_pipelines = self._get_pipelines_registry_callable(
@@ -211,16 +215,22 @@ class _ProjectPipelines(MutableMapping):
         try:
             sig = inspect.signature(register_pipelines)
         except (TypeError, ValueError):
-            # Extremely defensive: if signature inspection fails
             project_pipelines = register_pipelines()
         else:
             if "pipeline" in sig.parameters:
-                pipeline_param = requested_pipeline
-                project_pipelines = register_pipelines(pipeline=pipeline_param)
+                # Check if register_pipelines accepts existing_pipelines parameter
+                params = sig.parameters
+                if "existing_pipelines" in params:
+                    # Pass current state
+                    project_pipelines = register_pipelines(
+                        pipeline=requested_pipeline, existing_pipelines=self._content
+                    )
+                else:
+                    project_pipelines = register_pipelines(pipeline=requested_pipeline)
             else:
                 project_pipelines = register_pipelines()
 
-        self._content.update(project_pipelines)
+        self._content = project_pipelines
         self._is_data_loaded = True
 
     def configure(self, pipelines_module: str | None = None) -> None:

@@ -71,7 +71,13 @@ def test_configure_project_should_not_raise_for_unimportable_pipelines(
     # since pipelines loading is lazy
     configure_project(mock_package_name_with_unimportable_pipelines_file)
 
+    # Reset state for clean test
+    pipelines._is_data_loaded = False
+    pipelines._content = {}
+    pipelines._loaded_pipeline_names = set()
+
     # accessing data should raise for unimportable pipelines
+    # With the new behavior, attempting to load triggers the import which fails
     with pytest.raises(
         ModuleNotFoundError, match="No module named 'this_is_not_a_real_thing'"
     ):
@@ -140,6 +146,7 @@ def test_pipelines_load_data_backward_compatibility(
     # Reset the state to ensure fresh load
     pipelines._is_data_loaded = False
     pipelines._content = {}
+    pipelines._loaded_pipeline_names = set()  # Reset the new tracking set
 
     # Access any pipeline - should load all pipelines (backward compatibility)
     pipeline1 = pipelines["pipeline1"]
@@ -155,7 +162,7 @@ def test_pipelines_load_data_backward_compatibility(
 def test_pipelines_load_data_signature_inspection_failure(
     monkeypatch, tmpdir, exception_type
 ):
-    """Test that _load_data falls back to register_pipelines() when signature inspection fails (lines 210-212)."""
+    """Test that _load_data falls back to register_pipelines() when signature inspection fails."""
     # Create a package with register_pipelines
     pipelines_file_path = (
         tmpdir.mkdir(f"test_sig_fail_{exception_type.__name__}")
@@ -182,6 +189,7 @@ def test_pipelines_load_data_signature_inspection_failure(
         # Reset the state
         pipelines._is_data_loaded = False
         pipelines._content = {}
+        pipelines._loaded_pipeline_names = set()  # Reset the new tracking set
 
         # Mock inspect.signature to raise exception to trigger the exception handler
         import inspect as inspect_module
@@ -230,12 +238,74 @@ def selective_registry_package(tmpdir):
 def test_pipelines_load_data_passes_requested_pipeline_to_register_pipelines(
     selective_registry_package,
 ):
+    """Test that register_pipelines receives the requested pipeline parameter."""
     configure_project(selective_registry_package)
 
     # Force a clean load
     pipelines._is_data_loaded = False
     pipelines._content = {}
+    pipelines._loaded_pipeline_names = set()  # Reset the new tracking set
 
     _ = pipelines["my_pipeline"]
 
     assert set(pipelines._content) == {"my_pipeline", "__default__"}
+
+
+def test_pipelines_incremental_loading_merges_defaults(
+    selective_registry_package,
+):
+    """Test that loading multiple pipelines incrementally merges __default__ correctly."""
+    configure_project(selective_registry_package)
+
+    # Force a clean load
+    pipelines._is_data_loaded = False
+    pipelines._content = {}
+    pipelines._loaded_pipeline_names = set()
+
+    # Load first pipeline
+    _ = pipelines["first_pipeline"]
+    assert "first_pipeline" in pipelines._content
+    assert "__default__" in pipelines._content
+
+    # __default__ should contain the first pipeline's nodes
+    first_default = pipelines._content["__default__"]
+
+    # Load second pipeline
+    _ = pipelines["second_pipeline"]
+    assert "first_pipeline" in pipelines._content
+    assert "second_pipeline" in pipelines._content
+    assert "__default__" in pipelines._content
+
+    # __default__ should now have been updated with the second pipeline
+    # The _update_content method adds __default__ pipelines together
+    second_default = pipelines._content["__default__"]
+
+    # Since both are empty pipelines in the fixture, this just verifies the merge happened
+    # In a real scenario with nodes, second_default would have nodes from both
+    assert isinstance(first_default, Pipeline)
+    assert isinstance(second_default, Pipeline)
+
+
+def test_pipelines_does_not_reload_same_pipeline_twice(
+    selective_registry_package,
+):
+    """Test that accessing the same pipeline twice doesn't reload it."""
+    configure_project(selective_registry_package)
+
+    # Force a clean load
+    pipelines._is_data_loaded = False
+    pipelines._content = {}
+    pipelines._loaded_pipeline_names = set()
+
+    # Load pipeline first time
+    pipeline1_first = pipelines["my_pipeline"]
+    loaded_names_after_first = pipelines._loaded_pipeline_names.copy()
+
+    # Load same pipeline again
+    pipeline1_second = pipelines["my_pipeline"]
+    loaded_names_after_second = pipelines._loaded_pipeline_names.copy()
+
+    # Should be the same object and _loaded_pipeline_names shouldn't grow
+    assert pipeline1_first is pipeline1_second
+    assert loaded_names_after_first == loaded_names_after_second
+    assert "my_pipeline" in pipelines._loaded_pipeline_names

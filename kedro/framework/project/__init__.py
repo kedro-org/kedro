@@ -21,7 +21,7 @@ from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
 from kedro.io import CatalogProtocol
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, pipeline
 
 if TYPE_CHECKING:
     import types
@@ -236,7 +236,6 @@ class _ProjectPipelines(MutableMapping):
                 project_pipelines = register_pipelines()
 
         self._update_content(project_pipelines)
-
         self._loaded_pipeline_names.update(project_pipelines.keys())
 
     def configure(self, pipelines_module: str | None = None) -> None:
@@ -435,7 +434,6 @@ def find_pipelines(  # noqa: PLR0915, PLR0912
     """
     pipeline_obj = None
 
-    # Normalize requested pipelines
     requested_pipelines: set[str] | None = None
     if name is not None and name != "__default__":
         # Split by comma and strip whitespace, filter out empty strings
@@ -467,6 +465,11 @@ def find_pipelines(  # noqa: PLR0915, PLR0912
         pipeline_obj = _create_pipeline(pipeline_module)
 
     pipelines_dict: dict[str, Pipeline] = {}
+
+    if requested_pipelines is None or (
+        requested_pipelines is not None and "__default__" in requested_pipelines
+    ):
+        pipelines_dict["__default__"] = pipeline_obj or pipeline([])
 
     # Handle the case that a project doesn't have a pipelines directory.
     try:

@@ -201,15 +201,7 @@ class _ProjectPipelines(MutableMapping):
         if self._pipelines_module is None:
             return
 
-        # Check if we need to reload (new pipeline requested that's not in content)
-        needs_reload = False
-        if requested_pipeline is not None:
-            if requested_pipeline not in self._content:
-                needs_reload = True
-        elif not self._is_data_loaded:
-            needs_reload = True
-
-        if not needs_reload:
+        if self._is_data_loaded:
             return
 
         register_pipelines = self._get_pipelines_registry_callable(

@@ -8,6 +8,7 @@
 ## Major features and improvements
 * Added `@experimental` decorator to mark unstable or early-stage public APIs.
 * Added support for running multiple pipelines in a single Kedro session run via the `--pipelines` CLI option and `pipeline_names` argument in `KedroSession.run()` method.
+* Updated the `spaceflights-pyspark` starter to use the new `SparkDatasetV2` integration, enabling local, Databricks-native, and remote Spark execution workflows.
 
 ## Experimental features
 * Added experimental `llm_context_node` and `LLMContextNode` for assembling LLMs, prompts, and tools into a runtime `LLMContext` within Kedro pipelines.
@@ -20,6 +21,7 @@
 
 ## Documentation changes
 * Added beginner-friendly notes on `uvx` installation.
+* Updated Databricks deployment docs to cover `Spark Connect`, `Unity Catalog`–first workflows, and local-to-remote development.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

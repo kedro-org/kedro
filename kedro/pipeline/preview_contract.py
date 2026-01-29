@@ -72,15 +72,6 @@ def _validate_non_empty_str(value: Any, field_name: str) -> None:
         raise TypeError(f"{field_name} must be a non-empty str")
 
 
-def _validate_table_rows(rows: list[dict[str, JSONValue]], field_name: str) -> None:
-    """Validate that table rows are properly formatted."""
-    for i, row in enumerate(rows):
-        _validate_type(row, dict, f"{field_name}[{i}]")
-        if not all(isinstance(k, str) for k in row.keys()):
-            raise TypeError(f"{field_name}[{i}] keys must be str")
-        assert_json_value(row, path=f"$.content[{i}]")
-
-
 @dataclass(frozen=True)
 class TextPreview(BasePreview):
     content: str
@@ -97,35 +88,6 @@ class MermaidPreview(BasePreview):
 
     def __post_init__(self) -> None:
         _validate_type(self.content, str, "MermaidPreview.content")
-
-
-@dataclass(frozen=True)
-class JsonPreview(BasePreview):
-    content: JSONValue
-    kind: Literal["json"] = field(default="json", init=False)
-
-    def __post_init__(self) -> None:
-        assert_json_value(self.content, "$.content")
-
-
-@dataclass(frozen=True)
-class TablePreview(BasePreview):
-    content: list[dict[str, JSONValue]]
-    kind: Literal["table"] = field(default="table", init=False)
-
-    def __post_init__(self) -> None:
-        _validate_type(self.content, list, "TablePreview.content")
-        _validate_table_rows(self.content, "TablePreview.content")
-
-
-@dataclass(frozen=True)
-class PlotlyPreview(BasePreview):
-    content: JSONObject
-    kind: Literal["plotly"] = field(default="plotly", init=False)
-
-    def __post_init__(self) -> None:
-        _validate_type(self.content, dict, "PlotlyPreview.content")
-        assert_json_value(self.content, "$.content")
 
 
 @dataclass(frozen=True)
@@ -149,12 +111,4 @@ class CustomPreview(BasePreview):
         assert_json_value(self.content, "$.content")
 
 
-PreviewPayload: TypeAlias = (
-    TextPreview
-    | MermaidPreview
-    | JsonPreview
-    | TablePreview
-    | PlotlyPreview
-    | ImagePreview
-    | CustomPreview
-)
+PreviewPayload: TypeAlias = TextPreview | MermaidPreview | ImagePreview | CustomPreview

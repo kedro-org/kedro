@@ -5,10 +5,7 @@ import pytest
 from kedro.pipeline.preview_contract import (
     CustomPreview,
     ImagePreview,
-    JsonPreview,
     MermaidPreview,
-    PlotlyPreview,
-    TablePreview,
     TextPreview,
     assert_json_value,
 )
@@ -122,100 +119,6 @@ class TestMermaidPreview:
         result = preview.to_dict()
         assert result["kind"] == "mermaid"
         assert result["content"] == "graph TD\n A"
-
-
-class TestJsonPreview:
-    """Tests for JsonPreview dataclass."""
-
-    def test_valid_json_preview_with_dict(self):
-        """Test creating valid JsonPreview with dict."""
-        preview = JsonPreview(content={"key": "value"})
-        assert preview.kind == "json"
-        assert preview.content == {"key": "value"}
-
-    def test_valid_json_preview_with_list(self):
-        """Test creating valid JsonPreview with list."""
-        preview = JsonPreview(content=[1, 2, 3])
-        assert preview.kind == "json"
-        assert preview.content == [1, 2, 3]
-
-    def test_json_preview_invalid_content(self):
-        """Test that non-JSON-serializable content is rejected."""
-        with pytest.raises(TypeError, match="value is not JSON-serializable"):
-            JsonPreview(content=object())
-
-    def test_json_preview_to_dict(self):
-        """Test JsonPreview serialization."""
-        preview = JsonPreview(content={"data": [1, 2, 3]})
-        result = preview.to_dict()
-        assert result["kind"] == "json"
-        assert result["content"] == {"data": [1, 2, 3]}
-
-
-class TestTablePreview:
-    """Tests for TablePreview dataclass."""
-
-    def test_valid_table_preview(self):
-        """Test creating valid TablePreview."""
-        preview = TablePreview(content=[{"name": "Alice", "age": 30}])
-        assert preview.kind == "table"
-        assert preview.content == [{"name": "Alice", "age": 30}]
-
-    def test_table_preview_non_list_content(self):
-        """Test that non-list content is rejected."""
-        with pytest.raises(TypeError, match="TablePreview.content must be list"):
-            TablePreview(content="not a list")
-
-    def test_table_preview_non_dict_row(self):
-        """Test that non-dict rows are rejected."""
-        with pytest.raises(TypeError, match=r"TablePreview.content\[0\] must be dict"):
-            TablePreview(content=["not a dict"])
-
-    def test_table_preview_row_with_non_string_key(self):
-        """Test that rows with non-string keys are rejected."""
-        with pytest.raises(
-            TypeError, match=r"TablePreview.content\[0\] keys must be str"
-        ):
-            TablePreview(content=[{1: "value"}])
-
-    def test_table_preview_non_json_serializable_cell(self):
-        """Test that non-JSON-serializable cell values are rejected."""
-        with pytest.raises(TypeError, match="value is not JSON-serializable"):
-            TablePreview(content=[{"data": object()}])
-
-    def test_table_preview_to_dict(self):
-        """Test TablePreview serialization."""
-        preview = TablePreview(content=[{"id": 1, "name": "Alice"}])
-        result = preview.to_dict()
-        assert result["kind"] == "table"
-        assert result["content"] == [{"id": 1, "name": "Alice"}]
-
-
-class TestPlotlyPreview:
-    """Tests for PlotlyPreview dataclass."""
-
-    def test_valid_plotly_preview(self):
-        """Test creating valid PlotlyPreview."""
-        preview = PlotlyPreview(content={"data": [], "layout": {}})
-        assert preview.kind == "plotly"
-        assert preview.content == {"data": [], "layout": {}}
-
-    def test_plotly_preview_invalid_content_type(self):
-        """Test that non-dict content is rejected."""
-        with pytest.raises(TypeError, match="PlotlyPreview.content must be dict"):
-            PlotlyPreview(content="not a dict")
-
-    def test_plotly_preview_invalid_content_value(self):
-        """Test that non-JSON-serializable content is rejected."""
-        with pytest.raises(TypeError, match="value is not JSON-serializable"):
-            PlotlyPreview(content={"obj": object()})
-
-    def test_plotly_preview_to_dict(self):
-        """Test PlotlyPreview serialization."""
-        preview = PlotlyPreview(content={"data": [1, 2]})
-        result = preview.to_dict()
-        assert result["kind"] == "plotly"
-        assert result["content"]["data"] == [1, 2]
 
 
 class TestImagePreview:

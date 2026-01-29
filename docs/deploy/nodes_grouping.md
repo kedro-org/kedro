@@ -36,7 +36,7 @@ You can tag individual nodes or the entire pipeline. This approach allows flexib
 Please note that nodes with the same tag can exist in different pipelines. This overlap can make debugging and maintenance more challenging. Tags also do not enforce structure like pipelines or namespaces.
 
 **Best used when**
-- You need to run specific nodes that don’t belong to the same pipeline.
+- You need to run specific nodes that don't belong to the same pipeline.
 - You want to rerun a subset of nodes in a large pipeline.
 
 **Not to use when**
@@ -88,6 +88,18 @@ return Pipeline(
   ```
 More information: [Namespaces](https://docs.kedro.org/en/stable/build/namespaces/)
 
+### Using namespaces with deployment plugins
+
+When deploying Kedro pipelines, some plugins support grouping nodes by namespace to create more efficient task structures:
+
+**Kedro-Airflow**: The `kedro-airflow` plugin supports grouping nodes by namespace when generating Airflow DAGs. Use the `--group-by namespace` flag to combine all nodes within the same namespace into a single Airflow task:
+
+```bash
+kedro airflow create --group-by namespace
+```
+
+This reduces the number of Airflow tasks and keeps logically related nodes together. For more details, see the [kedro-airflow documentation](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) and the [Airflow deployment guide](./supported-platforms/airflow.md#grouping-nodes-in-airflow-tasks).
+
 ---
 
 **Summary table**
@@ -97,3 +109,4 @@ More information: [Namespaces](https://docs.kedro.org/en/stable/build/namespaces
 | **What Works** | If you're happy with how the nodes are structured in your existing pipeline, or your pipeline is low complexity and a new grouping view is not required then you don't have to use any alternatives | Tagging individual nodes or the entire pipeline allows flexible execution of specific sections without altering the pipeline structure, and Kedro-Viz offers clear visualisation of these tagged nodes for better understanding. | Namespaces group nodes to ensure clear dependencies and separation within a pipeline, allow selective execution, and can be visualised using Kedro-Viz. |
 | **What Doesn't Work** | If you want to group nodes differently from the current pipeline structure, instead of creating a new pipeline, you can use alternative grouping methods such as tags or namespaces. | Lack of hierarchical structure, using tags makes debugging and maintaining the codebase more challenging | Defining namespaces at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps create a modular structure by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline. |
 | **Syntax** | `kedro run --pipeline=<your_pipeline_name>` | `kedro run --tags=<your_tag_name>` | `kedro run --namespaces=< namespace1,namespace2 >` |
+| **Deployment Plugin Support** | N/A | N/A | `kedro airflow create --group-by namespace` |

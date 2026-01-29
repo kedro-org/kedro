@@ -88,8 +88,8 @@ class Node:
                 in the node ``inputs`` or ``outputs``.
             namespace: Optional node namespace.
             preview_fn: Optional preview function that returns one of the valid
-                preview types (TextPreview, MermaidPreview, JsonPreview, TablePreview,
-                PlotlyPreview, ImagePreview, or CustomPreview). This is an experimental feature.
+                preview types (TextPreview, MermaidPreview, ImagePreview, or CustomPreview).
+                This is an experimental feature.
 
         Raises:
             ValueError: Raised in the following cases:
@@ -420,9 +420,8 @@ class Node:
         """Execute the preview function if available and validate its return type.
 
         Returns:
-            A preview payload (one of TextPreview, MermaidPreview, JsonPreview,
-                TablePreview, PlotlyPreview, ImagePreview, or CustomPreview) if
-                preview_fn is set, None otherwise.
+            A preview payload (one of TextPreview, MermaidPreview, ImagePreview,
+                or CustomPreview) if preview_fn is set, None otherwise.
 
         Raises:
             ValueError: If the preview function does not return one of the valid
@@ -431,28 +430,14 @@ class Node:
         Examples:
             ```python
             from kedro.pipeline.preview_contract import (
-                JsonPreview,
                 MermaidPreview,
-                TablePreview,
-                PlotlyPreview,
                 ImagePreview,
             )
 
             # Define your preview methods
 
 
-            # Example 1: JSON preview
-            def preview_data_summary() -> JsonPreview:
-                return JsonPreview(
-                    content={
-                        "num_rows": 1000,
-                        "num_columns": 5,
-                        "columns": ["id", "name", "age", "city", "score"],
-                    },
-                )
-
-
-            # Example 2: Mermaid diagram
+            # Example 1: Mermaid diagram
             def preview_pipeline_flow() -> MermaidPreview:
                 steps = ["Load", "Validate", "Transform", "Save"]
                 mermaid = "graph LR\\n"
@@ -463,27 +448,7 @@ class Node:
                 return MermaidPreview(content=mermaid)
 
 
-            # Example 3: Table preview
-            def preview_table() -> TablePreview:
-                return TablePreview(
-                    content=[
-                        {"name": "Alice", "age": 30, "city": "NYC"},
-                        {"name": "Bob", "age": 25, "city": "LA"},
-                    ],
-                )
-
-
-            # Example 4: Plotly preview
-            def preview_plotly() -> PlotlyPreview:
-                return PlotlyPreview(
-                    content={
-                        "data": [{"x": [1, 2, 3], "y": [2, 4, 6], "type": "scatter"}],
-                        "layout": {"title": "My Plot"},
-                    },
-                )
-
-
-            # Example 5: Image preview (URL or data URI)
+            # Example 2: Image preview (URL or data URI)
             def preview_image() -> ImagePreview:
                 return ImagePreview(
                     content="https://example.com/chart.png",
@@ -515,19 +480,13 @@ class Node:
         from kedro.pipeline.preview_contract import (
             CustomPreview,
             ImagePreview,
-            JsonPreview,
             MermaidPreview,
-            PlotlyPreview,
-            TablePreview,
             TextPreview,
         )
 
         valid_types = (
             TextPreview,
             MermaidPreview,
-            JsonPreview,
-            TablePreview,
-            PlotlyPreview,
             ImagePreview,
             CustomPreview,
         )
@@ -535,8 +494,7 @@ class Node:
         if not isinstance(result, valid_types):
             raise ValueError(
                 f"preview_fn must return one of the valid preview types "
-                f"(TextPreview, MermaidPreview, JsonPreview, TablePreview, "
-                f"PlotlyPreview, ImagePreview, or CustomPreview), "
+                f"(TextPreview, MermaidPreview, ImagePreview, or CustomPreview), "
                 f"but got '{type(result).__name__}' instead."
             )
 
@@ -840,8 +798,8 @@ def node(  # noqa: PLR0913
             or ``outputs``.
         namespace: Optional node namespace.
         preview_fn: Optional preview function that returns one of the valid
-            preview types (TextPreview, MermaidPreview, JsonPreview, TablePreview,
-            PlotlyPreview, ImagePreview, or CustomPreview). This is an experimental feature.
+            preview types (TextPreview, MermaidPreview, ImagePreview, or CustomPreview).
+            This is an experimental feature.
 
     Returns:
         A Node object with mapped inputs, outputs and function.

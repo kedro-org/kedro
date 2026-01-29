@@ -21,7 +21,7 @@
 
 ## Documentation changes
 * Added beginner-friendly notes on `uvx` installation.
-* Updated Databricks deployment docs to cover `Spark Connect`, `Unity Catalog`–first workflows, and local-to-remote development.
+* Updated Databricks deployment docs to cover `Spark Connect` and `Unity Catalog` – first workflows, and local-to-remote development.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

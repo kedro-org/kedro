@@ -21,7 +21,7 @@ from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
 from kedro.io import CatalogProtocol
-from kedro.pipeline import Pipeline, pipeline
+from kedro.pipeline import Pipeline
 
 if TYPE_CHECKING:
     import types
@@ -190,6 +190,7 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module: str | None = None
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
+        self._loaded_pipeline_names: set[str] = set()
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
@@ -197,11 +198,25 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
+    def _update_content(self, project_pipelines: dict[str, Pipeline]) -> None:
+        new_default = project_pipelines.pop("__default__", None)
+
+        self._content.update(project_pipelines)
+
+        if new_default is not None:
+            if "__default__" in self._content:
+                self._content["__default__"] += new_default
+            else:
+                self._content["__default__"] = new_default
+
     def _load_data(self, requested_pipeline: str | None = None) -> None:
         if self._pipelines_module is None:
             return
 
-        if self._is_data_loaded:
+        if requested_pipeline is not None:
+            if requested_pipeline in self._loaded_pipeline_names:
+                return
+        elif self._loaded_pipeline_names:
             return
 
         register_pipelines = self._get_pipelines_registry_callable(
@@ -220,8 +235,9 @@ class _ProjectPipelines(MutableMapping):
             else:
                 project_pipelines = register_pipelines()
 
-        self._content.update(project_pipelines)
-        self._is_data_loaded = True
+        self._update_content(project_pipelines)
+
+        self._loaded_pipeline_names.update(project_pipelines.keys())
 
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
@@ -451,10 +467,6 @@ def find_pipelines(  # noqa: PLR0915, PLR0912
         pipeline_obj = _create_pipeline(pipeline_module)
 
     pipelines_dict: dict[str, Pipeline] = {}
-
-    # Only add __default__ if we're loading all pipelines or if it was explicitly requested
-    if requested_pipelines is None or "__default__" in requested_pipelines:
-        pipelines_dict["__default__"] = pipeline_obj or pipeline([])
 
     # Handle the case that a project doesn't have a pipelines directory.
     try:

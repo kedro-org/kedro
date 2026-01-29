@@ -338,7 +338,7 @@ class KedroSession:
                 "`pipeline_name` is deprecated and will be removed in a future release. "
                 "Please use `pipeline_names` instead."
             )
-            pipeline_names = [pipeline_name]
+            pipeline_names = pipeline_name.split(",")
 
         if self._run_called:
             raise KedroSessionError(

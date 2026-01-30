@@ -190,7 +190,6 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module: str | None = None
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
-        self._loaded_pipeline_names: set[str] = set()
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
@@ -198,25 +197,26 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def _update_content(self, project_pipelines: dict[str, Pipeline]) -> None:
-        new_default = project_pipelines.pop("__default__", None)
+    def get_pipelines(
+        self, requested_pipeline: str | None = None
+    ) -> dict[str, Pipeline]:
+        """Returns one or more of the project's pipelines.
 
-        self._content.update(project_pipelines)
+        Args:
+        requested_pipeline: Optional pipeline name for selective loading.
 
-        if new_default is not None:
-            if "__default__" in self._content:
-                self._content["__default__"] += new_default
-            else:
-                self._content["__default__"] = new_default
+        Returns:
+            A mapping from pipeline names to ``Pipeline`` objects.
+        """
+        self._load_data(requested_pipeline=requested_pipeline)
+        return self._content
 
     def _load_data(self, requested_pipeline: str | None = None) -> None:
-        if self._pipelines_module is None:
-            return
+        """Lazily read pipelines defined in the pipelines registry module."""
 
-        if requested_pipeline is not None:
-            if requested_pipeline in self._loaded_pipeline_names:
-                return
-        elif self._loaded_pipeline_names:
+        # If the pipelines dictionary has not been configured with a pipelines module
+        # or if data has been loaded
+        if self._pipelines_module is None or self._is_data_loaded:
             return
 
         register_pipelines = self._get_pipelines_registry_callable(
@@ -230,13 +230,12 @@ class _ProjectPipelines(MutableMapping):
             project_pipelines = register_pipelines()
         else:
             if "pipeline" in sig.parameters:
-                pipeline_param = requested_pipeline
-                project_pipelines = register_pipelines(pipeline=pipeline_param)
+                project_pipelines = register_pipelines(pipeline=requested_pipeline)
             else:
                 project_pipelines = register_pipelines()
 
-        self._update_content(project_pipelines)
-        self._loaded_pipeline_names.update(project_pipelines.keys())
+        self._content = project_pipelines
+        self._is_data_loaded = True
 
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
@@ -246,14 +245,9 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module = pipelines_module
         self._is_data_loaded = False
         self._content = {}
-        self._loaded_pipeline_names = set()
-
-    def __getitem__(self, key: str) -> Pipeline:
-        """Override __getitem__ to load data before accessing, passing the requested pipeline."""
-        self._load_data(requested_pipeline=key)
-        return self._content[key]
 
     # Dict-like interface
+    __getitem__ = _load_data_wrapper(operator.getitem)
     __setitem__ = _load_data_wrapper(operator.setitem)
     __delitem__ = _load_data_wrapper(operator.delitem)
     __iter__ = _load_data_wrapper(iter)
@@ -414,8 +408,11 @@ def find_pipelines(  # noqa: PLR0915, PLR0912
     https://docs.kedro.org/en/stable/build/pipeline_registry/
 
     Args:
-        name: Optional pipeline names to load selectively. If provided,
-            only the desired pipelines are loaded.
+        name: Optional pipeline name(s) to load selectively. Can be:
+            - None: Load all pipelines
+            - "__default__": Load all pipelines (same as None)
+            - "pipeline_name": Load single pipeline
+            - "pipeline1,pipeline2": Load multiple comma-separated pipelines
         raise_errors: If ``True``, raise an error upon failed discovery.
 
     Returns:
@@ -433,11 +430,17 @@ def find_pipelines(  # noqa: PLR0915, PLR0912
             ``Pipeline`` object, or if the module import fails up front.
             If ``raise_errors`` is ``True``, see Raises section instead.
     """
+    # Safety check: If PACKAGE_NAME is None, we can't discover pipelines
+    if PACKAGE_NAME is None:
+        if name is None or name == "__default__":
+            return {"__default__": pipeline([])}
+        return {}
+
     pipeline_obj = None
 
+    # Parse requested pipelines from comma-separated string
     requested_pipelines: set[str] | None = None
     if name is not None and name != "__default__":
-        # Split by comma and strip whitespace, filter out empty strings
         pipeline_names = {
             pipeline.strip() for pipeline in name.split(",") if pipeline.strip()
         }
@@ -467,9 +470,8 @@ def find_pipelines(  # noqa: PLR0915, PLR0912
 
     pipelines_dict: dict[str, Pipeline] = {}
 
-    if requested_pipelines is None or (
-        requested_pipelines is not None and "__default__" in requested_pipelines
-    ):
+    # Only add __default__ if we're loading all pipelines (no specific ones requested)
+    if requested_pipelines is None:
         pipelines_dict["__default__"] = pipeline_obj or pipeline([])
 
     # Handle the case that a project doesn't have a pipelines directory.
@@ -483,7 +485,8 @@ def find_pipelines(  # noqa: PLR0915, PLR0912
                 if raise_errors:
                     raise KeyError(error_msg) from exc
                 warnings.warn(error_msg)
-            return pipelines_dict
+                return {}  # Return empty dict for specific pipelines when dir missing
+            return pipelines_dict  # Return with __default__ when loading all
 
     # If specific pipelines were requested, try to import them directly
     if requested_pipelines is not None and requested_pipelines:

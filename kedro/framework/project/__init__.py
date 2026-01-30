@@ -246,6 +246,7 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module = pipelines_module
         self._is_data_loaded = False
         self._content = {}
+        self._loaded_pipeline_names = set()
 
     def __getitem__(self, key: str) -> Pipeline:
         """Override __getitem__ to load data before accessing, passing the requested pipeline."""

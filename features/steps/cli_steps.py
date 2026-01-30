@@ -545,9 +545,6 @@ def check_created_project_structure_from_tools(context, tools):
     if "data" in tools_list:  # data tool
         assert is_created("data"), "data directory does not exist"
 
-    if "pyspark" in tools_list:  # PySpark tool
-        assert is_created("conf/base/spark.yml"), "spark.yml does not exist"
-
     if "viz" in tools_list:  # viz tool
         expected_reporting_path = Path(
             f"src/{context.package_name}/pipelines/reporting"

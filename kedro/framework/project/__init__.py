@@ -188,7 +188,6 @@ class _ProjectPipelines(MutableMapping):
 
     def __init__(self) -> None:
         self._pipelines_module: str | None = None
-        self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
         self._loaded_pipeline_names: set[str] = set()
 
@@ -244,7 +243,6 @@ class _ProjectPipelines(MutableMapping):
         data are reloaded.
         """
         self._pipelines_module = pipelines_module
-        self._is_data_loaded = False
         self._content = {}
         self._loaded_pipeline_names = set()
 

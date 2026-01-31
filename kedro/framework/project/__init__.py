@@ -197,20 +197,6 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def get_pipelines(
-        self, requested_pipeline: str | None = None
-    ) -> dict[str, Pipeline]:
-        """Returns one or more of the project's pipelines.
-
-        Args:
-        requested_pipeline: Optional pipeline name for selective loading.
-
-        Returns:
-            A mapping from pipeline names to ``Pipeline`` objects.
-        """
-        self._load_data(requested_pipeline=requested_pipeline)
-        return self._content
-
     def _load_data(self, requested_pipeline: str | None = None) -> None:
         """Lazily read pipelines defined in the pipelines registry module."""
 
@@ -237,6 +223,22 @@ class _ProjectPipelines(MutableMapping):
         self._content = project_pipelines
         self._is_data_loaded = True
 
+    def __getitem__(self, key: str) -> Pipeline:
+        # Load requested pipelines (one/multiple/all)
+        self._load_data(requested_pipeline=key)
+
+        # If only one was requested and it exists, return it directly
+        if key in self._content:
+            return self._content[key]
+
+        # If multiple pipelines were requested, combine them
+        combined = Pipeline([])
+
+        for p in self._content.values():
+            combined += p
+
+        return combined
+
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every ``configure`` call,
@@ -247,7 +249,6 @@ class _ProjectPipelines(MutableMapping):
         self._content = {}
 
     # Dict-like interface
-    __getitem__ = _load_data_wrapper(operator.getitem)
     __setitem__ = _load_data_wrapper(operator.setitem)
     __delitem__ = _load_data_wrapper(operator.delitem)
     __iter__ = _load_data_wrapper(iter)

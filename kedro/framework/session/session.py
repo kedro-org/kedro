@@ -353,15 +353,12 @@ class KedroSession:
         context = self.load_context()
 
         names = pipeline_names or "__default__"
+        pipelines_to_run = Pipeline([])
 
         try:
-            pipelines_dict = pipelines.get_pipelines(names)
+            pipelines_to_run = pipelines[names]
         except KeyError as exc:
             raise ValueError("Failed to retrieve the requested pipelines.") from exc
-
-        pipelines_to_run = Pipeline([])
-        for pipeline in pipelines_dict.values():
-            pipelines_to_run += pipeline
 
         filtered_pipeline = pipelines_to_run.filter(
             tags=tags,

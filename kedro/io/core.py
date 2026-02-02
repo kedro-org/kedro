@@ -12,10 +12,9 @@ import sys
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
-from functools import partial, wraps
+from functools import wraps
 from glob import iglob
 from inspect import getcallargs
-from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
 from typing import (  # noqa: UP035
     TYPE_CHECKING,
@@ -30,8 +29,6 @@ from typing import (  # noqa: UP035
     runtime_checkable,
 )
 
-from cachetools import Cache, cachedmethod
-from cachetools.keys import hashkey
 from typing_extensions import Self
 
 # These are re-exported for backward compatibility
@@ -734,13 +731,19 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._version = version
         self._exists_function = exists_function or _local_exists
         self._glob_function = glob_function or iglob
-        # 1 entry for load version, 1 for save version
-        self._version_cache = Cache(maxsize=2)  # type: Cache
+        # Manual cache for load and save versions
+        self._cached_load_version: str | None = None
+        self._cached_save_version: str | None = None
 
-    # 'key' is set to prevent cache key overlapping for load and save:
-    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
-    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "load"))
     def _fetch_latest_load_version(self) -> str:
+        """Fetch the most recent existing version from the given path.
+
+        Results are cached to avoid repeated filesystem operations.
+        """
+        # Return cached version if available
+        if self._cached_load_version is not None:
+            return self._cached_load_version
+
         # When load version is unpinned, fetch the most recent existing
         # version from the given path.
         pattern = str(self._get_versioned_path("*"))
@@ -758,14 +761,20 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         if not most_recent:
             message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
-        return PurePath(most_recent).parent.name
 
-    # 'key' is set to prevent cache key overlapping for load and save:
-    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
-    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
+        # Cache and return the result
+        self._cached_load_version = PurePath(most_recent).parent.name
+        return self._cached_load_version
+
     def _fetch_latest_save_version(self) -> str:
-        """Generate and cache the current save version"""
-        return generate_timestamp()
+        """Generate and cache the current save version."""
+        # Return cached version if available
+        if self._cached_save_version is not None:
+            return self._cached_save_version
+
+        # Generate new timestamp and cache it
+        self._cached_save_version = generate_timestamp()
+        return self._cached_save_version
 
     def resolve_load_version(self) -> str | None:
         """Compute the version the dataset should be loaded with."""
@@ -818,7 +827,9 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
         @wraps(save_func)
         def save(self: Self, data: _DI) -> None:
-            self._version_cache.clear()
+            # Clear version cache before saving
+            self._cached_load_version = None
+            self._cached_save_version = None
             save_version = (
                 self.resolve_save_version()
             )  # Make sure last save version is set
@@ -844,7 +855,9 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                 warnings.warn(
                     _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
                 )
-                self._version_cache.clear()
+                # Clear cache to ensure consistency
+                self._cached_load_version = None
+                self._cached_save_version = None
 
         return save
 
@@ -870,7 +883,9 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     def _release(self) -> None:
         super()._release()
-        self._version_cache.clear()
+        # Clear version cache
+        self._cached_load_version = None
+        self._cached_save_version = None
 
 
 def get_protocol_and_path(

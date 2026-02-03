@@ -727,6 +727,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             glob_function: Function that is used for finding all paths
                 in a filesystem, which match a given pattern.
         """
+        from threading import RLock
+
         self._filepath = filepath
         self._version = version
         self._exists_function = exists_function or _local_exists
@@ -734,47 +736,50 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         # Manual cache for load and save versions
         self._cached_load_version: str | None = None
         self._cached_save_version: str | None = None
+        self._version_cache_lock = RLock()
 
     def _fetch_latest_load_version(self) -> str:
         """Fetch the most recent existing version from the given path.
 
         Results are cached to avoid repeated filesystem operations.
         """
-        # Return cached version if available
-        if self._cached_load_version is not None:
-            return self._cached_load_version
+        with self._version_cache_lock:
+            # Return cached version if available
+            if self._cached_load_version is not None:
+                return self._cached_load_version
 
-        # When load version is unpinned, fetch the most recent existing
-        # version from the given path.
-        pattern = str(self._get_versioned_path("*"))
-        try:
-            version_paths = sorted(self._glob_function(pattern), reverse=True)
-        except Exception as exc:
-            message = (
-                f"Did not find any versions for {self}. This could be "
-                f"due to insufficient permission. Exception: {exc}"
+            # When load version is unpinned, fetch the most recent existing
+            # version from the given path.
+            pattern = str(self._get_versioned_path("*"))
+            try:
+                version_paths = sorted(self._glob_function(pattern), reverse=True)
+            except Exception as exc:
+                message = (
+                    f"Did not find any versions for {self}. This could be "
+                    f"due to insufficient permission. Exception: {exc}"
+                )
+                raise VersionNotFoundError(message) from exc
+            most_recent = next(
+                (path for path in version_paths if self._exists_function(path)), None
             )
-            raise VersionNotFoundError(message) from exc
-        most_recent = next(
-            (path for path in version_paths if self._exists_function(path)), None
-        )
-        if not most_recent:
-            message = f"Did not find any versions for {self}"
-            raise VersionNotFoundError(message)
+            if not most_recent:
+                message = f"Did not find any versions for {self}"
+                raise VersionNotFoundError(message)
 
-        # Cache and return the result
-        self._cached_load_version = PurePath(most_recent).parent.name
-        return self._cached_load_version
+            # Cache and return the result
+            self._cached_load_version = PurePath(most_recent).parent.name
+            return self._cached_load_version
 
     def _fetch_latest_save_version(self) -> str:
         """Generate and cache the current save version."""
-        # Return cached version if available
-        if self._cached_save_version is not None:
-            return self._cached_save_version
+        with self._version_cache_lock:
+            # Return cached version if available
+            if self._cached_save_version is not None:
+                return self._cached_save_version
 
-        # Generate new timestamp and cache it
-        self._cached_save_version = generate_timestamp()
-        return self._cached_save_version
+            # Generate new timestamp and cache it
+            self._cached_save_version = generate_timestamp()
+            return self._cached_save_version
 
     def resolve_load_version(self) -> str | None:
         """Compute the version the dataset should be loaded with."""
@@ -828,8 +833,9 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         @wraps(save_func)
         def save(self: Self, data: _DI) -> None:
             # Clear version cache before saving
-            self._cached_load_version = None
-            self._cached_save_version = None
+            with self._version_cache_lock:
+                self._cached_load_version = None
+                self._cached_save_version = None
             save_version = (
                 self.resolve_save_version()
             )  # Make sure last save version is set
@@ -856,8 +862,9 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                     _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
                 )
                 # Clear cache to ensure consistency
-                self._cached_load_version = None
-                self._cached_save_version = None
+                with self._version_cache_lock:
+                    self._cached_load_version = None
+                    self._cached_save_version = None
 
         return save
 
@@ -884,8 +891,9 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _release(self) -> None:
         super()._release()
         # Clear version cache
-        self._cached_load_version = None
-        self._cached_save_version = None
+        with self._version_cache_lock:
+            self._cached_load_version = None
+            self._cached_save_version = None
 
 
 def get_protocol_and_path(

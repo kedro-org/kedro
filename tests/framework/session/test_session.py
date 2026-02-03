@@ -867,7 +867,7 @@ class TestKedroSession:
     # TODO: This seems like a geniuine failure
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_run_non_existent_pipeline(self, fake_project, mock_runner, mocker):
-        pattern = "Failed to retrieve the requested pipelines. "
+        pattern = "Failed to retrieve the requested pipelines."
         mocker.patch(
             "kedro_telemetry.plugin._check_for_telemetry_consent",
             return_value=False,

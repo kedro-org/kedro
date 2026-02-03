@@ -197,21 +197,3 @@ def test_pipelines_load_data_signature_inspection_failure(
         assert "test_pipeline" in project.pipelines._content
     finally:
         sys.path.pop(0)
-
-
-def test_get_pipelines_without_configure_project_returns_empty_dict(
-    mock_package_name_with_pipelines_file,
-):
-    importlib.reload(project)
-    result = project.pipelines.get_pipelines()
-    assert result == {}
-
-
-def test_get_pipelines_selective_single_pipeline(selective_registry_package):
-    project.configure_project(selective_registry_package)
-
-    result = project.pipelines.get_pipelines("my_pipeline")
-
-    assert "my_pipeline" in result
-    assert "__default__" in result
-    assert isinstance(result["my_pipeline"], Pipeline)

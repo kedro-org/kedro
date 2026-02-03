@@ -895,6 +895,29 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             self._cached_load_version = None
             self._cached_save_version = None
 
+    def __getstate__(self) -> dict[str, Any]:
+        """Prepare the dataset for pickling by excluding non-picklable RLock.
+
+        Returns:
+            Dictionary of instance attributes, excluding the lock.
+        """
+        state = self.__dict__.copy()
+        # Remove the unpicklable RLock
+        state.pop("_version_cache_lock", None)
+        return state
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        """Restore the dataset from pickle by recreating the RLock.
+
+        Args:
+            state: Dictionary of instance attributes.
+        """
+        from threading import RLock
+
+        self.__dict__.update(state)
+        # Recreate the RLock after unpickling
+        self._version_cache_lock = RLock()
+
 
 def get_protocol_and_path(
     filepath: str | os.PathLike, version: Version | None = None

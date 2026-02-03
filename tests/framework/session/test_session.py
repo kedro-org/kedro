@@ -864,6 +864,7 @@ class TestKedroSession:
             catalog=mock_catalog,
         )
 
+    # TODO: This seems like a geniuine failure
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_run_non_existent_pipeline(self, fake_project, mock_runner, mocker):
         pattern = (

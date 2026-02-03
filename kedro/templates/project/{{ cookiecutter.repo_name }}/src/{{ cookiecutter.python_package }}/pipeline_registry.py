@@ -15,6 +15,6 @@ def register_pipelines(pipeline: str | None = None) -> dict[str, Pipeline]:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
 
-    pipelines = find_pipelines(name=pipeline, raise_errors=True)
+    pipelines = find_pipelines(name=pipeline)
     pipelines["__default__"] = sum(pipelines.values())
     return pipelines

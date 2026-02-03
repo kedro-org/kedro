@@ -227,17 +227,18 @@ class _ProjectPipelines(MutableMapping):
         # Load requested pipelines (one/multiple/all)
         self._load_data(requested_pipeline=key)
 
-        # If only one was requested and it exists, return it directly
+        # Single pipeline exists
         if key in self._content:
             return self._content[key]
 
-        # If multiple pipelines were requested, combine them
-        combined = Pipeline([])
+        # Multiple pipelines requested
+        if "," in key:
+            combined = Pipeline([])
+            for p in self._content.values():
+                combined += p
+            return combined
 
-        for p in self._content.values():
-            combined += p
-
-        return combined
+        raise KeyError(key)
 
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.

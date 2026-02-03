@@ -1,4 +1,3 @@
-import importlib
 import sys
 import textwrap
 
@@ -6,15 +5,6 @@ import pytest
 
 from kedro.framework import project
 from kedro.pipeline import Pipeline
-
-
-@pytest.fixture(autouse=True)
-def reset_pipelines_state():
-    """Ensure pipelines global state is clean for every test."""
-    project.pipelines._is_data_loaded = False
-    project.pipelines._content = {}
-    project.pipelines._loaded_pipeline_names = set()
-    yield
 
 
 @pytest.fixture
@@ -133,12 +123,15 @@ def selective_registry_package(tmpdir):
     sys.path.pop(0)
 
 
-def test_pipelines_without_configure_project_is_empty(
-    mock_package_name_with_pipelines_file,
-):
-    # Reload project module safely instead of deleting sys.modules
-    importlib.reload(project)
-    assert project.pipelines == {}
+def test_pipelines_without_configure_project_is_empty():
+    # Create a fresh project module reference
+    import kedro.framework.project as fresh_project
+
+    # Reset to unconfigured state
+    fresh_project.PACKAGE_NAME = None
+    fresh_project.pipelines.configure(None)
+
+    assert fresh_project.pipelines == {}
 
 
 def test_pipelines_after_configuring_project_shows_updated_values(

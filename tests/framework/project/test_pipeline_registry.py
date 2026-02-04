@@ -123,6 +123,31 @@ def selective_registry_package(tmpdir):
     sys.path.pop(0)
 
 
+@pytest.fixture
+def mock_package_with_pipeline_param(tmpdir):
+    """Package with register_pipelines that accepts pipeline parameter."""
+    pipelines_file = tmpdir.mkdir("test_pipeline_param") / "pipeline_registry.py"
+    pipelines_file.write(
+        textwrap.dedent(
+            """
+            from kedro.pipeline import Pipeline
+
+            def register_pipelines(pipeline=None):
+                # This function accepts pipeline parameter
+                if pipeline == "specific":
+                    return {"specific": Pipeline([]), "__default__": Pipeline([])}
+                return {"all": Pipeline([]), "__default__": Pipeline([])}
+            """
+        )
+    )
+    project_path, package_name, _ = str(pipelines_file).rpartition(
+        "test_pipeline_param"
+    )
+    sys.path.insert(0, project_path)
+    yield package_name
+    sys.path.pop(0)
+
+
 def test_pipelines_without_configure_project_is_empty():
     # Create a fresh project module reference
     import kedro.framework.project as fresh_project
@@ -190,3 +215,42 @@ def test_pipelines_load_data_signature_inspection_failure(
         assert "test_pipeline" in project.pipelines._content
     finally:
         sys.path.pop(0)
+
+
+def test_load_data_calls_register_pipelines_with_pipeline_parameter(
+    mock_package_with_pipeline_param,
+):
+    """Test that _load_data passes requested_pipeline to register_pipelines when signature has 'pipeline' param."""
+    project.configure_project(mock_package_with_pipeline_param)
+
+    result = project.pipelines["specific"]
+
+    assert isinstance(result, Pipeline)
+    assert "specific" in project.pipelines._content
+
+
+def test_getitem_with_comma_separated_pipelines(mock_package_with_pipeline_param):
+    """Test that __getitem__ handles comma-separated pipeline keys by combining them."""
+    project.configure_project(mock_package_with_pipeline_param)
+
+    project.pipelines._content = {
+        "pipeline1": Pipeline([]),
+        "pipeline2": Pipeline([]),
+        "__default__": Pipeline([]),
+    }
+    project.pipelines._is_data_loaded = True
+
+    result = project.pipelines["pipeline1,pipeline2"]
+
+    assert isinstance(result, Pipeline)
+
+
+def test_getitem_raises_keyerror_for_missing_pipeline(mock_package_with_pipeline_param):
+    """Test that __getitem__ raises KeyError when pipeline doesn't exist."""
+    project.configure_project(mock_package_with_pipeline_param)
+
+    # Mark as loaded so it doesn't try to load
+    project.pipelines._is_data_loaded = True
+
+    with pytest.raises(KeyError, match="nonexistent"):
+        _ = project.pipelines["nonexistent"]

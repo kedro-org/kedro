@@ -630,3 +630,71 @@ def test_find_multiple_pipelines_when_pipelines_dir_missing_raise_errors_false(
         pipelines = find_pipelines(name="pipeline1,pipeline2", raise_errors=False)
         # Should return empty dict (no pipelines loaded)
         assert pipelines == {}
+
+
+def test_find_pipelines_package_name_none_returns_default():
+    """Test that find_pipelines returns default pipeline when PACKAGE_NAME is None and name is None."""
+    from kedro.framework import project
+
+    # Save original
+    original_package_name = project.PACKAGE_NAME
+
+    try:
+        # Set PACKAGE_NAME to None
+        project.PACKAGE_NAME = None
+
+        # Call find_pipelines with name=None
+        result = find_pipelines(name=None)
+
+        from kedro.pipeline import Pipeline
+
+        assert set(result.keys()) == {"__default__"}
+        assert isinstance(result["__default__"], Pipeline)
+        assert len(result["__default__"].nodes) == 0
+    finally:
+        # Restore
+        project.PACKAGE_NAME = original_package_name
+
+
+def test_find_pipelines_package_name_none_with_specific_name():
+    """Test that find_pipelines returns empty dict when PACKAGE_NAME is None and specific pipeline requested."""
+    from kedro.framework import project
+
+    # Save original
+    original_package_name = project.PACKAGE_NAME
+
+    try:
+        # Set PACKAGE_NAME to None
+        project.PACKAGE_NAME = None
+
+        # Call find_pipelines with specific name
+        result = find_pipelines(name="my_pipeline")
+
+        assert result == {}
+    finally:
+        # Restore
+        project.PACKAGE_NAME = original_package_name
+
+
+def test_find_pipelines_package_name_none_with_default_name():
+    """Test that find_pipelines returns default pipeline when PACKAGE_NAME is None and name='__default__'."""
+    from kedro.framework import project
+
+    # Save original
+    original_package_name = project.PACKAGE_NAME
+
+    try:
+        # Set PACKAGE_NAME to None
+        project.PACKAGE_NAME = None
+
+        # Call find_pipelines with name="__default__"
+        result = find_pipelines(name="__default__")
+
+        from kedro.pipeline import Pipeline
+
+        assert set(result.keys()) == {"__default__"}
+        assert isinstance(result["__default__"], Pipeline)
+        assert len(result["__default__"].nodes) == 0
+    finally:
+        # Restore
+        project.PACKAGE_NAME = original_package_name

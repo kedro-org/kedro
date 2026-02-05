@@ -663,6 +663,16 @@ class Node:
             return dict(zip(self._outputs, result))
 
         if self._outputs is None:
+            if outputs is not None:
+                node_name = self._name or self._func_name
+                warnings.warn(
+                    f"Node '{node_name}' returned a value of type "
+                    f"'{type(outputs).__name__}' but outputs=None. The return value "
+                    f"will be discarded. If you want to use this output, specify "
+                    f"outputs in the node definition.",
+                    UserWarning,
+                    stacklevel=4,
+                )
             return {}
         if isinstance(self._outputs, str):
             return {self._outputs: outputs}

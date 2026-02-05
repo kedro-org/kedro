@@ -141,3 +141,84 @@ class TestNodeRunInvalidOutput:
         pattern += r"the node definition contains 3 output\(s\)\."
         with pytest.raises(ValueError, match=pattern):
             node(one_in_two_out, "ds1", ["A", "B", "C"]).run({"ds1": mocked_dataset})
+
+
+class TestNodeOutputsNoneWarning:
+    """Test warning behavior when outputs=None but function returns a value."""
+
+    def test_outputs_none_with_dict_return_warns(self):
+        """Test that a warning is issued when function returns dict but outputs=None."""
+
+        def returns_dict(arg):
+            return {"r2_score": 0.95, "mae": 0.1}
+
+        test_node = node(returns_dict, "input", None, name="test_node")
+
+        pattern = (
+            r"Node 'test_node' returned a value of type 'dict' but outputs=None\. "
+            r"The return value will be discarded\."
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            test_node.run({"input": 42})
+
+    def test_outputs_none_with_list_return_warns(self):
+        """Test that a warning is issued when function returns list but outputs=None."""
+
+        def returns_list(arg):
+            return [1, 2, 3]
+
+        test_node = node(returns_list, "input", None, name="test_node")
+
+        pattern = (
+            r"Node 'test_node' returned a value of type 'list' but outputs=None\. "
+            r"The return value will be discarded\."
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            test_node.run({"input": 42})
+
+    def test_outputs_none_with_value_return_warns(self):
+        """Test that a warning is issued when function returns a value but outputs=None."""
+
+        def returns_value(arg):
+            return 42
+
+        test_node = node(returns_value, "input", None, name="test_node")
+
+        pattern = (
+            r"Node 'test_node' returned a value of type 'int' but outputs=None\. "
+            r"The return value will be discarded\."
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            test_node.run({"input": 10})
+
+    def test_outputs_none_with_none_return_no_warning(self):
+        """Test that no warning is issued when function returns None and outputs=None."""
+
+        def returns_none(arg):
+            # Side effect only function
+            pass  # implicitly returns None
+
+        test_node = node(returns_none, "input", None, name="test_node")
+
+        # Should not issue a warning
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")  # Convert warnings to errors
+            result = test_node.run({"input": 42})
+            assert result == {}
+
+    def test_outputs_none_unnamed_node_uses_func_name_in_warning(self):
+        """Test that the function name is used in warning when node has no name."""
+
+        def my_function(arg):
+            return {"result": arg}
+
+        test_node = node(my_function, "input", None)  # No name specified
+
+        pattern = (
+            r"Node 'my_function' returned a value of type 'dict' but outputs=None\. "
+            r"The return value will be discarded\."
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            test_node.run({"input": 42})

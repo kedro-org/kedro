@@ -667,11 +667,10 @@ class Node:
                 node_name = self._name or self._func_name
                 warnings.warn(
                     f"Node '{node_name}' returned a value of type "
-                    f"'{type(outputs).__name__}' but outputs=None. The return value "
-                    f"will be discarded. If you want to use this output, specify "
-                    f"outputs in the node definition.",
+                    f"'{type(outputs).__name__}', but outputs=None. "
+                    f"This value will not be included in the pipeline outputs. "
+                    f"To keep it, specify outputs in the node definition.",
                     UserWarning,
-                    stacklevel=4,
                 )
             return {}
         if isinstance(self._outputs, str):

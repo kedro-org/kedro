@@ -160,8 +160,9 @@ class TestNodeOutputsNoneWarning:
 
         test_node = node(func, "input", None, name="test_node")
         pattern = (
-            rf"Node 'test_node' returned a value of type '{expected_type}' "
-            rf"but outputs=None\. The return value will be discarded\."
+            rf"Node 'test_node' returned a value of type '{expected_type}', "
+            rf"but outputs=None\. This value will not be included in the "
+            rf"pipeline outputs\. To keep it, specify outputs in the node definition\."
         )
         with pytest.warns(UserWarning, match=pattern):
             test_node.run({"input": 42})

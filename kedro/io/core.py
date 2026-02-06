@@ -727,17 +727,14 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             glob_function: Function that is used for finding all paths
                 in a filesystem, which match a given pattern.
         """
-
         self._filepath = filepath
         self._version = version
         self._exists_function = exists_function or _local_exists
         self._glob_function = glob_function or iglob
-        # Manual cache for load and save versions
         self._cached_load_version: str | None = None
 
     def _fetch_latest_load_version(self) -> str:
         """Fetch the most recent existing version from the given path.
-
         Results are cached to avoid repeated filesystem operations.
         """
 
@@ -768,7 +765,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         return self._cached_load_version
 
     def _fetch_latest_save_version(self) -> str:
-        """Generate and cache the current save version."""
+        """Generate and cache the current save version"""
         return generate_timestamp()
 
     def resolve_load_version(self) -> str | None:
@@ -822,8 +819,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
         @wraps(save_func)
         def save(self: Self, data: _DI) -> None:
-            # Clear version cache before saving
-
             self._cached_load_version = None
             save_version = (
                 self.resolve_save_version()
@@ -850,8 +845,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                 warnings.warn(
                     _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
                 )
-                # Clear cache to ensure consistency
-
                 self._cached_load_version = None
 
         return save
@@ -878,7 +871,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     def _release(self) -> None:
         super()._release()
-        # Clear version cache
         self._cached_load_version = None
 
 

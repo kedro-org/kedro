@@ -600,14 +600,11 @@ class TestAbstractVersionedDataset:
     def test_cache_release(self, my_versioned_dataset):
         # Set cache values
         my_versioned_dataset._cached_load_version = "2024-01-01T00.00.00.000Z"
-        my_versioned_dataset._cached_save_version = "2024-01-01T00.00.00.000Z"
         assert my_versioned_dataset._cached_load_version is not None
-        assert my_versioned_dataset._cached_save_version is not None
 
         # Release should clear the cache
         my_versioned_dataset._release()
         assert my_versioned_dataset._cached_load_version is None
-        assert my_versioned_dataset._cached_save_version is None
 
     def test_fetch_latest_load_version_success(self, my_versioned_dataset, mocker):
         mock_get_versioned_path = mocker.patch(
@@ -628,7 +625,6 @@ class TestAbstractVersionedDataset:
 
         # Ensure the cache is empty for the test
         my_versioned_dataset._cached_load_version = None
-        my_versioned_dataset._cached_save_version = None
         result = my_versioned_dataset._fetch_latest_load_version()
 
         mock_get_versioned_path.assert_called_once_with("*")

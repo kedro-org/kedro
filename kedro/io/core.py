@@ -732,6 +732,12 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._exists_function = exists_function or _local_exists
         self._glob_function = glob_function or iglob
         self._cached_load_version: str | None = None
+        self._cached_save_version: str | None = None
+
+    def _clear_version_cache(self) -> None:
+        """Clear both load and save version caches."""
+        self._cached_load_version = None
+        self._cached_save_version = None
 
     def _fetch_latest_load_version(self) -> str:
         """Fetch the most recent existing version from the given path.
@@ -766,7 +772,13 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     def _fetch_latest_save_version(self) -> str:
         """Generate and cache the current save version"""
-        return generate_timestamp()
+        # Return cached version if available
+        if self._cached_save_version is not None:
+            return self._cached_save_version
+
+        # Generate new timestamp and cache it
+        self._cached_save_version = generate_timestamp()
+        return self._cached_save_version
 
     def resolve_load_version(self) -> str | None:
         """Compute the version the dataset should be loaded with."""
@@ -819,7 +831,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
         @wraps(save_func)
         def save(self: Self, data: _DI) -> None:
-            self._cached_load_version = None
+            self._clear_version_cache()
             save_version = (
                 self.resolve_save_version()
             )  # Make sure last save version is set
@@ -845,7 +857,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                 warnings.warn(
                     _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
                 )
-                self._cached_load_version = None
+                self._clear_version_cache()
 
         return save
 
@@ -871,7 +883,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     def _release(self) -> None:
         super()._release()
-        self._cached_load_version = None
+        self._clear_version_cache()
 
 
 def get_protocol_and_path(

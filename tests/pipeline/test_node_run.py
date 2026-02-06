@@ -1,3 +1,5 @@
+import warnings
+
 import pytest
 
 from kedro.pipeline import node
@@ -172,6 +174,7 @@ class TestNodeOutputsNoneWarning:
             return None
 
         test_node = node(func, "input", None, name="test_node")
-        with pytest.warns(None):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
             result = test_node.run({"input": 42})
         assert result == {}

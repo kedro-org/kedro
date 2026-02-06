@@ -727,7 +727,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             glob_function: Function that is used for finding all paths
                 in a filesystem, which match a given pattern.
         """
-        from threading import RLock
 
         self._filepath = filepath
         self._version = version
@@ -735,51 +734,42 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._glob_function = glob_function or iglob
         # Manual cache for load and save versions
         self._cached_load_version: str | None = None
-        self._cached_save_version: str | None = None
-        self._version_cache_lock = RLock()
 
     def _fetch_latest_load_version(self) -> str:
         """Fetch the most recent existing version from the given path.
 
         Results are cached to avoid repeated filesystem operations.
         """
-        with self._version_cache_lock:
-            # Return cached version if available
-            if self._cached_load_version is not None:
-                return self._cached_load_version
 
-            # When load version is unpinned, fetch the most recent existing
-            # version from the given path.
-            pattern = str(self._get_versioned_path("*"))
-            try:
-                version_paths = sorted(self._glob_function(pattern), reverse=True)
-            except Exception as exc:
-                message = (
-                    f"Did not find any versions for {self}. This could be "
-                    f"due to insufficient permission. Exception: {exc}"
-                )
-                raise VersionNotFoundError(message) from exc
-            most_recent = next(
-                (path for path in version_paths if self._exists_function(path)), None
-            )
-            if not most_recent:
-                message = f"Did not find any versions for {self}"
-                raise VersionNotFoundError(message)
-
-            # Cache and return the result
-            self._cached_load_version = PurePath(most_recent).parent.name
+        # Return cached version if available
+        if self._cached_load_version is not None:
             return self._cached_load_version
+
+        # When load version is unpinned, fetch the most recent existing
+        # version from the given path.
+        pattern = str(self._get_versioned_path("*"))
+        try:
+            version_paths = sorted(self._glob_function(pattern), reverse=True)
+        except Exception as exc:
+            message = (
+                f"Did not find any versions for {self}. This could be "
+                f"due to insufficient permission. Exception: {exc}"
+            )
+            raise VersionNotFoundError(message) from exc
+        most_recent = next(
+            (path for path in version_paths if self._exists_function(path)), None
+        )
+        if not most_recent:
+            message = f"Did not find any versions for {self}"
+            raise VersionNotFoundError(message)
+
+        # Cache and return the result
+        self._cached_load_version = PurePath(most_recent).parent.name
+        return self._cached_load_version
 
     def _fetch_latest_save_version(self) -> str:
         """Generate and cache the current save version."""
-        with self._version_cache_lock:
-            # Return cached version if available
-            if self._cached_save_version is not None:
-                return self._cached_save_version
-
-            # Generate new timestamp and cache it
-            self._cached_save_version = generate_timestamp()
-            return self._cached_save_version
+        return generate_timestamp()
 
     def resolve_load_version(self) -> str | None:
         """Compute the version the dataset should be loaded with."""
@@ -833,9 +823,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         @wraps(save_func)
         def save(self: Self, data: _DI) -> None:
             # Clear version cache before saving
-            with self._version_cache_lock:
-                self._cached_load_version = None
-                self._cached_save_version = None
+
+            self._cached_load_version = None
             save_version = (
                 self.resolve_save_version()
             )  # Make sure last save version is set
@@ -862,9 +851,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                     _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
                 )
                 # Clear cache to ensure consistency
-                with self._version_cache_lock:
-                    self._cached_load_version = None
-                    self._cached_save_version = None
+
+                self._cached_load_version = None
 
         return save
 
@@ -891,32 +879,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _release(self) -> None:
         super()._release()
         # Clear version cache
-        with self._version_cache_lock:
-            self._cached_load_version = None
-            self._cached_save_version = None
-
-    def __getstate__(self) -> dict[str, Any]:
-        """Prepare the dataset for pickling by excluding non-picklable RLock.
-
-        Returns:
-            Dictionary of instance attributes, excluding the lock.
-        """
-        state = self.__dict__.copy()
-        # Remove the unpicklable RLock
-        state.pop("_version_cache_lock", None)
-        return state
-
-    def __setstate__(self, state: dict[str, Any]) -> None:
-        """Restore the dataset from pickle by recreating the RLock.
-
-        Args:
-            state: Dictionary of instance attributes.
-        """
-        from threading import RLock
-
-        self.__dict__.update(state)
-        # Recreate the RLock after unpickling
-        self._version_cache_lock = RLock()
+        self._cached_load_version = None
 
 
 def get_protocol_and_path(

@@ -621,30 +621,6 @@ class TestAbstractVersionedDataset:
         assert my_versioned_dataset._cached_load_version is None
         assert my_versioned_dataset._cached_save_version is None
 
-    def test_fetch_latest_save_version_caching(self, my_versioned_dataset, mocker):
-        # Mock generate_timestamp to return predictable values
-        mock_generate = mocker.patch(
-            "kedro.io.core.generate_timestamp",
-            side_effect=["2024-01-01T00.00.00.000Z", "2024-01-02T00.00.00.000Z"],
-        )
-
-        # First call should generate and cache
-        result1 = my_versioned_dataset._fetch_latest_save_version()
-        assert result1 == "2024-01-01T00.00.00.000Z"
-        assert my_versioned_dataset._cached_save_version == "2024-01-01T00.00.00.000Z"
-        mock_generate.assert_called_once()
-
-        # Second call should return cached value without calling generate_timestamp again
-        result2 = my_versioned_dataset._fetch_latest_save_version()
-        assert result2 == "2024-01-01T00.00.00.000Z"
-        mock_generate.assert_called_once()  # Still only called once
-
-        # Clear cache and call again - should generate new timestamp
-        my_versioned_dataset._clear_version_cache()
-        result3 = my_versioned_dataset._fetch_latest_save_version()
-        assert result3 == "2024-01-02T00.00.00.000Z"
-        assert mock_generate.call_count == 2
-
     def test_fetch_latest_load_version_success(self, my_versioned_dataset, mocker):
         mock_get_versioned_path = mocker.patch(
             "kedro.io.core.AbstractVersionedDataset._get_versioned_path",

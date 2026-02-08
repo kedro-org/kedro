@@ -16,6 +16,10 @@ function _handleReadTheDocsData(data) {
 
     console.log("Project slug:", projectSlug, "| Version:", versionSlug);
 
+    if (projectSlug === "kedro-datasets") {
+        console.log("==== I AM HERE!!! =====");
+    };
+
     // Ensure the version is updated after each release of kedro-datasets
     if (
         (projectSlug === "kedro" && versionSlug !== "stable") ||

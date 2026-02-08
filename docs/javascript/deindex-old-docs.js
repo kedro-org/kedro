@@ -20,7 +20,7 @@ function _handleReadTheDocsData(data) {
     if (
         (projectSlug === "kedro" && versionSlug !== "stable") ||
         (projectSlug === "kedro-viz" && versionSlug !== "stable") ||
-        (projectSlug === "kedro-datasets" && versionSlug !== "kedro-datasets-9.0.0")
+        (projectSlug === "kedro-datasets" && versionSlug !== "kedro-datasets-9.1.1")
     ) {
         console.log("Non-indexable version detected, injecting meta tag");
         const meta = document.createElement("meta");

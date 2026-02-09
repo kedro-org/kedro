@@ -163,8 +163,10 @@ class TestNodeOutputsNoneWarning:
         test_node = node(func, "input", None, name="test_node")
         pattern = (
             rf"Node 'test_node' returned a value of type '{expected_type}', "
-            rf"but outputs=None\. This value will not be included in the "
-            rf"pipeline outputs\. To keep it, specify outputs in the node definition\."
+            r"but the node is defined with outputs=None\. "
+            r"Kedro ignores return values for nodes without declared outputs\. "
+            r"If this return value is intentional, declare outputs in the node "
+            r"definition to include it in the pipeline\."
         )
         with pytest.warns(UserWarning, match=pattern):
             test_node.run({"input": 42})

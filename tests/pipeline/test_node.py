@@ -5,6 +5,13 @@ from functools import partial, update_wrapper, wraps
 import pytest
 
 from kedro.pipeline import node
+from kedro.pipeline.preview_contract import (
+    CustomPreview,
+    ImagePreview,
+    MermaidPreview,
+    TextPreview,
+)
+from kedro.utils import KedroExperimentalWarning
 from tests.test_utils import biconcat, constant_output, identity, triconcat
 
 
@@ -567,3 +574,198 @@ class TestNodeInputOutputNameValidation:
                 outputs="other_namespace.output_dataset",
                 namespace="namespace",
             )
+
+
+class TestNodePreviewPayload:
+    def test_text_preview(self):
+        payload = TextPreview(content="test content")
+        assert payload.kind == "text"
+        assert payload.content == "test content"
+
+    def test_mermaid_preview(self):
+        payload = MermaidPreview(content="graph LR\n A --> B")
+        assert payload.kind == "mermaid"
+        assert payload.content == "graph LR\n A --> B"
+
+    def test_image_preview_with_url(self):
+        payload = ImagePreview(content="https://example.com/image.png")
+        assert payload.kind == "image"
+        assert payload.content == "https://example.com/image.png"
+
+    def test_image_preview_with_data_uri(self):
+        data_uri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+        payload = ImagePreview(content=data_uri)
+        assert payload.kind == "image"
+        assert payload.content == data_uri
+
+    def test_custom_preview(self):
+        payload = CustomPreview(renderer_key="my_renderer", content={"custom": "data"})
+        assert payload.kind == "custom"
+        assert payload.renderer_key == "my_renderer"
+        assert payload.content == {"custom": "data"}
+
+    def test_invalid_content_type_for_text(self):
+        with pytest.raises(TypeError, match="TextPreview.content must be str"):
+            TextPreview(content={"invalid": "type"})
+
+    def test_invalid_custom_preview_missing_renderer_key(self):
+        with pytest.raises(
+            TypeError, match="CustomPreview.renderer_key must be a non-empty str"
+        ):
+            CustomPreview(renderer_key="", content={"data": "value"})
+
+
+class TestNodePreviewFunction:
+    @pytest.fixture(autouse=True)
+    def reset_preview_warning_flag(self):
+        """Reset the preview_fn warning flag before and after each test."""
+        from kedro.pipeline.node import Node
+
+        # Remove the flag before the test
+        if hasattr(Node, "__preview_fn_warned__"):
+            delattr(Node, "__preview_fn_warned__")
+
+        yield
+
+        # Clean up after the test
+        if hasattr(Node, "__preview_fn_warned__"):
+            delattr(Node, "__preview_fn_warned__")
+
+    def test_node_with_preview_fn_emits_warning_only_once(self):
+        """Test that the preview_fn warning is only emitted once per session."""
+
+        def test_text_preview():
+            return TextPreview(content="Test Data")
+
+        def another_text_preview():
+            return TextPreview(content="another")
+
+        import warnings
+
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+
+            # Create first node - should warn
+            node1 = node(identity, "input1", "output1", preview_fn=test_text_preview)
+            warnings_after_first = [
+                w
+                for w in warning_list
+                if issubclass(w.category, KedroExperimentalWarning)
+            ]
+            assert len(warnings_after_first) == 1
+            assert "preview_fn" in str(warnings_after_first[0].message)
+
+            # Create second node - should NOT warn (same session)
+            node2 = node(identity, "input2", "output2", preview_fn=another_text_preview)
+            warnings_after_second = [
+                w
+                for w in warning_list
+                if issubclass(w.category, KedroExperimentalWarning)
+            ]
+            assert len(warnings_after_second) == 1  # No additional warnings
+
+            # Create third node - should NOT warn (same session)
+            node3 = node(identity, "input3", "output3", preview_fn=test_text_preview)
+            warnings_after_third = [
+                w
+                for w in warning_list
+                if issubclass(w.category, KedroExperimentalWarning)
+            ]
+            assert len(warnings_after_third) == 1  # Still only one warning total
+
+        assert node1._preview_fn is test_text_preview
+        assert node2._preview_fn is another_text_preview
+        assert node3._preview_fn is test_text_preview
+
+    def test_node_without_preview_fn_no_warning(self):
+        import warnings
+
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+            node(identity, "input", "output")
+        experimental_warnings = [
+            w for w in warning_list if issubclass(w.category, KedroExperimentalWarning)
+        ]
+        assert len(experimental_warnings) == 0
+
+    def test_preview_fn_not_callable_raises_error(self):
+        pattern = r"preview_fn must be a function, not 'str'"
+        with pytest.raises(ValueError, match=pattern):
+            node(identity, "input", "output", preview_fn="not a function")
+
+    def test_preview_returns_none_when_no_preview_fn(self):
+        n = node(identity, "input", "output")
+        result = n.preview()
+        assert result is None
+
+    def test_preview_executes_preview_fn(self):
+        def test_text_preview():
+            return TextPreview(content="key: value")
+
+        with pytest.warns(KedroExperimentalWarning):
+            n = node(identity, "input", "output", preview_fn=test_text_preview)
+
+        result = n.preview()
+
+        assert isinstance(result, TextPreview)
+        assert result.kind == "text"
+        assert result.content == "key: value"
+
+    def test_preview_fn(self):
+        def preview_fn():
+            return TextPreview(content="col: value")
+
+        with pytest.warns(KedroExperimentalWarning):
+            n = node(identity, "input", "output", preview_fn=preview_fn)
+
+        result = n.preview()
+
+        assert isinstance(result, TextPreview)
+        assert result.kind == "text"
+        assert result.content == "col: value"
+
+    def test_preview_validates_return_type(self):
+        def bad_preview_fn():
+            return "not a PreviewPayload"
+
+        with pytest.warns(KedroExperimentalWarning):
+            n = node(identity, "input", "output", preview_fn=bad_preview_fn)
+
+        pattern = r"preview_fn must return one of the valid preview types.*but got 'str' instead"
+        with pytest.raises(ValueError, match=pattern):
+            n.preview()
+
+    def test_preview_validates_return_type_dict(self):
+        def bad_preview_fn():
+            return {"kind": "json", "content": "test"}
+
+        with pytest.warns(KedroExperimentalWarning):
+            n = node(identity, "input", "output", preview_fn=bad_preview_fn)
+
+        pattern = r"preview_fn must return one of the valid preview types.*but got 'dict' instead"
+        with pytest.raises(ValueError, match=pattern):
+            n.preview()
+
+    def test_preview_fn_preserved_in_copy(self):
+        def preview_fn():
+            return TextPreview(content="preview")
+
+        with pytest.warns(KedroExperimentalWarning):
+            original = node(identity, "input", "output", preview_fn=preview_fn)
+
+        copied = original._copy(name="new_name")
+        assert copied._preview_fn is preview_fn
+
+    def test_preview_fn_can_be_overwritten_in_copy(self):
+        def preview_fn1():
+            return TextPreview(content="preview1")
+
+        def preview_fn2():
+            return TextPreview(content={"data": "preview2"})
+
+        with pytest.warns(KedroExperimentalWarning):
+            original = node(identity, "input", "output", preview_fn=preview_fn1)
+
+        copied = original._copy(preview_fn=preview_fn2)
+        assert original._preview_fn is preview_fn1
+        assert copied._preview_fn is preview_fn2

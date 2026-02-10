@@ -33,6 +33,8 @@ jobs:
           activate-environment: true
       - name: Install dependencies
         run: |
+          # TEMP: For passing tests, will be removed before merge
+          uv pip install "git+https://github.com/kedro-org/kedro-plugins.git@fix/remove-cachetools-deps#subdirectory=kedro-datasets"
           make install-test-requirements
           uv pip install pip
           make install-pre-commit

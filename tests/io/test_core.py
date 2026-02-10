@@ -669,6 +669,7 @@ class TestAbstractVersionedDataset:
 
         # First test no versions at all
         assert len(my_versioned_dataset.list_versions()) == 0
+        assert my_versioned_dataset.list_versions(full_path=False) == []
 
         # Now test with 3 versions
         versions = ["version1", "version2", "version3"]
@@ -679,8 +680,44 @@ class TestAbstractVersionedDataset:
 
         versions.reverse()
 
+        # Test with full_path=False (should return only version names)
         assert versions == my_versioned_dataset.list_versions(full_path=False)
-        assert len(my_versioned_dataset.list_versions()) == 3
+
+        # Test with full_path=True (should return full paths)
+        full_paths = my_versioned_dataset.list_versions(full_path=True)
+        assert len(full_paths) == 3
+
+        # Verify paths end with expected pattern: <version>/<filename>
+        for i, full_path in enumerate(full_paths):
+            assert versions[i] in full_path
+            assert full_path.endswith("test.csv")
+
+    def test_get_version_from_path(self, my_versioned_dataset):
+        """Test that _get_version_from_path correctly extracts version from paths."""
+        # Test standard versioned path with forward slashes
+        path = "data/model.pkl/2024-01-15T10.30.00.000Z/model.pkl"
+        version = my_versioned_dataset._get_version_from_path(path)
+        assert version == "2024-01-15T10.30.00.000Z"
+
+    def test_list_versions_sorted(self, my_versioned_dataset):
+        """Test that list_versions returns versions in reverse chronological order."""
+        data = "test"
+
+        # Save versions in non-chronological order
+        versions = [
+            "2024-01-10T10.00.00.000Z",
+            "2024-01-15T10.00.00.000Z",
+            "2024-01-12T10.00.00.000Z",
+        ]
+
+        for version in versions:
+            my_versioned_dataset._version = Version(load=None, save=version)
+            my_versioned_dataset.save(data)
+
+        # Should be sorted in reverse chronological order (newest first)
+        result = my_versioned_dataset.list_versions(full_path=False)
+        expected = sorted(versions, reverse=True)
+        assert result == expected
 
 
 

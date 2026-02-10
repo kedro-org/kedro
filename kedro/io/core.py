@@ -819,10 +819,53 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         return self._filepath / version / self._filepath.name
 
 
-    def _get_version_from_path(self, path: str):
+    def _get_version_from_path(self, path: str) -> str:
+        """Extract version string from a versioned dataset path.
+
+        Args:
+            path: Full path to a versioned dataset file.
+
+        Returns:
+            Version string extracted from the path.
+        """
         return PurePath(path).parent.name
 
-    def list_versions(self, full_path: bool = True) -> list:
+    def list_versions(self, full_path: bool = True) -> list[str]:
+        """List all available versions of this dataset.
+
+        This method allows you to retrieve all existing versions of a versioned
+        dataset. It's useful for tracking dataset history, auditing changes, or
+        implementing custom version selection logic.
+
+        Args:
+            full_path: If True, returns the full path to each version.
+                If False, returns only the version strings (timestamps).
+
+        Returns:
+            A list of version paths (if full_path=True) or version strings
+            (if full_path=False), sorted in reverse chronological order
+            (most recent first).
+
+        Raises:
+            VersionNotFoundError: If the dataset has no versions or if there
+                are permission issues accessing the version directory.
+
+        Example:
+            ::
+
+                >>> dataset = MyVersionedDataset(
+                ...     filepath="data/model.pkl",
+                ...     version=Version(None, None)
+                ... )
+                >>> # After saving multiple versions...
+                >>> versions = dataset.list_versions(full_path=False)
+                >>> print(versions)
+                ['2024-01-15T10.30.00.000Z', '2024-01-14T09.15.00.000Z']
+                >>> # Get full paths
+                >>> paths = dataset.list_versions(full_path=True)
+                >>> print(paths[0])
+                'data/model.pkl/2024-01-15T10.30.00.000Z/model.pkl'
+        """
         version_paths = self._get_versions()
 
         if full_path:

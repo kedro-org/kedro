@@ -8,6 +8,7 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 from warnings import warn
+import dataclasses
 
 from attrs import define, field
 
@@ -326,8 +327,18 @@ class KedroContext:
             """
             key = f"params:{param_name}"
             params_dict[key] = param_value
+
+            # Convert typed objects to dicts for nested path registration
+            nested_dict = None
             if isinstance(param_value, dict):
-                for key, val in param_value.items():
+                nested_dict = param_value
+            elif self._is_pydantic_model(param_value):
+                nested_dict = param_value.model_dump()
+            elif dataclasses.is_dataclass(param_value) and not isinstance(param_value, type):
+                nested_dict = dataclasses.asdict(param_value)
+
+            if nested_dict is not None:
+                for key, val in nested_dict.items():
                     _add_param_to_params_dict(f"{param_name}.{key}", val)
 
         for param_name, param_value in params.items():
@@ -345,6 +356,14 @@ class KedroContext:
             )
             conf_creds = {}
         return conf_creds
+
+    @staticmethod
+    def _is_pydantic_model(value: Any) -> bool:
+        try:
+            import pydantic
+            return isinstance(value, pydantic.BaseModel)
+        except ImportError:
+            return False
 
 
 class KedroContextError(Exception):

@@ -92,7 +92,7 @@ class ParameterValidator:
 
         # Handle validation errors
         if validation_errors:
-            error_message = "Parameter validation failed:\\n" + "\\n".join(
+            error_message = "Parameter validation failed:\n" + "\n".join(
                 f"- {error}" for error in validation_errors
             )
             raise ValidationError(error_message, errors=validation_errors)

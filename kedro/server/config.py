@@ -11,6 +11,7 @@ KEDRO_PROJECT_PATH_ENV = "KEDRO_PROJECT_PATH"
 # Default server settings
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
+DEFAULT_MCP_PORT = 8001
 
 
 class ServerSettingsError(Exception):

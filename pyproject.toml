@@ -101,7 +101,10 @@ server = [
     "fastapi>=0.100.0",
     "uvicorn>=0.20.0",
 ]
-all = [ "kedro[test,docs,jupyter,benchmark,server]" ]
+mcp = [
+    "mcp>=1.0.0,<2.0.0",
+]
+all = [ "kedro[test,docs,jupyter,benchmark,server,mcp]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"

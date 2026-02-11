@@ -1,14 +1,14 @@
 # AWS Step Functions
 
-This tutorial explains how to deploy a Kedro project with [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) in order to run a Kedro pipeline in production on AWS [Serverless Computing](https://aws.amazon.com/serverless/) platform.
+This tutorial explains how to deploy a Kedro project with [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) to run a Kedro pipeline in production on the AWS [Serverless Computing](https://aws.amazon.com/serverless/) platform.
 
 ## Why would you run a Kedro pipeline with AWS Step Functions?
 
 A major problem when data pipelines move to production is to build and maintain the underlying compute infrastructure, or [servers](https://en.wikipedia.org/wiki/Server_(computing)). [Serverless computing](https://en.wikipedia.org/wiki/Serverless_computing) hands the provisioning and management of distributed computing resources to cloud providers, enabling data engineers and data scientists to focus on their business problems.
 
-[Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/) and [AWS Lambda](https://aws.amazon.com/lambda/) are good examples of this solution, but others are available. Services like [AWS Step Functions](https://aws.amazon.com/step-functions/) offer a managed orchestration capability that makes it easy to sequence serverless functions and multiple cloud-native services into business-critical applications.
+[Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/) and [AWS Lambda](https://aws.amazon.com/lambda/) are good examples of this solution, but others are available. Services like [AWS Step Functions](https://aws.amazon.com/step-functions/) offer a managed orchestration capability that helps you sequence serverless functions and multiple cloud-native services into business-critical applications.
 
-From a Kedro perspective, this means the ability to run each node and retain the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure. Another benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider, such as the use of the [feature store for Amazon SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.
+From a Kedro perspective, this means the ability to run each node and keep the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure. Another benefit of running a Kedro pipeline in a serverless computing platform is the ability to use other services from the same provider, such as the [feature store for Amazon SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.
 
 The following discusses how to run the Kedro pipeline from the [spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) on [AWS Step Functions](https://aws.amazon.com/step-functions/).
 
@@ -27,7 +27,7 @@ To use AWS Step Functions, ensure you have the following:
   - The final project directory's name should be `spaceflights-step-functions`.
   - You should complete the [spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) to understand the project's structure.
 
-* In this tutorial, we will also be using [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) to write our deployment script. To install the `cdk` command, please consult [AWS guide](https://docs.aws.amazon.com/cdk/v2/guide/cli.html). The official method of installation is using [npm](https://www.npmjs.com/):
+* In this tutorial, we also use the [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) to write our deployment script. To install the `cdk` command, see the [AWS guide](https://docs.aws.amazon.com/cdk/v2/guide/cli.html). The official installation method uses [`npm`](https://www.npmjs.com/):
 
 ```console
 $ npm install -g aws-cdk
@@ -107,7 +107,7 @@ The rest of the tutorial will explain each step in the deployment process above 
 
 ### Step 2. Package the Kedro pipeline as an AWS Lambda-compliant Docker image
 
-In December 2020, [AWS announced that an AWS Lambda function can now use a container image up to **10 GB in size**](https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/) as its deployment package, besides the original zip method. As it has a few [requirements for the container image to work properly](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-reqs), you must build your own custom Docker container image, both to contain the Kedro pipeline and to comply with Lambda's requirements.
+In December 2020, [AWS announced that an AWS Lambda function can now use a container image up to **10 GB in size**](https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/) as its deployment package. The image works alongside the original zip method. Because Lambda imposes specific [requirements for the container image to work properly](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-reqs), you must build a custom Docker container image that includes the Kedro pipeline and meets those requirements.
 
 !!! note
     All the following steps should be done in the Kedro project's root directory.
@@ -118,7 +118,7 @@ In December 2020, [AWS announced that an AWS Lambda function can now use a conta
 $ kedro package
 ```
 
-For more information, please visit the guide on [packaging Kedro as a Python package](../../deploy/package_a_project.md).
+For more information, see the guide on [packaging Kedro as a Python package](../../deploy/package_a_project.md).
 
 * **Step 2.2**: Create a `lambda_handler.py` file:
 
@@ -351,7 +351,7 @@ KedroStepFunctionsStack(app, "KedroStepFunctionsStack")
 app.synth()
 ```
 
-This script contains the logic to convert a Kedro pipeline into an AWS Step Functions State Machine with each Kedro node defined as a Lambda function using the Docker image in Step 2. You will then need to register it with CDK by creating a `cdk.json` with the following content:
+This script converts a Kedro pipeline into an AWS Step Functions State Machine, defining each Kedro node as a Lambda function that uses the Docker image in Step 2. Register it with CDK by creating a `cdk.json` with the following content:
 
 ```json
 {
@@ -363,13 +363,13 @@ And that's it! You are now ready to deploy and run the Kedro pipeline on AWS Ste
 
 ### Step 4. Deploy the pipeline
 
-Deploying with CDK is very straightforward. You just need to run:
+Deploy with CDK by running:
 
 ```console
 $ cdk deploy
 ```
 
-After the deployment finishes, when you log into AWS Management Console, you should be able to see an AWS Step Functions State Machine created for your pipeline:
+After the deployment finishes, log into AWS Management Console to see the AWS Step Functions State Machine created for your pipeline:
 
 ![](../../meta/images/aws_step_functions_state_machine_listing.png)
 
@@ -377,8 +377,8 @@ As well as the corresponding Lambda functions for each Kedro node:
 
 ![](../../meta/images/aws_lambda_functions.png)
 
-If you go into the state machine and click on `Start Execution`, you will be able to see a full end-to-end (E2E) run of the Kedro pipeline on AWS Step Functions.
+If you open the state machine and click `Start Execution`, you can see a full end-to-end (E2E) run of the Kedro pipeline on AWS Step Functions.
 
 ## Limitations
 
-Generally speaking, the [limitations on AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) have improved dramatically in recent years. However, it's still worth noting that each Lambda function has a 15-minute timeout, 10GB maximum memory limit and 10GB container image code package size limit. This means, for example, if you have a node that takes longer than 15 minutes to run, you should switch to some other AWS services, such as [AWS Batch](aws_batch.md) or [AWS ECS](https://aws.amazon.com/ecs/), to execute that node.
+The [limitations on AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) have improved in recent years. Each Lambda function still has a 15-minute timeout, a 10 GB memory limit, and a 10 GB container image size limit. If a node takes longer than 15 minutes to run, switch to another AWS service, such as [AWS Batch](aws_batch.md) or [AWS ECS](https://aws.amazon.com/ecs/), to execute that node.

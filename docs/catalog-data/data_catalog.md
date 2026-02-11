@@ -12,7 +12,7 @@ This page introduces the basic sections of `catalog.yml`, which is the file Kedr
 ## The basics of `catalog.yml`
 A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../tutorials/set_up_data.md).
 
-The example below registers two `csv` datasets, and an `xlsx` dataset. The minimum details needed to load and save a file within a local file system are the key, which is name of the dataset, the type of data to indicate the dataset to use (`type`) and the file's location (`filepath`).
+The example below registers two `csv` datasets and one `xlsx` dataset. To load or save a file within the local file system you must provide the dataset name (`key`), specify the dataset class through `type`, and set the file location using `filepath`.
 
 ```yaml
 companies:
@@ -35,7 +35,7 @@ shuttles:
 The dataset configuration in `catalog.yml` is defined as follows:
 
 1. The top-level key is the dataset name used as a dataset identifier in the catalog - `shuttles`, `weather` in the example below.
-2. The next level includes multiple keys. The first one is the mandatory key - `type` which defines the type of dataset to use.
+2. The next level includes multiple keys. The first mandatory key is `type`, which declares the dataset type to use.
 The rest of the keys are dataset parameters and vary depending on the implementation.
 To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/).and navigate to the `__init__` method of the target dataset.
 3. Some dataset parameters can be further configured depending on the libraries underlying the dataset implementation.
@@ -87,11 +87,11 @@ The following protocols are available:
   using the library s3fs.
 - **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - for example, MinIO, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
-  resource using gcsfs (in development).
+  resource using `gcsfs` (in development).
 - **Azure Blob Storage / Azure Data Lake Storage Gen2**: `abfs://` - Azure Blob Storage, typically used when working on an Azure environment.
 - **HTTP(s)**: ``http://`` or ``https://`` for reading data directly from HTTP web servers.
 
-`fsspec` also provides other file systems, such as SSH, FTP and WebHDFS. [See the fsspec documentation for more information](https://filesystem-spec.readthedocs.io/en/latest/api.html#implementations).
+`fsspec` also provides other file systems, such as SSH, FTP, and WebHDFS. [See the fsspec documentation for more information](https://filesystem-spec.readthedocs.io/en/latest/api.html#implementations).
 
 
 ## Additional settings in `catalog.yml`
@@ -101,7 +101,7 @@ This section explains the additional settings available within `catalog.yml`.
 ### Load, save and filesystem arguments
 The Kedro Data Catalog also accepts different groups of `*_args` parameters that serve different purposes:
 
-* **`load_args` and `save_args`**: Configure how a third-party library loads/saves data from/to a file. In the spaceflights example above, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the equivalent output is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
+* **`load_args` and `save_args`**: Configure how a third-party library loads/saves data from/to a file. In the spaceflights example above, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the matching output parameter is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
 
 For example, to load or save a CSV on a local file system, using specified load/save arguments:
 
@@ -198,7 +198,7 @@ cars:
 
 In this example, `filepath` is used as the basis of a folder that stores versions of the `cars` dataset. Each time a new version is created by a pipeline run it is stored within `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
 
-By default, `kedro run` loads the latest version of the dataset. However, you can also specify a particular versioned dataset with `--load-version` flag as follows:
+By default, `kedro run` loads the latest version of the dataset. You can also specify a particular versioned dataset with the `--load-version` flag as follows:
 
 ```bash
 kedro run --load-versions=cars:YYYY-MM-DDThh.mm.ss.sssZ
@@ -210,7 +210,7 @@ A dataset offers versioning support if it extends the [kedro.io.AbstractVersione
 To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataset`. For instance, if you encounter a class like `CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
 
 !!! note
-    Note that HTTP(S) is a supported file system in the dataset implementations, but if you use it, you can't also use versioning.
+   HTTP(S) is a supported file system in the dataset implementations, but it cannot be combined with versioning.
 
 ## Use the Data Catalog within Kedro configuration
 
@@ -220,7 +220,7 @@ By default, Kedro has a `base` and a `local` folder for configuration. The Data 
 
 In summary, if you need to configure your datasets for different environments, you can create both `conf/base/catalog.yml` and `conf/local/catalog.yml`. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production, while adding a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets while you are using them for prototyping data pipeline(s).
 
-To illustrate this, consider the following catalog entry for a dataset named `cars` in `conf/base/catalog.yml`, which points to a csv file stored in a bucket on AWS S3:
+To illustrate this, consider the following catalog entry for a dataset named `cars` in `conf/base/catalog.yml`, which points to a CSV file stored in a bucket on AWS S3:
 
 ```yaml
 cars:

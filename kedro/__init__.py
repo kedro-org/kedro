@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 import sys
 import warnings
 
-__version__ = "1.0.0"
+__version__ = "1.2.0"
 
 
 class KedroDeprecationWarning(DeprecationWarning):

@@ -11,6 +11,9 @@ uvx kedro new --starter=<path-to-starter>
 ```
 
 !!! note
+    Using `uvx` lets you run Kedro without installing it into your system or virtual environment. It downloads and runs Kedro in a clean temporary environment each time. If you prefer a standard installation (for example pip + virtual environment), see the [installation guide](../getting-started/install.md#alternative-methods).
+
+!!! note
     `path-to-starter` could be the path to a local directory, a URL to a remote VCS repository supported by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
 
 
@@ -41,6 +44,7 @@ The Kedro team maintains the following starters for a range of Kedro projects:
 * [`databricks-iris`](https://github.com/kedro-org/kedro-starters/tree/main/databricks-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a setup for [Databricks](https://docs.kedro.org/en/stable/deploy/supported-platforms/databricks/) deployment.
 * [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pandas` datasets.
 * [`spaceflights-pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pyspark` datasets.
+* [`support-agent-langgraph`](https://github.com/kedro-org/kedro-starters/tree/main/support-agent-langgraph): An example project demonstrating pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 
 ### Archived starters
 
@@ -54,7 +58,7 @@ The following Kedro starters have been archived and are unavailable in Kedro ver
 The latest version of Kedro that supports these starters is Kedro 0.18.14.
 
 * To check the version of Kedro you have installed, type `kedro -V` in your terminal window.
-* To install a specific version of Kedro, e.g. 0.18.14, type `pip install kedro==0.18.14`.
+* To install a specific version of Kedro, for example, 0.18.14, type `pip install kedro==0.18.14`.
 * To create a project with one of these starters using `kedro new`,  type the following (assuming Kedro version 0.18.14) `kedro new --starter=pandas-iris --checkout=0.18.14` (for example, to use the `pandas-iris` starter).
 
 

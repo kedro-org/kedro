@@ -5,7 +5,7 @@ It provides tools for tracking experiments, packaging code into reproducible run
 MLflow supports machine learning frameworks such as TensorFlow, PyTorch, and scikit-learn.
 
 Adding MLflow to a Kedro project enables you to track and manage your machine learning experiments and models.
-For example, you can log metrics, parameters, and artifacts from your Kedro pipeline runs to MLflow, then compare and reproduce the results. When collaborating with others on a Kedro project, MLflow's model registry and deployment tools help you to share and deploy machine learning models.
+For example, you can log metrics, parameters, and artifacts from your Kedro pipeline runs to MLflow, then compare and reproduce the results. When collaborating with others on a Kedro project, the MLflow model registry and deployment tools help you share and deploy machine learning models.
 
 ## Prerequisites
 
@@ -35,9 +35,11 @@ This will make MLflow record metadata and artifacts for each run
 to a local directory called `mlflow_runs`.
 
 !!! note
-    If you want to use a more sophisticated setup, have a look at the documentation of
-[MLflow tracking server](https://mlflow.org/docs/latest/tracking/server/), [the official MLflow tracking server 5 minute overview](https://mlflow.org/docs/latest/getting-started/tracking-server-overview/),
-and [the MLflow tracking server documentation](https://mlflow.org/docs/latest/tracking/server).
+    If you want to use a more sophisticated setup, review these MLflow guides:
+
+    - [MLflow tracking server](https://mlflow.org/docs/latest/tracking/server/)
+    - [The official MLflow tracking server five-minute overview](https://mlflow.org/docs/latest/getting-started/tracking-server-overview/)
+    - [The MLflow tracking server documentation](https://mlflow.org/docs/latest/tracking/server)
 
 
 ## Simple use cases
@@ -99,30 +101,30 @@ Use of this dataset has the advantage that the preview capabilities of the MLflo
 
 !!! warning
     This will work for datasets that are outputs of a node,
-    and will have no effect for datasets that are free inputs (hence are only loaded).
+    and will have no effect for datasets that are free inputs because they are loaded without modification.
 
-For example, if you modify the a `matplotlib.MatplotlibWriter` dataset like this:
+For example, if you change a `matplotlib.MatplotlibDataset` dataset like this:
 
 ```diff
  # conf/base/catalog.yml
 
  dummy_confusion_matrix:
--  type: matplotlib.MatplotlibWriter
+-  type: matplotlib.MatplotlibDataset
 -  filepath: data/08_reporting/dummy_confusion_matrix.png
 -  versioned: true
 +  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
 +  dataset:
-+    type: matplotlib.MatplotlibWriter
++    type: matplotlib.MatplotlibDataset
 +    filepath: data/08_reporting/dummy_confusion_matrix.png
 ```
 
-Then the image would be logged as part of the artifacts of the run
+Then the image would be logged as part of the artifacts of the run,
 and you would be able to preview it in the MLflow web UI:
 
 ![MLflow image preview thanks to the artifact tracking capabilities of kedro-mlflow](../meta/images/mlflow-artifact-preview-image.png)
 
 !!! warning
-    If you get a `Failed while saving data to dataset MlflowMatplotlibWriter` error,
+    If you get a `Failed while saving data to dataset MlflowArtifactDataset` error,
     it's probably because you had already executed `kedro run` while the dataset was marked as `versioned: true`.
     The solution is to clean up the old `data/08_reporting/dummy_confusion_matrix.png` directory.
 
@@ -137,7 +139,7 @@ The `kedro-mlflow` plugin introduces a special artifact, `MlflowModelTrackingDat
 that you can use to load and save your models as MLflow artifacts.
 
 For example, if you have a dataset corresponding to a scikit-learn model,
-you can modify it as follows:
+you can change it as follows:
 
 ```diff
  regressor:
@@ -171,7 +173,7 @@ To load a model from a specific run, you can specify the `run_id`.
 For that, you can make use of {ref}`runtime parameters <runtime-params>`:
 
 ```yaml
-# Add the intermediate datasets to run only the inference
+# Add the intermediate datasets to run the inference pipeline
 X_test:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/X_test.parquet
@@ -198,7 +200,7 @@ $ kedro run --from-nodes=evaluate_model_node --params mlflow_run_id=4cba84...
 
 !!! note
     Notice that MLflow runs are immutable for reproducibility purposes,
-therefore you cannot _save_ a model in an existing run.
+so you cannot _save_ a model in an existing run.
 
 
 ## Advanced use cases

@@ -1,6 +1,6 @@
 # Migration guide for config loaders
 The `ConfigLoader` and `TemplatedConfigLoader` classes have been deprecated since Kedro `0.18.12` and were removed in Kedro `0.19.0`. To use that release or later, you must adopt the [kedro.config.OmegaConfigLoader][].
-This migration guide outlines the primary distinctions between the old loaders and the `OmegaConfigLoader`, providing step-by-step instructions on updating your code base to utilise the new class effectively.
+This migration guide outlines the primary distinctions between the old loaders and the `OmegaConfigLoader`, providing step-by-step instructions on updating your code base to use the new class effectively.
 
 ## `ConfigLoader` to `OmegaConfigLoader`
 
@@ -38,7 +38,7 @@ Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoa
 ```
 
 ### 4. File format support
-`OmegaConfigLoader` supports only `yaml` and `json` file formats. Make sure that all your configuration files are in one of these formats. If you previously used other formats with `ConfigLoader`, convert them to `yaml` or `json`.
+`OmegaConfigLoader` supports `yaml` and `json` file formats. Make sure that all your configuration files use one of these formats. If you relied on other formats with `ConfigLoader`, convert them to `yaml` or `json`.
 
 ### 5. Load configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `ConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
@@ -97,7 +97,7 @@ Replace the import statement for `TemplatedConfigLoader` with the one for `Omega
 ```
 
 ### 4. File format support
-`OmegaConfigLoader` supports only `yaml` and `json` file formats. Make sure that all your configuration files are in one of these formats. If you were using other formats with `TemplatedConfigLoader`, convert them to `yaml` or `json`.
+`OmegaConfigLoader` supports `yaml` and `json` file formats. Make sure that all your configuration files use one of these formats. If you used other formats with `TemplatedConfigLoader`, convert them to `yaml` or `json`.
 
 ### 5. Load configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `TemplatedConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
@@ -116,12 +116,11 @@ When you migrate to use `OmegaConfigLoader` it  requires you to fetch configurat
 In this example, the `"catalog"` key points to the default catalog patterns specified in the `OmegaConfigLoader` class.
 
 ### 6. Templating of values
-Templating of values is done through native [variable interpolation in `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader). Where in `TemplatedConfigLoader` it was necessary to
-provide the template values in a `globals` file or dictionary, in `OmegaConfigLoader` you can provide these values within the same file that has the placeholders or a file that has a name that follows [the same config pattern specified](configuration_basics.md#configuration-patterns).
+Templating of values is done through native [variable interpolation in `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader). With `TemplatedConfigLoader` you had to provide the template values in a `globals` file or dictionary. `OmegaConfigLoader` lets you keep these values within the same file that has the placeholders or in a file whose name follows [the same config pattern specified](configuration_basics.md#configuration-patterns).
 The variable interpolation is scoped to a specific configuration type and environment. If you want to share templated values across configuration types and environments, [you will need to use globals](#7-globals).
 
 Suppose you are migrating a templated **catalog** file from using `TemplatedConfigLoader` to `OmegaConfigLoader` you would do the following:
-1. Rename `conf/base/globals.yml` to match the patterns specified for catalog (`["catalog*", "catalog*/**", "**/catalog*"]`), for example `conf/base/catalog_globals.yml`
+1. Rename `conf/base/globals.yml` to match the patterns specified for catalog (`["catalog*", "catalog*/**", "**/catalog*"]`), for example `conf/base/catalog_variables.yml`
 2. Add an underscore `_` to any catalog template values. This is needed because of how catalog entries are validated.
 
 ```diff
@@ -153,8 +152,8 @@ raw_car_data:
 +    filepath: "s3://${_bucket_name}/data/${_key_prefix}/raw/cars.csv"
 ```
 
-#### Providing default values for templates via `oc.select`
-To provide a default for any template values you have to use [the omegaconf `oc.select` resolver](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-select).
+#### Providing default values for templates with `oc.select`
+To provide a default for any template values you have to use [the OmegaConf `oc.select` resolver](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-select).
 
 ```diff
 boats:
@@ -165,8 +164,9 @@ boats:
 ```
 
 ### 7. Globals
-If you want to share variables across configuration types, for example parameters and catalog, and environments you need to use [the custom globals resolver with the `OmegaConfigLoader`](advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader).
-The `OmegaConfigLoader` requires global values to be provided in a `globals.yml` file. Note that using a `globals_dict` to provide globals is not supported with `OmegaConfigLoader`. The following section explains the differences between using globals with `TemplatedConfigLoader` and the `OmegaConfigLoader`.
+If you want to share variables across configuration types (for example parameters and catalog) and environments, use [the custom globals resolver with the `OmegaConfigLoader`](advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader).
+The `OmegaConfigLoader` requires global values to be provided in a `globals.yml` file.
+Using a `globals_dict` to provide globals is not supported with `OmegaConfigLoader`. The following section explains the differences between using globals with `TemplatedConfigLoader` and the `OmegaConfigLoader`.
 
 Let's assume your project contains a `conf/base/globals.yml` file with the following contents:
 
@@ -209,8 +209,8 @@ raw_car_data:
 +   filepath: "s3://${globals:bucket_name}/data/${globals:key_prefix}/${globals:folders.raw}/${globals:filename,'cars.csv'}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
 ```
 
-### 8. Deprecation of Jinja2
-`OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../catalog-data/kedro_dataset_factories.md).
+### 8. Deprecation of Jinja2 support
+`OmegaConfigLoader` does not support Jinja2 syntax in configuration. You can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../catalog-data/kedro_dataset_factories.md).
 The following example shows how you can rewrite your Jinja2 configuration to work with `OmegaConfigLoader`:
 
 ```diff

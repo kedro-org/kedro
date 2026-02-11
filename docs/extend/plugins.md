@@ -6,9 +6,9 @@ Kedro plugins allow you to create new features for Kedro and inject additional c
 
 Kedro's extension mechanism is built on [`pluggy`](https://pluggy.readthedocs.io/), a solid plugin management library that was created for the [pytest](https://docs.pytest.org/) ecosystem. `pluggy` relies on [entry points](https://packaging.python.org/en/latest/specifications/entry-points/), a Python mechanism for packages to provide components that can be discovered by other packages using [`importlib.metadata`](https://docs.python.org/3/library/importlib.metadata.html#entry-points).
 
-## Example of a simple plugin
+## Example plugin
 
-Here is a simple example of a plugin that prints the pipeline as JSON:
+Here is an example plugin that prints the pipeline as JSON:
 
 `kedrojson/plugin.py`
 
@@ -29,7 +29,7 @@ def to_json(metadata):
     pipeline = pipelines["__default__"]
     print(pipeline.to_json())
 ```
-From version 0.18.14, Kedro replaced `setup.py` with `pyproject.toml`. The plugin needs to provide entry points in either file. If you are using `setup.py`, please refer to the [`0.18.13` version of documentations](https://docs.kedro.org/en/0.18.13/extend_kedro/plugins.html).
+From version 0.18.14, Kedro replaced `setup.py` with `pyproject.toml`. The plugin needs to provide entry points in either file. If you use `setup.py`, see the [`0.18.13` documentation](https://docs.kedro.org/en/0.18.13/extend_kedro/plugins.html).
 
 To add the entry point to `pyproject.toml`, the plugin needs to provide the following `entry_points` configuration:
 ```toml
@@ -65,25 +65,25 @@ context = session.load_context()
 
 ## Initialisation
 
-If the plugin initialisation needs to occur prior to Kedro starting, it can declare the `entry_point` key `kedro.init`. This entry point must refer to a function that currently has no arguments, but for future proofing you should declare it with `**kwargs`.
+If the plugin initialisation needs to occur before Kedro starts, it can declare the `entry_point` key `kedro.init`. This entry point must point to a function that has no arguments, but for future proofing you should declare it with `**kwargs`.
 
 ## `global` and `project` commands
 
 Plugins may also add commands to the Kedro CLI, which supports two types of commands:
 
 * _global_ - available both inside and outside a Kedro project. Global commands use the `entry_point` key `kedro.global_commands`.
-* _project_ - available only when a Kedro project is detected in the current directory. Project commands use the `entry_point` key `kedro.project_commands`.
+* _project_ - available when a Kedro project is detected in the current directory. Project commands use the `entry_point` key `kedro.project_commands`.
 
 ## Suggested command convention
 
-We use the following command convention: `kedro <plugin-name> <command>`, with `kedro <plugin-name>` acting as a top-level command group. This is our suggested way of structuring your plugin but it is not necessary for your plugin to work.
+We use the following command convention: `kedro <plugin-name> <command>`, with `kedro <plugin-name>` acting as a top-level command group. This structure is optional.
 
 ## Advanced: Lazy loading of plugin commands
 
-If you are developing a plugin with a large set of CLI commands or with certain large libraries that are slow to import but are used by a small subset of commands, consider using lazy loading of these commands. This can significantly improve the performance of the plugin as well as the overall performance of Kedro CLI. To do this, you can follow [the instructions on the
+If your plugin includes a sizable set of CLI commands or heavy dependencies that are slow to import, consider lazy loading. This approach improves the performance of the plugin as well as the Kedro CLI. Follow [the instructions in the
 `click` documentation on lazy loading of commands](https://click.palletsprojects.com/en/8.1.x/complex/#lazily-loading-subcommands). From Kedro 0.19.7, the [Kedro commands are declared as lazy loaded command groups](https://github.com/kedro-org/kedro/blob/main/kedro/framework/cli/cli.py) that you can use as a reference for the implementation.
 
-Consider the previous example of the `kedrojson` plugin. Suppose the plugin has two commands, `kedro to_json pipelines` and `kedro to_json nodes`. The `to_json pipelines` command is used more frequently than the `to_json nodes` command and the `to_json nodes` command requires a large library to be imported. In this case, you can define your commands to be lazily loaded with delayed imports as follows:
+Consider the previous example of the `kedrojson` plugin. Suppose the plugin has two commands, `kedro to_json pipelines` and `kedro to_json nodes`. The `to_json pipelines` command is used more frequently than the `to_json nodes` command and the `to_json nodes` command requires a large library to be imported. In this case, you can define your commands with lazy loading and delayed imports as follows:
 
 In `kedrojson/plugin.py`:
 ```python
@@ -121,14 +121,14 @@ def pipelines():
     ...
 ```
 
-The loading of the individual `nodes` and `pipelines` commands and subsequently the imports of the large libraries will be delayed until the respective commands are called.
+The loading of the individual `nodes` and `pipelines` commands, and the related imports, will be delayed until the respective commands are called.
 
 
 ## Hooks
 
 You can develop hook implementations and have them automatically registered to the project context when the plugin is installed.
 
-To enable this for your custom plugin, simply add the following entry in `pyproject.toml`
+To enable this for your custom plugin, add the following entry in `pyproject.toml`
 
 To use `pyproject.toml`, specify
 ```toml
@@ -158,7 +158,7 @@ hooks = MyHooks()
 
 ## CLI Hooks
 
-You can also develop Hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI Hooks, please visit our [kedro.framework.cli.hooks][] API documentation. To register CLI Hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
+You can also develop Hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI Hooks, see our [kedro.framework.cli.hooks][] API documentation. To register CLI Hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
 
 
 ```toml
@@ -199,7 +199,7 @@ When you are ready to submit your code:
 
 ## Supported Kedro plugins
 
-- [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets), a collection of all of Kedro's data connectors. These data
+- [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets), a collection of Kedro's data connectors. These data
 connectors are implementations of the `AbstractDataset`
 - [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow), a tool for converting your Kedro project into an Airflow project
@@ -208,7 +208,7 @@ connectors are implementations of the `AbstractDataset`
 
 ## Community-developed plugins
 
-There are many community-developed plugins available and a comprehensive list of plugins is published on the [`awesome-kedro`](https://github.com/kedro-org/awesome-kedro) GitHub repository. The list below is a small snapshot of some of those under active maintenance.
+Several community-developed plugins are available and a comprehensive list of plugins is published on the [`awesome-kedro`](https://github.com/kedro-org/awesome-kedro) GitHub repository. The list below is a small snapshot of some of those under active maintenance.
 
 
 !!! note
@@ -221,3 +221,4 @@ There are many community-developed plugins available and a comprehensive list of
 - [kedro-azureml](https://github.com/getindata/kedro-azureml), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Azure ML Pipelines service
 - [kedro-sagemaker](https://github.com/getindata/kedro-sagemaker), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Amazon SageMaker service
 - [kedro-partitioned](https://github.com/kedro-partitioned/kedro-partitioned), by [Gabriel Daiha Alves](https://github.com/gabrieldaiha) and [Nickolas da Rocha Machado](https://github.com/nickolasrm), extends the functionality on processing partitioned data.
+- [kedro-dagster](https://github.com/gtauzin/kedro-dagster), by [Guillaume Tauzin](https://github.com/gtauzin), enables translating a Kedro project to [Dagster](https://dagster.io/). It comes with an example project to get you started in the [kedro-dagster-example repo](https://github.com/gtauzin/kedro-dagster-example). You can find more information in the [kedro-dagster documentation](https://kedro-dagster.readthedocs.io/).

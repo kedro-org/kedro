@@ -5,7 +5,7 @@ can be used to manage and execute distributed computing workloads using Apache S
 independently allocates the resources needed for each job and releases them at completion.
 
 EMR Serverless is typically used for pipelines that are either fully or partially dependent on PySpark.
-For other parts of the pipeline such as modeling, where a non-distributed computing approach may be suitable, EMR Serverless might not be needed.
+For other parts of the pipeline such as modelling, where a non-distributed computing approach may be suitable, EMR Serverless might not be needed.
 
 
 ## Context
@@ -20,14 +20,14 @@ Some applications may need a different approach, such as:
 - **Python dependencies:** Some applications use a range of third-party dependencies that need to be installed on both the driver and worker nodes.
 
 Even though the official AWS documentation provides methods for configuring a [custom Python version](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python.html)
-and for [using custom dependencies](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python-libraries.html), there are some limitations. The methods are prone to errors, can be difficult to debug, and do not ensure full compatibility (see the [FAQ section below](#faq) for more details).
+and for [using custom dependencies](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python-libraries.html), there are some limitations. The methods are prone to errors, can be difficult to debug, and do not ensure full compatibility (see the [FAQ section below](#frequently-asked-questions) for more details).
 
 EMR Serverless offers a solution to the limitations described, starting with Amazon EMR 6.9.0, which supports [custom images](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html). With a custom Docker image you can package a specific Python version along
 with all required dependencies into a single immutable container. This ensures a consistent runtime environment
 across the entire setup and also enables control over the runtime environment.
 
-This approach helps to avoid job failures due to misconfigurations or potential conflicts with system-level packages,
-and ensures the package is portable so it can be debugged and tested locally ([see more details on validation](#optional-validate-the-custom-image)). Using the approach can provide a repeatable, reliable environment and improve operational flexibility.
+This approach helps to avoid job failures caused by configuration conflicts with system-level packages.
+It also keeps the package portable so it can be debugged and tested locally ([see more details on validation](#optional-validate-the-custom-image)). Using the approach can provide a repeatable, reliable environment and improve operational flexibility.
 
 With this context established, the rest of this page describes how to deploy a Kedro project to EMR Serverless.
 
@@ -58,7 +58,7 @@ ENV PYENV_ROOT /usr/.pyenv
 ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 ENV PYTHON_VERSION=3.9.16
 
-# Install pyenv, initialize it, install desired Python version and set as global
+# Install pyenv, initialise it, install desired Python version and set as global
 RUN curl https://pyenv.run | bash
 RUN eval "$(pyenv init -)"
 RUN pyenv install ${PYTHON_VERSION} && pyenv global ${PYTHON_VERSION}
@@ -94,7 +94,7 @@ For more details, see the following resources:
 
 - [Package a Kedro project](https://docs.kedro.org/en/stable/deploy/package_a_project/#package-a-kedro-project)
 - [Run a packaged project](https://docs.kedro.org/en/stable/deploy/package_a_project/#run-a-packaged-project)
-- [Customizing an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
+- [Customising an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
 - [Using custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-custom-images.html)
 
 ## Setup
@@ -152,9 +152,9 @@ for more details.
 ## Run a job
 
 !!! note
-    On making changes to the custom image, and rebuilding and pushing to ECR, be sure to restart the EMR Serverless application before submitting a job if your application is **already started**. Otherwise, new changes may not be reflected in the job run.
+    When you change the custom image, rebuild it, and push it to ECR, restart the EMR Serverless application before submitting a job if the application is **already started**. Otherwise, the job may not pick up the new image.
 
-    This may be due to the fact that when the application has started, EMR Serverless keeps a pool of warm resources (also referred to as [pre-initialized capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/pre-init-capacity.html)) ready to run a job, and the nodes may have already used the previous version of the ECR image.
+    This behaviour occurs because a running application keeps a pool of warm resources (also referred to as [pre-initialised capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/pre-init-capacity.html)) ready for jobs, and the nodes may already reference the previous version of the ECR image.
 
 See details on [how to run a Spark job on EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html).
 
@@ -166,8 +166,8 @@ The following parameters need to be provided:
 !!! note
     The use of an "entrypoint script" is needed because [EMR Serverless disregards `[CMD]` or `[ENTRYPOINT]` instructions
     in the Dockerfile](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html#considerations).
-    We recommend to run Kedro programmatically through an "entrypoint script" to eliminate the need to use, for example,
-    a [subprocess](https://docs.python.org/3/library/subprocess.html) to invoke `kedro run`. See [FAQ](#faq) for more details.
+    We recommend running Kedro programmatically through an "entrypoint script" to avoid using, for example,
+    separate process-spawning utilities from the Python standard library to invoke `kedro run`. See [FAQ](#frequently-asked-questions) for more details.
 
 
 Example using AWS CLI:
@@ -187,18 +187,18 @@ aws emr-serverless start-job-run \
 
 Enter the respective values in the placeholders above. For example, use the ARN from the job runtime role created earlier for `<execution-role-arn>`.
 
-## FAQ
+## Frequently asked questions
 
 ### How is the approach defined here different from the approach in ["Seven steps to deploy Kedro pipelines on Amazon EMR"](https://kedro.org/blog/how-to-deploy-kedro-pipelines-on-amazon-emr) on the Kedro blog?
 
 There are similarities in steps in both approaches. The key difference is that this page explains how to provide a custom Python version
 through the custom image. The blog post provides Python dependencies in a virtual environment for EMR.
 
-The approach of providing a custom image applies to EMR *Serverless*. On EMR it would be worth considering [using a custom AMI](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html), as an alternative to using [bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html). This has not been explored nor tested as yet.
+The approach of providing a custom image applies to EMR *Serverless*. On EMR it would be worth considering [using a custom AMI](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html), as an alternative to using [bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html). This has not been explored nor tested.
 
-### EMR Serverless already has Python installed. Why do we need a custom Python version?
+### Why install a custom Python version on EMR Serverless?
 
-Some applications may require a different Python version than the default version installed. For example, your code base may require Python 3.9 while the default Python installation on the latest EMR releases (6.10.0, 6.11.0) is based on Python 3.7.
+Some applications may need a different Python version than the default installation. For example, your code base may rely on Python 3.9, while the latest EMR releases (6.10.0, 6.11.0) ship with Python 3.7.
 
 ### Why do we need to create a custom image to provide the custom Python version?
 
@@ -220,10 +220,10 @@ programmatically, instead of using [subprocess](https://docs.python.org/3/librar
 ### How about using the method described in [Lifecycle management with KedroSession](https://docs.kedro.org/en/0.18.11/kedro_project_setup/session.html) to run Kedro programmatically?
 
 This is a valid alternative to run Kedro programmatically, without needing to package the Kedro project, but the arguments are not a direct mapping to Kedro command line arguments:
-- Different names are used. For example, "pipeline_name" and "node_names" are used instead of "pipeline" and "nodes".
-- Different types are used. For example, to specify the "runner" you need to pass an `AbstractRunner` object, instead of a string value like "ThreadRunner".
+- Different names are used. For example, `pipeline_name` and `node_names` are used instead of `pipeline` and `nodes`.
+- Different types are used. For example, to specify the runner you need to pass an `AbstractRunner` object, instead of a string value like `ThreadRunner`.
 
-Arguments need to be passed separately: "env" is passed directly to `KedroSession.create()` while
-other arguments such as "pipeline_name" and "node_names" need to be passed to `session.run()`.
+Arguments need to be passed separately: `env` is passed directly to `KedroSession.create()` while
+other arguments such as `pipeline_name` and `node_names` need to be passed to `session.run()`.
 
-It is most suited to scenarios such as invoking `kedro run`, or where you do not provide many command line arguments to Kedro.
+It is most suited to scenarios such as invoking `kedro run`, or where you do not provide several command line arguments to Kedro.

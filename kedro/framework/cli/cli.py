@@ -211,7 +211,7 @@ class KedroCLI(CommandCollection):
             raise
 
     @property
-    def global_groups(self) -> Sequence[click.MultiCommand]:
+    def global_groups(self) -> Sequence[click.Group]:
         """Property which loads all global command groups from plugins and
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
@@ -219,12 +219,12 @@ class KedroCLI(CommandCollection):
         return [cli, *load_entry_points("global"), global_commands]
 
     @property
-    def project_groups(self) -> Sequence[click.MultiCommand]:
+    def project_groups(self) -> Sequence[click.Group]:
         """Property which loads all project command groups from the
         project and the plugins, then combines them with the built-in ones.
         Built-in commands can be overridden by plugins, which can be
         overridden by a custom project cli.py.
-        See https://docs.kedro.org/en/stable/extend_kedro/common_use_cases.html#use-case-3-how-to-add-or-modify-cli-commands
+        See https://docs.kedro.org/en/stable/extend/common_use_cases/#use-case-3-how-to-add-or-modify-cli-commands
         on how to add this.
         """
         if not self._metadata:

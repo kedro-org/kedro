@@ -4,7 +4,7 @@ In this section, we introduce namespaces - a powerful tool for grouping and isol
 
 - **Reusing a Kedro pipeline:** If you need to reuse a pipeline with some modifications of inputs, outputs or parameters, Kedro does not allow direct duplication because all nodes within a project must have unique names. Using namespaces helps resolve this issue by isolating identical pipelines while also enhancing visualisation in Kedro-Viz.
 
-- **Grouping specific nodes:**  Namespaces provide a simple way to group selected nodes, making it possible to execute them together in deployment while also improving their visual representation in Kedro-Viz.
+- **Grouping specific nodes:**  Namespaces provide a way to group selected nodes, making it possible to execute them together in deployment while also improving their visual representation in Kedro-Viz.
 
 ## How to reuse your pipelines
 
@@ -16,7 +16,7 @@ def create_pipeline(**kwargs) -> Pipeline:
        existing_pipeline, # Name of the existing Pipeline object
        inputs = {"old_input_df_name" : "new_input_df_name"},  # Mapping existing Pipeline input to new input
        outputs = {"old_output_df_name" : "new_output_df_name"},  # Mapping existing Pipeline output to new output
-       parameters = {"params: model_options": "params: new_model_options"},  # Updating parameters
+       parameters = {"params:model_options": "params:new_model_options"},  # Updating parameters
     )
 ```
 
@@ -75,16 +75,16 @@ model_options_1:
 ```
 
 !!! note
-    In Kedro, you cannot run pipelines with the same node names. In this example, both pipelines have nodes with the same names, so it's impossible to execute them together. However, `base_data_science` is not registered and will not be executed with the `kedro run` command. The `data_science` pipeline, on the other hand, will be executed during `kedro run` because it will be autodiscovered by Kedro, as it was created inside the `create_pipeline()` function.
+    In Kedro, you cannot run pipelines with the same node names. In this example, both pipelines have nodes with the same names, so it is impossible to execute them together. The `base_data_science` pipeline is not registered and will not run with the `kedro run` command. The `data_science` pipeline runs because Kedro discovers it automatically when `create_pipeline()` constructs it.
 
-If you want to execute `base_data_science` and `data_science` pipelines together or reuse `base_data_science` a few more times, you need to modify the node names. The easiest way to do this is by using namespaces.
+If you want to execute `base_data_science` and `data_science` pipelines together or reuse `base_data_science` several more times, you need to change the node names. The easiest way to do this is by using namespaces.
 
 ## What is a namespace
 
 A namespace is a way to isolate nodes, inputs, outputs, and parameters inside your pipeline. If you put `namespace="namespace_name"` attribute inside the `Pipeline` class, it will add the `namespace_name.` prefix to all nodes, inputs, outputs, and parameters inside your new pipeline.
 
 !!! note
-    If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you can disable it by setting the `prefix_datasets_with_namespace` parameter to `False`. This will keep the original names of your inputs, outputs, and parameters. However, the nodes will still be prefixed with the namespace name. For example:
+    If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you can disable it by setting the `prefix_datasets_with_namespace` parameter to `False`. This keeps the original names of your inputs, outputs, and parameters. The nodes are still prefixed with the namespace name. For example:
 
 ```python
 Pipeline(
@@ -93,7 +93,7 @@ Pipeline(
     prefix_datasets_with_namespace=False,
 )
 ```
-Alternatively, you can also specify the mapping of the inputs, outputs, and parameters inside the corresponding parameters of the `Pipeline` class. For example:
+You can also specify the mapping of the inputs, outputs, and parameters inside the corresponding parameters of the `Pipeline` class. For example:
 
 ```python
 Pipeline(
@@ -111,7 +111,7 @@ Let's extend our previous example and try to reuse the `base_data_science` pipel
 kedro pipeline create data_science_2
 ```
 
-Then, we need to modify the `src/project_name/pipelines/data_science_2/pipeline.py` file to create a pipeline in a similar way to the example above. We will import `base_data_science` from the code above and use a namespace to isolate our nodes:
+Then, we need to change the `src/project_name/pipelines/data_science_2/pipeline.py` file to create a pipeline in a similar way to the example above. We will import `base_data_science` from the code above and use a namespace to isolate our nodes:
 
 ```python
 #src/project_name/pipelines/data_science_2/pipeline.py
@@ -127,7 +127,7 @@ def create_pipeline() -> Pipeline:
     )
 ```
 
-To use a new set of parameters, copy `model_options` from `conf/base/parameters_data_science.yml` to `conf/base/parameters_data_science_2.yml` and modify it slightly to try new model training parameters, such as test size and a different feature set. Call it `model_options_2`:
+To use a new set of parameters, copy `model_options` from `conf/base/parameters_data_science.yml` to `conf/base/parameters_data_science_2.yml` and change it slightly to try new model training parameters, such as test size and a different feature set. Call it `model_options_2`:
 
 ```python
 #conf/base/parameters.yml
@@ -141,7 +141,7 @@ model_options_2:
     - company_rating
 ```
 
-In this example, all nodes inside the `data_science_2` pipeline will be prefixed with `ds_2`: `ds_2.split_data`, `ds_2.train_model`, `ds_2.evaluate_model`. Parameters will be used from `model_options_2` because we overwrite `model_options` with them. The input for that pipeline will be `model_input_table` as it was previously, because we mentioned that in the inputs parameter (without that, the input would be modified to `ds_2.model_input_table`, but we don't have that table in the pipeline).
+In this example, all nodes inside the `data_science_2` pipeline are prefixed with `ds_2`: `ds_2.split_data`, `ds_2.train_model`, `ds_2.evaluate_model`. Parameters come from `model_options_2` because we overwrite `model_options` with them. The input for that pipeline remains `model_input_table` because we specified it in the inputs parameter. Without that mapping, the input becomes `ds_2.model_input_table`, which does not exist in the pipeline.
 
 Since the node names are unique now, we can run the project with:
 
@@ -149,7 +149,7 @@ Since the node names are unique now, we can run the project with:
 kedro run
 ```
 
-Logs show that `data_science` and `data_science_2` pipelines were executed successfully with different R2 results. Now, we can see how Kedro-viz renders namespaced pipelines in collapsible "super nodes":
+Logs show that `data_science` and `data_science_2` pipelines completed with different R2 results. Now, we can see how Kedro-Viz renders namespaced pipelines in collapsible "super nodes":
 
 ```python
 kedro viz run
@@ -157,9 +157,9 @@ kedro viz run
 
 After running viz, we can see two equal pipelines: `data_science` and `data_science_2`:
 
-![namespaces uncollapsed](../meta/images/namespaces_uncollapsed.png)
+![namespaces un-collapsed](../meta/images/namespaces_uncollapsed.png)
 
-We can collapse all namespaced pipelines (in our case, it's only `data_science_2`) with a special button and see that the `data_science_2` pipeline was collapsed into one super node called `Ds 2`:
+We can collapse all namespaced pipelines (in this example, the namespaced pipeline is `data_science_2`) with a special button and see that the `data_science_2` pipeline collapses into one super node called `Ds 2`:
 
 ![namespaces collapsed](../meta/images/namespaces_collapsed.png)
 
@@ -171,13 +171,13 @@ We can collapse all namespaced pipelines (in our case, it's only `data_science_2
 
 If we want to make all pipelines in this example fully namespaced, we should:
 
-Modify the `data_processing` pipeline by adding to the `Pipeline` class in `src/project_name/pipelines/data_processing/pipeline.py` with the following code:
+Change the `data_processing` pipeline by adding to the `Pipeline` class in `src/project_name/pipelines/data_processing/pipeline.py` with the following code:
 ```python
         namespace="data_processing",
         inputs={"companies", "shuttles", "reviews"},  # Inputs remain the same, without namespace prefix
         outputs={"model_input_table"},  # Outputs remain the same, without namespace prefix
 ```
-Modify the `data_science` pipeline by adding namespace and inputs in the same way as it was done in `data_science_2` pipeline:
+Change the `data_science` pipeline by adding namespace and inputs in the same way as in the `data_science_2` pipeline:
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
@@ -195,7 +195,7 @@ After executing the pipeline with `kedro run`, the visualisation with `kedro viz
 
 ## Group nodes with namespaces
 
-You can use namespaces in your Kedro projects, not only to reuse pipelines but to also group your nodes for better high level visualisation in Kedro Viz and for deployment purposes. In production environments, it might be inefficient to map each node to a container. Using namespaces as a grouping mechanism, you can map each namespaced pipeline to a container or a task in your deployment environment.
+You can use namespaces in your Kedro projects to reuse pipelines and to group nodes for better high-level visualisation in Kedro-Viz and for deployment purposes. In production environments, it might be inefficient to map each node to a container. Using namespaces as a grouping mechanism, you can map each namespaced pipeline to a container or a task in your deployment environment.
 
 For example, in your spaceflights project, you can assign a namespace to the `data_processing` pipeline like this:
 
@@ -233,9 +233,9 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 
 !!! note
-    From Kedro 1.0.0, use the `group_nodes_by(group_by)` method on the `Pipeline` object to group nodes according to a chosen strategy, such as by `top-level` namespace. This replaces the older `grouped_nodes_by_namespace()` method and returns a list of `GroupedNodes` for improved type safety and consistency. Plugin developers are encouraged to use this method to obtain structured groupings of nodes for deployment environments. To treat each node as a separate group, pass `group_by=None`.
+    From Kedro 1.0.0, use the `group_nodes_by(group_by)` method on the `Pipeline` object to group nodes according to a chosen strategy, such as by `top-level` namespace. This replaces the older `grouped_nodes_by_namespace()` method and returns a list of `GroupedNodes` for improved type safety and consistency. Plugin developers are encouraged to use this method to get structured groupings of nodes for deployment environments. To treat each node as a separate group, pass `group_by=None`.
 
-You can further nest namespaces by assigning namespaces on the node level with the `namespace` argument of the `Node` class. Namespacing at node level should only be done to enhance visualisation by creating collapsible pipeline parts on Kedro Viz. In this case, only the node name will be prefixed with `namespace_name`, while inputs, outputs, and parameters will remain unchanged. This behaviour differs from [namespacing at the pipeline level](#what-is-a-namespace).
+You can further nest namespaces by assigning namespaces at the node level with the `namespace` argument of the `Node` class. Namespacing at node level should be done to enhance visualisation by creating collapsible pipeline parts on Kedro-Viz. In this case, the node name is prefixed with `namespace_name`, while inputs, outputs, and parameters remain unchanged. This behaviour differs from [namespacing at the pipeline level](#what-is-a-namespace).
 
 For example, if you want to group the first two nodes of the `data_processing` pipeline from [Spaceflights tutorial](../tutorials/add_another_pipeline.md#data-science-pipeline) into the same collapsible namespace for visualisation, you can update your pipeline like this:
 
@@ -274,7 +274,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-As you can see in the above example, the entire pipeline is namespaced as `data_processing`, while the first two nodes are also namespaced as `data_processing.preprocessing`. This will allow you to collapse the nested `preprocessing` namespace in Kedro-Viz for better visualisation.
+In the example above, the entire pipeline is namespaced as `data_processing`, while the first two nodes are also namespaced as `data_processing.preprocessing`. This allows you to collapse the nested `preprocessing` namespace in Kedro-Viz for better visualisation.
 
 You can execute the whole namespaced pipeline with:
 ```bash

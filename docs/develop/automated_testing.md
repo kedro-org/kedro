@@ -4,18 +4,18 @@ An important step towards achieving high code quality and maintainability in you
 ## Introduction
 
 Software testing is the process of checking that the code you have written fulfills its requirements. Software testing can either be **manual** or **automated**. In the context of Kedro:
-- **Manual testing** is when you run part or all of your project and check that the results are what you expect.
-- **Automated testing** is writing new code (using libraries called _testing frameworks_) that runs part or all of your project and automatically checks the results against what you expect.
+- **Manual testing** is when you run part or the entire project and check that the results are what you expect.
+- **Automated testing** is writing new code (using libraries called _testing frameworks_) that runs part or the entire project and automatically checks the results against what you expect.
 
 As a project grows larger, new code will increasingly rely on existing code. As these interdependencies grow, making changes in one part of the code base can unexpectedly break the intended functionality in another part.
 
 The major disadvantage of manual testing is that it is time-consuming. Manual tests are usually run once, directly after new functionality has been added. It is impractical to repeat manual tests for the entire code base each time a change is made, which means this strategy often misses breaking changes.
 
-The solution to this problem is automated testing. Automated testing allows many tests across the whole code base to be run in seconds, every time a new feature is added or an old one is changed. In this way, breaking changes can be discovered during development rather than in production.
+The solution to this problem is automated testing. Automated testing runs comprehensive test suites across the whole code base in seconds, every time a new feature is added or an old one is changed. In this way, breaking changes can be discovered during development rather than in production.
 
 ## Set up automated testing with `pytest`
 
-There are many testing frameworks available for Python. One of the most popular is `pytest` (see the [project's home page](https://docs.pytest.org/en/7.1.x/) for a quick overview). `pytest` is often used in Python projects for its short, readable tests and powerful set of features.
+Python offers several testing frameworks. One of the most popular is `pytest` (see the [project's home page](https://docs.pytest.org/en/7.1.x/) for an overview). `pytest` is often used in Python projects for its short, readable tests and powerful set of features.
 
 Let's look at how you can start working with `pytest` in your Kedro project.
 
@@ -39,7 +39,7 @@ dev = [
 pip install ."[dev]"
 ```
 
-Alternatively, you can individually install test requirements as you would install other packages with `pip`, making sure you have installed your project locally and your [project's virtual environment is active](../getting-started/install.md#how-to-manually-create-a-virtual-environment-for-your-kedro-project).
+You can also install test requirements individually as you would install other packages with `pip`, making sure you have installed your project locally and your [project's virtual environment is active](../getting-started/install.md#how-to-manually-create-a-virtual-environment-for-your-kedro-project).
 
 1. To install your project, navigate to your project root and run the following command:
 
@@ -102,15 +102,15 @@ class TestKedroRun:
             assert session.run() is not None
 ```
 
-This test is redundant, but it introduces a few of `pytest`'s core features and demonstrates the layout of a test file:
+This test is redundant, but it introduces several of `pytest`'s core features and demonstrates the layout of a test file:
 - Tests are implemented in methods or functions beginning with `test_` and classes beginning with `Test`.
 - The `assert` statement is used to compare the result of the test with an expected value.
 
-Although this specific example does not utilise fixtures, they are an essential part of pytest for defining reusable resources across tests. See [Fixtures](https://docs.pytest.org/en/7.1.x/explanation/fixtures.html#about-fixtures)
+Although this specific example does not use fixtures, they are an essential part of pytest for defining reusable resources across tests. See [Fixtures](https://docs.pytest.org/en/7.1.x/explanation/fixtures.html#about-fixtures)
 
 Tests should be named as descriptively as possible, especially if you are working with other people. For example, it is easier to understand the purpose of a test with the name `test_node_passes_with_valid_input` than a test with the name `test_passes`.
 
-You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using all of the features of `pytest`, see the [project documentation](https://docs.pytest.org/).
+You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using the full feature set of `pytest`, see the [project documentation](https://docs.pytest.org/).
 
 
 ### Run your tests
@@ -134,7 +134,7 @@ tests/test_run.py .                                                  [100%]
 ============================== 1 passed in 0.38s ===============================
 ```
 
-This output indicates that one test ran successfully in the file `src/tests/test_run.py`.
+This output indicates that one test ran in the file `src/tests/test_run.py`.
 
 ## Add test coverage reports with `pytest-cov`
 
@@ -181,4 +181,4 @@ src/spaceflights/settings.py                                 0      0   100%
 TOTAL                                                       98     98     0%
 ```
 
-This is the simplest report that `coverage.py` (via `pytest-cov`) will produce. It gives an overview of how many of the executable statements in each project file are covered by tests. For detail on the full set of features offered, see the [`coverage.py` docs](https://coverage.readthedocs.io/).
+This is the simplest report that `coverage.py` (through `pytest-cov`) will produce. It gives an overview of the proportion of executable statements in each project file that are covered by tests. For detail on the full set of features offered, see the [`coverage.py` docs](https://coverage.readthedocs.io/).

@@ -20,7 +20,7 @@ test_dataset:
       encoding: "utf-8"
 ```
 
-`load_args` and `save_args` configure how a third-party library (e.g. `pandas` for `CSVDataset`) loads/saves data from/to a file.
+`load_args` and `save_args` configure how a third-party library (for example, `pandas` for `CSVDataset`) loads/saves data from/to a file.
 
 ## Save data to a CSV file without row names (index) using `utf-8` encoding
 
@@ -123,7 +123,7 @@ trains:
 
 ```yaml
 results_plot:
-  type: matplotlib.MatplotlibWriter
+  type: matplotlib.MatplotlibDataset
   filepath: gcs://your_bucket/data/08_results/plots/output_1.jpeg
   fs_args:
     project: my-project
@@ -208,7 +208,7 @@ scooters_query:
 
 When you use [pandas.SQLTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.SQLTableDataset/), or [pandas.SQLQueryDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.SQLQueryDataset/) you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
 
-`scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataset` only).
+`scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` when using `pandas.SQLTableDataset`.
 
 
 ## Load data from an API endpoint
@@ -358,7 +358,7 @@ airplanes:
     sep: ;
 ```
 
-In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
+In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. By default, that would replace the whole dictionary. To extend `load_args`, the defaults for that block are then re-inserted.
 
 ## Read the same file using different datasets with transcoding
 
@@ -381,7 +381,7 @@ my_dataframe@pandas:
   filepath: data/02_intermediate/data.parquet
 ```
 
- When using transcoding you must ensure the filepaths defined for each catalog entry share the same format (for example: CSV, JSON, Parquet). These entries can then be used in the pipeline as follows:
+ When using transcoding you must ensure the file paths defined for each catalog entry share the same format (for example: CSV, JSON, Parquet). These entries can then be used in the pipeline as follows:
 
 ```python
 Pipeline(
@@ -399,7 +399,7 @@ for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the seco
 
 ### How *not* to use transcoding
 
-Kedro pipelines automatically resolve the node execution order and check to ensure there are no circular dependencies in the pipeline. It is during this process that the transcoded datasets are resolved and the transcoding notation `@...` is stripped. This means within the pipeline the datasets `my_dataframe@spark` and `my_dataframe@pandas` are considered to be one `my_dataframe` dataset. The `DataCatalog`, however, treats transcoded entries as separate datasets, as they are only resolved as part of the pipeline resolution process. This results in differences between your defined pipeline in `pipeline.py` and the resolved pipeline that is run by Kedro, and these differences may lead to unintended behaviours. Thus, it is important to be aware of this when using transcoding.
+Kedro pipelines automatically resolve the node execution order and check to ensure there are no circular dependencies in the pipeline. It is during this process that the transcoded datasets are resolved and the transcoding notation `@...` is stripped. This means within the pipeline the datasets `my_dataframe@spark` and `my_dataframe@pandas` are considered to be one `my_dataframe` dataset. The `DataCatalog`, though, treats transcoded entries as separate datasets because they are resolved as part of the pipeline resolution process. This results in differences between your defined pipeline in `pipeline.py` and the resolved pipeline that is run by Kedro, and these differences may lead to unintended behaviours. Thus, it is important to be aware of this when using transcoding.
 
 ```{caution}
 Below are some examples where transcoding may produce unwanted side effects and raise errors.
@@ -457,7 +457,7 @@ Pipeline(
 )
 ```
 
-In this example, there is a single dependency between the nodes `my_func3_node` and `my_func2_node`. However, when this pipeline is resolved there are some hidden dependencies that will restrict the node execution order. We can expose them by removing the transcoding notation:
+In this example, there is a single dependency between the nodes `my_func3_node` and `my_func2_node`. Though, when this pipeline is resolved there are some hidden dependencies that will restrict the node execution order. We can expose them by removing the transcoding notation:
 
 ```python
 resolved_pipeline(

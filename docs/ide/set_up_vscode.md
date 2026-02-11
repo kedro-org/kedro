@@ -1,6 +1,6 @@
 # Set up Visual Studio Code
 
-Start by opening a new project directory in VS Code and installing the Python plugin under **Tools and languages**:
+Open a new project directory in VS Code and install the Python plugin under **Tools and languages**:
 
 ![](../meta/images/vscode_startup.png)
 
@@ -10,25 +10,25 @@ At this stage, you should be able to see the `conda` environment that you have c
 
 ![](../meta/images/vscode_setup_interpreter.png)
 
-## Kedro VS Code Extension
-[Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) supports Kedro 0.19+. It helps you navigate around your Kedro project by finding the definition of your datasets, find references to them in your code, and more.
+## Kedro VS Code extension
+[Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) supports Kedro 0.19+. It helps you navigate your Kedro project by finding dataset definitions, locating references in your code, and more.
 
 ![Kedro VS Code gif](https://github.com/kedro-org/vscode-kedro/blob/main/assets/lsp-go-to-definition.gif?raw=true)
 
-## Setting up `venv` / `virtualenv` in VS Code
+## Set up `venv` or `virtualenv` in VS Code
 
-We're going to show you how to get your virtual environments to show up in your Python interpreter in VS Code. You do this by opening [`settings.json`](https://code.visualstudio.com/docs/getstarted/getting-started#_configure-vs-code-settings) and adding the following:
+To ensure your virtual environments appear in the Python interpreter list, open [`settings.json`](https://code.visualstudio.com/docs/getstarted/getting-started#_configure-vs-code-settings) and add the following:
 
 ```console
 "python.venvPath": "/path/containing/your/venvs/"
 ```
 
-It is useful to note that if you create a `venv` / `virtualenv` in your project directory named `venv`, VS Code (much like PyCharm) automatically loads it as the Python interpreter (unless you manually define your Python interpreter to something else as described above).
+If you create a `venv` / `virtualenv` in your project directory named `venv`, VS Code (much like PyCharm) automatically loads it as the Python interpreter unless you manually define a different interpreter as described above.
 
 
-## Setting up tasks
+## Set up tasks
 
-Here we will show you how to setup tasks for such Kedro CLI commands as `run`, `test`, `install`, `package`, etc.
+This section shows how to configure tasks for Kedro CLI commands such as `run`, `test`, `install`, and `package`.
 
 You'll start by finding the path of your Kedro CLI script in the terminal:
 
@@ -40,7 +40,7 @@ which kedro
 where kedro
 ```
 
-We're going to need you to modify your `tasks.json`. To do this, go to **Terminal > Configure Tasks...** on your menu and open up `tasks.json` in the editor. Modify it with the following:
+Update `tasks.json` by going to **Terminal > Configure Tasks...** and opening the file in the editor. Replace or extend it with the following:
 
 ```
 {
@@ -95,12 +95,12 @@ We're going to need you to modify your `tasks.json`. To do this, go to **Termina
 }
 ```
 
-To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift + B` for macOS. You can run other tasks by going to **Terminal > Run** and choosing which task you want to run.
+To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift + B` for macOS. You can run other tasks by going to **Terminal > Run** and choosing the task you want to run.
 
 ![](../meta/images/vscode_run.png)
 
 
-## Setting a custom Kedro project path
+## Set a custom Kedro project path
 
 Starting with Kedro VS Code extension version 0.3.0, you can now specify a custom path to your Kedro project. This is useful when:
 
@@ -109,7 +109,7 @@ Starting with Kedro VS Code extension version 0.3.0, you can now specify a custo
 - You have multiple Kedro projects and want to switch between them
 
 
-### Set up a custom path using the command palette
+### Set a custom path using the command palette
 
 1. Open the Command Palette by pressing `Cmd + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux)
 2. Type `Kedro: Set Project Path` and select it
@@ -117,7 +117,7 @@ Starting with Kedro VS Code extension version 0.3.0, you can now specify a custo
 
 ![Setting Kedro project path through Command Palette](../meta/images/vscode_set_custom_path_using_command_palette.gif)
 
-### Set up a custom path using the VSCode settings UI
+### Set a custom path using the VS Code settings UI
 
 1. Open VS Code settings by pressing `Cmd + ,` (macOS) or `Ctrl + ,` (Windows/Linux)
 2. Search for `kedro` in the settings search bar
@@ -158,7 +158,7 @@ root
 
 In this case, you would set the Kedro project path to the absolute path of the `kedroProject` directory, such as `/Users/username/root/folder1/kedroProject`.
 
-### Switching between multiple projects
+### Switch between multiple projects
 
 If you work with multiple Kedro projects, you can switch between them by updating the project path setting. The extension will automatically detect the change and reconfigure itself to work with the newly specified project.
 
@@ -171,7 +171,7 @@ If the extension doesn't recognise your Kedro project after setting a custom pat
 3. Reload VS Code if the changes don’t take effect.
 
 
-## Real time catalog validation with Kedro LSP
+## Enable real-time catalog validation with Kedro LSP
 
 With the latest **Kedro VS Code extension**, you can automatically check your `catalog*.yml` or `catalog*.yaml` files without installing additional YAML plugins or schemas. The extension now uses a **Language Server Protocol (LSP)** approach to catch configuration issues as you edit.
 
@@ -195,7 +195,7 @@ This simplifies fixing dataset errors caused by things such as typos in your dat
 
 ## Visualise the pipeline with Kedro-Viz
 
-To visualize your Kedro project using Kedro-Viz in Visual Studio Code, follow these steps:
+To visualise your Kedro project using Kedro-Viz in Visual Studio Code, follow these steps:
 
 1. **Open the Command Palette**:
 Press `Cmd` + `Shift` + `P` (on macOS) or `Ctrl` + `Shift` + `P` (on Windows/Linux).
@@ -205,7 +205,7 @@ Type `kedro: Run Kedro Viz` and select the command.
 This will launch Kedro-Viz and display your pipeline visually within the extension.
 
 !!! note
-    To update the Kedro-Viz flowchart after making any changes to your Kedro project, please hit `Cmd` + `Shift` + `P` to open the VSCode command and look for `kedro: restart server`.
+    To update the Kedro-Viz flowchart after making changes to your Kedro project, press `Cmd` + `Shift` + `P` to open the VS Code command palette and run `kedro: restart server`.
 
 - **Navigate to Node Functions**:
 Click on a node in the Kedro-Viz flowchart, and it will automatically navigate to the corresponding node function in your code.
@@ -223,7 +223,7 @@ Clicking on a data node in the flowchart will open the corresponding dataset in 
     2. Search for "Kedro Auto Reload"
     3. Check the box for `Kedro: Auto Reload Kedro Viz`
 
-![Autoreload kedro viz](../meta/images/vscode_autoreload_viz.gif)
+![Auto reload Kedro-Viz](../meta/images/vscode_autoreload_viz.gif)
 
 !!! note
     Since auto reload restarts the LSP server, the current state in Kedro-Viz (like expanded pipelines or zoom level) will be reset.
@@ -294,7 +294,7 @@ Execution should stop at the breakpoint:
 
 ![](../meta/images/vscode_breakpoint.png)
 
-### Advanced: Remote interpreter debugging
+### Advanced: remote interpreter debugging
 
 It is possible to debug remotely using VS Code. The following example assumes SSH access is available on the remote computer (running a Unix-like OS) running the code that will be debugged.
 

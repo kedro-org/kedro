@@ -2,113 +2,43 @@
 
 This page outlines some best practices when building a Kedro pipeline with [`PySpark`](https://spark.apache.org/docs/latest/api/python/index.html). It assumes a basic understanding of both Kedro and `PySpark`.
 
-## Centralise Spark configuration in `conf/base/spark.yml`
+## Get started with the PySpark starter
 
-Spark allows you to specify many different [configuration options](https://spark.apache.org/docs/latest/configuration.html). We recommend storing all of these options in a file located at `conf/base/spark.yml`. Below is an example of the content of the file to specify the `maxResultSize` of the Spark's driver and to use the `FAIR` scheduler:
+You can use the built-in PySpark starter with the `kedro new` command to create a working Spark-based project:
 
-```yaml
-spark.driver.maxResultSize: 3g
-spark.scheduler.mode: FAIR
+```bash
+uvx kedro new --name=spaceflights-databricks --tools=pyspark --example=y
 ```
 
-!!! Note
-    Optimal configuration for Spark depends on the setup of your Spark cluster.
+This starter is designed specifically for Spark. It replaces pandas-based datasets with `SparkDatasetV2` in the Data Catalog and implements data transformations using Spark.
 
-## Initialise a `SparkSession` using a hook
+The starter supports multiple execution modes, including running [Kedro directly on Databricks](../deploy/supported-platforms/databricks.md#run-kedro-within-databricks-git-folders) and [using a remote Spark cluster from your local machine with Databricks Connect](../deploy/supported-platforms/databricks.md#local-development-remote-databricks-cluster-databricks-connect).
 
-Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) using an `after_context_created` [hook](../extend/hooks/introduction.md). This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
+If you want to run the project locally, install PySpark first. It is not included in the starter dependencies by default. You can install it with `kedro-datasets`:
 
-Below is an example implementation to initialise the `SparkSession` in `src/<package_name>/hooks.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
-
-```python
-from kedro.framework.hooks import hook_impl
-from pyspark import SparkConf
-from pyspark.sql import SparkSession
-
-
-class SparkHooks:
-    @hook_impl
-    def after_context_created(self, context) -> None:
-        """Initialises a SparkSession using the config
-        defined in project's conf folder.
-        """
-
-        # Load the spark configuration in spark.yaml using the config loader
-        parameters = context.config_loader["spark"]
-        spark_conf = SparkConf().setAll(parameters.items())
-
-        # Initialise the spark session
-        spark_session_conf = (
-            SparkSession.builder.appName(context.project_path.name)
-            .enableHiveSupport()
-            .config(conf=spark_conf)
-        )
-        _spark_session = spark_session_conf.getOrCreate()
-        _spark_session.sparkContext.setLogLevel("WARN")
+```bash
+uv pip install kedro-datasets[spark-local]
 ```
 
-You should modify this code to adapt it to your cluster's setup, e.g. setting master to `yarn` if you are running Spark on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).
+## Use Kedro’s built-in Spark datasets to load and save raw data
 
-Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere in your pipeline. `SparkSession.builder.getOrCreate()` is a global [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html).
+We recommend using Kedro’s built-in Spark datasets to load raw data into Spark [DataFrames](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html) and to write the results back to storage.
 
-We don't recommend storing Spark session on the context object, as it cannot be serialised and therefore prevents the context from being initialised for some plugins.
+You can find full documentation for the main Spark dataset, including examples for both Data Catalog configuration and Python API usage, here:
 
-You will also need to register `SparkHooks` by updating the `HOOKS` variable in `src/<package_name>/settings.py` as follows:
+- [`spark.SparkDatasetV2`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/spark.SparkDatasetV2/)
 
-```python
-from <package_name>.hooks import SparkHooks
+Kedro also provides several platform-specific Spark datasets:
 
-HOOKS = (SparkHooks(),)
-```
+- [`spark.DeltaTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/spark.DeltaTableDataset/)
+- [`spark.SparkJDBCDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/spark.SparkJDBCDataset/)
+- [`spark.SparkHiveDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/spark.SparkHiveDataset/)
 
-## Use Kedro's built-in Spark datasets to load and save raw data
-
-We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
-
-- [spark.DeltaTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.DeltaTableDataset/)
-- [spark.SparkDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkDataset/)
-- [spark.SparkJDBCDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkJDBCDataset/)
-- [spark.SparkHiveDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkHiveDataset/)
-
-
-The example below illustrates how to use `spark.SparkDataset` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
-
-```yaml
-weather:
-  type: spark.SparkDataset
-  filepath: s3a://your_bucket/data/01_raw/weather-
-  file_format: csv
-  load_args:
-    header: True
-    inferSchema: True
-  save_args:
-    sep: '|'
-    header: True
-```
-
-Or using the Python API:
-
-```python
-import pyspark.sql
-from kedro.io import DataCatalog
-from kedro_datasets.spark import SparkDataset
-
-spark_ds = SparkDataset(
-    filepath="s3a://your_bucket/data/01_raw/weather*",
-    file_format="csv",
-    load_args={"header": True, "inferSchema": True},
-    save_args={"sep": "|", "header": True},
-)
-catalog = DataCatalog({"weather": spark_ds})
-
-df = catalog.load("weather")
-assert isinstance(df, pyspark.sql.DataFrame)
-```
 
 ## Spark and Delta Lake interaction
 
-[Delta Lake](https://delta.io/) is an open-source project that enables building a Lakehouse architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
-To setup PySpark with Delta Lake, have a look at [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python). You may have to update the `SparkHooks` in your `src/<package_name>/hooks.py` to set up the `SparkSession` with Delta Lake support:
+[Delta Lake](https://delta.io/) is an open-source project that enables building a lake house architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
+To set up PySpark with Delta Lake, review [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python). You may have to update the `SparkHooks` in your `src/<package_name>/hooks.py` to set up the `SparkSession` with Delta Lake support:
 
 ```diff
 from kedro.framework.hooks import hook_impl
@@ -146,7 +76,7 @@ For nodes operating on `DataFrame` that doesn't need to perform Spark actions su
 
 ## Use `MemoryDataset` with `copy_mode="assign"` for non-`DataFrame` Spark objects
 
-Sometimes, you might want to use Spark objects that aren't `DataFrame` as inputs and outputs in your pipeline. For example, suppose you have a `train_model` node to train a classifier using Spark ML's [`RandomForrestClassifier`](https://spark.apache.org/docs/latest/ml-classification-regression.html#random-forest-classifier) and a `predict` node to make predictions using this classifier. In this scenario, the `train_model` node will output a `RandomForestClassifier` object, which then becomes the input for the `predict` node. Below is the code for this pipeline:
+Sometimes, you might want to use Spark objects that aren't `DataFrame` as inputs and outputs in your pipeline. For example, suppose you have a `train_model` node to train a classifier using the Spark ML [`RandomForestClassifier`](https://spark.apache.org/docs/latest/ml-classification-regression.html#random-forest-classifier) and a `predict` node to make predictions using this classifier. In this scenario, the `train_model` node will output a `RandomForestClassifier` object, which then becomes the input for the `predict` node. Below is the code for this pipeline:
 
 ```python
 from typing import Any, Dict
@@ -193,16 +123,12 @@ The `assign` copy mode ensures that the `MemoryDataset` will be assigned the Spa
 
 ## Tips for maximising concurrency using `ThreadRunner`
 
-Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the [kedro.runner.ThreadRunner][]:
+Under the hood, every Kedro node that performs a Spark action (for example, `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. To do that, you will need to run your Kedro pipeline with the [kedro.runner.ThreadRunner][]:
 
 ```bash
 kedro run --runner=ThreadRunner
 ```
 
-To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialise a `SparkSession`](#initialise-a-sparksession-using-a-hook) section:
-
-```yaml
-spark.scheduler.mode: FAIR
-```
+To further increase the concurrency level, you can enable fair scheduling in Spark ≥ 0.8. This gives each node an equal share of the Spark cluster and increases the chance that jobs run concurrently. By default, Spark uses FIFO scheduling, so a job that consumes excessive resources can block other jobs. To enable fair scheduling, configure the `spark.scheduler.mode` option in your local PySpark settings file.
 
 For more information, see the Spark documentation on [jobs scheduling within an application](https://spark.apache.org/docs/latest/job-scheduling.html#scheduling-within-an-application).

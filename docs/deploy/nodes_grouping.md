@@ -29,14 +29,14 @@ More information: [Run a pipeline by name](https://docs.kedro.org/en/stable/buil
 
 ## Grouping by tags
 
-You can tag individual nodes or the entire pipeline, allowing flexible execution of specific sections without modifying the pipeline structure. Kedro-Viz provides a clear visualisation of tagged nodes, making it easier to understand.
+You can tag individual nodes or the entire pipeline. This approach allows flexible execution of specific sections without modifying the pipeline structure. Kedro-Viz provides a clear visualisation of tagged nodes, making it easier to understand.
 <br>
 ![Filters Panel in Kedro Viz](../meta/images/kedro_viz_filters_tags.png)
 
-Please note that nodes with the same tag can exist in different pipelines, making debugging and maintaining the codebase more challenging, and tags do not enforce structure like pipelines or namespaces.
+Please note that nodes with the same tag can exist in different pipelines. This overlap can make debugging and maintenance more challenging. Tags also do not enforce structure like pipelines or namespaces.
 
 **Best used when**
-- You need to run specific nodes that don’t belong to the same pipeline.
+- You need to run specific nodes that don't belong to the same pipeline.
 - You want to rerun a subset of nodes in a large pipeline.
 
 **Not to use when**
@@ -59,7 +59,7 @@ Namespaces allow you to group nodes, ensuring clear dependencies and separation 
 <br>
 ![Switching expanding namespaced pipeline in Kedro Viz](../meta/images/kedro_viz_expanding_namespace.gif)
 
-Using namespaces comes with a few challenges:
+Using namespaces comes with some challenges:
 - **Defining namespace at Pipeline-level:** When applying a namespace at the pipeline level, Kedro automatically renames all inputs, outputs, and parameters within that pipeline. You will need to update your catalog accordingly. If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you should list these objects inside the corresponding parameters of the `Pipeline` class. For example:
 
 ```
@@ -78,7 +78,7 @@ return Pipeline(
 - Your pipeline structure is well-defined, and using namespaces improves visualisation in Kedro-Viz.
 
 **Not to use when**
-- In small and simple projects, using namespaces can introduce unnecessary complexity, making pipeline grouping a more suitable choice.
+- In small projects with straightforward pipelines, using namespaces can introduce unnecessary complexity, making pipeline grouping a more suitable choice.
 - Namespaces require additional effort, such as updating catalog names, since namespace prefixes are automatically applied to all the elements unless explicitly overridden in the namespaced pipeline parameters.
 
 **How to use**
@@ -88,6 +88,18 @@ return Pipeline(
   ```
 More information: [Namespaces](https://docs.kedro.org/en/stable/build/namespaces/)
 
+### Using namespaces with deployment plugins
+
+When deploying Kedro pipelines, some plugins support grouping nodes by namespace to create more efficient task structures:
+
+**Kedro-Airflow**: The `kedro-airflow` plugin supports grouping nodes by namespace when generating Airflow DAGs. Use the `--group-by namespace` flag to combine all nodes within the same namespace into a single Airflow task:
+
+```bash
+kedro airflow create --group-by namespace
+```
+
+This reduces the number of Airflow tasks and keeps logically related nodes together. For more details, see the [kedro-airflow documentation](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) and the [Airflow deployment guide](./supported-platforms/airflow.md#grouping-nodes-in-airflow-tasks).
+
 ---
 
 **Summary table**
@@ -95,5 +107,6 @@ More information: [Namespaces](https://docs.kedro.org/en/stable/build/namespaces
 | Aspect | Pipelines | Tags | Namespaces |
 |--------|-----------|------|-----------|
 | **What Works** | If you're happy with how the nodes are structured in your existing pipeline, or your pipeline is low complexity and a new grouping view is not required then you don't have to use any alternatives | Tagging individual nodes or the entire pipeline allows flexible execution of specific sections without altering the pipeline structure, and Kedro-Viz offers clear visualisation of these tagged nodes for better understanding. | Namespaces group nodes to ensure clear dependencies and separation within a pipeline, allow selective execution, and can be visualised using Kedro-Viz. |
-| **What Doesn't Work** | If you want to group nodes differently from the current pipeline structure, instead of creating a new pipeline, you can use alternative grouping methods such as tags or namespaces. | Lack of hierarchical structure, using tags makes debugging and maintaining the codebase more challenging | Defining namespaces at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps with modularisation by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline. |
+| **What Doesn't Work** | If you want to group nodes differently from the current pipeline structure, instead of creating a new pipeline, you can use alternative grouping methods such as tags or namespaces. | Lack of hierarchical structure, using tags makes debugging and maintaining the codebase more challenging | Defining namespaces at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps create a modular structure by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline. |
 | **Syntax** | `kedro run --pipeline=<your_pipeline_name>` | `kedro run --tags=<your_tag_name>` | `kedro run --namespaces=< namespace1,namespace2 >` |
+| **Deployment Plugin Support** | N/A | N/A | `kedro airflow create --group-by namespace` |

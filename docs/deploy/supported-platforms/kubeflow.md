@@ -2,13 +2,13 @@
 
 
 ## Why would you use Kubeflow Pipelines?
-Kubeflow Pipelines is an end-to-end (E2E) orchestration tool to deploy, scale and manage your machine learning systems within Docker containers. You can schedule and compare runs, and examine detailed reports on each run.
+Kubeflow Pipelines is an end-to-end (E2E) orchestration tool to deploy, scale, and manage your machine learning systems within Docker containers. You can schedule and compare runs, and examine detailed reports on each run.
 
 Here are the main reasons to use Kubeflow Pipelines:
 
 - It is cloud-agnostic and can run on any Kubernetes cluster
 - Kubeflow is tailored towards machine learning workflows for model deployment, experiment tracking, and hyperparameter tuning
-- You can re-use components and pipelines to create E2E solutions
+- You can reuse components and pipelines to create E2E solutions
 
 
 ## The `kedro-kubeflow` plugin

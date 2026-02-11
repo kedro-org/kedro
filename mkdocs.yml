@@ -52,9 +52,16 @@ plugins:
   - search
   - autorefs
   - mermaid2
+  - redirects:
+      redirect_maps:
+        'configuration/telemetry.md': 'about/telemetry.md'
   - mkdocstrings:
       handlers:
         python:
+          inventories:
+            - https://docs.kedro.org/en/stable/objects.inv
+            - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
+          paths: [src]
           options:
             show_root_toc_entry: true
             show_source: false #currently doesn't show source at correct level, and not for pydantic models
@@ -67,10 +74,6 @@ plugins:
               ignore_init_summary: true
               warn_unknown_params: false
               returns_named_value: false
-            paths: [src]
-            import:
-              - https://docs.kedro.org/en/stable/objects.inv
-              - https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv
   - llmstxt:
       markdown_description: |
         Kedro is an open-source Python framework for creating reproducible, maintainable, and modular data science code.
@@ -144,6 +147,7 @@ plugins:
           - build/namespaces.md: Reusing pipelines with namespaces
           - build/pipeline_registry.md: Registering and discovering pipelines
           - build/slice_a_pipeline.md: Slicing pipelines for partial execution
+          - build/llm_context_node.md: Using LLM Context Nodes to construct LLMContext
 
         Development Practices:
           - develop/dependencies.md: Managing project dependencies
@@ -164,13 +168,9 @@ plugins:
           - deploy/supported-platforms/amazon_emr_serverless.md: Amazon EMR Serverless guide
           - deploy/supported-platforms/aws_step_functions.md: AWS Step Functions integration
           - deploy/supported-platforms/azure.md: Azure ML pipelines deployment
+          - deploy/supported-platforms/dagster.md: Dagster deployment
           - deploy/supported-platforms/dask.md: Dask integration for parallel computing
-          - deploy/supported-platforms/databricks/index.md: Databricks overview
-          - deploy/supported-platforms/databricks/databricks_notebooks_development_workflow.md: Databricks notebooks workflow
-          - deploy/supported-platforms/databricks/databricks_ide_databricks_asset_bundles_workflow.md: Databricks asset bundles
-          - deploy/supported-platforms/databricks/databricks_deployment_workflow.md: Databricks deployment guide
-          - deploy/supported-platforms/databricks/databricks_dbx_workflow.md: Using dbx with Databricks
-          - deploy/supported-platforms/databricks/databricks_visualisation.md: Databricks visualization
+          - deploy/supported-platforms/databricks.md: Databricks deployment
           - deploy/supported-platforms/kubeflow.md: Kubeflow Pipelines integration
           - deploy/supported-platforms/prefect.md: Prefect workflow orchestration
           - deploy/supported-platforms/vertexai.md: Google VertexAI deployment
@@ -249,6 +249,7 @@ plugins:
           - about/technical_steering_committee.md: Kedro's Technical Steering Committee
           - about/migration.md: Migration guide between Kedro versions
           - about/telemetry.md: Understanding Kedro telemetry
+          - about/experimental.md: Experimental APIs in Kedro
 
 markdown_extensions:
   - attr_list
@@ -343,6 +344,7 @@ nav:
           - Reusing pipelines (namespaces): build/namespaces.md
           - Pipeline registry: build/pipeline_registry.md
           - Slice a pipeline: build/slice_a_pipeline.md
+          - LLM context node (experimental): build/llm_context_node.md
       - Develop:
           - Dependency management: develop/dependencies.md
           - Logging: develop/logging.md
@@ -362,14 +364,9 @@ nav:
               - Amazon EMR Serverless: deploy/supported-platforms/amazon_emr_serverless.md
               - AWS Step Functions: deploy/supported-platforms/aws_step_functions.md
               - Azure ML pipelines: deploy/supported-platforms/azure.md
+              - Dagster: deploy/supported-platforms/dagster.md
               - Dask: deploy/supported-platforms/dask.md
-              - Databricks:
-                - Overview: deploy/supported-platforms/databricks/index.md
-                - Use a Databricks workspace to develop a Kedro project: deploy/supported-platforms/databricks/databricks_notebooks_development_workflow.md
-                - Use an IDE and Databricks asset Bundles to deploy a Kedro project: deploy/supported-platforms/databricks/databricks_ide_databricks_asset_bundles_workflow.md
-                - Use a Databricks job to deploy a Kedro project: deploy/supported-platforms/databricks/databricks_deployment_workflow.md
-                - Use an IDE, dbx and Databricks Repos to develop a Kedro project: deploy/supported-platforms/databricks/databricks_dbx_workflow.md
-                - Databricks visualisation: deploy/supported-platforms/databricks/databricks_visualisation.md
+              - Databricks: deploy/supported-platforms/databricks.md
               - Kubeflow Pipelines: deploy/supported-platforms/kubeflow.md
               - Prefect: deploy/supported-platforms/prefect.md
               - VertexAI: deploy/supported-platforms/vertexai.md
@@ -425,8 +422,9 @@ nav:
               - kedro.logging: api/kedro.logging.md
               - kedro.pipeline:
                   - Overview: api/pipeline/kedro.pipeline.md
-                  - node: api/pipeline/kedro.pipeline.node.md
+                  - Node: api/pipeline/kedro.pipeline.node.md
                   - Pipeline: api/pipeline/kedro.pipeline.Pipeline.md
+                  - LLM context node: api/pipeline/kedro.pipeline.llm_context.md
               - kedro.runner:
                   - Overview: api/runner/kedro.runner.md
                   - AbstractRunner: api/runner/kedro.runner.AbstractRunner.md
@@ -448,6 +446,8 @@ nav:
           - DVC: integrations-and-plugins/dvc.md
           - Delta Lake: integrations-and-plugins/deltalake_versioning.md
           - Iceberg: integrations-and-plugins/iceberg_versioning.md
+          - Great Expectations: integrations-and-plugins/great_expectations.md
+          - Pandera: integrations-and-plugins/pandera.md
       - IDE Support:
           - Visual Studio Code: ide/set_up_vscode.md
           - PyCharm: ide/set_up_pycharm.md
@@ -457,6 +457,7 @@ nav:
             #   - Kedro Wizard: about/community/wizard.md
           - Contributing:
               - Kedro's Technical Steering Committee: about/technical_steering_committee.md
+          - Experimental APIs in Kedro: about/experimental.md
             #   - Kedro Maintainer: about/contributing/maintainer.md
             #   - Contributing on GitHub: about/contributing/github.md
             #   - Contributing documentation: about/contributing/documentation.md

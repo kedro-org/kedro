@@ -22,17 +22,18 @@ flowchart TD
     F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Airflow</li><li>Amazon SageMaker</li><li>AWS Step functions</li><li>Azure</li><li>Dask</li><li>Databricks</li><li>Kubeflow Pipelines</li><li>Prefect</li><li>Vertex AI</li>"]
 ```
 
-## Deployment Methods
+## Deployment methods
 
-This following pages provide information for deployment to, or integration with, the following:
+The following pages provide information for deployment to, or integration with, the following:
 
 - [Airflow](./supported-platforms/airflow.md)
 - [Amazon SageMaker](./supported-platforms/amazon_sagemaker.md)
 - [Amazon EMR Serverless](./supported-platforms/amazon_emr_serverless.md)
 - [AWS Step functions](./supported-platforms/aws_step_functions.md)
 - [Azure](./supported-platforms/azure.md)
+- [Dagster](./supported-platforms/dagster.md)
 - [Dask](./supported-platforms/dask.md)
-- [Databricks](./supported-platforms/databricks/index.md)
+- [Databricks](./supported-platforms/databricks.md)
 - [Kubeflow Pipelines](./supported-platforms/kubeflow.md)
 - [Prefect](./supported-platforms/prefect.md)
 - [Vertex AI](./supported-platforms/vertexai.md)
@@ -45,6 +46,6 @@ This following pages provide information for deployment to, or integration with,
 
 ## Effective node grouping for deployment
 
-Effectively grouping nodes in deployment makes pipelines easier to manage and update, improves performance by using resources more efficiently, and enables them to handle larger datasets as they scale across different deployment environments. To learn more about the best ways to group nodes using Pipelines, Tags, and Namespaces, follow our detailed guide:
+Effective node grouping makes deployments easier to manage and update. It also improves performance by using resources more efficiently and enables pipelines to handle larger datasets as they scale across different environments. To learn more about grouping nodes using pipelines, tags, and namespaces, follow our detailed guide:
 
 - [Node Grouping in Kedro](nodes_grouping.md)

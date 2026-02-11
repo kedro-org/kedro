@@ -12,6 +12,7 @@ tokens:
   - '(?:\w+)log'
   - '(?:\w+)lor'
   - '(?:\w+)lyze'
+  - 'behavior'
 exceptions:
     - backlog
     - blog
@@ -19,6 +20,7 @@ exceptions:
     - catalog
     - Catalog
     - DataCatalog
+    - data_catalog
     - dialog
     - log
     - maize

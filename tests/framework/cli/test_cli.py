@@ -77,7 +77,9 @@ class TestCliCommands:
         """Run `kedro` without arguments."""
         result = CliRunner().invoke(cli, [])
 
-        assert result.exit_code == 0
+        # Exit code 2: click 8.2+ exits with code 2 when a group is invoked
+        # without a subcommand
+        assert result.exit_code == 2
         assert "kedro" in result.output
 
     def test_print_version(self):
@@ -200,7 +202,9 @@ class TestCommandCollection:
         """Check that help output includes stub_cli group description."""
         cmd_collection = CommandCollection(("Commands", [cli, stub_cli]))
         result = CliRunner().invoke(cmd_collection, [])
-        assert result.exit_code == 0
+        # Exit code 2: click 8.2+ exits with code 2 when a group is invoked
+        # without a subcommand
+        assert result.exit_code == 2
         assert "Stub CLI group description" in result.output
         assert "Kedro is a CLI" in result.output
 
@@ -453,7 +457,9 @@ class TestKedroCLI:
 
         result = CliRunner().invoke(kedro_cli, [])
 
-        assert result.exit_code == 0
+        # Exit code 2: click 8.2+ exits with code 2 when a group is invoked
+        # without a subcommand
+        assert result.exit_code == 2
         assert "Global commands from kedro" in result.output
         assert "Project specific commands from kedro" not in result.output
 
@@ -487,7 +493,9 @@ class TestKedroCLI:
         ]
 
         result = CliRunner().invoke(kedro_cli, [])
-        assert result.exit_code == 0
+        # Exit code 2: click 8.2+ exits with code 2 when a group is invoked
+        # without a subcommand
+        assert result.exit_code == 2
         assert "Global commands from kedro" in result.output
         assert "Project specific commands from kedro" in result.output
 
@@ -569,6 +577,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -610,6 +619,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -651,6 +661,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -683,6 +694,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=["fake_namespace"],
             only_missing_outputs=False,
         )
@@ -708,6 +720,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -749,9 +762,64 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
+
+    def test_run_multiple_pipelines(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipelines", "pipe1,pipe2"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert fake_session.run.call_count == 1
+        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
+
+        pipelines = fake_session.run.call_args.kwargs["pipeline_names"]
+        assert "pipe1" in pipelines
+        assert "pipe2" in pipelines
+
+    def test_run_multiple_pipelines_with_duplicate_name(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipelines", "pipe1,pipe1"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert fake_session.run.call_count == 1
+        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
+        assert fake_session.run.call_args.kwargs["pipeline_names"] == ["pipe1"]
+
+    def test_pipeline_and_pipelines_mutually_exclusive(
+        self, fake_project_cli, fake_metadata
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipeline", "pipe1", "--pipelines", "pipe2"],
+            obj=fake_metadata,
+        )
+
+        assert result.exit_code != 0
+        assert "cannot be used together" in result.output.lower()
+
+    def test_pipeline_name_deprecation_warning(
+        self, fake_project_cli, fake_metadata, caplog
+    ):
+        CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipeline", "pipe1"],
+            obj=fake_metadata,
+        )
+
+        assert "deprecated" in caplog.text.lower()
 
     @mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_invalid_config(
@@ -815,6 +883,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -878,9 +947,10 @@ class TestRunCommand:
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
         )
         assert result.exit_code
+        # Click 8.2+ sends error messages to stderr, so check result.output
         assert (
             "Item `bad` must contain a key and a value separated by `=`."
-            in result.stdout
+            in result.output
         )
 
     @mark.parametrize("bad_arg", ["=", "=value", " =value"])
@@ -889,7 +959,8 @@ class TestRunCommand:
             fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
         )
         assert result.exit_code
-        assert "Parameter key cannot be an empty string" in result.stdout
+        # Click 8.2+ sends error messages to stderr, so check result.output
+        assert "Parameter key cannot be an empty string" in result.output
 
     @mark.parametrize(
         "lv_input, lv_dict",
@@ -928,6 +999,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions=lv_dict,
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -991,6 +1063,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )

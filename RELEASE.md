@@ -1,18 +1,57 @@
 # Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Documentation changes
+## Community contributions
+
+# Release 1.2.0
+## Major features and improvements
+* Added `@experimental` decorator to mark unstable or early-stage public APIs.
+* Added support for running multiple pipelines in a single Kedro session run via the `--pipelines` CLI option and `pipeline_names` argument in `KedroSession.run()` method.
+* Updated the `spaceflights-pyspark` starter to use the new `SparkDatasetV2` integration, enabling local, Databricks-native, and remote Spark execution workflows.
+
+## Experimental features
+* Added experimental `llm_context_node` and `LLMContextNode` for assembling LLMs, prompts, and tools into a runtime `LLMContext` within Kedro pipelines.
+* Added experimental `preview_fn` argument to `Node` class to add support for user-injectable node preview functions.
+* Added new experimental `support-agent-langgraph` starter, which supports the above experimental features. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
+
+## Bug fixes and other changes
+* Set `raise_errors=True` in `find_pipelines()` calls in the project template's `pipeline_registry.py` to ensure pipeline discovery errors are raised during project runs.
+* Fixed packaged runs logging the current working directory name; they now log the installed package name (or project path) instead.
+
+## Documentation changes
+* Added beginner-friendly notes on `uvx` installation.
+* Updated Databricks deployment docs to cover `Spark Connect` and `Unity Catalog` – first workflows, and local-to-remote development.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Mohmn](https://github.com/Mohmn)
+
+# Release 1.1.1
+## Bug fixes and other changes
+* Fixed project version mismatch error. The error is now only raised when the **major version** of the project and Kedro package differ, allowing minor and patch version differences without unnecessary failures.
+
+# Release 1.1.0
 
 ## Major features and improvements
 * Added the `ignore_hidden` parameter to the `OmegaConfigLoader`.
 * Dropped support for Python 3.9 (EOL Oct 2025). Minimum supported version is now 3.10.
 
 ## Bug fixes and other changes
+* Bumped `click` dependency to support versions 8.2.0 and above.
+* Fixed typos in docs and docstrings.
+* Fixed duplicate execution of the `deindex-old-docs.js` script on Kedro documentation pages, preventing double injection of `noindex` meta tags after the MkDocs migration.
 
 ## Documentation changes
 * Added a note on programmatically creating lambdas when lazily saving a `PartionedDataset`.
+* Added Dagster as a supported deployment platform and the `kedro-dagster` plugin to the list of community plugins.
+* Added new data-validation documentation covering how to use Pandera and Great Expectations with Kedro.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Aseem Sangalay](https://github.com/aseemsangalay)
 * [Chris Schopp](https://github.com/chrisschopp)
+* [Yaroslav Halchenko](https://github.com/yarikoptic)
 
 # Release 1.0.0
 ## Major features and improvements

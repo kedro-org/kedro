@@ -32,6 +32,7 @@ class TypeExtractor:
         """
         try:
             from kedro.framework.project import pipelines
+            pipeline_dict = dict(pipelines)
         except ImportError:
             self.logger.warning(
                 "Could not import pipelines from kedro.framework.project"
@@ -42,7 +43,6 @@ class TypeExtractor:
             return {}
 
         all_type_requirements = {}
-        pipeline_dict = dict(pipelines)
 
         for pipeline_name, pipeline in pipeline_dict.items():
             # Skip __default__ pipeline to avoid duplicate processing

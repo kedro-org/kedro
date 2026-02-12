@@ -59,9 +59,10 @@ class ParameterValidator:
                 )
 
                 if raw_value is None:
-                    error_msg = f"Missing required parameter: {param_key}"
-                    validation_errors.append(error_msg)
-                    self.logger.error(error_msg)
+                    # We shouldn't count this as an error because users might not be running the pipeline or the params is optional.
+                    self.logger.debug(
+                        f"Parameter '{param_key}' not found in config, skipping validation"
+                    )
                     continue
 
                 # Attempt to instantiate the model

@@ -720,8 +720,6 @@ class TestAbstractVersionedDataset:
         assert result == expected
 
 
-
-
 class MyLegacyDataset(AbstractDataset):
     def __init__(self, filepath="", save_args=None, fs_args=None, var=None):
         self._filepath = PurePosixPath(filepath)

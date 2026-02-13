@@ -7,7 +7,6 @@ from __future__ import annotations
 import abc
 import copy
 import logging
-import os
 import pprint
 import sys
 import warnings
@@ -44,6 +43,7 @@ from kedro.utils import (  # noqa: F401
 )
 
 if TYPE_CHECKING:
+    import os
     from multiprocessing.managers import SyncManager
 
 
@@ -760,9 +760,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
         version_paths = self._get_versions()
 
-        most_recent = next(
-            (path for path in version_paths), None
-        )
+        most_recent = next((path for path in version_paths), None)
         if not most_recent:
             message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
@@ -817,7 +815,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
-
 
     def _get_version_from_path(self, path: str) -> str:
         """Extract version string from a versioned dataset path.

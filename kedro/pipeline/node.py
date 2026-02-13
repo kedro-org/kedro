@@ -663,6 +663,16 @@ class Node:
             return dict(zip(self._outputs, result))
 
         if self._outputs is None:
+            if outputs is not None:
+                node_name = self._name or self._func_name
+                warnings.warn(
+                    f"Node '{node_name}' returned a value of type "
+                    f"'{type(outputs).__name__}', but the node is defined with outputs=None. "
+                    "Kedro ignores return values for nodes without declared outputs. "
+                    "If this return value is intentional, declare outputs in the node "
+                    "definition to include it in the pipeline.",
+                    UserWarning,
+                )
             return {}
         if isinstance(self._outputs, str):
             return {self._outputs: outputs}

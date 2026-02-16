@@ -350,15 +350,13 @@ With these changes, when you run `kedro run` in your terminal, you should see `y
 !!! warning
     This functionality is experimental and may change or be removed in future releases. Experimental features follow the process described in  [`docs/about/experimental.md`](../about/experimental.md).
 
-Preview function enables you to inject a callable which helps in debugging and monitoring. Instead of loading full datasets, preview functions can return lightweight summaries such as JSON metadata, table samples, charts, or diagrams.
+Preview function enables you to inject a callable which helps in debugging and monitoring. Instead of loading full datasets, preview functions can return lightweight summaries, code snippets, charts, or diagrams.
 
 ### Overview
 
 A preview function is a callable that returns a preview payload. Preview payloads can be:
 
-- **JSON data** for metadata and statistics
-- **Tables** for data samples
-- **Charts** (Plotly) for visualisations
+- **Summaries** (Text) for logs and code snippets
 - **Diagrams** (Mermaid) for relationships and workflows
 - **Images** for plots or visual outputs
 - **Custom formats** with your own renderer
@@ -425,82 +423,11 @@ Import the preview types you need:
 
 ```python
 from kedro.pipeline.preview_contract import (
-    JsonPreview,
-    TablePreview,
-    PlotlyPreview,
     MermaidPreview,
     ImagePreview,
     TextPreview,
     CustomPreview,
 )
-```
-
-#### JSON preview
-
-Use for metadata, statistics, or structured data:
-
-```python
-def preview_model_metrics() -> JsonPreview:
-    return JsonPreview(
-        content={
-            "accuracy": 0.95,
-            "precision": 0.93,
-            "recall": 0.94,
-            "f1_score": 0.935,
-        }
-    )
-```
-
-#### Table preview
-
-Use for data samples or tabular summaries.
-
-**Note**: `TablePreview` requires `content` as a `list[dict]`. If you have a pandas or polars DataFrame, convert it first:
-
-```python
-import pandas as pd
-
-def preview_sample_rows() -> TablePreview:
-    # Option 1: Define data directly as list of dicts
-    return TablePreview(
-        content=[
-            {"name": "Alice", "age": 30, "city": "NYC"},
-            {"name": "Bob", "age": 25, "city": "LA"},
-            {"name": "Charlie", "age": 35, "city": "SF"},
-        ]
-    )
-
-def preview_from_dataframe(df: pd.DataFrame) -> TablePreview:
-    # Option 2: Convert pandas DataFrame
-    return TablePreview(content=df.head(5).to_dict(orient="records"))
-
-def preview_from_polars(df) -> TablePreview:
-    # Option 3: Convert polars DataFrame
-    return TablePreview(content=df.head(5).to_dicts())
-```
-
-#### Plotly preview
-
-Use for interactive charts and visualisations:
-
-```python
-def preview_distribution() -> PlotlyPreview:
-    return PlotlyPreview(
-        content={
-            "data": [
-                {
-                    "x": ["A", "B", "C"],
-                    "y": [10, 15, 13],
-                    "type": "bar"
-                }
-            ],
-            "layout": {
-                "title": "Category Distribution",
-                "xaxis": {"title": "Category"},
-                "yaxis": {"title": "Count"}
-            }
-        }
-    )
 ```
 
 #### Mermaid preview
@@ -668,14 +595,10 @@ All preview types support optional metadata with `meta` parameter. The `meta` pa
 **Example: Adding general metadata**
 
 ```python
-def preview_with_metadata() -> JsonPreview:
-    return JsonPreview(
-        content={"accuracy": 0.95},
-        meta={
-            "model_version": "v2.1",
-            "training_date": "2024-01-15",
-            "dataset": "train_split_2024"
-        }
+def preview_processing_log() -> TextPreview:
+    return TextPreview(
+        content="Processed 1,000 records\nRemoved 50 duplicates\nFilled 23 missing values",
+        meta={"created_by": "admin"}
     )
 ```
 
@@ -693,19 +616,32 @@ Preview functions don't have access to node inputs or outputs directly. They're 
 **Use closure to capture context**
 
 ```python
-def make_preview_fn(data_sample):
+def make_preview_fn(graph_diagram):
     """Create a preview function with captured context."""
-    def preview_fn() -> TablePreview:
-        return TablePreview(content=data_sample)
+    def preview_fn() -> MermaidPreview:
+        return MermaidPreview(content=graph_diagram)
     return preview_fn
 
 # In your pipeline creation
-sample_data = [{"id": 1, "value": 100}, {"id": 2, "value": 200}]
+sample_diagram = """graph TD
+    A[Raw Data] -->|Ingest| B(Typed Data)
+    B --> C{Quality Check}
+    C -->|Pass| D[Clean Data]
+    C -->|Fail| E[Error Log]
+    D --> F[Feature Engineering]
+    F --> G[Model Training]
+    G --> H[Predictions]
+
+    style A fill:#e1f5ff
+    style D fill:#c8e6c9
+    style E fill:#ffcdd2
+    style H fill:#fff9c4"""
+
 node(
     func=process_data,
     inputs="data",
     outputs="result",
-    preview_fn=make_preview_fn(sample_data)
+    preview_fn=make_preview_fn(sample_diagram)
 )
 ```
 

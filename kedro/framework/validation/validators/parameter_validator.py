@@ -101,13 +101,12 @@ class ParameterValidator:
         return transformed_params
 
     def validate_raw_params(
-        self, config_params: dict, runtime_params: dict
+        self, raw_params: dict
     ) -> dict[str, Any]:
         """Validate raw parameters before they are assigned to context.
 
         Args:
-            config_params: Parameters from config loader
-            runtime_params: Runtime parameters
+            raw_params: Parameters from config loader includes config and runtime parameters
 
         Returns:
             Dictionary of validated and transformed parameters
@@ -115,9 +114,6 @@ class ParameterValidator:
         Raises:
             ValidationError: If validation fails
         """
-        # Merge parameters (runtime params override config params)
-        raw_params = {**config_params, **runtime_params}
-
         # Get parameter requirements
         requirements = self.get_pipeline_requirements()
 

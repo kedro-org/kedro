@@ -194,8 +194,8 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
+    _parameter_validator: ParameterValidator = field(init=False, factory=ParameterValidator)
     _validated_params_cache: dict[str, Any] | None = None
-    _parameter_validator: ParameterValidator | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -219,23 +219,19 @@ class KedroContext:
         if self._validated_params_cache is not None:
             return self._validated_params_cache
 
-        # Get raw parameters
+        # Get raw parameters note: config loader includes runtime params
         try:
-            config_params = self.config_loader["parameters"]
+            raw_params = self.config_loader["parameters"]
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
-            config_params = {}
-
-        runtime_params = self._runtime_params or {}
+            raw_params = {}
 
         # Initialize parameter validator if needed
         if self._parameter_validator is None:
             self._parameter_validator = ParameterValidator()
 
         # Validate parameters
-        validated_params = self._parameter_validator.validate_raw_params(
-            config_params, runtime_params
-        )
+        validated_params = self._parameter_validator.validate_raw_params(raw_params)
 
         # Cache the result
         self._validated_params_cache = validated_params

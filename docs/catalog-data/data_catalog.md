@@ -218,7 +218,7 @@ print(versions)  # ['2024-01-15T10.30.00.000Z', '2024-01-14T09.15.00.000Z', ...]
 
 The `list_versions()` method accepts a `full_path` parameter:
 - `full_path=True` (default): Returns full file paths to each version
-- `full_path=False`: Returns only the version strings (timestamps)
+- `full_path=False`: Returns the version strings (timestamps)
 
 Versions are returned in reverse chronological order (newest first).
 

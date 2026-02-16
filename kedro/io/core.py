@@ -751,7 +751,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         # When load version is unpinned, fetch the most recent existing
         # version from the given path.
         pattern = str(self._get_versioned_path("*"))
-
         try:
             version_paths = sorted(self._glob_function(pattern), reverse=True)
         except Exception as exc:
@@ -763,9 +762,6 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
         return [path for path in version_paths if self._exists_function(path)]
 
-    # 'key' is set to prevent cache key overlapping for load and save:
-    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
-    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "load"))
     def _fetch_latest_load_version(self) -> str:
         # When load version is unpinned, fetch the most recent existing
         # version from the given path.

@@ -5,7 +5,7 @@
 ## Community contributions
 
 
-# Release 1.3.0 
+# Release 1.3.0
 
 ## Major features and improvements
 * Added `list_versions()` method for versioned datasets to list available dataset versions.

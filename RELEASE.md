@@ -4,6 +4,19 @@
 ## Documentation changes
 ## Community contributions
 
+
+# Release 1.3.0
+
+## Major features and improvements
+* Added `list_versions()` method for versioned datasets to list available dataset versions.
+
+## Bug fixes and other changes
+* Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
+* Added a warning when a node returns a value but is defined with `outputs=None`, clarifying that the return value is ignored.
+
+## Documentation changes
+## Community contributions
+
 # Release 1.2.0
 ## Major features and improvements
 * Added `@experimental` decorator to mark unstable or early-stage public APIs.

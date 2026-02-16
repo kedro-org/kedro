@@ -739,17 +739,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._cached_load_version = None
         self._cached_save_version = None
 
-    def _fetch_latest_load_version(self) -> str:
-        """Fetch the most recent existing version from the given path.
-        Results are cached to avoid repeated filesystem operations.
-        """
-
-        # Return cached version if available
-        if self._cached_load_version is not None:
-            return self._cached_load_version
-
-        # When load version is unpinned, fetch the most recent existing
-        # version from the given path.
+    def _get_versions(self) -> list[str]:
+        """Get all existing versions for this dataset, sorted by most recent first."""
         pattern = str(self._get_versioned_path("*"))
         try:
             version_paths = sorted(self._glob_function(pattern), reverse=True)
@@ -759,9 +750,22 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                 f"due to insufficient permission. Exception: {exc}"
             )
             raise VersionNotFoundError(message) from exc
-        most_recent = next(
-            (path for path in version_paths if self._exists_function(path)), None
-        )
+
+        return [path for path in version_paths if self._exists_function(path)]
+
+    def _fetch_latest_load_version(self) -> str:
+        """Fetch the most recent existing version from the given path.
+        Results are cached to avoid repeated filesystem operations.
+        """
+        # Return cached version if available
+        if self._cached_load_version is not None:
+            return self._cached_load_version
+
+        # When load version is unpinned, fetch the most recent existing
+        # version from the given path.
+        version_paths = self._get_versions()
+
+        most_recent = next((path for path in version_paths), None)
         if not most_recent:
             message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
@@ -822,6 +826,60 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
+
+    def _get_version_from_path(self, path: str) -> str:
+        """Extract version string from a versioned dataset path.
+
+        Args:
+            path: Full path to a versioned dataset file.
+
+        Returns:
+            Version string extracted from the path.
+        """
+        return PurePath(path).parent.name
+
+    def list_versions(self, full_path: bool = True) -> list[str]:
+        """List all available versions of this dataset.
+
+        This method allows you to retrieve all existing versions of a versioned
+        dataset. It's useful for tracking dataset history, auditing changes, or
+        implementing custom version selection logic.
+
+        Args:
+            full_path: If True, returns the full path to each version.
+                If False, returns only the version strings (timestamps).
+
+        Returns:
+            A list of version paths (if full_path=True) or version strings
+            (if full_path=False), sorted in reverse chronological order
+            (most recent first).
+
+        Raises:
+            VersionNotFoundError: If the dataset has no versions or if there
+                are permission issues accessing the version directory.
+
+        Example:
+            ::
+
+                >>> dataset = MyVersionedDataset(
+                ...     filepath="data/model.pkl",
+                ...     version=Version(None, None)
+                ... )
+                >>> # After saving multiple versions...
+                >>> versions = dataset.list_versions(full_path=False)
+                >>> print(versions)
+                ['2024-01-15T10.30.00.000Z', '2024-01-14T09.15.00.000Z']
+                >>> # Get full paths
+                >>> paths = dataset.list_versions(full_path=True)
+                >>> print(paths[0])
+                'data/model.pkl/2024-01-15T10.30.00.000Z/model.pkl'
+        """
+        version_paths = self._get_versions()
+
+        if full_path:
+            return version_paths
+
+        return [self._get_version_from_path(path) for path in version_paths]
 
     @classmethod
     def _save_wrapper(

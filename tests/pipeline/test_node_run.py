@@ -1,3 +1,5 @@
+import warnings
+
 import pytest
 
 from kedro.pipeline import node
@@ -141,3 +143,40 @@ class TestNodeRunInvalidOutput:
         pattern += r"the node definition contains 3 output\(s\)\."
         with pytest.raises(ValueError, match=pattern):
             node(one_in_two_out, "ds1", ["A", "B", "C"]).run({"ds1": mocked_dataset})
+
+
+class TestNodeOutputsNoneWarning:
+    """Test warning behavior when outputs=None but function returns a value."""
+
+    @pytest.mark.parametrize(
+        "return_value,expected_type",
+        [
+            ({"r2_score": 0.95}, "dict"),
+            ([1, 2, 3], "list"),
+            (42, "int"),
+        ],
+    )
+    def test_outputs_none_warns_when_value_returned(self, return_value, expected_type):
+        def func(_):
+            return return_value
+
+        test_node = node(func, "input", None, name="test_node")
+        pattern = (
+            rf"Node 'test_node' returned a value of type '{expected_type}', "
+            r"but the node is defined with outputs=None\. "
+            r"Kedro ignores return values for nodes without declared outputs\. "
+            r"If this return value is intentional, declare outputs in the node "
+            r"definition to include it in the pipeline\."
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            test_node.run({"input": 42})
+
+    def test_outputs_none_does_not_warn_when_none_returned(self):
+        def func(_):
+            return None
+
+        test_node = node(func, "input", None, name="test_node")
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            result = test_node.run({"input": 42})
+        assert result == {}

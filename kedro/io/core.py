@@ -739,17 +739,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._cached_load_version = None
         self._cached_save_version = None
 
-    def _fetch_latest_load_version(self) -> str:
-        """Fetch the most recent existing version from the given path.
-        Results are cached to avoid repeated filesystem operations.
-        """
-
-        # Return cached version if available
-        if self._cached_load_version is not None:
-            return self._cached_load_version
-
-        # When load version is unpinned, fetch the most recent existing
-        # version from the given path.
+    def _get_versions(self) -> list[str]:
+        """Get all existing versions for this dataset, sorted by most recent first."""
         pattern = str(self._get_versioned_path("*"))
         try:
             version_paths = sorted(self._glob_function(pattern), reverse=True)
@@ -763,9 +754,15 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         return [path for path in version_paths if self._exists_function(path)]
 
     def _fetch_latest_load_version(self) -> str:
+        """Fetch the most recent existing version from the given path.
+        Results are cached to avoid repeated filesystem operations.
+        """
+        # Return cached version if available
+        if self._cached_load_version is not None:
+            return self._cached_load_version
+
         # When load version is unpinned, fetch the most recent existing
         # version from the given path.
-
         version_paths = self._get_versions()
 
         most_recent = next((path for path in version_paths), None)

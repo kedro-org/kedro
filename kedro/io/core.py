@@ -12,10 +12,9 @@ import sys
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
-from functools import partial, wraps
+from functools import wraps
 from glob import iglob
 from inspect import getcallargs
-from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
 from typing import (  # noqa: UP035
     TYPE_CHECKING,
@@ -30,8 +29,6 @@ from typing import (  # noqa: UP035
     runtime_checkable,
 )
 
-from cachetools import Cache, cachedmethod
-from cachetools.keys import hashkey
 from typing_extensions import Self
 
 # These are re-exported for backward compatibility
@@ -734,15 +731,16 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._version = version
         self._exists_function = exists_function or _local_exists
         self._glob_function = glob_function or iglob
-        # 1 entry for load version, 1 for save version
-        self._version_cache = Cache(maxsize=2)  # type: Cache
+        self._cached_load_version: str | None = None
+        self._cached_save_version: str | None = None
 
-    # 'key' is set to prevent cache key overlapping for load and save:
-    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
-    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "load"))
-    def _fetch_latest_load_version(self) -> str:
-        # When load version is unpinned, fetch the most recent existing
-        # version from the given path.
+    def _clear_version_cache(self) -> None:
+        """Clear both load and save version caches."""
+        self._cached_load_version = None
+        self._cached_save_version = None
+
+    def _get_versions(self) -> list[str]:
+        """Get all existing versions for this dataset, sorted by most recent first."""
         pattern = str(self._get_versioned_path("*"))
         try:
             version_paths = sorted(self._glob_function(pattern), reverse=True)
@@ -752,20 +750,39 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                 f"due to insufficient permission. Exception: {exc}"
             )
             raise VersionNotFoundError(message) from exc
-        most_recent = next(
-            (path for path in version_paths if self._exists_function(path)), None
-        )
+
+        return [path for path in version_paths if self._exists_function(path)]
+
+    def _fetch_latest_load_version(self) -> str:
+        """Fetch the most recent existing version from the given path.
+        Results are cached to avoid repeated filesystem operations.
+        """
+        # Return cached version if available
+        if self._cached_load_version is not None:
+            return self._cached_load_version
+
+        # When load version is unpinned, fetch the most recent existing
+        # version from the given path.
+        version_paths = self._get_versions()
+
+        most_recent = next((path for path in version_paths), None)
         if not most_recent:
             message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
-        return PurePath(most_recent).parent.name
 
-    # 'key' is set to prevent cache key overlapping for load and save:
-    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
-    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
+        # Cache and return the result
+        self._cached_load_version = PurePath(most_recent).parent.name
+        return self._cached_load_version
+
     def _fetch_latest_save_version(self) -> str:
         """Generate and cache the current save version"""
-        return generate_timestamp()
+        # Return cached version if available
+        if self._cached_save_version is not None:
+            return self._cached_save_version
+
+        # Generate new timestamp and cache it
+        self._cached_save_version = generate_timestamp()
+        return self._cached_save_version
 
     def resolve_load_version(self) -> str | None:
         """Compute the version the dataset should be loaded with."""
@@ -810,6 +827,60 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
+    def _get_version_from_path(self, path: str) -> str:
+        """Extract version string from a versioned dataset path.
+
+        Args:
+            path: Full path to a versioned dataset file.
+
+        Returns:
+            Version string extracted from the path.
+        """
+        return PurePath(path).parent.name
+
+    def list_versions(self, full_path: bool = True) -> list[str]:
+        """List all available versions of this dataset.
+
+        This method allows you to retrieve all existing versions of a versioned
+        dataset. It's useful for tracking dataset history, auditing changes, or
+        implementing custom version selection logic.
+
+        Args:
+            full_path: If True, returns the full path to each version.
+                If False, returns only the version strings (timestamps).
+
+        Returns:
+            A list of version paths (if full_path=True) or version strings
+            (if full_path=False), sorted in reverse chronological order
+            (most recent first).
+
+        Raises:
+            VersionNotFoundError: If the dataset has no versions or if there
+                are permission issues accessing the version directory.
+
+        Example:
+            ::
+
+                >>> dataset = MyVersionedDataset(
+                ...     filepath="data/model.pkl",
+                ...     version=Version(None, None)
+                ... )
+                >>> # After saving multiple versions...
+                >>> versions = dataset.list_versions(full_path=False)
+                >>> print(versions)
+                ['2024-01-15T10.30.00.000Z', '2024-01-14T09.15.00.000Z']
+                >>> # Get full paths
+                >>> paths = dataset.list_versions(full_path=True)
+                >>> print(paths[0])
+                'data/model.pkl/2024-01-15T10.30.00.000Z/model.pkl'
+        """
+        version_paths = self._get_versions()
+
+        if full_path:
+            return version_paths
+
+        return [self._get_version_from_path(path) for path in version_paths]
+
     @classmethod
     def _save_wrapper(
         cls, save_func: Callable[[Self, _DI], None]
@@ -818,7 +889,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
         @wraps(save_func)
         def save(self: Self, data: _DI) -> None:
-            self._version_cache.clear()
+            self._clear_version_cache()
             save_version = (
                 self.resolve_save_version()
             )  # Make sure last save version is set
@@ -844,7 +915,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                 warnings.warn(
                     _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
                 )
-                self._version_cache.clear()
+                self._clear_version_cache()
 
         return save
 
@@ -870,7 +941,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
     def _release(self) -> None:
         super()._release()
-        self._version_cache.clear()
+        self._clear_version_cache()
 
 
 def get_protocol_and_path(

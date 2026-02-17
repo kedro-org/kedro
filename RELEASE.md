@@ -1,12 +1,32 @@
 # Upcoming Release
 ## Major features and improvements
+## Bug fixes and other changes
+## Documentation changes
+## Community contributions
+
+
+# Release 1.3.0
+
+## Major features and improvements
+* Added `list_versions()` method for versioned datasets to list available dataset versions.
+
+## Bug fixes and other changes
+* Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
+* Added a warning when a node returns a value but is defined with `outputs=None`, clarifying that the return value is ignored.
+
+## Documentation changes
+## Community contributions
+
+# Release 1.2.0
+## Major features and improvements
 * Added `@experimental` decorator to mark unstable or early-stage public APIs.
-* Added the new `support-agent-langgraph` starter. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 * Added support for running multiple pipelines in a single Kedro session run via the `--pipelines` CLI option and `pipeline_names` argument in `KedroSession.run()` method.
+* Updated the `spaceflights-pyspark` starter to use the new `SparkDatasetV2` integration, enabling local, Databricks-native, and remote Spark execution workflows.
 
 ## Experimental features
 * Added experimental `llm_context_node` and `LLMContextNode` for assembling LLMs, prompts, and tools into a runtime `LLMContext` within Kedro pipelines.
 * Added experimental `preview_fn` argument to `Node` class to add support for user-injectable node preview functions.
+* Added new experimental `support-agent-langgraph` starter, which supports the above experimental features. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 
 ## Bug fixes and other changes
 * Set `raise_errors=True` in `find_pipelines()` calls in the project template's `pipeline_registry.py` to ensure pipeline discovery errors are raised during project runs.
@@ -14,6 +34,7 @@
 
 ## Documentation changes
 * Added beginner-friendly notes on `uvx` installation.
+* Updated Databricks deployment docs to cover `Spark Connect` and `Unity Catalog` – first workflows, and local-to-remote development.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

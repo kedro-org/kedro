@@ -60,7 +60,7 @@ test = [
     "jupyter~=1.0",
     "kedro-datasets",
     "mypy~=1.0",
-    "pandas~=2.0",
+    "pandas>=2.0,<4.0",
     "pluggy>=1.0",
     "pre-commit>=2.9.2,<5.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "pytest-cov>=3,<8",
@@ -68,7 +68,7 @@ test = [
     "pytest-xdist[psutil]>=2.2.1,<4.0",
     "pytest>=7.2,<10.0",
     "requests_mock",
-    "s3fs>=2021.4,<2026.2",
+    "s3fs>=2021.4,<2026.5",
     # mypy related dependencies
     "pandas-stubs",
     "types-PyYAML",

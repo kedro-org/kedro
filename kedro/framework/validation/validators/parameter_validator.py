@@ -100,9 +100,7 @@ class ParameterValidator:
 
         return transformed_params
 
-    def validate_raw_params(
-        self, raw_params: dict
-    ) -> dict[str, Any]:
+    def validate_raw_params(self, raw_params: dict) -> dict[str, Any]:
         """Validate raw parameters before they are assigned to context.
 
         Args:

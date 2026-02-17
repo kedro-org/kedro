@@ -32,6 +32,7 @@ class TypeExtractor:
         """
         try:
             from kedro.framework.project import pipelines
+
             pipeline_dict = dict(pipelines)
         except ImportError:
             self.logger.warning(

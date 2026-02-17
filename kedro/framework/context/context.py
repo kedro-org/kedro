@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 from warnings import warn
-import dataclasses
 
 from attrs import define, field
 
@@ -194,7 +194,9 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
-    _parameter_validator: ParameterValidator = field(init=False, factory=ParameterValidator)
+    _parameter_validator: ParameterValidator = field(
+        init=False, factory=ParameterValidator
+    )
     _validated_params_cache: dict[str, Any] | None = None
 
     @property
@@ -224,7 +226,7 @@ class KedroContext:
             raw_params = self.config_loader["parameters"]
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
-            raw_params = {}
+            raw_params = self._runtime_params or {}
 
         # Initialize parameter validator if needed
         if self._parameter_validator is None:
@@ -330,7 +332,9 @@ class KedroContext:
                 nested_dict = param_value
             elif self._is_pydantic_model(param_value):
                 nested_dict = param_value.model_dump()
-            elif dataclasses.is_dataclass(param_value) and not isinstance(param_value, type):
+            elif dataclasses.is_dataclass(param_value) and not isinstance(
+                param_value, type
+            ):
                 nested_dict = dataclasses.asdict(param_value)
 
             if nested_dict is not None:
@@ -357,6 +361,7 @@ class KedroContext:
     def _is_pydantic_model(value: Any) -> bool:
         try:
             import pydantic
+
             return isinstance(value, pydantic.BaseModel)
         except ImportError:
             return False

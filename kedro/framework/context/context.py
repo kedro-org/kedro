@@ -228,10 +228,6 @@ class KedroContext:
             warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
             raw_params = self._runtime_params or {}
 
-        # Initialize parameter validator if needed
-        if self._parameter_validator is None:
-            self._parameter_validator = ParameterValidator()
-
         # Validate parameters
         validated_params = self._parameter_validator.validate_raw_params(raw_params)
 

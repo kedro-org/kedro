@@ -45,8 +45,8 @@ class TestExtractTypesFromPipelines:
         real_dict = {"__default__": pipeline, "data_science": pipeline}
 
         with patch(
-                "kedro.framework.project.pipelines",
-                real_dict,
+            "kedro.framework.project.pipelines",
+            real_dict,
         ):
             result = type_extractor.extract_types_from_pipelines()
 
@@ -198,7 +198,9 @@ class TestResolveNestedPath:
 
     def test_nested_key(self, type_extractor):
         data = {"model": {"options": {"test_size": 0.2}}}
-        assert type_extractor.resolve_nested_path(data, "model.options.test_size") == 0.2
+        assert (
+            type_extractor.resolve_nested_path(data, "model.options.test_size") == 0.2
+        )
 
     def test_missing_flat_key(self, type_extractor):
         data = {"test_size": 0.2}

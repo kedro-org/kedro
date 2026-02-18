@@ -23,9 +23,7 @@ class TestValidationError:
         assert error.errors == errors
 
     def test_error_with_all_fields(self):
-        error = ValidationError(
-            "failed", source_key="config", errors=["err1", "err2"]
-        )
+        error = ValidationError("failed", source_key="config", errors=["err1", "err2"])
         assert str(error) == "failed"
         assert error.source_key == "config"
         assert error.errors == ["err1", "err2"]

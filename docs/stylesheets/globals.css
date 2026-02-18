@@ -134,13 +134,12 @@
     .md-nav__item--section > .md-nav__link[for] {
         color: var(--text-primary-color);
         align-items: center;
+        margin-left: 20px;
     }
 
     /* Apply border-radius to scrollbar container */
     .md-sidebar__scrollwrap {
       border-radius: 12px;
-      overflow-y: auto;
-      max-height: calc(100vh - 7.2rem);
     }
 
     .md-sidebar__inner {

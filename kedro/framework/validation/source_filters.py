@@ -18,7 +18,6 @@ class SourceFilter(ABC):
         Returns:
             True if this filter should process the source, False otherwise
         """
-        pass
 
     @abstractmethod
     def extract_key(self, source_name: str) -> str:
@@ -30,7 +29,6 @@ class SourceFilter(ABC):
         Returns:
             The extracted key
         """
-        pass
 
     @abstractmethod
     def get_log_message(self, key: str, type_name: str) -> str:
@@ -43,7 +41,6 @@ class SourceFilter(ABC):
         Returns:
             Log message string
         """
-        pass
 
 
 class ParameterSourceFilter(SourceFilter):

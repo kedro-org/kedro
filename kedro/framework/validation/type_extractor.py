@@ -9,13 +9,16 @@ from typing import TYPE_CHECKING, Any, get_type_hints
 from .exceptions import ValidationError
 
 if TYPE_CHECKING:
+    from kedro.pipeline import Pipeline
+    from kedro.pipeline.node import Node
+
     from .source_filters import SourceFilter
 
 
 class TypeExtractor:
     """Extracts type requirements from various sources like pipeline nodes."""
 
-    def __init__(self, source_filter: SourceFilter):
+    def __init__(self, source_filter: SourceFilter) -> None:
         """Initialize the type extractor.
 
         Args:
@@ -58,7 +61,7 @@ class TypeExtractor:
         )
         return all_type_requirements
 
-    def _extract_types_from_pipeline(self, pipeline) -> dict[str, type]:
+    def _extract_types_from_pipeline(self, pipeline: Pipeline) -> dict[str, type]:
         """Extract type requirements from a single pipeline.
 
         Args:
@@ -75,7 +78,7 @@ class TypeExtractor:
 
         return type_requirements
 
-    def extract_types_from_node(self, node) -> dict[str, type]:
+    def extract_types_from_node(self, node: Node) -> dict[str, type]:
         """Extract typed requirements from a single node using configured source filters.
 
         Args:
@@ -118,7 +121,9 @@ class TypeExtractor:
 
         return all_requirements
 
-    def _build_dataset_to_arg_mapping(self, node, signature) -> dict[str, str]:
+    def _build_dataset_to_arg_mapping(
+        self, node: Node, signature: inspect.Signature
+    ) -> dict[str, str]:
         """Build mapping from dataset names to argument names.
 
         Args:
@@ -128,7 +133,7 @@ class TypeExtractor:
         Returns:
             Dictionary mapping dataset names to argument names
         """
-        dataset_to_arg = {}
+        dataset_to_arg: dict[str, str] = {}
         node_inputs = getattr(node, "inputs", None)
 
         if isinstance(node_inputs, dict):

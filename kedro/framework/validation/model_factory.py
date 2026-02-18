@@ -13,7 +13,7 @@ from .exceptions import ModelInstantiationError
 class ModelFactory:
     """Handles instantiation of various model types like Pydantic models and dataclasses."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the model factory."""
         self.logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class ModelFactory:
         Returns:
             Validated Pydantic model instance
         """
-        return model_type.model_validate(raw_value)
+        return model_type.model_validate(raw_value)  # type: ignore[attr-defined]
 
     def instantiate_dataclass(self, raw_value: Any, model_type: type) -> Any:
         """Handle dataclass instantiation.

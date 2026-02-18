@@ -381,12 +381,6 @@ nav:
       - Configuration:
           - Configuration basics: configure/configuration_basics.md
 
-      - Runtime:
-          - Runner abstraction: api/runner/kedro.runner.md
-          - SequentialRunner: api/runner/kedro.runner.SequentialRunner.md
-          - ParallelRunner: api/runner/kedro.runner.ParallelRunner.md
-          - ThreadRunner: api/runner/kedro.runner.ThreadRunner.md
-
       - Deployment:
           - Deployment overview: deploy/index.md
           - Node grouping strategy: deploy/nodes_grouping.md

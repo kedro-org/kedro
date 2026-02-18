@@ -324,6 +324,64 @@ class TestKedroContext:
         expected_msg = "Credentials not found in your Kedro project config."
         assert any(expected_msg in log_message for log_message in log_messages)
 
+    def test_get_parameters_with_pydantic_model(self, dummy_context, mocker):
+        from pydantic import BaseModel
+
+        class ModelOptions(BaseModel):
+            test_size: float
+            random_state: int
+
+        model_instance = ModelOptions(test_size=0.2, random_state=3)
+
+        mocker.patch.object(
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(
+                lambda self: {"model_options": model_instance}
+            ),
+        )
+
+        result = dummy_context._get_parameters()
+
+        assert result["params:model_options"] == model_instance
+        assert result["params:model_options.test_size"] == 0.2
+        assert result["params:model_options.random_state"] == 3
+
+    def test_get_parameters_with_dataclass(self, dummy_context, mocker):
+        import dataclasses
+
+        @dataclasses.dataclass
+        class EvalConfig:
+            metric: str
+            threshold: float
+
+        dc_instance = EvalConfig(metric="rmse", threshold=0.5)
+
+        mocker.patch.object(
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(lambda self: {"eval_config": dc_instance}),
+        )
+
+        result = dummy_context._get_parameters()
+
+        assert result["params:eval_config"] == dc_instance
+        assert result["params:eval_config.metric"] == "rmse"
+        assert result["params:eval_config.threshold"] == 0.5
+
+    def test_is_pydantic_model(self, dummy_context):
+        from pydantic import BaseModel
+
+        class MyModel(BaseModel):
+            x: int = 1
+
+        assert dummy_context._is_pydantic_model(MyModel(x=1)) is True
+        assert dummy_context._is_pydantic_model({"x": 1}) is False
+
+    def test_is_pydantic_model_without_pydantic(self, dummy_context, mocker):
+        mocker.patch.dict("sys.modules", {"pydantic": None})
+        assert dummy_context._is_pydantic_model({"x": 1}) is False
+
 
 @pytest.mark.parametrize(
     "path_string,expected",

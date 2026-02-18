@@ -93,7 +93,7 @@ class TypeExtractor:
             type_hints = get_type_hints(func, include_extras=False)
         except Exception as exc:
             self.logger.warning(
-                f"Could not extract type hints from function {func.__name__}: {exc}"
+                f"Could not extract type hints from function {getattr(func, '__name__', repr(func))}: {exc}"
             )
             return {}
 

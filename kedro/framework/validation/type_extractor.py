@@ -1,4 +1,4 @@
-"""Type extractor for extracting type hints from various sources."""
+"""Type extractor for extracting type hints from various sources. [to delete]"""
 
 from __future__ import annotations
 

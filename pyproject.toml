@@ -48,6 +48,9 @@ classifiers = [
 dynamic = ["readme", "version"]
 
 [project.optional-dependencies]
+inspect = [
+    "pydantic>=2.0",
+]
 test = [
     "behave>=1.2.6,<2.0",
     "coverage[toml]",

@@ -215,7 +215,7 @@ snapshot: ProjectSnapshot = inspect_project(
 ```python
 class ProjectSnapshot(BaseModel):
     """Complete snapshot of a Kedro project's structure."""
-    metadata:           ProjectMetadata
+    metadata:           ProjectMetadataSnapshot
     pipelines:          List[PipelineInfo]
     selected_pipeline:  str
     has_missing_deps:   bool              # True if any modules were mocked
@@ -228,7 +228,7 @@ class ProjectSnapshot(BaseModel):
 ### Project metadata
 
 ```python
-class ProjectMetadata(BaseModel):
+class ProjectMetadataSnapshot(BaseModel):
     project_name:   str                  # from pyproject.toml / settings
     project_path:   str                  # absolute path
     package_name:   str                  # Python package name

@@ -226,8 +226,8 @@ from kedro.io import DataCatalog
 | Pipeline list | `snapshot.pipelines[].id` | — | No |
 | Pipeline graph (nodes, edges) | `PipelineInfo.nodes`, `.edges` | — | No |
 | Node namespace | `NodeInfo.namespace` | — | No |
-| Environment list | — | `ProjectMetadata.environments` | No (with Phase 2) |
-| Config file paths | — | `ProjectMetadata.config_paths` | No (with Phase 2) |
+| Environment list | — | `ProjectMetadataSnapshot.environments` | No (with Phase 2) |
+| Config file paths | — | `ProjectMetadataSnapshot.config_paths` | No (with Phase 2) |
 | Dataset resolved config | — | `DatasetInfo` (filepath, layer, metadata) | No (with Phase 2) |
 | Node source location | — | `NodeInfo.source_location` | No (with Phase 2) |
 | Go-to-definition (datasets + params) | — | `DatasetInfo.definition_file/line`, `ParametersInfo.parameter_locations` | No (with Phase 2) |
@@ -269,8 +269,8 @@ param_values = {n.name: n.parameters for p in snapshot.pipelines for n in p.node
 #### Phase 2 replaces ~75% of Kedro API surface
 
 Additionally eliminates:
-- `config_loader._fs.glob()`, `_is_hidden()`, `_is_valid_config_path()` — replaced by `ProjectMetadata.config_paths`
-- Manual environment scanning — replaced by `ProjectMetadata.environments`
+- `config_loader._fs.glob()`, `_is_hidden()`, `_is_valid_config_path()` — replaced by `ProjectMetadataSnapshot.config_paths`
+- Manual environment scanning — replaced by `ProjectMetadataSnapshot.environments`
 - `config_loader["catalog"]` raw dict access for hover — replaced by `DatasetInfo`
 - `SafeLineLoader` hack for YAML line numbers — replaced by `DatasetInfo.definition_file/line` and `ParametersInfo.parameter_locations`
 
@@ -355,8 +355,8 @@ It has **4 source files** — the plugin is small but touches many Kedro APIs.
 | Filter by tags | Client-side filter on `NodeInfo.tags` | — | Covered (client-side) |
 | **MemoryDataset detection** | `NodeInfo.dataset_type` = `"MemoryDataset"` | `DatasetInfo.type` | **Partially covered — see below** |
 | **Namespace grouping** | `NodeInfo.namespace` available | `/inspect/modular-pipelines` | Covered (client builds groups from namespace) |
-| Package name, project path | `ProjectMetadata` | — | Covered |
-| Environments, config paths | `ProjectMetadata` | — | Covered |
+| Package name, project path | `ProjectMetadataSnapshot` | — | Covered |
+| Environments, config paths | `ProjectMetadataSnapshot` | — | Covered |
 | **Airflow config loading** | — | `/inspect/config/{type}` | Covered in Phase 2 |
 | **Pipeline operations** (`only_nodes_with_tags`, `group_nodes_by`) | — | — | **Not applicable — see below** |
 
@@ -428,10 +428,10 @@ That's it. **Zero imports** from `kedro.pipeline`, `kedro.io`, `kedro.framework.
 
 | kedro-docker need | Inspection API coverage | Verdict |
 |---|---|---|
-| Project root path | `ProjectMetadata.project_path` | Covered, but plugin doesn't need it — uses `Path.cwd()` |
-| Image name | `ProjectMetadata.package_name` | Could replace `Path.cwd().name` with a proper project name |
-| Volume mount paths | `ProjectMetadata.config_paths` | Could derive from config paths instead of hardcoding |
-| Source directory | `ProjectMetadata.source_dir` | Could use for smarter Dockerfile `COPY` |
+| Project root path | `ProjectMetadataSnapshot.project_path` | Covered, but plugin doesn't need it — uses `Path.cwd()` |
+| Image name | `ProjectMetadataSnapshot.package_name` | Could replace `Path.cwd().name` with a proper project name |
+| Volume mount paths | `ProjectMetadataSnapshot.config_paths` | Could derive from config paths instead of hardcoding |
+| Source directory | `ProjectMetadataSnapshot.source_dir` | Could use for smarter Dockerfile `COPY` |
 | Pipeline structure | `PipelineInfo`, `NodeInfo` | Not needed — docker doesn't inspect pipelines |
 | Dataset types | `NodeInfo.dataset_type` | Not needed — docker doesn't inspect catalog |
 | Parameters | `NodeInfo.parameters` | Not needed — docker doesn't read params |
@@ -727,8 +727,8 @@ from kedro.utils import load_obj
 | kedro-mlflow need | Proposed API coverage | Why |
 |---|---|---|
 | `context.config_loader` (load `mlflow.yml`) | Not in scope | Runtime config loading, plugin-specific |
-| `context._package_name` → experiment name | `ProjectMetadata.package_name` | Covered |
-| `context.project_path` → resolve URIs | `ProjectMetadata.project_path` | Covered |
+| `context._package_name` → experiment name | `ProjectMetadataSnapshot.package_name` | Covered |
+| `context.project_path` → resolve URIs | `ProjectMetadataSnapshot.project_path` | Covered |
 | `context._get_config_credentials()` | Not in scope | Runtime credentials, never exposed |
 | `pipeline.nodes` | `PipelineInfo.nodes` | Structure only — not Pipeline objects |
 | `pipeline.inputs()` / `pipeline.outputs()` | Derivable from `PipelineInfo.edges` | Covered for read-only |
@@ -738,7 +738,7 @@ from kedro.utils import load_obj
 | `catalog.load()` / `catalog.save()` | Not in scope | Runtime I/O |
 | `runner.run(pipeline, catalog)` | Not in scope | Runtime execution |
 | `AbstractDataset` / `AbstractVersionedDataset` | Not in scope | Framework extension points |
-| `settings.CONF_SOURCE` | `ProjectMetadata.config_paths` | Partial — paths available, not the raw setting |
+| `settings.CONF_SOURCE` | `ProjectMetadataSnapshot.config_paths` | Partial — paths available, not the raw setting |
 
 ### Why kedro-mlflow should NOT adopt `inspect_project()`
 
@@ -751,7 +751,7 @@ kedro-mlflow needs **live Kedro objects** at every layer:
 5. **Catalog manipulation** — hooks modify the catalog in-place (`catalog[name] = ...`)
 
 The only place `inspect_project()` could marginally help is the CLI `init` command
-(replacing `bootstrap_project()` + `settings.CONF_SOURCE` with `ProjectMetadata.config_paths`),
+(replacing `bootstrap_project()` + `settings.CONF_SOURCE` with `ProjectMetadataSnapshot.config_paths`),
 but the simplification is minimal.
 
 ### Implications for the inspection API design
@@ -770,7 +770,7 @@ kedro-mlflow validates two design decisions in the inspection API:
 ### Verdict: different problem space, minimal overlap
 
 kedro-mlflow is a **runtime plugin** that augments Kedro's execution lifecycle. The inspection API
-is a **static analysis tool**. Their overlap is limited to `ProjectMetadata` fields (package name,
+is a **static analysis tool**. Their overlap is limited to `ProjectMetadataSnapshot` fields (package name,
 project path) which kedro-mlflow already gets through more direct channels (`KedroContext`).
 
 **No new endpoints or model changes needed.**

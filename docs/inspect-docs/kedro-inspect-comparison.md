@@ -50,7 +50,7 @@ src/kedro_inspect/
 | **Catalog awareness** | None — no catalog, no dataset types, no factory pattern resolution | Full — resolves factory patterns via `CatalogConfigResolver`, extracts dataset type strings without materialisation |
 | **Graph structure** | No edges, no graph — just a flat list of nodes | Full DAG: `NodeInfo` + `EdgeInfo` + node type classification (task/data/parameters) |
 | **Parameters** | Not resolved — only maps function params to dataset names | Resolved from `parameters.yml` via OmegaConf (merged, interpolated) |
-| **Project metadata** | None | `ProjectMetadata`: project name, package name, kedro version, source dir, environments, config paths |
+| **Project metadata** | None | `ProjectMetadataSnapshot`: project name, package name, kedro version, source dir, environments, config paths |
 | **REST API** | None — CLI only | `/inspect/snapshot`, `/inspect/pipelines`, `/inspect/pipelines/{id}`, Phase 2 endpoints |
 | **Programmatic API** | `InspectedPipeline.from_kedro_pipeline(pipeline)` | `inspect_project(path, env, extra_params, pipeline_id)` |
 | **Serialisation format** | Custom `TypedDict` classes with `to_dict()` / `from_dict()` | Pydantic `BaseModel` with built-in JSON serialisation |

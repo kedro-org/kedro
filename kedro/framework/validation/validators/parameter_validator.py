@@ -17,7 +17,7 @@ from kedro.framework.validation import (
 class ParameterValidator:
     """Parameter validator that combines type extraction and model instantiation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize parameter validator."""
         self.type_extractor = TypeExtractor(ParameterSourceFilter())
         self.model_factory = ModelFactory()

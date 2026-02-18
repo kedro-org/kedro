@@ -1,4 +1,8 @@
+"""Tests for kedro.framework.validation.model_factory."""
+
 from __future__ import annotations
+
+from unittest.mock import patch
 
 import pytest
 
@@ -41,6 +45,10 @@ class TestModelFactory:
 
     def test_is_pydantic_model_false_builtin(self, model_factory):
         assert model_factory._is_pydantic_model(str) is False
+
+    def test_is_pydantic_model_import_error(self, model_factory):
+        with patch.dict("sys.modules", {"pydantic": None}):
+            assert model_factory._is_pydantic_model(SampleDataclass) is False
 
     def test_instantiate_dataclass(self, model_factory):
         raw = {"name": "test", "value": 1.5}

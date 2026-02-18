@@ -23,11 +23,14 @@ class TestExtractTypesFromPipelines:
 
     def test_general_exception_returns_empty(self, type_extractor):
         with patch(
-            "kedro.framework.validation.type_extractor.pipelines",
+            "kedro.framework.project.pipelines",
+            new_callable=lambda: type(
+                "BadPipelines",
+                (),
+                {"__iter__": lambda self: (_ for _ in ()).throw(RuntimeError("boom"))},
+            ),
             create=True,
-        ) as mock_pipelines:
-            # dict() on the mock will raise
-            mock_pipelines.__iter__ = MagicMock(side_effect=RuntimeError("boom"))
+        ):
             result = type_extractor.extract_types_from_pipelines()
         assert result == {}
 
@@ -52,6 +55,28 @@ class TestExtractTypesFromPipelines:
 
         assert "eval_config" in result
 
+    def test_successful_extraction(self, type_extractor):
+        def my_func(options: SampleDataclass) -> None:
+            pass
+
+        node = MagicMock()
+        node.func = my_func
+        node.inputs = ["params:eval_config"]
+
+        pipeline = MagicMock()
+        pipeline.nodes = [node]
+
+        real_dict = {"data_science": pipeline}
+
+        with patch(
+            "kedro.framework.project.pipelines",
+            real_dict,
+        ):
+            result = type_extractor.extract_types_from_pipelines()
+
+        assert "eval_config" in result
+        assert result["eval_config"] == SampleDataclass
+
 
 class TestExtractTypesFromNode:
     def test_no_func_attribute(self, type_extractor):
@@ -60,9 +85,17 @@ class TestExtractTypesFromNode:
         assert result == {}
 
     def test_signature_extraction_error(self, type_extractor):
+        def bad_func() -> None:
+            pass
+
         node = MagicMock()
-        node.func = "not_a_function"  # will fail inspect.signature
-        result = type_extractor.extract_types_from_node(node)
+        node.func = bad_func
+
+        with patch(
+            "kedro.framework.validation.type_extractor.get_type_hints",
+            side_effect=TypeError("boom"),
+        ):
+            result = type_extractor.extract_types_from_node(node)
         assert result == {}
 
     @pytest.mark.skipif(not PYDANTIC_AVAILABLE, reason="Pydantic not installed")

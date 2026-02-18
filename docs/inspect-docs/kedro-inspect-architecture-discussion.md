@@ -6,15 +6,17 @@
 
 **Benefits:** Single source of truth, no heavy dependencies required for inspection, enables remote use-cases (kedro server → consumers), simplifies plugins.
 
-## Session scope and expectations
+## Discussion Scope and expectations
 
-### 1. What this session is about
+### 1. What this discussion is about
 
 The intention is to give an **overall idea and design approach** for:
 
-- **A JSON that speaks Kedro’s language** — pipelines, nodes (inputs/outputs), catalog dataset types, parameters — that users can **export from a Kedro project without installing any project dependencies** (only Kedro itself).
+- **A JSON that speaks Kedro’s language** — pipelines, nodes (inputs/outputs), catalog dataset types, parameters — that users can **export from a Kedro project without installing any project dependencies** (only Kedro and pydantic).
+
 - **Treating this as a serialization concern:** Kedro-Viz already does something like this today (lite mode: load project without heavy deps and produce a serializable snapshot). Rather than each consumer reimplementing that, we want a **single, supported way** to produce that export from core.
-- **Layering:** **Basic serialization support in Kedro core** (e.g. `safe_context` + a minimal, Kedro-native snapshot), and optionally a **richer inspect plugin** (e.g. kedro-inspect) that builds on top and caters to Viz and other plugins with extra structure (edges, layers, REST, etc.).
+
+- **Layering:** **Basic serialization support in Kedro core** (e.g. `safe_context` + a minimal, Kedro-native snapshot), and optionally a **richer inspect plugin** (e.g. kedro-inspect) that builds on top and caters to Viz and other plugins with extra structure (edges, layers, REST, etc.), this is not recommended for now to start with.
 
 ### 2. What we’re not locking in
 
@@ -34,13 +36,13 @@ A community package **[AlpAribal/kedro-inspect](https://github.com/AlpAribal/ked
 | **No resolved parameters** | Only maps function params to dataset names; doesn’t resolve `parameters.yml` (OmegaConf). |
 | **No project metadata** | No project name, package name, environments, config paths in the output. |
 
-So we’re not reinventing inspection from scratch — we’re designing a **core-supported, dependency-free, Kedro-native serialization** that addresses these gaps and then allowing a richer plugin (or evolution of ideas from kedro-inspect) to sit on top. A detailed comparison is in [kedro-inspect-comparison.md](https://github.com/kedro-org/kedro/blob/spike/inspect-api/docs/inspect-docs/kedro-inspect-comparison.md).
+So we’re not reinventing inspection from scratch — we’re designing a **core-supported, dependency-free, Kedro-native serialization** that addresses these gaps and then allowing a richer plugin (or evolution of ideas from kedro-inspect) to sit on top (in future). 
+
+A detailed comparison is in [kedro-inspect-comparison.md](https://github.com/kedro-org/kedro/blob/spike/inspect-api/docs/inspect-docs/kedro-inspect-comparison.md).
 
 ## Architecture overview
 
-The diagram below shows the full flow: **inspect any Kedro project with only Kedro installed** (no pandas, spark, or other project dependencies). Core provides `safe_context` (so the project can load without those dependencies) and builds a **Kedro-native ProjectSnapshot**.
-
-**Open for discussion:** An optional **kedro-inspect** package can add richer models (e.g. edges, REST) for Viz and other plugins.
+The diagram below shows the full flow: **inspect any Kedro project with only Kedro its dependencies and pydantic installed** (no pandas, spark, or other project dependencies). Core provides `safe_context` (so the project can load without those dependencies) and builds a **Kedro-native ProjectSnapshot**.
 
 ```mermaid
 flowchart LR
@@ -84,11 +86,15 @@ flowchart LR
 
 **Summary:** `safe_context` lets Kedro load the project without heavy dependencies; inside it we create a session, read pipelines and catalog config (no I/O), and return a **ProjectSnapshot** that respects execution order and stays Kedro-native; plugins can add edges/REST via an optional package.
 
+**Open for discussion:** An optional **kedro-inspect** package can add richer models (e.g. edges, REST) for Viz and other plugins.
+
 ---
 
 ## Demo
 
-Prototype using **`kedro inspect`** CLI commands on **kedro-viz/demo-project**. The exact commands and output format are **not fixed**; the following is the kind of usage that is **achievable** with the inspection API:
+**Prototype:** https://github.com/kedro-org/kedro/tree/spike/inspect-api/kedro/inspection
+
+Prototype uses **`kedro inspect`** CLI commands on **kedro-viz/demo-project**. The exact commands and output format are **not fixed**; the following is the kind of usage that is **achievable** with the inspection API:
 
 | Command | What it gives |
 |--------|----------------|
@@ -133,7 +139,7 @@ data = snapshot.model_dump()
 print(snapshot.metadata.project_name, len(snapshot.pipelines), "pipelines")
 ```
 
-**Note:** The inspection API and `kedro inspect` require pydantic. Install with `pip install kedro[inspect]`; without it, using inspection raises an actionable error.
+**Note:** The inspection API and `kedro inspect` require pydantic. For testing prototype, install with `uv pip install "git+https://github.com/kedro-org/kedro@spike/inspect-api[inspect]"`; without it, using inspection raises an actionable error.
 
 ---
 

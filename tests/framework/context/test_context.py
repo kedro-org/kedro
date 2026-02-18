@@ -378,6 +378,10 @@ class TestKedroContext:
         assert dummy_context._is_pydantic_model(MyModel(x=1)) is True
         assert dummy_context._is_pydantic_model({"x": 1}) is False
 
+    def test_is_pydantic_model_without_pydantic(self, dummy_context, mocker):
+        mocker.patch.dict("sys.modules", {"pydantic": None})
+        assert dummy_context._is_pydantic_model({"x": 1}) is False
+
 
 @pytest.mark.parametrize(
     "path_string,expected",

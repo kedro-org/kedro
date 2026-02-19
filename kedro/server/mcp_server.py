@@ -9,14 +9,12 @@ from __future__ import annotations
 
 import json
 import logging
-import time
-import traceback
 from typing import Any
 
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
-from kedro.server.config import get_project_path, is_debug_mode
-from kedro.utils import load_obj
+from kedro.server.config import get_project_path
+from kedro.server.runner import execute_pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +112,9 @@ def create_mcp_server(
     @mcp.tool()
     def run_pipeline(  # noqa: PLR0913
         pipeline: str | None = None,
+        pipeline_names: list[str] | None = None,
         env: str | None = None,
+        conf_source: str | None = None,
         params: dict[str, Any] | None = None,
         runner: str | None = None,
         is_async: bool = False,
@@ -135,7 +135,9 @@ def create_mcp_server(
 
         Args:
             pipeline: Pipeline name. Defaults to '__default__'.
+            pipeline_names: Run multiple pipelines. Mutually exclusive with pipeline.
             env: Configuration environment (e.g. 'base', 'local').
+            conf_source: Path to a custom configuration directory.
             params: Extra parameters for the pipeline context.
             runner: Runner class: 'SequentialRunner', 'ParallelRunner', 'ThreadRunner'.
             is_async: Load/save node inputs and outputs asynchronously.
@@ -149,78 +151,26 @@ def create_mcp_server(
             namespaces: Run only nodes within these namespaces.
             only_missing_outputs: Skip nodes whose outputs already exist.
         """
-        start_time = time.perf_counter()
-        debug_mode = is_debug_mode()
-        run_id: str | None = None
-
-        try:
-            runner_name = runner or "SequentialRunner"
-            runner_class = load_obj(runner_name, "kedro.runner")
-            runner_obj = runner_class(is_async=is_async)
-
-            with KedroSession.create(
-                project_path=project_path,
-                env=env,
-                runtime_params=params,
-            ) as session:
-                run_id = session.session_id
-
-                logger.info(
-                    "Starting pipeline run %s (pipeline=%s, env=%s)",
-                    run_id,
-                    pipeline or "__default__",
-                    env,
-                )
-
-                session.run(
-                    pipeline_name=pipeline,
-                    tags=tuple(tags) if tags else None,
-                    runner=runner_obj,
-                    node_names=tuple(node_names) if node_names else None,
-                    from_nodes=from_nodes,
-                    to_nodes=to_nodes,
-                    from_inputs=from_inputs,
-                    to_outputs=to_outputs,
-                    load_versions=load_versions,
-                    namespaces=namespaces,
-                    only_missing_outputs=only_missing_outputs,
-                )
-
-            duration_ms = (time.perf_counter() - start_time) * 1000
-            logger.info("Pipeline run %s completed in %.2fms", run_id, duration_ms)
-
-            return json.dumps(
-                {
-                    "run_id": run_id,
-                    "status": "success",
-                    "duration_ms": round(duration_ms, 2),
-                }
-            )
-
-        except Exception as exc:
-            duration_ms = (time.perf_counter() - start_time) * 1000
-            logger.error(
-                "Pipeline run %s failed: %s",
-                run_id or "unknown",
-                str(exc),
-                exc_info=True,
-            )
-
-            error = {
-                "type": type(exc).__qualname__,
-                "message": str(exc),
-            }
-            if debug_mode:
-                error["traceback"] = traceback.format_tb(exc.__traceback__)
-
-            return json.dumps(
-                {
-                    "run_id": run_id or "unknown",
-                    "status": "failed",
-                    "duration_ms": round(duration_ms, 2),
-                    "error": error,
-                }
-            )
+        result = execute_pipeline(
+            project_path,
+            pipeline=pipeline,
+            pipeline_names=pipeline_names,
+            env=env,
+            conf_source=conf_source,
+            params=params,
+            runner=runner,
+            is_async=is_async,
+            tags=tags,
+            node_names=node_names,
+            from_nodes=from_nodes,
+            to_nodes=to_nodes,
+            from_inputs=from_inputs,
+            to_outputs=to_outputs,
+            load_versions=load_versions,
+            namespaces=namespaces,
+            only_missing_outputs=only_missing_outputs,
+        )
+        return json.dumps(result.to_dict())
 
     @mcp.tool()
     def list_datasets(env: str | None = None) -> str:

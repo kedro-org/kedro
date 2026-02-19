@@ -11,8 +11,8 @@ from kedro.framework.cli.utils import CONTEXT_SETTINGS, KedroCliError
 from kedro.framework.startup import bootstrap_project
 from kedro.server.config import (
     DEFAULT_HOST,
+    DEFAULT_HTTP_PORT,
     DEFAULT_MCP_PORT,
-    DEFAULT_PORT,
     KEDRO_PROJECT_PATH_ENV,
 )
 from kedro.utils import find_kedro_project
@@ -76,8 +76,8 @@ def http_group() -> None:
     "--port",
     "-p",
     type=int,
-    default=DEFAULT_PORT,
-    help=f"Port to bind the server to. Default: {DEFAULT_PORT}",
+    default=DEFAULT_HTTP_PORT,
+    help=f"Port to bind the server to. Default: {DEFAULT_HTTP_PORT}",
 )
 @click.option(
     "--reload",
@@ -120,7 +120,7 @@ def http_start(
     except ImportError as exc:
         raise KedroCliError(
             "Kedro HTTP server requires 'uvicorn' and 'fastapi' packages. "
-            "Install them with: pip install kedro[server]"
+            "Install them with: pip install kedro[http]"
         ) from exc
 
     project_path = _resolve_project_path(metadata)
@@ -138,7 +138,7 @@ def http_start(
 
     # Start uvicorn programmatically
     uvicorn.run(
-        "kedro.server.app:create_app",
+        "kedro.server.http_server:create_http_server",
         factory=True,
         host=host,
         port=port,

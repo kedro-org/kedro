@@ -20,7 +20,7 @@ To set yourself up, create a new Kedro project:
 ```
 $ kedro new --starter=spaceflights-pandas-viz --name spaceflights-mlflow
 $ cd spaceflights-mlflow
-$ python -m venv && source .venv/bin/activate
+$ python -m venv .venv && source .venv/bin/activate
 (.venv) $ pip install -r requirements.txt
 ```
 
@@ -128,7 +128,7 @@ and you would be able to preview it in the MLflow web UI:
     it's probably because you had already executed `kedro run` while the dataset was marked as `versioned: true`.
     The solution is to clean up the old `data/08_reporting/dummy_confusion_matrix.png` directory.
 
-Check out {external+kedro-mlflow:doc}`the official kedro-mlflow documentation on versioning Kedro datasets <source/04_experimentation_tracking/03_version_datasets>`
+Check out [the official kedro-mlflow documentation on versioning Kedro datasets](https://kedro-mlflow.readthedocs.io/en/stable/source/03_experiment_tracking/01_experiment_tracking/03_version_datasets.html)
 for more information.
 
 ### Model registry in MLflow using `kedro-mlflow`
@@ -142,6 +142,8 @@ For example, if you have a dataset corresponding to a scikit-learn model,
 you can change it as follows:
 
 ```diff
+ # conf/base/catalog.yml
+
  regressor:
 -  type: pickle.PickleDataset
 -  filepath: data/06_models/regressor.pickle
@@ -158,6 +160,8 @@ If you also want to _register_ it
 you can add a `registered_model_name` parameter:
 
 ```yaml
+# conf/base/catalog.yml
+
 regressor:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
   flavor: mlflow.sklearn
@@ -173,6 +177,8 @@ To load a model from a specific run, you can specify the `run_id`.
 For that, you can make use of {ref}`runtime parameters <runtime-params>`:
 
 ```yaml
+# conf/base/catalog.yml
+
 # Add the intermediate datasets to run the inference pipeline
 X_test:
   type: pandas.ParquetDataset

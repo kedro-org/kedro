@@ -20,7 +20,7 @@ To set yourself up, create a new Kedro project:
 ```
 $ kedro new --starter=spaceflights-pandas --name spaceflights-mlflow
 $ cd spaceflights-mlflow
-$ python -m venv && source .venv/bin/activate
+$ python -m venv .venv && source .venv/bin/activate
 (.venv) $ pip install -r requirements.txt
 ```
 
@@ -128,7 +128,7 @@ and you would be able to preview it in the MLflow web UI:
     it's probably because you had already executed `kedro run` while the dataset was marked as `versioned: true`.
     The solution is to clean up the old `data/08_reporting/dummy_confusion_matrix.png` directory.
 
-Check out {external+kedro-mlflow:doc}`the official kedro-mlflow documentation on versioning Kedro datasets <source/04_experimentation_tracking/03_version_datasets>`
+Check out [the official kedro-mlflow documentation on versioning Kedro datasets](https://kedro-mlflow.readthedocs.io/en/stable/source/03_experiment_tracking/01_experiment_tracking/03_version_datasets.html)
 for more information.
 
 ### Model registry in MLflow using `kedro-mlflow`

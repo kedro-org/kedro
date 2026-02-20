@@ -158,6 +158,8 @@ If you also want to _register_ it
 you can add a `registered_model_name` parameter:
 
 ```yaml
+# conf/base/catalog.yml
+
 regressor:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
   flavor: mlflow.sklearn
@@ -173,6 +175,7 @@ To load a model from a specific run, you can specify the `run_id`.
 For that, you can make use of {ref}`runtime parameters <runtime-params>`:
 
 ```yaml
+# conf/base/catalog.yml
 # Add the intermediate datasets to run the inference pipeline
 X_test:
   type: pandas.ParquetDataset

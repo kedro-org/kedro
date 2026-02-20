@@ -71,7 +71,13 @@ def test_configure_project_should_not_raise_for_unimportable_pipelines(
     # since pipelines loading is lazy
     configure_project(mock_package_name_with_unimportable_pipelines_file)
 
+    # Reset state for clean test
+    pipelines._is_data_loaded = False
+    pipelines._content = {}
+    pipelines._loaded_pipeline_names = set()
+
     # accessing data should raise for unimportable pipelines
+    # With the new behavior, attempting to load triggers the import which fails
     with pytest.raises(
         ModuleNotFoundError, match="No module named 'this_is_not_a_real_thing'"
     ):

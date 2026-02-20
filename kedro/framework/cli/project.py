@@ -204,9 +204,7 @@ def package(metadata: ProjectMetadata) -> None:
     callback=_split_load_versions,
 )
 @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
-@click.option(
-    "--pipelines", type=str, default="", help=PIPELINES_ARG_HELP, callback=split_string
-)
+@click.option("--pipelines", type=str, default="", help=PIPELINES_ARG_HELP)
 @click.option(
     "--namespaces",
     "-ns",
@@ -251,7 +249,7 @@ def run(  # noqa: PLR0913
     to_outputs: str,
     load_versions: dict[str, str] | None,
     pipeline: str,
-    pipelines: list[str],
+    pipelines: str,
     config: str,
     conf_source: str,
     params: dict[str, Any],
@@ -265,7 +263,7 @@ def run(  # noqa: PLR0913
             "Options '--pipeline' and '--pipelines' cannot be used together"
         )
 
-    pipelines_to_run = list(set(pipelines)) if pipelines else None
+    pipelines_to_run = pipelines if pipelines else None
 
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)

@@ -59,6 +59,7 @@ class TestRegistryDescribeCommand:
         expected_dict = {"Nodes": pipelines_dict[pipeline_name]}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
+    # TODO: This is genuine failure, behaviour needs to be fixed
     def test_registered_pipeline_not_found(self, fake_project_cli, fake_metadata):
         result = CliRunner().invoke(
             fake_project_cli, ["registry", "describe", "missing"], obj=fake_metadata

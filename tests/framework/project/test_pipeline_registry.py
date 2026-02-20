@@ -3,7 +3,7 @@ import textwrap
 
 import pytest
 
-from kedro.framework.project import configure_project, pipelines
+from kedro.framework import project
 from kedro.pipeline import Pipeline
 
 
@@ -13,9 +13,9 @@ def mock_package_name_with_pipelines_file(tmpdir):
     pipelines_file_path.write(
         textwrap.dedent(
             """
-                from kedro.pipeline import Pipeline
-                def register_pipelines():
-                    return {"new_pipeline": Pipeline([])}
+            from kedro.pipeline import Pipeline
+            def register_pipelines():
+                return {"new_pipeline": Pipeline([])}
             """
         )
     )
@@ -25,27 +25,16 @@ def mock_package_name_with_pipelines_file(tmpdir):
     sys.path.pop(0)
 
 
-def test_pipelines_without_configure_project_is_empty(
-    mock_package_name_with_pipelines_file,
-):
-    # Reimport `pipelines` from `kedro.framework.project` to ensure that
-    # it was not set by a prior call to the `configure_project` function.
-    del sys.modules["kedro.framework.project"]
-    from kedro.framework.project import pipelines
-
-    assert pipelines == {}
-
-
 @pytest.fixture
 def mock_package_name_with_unimportable_pipelines_file(tmpdir):
     pipelines_file_path = tmpdir.mkdir("test_broken_package") / "pipeline_registry.py"
     pipelines_file_path.write(
         textwrap.dedent(
             """
-                import this_is_not_a_real_thing
-                from kedro.pipeline import Pipeline
-                def register_pipelines():
-                    return {"new_pipeline": Pipeline([])}
+            import this_is_not_a_real_thing
+            from kedro.pipeline import Pipeline
+            def register_pipelines():
+                return {"new_pipeline": Pipeline([])}
             """
         )
     )
@@ -57,22 +46,211 @@ def mock_package_name_with_unimportable_pipelines_file(tmpdir):
     sys.path.pop(0)
 
 
+@pytest.fixture
+def mock_package_name_with_selective_pipelines_file(tmpdir):
+    pipelines_file_path = (
+        tmpdir.mkdir("test_selective_package") / "pipeline_registry.py"
+    )
+    pipelines_file_path.write(
+        textwrap.dedent(
+            """
+            from kedro.framework.project import find_pipelines
+            from kedro.pipeline import Pipeline
+
+            def register_pipelines(pipeline: str | None = None):
+                pipelines = find_pipelines(raise_errors=True, name=pipeline)
+                pipelines["__default__"] = sum(pipelines.values())
+                return pipelines
+            """
+        )
+    )
+    project_path, package_name, _ = str(pipelines_file_path).rpartition(
+        "test_selective_package"
+    )
+    sys.path.insert(0, project_path)
+    yield package_name
+    sys.path.pop(0)
+
+
+@pytest.fixture
+def mock_package_name_with_old_pipelines_file(tmpdir):
+    pipelines_file_path = tmpdir.mkdir("test_old_package") / "pipeline_registry.py"
+    pipelines_file_path.write(
+        textwrap.dedent(
+            """
+            from kedro.pipeline import Pipeline
+
+            def register_pipelines():
+                return {
+                    "pipeline1": Pipeline([]),
+                    "pipeline2": Pipeline([]),
+                    "__default__": Pipeline([]),
+                }
+            """
+        )
+    )
+    project_path, package_name, _ = str(pipelines_file_path).rpartition(
+        "test_old_package"
+    )
+    sys.path.insert(0, project_path)
+    yield package_name
+    sys.path.pop(0)
+
+
+@pytest.fixture
+def selective_registry_package(tmpdir):
+    pipelines_file = tmpdir.mkdir("test_selective_registry") / "pipeline_registry.py"
+    pipelines_file.write(
+        textwrap.dedent(
+            """
+            from kedro.pipeline import Pipeline
+
+            def register_pipelines(pipeline=None):
+                if pipeline is None:
+                    return {"__default__": Pipeline([])}
+                return {
+                    pipeline: Pipeline([]),
+                    "__default__": Pipeline([]),
+                }
+            """
+        )
+    )
+    project_path, package_name, _ = str(pipelines_file).rpartition(
+        "test_selective_registry"
+    )
+    sys.path.insert(0, project_path)
+    yield package_name
+    sys.path.pop(0)
+
+
+@pytest.fixture
+def mock_package_with_pipeline_param(tmpdir):
+    """Package with register_pipelines that accepts pipeline parameter."""
+    pipelines_file = tmpdir.mkdir("test_pipeline_param") / "pipeline_registry.py"
+    pipelines_file.write(
+        textwrap.dedent(
+            """
+            from kedro.pipeline import Pipeline
+
+            def register_pipelines(pipeline=None):
+                # This function accepts pipeline parameter
+                if pipeline == "specific":
+                    return {"specific": Pipeline([]), "__default__": Pipeline([])}
+                return {"all": Pipeline([]), "__default__": Pipeline([])}
+            """
+        )
+    )
+    project_path, package_name, _ = str(pipelines_file).rpartition(
+        "test_pipeline_param"
+    )
+    sys.path.insert(0, project_path)
+    yield package_name
+    sys.path.pop(0)
+
+
+def test_pipelines_without_configure_project_is_empty():
+    # Create a fresh project module reference
+    import kedro.framework.project as fresh_project
+
+    # Reset to unconfigured state
+    fresh_project.PACKAGE_NAME = None
+    fresh_project.pipelines.configure(None)
+
+    assert fresh_project.pipelines == {}
+
+
 def test_pipelines_after_configuring_project_shows_updated_values(
     mock_package_name_with_pipelines_file,
 ):
-    configure_project(mock_package_name_with_pipelines_file)
-    assert isinstance(pipelines["new_pipeline"], Pipeline)
+    project.configure_project(mock_package_name_with_pipelines_file)
+    assert isinstance(project.pipelines["new_pipeline"], Pipeline)
 
 
 def test_configure_project_should_not_raise_for_unimportable_pipelines(
     mock_package_name_with_unimportable_pipelines_file,
 ):
-    # configure_project should not raise error for unimportable pipelines
-    # since pipelines loading is lazy
-    configure_project(mock_package_name_with_unimportable_pipelines_file)
+    project.configure_project(mock_package_name_with_unimportable_pipelines_file)
 
-    # accessing data should raise for unimportable pipelines
     with pytest.raises(
         ModuleNotFoundError, match="No module named 'this_is_not_a_real_thing'"
     ):
-        _ = pipelines["new_pipeline"]
+        _ = project.pipelines["new_pipeline"]
+
+
+@pytest.mark.parametrize("exception_type", [TypeError, ValueError])
+def test_pipelines_load_data_signature_inspection_failure(
+    monkeypatch, tmpdir, exception_type
+):
+    pipelines_file_path = (
+        tmpdir.mkdir(f"test_sig_fail_{exception_type.__name__}")
+        / "pipeline_registry.py"
+    )
+    pipelines_file_path.write(
+        textwrap.dedent(
+            """
+            from kedro.pipeline import Pipeline
+            def register_pipelines():
+                return {"test_pipeline": Pipeline([])}
+            """
+        )
+    )
+    project_path, package_name, _ = str(pipelines_file_path).rpartition(
+        f"test_sig_fail_{exception_type.__name__}"
+    )
+    sys.path.insert(0, project_path)
+
+    try:
+        project.configure_project(package_name)
+
+        import inspect as inspect_module
+
+        def mock_signature_raises(*args, **kwargs):
+            raise exception_type("Cannot inspect signature")
+
+        monkeypatch.setattr(inspect_module, "signature", mock_signature_raises)
+
+        result = project.pipelines["test_pipeline"]
+
+        assert isinstance(result, Pipeline)
+        assert "test_pipeline" in project.pipelines._content
+    finally:
+        sys.path.pop(0)
+
+
+def test_load_data_calls_register_pipelines_with_pipeline_parameter(
+    mock_package_with_pipeline_param,
+):
+    """Test that _load_data passes requested_pipeline to register_pipelines when signature has 'pipeline' param."""
+    project.configure_project(mock_package_with_pipeline_param)
+
+    result = project.pipelines["specific"]
+
+    assert isinstance(result, Pipeline)
+    assert "specific" in project.pipelines._content
+
+
+def test_getitem_with_comma_separated_pipelines(mock_package_with_pipeline_param):
+    """Test that __getitem__ handles comma-separated pipeline keys by combining them."""
+    project.configure_project(mock_package_with_pipeline_param)
+
+    project.pipelines._content = {
+        "pipeline1": Pipeline([]),
+        "pipeline2": Pipeline([]),
+        "__default__": Pipeline([]),
+    }
+    project.pipelines._is_data_loaded = True
+
+    result = project.pipelines["pipeline1,pipeline2"]
+
+    assert isinstance(result, Pipeline)
+
+
+def test_getitem_raises_keyerror_for_missing_pipeline(mock_package_with_pipeline_param):
+    """Test that __getitem__ raises KeyError when pipeline doesn't exist."""
+    project.configure_project(mock_package_with_pipeline_param)
+
+    # Mark as loaded so it doesn't try to load
+    project.pipelines._is_data_loaded = True
+
+    with pytest.raises(KeyError, match="nonexistent"):
+        _ = project.pipelines["nonexistent"]

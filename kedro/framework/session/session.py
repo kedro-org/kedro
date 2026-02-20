@@ -282,7 +282,7 @@ class KedroSession:
     def run(  # noqa: PLR0913
         self,
         pipeline_name: str | None = None,
-        pipeline_names: list[str] | None = None,
+        pipeline_names: str | None = None,
         tags: Iterable[str] | None = None,
         runner: AbstractRunner | None = None,
         node_names: Iterable[str] | None = None,
@@ -338,7 +338,7 @@ class KedroSession:
                 "`pipeline_name` is deprecated and will be removed in a future release. "
                 "Please use `pipeline_names` instead."
             )
-            pipeline_names = [pipeline_name]
+            pipeline_names = pipeline_name
 
         if self._run_called:
             raise KedroSessionError(
@@ -352,19 +352,15 @@ class KedroSession:
         runtime_params = self.store.get("runtime_params") or {}
         context = self.load_context()
 
-        names = pipeline_names or ["__default__"]
-        combined_pipelines = Pipeline([])
-        for name in names:
-            try:
-                combined_pipelines += pipelines[name]
-            except KeyError as exc:
-                raise ValueError(
-                    f"Failed to find the pipeline named '{name}'. "
-                    f"It needs to be generated and returned "
-                    f"by the 'register_pipelines' function."
-                ) from exc
+        names = pipeline_names or "__default__"
+        pipelines_to_run = Pipeline([])
 
-        filtered_pipeline = combined_pipelines.filter(
+        try:
+            pipelines_to_run = pipelines[names]
+        except KeyError as exc:
+            raise ValueError("Failed to retrieve the requested pipelines.") from exc
+
+        filtered_pipeline = pipelines_to_run.filter(
             tags=tags,
             from_nodes=from_nodes,
             to_nodes=to_nodes,

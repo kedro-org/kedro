@@ -98,6 +98,7 @@ def info() -> None:
         "package": "kedro.framework.cli.project.package",
         "jupyter": "kedro.framework.cli.jupyter.jupyter",
         "pipeline": "kedro.framework.cli.pipeline.pipeline",
+        "server": "kedro.framework.cli.server.server_group",
     },
 )
 def project_commands() -> None:

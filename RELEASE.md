@@ -1,8 +1,11 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+* Fixed `CatalogConfigResolver` incorrectly iterating over `namedtuple` subclasses (e.g. `sqlalchemy.engine.URL`) during pattern resolution by using exact type checks instead of `isinstance`.
 ## Documentation changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Mr-Neutr0n](https://github.com/Mr-Neutr0n)
 
 
 # Release 1.3.0

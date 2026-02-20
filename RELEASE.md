@@ -9,6 +9,7 @@
 
 ## Major features and improvements
 * Added `list_versions()` method for versioned datasets to list available dataset versions.
+* Added `SESSION_CLASS` as a configurable project setting, allowing users to define a custom KedroSession subclass
 
 ## Bug fixes and other changes
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.

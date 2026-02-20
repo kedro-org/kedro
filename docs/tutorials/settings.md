@@ -13,6 +13,7 @@ By default, all code in `settings.py` is commented out. When settings are not su
 | --------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `HOOKS`                     | `tuple()`                                         | Inject additional behaviour into the execution timeline with [project Hooks](../extend/hooks/introduction.md).            |
 | `DISABLE_HOOKS_FOR_PLUGINS` | `tuple()`                                         | Disable [auto-registration of Hooks from plugins](../extend/hooks/introduction.md#disable-auto-registered-plugins-hooks). |
+| `SESSION_CLASS` | `kedro.framework.session.KedroSession` | Customize how the [Kedro Session](../extend/session.md) is handled|
 | `SESSION_STORE_CLASS`       | `kedro.framework.session.session.BaseSessionStore`| Customise how [session data](../extend/session.md) is stored.                                                                |
 | `SESSION_STORE_ARGS`        | `dict()`                                          | Keyword arguments for the `SESSION_STORE_CLASS` constructor.                                                       |
 | `CONTEXT_CLASS`             | `kedro.framework.context.KedroContext`            | Customise how Kedro library components are managed.                                                                |

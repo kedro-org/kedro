@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -13,6 +14,7 @@ from attrs import define, field
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.context import CatalogCommandsMixin
+from kedro.framework.validation.validators import ParameterValidator
 from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
 
@@ -192,6 +194,10 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
+    _parameter_validator: ParameterValidator = field(
+        init=False, factory=ParameterValidator
+    )
+    _validated_params_cache: dict[str, Any] | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -205,21 +211,41 @@ class KedroContext:
         """
         return self._get_catalog()
 
+    def _get_validated_params(self) -> dict[str, Any]:
+        """Get validated parameters with caching support.
+
+        Returns:
+            Validated and transformed parameters with model instantiation.
+        """
+        # Return cached result if available
+        if self._validated_params_cache is not None:
+            return self._validated_params_cache
+
+        # Get raw parameters note: config loader includes runtime params
+        try:
+            raw_params = self.config_loader["parameters"]
+        except MissingConfigException as exc:
+            warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
+            raw_params = self._runtime_params or {}
+
+        # Validate parameters
+        validated_params = self._parameter_validator.validate_raw_params(raw_params)
+
+        # Cache the result
+        self._validated_params_cache = validated_params
+
+        return validated_params
+
     @property
     def params(self) -> dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
 
         Returns:
             Parameters defined in `parameters.yml` with the addition of any
-                extra parameters passed at initialization.
+                extra parameters passed at initialization. Parameters are validated
+                and transformed according to pipeline node type hints.
         """
-        try:
-            params = self.config_loader["parameters"]
-        except MissingConfigException as exc:
-            warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
-            params = {}
-        _update_nested_dict(params, self._runtime_params or {})
-        return params  # type: ignore
+        return self._get_validated_params()
 
     def _get_catalog(
         self,
@@ -295,8 +321,20 @@ class KedroContext:
             """
             key = f"params:{param_name}"
             params_dict[key] = param_value
+
+            # Convert typed objects to dicts for nested path registration
+            nested_dict = None
             if isinstance(param_value, dict):
-                for key, val in param_value.items():
+                nested_dict = param_value
+            elif self._is_pydantic_model(param_value):
+                nested_dict = param_value.model_dump()
+            elif dataclasses.is_dataclass(param_value) and not isinstance(
+                param_value, type
+            ):
+                nested_dict = dataclasses.asdict(param_value)
+
+            if nested_dict is not None:
+                for key, val in nested_dict.items():
                     _add_param_to_params_dict(f"{param_name}.{key}", val)
 
         for param_name, param_value in params.items():
@@ -314,6 +352,15 @@ class KedroContext:
             )
             conf_creds = {}
         return conf_creds
+
+    @staticmethod
+    def _is_pydantic_model(value: Any) -> bool:
+        try:
+            import pydantic
+
+            return isinstance(value, pydantic.BaseModel)
+        except ImportError:
+            return False
 
 
 class KedroContextError(Exception):

@@ -159,7 +159,6 @@ you can add a `registered_model_name` parameter:
 
 ```yaml
 # conf/base/catalog.yml
-
 regressor:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
   flavor: mlflow.sklearn

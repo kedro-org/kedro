@@ -49,3 +49,17 @@ def describe_registered_pipeline(
     result = {"Nodes": nodes}
 
     click.echo(yaml.dump(result))
+
+
+@registry.command("inspect")
+def inspect_registered_pipeline() -> None:
+    all_pipeline_names = pipelines.keys()
+    for pipeline_name in all_pipeline_names:
+        click.echo(f"Pipeline: {pipeline_name}")
+        pipeline_obj = pipelines.get(pipeline_name)
+        nodes = []
+        for node in pipeline_obj.nodes:
+            nodes.append(f"{node.name} ({node._func_name}), inputs: {node.inputs}, outputs: {node.outputs, parameters: {node.parameters}}")
+        result = {"Nodes": nodes}
+        click.echo(yaml.dump(result))
+        click.echo("-" * 100)

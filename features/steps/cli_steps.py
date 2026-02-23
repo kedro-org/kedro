@@ -490,6 +490,7 @@ def add_req(context: behave.runner.Context, dependency: str):
 
 @then("CLI should print the version in an expected format")
 def check_kedro_version(context):
+    """Behave step to check validity of the kedro version."""
     expected = f"kedro, version {kedro.__version__}"
     assert expected in context.version_str
 

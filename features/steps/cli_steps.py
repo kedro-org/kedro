@@ -493,6 +493,7 @@ def check_kedro_version(context):
     expected = f"kedro, version {kedro.__version__}"
     assert expected in context.version_str
 
+
 @then("the expected project directories and files should be created")
 def check_created_project_structure(context):
     """Behave step to check the subdirectories created by kedro new."""

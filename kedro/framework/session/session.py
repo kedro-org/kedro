@@ -352,6 +352,12 @@ class KedroSession:
         runtime_params = self.store.get("runtime_params") or {}
         context = self.load_context()
 
+        # Set pipeline filter if pipeline_names is provided
+        if pipeline_names:
+            pipelines.set_pipeline_filter(pipeline_names)
+        else:
+            pipelines.set_pipeline_filter(None)
+
         names = pipeline_names or ["__default__"]
         combined_pipelines = Pipeline([])
         for name in names:

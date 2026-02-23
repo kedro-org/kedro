@@ -744,7 +744,9 @@ class TestKedroSession:
             _FAKE_PIPELINE_NAME: filter_mock,
             "__default__": filter_mock,
         }
-        mocker.patch("kedro.framework.session.session.pipelines", pipelines_ret)
+        pipelines_mock = mocker.MagicMock()
+        pipelines_mock.__getitem__ = mocker.Mock(side_effect=pipelines_ret.__getitem__)
+        mocker.patch("kedro.framework.session.session.pipelines", pipelines_mock)
         mocker.patch(
             "kedro.io.data_catalog.CatalogConfigResolver.match_dataset_pattern",
             return_value=match_pattern,

@@ -9,6 +9,7 @@ import shutil
 import sys
 from pathlib import Path
 from unittest.mock import patch
+from urllib.parse import urlparse
 
 import pytest
 import yaml
@@ -62,12 +63,29 @@ def template_in_cwd(tmp_path, chdir_to_tmp):
     return template_path
 
 
+def _is_github_host(url: str) -> bool:
+    """Check if URL hostname is github.com (avoids substring matching issues)."""
+    if not url:
+        return False
+    try:
+        parsed = urlparse(url)
+        host = (parsed.netloc or "").lower().split(":")[0]
+        return host == "github.com" or host.endswith(".github.com")
+    except Exception:
+        return False
+
+
 def _mock_determine_repo_dir_impl(*args, **kwargs):
     """Mock determine_repo_dir to return local template path instead of cloning."""
     template = kwargs.get("template", args[0] if args else None)
-    if template and (str(template).startswith("git+") or "github.com" in str(template)):
-        return str(TEMPLATE_PATH), None
     if template:
+        template_str = str(template)
+        # Only substitute for GitHub URLs (use hostname check, not substring)
+        if template_str.startswith(("git+", "http://", "https://")) and _is_github_host(
+            template_str
+        ):
+            return str(TEMPLATE_PATH), None
+        # Local path or non-GitHub URL - return as-is
         return str(template), None
     return str(TEMPLATE_PATH), None
 
@@ -198,9 +216,11 @@ def mock_make_cookiecutter_args_and_fetch_template(*args, **kwargs):
     )
     cookiecutter_args["checkout"] = "main"  # Force the checkout to be "main"
 
-    # If starter_path is a git URL, replace it with local template path
+    # If starter_path is a GitHub URL, replace it with local template path
     # and remove directory argument since local template doesn't have starter subdirectories
-    if starter_path.startswith("git+") or "github.com" in starter_path:
+    if starter_path.startswith(("git+", "http://", "https://")) and _is_github_host(
+        starter_path
+    ):
         starter_path = str(TEMPLATE_PATH)
         # Remove directory argument when using local template
         cookiecutter_args.pop("directory", None)

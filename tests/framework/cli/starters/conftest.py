@@ -5,179 +5,47 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
-import os
 import shutil
 import sys
-import tempfile
-from importlib import import_module
 from pathlib import Path
 from unittest.mock import patch
 
-import click
 import pytest
 import yaml
-from click.testing import CliRunner
-from pytest import fixture
 
 if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib
 
-from kedro import __version__ as kedro_version
 from kedro import __version__ as version
-from kedro.framework.cli.catalog import catalog_cli
-from kedro.framework.cli.cli import cli
-from kedro.framework.cli.jupyter import jupyter_cli
-from kedro.framework.cli.pipeline import pipeline_cli
-from kedro.framework.cli.project import project_group
-from kedro.framework.cli.registry import registry_cli
 from kedro.framework.cli.starters import (
     TEMPLATE_PATH,
     _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
     _parse_yes_no_to_bool,
-    create_cli,
 )
-from kedro.framework.project import configure_project, pipelines, settings
-from kedro.framework.startup import ProjectMetadata
 
-REPO_NAME = "dummy_project"
-PACKAGE_NAME = "dummy_package"
-
+# Number of files in the base template when no tools are selected.
+# Includes: .gitignore, README.md, requirements.txt, pyproject.toml, and
+# the default src/ package structure.
 FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
 
 
-@fixture
-def entry_points(mocker):
-    return mocker.patch("importlib.metadata.entry_points", spec=True)
+# Override parent's entry_points/entry_point to avoid mocker dependency
+@pytest.fixture
+def entry_points():
+    """Mock importlib.metadata.entry_points for starter plugin tests."""
+    with patch("importlib.metadata.entry_points", spec=True) as mock:
+        yield mock
 
 
-@fixture
-def entry_point(mocker, entry_points):
-    ep = mocker.patch("importlib.metadata.EntryPoint", spec=True)
-    entry_points.return_value.select.return_value = [ep]
-    return ep
-
-
-@fixture(scope="module")
-def fake_root_dir():
-    # using tempfile as tmp_path fixture doesn't support module scope
-    tmpdir = tempfile.mkdtemp()
-    try:
-        yield Path(tmpdir).resolve()
-    finally:
-        shutil.rmtree(tmpdir, ignore_errors=True)
-
-
-@fixture(scope="module")
-def fake_package_path(fake_root_dir):
-    return fake_root_dir.resolve() / REPO_NAME / "src" / PACKAGE_NAME
-
-
-@fixture(scope="module")
-def fake_repo_path(fake_root_dir):
-    return fake_root_dir.resolve() / REPO_NAME
-
-
-@fixture(scope="module")
-def dummy_config(fake_root_dir, fake_metadata):
-    config = {
-        "project_name": fake_metadata.project_name,
-        "repo_name": REPO_NAME,
-        "python_package": fake_metadata.package_name,
-        "output_dir": str(fake_root_dir),
-    }
-
-    config_path = fake_root_dir / "dummy_config.yml"
-    with config_path.open("w") as f:
-        yaml.dump(config, f)
-
-    return config_path
-
-
-@fixture(scope="module")
-def fake_metadata(fake_root_dir):
-    metadata = ProjectMetadata(
-        config_file=fake_root_dir / REPO_NAME / "pyproject.toml",
-        package_name=PACKAGE_NAME,
-        project_name="CLI Testing Project",
-        project_path=fake_root_dir / REPO_NAME,
-        kedro_init_version=kedro_version,
-        source_dir=fake_root_dir / REPO_NAME / "src",
-        tools=None,
-        example_pipeline=None,
-    )
-    return metadata
-
-
-# This is needed just for the tests, those CLI groups are merged in our
-# code when invoking `kedro` but when imported, they still need to be merged
-@fixture(scope="module")
-def fake_kedro_cli():
-    return click.CommandCollection(
-        name="Kedro",
-        sources=[
-            cli,
-            create_cli,
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            project_group,
-            registry_cli,
-        ],
-    )
-
-
-@fixture(scope="module")
-def fake_project_cli(
-    fake_repo_path: Path,
-    dummy_config: Path,
-    fake_kedro_cli: click.CommandCollection,
-):
-    old_settings = settings.as_dict()
-    starter_path = Path(__file__).resolve().parents[3]
-    starter_path = starter_path / "features" / "test_starter"
-    modules_before = sys.modules.copy()
-    CliRunner().invoke(
-        fake_kedro_cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)]
-    )
-    # Delete the project logging.yml, which leaves behind info.log and error.log files.
-    # This leaves logging config as the framework default.
-    try:
-        (fake_repo_path / "conf" / "logging.yml").unlink()
-    except FileNotFoundError:
-        pass
-
-    # NOTE: Here we load a couple of modules, as they would be imported in
-    # the code and tests.
-    # It's safe to remove the new entries from path due to the python
-    # module caching mechanism. Any `reload` on it will not work though.
-    old_path = sys.path.copy()
-    sys.path = [str(fake_repo_path / "src"), *sys.path]
-
-    import_module(PACKAGE_NAME)
-    with patch(
-        "kedro.framework.project.LOGGING.set_project_logging", return_value=None
-    ):
-        configure_project(PACKAGE_NAME)
-        yield fake_kedro_cli
-
-    # reset side-effects of configure_project
-    pipelines.configure()
-
-    for key, value in old_settings.items():
-        settings.set(key, value)
-    sys.path = old_path
-
-    # Restore sys.modules to its previous state
-    sys.modules.clear()
-    sys.modules.update(modules_before)
-
-
-@fixture
-def chdir_to_dummy_project(fake_repo_path, monkeypatch):
-    monkeypatch.chdir(str(fake_repo_path))
+@pytest.fixture
+def entry_point(entry_points):
+    """Mock importlib.metadata.EntryPoint for starter plugin tests."""
+    with patch("importlib.metadata.EntryPoint", spec=True) as mock_ep:
+        entry_points.return_value.select.return_value = [mock_ep]
+        yield mock_ep
 
 
 # Shared fixtures for starter tests
@@ -187,59 +55,53 @@ def chdir_to_tmp(monkeypatch, tmp_path):
 
 
 @pytest.fixture
-def mock_determine_repo_dir(mocker):
+def template_in_cwd(tmp_path, chdir_to_tmp):
+    """Copy template to 'template' in cwd for tests using local starter."""
+    template_path = tmp_path / "template"
+    shutil.copytree(TEMPLATE_PATH, template_path)
+    return template_path
+
+
+def _mock_determine_repo_dir_impl(*args, **kwargs):
+    """Mock determine_repo_dir to return local template path instead of cloning."""
+    template = kwargs.get("template", args[0] if args else None)
+    if template and (str(template).startswith("git+") or "github.com" in str(template)):
+        return str(TEMPLATE_PATH), None
+    if template:
+        return str(template), None
+    return str(TEMPLATE_PATH), None
+
+
+@pytest.fixture
+def mock_determine_repo_dir():
     """Mock cookiecutter's determine_repo_dir to avoid git interactions."""
-    return mocker.patch(
+    with patch(
         "cookiecutter.repository.determine_repo_dir",
         return_value=(str(TEMPLATE_PATH), None),
-    )
+    ) as mock:
+        yield mock
 
 
 @pytest.fixture
-def mock_cookiecutter(mocker):
+def mock_cookiecutter():
     """Mock cookiecutter.main.cookiecutter to avoid actual project creation."""
-    return mocker.patch("cookiecutter.main.cookiecutter")
+    with patch("cookiecutter.main.cookiecutter") as mock:
+        yield mock
 
 
 @pytest.fixture
-def patch_cookiecutter_args(mocker):
+def patch_cookiecutter_args():
     """Patch cookiecutter args to force checkout to 'main' and prevent git cloning."""
-
-    # Mock determine_repo_dir to return the local template path to avoid git cloning
-    def mock_determine_repo_dir(*args, **kwargs):
-        """Mock determine_repo_dir to return local template path instead of cloning."""
-        # Handle both positional and keyword arguments
-        template = kwargs.get("template", args[0] if args else None)
-
-        # If template is a git URL, return the local template path instead
-        if template and (
-            str(template).startswith("git+") or "github.com" in str(template)
-        ):
-            return str(TEMPLATE_PATH), None
-        # Otherwise, return the template path as-is (for local paths)
-        if template:
-            return str(template), None
-        # Fallback to TEMPLATE_PATH if no template provided
-        return str(TEMPLATE_PATH), None
-
-    mocker.patch(
-        "cookiecutter.repository.determine_repo_dir",
-        side_effect=mock_determine_repo_dir,
-    )
-
-    # Mock cookiecutter to create expected files when example_pipeline is True
     original_cookiecutter = None
     try:
         from cookiecutter.main import cookiecutter as original_cookiecutter_func
+
         original_cookiecutter = original_cookiecutter_func
     except ImportError:
         pass
 
     def mock_cookiecutter_with_example_files(template, **kwargs):
         """Mock cookiecutter that creates expected files for example pipeline."""
-        import shutil
-        from pathlib import Path
-
         extra_context = kwargs.get("extra_context", {})
         output_dir = Path(kwargs.get("output_dir", "."))
         repo_name = extra_context.get("repo_name", "new-kedro-project")
@@ -247,16 +109,13 @@ def patch_cookiecutter_args(mocker):
         project_path = output_dir / repo_name
         example_pipeline = extra_context.get("example_pipeline", "False")
 
-        # Remove directory argument if present (local template doesn't have starter subdirectories)
-        # This is already handled in mock_make_cookiecutter_args_and_fetch_template,
-        # but we do it here too as a safety measure
         kwargs_without_directory = {k: v for k, v in kwargs.items() if k != "directory"}
-        
-        # Use real cookiecutter with local template (determine_repo_dir is already mocked)
+
         if original_cookiecutter:
-            result_path = original_cookiecutter(template=template, **kwargs_without_directory)
+            result_path = original_cookiecutter(
+                template=template, **kwargs_without_directory
+            )
         else:
-            # Fallback: copy template manually
             template_path = Path(template)
             if template_path.exists() and template_path.is_dir():
                 shutil.copytree(
@@ -269,82 +128,69 @@ def patch_cookiecutter_args(mocker):
                 result_path = str(project_path)
                 project_path.mkdir(parents=True, exist_ok=True)
 
-        # If example_pipeline is True, create the expected example files
         if example_pipeline == "True":
-            result_path_obj = Path(result_path)
-            # Create data files (3 raw data files)
-            (result_path_obj / "data" / "01_raw").mkdir(parents=True, exist_ok=True)
-            for data_file in ["companies.csv", "reviews.csv", "shuttles.xlsx"]:
-                (result_path_obj / "data" / "01_raw" / data_file).touch()
-
-            # Create parameters files (3 YAML files)
-            (result_path_obj / "conf" / "base").mkdir(parents=True, exist_ok=True)
-            for param_file in [
-                "parameters_data_science.yml",
-                "parameters_reporting.yml",
-                "parameters.yml",
-            ]:
-                (result_path_obj / "conf" / "base" / param_file).write_text("{}")
-
-            # Create pipeline Python files (9 files)
-            pipelines_dir = (
-                result_path_obj / "src" / python_package / "pipelines"
-            )
-            pipelines_dir.mkdir(parents=True, exist_ok=True)
-
-            # Data science pipeline
-            (pipelines_dir / "data_science").mkdir(parents=True, exist_ok=True)
-            (pipelines_dir / "data_science" / "__init__.py").touch()
-            (pipelines_dir / "data_science" / "pipeline.py").write_text(
-                "def create_pipeline(**kwargs):\n    return None\n"
-            )
-            (pipelines_dir / "data_science" / "nodes.py").write_text("# nodes\n")
-
-            # Data engineering pipeline
-            (pipelines_dir / "data_engineering").mkdir(parents=True, exist_ok=True)
-            (pipelines_dir / "data_engineering" / "__init__.py").touch()
-            (pipelines_dir / "data_engineering" / "pipeline.py").write_text(
-                "def create_pipeline(**kwargs):\n    return None\n"
-            )
-            (pipelines_dir / "data_engineering" / "nodes.py").write_text("# nodes\n")
-
-            # Reporting pipeline (3 files for viz)
-            (pipelines_dir / "reporting").mkdir(parents=True, exist_ok=True)
-            (pipelines_dir / "reporting" / "__init__.py").touch()
-            (pipelines_dir / "reporting" / "pipeline.py").write_text(
-                "def create_pipeline(**kwargs):\n    return None\n"
-            )
-            (pipelines_dir / "reporting" / "nodes.py").write_text("# nodes\n")
-            (pipelines_dir / "reporting" / "visualizations.py").write_text("# viz\n")
-
-            # Create test file if testing tool is selected
-            tools = extra_context.get("tools", "['None']")
-            if "Testing" in tools or "2" in tools:
-                test_dir = result_path_obj / "tests" / "pipelines" / "data_science"
-                test_dir.mkdir(parents=True, exist_ok=True)
-                (test_dir / "test_pipeline.py").write_text("# test\n")
+            tools_str = extra_context.get("tools", "['None']")
+            _create_example_pipeline_files(Path(result_path), python_package, tools_str)
 
         return result_path
 
-    mocker.patch(
-        "cookiecutter.main.cookiecutter",
-        side_effect=mock_cookiecutter_with_example_files,
-    )
-
-    # Mock the args function
-    mocker.patch(
-        "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
-        side_effect=mock_make_cookiecutter_args_and_fetch_template,
-    )
-
-
-@pytest.fixture
-def mock_env_vars(mocker):
-    """Fixture to mock environment variables"""
-    mocker.patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}, clear=True)
+    with (
+        patch(
+            "cookiecutter.repository.determine_repo_dir",
+            side_effect=_mock_determine_repo_dir_impl,
+        ),
+        patch(
+            "cookiecutter.main.cookiecutter",
+            side_effect=mock_cookiecutter_with_example_files,
+        ),
+        patch(
+            "kedro.framework.cli.starters._make_cookiecutter_args_and_fetch_template",
+            side_effect=mock_make_cookiecutter_args_and_fetch_template,
+        ),
+    ):
+        yield
 
 
 # Shared helper functions for starter tests
+def _create_example_pipeline_files(
+    result_path_obj: Path, python_package: str, tools: str
+):
+    """Create expected example pipeline files (data, params, pipelines, tests)."""
+    # Create data files (3 raw data files)
+    (result_path_obj / "data" / "01_raw").mkdir(parents=True, exist_ok=True)
+    for data_file in ["companies.csv", "reviews.csv", "shuttles.xlsx"]:
+        (result_path_obj / "data" / "01_raw" / data_file).touch()
+
+    # Create parameters files (3 YAML files)
+    (result_path_obj / "conf" / "base").mkdir(parents=True, exist_ok=True)
+    for param_file in [
+        "parameters_data_science.yml",
+        "parameters_reporting.yml",
+        "parameters.yml",
+    ]:
+        (result_path_obj / "conf" / "base" / param_file).write_text("{}")
+
+    # Create pipeline Python files (9 files)
+    pipelines_dir = result_path_obj / "src" / python_package / "pipelines"
+    pipelines_dir.mkdir(parents=True, exist_ok=True)
+
+    for pipeline_name in ["data_science", "data_engineering", "reporting"]:
+        pipeline_dir = pipelines_dir / pipeline_name
+        pipeline_dir.mkdir(parents=True, exist_ok=True)
+        (pipeline_dir / "__init__.py").touch()
+        (pipeline_dir / "pipeline.py").write_text(
+            "def create_pipeline(**kwargs):\n    return None\n"
+        )
+        (pipeline_dir / "nodes.py").write_text("# nodes\n")
+    (pipelines_dir / "reporting" / "visualizations.py").write_text("# viz\n")
+
+    # Create test file if testing tool is selected
+    if "Testing" in tools or "2" in tools:
+        test_dir = result_path_obj / "tests" / "pipelines" / "data_science"
+        test_dir.mkdir(parents=True, exist_ok=True)
+        (test_dir / "test_pipeline.py").write_text("# test\n")
+
+
 def mock_make_cookiecutter_args_and_fetch_template(*args, **kwargs):
     """Mock function to force checkout to 'main' and use local template for git URLs."""
     cookiecutter_args, starter_path = _make_cookiecutter_args_and_fetch_template(
@@ -362,17 +208,23 @@ def mock_make_cookiecutter_args_and_fetch_template(*args, **kwargs):
     return cookiecutter_args, starter_path
 
 
-def _clean_up_project(project_dir):
-    """Clean up a project directory."""
-    if project_dir.is_dir():
-        shutil.rmtree(str(project_dir), ignore_errors=True)
-
-
 def _write_yaml(filepath: Path, config: dict):
     """Write a YAML config file."""
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
+
+
+def _default_config(**overrides):
+    """Return default config dict for kedro new, with optional overrides."""
+    base = {
+        "tools": "none",
+        "project_name": "My Project",
+        "example_pipeline": "no",
+        "repo_name": "my-project",
+        "python_package": "my_project",
+    }
+    return {**base, **overrides}
 
 
 def _make_cli_prompt_input(

@@ -2,20 +2,15 @@
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.starters import (
-    TEMPLATE_PATH,
-    _fetch_validate_parse_config_from_user_prompts,
-)
+from kedro.framework.cli.starters import _fetch_validate_parse_config_from_user_prompts
 from tests.framework.cli.starters.conftest import (
     _assert_requirements_ok,
     _assert_template_ok,
-    _clean_up_project,
     _make_cli_prompt_input,
     _write_yaml,
 )
@@ -31,7 +26,6 @@ class TestNewFromUserPromptsValid:
             fake_kedro_cli, ["new"], input=_make_cli_prompt_input()
         )
         _assert_template_ok(result)
-        _clean_up_project(Path("./new-kedro-project"))
 
     def test_custom_project_name(self, fake_kedro_cli):
         result = CliRunner().invoke(
@@ -45,7 +39,6 @@ class TestNewFromUserPromptsValid:
             repo_name="my-project",
             python_package="my_project",
         )
-        _clean_up_project(Path("./my-project"))
 
     def test_custom_project_name_with_hyphen_and_underscore_and_number(
         self, fake_kedro_cli
@@ -61,21 +54,16 @@ class TestNewFromUserPromptsValid:
             repo_name="my-project--1",
             python_package="my_project__1",
         )
-        _clean_up_project(Path("./my-project--1"))
 
-    def test_no_prompts(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
-        (Path("template") / "prompts.yml").unlink()
+    def test_no_prompts(self, fake_kedro_cli, template_in_cwd):
+        (template_in_cwd / "prompts.yml").unlink()
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         _assert_template_ok(result)
-        _clean_up_project(Path("./new-kedro-project"))
 
-    def test_empty_prompts(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
-        _write_yaml(Path("template") / "prompts.yml", {})
+    def test_empty_prompts(self, fake_kedro_cli, template_in_cwd):
+        _write_yaml(template_in_cwd / "prompts.yml", {})
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         _assert_template_ok(result)
-        _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
         "regex, valid_value",
@@ -85,10 +73,11 @@ class TestNewFromUserPromptsValid:
             ("^\\d+$", "123"),
         ],
     )
-    def test_custom_prompt_valid_input(self, fake_kedro_cli, regex, valid_value):
-        shutil.copytree(TEMPLATE_PATH, "template")
+    def test_custom_prompt_valid_input(
+        self, fake_kedro_cli, template_in_cwd, regex, valid_value
+    ):
         _write_yaml(
-            Path("template") / "prompts.yml",
+            template_in_cwd / "prompts.yml",
             {
                 "project_name": {"title": "Project Name"},
                 "custom_value": {
@@ -110,12 +99,11 @@ class TestNewFromUserPromptsValid:
             python_package="my_project",
         )
 
-        _clean_up_project(Path("./my-project"))
-
-    def test_custom_prompt_for_essential_variable(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
+    def test_custom_prompt_for_essential_variable(
+        self, fake_kedro_cli, template_in_cwd
+    ):
         _write_yaml(
-            Path("template") / "prompts.yml",
+            template_in_cwd / "prompts.yml",
             {
                 "project_name": {"title": "Project Name"},
                 "repo_name": {
@@ -136,7 +124,6 @@ class TestNewFromUserPromptsValid:
             repo_name="my_custom_repo",
             python_package="my_project",
         )
-        _clean_up_project(Path("./my_custom_repo"))
 
     def test_fetch_validate_parse_config_from_user_prompts_without_context(self):
         required_prompts = {}
@@ -170,16 +157,14 @@ class TestNewFromUserPromptsInvalid:
         )
         assert "cookiecutter.exceptions" in result.output
 
-    def test_prompt_no_title(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
-        _write_yaml(Path("template") / "prompts.yml", {"repo_name": {}})
+    def test_prompt_no_title(self, fake_kedro_cli, template_in_cwd):
+        _write_yaml(template_in_cwd / "prompts.yml", {"repo_name": {}})
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         assert result.exit_code != 0
         assert "Each prompt must have a title field to be valid" in result.output
 
-    def test_prompt_bad_yaml(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
-        (Path("template") / "prompts.yml").write_text("invalid\tyaml", encoding="utf-8")
+    def test_prompt_bad_yaml(self, fake_kedro_cli, template_in_cwd):
+        (template_in_cwd / "prompts.yml").write_text("invalid\tyaml", encoding="utf-8")
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         assert result.exit_code != 0
         assert "Failed to generate project: could not load prompts.yml" in result.output
@@ -208,10 +193,9 @@ class TestNewFromUserPromptsInvalid:
             in result.output
         )
 
-    def test_custom_prompt_invalid_input(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
+    def test_custom_prompt_invalid_input(self, fake_kedro_cli, template_in_cwd):
         _write_yaml(
-            Path("template") / "prompts.yml",
+            template_in_cwd / "prompts.yml",
             {
                 "project_name": {"title": "Project Name"},
                 "custom_value": {
@@ -275,7 +259,6 @@ class TestToolsAndExampleFromUserPrompts:
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             in result.output
         )
-        _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
         "bad_input",
@@ -341,7 +324,6 @@ class TestToolsAndExampleFromUserPrompts:
         )
 
         _assert_template_ok(result, example_pipeline=example_pipeline)
-        _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
         "bad_input",

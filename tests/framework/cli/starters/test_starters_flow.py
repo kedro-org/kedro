@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import shutil
-from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
@@ -12,7 +11,6 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 from kedro import __version__ as version
 from kedro.framework.cli.starters import (
     _OFFICIAL_STARTER_SPECS_DICT,
-    TEMPLATE_PATH,
     KedroStarterSpec,
     _convert_tool_short_names_to_numbers,
     _parse_tools_input,
@@ -21,7 +19,6 @@ from kedro.framework.cli.starters import (
 )
 from tests.framework.cli.starters.conftest import (
     _assert_template_ok,
-    _clean_up_project,
     _make_cli_prompt_input,
 )
 
@@ -236,35 +233,29 @@ class TestConvertToolNamesToNumbers:
 class TestNewWithStarterValid:
     """Tests for using starters with mocked git interactions."""
 
-    def test_absolute_path(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
+    def test_absolute_path(self, fake_kedro_cli, template_in_cwd):
         result = CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "-v", "--starter", str(Path("./template").resolve())],
+            ["new", "-v", "--starter", str(template_in_cwd)],
             input=_make_cli_prompt_input(),
         )
         _assert_template_ok(result)
-        _clean_up_project(Path("./new-kedro-project"))
 
-    def test_relative_path(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
+    def test_relative_path(self, fake_kedro_cli, template_in_cwd):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "-v", "--starter", "template"],
             input=_make_cli_prompt_input(),
         )
         _assert_template_ok(result)
-        _clean_up_project(Path("./new-kedro-project"))
 
-    def test_relative_path_directory(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
+    def test_relative_path_directory(self, fake_kedro_cli, template_in_cwd):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new", "-v", "--starter", ".", "--directory", "template"],
             input=_make_cli_prompt_input(),
         )
         _assert_template_ok(result)
-        _clean_up_project(Path("./new-kedro-project"))
 
     def test_alias(self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter):
         """Test starter alias with mocked git interactions."""
@@ -363,11 +354,10 @@ class TestNewWithStarterValid:
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
 
-    def test_no_hint(self, fake_kedro_cli):
-        shutil.copytree(TEMPLATE_PATH, "template")
+    def test_no_hint(self, fake_kedro_cli, template_in_cwd):
         result = CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "-v", "--starter", str(Path("./template").resolve())],
+            ["new", "-v", "--starter", str(template_in_cwd)],
             input=_make_cli_prompt_input(),
         )
         assert (
@@ -376,7 +366,6 @@ class TestNewWithStarterValid:
         )
         assert "You have selected" not in result.output
         _assert_template_ok(result)
-        _clean_up_project(Path("./new-kedro-project"))
 
 
 class TestNewWithStarterInvalid:
@@ -399,22 +388,25 @@ class TestNewWithStarterInvalid:
             ),
         ],
     )
-    def test_invalid_checkout(self, starter, repo, fake_kedro_cli, mocker):
+    def test_invalid_checkout(self, starter, repo, fake_kedro_cli):
         """Test invalid checkout with mocked git interactions."""
-        mocker.patch(
-            "cookiecutter.repository.determine_repo_dir",
-            side_effect=RepositoryCloneFailed,
-        )
-        mock_ls_remote = mocker.patch("git.cmd.Git").return_value.ls_remote
-        mock_ls_remote.return_value = "tag1\ntag2"
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new", "-v", "--starter", starter, "--checkout", "invalid"],
-            input=_make_cli_prompt_input(),
-        )
-        assert result.exit_code != 0
-        assert (
-            "Specified tag invalid. The following tags are available: tag1, tag2"
-            in result.output
-        )
-        mock_ls_remote.assert_called_with("--tags", repo)
+        with (
+            patch(
+                "cookiecutter.repository.determine_repo_dir",
+                side_effect=RepositoryCloneFailed,
+            ),
+            patch("git.cmd.Git") as mock_git,
+        ):
+            mock_ls_remote = mock_git.return_value.ls_remote
+            mock_ls_remote.return_value = "tag1\ntag2"
+            result = CliRunner().invoke(
+                fake_kedro_cli,
+                ["new", "-v", "--starter", starter, "--checkout", "invalid"],
+                input=_make_cli_prompt_input(),
+            )
+            assert result.exit_code != 0
+            assert (
+                "Specified tag invalid. The following tags are available: tag1, tag2"
+                in result.output
+            )
+            mock_ls_remote.assert_called_with("--tags", repo)

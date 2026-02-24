@@ -12,7 +12,6 @@ from tests.framework.cli.starters.conftest import (
     _assert_name_ok,
     _assert_requirements_ok,
     _assert_template_ok,
-    _clean_up_project,
     _make_cli_prompt_input_without_name,
     _make_cli_prompt_input_without_tools,
 )
@@ -54,12 +53,12 @@ class TestToolsAndExampleFromCLI:
             input=_make_cli_prompt_input_without_tools(),
         )
 
-        tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
-        tools = ",".join(tools) if tools != [] else "none"
+        tools_normalized = _convert_tool_short_names_to_numbers(selected_tools=tools)
+        tools_str = ",".join(tools_normalized) if tools_normalized else "none"
 
-        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
-        _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
-        if tools not in ("none", "NONE"):
+        _assert_template_ok(result, tools=tools_str, example_pipeline=example_pipeline)
+        _assert_requirements_ok(result, tools=tools_str, repo_name="new-kedro-project")
+        if tools_str != "none":
             assert "You have selected the following project tools:" in result.output
         else:
             assert "You have selected no project tools" in result.output
@@ -67,7 +66,6 @@ class TestToolsAndExampleFromCLI:
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             in result.output
         )
-        _clean_up_project(Path("./new-kedro-project"))
 
     def test_invalid_tools_flag(self, fake_kedro_cli):
         result = CliRunner().invoke(
@@ -118,7 +116,6 @@ class TestToolsAndExampleFromCLI:
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             not in result.output
         )
-        _clean_up_project(Path("./new-kedro-project"))
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -140,10 +137,8 @@ class TestNameFromCLI:
             input=_make_cli_prompt_input_without_name(),
         )
 
-        repo_name = name.lower().replace(" ", "_").replace("-", "_")
         assert result.exit_code == 0
         _assert_name_ok(result, project_name=name)
-        _clean_up_project(Path("./" + repo_name))
 
     @pytest.mark.parametrize(
         "name",
@@ -196,7 +191,6 @@ class TestTelemetryCLIFlag:
             target_string = "consent: true"
 
         assert target_string in file_content
-        _clean_up_project(Path("./" + repo_name))
 
     @pytest.mark.parametrize(
         "input",
@@ -229,7 +223,6 @@ class TestTelemetryCLIFlag:
             target_string = "consent: false"
 
         assert target_string in file_content
-        _clean_up_project(Path("./" + repo_name))
 
     def test_flag_value_is_invalid(self, fake_kedro_cli):
         result = CliRunner().invoke(

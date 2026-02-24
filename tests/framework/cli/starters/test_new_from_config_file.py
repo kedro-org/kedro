@@ -2,20 +2,16 @@
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.starters import (
-    TEMPLATE_PATH,
-    _convert_tool_short_names_to_numbers,
-)
+from kedro.framework.cli.starters import _convert_tool_short_names_to_numbers
 from tests.framework.cli.starters.conftest import (
     _assert_requirements_ok,
     _assert_template_ok,
-    _clean_up_project,
+    _default_config,
     _write_yaml,
 )
 
@@ -26,144 +22,97 @@ class TestNewFromConfigFileValid:
 
     def test_required_keys_only(self, fake_kedro_cli):
         """Test project created from config."""
-        config = {
-            "tools": "none",
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+        config = _default_config()
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
-        _clean_up_project(Path("./my-project"))
 
     def test_custom_required_keys(self, fake_kedro_cli):
         """Test project created from config."""
-        config = {
-            "tools": "none",
-            "project_name": "Project X",
-            "example_pipeline": "no",
-            "repo_name": "projectx",
-            "python_package": "proj_x",
-        }
+        config = _default_config(
+            project_name="Project X",
+            repo_name="projectx",
+            python_package="proj_x",
+        )
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
-        _clean_up_project(Path("./projectx"))
 
     def test_custom_kedro_version(self, fake_kedro_cli):
         """Test project created from config."""
-        config = {
-            "tools": "none",
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-            "kedro_version": "my_version",
-        }
+        config = _default_config(kedro_version="my_version")
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
-        _clean_up_project(Path("./my-project"))
 
     def test_custom_output_dir(self, fake_kedro_cli):
         """Test project created from config."""
-        config = {
-            "tools": "none",
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-            "output_dir": "my_output_dir",
-        }
+        config = _default_config(output_dir="my_output_dir")
         _write_yaml(Path("config.yml"), config)
         Path("my_output_dir").mkdir()
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
-        _clean_up_project(Path("./my-project"))
 
     def test_extra_keys_allowed(self, fake_kedro_cli):
         """Test project created from config."""
-        config = {
-            "tools": "none",
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
-        _write_yaml(Path("config.yml"), {**config, "extra_key": "my_extra_key"})
+        config = _default_config(extra_key="my_extra_key")
+        _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
-        _assert_template_ok(result, **config)
-        _clean_up_project(Path("./my-project"))
+        _assert_template_ok(
+            result, **{k: v for k, v in config.items() if k != "extra_key"}
+        )
 
-    def test_no_prompts(self, fake_kedro_cli):
-        config = {
-            "project_name": "My Project",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+    def test_no_prompts(self, fake_kedro_cli, template_in_cwd):
+        config = _default_config()
+        del config["tools"]
+        del config["example_pipeline"]
         _write_yaml(Path("config.yml"), config)
-        shutil.copytree(TEMPLATE_PATH, "template")
-        (Path("template") / "prompts.yml").unlink()
+        (template_in_cwd / "prompts.yml").unlink()
         result = CliRunner().invoke(
-            fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
+            fake_kedro_cli,
+            ["new", "--starter", "template", "--config", "config.yml"],
         )
         _assert_template_ok(result, **config)
-        _clean_up_project(Path("./my-project"))
 
-    def test_empty_prompts(self, fake_kedro_cli):
-        config = {
-            "project_name": "My Project",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+    def test_empty_prompts(self, fake_kedro_cli, template_in_cwd):
+        config = _default_config()
+        del config["tools"]
+        del config["example_pipeline"]
         _write_yaml(Path("config.yml"), config)
-        shutil.copytree(TEMPLATE_PATH, "template")
-        _write_yaml(Path("template") / "prompts.yml", {})
+        _write_yaml(template_in_cwd / "prompts.yml", {})
         result = CliRunner().invoke(
-            fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
+            fake_kedro_cli,
+            ["new", "--starter", "template", "--config", "config.yml"],
         )
         _assert_template_ok(result, **config)
-        _clean_up_project(Path("./my-project"))
 
     def test_config_with_no_tools_example(self, fake_kedro_cli):
         """Test project created from config."""
-        config = {
-            "project_name": "My Project",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+        config = _default_config()
+        del config["tools"]
+        del config["example_pipeline"]
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
-        _clean_up_project(Path("./my-project"))
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromConfigFileInvalid:
     def test_output_dir_does_not_exist(self, fake_kedro_cli):
         """Check the error if the output directory is invalid."""
-        config = {
-            "tools": "none",
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-            "output_dir": "does_not_exist",
-        }
+        config = _default_config(output_dir="does_not_exist")
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(fake_kedro_cli, ["new", "-v", "-c", "config.yml"])
         assert result.exit_code != 0
@@ -171,12 +120,8 @@ class TestNewFromConfigFileInvalid:
 
     def test_config_missing_key(self, fake_kedro_cli):
         """Check the error if keys are missing from config file."""
-        config = {
-            "tools": "none",
-            "example_pipeline": "no",
-            "python_package": "my_project",
-            "repo_name": "my-project",
-        }
+        config = _default_config()
+        del config["project_name"]
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(fake_kedro_cli, ["new", "-v", "-c", "config.yml"])
         assert result.exit_code != 0
@@ -203,13 +148,7 @@ class TestNewFromConfigFileInvalid:
         assert "Failed to generate project: could not load config" in result.output
 
     def test_invalid_project_name_special_characters(self, fake_kedro_cli):
-        config = {
-            "tools": "none",
-            "project_name": "My $Project!",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+        config = _default_config(project_name="My $Project!")
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
@@ -222,13 +161,7 @@ class TestNewFromConfigFileInvalid:
         )
 
     def test_invalid_project_name_too_short(self, fake_kedro_cli):
-        config = {
-            "tools": "none",
-            "project_name": "P",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+        config = _default_config(project_name="P")
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
@@ -271,24 +204,24 @@ class TestToolsAndExampleFromConfigFile:
     @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
     def test_valid_tools_and_example(self, fake_kedro_cli, tools, example_pipeline):
         """Test project created from config."""
-        config = {
-            "tools": tools,
-            "project_name": "New Kedro Project",
-            "example_pipeline": example_pipeline,
-            "repo_name": "new-kedro-project",
-            "python_package": "new_kedro_project",
-        }
+        config = _default_config(
+            tools=tools,
+            project_name="New Kedro Project",
+            example_pipeline=example_pipeline,
+            repo_name="new-kedro-project",
+            python_package="new_kedro_project",
+        )
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
 
-        tools = _convert_tool_short_names_to_numbers(selected_tools=tools)
-        tools = ",".join(tools) if tools != [] else "none"
+        tools_normalized = _convert_tool_short_names_to_numbers(selected_tools=tools)
+        tools_str = ",".join(tools_normalized) if tools_normalized else "none"
 
-        _assert_template_ok(result, tools=tools, example_pipeline=example_pipeline)
-        _assert_requirements_ok(result, tools=tools, repo_name="new-kedro-project")
-        if tools not in ("none", "NONE", ""):
+        _assert_template_ok(result, tools=tools_str, example_pipeline=example_pipeline)
+        _assert_requirements_ok(result, tools=tools_str, repo_name="new-kedro-project")
+        if tools_str != "none":
             assert "You have selected the following project tools:" in result.output
         else:
             assert "You have selected no project tools" in result.output
@@ -296,7 +229,6 @@ class TestToolsAndExampleFromConfigFile:
             "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
             not in result.output
         )
-        _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
         "bad_input",
@@ -304,13 +236,7 @@ class TestToolsAndExampleFromConfigFile:
     )
     def test_viz_tool(self, fake_kedro_cli, bad_input):
         """Test project created from config with 'viz' tool."""
-        config = {
-            "tools": bad_input,
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+        config = _default_config(tools=bad_input)
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
@@ -328,13 +254,7 @@ class TestToolsAndExampleFromConfigFile:
     )
     def test_invalid_tools(self, fake_kedro_cli, bad_input):
         """Test project created from config."""
-        config = {
-            "tools": bad_input,
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+        config = _default_config(tools=bad_input)
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
@@ -346,17 +266,10 @@ class TestToolsAndExampleFromConfigFile:
             in result.output
         )
 
-    def test_invalid_tools_with_starter(self, fake_kedro_cli):
+    def test_invalid_tools_with_starter(self, fake_kedro_cli, template_in_cwd):
         """Test project created from config with tools and example used with --starter"""
-        config = {
-            "tools": "all",
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+        config = _default_config(tools="all")
         _write_yaml(Path("config.yml"), config)
-        shutil.copytree(TEMPLATE_PATH, "template")
         result = CliRunner().invoke(
             fake_kedro_cli,
             [
@@ -379,13 +292,7 @@ class TestToolsAndExampleFromConfigFile:
         ["lint,all", "test,none", "all,none"],
     )
     def test_invalid_tools_flag_combination(self, fake_kedro_cli, input):
-        config = {
-            "tools": input,
-            "project_name": "My Project",
-            "example_pipeline": "no",
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+        config = _default_config(tools=input)
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
@@ -400,20 +307,18 @@ class TestToolsAndExampleFromConfigFile:
     @pytest.mark.parametrize("example_pipeline", ["y", "n", "N", "YEs", "   yEs   "])
     def test_valid_example(self, fake_kedro_cli, example_pipeline):
         """Test project created from config."""
-        config = {
-            "tools": "none",
-            "project_name": "New Kedro Project",
-            "example_pipeline": example_pipeline,
-            "repo_name": "new-kedro-project",
-            "python_package": "new_kedro_project",
-        }
+        config = _default_config(
+            project_name="New Kedro Project",
+            example_pipeline=example_pipeline,
+            repo_name="new-kedro-project",
+            python_package="new_kedro_project",
+        )
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
 
         _assert_template_ok(result, **config)
-        _clean_up_project(Path("./new-kedro-project"))
 
     @pytest.mark.parametrize(
         "bad_input",
@@ -421,13 +326,7 @@ class TestToolsAndExampleFromConfigFile:
     )
     def test_invalid_example(self, fake_kedro_cli, bad_input):
         """Test project created from config."""
-        config = {
-            "tools": "none",
-            "project_name": "My Project",
-            "example_pipeline": bad_input,
-            "repo_name": "my-project",
-            "python_package": "my_project",
-        }
+        config = _default_config(example_pipeline=bad_input)
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]

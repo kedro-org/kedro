@@ -368,7 +368,9 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: PLR0912
+def find_pipelines(  # noqa: PLR0912, PLR0915
+    pipelines_to_find: list[str] | None = None, raise_errors: bool = False
+) -> dict[str, Pipeline]:
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.
@@ -381,6 +383,8 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
     https://docs.kedro.org/en/stable/build/pipeline_registry/
 
     Args:
+        pipelines_to_find: Optional list of pipeline names to load selectively.
+            If ``None`` or contains ``"__default__"``, all pipelines are loaded.
         raise_errors: If ``True``, raise an error upon failed discovery.
 
     Returns:
@@ -398,7 +402,19 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
             ``Pipeline`` object, or if the module import fails up front.
             If ``raise_errors`` is ``True``, see Raises section instead.
     """
+    # Safety check: If PACKAGE_NAME is None, we can't discover pipelines
+    if PACKAGE_NAME is None:
+        if pipelines_to_find is None or "__default__" in pipelines_to_find:
+            return {"__default__": pipeline([])}
+        return {}
+
     pipeline_obj = None
+
+    # Determine if specific pipelines were requested
+    load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
+    requested_pipelines: set[str] | None = None
+    if not load_all and pipelines_to_find is not None:
+        requested_pipelines = set(pipelines_to_find)
 
     # Handle the simplified project structure found in several starters.
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
@@ -420,15 +436,55 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
     else:
         pipeline_obj = _create_pipeline(pipeline_module)
 
-    pipelines_dict = {"__default__": pipeline_obj or pipeline([])}
+    pipelines_dict: dict[str, Pipeline] = {}
+
+    # Only add __default__ if we're loading all pipelines
+    if load_all:
+        pipelines_dict["__default__"] = pipeline_obj or pipeline([])
 
     # Handle the case that a project doesn't have a pipelines directory.
     try:
         pipelines_package = importlib.resources.files(f"{PACKAGE_NAME}.pipelines")
     except ModuleNotFoundError as exc:
         if str(exc) == f"No module named '{PACKAGE_NAME}.pipelines'":
+            if requested_pipelines is not None:
+                missing_str = ", ".join(sorted(requested_pipelines))
+                error_msg = f"Pipeline(s) not found: {missing_str}"
+                if raise_errors:
+                    raise KeyError(error_msg) from exc
+                warnings.warn(error_msg)
+                return {}
             return pipelines_dict
 
+    # If specific pipelines were requested, try to import them directly
+    if requested_pipelines is not None:
+        for pipeline_name in requested_pipelines:
+            pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+            try:
+                pipeline_module = importlib.import_module(pipeline_module_name)
+            except Exception as exc:
+                if raise_errors:
+                    raise ImportError(
+                        f"An error occurred while importing the "
+                        f"'{pipeline_module_name}' module."
+                    ) from exc
+
+                warnings.warn(
+                    IMPORT_ERROR_MESSAGE.format(
+                        module=pipeline_module_name, tb_exc=traceback.format_exc()
+                    )
+                )
+                continue
+
+            pipeline_obj = _create_pipeline(pipeline_module)
+            if pipeline_obj is not None:
+                pipelines_dict[pipeline_name] = pipeline_obj
+            elif raise_errors:
+                raise KeyError(f"Pipeline '{pipeline_name}' not found")
+
+        return pipelines_dict
+
+    # Load all pipelines (when no specific pipelines requested)
     for pipeline_dir in pipelines_package.iterdir():
         if not pipeline_dir.is_dir():
             continue
@@ -460,4 +516,5 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
         pipeline_obj = _create_pipeline(pipeline_module)
         if pipeline_obj is not None:
             pipelines_dict[pipeline_name] = pipeline_obj
+
     return pipelines_dict

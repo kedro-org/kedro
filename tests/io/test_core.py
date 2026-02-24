@@ -598,11 +598,28 @@ class TestAbstractVersionedDataset:
         assert my_versioned_dataset.exists()
 
     def test_cache_release(self, my_versioned_dataset):
-        my_versioned_dataset._version_cache["index"] = "value"
-        assert my_versioned_dataset._version_cache.currsize > 0
+        # Set cache values
+        my_versioned_dataset._cached_load_version = "2024-01-01T00.00.00.000Z"
+        my_versioned_dataset._cached_save_version = "2024-01-02T00.00.00.000Z"
+        assert my_versioned_dataset._cached_load_version is not None
+        assert my_versioned_dataset._cached_save_version is not None
 
+        # Release should clear the cache
         my_versioned_dataset._release()
-        assert my_versioned_dataset._version_cache.currsize == 0
+        assert my_versioned_dataset._cached_load_version is None
+        assert my_versioned_dataset._cached_save_version is None
+
+    def test_clear_version_cache(self, my_versioned_dataset):
+        # Set cache values
+        my_versioned_dataset._cached_load_version = "2024-01-01T00.00.00.000Z"
+        my_versioned_dataset._cached_save_version = "2024-01-02T00.00.00.000Z"
+        assert my_versioned_dataset._cached_load_version is not None
+        assert my_versioned_dataset._cached_save_version is not None
+
+        # Clear cache should reset both to None
+        my_versioned_dataset._clear_version_cache()
+        assert my_versioned_dataset._cached_load_version is None
+        assert my_versioned_dataset._cached_save_version is None
 
     def test_fetch_latest_load_version_success(self, my_versioned_dataset, mocker):
         mock_get_versioned_path = mocker.patch(
@@ -622,7 +639,7 @@ class TestAbstractVersionedDataset:
         )
 
         # Ensure the cache is empty for the test
-        my_versioned_dataset._version_cache = {}
+        my_versioned_dataset._cached_load_version = None
         result = my_versioned_dataset._fetch_latest_load_version()
 
         mock_get_versioned_path.assert_called_once_with("*")
@@ -663,6 +680,61 @@ class TestAbstractVersionedDataset:
             VersionNotFoundError, match="due to insufficient permission"
         ):
             my_versioned_dataset._fetch_latest_load_version()
+
+    def test_list_versions(self, my_versioned_dataset):
+        data = "test"
+
+        # First test no versions at all
+        assert len(my_versioned_dataset.list_versions()) == 0
+        assert my_versioned_dataset.list_versions(full_path=False) == []
+
+        # Now test with 3 versions
+        versions = ["version1", "version2", "version3"]
+
+        for version in versions:
+            my_versioned_dataset._version = Version(load=None, save=version)
+            my_versioned_dataset.save(data)
+
+        versions.reverse()
+
+        # Test with full_path=False (should return only version names)
+        assert versions == my_versioned_dataset.list_versions(full_path=False)
+
+        # Test with full_path=True (should return full paths)
+        full_paths = my_versioned_dataset.list_versions(full_path=True)
+        assert len(full_paths) == 3
+
+        # Verify paths end with expected pattern: <version>/<filename>
+        for i, full_path in enumerate(full_paths):
+            assert versions[i] in full_path
+            assert full_path.endswith("test.csv")
+
+    def test_get_version_from_path(self, my_versioned_dataset):
+        """Test that _get_version_from_path correctly extracts version from paths."""
+        # Test standard versioned path with forward slashes
+        path = "data/model.pkl/2024-01-15T10.30.00.000Z/model.pkl"
+        version = my_versioned_dataset._get_version_from_path(path)
+        assert version == "2024-01-15T10.30.00.000Z"
+
+    def test_list_versions_sorted(self, my_versioned_dataset):
+        """Test that list_versions returns versions in reverse chronological order."""
+        data = "test"
+
+        # Save versions in non-chronological order
+        versions = [
+            "2024-01-10T10.00.00.000Z",
+            "2024-01-15T10.00.00.000Z",
+            "2024-01-12T10.00.00.000Z",
+        ]
+
+        for version in versions:
+            my_versioned_dataset._version = Version(load=None, save=version)
+            my_versioned_dataset.save(data)
+
+        # Should be sorted in reverse chronological order (newest first)
+        result = my_versioned_dataset.list_versions(full_path=False)
+        expected = sorted(versions, reverse=True)
+        assert result == expected
 
 
 class MyLegacyDataset(AbstractDataset):

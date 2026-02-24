@@ -11,14 +11,14 @@ For example, you can log metrics, parameters, and artifacts from your Kedro pipe
 
 You will need the following:
 
-- A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas-viz` starter. If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
+- A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas` starter. If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
 - The MLflow client installed into the same virtual environment. For the purposes of this tutorial,
   you can use [MLflow](https://mlflow.org/docs/latest/)`in its simplest configuration <tracking>`.
 
 To set yourself up, create a new Kedro project:
 
 ```
-$ kedro new --starter=spaceflights-pandas-viz --name spaceflights-mlflow
+$ kedro new --starter=spaceflights-pandas --name spaceflights-mlflow
 $ cd spaceflights-mlflow
 $ python -m venv && source .venv/bin/activate
 (.venv) $ pip install -r requirements.txt

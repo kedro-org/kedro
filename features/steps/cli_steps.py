@@ -491,13 +491,8 @@ def add_req(context: behave.runner.Context, dependency: str):
 @then("CLI should print the version in an expected format")
 def check_kedro_version(context):
     """Behave step to check validity of the kedro version."""
-    CLI_flat_list = context.version_str.split()
-    CLI_dictionary = {
-        CLI_flat_list[i]: CLI_flat_list[i + 1]
-        for i in range(0, len(CLI_flat_list) - 1, 2)
-    }
-    version_no = CLI_dictionary.get("version")
-    assert version_no == kedro.__version__
+    expected = f"kedro, version {kedro.__version__}"
+    assert expected in context.version_str
 
 
 @then("the expected project directories and files should be created")
@@ -544,9 +539,6 @@ def check_created_project_structure_from_tools(context, tools):
 
     if "data" in tools_list:  # data tool
         assert is_created("data"), "data directory does not exist"
-
-    if "pyspark" in tools_list:  # PySpark tool
-        assert is_created("conf/base/spark.yml"), "spark.yml does not exist"
 
     if "viz" in tools_list:  # viz tool
         expected_reporting_path = Path(

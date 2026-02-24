@@ -1,39 +1,48 @@
-
-
-from copy import deepcopy
 import getpass
 import os
-from typing import Iterable
+import uuid
+from collections.abc import Iterable
+from copy import deepcopy
+from pathlib import Path
+
 import click
+
+from kedro import __version__ as kedro_version
 from kedro import logging
 from kedro.config.abstract_config import AbstractConfigLoader
 from kedro.framework.context.context import KedroContext
-from kedro.framework.hooks.manager import _create_hook_manager, _register_hooks, _register_hooks_entry_points
+from kedro.framework.hooks.manager import (
+    _create_hook_manager,
+    _register_hooks,
+    _register_hooks_entry_points,
+)
+from kedro.framework.project import pipelines, settings, validate_settings
 from kedro.framework.session.abstract_session import AbstractSession
-from pathlib import Path
-from kedro.framework.project import settings, validate_settings, pipelines
-from kedro.framework.session.session import KedroSessionError, _describe_git, _jsonify_cli_context
+from kedro.framework.session.session import (
+    KedroSessionError,
+    _describe_git,
+    _jsonify_cli_context,
+)
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline.pipeline import Pipeline
 from kedro.runner.parallel_runner import ParallelRunner
 from kedro.runner.runner import AbstractRunner
-import uuid
-from kedro import __version__ as kedro_version
-
 from kedro.runner.sequential_runner import SequentialRunner
+
 
 class KedroServiceSession(AbstractSession):
     """"""
 
     def __init__(
-            self,
-            session_id: str,
-            package_name: str | None = None,
-            project_path: Path | str | None = None,
-            save_on_close: bool = False,
-            conf_source: str | None = None,
+        self,
+        session_id: str,
+        package_name: str | None = None,
+        project_path: Path | str | None = None,
+        save_on_close: bool = False,
+        conf_source: str | None = None,
+        cache_context: bool = True,
     ):
         super().__init__(
             session_id=session_id,
@@ -51,7 +60,12 @@ class KedroServiceSession(AbstractSession):
             self._project_path / settings.CONF_SOURCE
         )
         self.results = {}
-        # self._context = self.load_context()
+        self._cache_context = cache_context
+        if cache_context:
+            self.context = self.load_context(runtime_params={})
+            self.catalog = self.context.catalog
+        else:
+            self.context = None
 
     def load_context(self, runtime_params) -> KedroContext:
         """An instance of the project context."""
@@ -68,8 +82,8 @@ class KedroServiceSession(AbstractSession):
             hook_manager=self._hook_manager,
         )
         self._hook_manager.hook.after_context_created(context=context)
-        print(context.params)
-        return context  
+        # print(context.params)
+        return context
 
     def _get_config_loader(self, runtime_params) -> AbstractConfigLoader:
         """An instance of the config loader."""
@@ -91,6 +105,7 @@ class KedroServiceSession(AbstractSession):
         save_on_close: bool = True,
         env: str | None = None,
         conf_source: str | None = None,
+        cache_context: bool = True,
     ) -> "KedroServiceSession":
         """Create a new KedroSession for the given project path and environment.
 
@@ -112,6 +127,7 @@ class KedroServiceSession(AbstractSession):
             session_id=generate_timestamp(),
             save_on_close=save_on_close,
             conf_source=conf_source,
+            cache_context=cache_context,
         )
 
         session_data = {
@@ -137,7 +153,6 @@ class KedroServiceSession(AbstractSession):
         session._store.update(session_data)
         return session
 
-
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS
         classpath = f"{store_class.__module__}.{store_class.__qualname__}"
@@ -156,7 +171,6 @@ class KedroServiceSession(AbstractSession):
             raise ValueError(
                 f"\n{err}.\nFailed to instantiate session store of type '{classpath}'."
             ) from err
-
 
     def run(
         self,
@@ -185,11 +199,9 @@ class KedroServiceSession(AbstractSession):
             try:
                 combined_pipelines += pipelines[name]
             except KeyError as exc:
-                raise ValueError(
-                    f"Failed to load pipeline {name}"
-                ) from exc
+                raise ValueError(f"Failed to load pipeline {name}") from exc
         print("runtime_params", runtime_params)
-        context = self.load_context(runtime_params)
+        context = self.context or self.load_context(runtime_params)
         filtered_pipeline = combined_pipelines.filter(
             tags=tags,
             from_nodes=from_nodes,
@@ -212,12 +224,16 @@ class KedroServiceSession(AbstractSession):
             if isinstance(runner, ParallelRunner)
             else settings.DATA_CATALOG_CLASS
         )
-
-        catalog = context._get_catalog(
-            catalog_class=catalog_class,
-            save_version=save_version,
-            load_versions=load_versions,
-        )
+        if self.context and self.catalog:
+            catalog = self.catalog
+            for key, value in runtime_params.items():
+                catalog["params:" + key] = value
+        else:
+            catalog = context._get_catalog(
+                catalog_class=catalog_class,
+                save_version=save_version,
+                load_versions=load_versions,
+            )
         record_data = {
             "session_id": session_id,
             "run_id": run_id,

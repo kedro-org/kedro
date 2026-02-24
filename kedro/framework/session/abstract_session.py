@@ -1,26 +1,26 @@
+import logging
+import traceback
 from abc import ABC, abstractmethod
 from copy import deepcopy
-import logging
 from pathlib import Path
-import traceback
+from typing import Any
 
-from kedro.framework.session.store import BaseSessionStore
-from kedro.utils import find_kedro_project
 from kedro.framework import project as kedro_project
 from kedro.framework.project import settings
-from typing import Any
+from kedro.framework.session.store import BaseSessionStore
+from kedro.utils import find_kedro_project
 
 
 class AbstractSession(ABC):
     """Abstract base class for Kedro sessions."""
 
     def __init__(
-            self,
-            session_id: str,
-            package_name: str | None = None,
-            project_path: Path | str | None = None,
-            save_on_close: bool = False,
-            conf_source: str | None = None,
+        self,
+        session_id: str,
+        package_name: str | None = None,
+        project_path: Path | str | None = None,
+        save_on_close: bool = False,
+        conf_source: str | None = None,
     ):
         self._project_path = Path(
             project_path or find_kedro_project(Path.cwd()) or Path.cwd()
@@ -60,7 +60,7 @@ class AbstractSession(ABC):
             raise ValueError(
                 f"\n{err}.\nFailed to instantiate session store of type '{classpath}'."
             ) from err
-        
+
     def _log_exception(self, exc_type: Any, exc_value: Any, exc_tb: Any) -> None:
         type_ = [] if exc_type.__module__ == "builtins" else [exc_type.__module__]
         type_.append(exc_type.__qualname__)
@@ -80,7 +80,7 @@ class AbstractSession(ABC):
     def store(self) -> dict[str, Any]:
         """Return a copy of internal store."""
         return dict(self._store)
-    
+
     @abstractmethod
     def load_context(self) -> dict[str, Any]:
         """Load the session context."""
@@ -102,4 +102,3 @@ class AbstractSession(ABC):
     def create(self, *args: Any, **kwargs: Any) -> "AbstractSession":
         """Create a new session."""
         pass
-

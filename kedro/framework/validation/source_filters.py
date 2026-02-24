@@ -6,17 +6,21 @@ from abc import ABC, abstractmethod
 
 
 class SourceFilter(ABC):
-    """Abstract base class for source-specific filtering and key extraction."""
+    """Abstract base class for source-specific filtering and key extraction.
+
+    Provides an extensible design for filtering and extracting type information
+    from different source types (e.g. parameters, datasets).
+    """
 
     @abstractmethod
     def should_process(self, source_name: str) -> bool:
         """Determine if this filter should process the given source name.
 
         Args:
-            source_name: The source identifier to check
+            source_name: The source identifier to check.
 
         Returns:
-            True if this filter should process the source, False otherwise
+            True if this filter should process the source, False otherwise.
         """
 
     @abstractmethod
@@ -24,10 +28,10 @@ class SourceFilter(ABC):
         """Extract the key from the source name.
 
         Args:
-            source_name: The source identifier to extract key from
+            source_name: The source identifier to extract key from.
 
         Returns:
-            The extracted key
+            The extracted key.
         """
 
     @abstractmethod
@@ -35,11 +39,11 @@ class SourceFilter(ABC):
         """Generate appropriate log message for this source type.
 
         Args:
-            key: The extracted key
-            type_name: The type name found
+            key: The extracted key.
+            type_name: The type name found.
 
         Returns:
-            Log message string
+            Log message string.
         """
 
 
@@ -57,21 +61,3 @@ class ParameterSourceFilter(SourceFilter):
     def get_log_message(self, key: str, type_name: str) -> str:
         """Generate parameter-specific log message."""
         return f"Found parameter requirement: {key} -> {type_name}"
-
-
-class DatasetSourceFilter(SourceFilter):
-    """Filter for dataset sources (future implementation)."""
-
-    def should_process(self, source_name: str) -> bool:
-        """Check if source is a dataset source."""
-        # Future: check for dataset patterns like "dataset:" prefix
-        return isinstance(source_name, str) and not source_name.startswith("params:")
-
-    def extract_key(self, source_name: str) -> str:
-        """Extract dataset key from dataset:key format."""
-        # Future: extract dataset key
-        return source_name
-
-    def get_log_message(self, key: str, type_name: str) -> str:
-        """Generate dataset-specific log message."""
-        return f"Found dataset requirement: {key} -> {type_name}"

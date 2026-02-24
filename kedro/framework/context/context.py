@@ -14,6 +14,7 @@ from attrs import define, field
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.context import CatalogCommandsMixin
+from kedro.framework.validation.utils import is_pydantic_model
 from kedro.framework.validation.validators import ParameterValidator
 from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
@@ -322,16 +323,24 @@ class KedroContext:
             key = f"params:{param_name}"
             params_dict[key] = param_value
 
-            # Convert typed objects to dicts for nested path registration
+            # Convert typed objects to dicts for nested path registration.
+            # Use shallow field access (not model_dump/asdict) to preserve
+            # nested typed objects like Pydantic sub-models.
             nested_dict = None
             if isinstance(param_value, dict):
                 nested_dict = param_value
-            elif self._is_pydantic_model(param_value):
-                nested_dict = param_value.model_dump()
+            elif is_pydantic_model(param_value):
+                nested_dict = {
+                    field_name: getattr(param_value, field_name)
+                    for field_name in param_value.model_fields
+                }
             elif dataclasses.is_dataclass(param_value) and not isinstance(
                 param_value, type
             ):
-                nested_dict = dataclasses.asdict(param_value)
+                nested_dict = {
+                    f.name: getattr(param_value, f.name)
+                    for f in dataclasses.fields(param_value)
+                }
 
             if nested_dict is not None:
                 for key, val in nested_dict.items():
@@ -352,15 +361,6 @@ class KedroContext:
             )
             conf_creds = {}
         return conf_creds
-
-    @staticmethod
-    def _is_pydantic_model(value: Any) -> bool:
-        try:
-            import pydantic
-
-            return isinstance(value, pydantic.BaseModel)
-        except ImportError:
-            return False
 
 
 class KedroContextError(Exception):

@@ -13,6 +13,8 @@ from kedro.framework.validation import (
     ValidationError,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class ParameterValidator:
     """Parameter validator that combines type extraction and model instantiation."""
@@ -21,13 +23,12 @@ class ParameterValidator:
         """Initialize parameter validator."""
         self.type_extractor = TypeExtractor(ParameterSourceFilter())
         self.model_factory = ModelFactory()
-        self.logger = logging.getLogger(__name__)
 
     def get_pipeline_requirements(self) -> dict[str, type]:
         """Get all parameter type requirements from available pipelines.
 
         Returns:
-            Dictionary mapping parameter keys to their expected types
+            Dictionary mapping parameter keys to their expected types.
         """
         return self.type_extractor.extract_types_from_pipelines()
 
@@ -35,14 +36,14 @@ class ParameterValidator:
         """Apply validation to parameters and return transformed dictionary.
 
         Args:
-            raw_params: Original parameters dictionary
-            requirements: Dictionary mapping parameter keys to expected types
+            raw_params: Original parameters dictionary.
+            requirements: Dictionary mapping parameter keys to expected types.
 
         Returns:
-            Transformed parameters dictionary with validated models
+            Transformed parameters dictionary with validated models.
 
         Raises:
-            ValidationError: If validation fails
+            ValidationError: If validation fails.
         """
         # Work on a deep copy to avoid modifying the original
         transformed_params = copy.deepcopy(raw_params)
@@ -59,9 +60,9 @@ class ParameterValidator:
                 )
 
                 if raw_value is None:
-                    # We shouldn't count this as an error because users might not be running the pipeline or the params is optional.
-                    self.logger.debug(
-                        f"Parameter '{param_key}' not found in config, skipping validation"
+                    logger.debug(
+                        "Parameter '%s' not found in config, skipping validation",
+                        param_key,
                     )
                     continue
 
@@ -70,25 +71,27 @@ class ParameterValidator:
                     param_key, raw_value, expected_type
                 )
 
-                # Only update if we got a different object (i.e., actual model instantiation occurred)
+                # Only update if actual model instantiation occurred
                 if validated_instance is not raw_value:
                     self.type_extractor.set_nested_value(
                         transformed_params, param_key, validated_instance
                     )
                     instantiated_count += 1
-                    self.logger.debug(
-                        f"Successfully instantiated {expected_type.__name__} for parameter '{param_key}'"
+                    logger.debug(
+                        "Successfully instantiated %s for parameter '%s'",
+                        expected_type.__name__,
+                        param_key,
                     )
 
             except Exception as exc:
                 error_msg = f"Parameter '{param_key}': {exc}"
                 validation_errors.append(error_msg)
-                self.logger.error(error_msg)
+                logger.error(error_msg)
 
         # Log success summary
         if instantiated_count > 0:
-            self.logger.info(
-                f"Successfully instantiated {instantiated_count} parameter models"
+            logger.debug(
+                "Successfully instantiated %d parameter models", instantiated_count
             )
 
         # Handle validation errors
@@ -104,19 +107,19 @@ class ParameterValidator:
         """Validate raw parameters before they are assigned to context.
 
         Args:
-            raw_params: Parameters from config loader includes config and runtime parameters
+            raw_params: Parameters from config loader (includes config and runtime parameters).
 
         Returns:
-            Dictionary of validated and transformed parameters
+            Dictionary of validated and transformed parameters.
 
         Raises:
-            ValidationError: If validation fails
+            ValidationError: If validation fails.
         """
         # Get parameter requirements
         requirements = self.get_pipeline_requirements()
 
         if not requirements:
-            self.logger.info(
+            logger.info(
                 "No typed parameter requirements found, returning original parameters"
             )
             return raw_params

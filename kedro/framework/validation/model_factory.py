@@ -3,47 +3,73 @@
 from __future__ import annotations
 
 import dataclasses
-import inspect
 import logging
 from typing import Any
 
 from .exceptions import ModelInstantiationError
+from .utils import is_pydantic_class
+
+logger = logging.getLogger(__name__)
 
 
 class ModelFactory:
-    """Handles instantiation of various model types like Pydantic models and dataclasses."""
+    """Handles instantiation of various model types like Pydantic models and dataclasses.
 
-    def __init__(self) -> None:
-        """Initialize the model factory."""
-        self.logger = logging.getLogger(__name__)
+    Example:
+    ```python
+    from pydantic import BaseModel
+
+
+    class ModelOptions(BaseModel):
+        test_size: float
+        random_state: int
+
+
+    factory = ModelFactory()
+    raw = {"test_size": 0.2, "random_state": 3}
+    instance = factory.instantiate("model_options", raw, ModelOptions)
+    # instance is ModelOptions(test_size=0.2, random_state=3)
+    ```
+    """
 
     def instantiate(self, source_key: str, raw_value: Any, model_type: type) -> Any:
         """Instantiate model from raw value, raise error on failure.
 
+        Supports Pydantic models, Python dataclasses, and falls back to returning
+        the raw value for unsupported types (e.g. builtins like ``int``, ``str``).
+
         Args:
-            source_key: The source key being processed
-            raw_value: The raw value from source
-            model_type: The target model type to instantiate
+            source_key: The source key being processed (e.g. ``"model_options"``).
+            raw_value: The raw value from source (typically a dict from YAML).
+            model_type: The target model type to instantiate.
 
         Returns:
-            Instantiated model object
+            Instantiated model object, or the raw value if the type is unsupported.
 
         Raises:
-            ModelInstantiationError: If instantiation fails
+            ModelInstantiationError: If instantiation fails.
+
+        Example:
+        ```python
+        factory = ModelFactory()
+        # Pydantic model
+        factory.instantiate("opts", {"x": 1}, MyPydanticModel)
+        # Dataclass
+        factory.instantiate("cfg", {"name": "a"}, MyDataclass)
+        # Unsupported type - returns raw value unchanged
+        factory.instantiate("threshold", 0.5, float)  # returns 0.5
+        ```
         """
         try:
-            # Handle Pydantic models
-            if self._is_pydantic_model(model_type):
-                return self.instantiate_pydantic(raw_value, model_type)
-
-            # Handle dataclasses
+            if is_pydantic_class(model_type):
+                return self._instantiate_pydantic(raw_value, model_type)
             elif dataclasses.is_dataclass(model_type):
-                return self.instantiate_dataclass(raw_value, model_type)
-
-            # Not a supported model type - return raw value
+                return self._instantiate_dataclass(raw_value, model_type)
             else:
-                self.logger.debug(
-                    f"Source '{source_key}' type {model_type.__name__} is not a supported model type, using raw value"
+                logger.debug(
+                    "Source '%s' type %s is not a supported model type, using raw value",
+                    source_key,
+                    model_type.__name__,
                 )
                 return raw_value
 
@@ -56,49 +82,29 @@ class ModelFactory:
                 original_error=exc,
             ) from exc
 
-    def instantiate_pydantic(self, raw_value: Any, model_type: type) -> Any:
+    def _instantiate_pydantic(self, raw_value: Any, model_type: type) -> Any:
         """Handle Pydantic model instantiation.
 
         Args:
-            raw_value: Raw value
-            model_type: Pydantic model type
+            raw_value: Raw value (typically a dict).
+            model_type: Pydantic model type.
 
         Returns:
-            Validated Pydantic model instance
+            Validated Pydantic model instance.
         """
         return model_type.model_validate(raw_value)  # type: ignore[attr-defined]
 
-    def instantiate_dataclass(self, raw_value: Any, model_type: type) -> Any:
+    def _instantiate_dataclass(self, raw_value: Any, model_type: type) -> Any:
         """Handle dataclass instantiation.
 
         Args:
-            raw_value: Raw value
-            model_type: Dataclass type
+            raw_value: Raw value (typically a dict).
+            model_type: Dataclass type.
 
         Returns:
-            Instantiated dataclass
+            Instantiated dataclass.
         """
         if isinstance(raw_value, dict):
             return model_type(**raw_value)
         else:
-            # If raw_value is not a dict, try to instantiate with empty dict
-            # This will likely fail but provides a clear error message
             return model_type()
-
-    def _is_pydantic_model(self, model_type: type) -> bool:
-        """Check if the given type is a Pydantic model.
-
-        Args:
-            model_type: Type to check
-
-        Returns:
-            True if it's a Pydantic model, False otherwise
-        """
-        try:
-            import pydantic
-
-            return inspect.isclass(model_type) and issubclass(
-                model_type, pydantic.BaseModel
-            )
-        except ImportError:
-            return False

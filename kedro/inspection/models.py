@@ -2,81 +2,58 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from pydantic import BaseModel
 
 
 class ProjectMetadataSnapshot(BaseModel):
-    """Kedro project identity and layout — from pyproject.toml / settings.
-
-    project_name comes from [tool.kedro] project_name in pyproject.toml.
-    """
+    """Project identity from pyproject.toml [tool.kedro]."""
 
     project_name: str
-    project_path: str
     package_name: str
     kedro_version: str
-    source_dir: str
-    environments: list[str]
-    config_paths: list[str]
 
 
 class NodeSnapshot(BaseModel):
-    """
-    Serializable snapshot of a Kedro Node; fields match the Node constructor API.
-    See: https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline.node/
-
-    Node(func, inputs, outputs, *, name=None, tags=None, confirms=None, namespace=None, preview_fn=None)
-    We omit func and preview_fn (not serializable). inputs/outputs are normalized to list[str].
-    """
+    """Serializable view of a Kedro Node. func is omitted (not serializable)."""
 
     name: str
     namespace: str | None = None
     tags: list[str] = []
     inputs: list[str] = []
     outputs: list[str] = []
-    confirms: list[str] = []
 
 
 class PipelineSnapshot(BaseModel):
-    """
-    Serializable snapshot of a Kedro Pipeline; fields match the Pipeline constructor API.
-    See: https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline.Pipeline/
+    """Serializable view of a registered Pipeline."""
 
-    Pipeline(nodes, *, inputs=None, outputs=None, parameters=None, tags=None,
-             namespace=None, prefix_datasets_with_namespace=True)
-    We add id and name (pipeline id/name in registry). Collection fields are list[str] for JSON.
-    """
-
-    id: str
+    id: str  # pipeline registry key
     name: str
     nodes: list[NodeSnapshot]
-    inputs: list[str] = []
-    outputs: list[str] = []
+    inputs: list[str] = []  # free inputs of the whole pipeline
+    outputs: list[str] = []  # terminal outputs of the whole pipeline
     parameters: list[str] = []
     tags: list[str] = []
     namespace: str | None = None
-    prefix_datasets_with_namespace: bool = True
 
 
-class DatasetConfigSnapshot(BaseModel):
-    """Resolved catalog entry for one dataset: type string only (no materialization)."""
+class DatasetSnapshot(BaseModel):
+    """Resolved catalog entry - config only, no data loaded."""
 
     name: str
-    type: str
-    is_free_input: bool = False
+    type: str  # e.g. "pandas.CSVDataset"
+    filepath: str | None = None  # resolved from config; null for MemoryDataset
+    is_pattern: bool = False  # True if this entry is a factory pattern template, not a concrete dataset
+    is_free_input: bool | None = (
+        None  # None = not computed (Tier 1); True/False set by Tier 2
+    )
 
 
 class ProjectSnapshot(BaseModel):
-    """
-    Complete snapshot of a Kedro project using only Kedro-native concepts:
-    pipelines, nodes (with inputs/outputs), catalog dataset types, and parameters.
-    """
+    """Complete project snapshot. The top-level return type of get_snapshot()."""
 
     metadata: ProjectMetadataSnapshot
     pipelines: list[PipelineSnapshot]
-    datasets: dict[str, DatasetConfigSnapshot]
-    parameters: dict[str, Any]
-    has_missing_deps: bool = False
-    mocked_dependencies: list[str] = []
+    datasets: dict[str, DatasetSnapshot]
+    parameter_keys: list[str] = []  # parameter names only, not values
+    has_missing_deps: bool = False  # only if we take the route of mocking deps
+    mocked_dependencies: list[str] = []  # only if we take the route of mocking deps

@@ -94,7 +94,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
 
 ## Selective pipeline loading
 
-In large projects, you may want to load only a subset of pipelines rather than discovering all of them. You can do this by passing a list of pipeline names to `find_pipelines()` via the `pipelines_to_find` parameter:
+In large projects, you may want to load a subset of pipelines rather than discovering every one of them. You can do this by passing a list of pipeline names to `find_pipelines()` through the `pipelines_to_find` parameter:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -108,7 +108,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     return pipelines
 ```
 
-Passing `None` (the default) or a list containing `"__default__"` loads all pipelines, which is equivalent to calling `find_pipelines()` with no arguments.
+Passing `None` (the default) or a list containing `"__default__"` loads all pipelines, which is the same as calling `find_pipelines()` with no arguments.
 
 !!! note
     If a pipeline name in `pipelines_to_find` does not match any pipeline in `src/<package_name>/pipelines/`, `find_pipelines()` will raise a warning and skip it. Set `raise_errors=True` to turn that into an error instead.

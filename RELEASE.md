@@ -9,6 +9,7 @@
 
 ## Major features and improvements
 * Added `list_versions()` method for versioned datasets to list available dataset versions.
+* Added `pipelines_to_find` parameter to `find_pipelines()`, allowing users to selectively run a subset of existing pipelines by modifying the pipeline registry.
 
 ## Bug fixes and other changes
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.

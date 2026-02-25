@@ -411,10 +411,8 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
     pipeline_obj = None
 
     # Determine if specific pipelines were requested
-    load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
-    requested_pipelines: set[str] | None = None
-    if not load_all and pipelines_to_find is not None:
-        requested_pipelines = set(pipelines_to_find)
+load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
+requested_pipelines = None if load_all else set(pipelines_to_find)
 
     # Handle the simplified project structure found in several starters.
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"

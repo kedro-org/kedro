@@ -142,7 +142,8 @@ For example, if you have a dataset corresponding to a scikit-learn model,
 you can change it as follows:
 
 ```diff
- regressor:
+# conf/base/catalog.yml
+regressor:
 -  type: pickle.PickleDataset
 -  filepath: data/06_models/regressor.pickle
 -  versioned: true

@@ -410,36 +410,34 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
             "Call 'configure_project' first."
         )
 
-    pipeline_obj = None
-
     # Determine if specific pipelines were requested
     load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
     requested_pipelines: set[str] | None = None if load_all else set(pipelines_to_find)  # type: ignore[arg-type]
 
-    # Handle the simplified project structure found in several starters.
-    pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
-    try:
-        pipeline_module = importlib.import_module(pipeline_module_name)
-    except Exception as exc:
-        if str(exc) != f"No module named '{pipeline_module_name}'":
-            if raise_errors:
-                raise ImportError(
-                    f"An error occurred while importing the "
-                    f"'{pipeline_module_name}' module."
-                ) from exc
-
-            warnings.warn(
-                IMPORT_ERROR_MESSAGE.format(
-                    module=pipeline_module_name, tb_exc=traceback.format_exc()
-                )
-            )
-    else:
-        pipeline_obj = _create_pipeline(pipeline_module)
-
     pipelines_dict: dict[str, Pipeline] = {}
 
-    # Only add __default__ if we're loading all pipelines
     if load_all:
+        # Handle the simplified project structure found in several starters.
+        pipeline_obj = None
+        pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
+        try:
+            pipeline_module = importlib.import_module(pipeline_module_name)
+        except Exception as exc:
+            if str(exc) != f"No module named '{pipeline_module_name}'":
+                if raise_errors:
+                    raise ImportError(
+                        f"An error occurred while importing the "
+                        f"'{pipeline_module_name}' module."
+                    ) from exc
+
+                warnings.warn(
+                    IMPORT_ERROR_MESSAGE.format(
+                        module=pipeline_module_name, tb_exc=traceback.format_exc()
+                    )
+                )
+        else:
+            pipeline_obj = _create_pipeline(pipeline_module)
+
         pipelines_dict["__default__"] = pipeline_obj or pipeline([])
 
     # Handle the case that a project doesn't have a pipelines directory.

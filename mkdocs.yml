@@ -300,8 +300,8 @@ nav:
       - FAQs: getting-started/faq.md
       - Tutorials:
           - Kedro Spaceflights tutorial:
-              - Spaceflight tutorial: tutorials/spaceflights_tutorial.md
               - Spaceflight tutorial template: tutorials/tutorial_template.md
+              - Spaceflight tutorial: tutorials/spaceflights_tutorial.md
               - Set up data: tutorials/set_up_data.md
               - Create a pipeline: tutorials/create_a_pipeline.md
               - Add another pipeline: tutorials/add_another_pipeline.md
@@ -316,6 +316,7 @@ nav:
           - Create a minimal Kedro project: create/minimal_kedro_project.md
           - Customise a new project: create/customise_project.md
           - Kedro tools: create/new_project_tools.md
+          - Migration guide: about/migration.md
 
       - Pipelines:
           - Run a pipeline: build/run_a_pipeline.md
@@ -362,6 +363,7 @@ nav:
           - Concepts: getting-started/kedro_concepts.md
           - Kedro architecture: getting-started/architecture_overview.md
           - Kedro starters: create/starters.md
+          - Experimental APIs: about/experimental.md
 
       - Pipelines:
           - Nodes: build/nodes.md
@@ -489,13 +491,10 @@ nav:
               - KedroDeprecationWarning: api/kedro.KedroDeprecationWarning.md
               - KedroPythonVersionWarning: api/kedro.KedroPythonVersionWarning.md
 
-      - Migration guide: about/migration.md
-      - Kedro telemetry: about/telemetry.md
-      - Experimental APIs in Kedro: about/experimental.md
-
   - About:
       - Contributing:
           - Kedro's Technical Steering Committee: about/technical_steering_committee.md
+      - Telemetry: about/telemetry.md
 
   - Kedro Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
   - Kedro Datasets: https://docs.kedro.org/projects/kedro-datasets/en/stable/

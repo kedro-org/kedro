@@ -456,35 +456,7 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
                 return {}
             return pipelines_dict
 
-    # If specific pipelines were requested, try to import them directly
-    if requested_pipelines is not None:
-        for pipeline_name in requested_pipelines:
-            pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
-            try:
-                pipeline_module = importlib.import_module(pipeline_module_name)
-            except Exception as exc:
-                if raise_errors:
-                    raise ImportError(
-                        f"An error occurred while importing the "
-                        f"'{pipeline_module_name}' module."
-                    ) from exc
-
-                warnings.warn(
-                    IMPORT_ERROR_MESSAGE.format(
-                        module=pipeline_module_name, tb_exc=traceback.format_exc()
-                    )
-                )
-                continue
-
-            pipeline_obj = _create_pipeline(pipeline_module)
-            if pipeline_obj is not None:
-                pipelines_dict[pipeline_name] = pipeline_obj
-            elif raise_errors:
-                raise KeyError(f"Pipeline '{pipeline_name}' not found")
-
-        return pipelines_dict
-
-    # Load all pipelines (when no specific pipelines requested)
+    seen: set[str] = set()
     for pipeline_dir in pipelines_package.iterdir():
         if not pipeline_dir.is_dir():
             continue
@@ -496,6 +468,10 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
         if pipeline_name.startswith("."):
             continue
 
+        if requested_pipelines is not None and pipeline_name not in requested_pipelines:
+            continue
+
+        seen.add(pipeline_name)
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
@@ -516,5 +492,17 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
         pipeline_obj = _create_pipeline(pipeline_module)
         if pipeline_obj is not None:
             pipelines_dict[pipeline_name] = pipeline_obj
+        elif raise_errors:
+            raise KeyError(f"Pipeline '{pipeline_name}' not found")
+
+    if requested_pipelines is not None:
+        for pipeline_name in requested_pipelines - seen:
+            pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+            error_msg = f"An error occurred while importing the '{pipeline_module_name}' module."
+            if raise_errors:
+                raise ImportError(error_msg)
+            warnings.warn(
+                f"{error_msg} Nothing defined therein will be returned by 'find_pipelines'."
+            )
 
     return pipelines_dict

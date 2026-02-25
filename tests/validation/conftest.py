@@ -4,6 +4,10 @@ from __future__ import annotations
 
 import dataclasses
 
+import pytest
+
+from kedro.validation.source_filters import ParameterSourceFilter
+
 
 @dataclasses.dataclass
 class SampleDataclass:
@@ -21,3 +25,8 @@ try:
     PYDANTIC_AVAILABLE = True
 except ImportError:
     PYDANTIC_AVAILABLE = False
+
+
+@pytest.fixture
+def source_filter():
+    return ParameterSourceFilter()

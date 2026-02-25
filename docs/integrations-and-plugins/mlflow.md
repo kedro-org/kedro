@@ -11,14 +11,14 @@ For example, you can log metrics, parameters, and artifacts from your Kedro pipe
 
 You will need the following:
 
-- A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas-viz` starter. If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
+- A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas` starter. If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
 - The MLflow client installed into the same virtual environment. For the purposes of this tutorial,
   you can use [MLflow](https://mlflow.org/docs/latest/)`in its simplest configuration <tracking>`.
 
 To set yourself up, create a new Kedro project:
 
 ```
-$ kedro new --starter=spaceflights-pandas-viz --name spaceflights-mlflow
+$ kedro new --starter=spaceflights-pandas --name spaceflights-mlflow
 $ cd spaceflights-mlflow
 $ python -m venv && source .venv/bin/activate
 (.venv) $ pip install -r requirements.txt
@@ -142,7 +142,8 @@ For example, if you have a dataset corresponding to a scikit-learn model,
 you can change it as follows:
 
 ```diff
- regressor:
+# conf/base/catalog.yml
+regressor:
 -  type: pickle.PickleDataset
 -  filepath: data/06_models/regressor.pickle
 -  versioned: true
@@ -158,6 +159,7 @@ If you also want to _register_ it
 you can add a `registered_model_name` parameter:
 
 ```yaml
+# conf/base/catalog.yml
 regressor:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
   flavor: mlflow.sklearn
@@ -173,6 +175,7 @@ To load a model from a specific run, you can specify the `run_id`.
 For that, you can make use of {ref}`runtime parameters <runtime-params>`:
 
 ```yaml
+# conf/base/catalog.yml
 # Add the intermediate datasets to run the inference pipeline
 X_test:
   type: pandas.ParquetDataset

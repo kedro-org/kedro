@@ -175,9 +175,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if key == "globals":
             # Update the cached value at self._globals since it is used by the globals resolver
             self._globals = value
-        super().__setitem__(key, value)
+        if isinstance(value, dict):
+            configdict_value = OmegaConf.create(value)
+        super().__setitem__(key, configdict_value)
 
-    def __getitem__(self, key: str) -> dict[str, Any]:  # noqa: PLR0912
+    def __getitem__(self, key: str) -> dict[str, Any]:
+        config = self._getitem_dict_config(key)
+        return self._convert_config_to_dict(config)
+
+    def _getitem_dict_config(self, key: str) -> dict[str, Any]:
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
 
@@ -201,7 +207,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._register_runtime_params_resolver()
 
         if key in self:
-            return super().__getitem__(key)  # type: ignore[no-any-return]
+            config = super().__getitem__(key)
+            return config  # type: ignore[no-any-return]
 
         if key not in self.config_patterns:
             raise KeyError(
@@ -224,17 +231,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
             base_path = str(Path(self.conf_source) / self.base_env)
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
-        try:
-            base_config = self.load_and_merge_dir_config(  # type: ignore[no-untyped-call]
-                base_path, patterns, key, processed_files, read_environment_variables
-            )
-        except UnsupportedInterpolationType as exc:
-            if "runtime_params" in str(exc):
-                raise UnsupportedInterpolationType(
-                    "The `runtime_params:` resolver is not supported for globals."
-                )
-            else:
-                raise exc
+
+        base_config = self._load_and_merge_dir_config(  # type: ignore[no-untyped-call]
+            base_path, patterns, key, processed_files, read_environment_variables
+        )
 
         config = base_config
 
@@ -252,18 +252,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
             env_path = str(Path(self.conf_source) / run_env)
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
-        try:
-            env_config = self.load_and_merge_dir_config(  # type: ignore[no-untyped-call]
-                env_path, patterns, key, processed_files, read_environment_variables
-            )
-        except UnsupportedInterpolationType as exc:
-            if "runtime_params" in str(exc):
-                raise UnsupportedInterpolationType(
-                    "The `runtime_params:` resolver is not supported for globals."
-                )
-            else:
-                raise exc
 
+        env_config = self._load_and_merge_dir_config(  # type: ignore[no-untyped-call]
+            env_path, patterns, key, processed_files, read_environment_variables
+        )
         resulting_config = self._merge_configs(config, env_config, key, env_path)
 
         if not processed_files and key != "globals":
@@ -289,7 +281,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         return KeysView(self.config_patterns)
 
     @typing.no_type_check
-    def load_and_merge_dir_config(
+    def _load_and_merge_dir_config(
         self,
         conf_path: str,
         patterns: Iterable[str],
@@ -368,20 +360,56 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._check_duplicates(key, config_per_file)
 
         if not aggregate_config:
-            return {}
+            return DictConfig({})
 
         if key == "parameters":
             # Merge with runtime parameters only for "parameters"
-            return OmegaConf.to_container(
-                OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
-            )
+            return OmegaConf.merge(*aggregate_config, self.runtime_params)
 
-        merged_config_container = OmegaConf.to_container(
-            OmegaConf.merge(*aggregate_config), resolve=True
+        return OmegaConf.merge(*aggregate_config)
+
+    def _convert_config_to_dict(self, config: DictConfig) -> DictConfig:
+        try:
+            config_container = OmegaConf.to_container(config, resolve=True)
+        except UnsupportedInterpolationType as exc:
+            if "runtime_params" in str(exc):
+                raise UnsupportedInterpolationType(
+                    "The `runtime_params:` resolver is not supported for globals."
+                )
+            else:
+                raise exc
+
+        return {k: v for k, v in config_container.items() if not k.startswith("_")}
+
+    def load_and_merge_dir_config(
+        self,
+        conf_path: str,
+        patterns: Iterable[str],
+        key: str,
+        processed_files: set,
+        read_environment_variables: bool | None = False,
+    ) -> dict[
+        str, Any
+    ]:  # TODO: remove this method in a further API polishing, it is kept for retrocompatibility
+        """Load and merge configuration files from a directory.
+
+        Args:
+            conf_path: Path to the configuration directory.
+            patterns: List of glob patterns to match configuration files.
+            key: Key of the configuration type to fetch.
+            processed_files: Set of files read for a given configuration type.
+            read_environment_variables: Whether to resolve environment variables.
+
+        Returns:
+            Merged configuration dictionary.
+        """
+        # Implementation goes here
+
+        config = self._load_and_merge_dir_config(
+            conf_path, patterns, key, processed_files, read_environment_variables
         )
-        return {
-            k: v for k, v in merged_config_container.items() if not k.startswith("_")
-        }
+
+        return self._convert_config_to_dict(config)
 
     @staticmethod
     def _initialise_filesystem_and_protocol(
@@ -423,7 +451,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         merging_strategy = self.merge_strategy.get(key, "destructive")
         try:
             strategy = MergeStrategies[merging_strategy.upper()]
-
             # Get the corresponding merge function and call it
             merge_function_name = MERGING_IMPLEMENTATIONS[strategy]
             merge_function = getattr(self, merge_function_name)
@@ -568,10 +595,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     @staticmethod
     def _destructive_merge(
-        config: dict[str, Any], env_config: dict[str, Any], env_path: str
-    ) -> dict[str, Any]:
+        config: DictConfig, env_config: DictConfig, env_path: str
+    ) -> DictConfig:
         # Destructively merge the two env dirs. The chosen env will override base.
-        common_keys = config.keys() & env_config.keys()
+        config_dict = OmegaConf.to_container(config)
+        env_config_dict = OmegaConf.to_container(env_config)
+        common_keys = config_dict.keys() & env_config_dict.keys()
         if common_keys:
             sorted_keys = ", ".join(sorted(common_keys))
             msg = (
@@ -580,15 +609,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
             )
             _config_logger.debug(msg, env_path, sorted_keys)
 
-        config.update(env_config)
-        return config
+        config_dict.update(env_config_dict)
+        return OmegaConf.create(config_dict)
 
     @staticmethod
     def _soft_merge(
-        config: dict[str, Any], env_config: dict[str, Any], env_path: str | None = None
-    ) -> Any:
+        config: DictConfig, env_config: DictConfig, env_path: str | None = None
+    ) -> DictConfig:
         # Soft merge the two env dirs. The chosen env will override base if keys clash.
-        return OmegaConf.to_container(OmegaConf.merge(config, env_config))
+        return OmegaConf.merge(config, env_config)
+        # return OmegaConf.to_container(OmegaConf.merge(config, env_config))
 
     def _is_hidden(self, path_str: str) -> bool:
         """Check if path contains any hidden directory or is a hidden file"""

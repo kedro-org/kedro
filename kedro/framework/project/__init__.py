@@ -369,7 +369,7 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
 
 
 def find_pipelines(  # noqa: PLR0912, PLR0915
-    pipelines_to_find: list[str] | None = None, raise_errors: bool = False
+    raise_errors: bool = False, pipelines_to_find: list[str] | None = None
 ) -> dict[str, Pipeline]:
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
@@ -391,6 +391,8 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
         A generated mapping from pipeline names to ``Pipeline`` objects.
 
     Raises:
+        RuntimeError: When the project has not been configured (i.e.
+            ``PACKAGE_NAME`` is ``None``).
         ImportError: When a module does not expose a ``create_pipeline``
             function, the ``create_pipeline`` function does not return a
             ``Pipeline`` object, or if the module import fails up front.
@@ -402,17 +404,17 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
             ``Pipeline`` object, or if the module import fails up front.
             If ``raise_errors`` is ``True``, see Raises section instead.
     """
-    # Safety check: If PACKAGE_NAME is None, we can't discover pipelines
     if PACKAGE_NAME is None:
-        if pipelines_to_find is None or "__default__" in pipelines_to_find:
-            return {"__default__": pipeline([])}
-        return {}
+        raise RuntimeError(
+            "'find_pipelines' cannot be called before the project is configured. "
+            "Call 'configure_project' first."
+        )
 
     pipeline_obj = None
 
     # Determine if specific pipelines were requested
-load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
-requested_pipelines = None if load_all else set(pipelines_to_find)
+    load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
+    requested_pipelines: set[str] | None = None if load_all else set(pipelines_to_find)  # type: ignore[arg-type]
 
     # Handle the simplified project structure found in several starters.
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"

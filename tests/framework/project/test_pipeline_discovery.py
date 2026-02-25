@@ -421,17 +421,17 @@ def test_find_pipelines_selective_load_skips_modules_without_create_pipeline(
         assert "empty_pipe" not in pipelines
 
 
-def test_find_pipelines_package_name_none_loads_all(monkeypatch):
+def test_find_pipelines_package_name_none_raises(monkeypatch):
     import kedro.framework.project as project_module
 
     monkeypatch.setattr(project_module, "PACKAGE_NAME", None)
-    pipelines = find_pipelines()
-    assert set(pipelines) == {"__default__"}
+    with pytest.raises(RuntimeError, match="find_pipelines.*cannot be called before"):
+        find_pipelines()
 
 
-def test_find_pipelines_package_name_none_selective_returns_empty(monkeypatch):
+def test_find_pipelines_package_name_none_selective_raises(monkeypatch):
     import kedro.framework.project as project_module
 
     monkeypatch.setattr(project_module, "PACKAGE_NAME", None)
-    pipelines = find_pipelines(pipelines_to_find=["some_pipeline"])
-    assert pipelines == {}
+    with pytest.raises(RuntimeError, match="find_pipelines.*cannot be called before"):
+        find_pipelines(pipelines_to_find=["some_pipeline"])

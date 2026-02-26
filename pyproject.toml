@@ -48,6 +48,10 @@ classifiers = [
 dynamic = ["readme", "version"]
 
 [project.optional-dependencies]
+new = [
+    "cookiecutter>=2.1.1,<3.0",
+    "gitpython>=3.0",
+]
 test = [
     "behave>=1.2.6,<2.0",
     "chardet<6",  # Temporary: remove once requests supports chardet 6 (causes RequestsDependencyWarning)
@@ -96,7 +100,7 @@ jupyter = [
 benchmark = [
     "asv"
 ]
-all = [ "kedro[test,docs,jupyter,benchmark]" ]
+all = [ "kedro[new,test,docs,jupyter,benchmark]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"

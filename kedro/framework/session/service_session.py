@@ -227,7 +227,14 @@ class KedroServiceSession(AbstractSession):
         if self.context and self.catalog:
             catalog = self.catalog
             for key, value in runtime_params.items():
-                catalog["params:" + key] = value
+                if "params:" + key not in catalog:
+                    catalog["params:" + key] = value
+                else:
+                    self._logger.warning(
+                        "Runtime parameter '%s' is overriding an existing catalog entry.",
+                        key,
+                    )
+                    catalog["params:" + key] = value
         else:
             catalog = context._get_catalog(
                 catalog_class=catalog_class,

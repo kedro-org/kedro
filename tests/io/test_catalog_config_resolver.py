@@ -206,6 +206,25 @@ class TestCatalogConfigResolver:
             )
             assert "Since runtime patterns are not provided" in caplog.text
 
+    def test_resolve_dataset_config_preserves_tuple_subclass(self):
+        """Tuple subclasses (e.g. sqlalchemy.engine.URL) should not be
+        iterated over during pattern resolution."""
+        from collections import namedtuple
+
+        # Simulate sqlalchemy.engine.URL which is a named tuple
+        FakeURL = namedtuple(
+            "FakeURL",
+            ["drivername", "username", "password", "host", "port", "database"],
+        )
+        url = FakeURL("postgresql", "user", "pass", "localhost", 5432, "mydb")
+        config = {"con": url, "table_name": "{name}"}
+        result = CatalogConfigResolver._resolve_dataset_config(
+            "ns.my_table", "{namespace}.{name}", config
+        )
+        # The URL object should pass through unchanged
+        assert result["con"] is url
+        assert result["table_name"] == "my_table"
+
     def test_retrieve_already_resolved_config(self):
         """Test retrieving already resolved config."""
         config = {

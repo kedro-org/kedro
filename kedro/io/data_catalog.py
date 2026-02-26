@@ -1052,7 +1052,12 @@ class DataCatalog(CatalogProtocol):
             extra={"markup": True},
         )
 
-        return dataset.load()
+        try:
+            ds_contents = dataset.load()
+        except DatasetError as e:
+            raise DatasetError(f"{ds_name}: {e}")
+
+        return ds_contents
 
     def release(self, ds_name: str) -> None:
         """Release any cached data associated with a dataset

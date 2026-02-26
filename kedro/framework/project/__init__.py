@@ -121,6 +121,10 @@ class _ProjectSettings(LazySettings):
         "CONTEXT_CLASS",
         default=_get_default_class("kedro.framework.context.KedroContext"),
     )
+    _SESSION_CLASS = _IsSubclassValidator(
+        "SESSION_CLASS",
+        default=_get_default_class("kedro.framework.session.KedroSession"),
+    )
     _SESSION_STORE_CLASS = _IsSubclassValidator(
         "SESSION_STORE_CLASS",
         default=_get_default_class("kedro.framework.session.store.BaseSessionStore"),
@@ -145,6 +149,7 @@ class _ProjectSettings(LazySettings):
                 self._CONF_SOURCE,
                 self._HOOKS,
                 self._CONTEXT_CLASS,
+                self._SESSION_CLASS,
                 self._SESSION_STORE_CLASS,
                 self._SESSION_STORE_ARGS,
                 self._DISABLE_HOOKS_FOR_PLUGINS,

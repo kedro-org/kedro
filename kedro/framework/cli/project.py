@@ -23,7 +23,6 @@ from kedro.framework.cli.utils import (
     validate_conf_source,
 )
 from kedro.framework.project import settings
-from kedro.framework.session import KedroSession
 from kedro.utils import load_obj
 
 if TYPE_CHECKING:
@@ -271,10 +270,10 @@ def run(  # noqa: PLR0913
     tuple_tags = tuple(tags)
     tuple_node_names = tuple(node_names)
 
-    with KedroSession.create(
+    with settings.SESSION_CLASS.create(
         env=env, conf_source=conf_source, runtime_params=params
     ) as session:
-        return session.run(
+        result: dict[str, Any] = session.run(
             tags=tuple_tags,
             runner=runner_obj(is_async=is_async),
             node_names=tuple_node_names,
@@ -288,3 +287,4 @@ def run(  # noqa: PLR0913
             namespaces=namespaces,
             only_missing_outputs=only_missing_outputs,
         )
+        return result

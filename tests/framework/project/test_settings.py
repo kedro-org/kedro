@@ -7,6 +7,7 @@ import pytest
 from kedro.config import OmegaConfigLoader
 from kedro.framework.context.context import KedroContext
 from kedro.framework.project import configure_project, settings, validate_settings
+from kedro.framework.session import KedroSession
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io import DataCatalog
 
@@ -16,6 +17,10 @@ class MyContext(KedroContext):
 
 
 class MyDataCatalog(DataCatalog):
+    pass
+
+
+class MyKedroSession(KedroSession):
     pass
 
 
@@ -58,6 +63,10 @@ def mock_package_name_with_settings_file(tmpdir):
                 # Class that manages the Data Catalog.
                 from {__name__} import MyDataCatalog
                 DATA_CATALOG_CLASS = MyDataCatalog
+
+                # Class that manages the KedroSession.
+                from {__name__} import MyKedroSession
+                SESSION_CLASS = MyKedroSession
             """
         )
     )
@@ -109,6 +118,7 @@ def test_settings_after_configuring_project_shows_updated_values(
     assert settings.CONFIG_LOADER_CLASS == OmegaConfigLoader
     assert settings.CONFIG_LOADER_ARGS == {"globals_pattern": "*globals.yml"}
     assert settings.DATA_CATALOG_CLASS == MyDataCatalog
+    assert settings.SESSION_CLASS is MyKedroSession
 
 
 def test_validate_settings_without_settings_file(

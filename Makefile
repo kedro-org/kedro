@@ -52,7 +52,7 @@ package: clean install
 	python -m pip install build && python -m build
 
 install-test-requirements:
-	uv pip install "kedro[test] @ ."
+	uv pip install -e ".[test]"
 
 install-pre-commit:
 	pre-commit install --install-hooks

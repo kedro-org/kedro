@@ -96,7 +96,14 @@ jupyter = [
 benchmark = [
     "asv"
 ]
-all = [ "kedro[test,docs,jupyter,benchmark]" ]
+http = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+]
+mcp = [
+    "mcp>=1.0.0,<2.0.0",
+]
+all = [ "kedro[test,docs,jupyter,benchmark,http,mcp]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"

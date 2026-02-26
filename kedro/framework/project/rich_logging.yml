@@ -9,10 +9,18 @@ handlers:
     # Advance options for customisation.
     # See https://docs.kedro.org/en/stable/develop/logging/#advanced-logging
     # tracebacks_show_locals: False
+  
+  plain:
+    class: kedro.logging.PlainTextHandler
 
 loggers:
   kedro:
     level: INFO
+  
+  kedro.runner.plain:
+    level: INFO
+    handlers: [plain]
+    propagate: False
 
 root:
   handlers: [rich]

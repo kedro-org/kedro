@@ -276,17 +276,28 @@ class _ProjectLogging(UserDict):
         logging.config.dictConfig(logging_config)
         self.data = logging_config
 
-    def set_project_logging(self, package_name: str) -> None:
+    def set_project_logging(
+        self, package_name: str, preserve_logging: bool = False
+    ) -> None:
         """Add the project level logging to the loggers upon provision of a package name.
         Checks if project logger already exists to prevent overwriting, if none exists
-        it defaults to setting project logs at INFO level."""
+        it defaults to setting project logs at INFO level.
+
+        Args:
+            package_name: The name of the project package.
+            preserve_logging: If True, skip re-applying the logging configuration via
+                ``dictConfig``. This prevents runtime-added handlers from being wiped
+                when ``configure_project()`` is called after custom handlers have been
+                attached (e.g. in a long-running server process).
+        """
         loggers = self.data.get("loggers", {})
         if not loggers:
             self.data["loggers"] = {}  # pragma: no cover
 
         if package_name not in self.data["loggers"]:
             self.data["loggers"][package_name] = {"level": "INFO"}
-            self.configure(self.data)
+            if not preserve_logging:
+                self.configure(self.data)
 
 
 PACKAGE_NAME = None
@@ -297,9 +308,16 @@ settings = _ProjectSettings()
 pipelines = _ProjectPipelines()
 
 
-def configure_project(package_name: str) -> None:
+def configure_project(package_name: str, preserve_logging: bool = False) -> None:
     """Configure a Kedro project by populating its settings with values
     defined in user's settings.py and pipeline_registry.py.
+
+    Args:
+        package_name: The name of the project package.
+        preserve_logging: If True, skip re-applying the logging configuration when
+            setting up the project logger. Useful in long-running processes (e.g.
+            FastAPI apps) where custom handlers are added at runtime and must not
+            be overwritten on repeated calls to ``configure_project()``.
     """
     settings_module = f"{package_name}.settings"
     settings.configure(settings_module)
@@ -315,7 +333,7 @@ def configure_project(package_name: str) -> None:
     PACKAGE_NAME = package_name
 
     if PACKAGE_NAME:
-        LOGGING.set_project_logging(PACKAGE_NAME)
+        LOGGING.set_project_logging(PACKAGE_NAME, preserve_logging=preserve_logging)
 
 
 def configure_logging(logging_config: dict[str, Any]) -> None:

@@ -218,6 +218,49 @@ def test_logger_without_rich_markup():
         assert "[dark_orange]" not in record.message
 
 
+def test_configure_project_preserve_logging_keeps_runtime_handlers():
+    """Runtime-added handlers should survive configure_project() when preserve_logging=True.
+
+    Regression test for https://github.com/kedro-org/kedro/issues/4606:
+    calling configure_project() triggers dictConfig(), which resets the logging
+    state and silently discards any handlers added after the initial LOGGING setup.
+    """
+    custom_handler = logging.StreamHandler()
+    custom_handler.name = "custom_runtime_handler"
+    root_logger = logging.getLogger()
+    root_logger.addHandler(custom_handler)
+
+    try:
+        configure_project("test_project_preserve", preserve_logging=True)
+
+        handler_names = {h.name for h in root_logger.handlers}
+        assert "custom_runtime_handler" in handler_names
+        # The package logger should still be registered in LOGGING.data
+        assert "test_project_preserve" in LOGGING.data.get("loggers", {})
+    finally:
+        root_logger.removeHandler(custom_handler)
+
+
+def test_configure_project_overwrites_runtime_handlers_by_default():
+    """Without preserve_logging=True, configure_project() wipes runtime-added handlers.
+
+    This documents the existing (pre-fix) default behaviour and ensures we haven't
+    accidentally changed it.
+    """
+    custom_handler = logging.StreamHandler()
+    custom_handler.name = "custom_runtime_handler_default"
+    root_logger = logging.getLogger()
+    root_logger.addHandler(custom_handler)
+
+    try:
+        configure_project("test_project_no_preserve")
+
+        handler_names = {h.name for h in root_logger.handlers}
+        assert "custom_runtime_handler_default" not in handler_names
+    finally:
+        root_logger.removeHandler(custom_handler)
+
+
 def test_logger_with_invalid_markup_args():
     root_logger = logging.getLogger()
     rich_handler = RichHandler()

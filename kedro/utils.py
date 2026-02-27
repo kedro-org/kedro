@@ -32,6 +32,9 @@ CLOUD_PROTOCOLS = (
 )
 PROTOCOL_DELIMITER = "://"
 
+# Config extensions
+_CONFIG_EXTENSIONS = (".yml", ".yaml")
+
 
 def _parse_filepath(filepath: str) -> dict[str, str]:
     """Split filepath on protocol and path. Based on `fsspec.utils.infer_storage_options`.
@@ -257,3 +260,22 @@ def experimental(obj: Callable | type) -> Callable | type:
         return obj
 
     return obj
+
+
+def find_config_file(
+    filename: str, extensions: tuple[str, ...] = _CONFIG_EXTENSIONS
+) -> Path | None:
+    """Find a config file in the current working directory.
+
+    Args:
+        filename: The name of the config file to find.
+        extensions: The extensions of the config file to find.
+
+    Returns:
+        The path to the config file if found, otherwise None.
+    """
+    path = Path(filename)
+    return next(
+        (path.with_suffix(ext) for ext in extensions if path.with_suffix(ext).exists()),
+        None,
+    )

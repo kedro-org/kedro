@@ -40,8 +40,12 @@ def test_project_logging_in_default_logging_config(default_logging_config_with_p
     assert logging.getLogger("test_project").level == logging.INFO
 
 
-def test_environment_variable_logging_config(monkeypatch, tmp_path):
-    config_path = Path(tmp_path) / "logging.yml"
+@pytest.mark.parametrize(
+    "logging_filename",
+    ["logging.yml", "logging.yaml"],
+)
+def test_environment_variable_logging_config(monkeypatch, tmp_path, logging_filename):
+    config_path = Path(tmp_path) / logging_filename
     monkeypatch.setenv("KEDRO_LOGGING_CONFIG", config_path.absolute())
     logging_config = {"version": 1, "loggers": {"kedro": {"level": "WARNING"}}}
     with config_path.open("w", encoding="utf-8") as f:
@@ -172,8 +176,12 @@ def test_has_rich_handler():
         assert not _has_rich_handler(test_logger)
 
 
-def test_default_logging_info_emission(monkeypatch, tmp_path, caplog):
-    config_path = (Path(tmp_path) / "conf" / "logging.yml").absolute()
+@pytest.mark.parametrize(
+    "logging_filename",
+    ["logging.yml", "logging.yaml"],
+)
+def test_default_logging_info_emission(monkeypatch, tmp_path, caplog, logging_filename):
+    config_path = (Path(tmp_path) / "conf" / logging_filename).absolute()
     config_path.parent.mkdir(parents=True)
     logging_config = {"version": 1, "loggers": {"kedro": {"level": "DEBUG"}}}
     with config_path.open("w", encoding="utf-8") as f:

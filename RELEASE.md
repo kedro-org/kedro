@@ -1,7 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
-* Added `preserve_logging` flag to `configure_project()` to prevent runtime-added logging handlers from being overwritten when `configure_project()` is called after custom handlers have been attached (e.g. in a long-running server process such as FastAPI). Fixes [#4606](https://github.com/kedro-org/kedro/issues/4606).
 ## Documentation changes
 ## Community contributions
 
@@ -14,9 +13,13 @@
 ## Bug fixes and other changes
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
 * Added a warning when a node returns a value but is defined with `outputs=None`, clarifying that the return value is ignored.
+* Added `preserve_logging` flag to `configure_project()` to prevent runtime-added logging handlers from being overwritten when `configure_project()` is called after custom handlers have been attached (e.g. in a long-running server process such as FastAPI).
+
 
 ## Documentation changes
 ## Community contributions
+* [aziq](https://github.com/aziq)
+* [zhubaobao2024](https://github.com/zhubaobao2024)
 
 # Release 1.2.0
 ## Major features and improvements

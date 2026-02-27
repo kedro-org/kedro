@@ -1,7 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
-* Added `preserve_logging` flag to `configure_project()` to prevent runtime-added logging handlers from being overwritten when `configure_project()` is called after custom handlers have been attached (e.g. in a long-running server process such as FastAPI). Fixes [#4606](https://github.com/kedro-org/kedro/issues/4606).
+* Added `preserve_logging` flag to `configure_project()` to prevent runtime-added logging handlers from being overwritten when `configure_project()` is called after custom handlers have been attached (e.g. in a long-running server process such as FastAPI).
 ## Documentation changes
 ## Community contributions
 

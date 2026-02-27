@@ -13,6 +13,7 @@
 ## Bug fixes and other changes
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
 * Added a warning when a node returns a value but is defined with `outputs=None`, clarifying that the return value is ignored.
+* Added util method `find_config_file()` to handle diffent config file extensions (.yml, .yaml)
 
 ## Documentation changes
 ## Community contributions

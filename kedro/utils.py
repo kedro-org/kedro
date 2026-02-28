@@ -2,12 +2,13 @@
 of kedro package.
 """
 
+import difflib
 import importlib
 import logging
 import os
 import re
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from functools import wraps
 from pathlib import Path
 from typing import Any
@@ -257,3 +258,34 @@ def experimental(obj: Callable | type) -> Callable | type:
         return obj
 
     return obj
+
+
+def get_close_matches(
+    input: str | list[str],
+    targets: Iterable[str],
+    max_suggestions: int = 3,
+    cutoff: float = 0.6,
+) -> list[str]:
+    """Get close matches from targets for inputs.
+
+    Args:
+        inputs: Inputs to get close matches for as a single string or list of strings.
+        targets: Targets to get close matches from as a list of strings.
+        max_suggestions: Maximum number of suggestions to return, defaults to 3.
+        cutoff: Cutoff value for the similarity ratio, defaults to 0.6.
+    Returns:
+        List of close matches or empty list if no matches are found.
+    """
+    _init_matches = []
+    if isinstance(input, str):
+        matches = difflib.get_close_matches(
+            input, list(targets), n=max_suggestions, cutoff=cutoff
+        )
+        _init_matches.extend(matches)
+    else:
+        for source_str in input:
+            _matches = difflib.get_close_matches(
+                source_str, list(targets), n=max_suggestions, cutoff=cutoff
+            )
+            _init_matches.extend(_matches)
+    return _init_matches[:max_suggestions]

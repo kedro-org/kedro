@@ -8,6 +8,7 @@ import logging.config
 import os
 import subprocess
 import sys
+import textwrap
 import traceback
 from copy import deepcopy
 from pathlib import Path
@@ -28,7 +29,7 @@ from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
-from kedro.utils import find_kedro_project
+from kedro.utils import find_kedro_project, get_close_matches
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -358,10 +359,16 @@ class KedroSession:
             try:
                 combined_pipelines += pipelines[name]
             except KeyError as exc:
+                matches = get_close_matches(name, pipelines.keys())
+                if matches:
+                    suggestion = f"Did you mean one of these?\n{textwrap.indent('\n'.join(matches), ' ' * 4)}"
+                else:
+                    suggestion = ""
                 raise ValueError(
                     f"Failed to find the pipeline named '{name}'. "
                     f"It needs to be generated and returned "
                     f"by the 'register_pipelines' function."
+                    f"{suggestion}"
                 ) from exc
 
         filtered_pipeline = combined_pipelines.filter(

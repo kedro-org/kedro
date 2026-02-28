@@ -5,13 +5,33 @@ from typing import Any, NoReturn, TypeVar
 
 import pytest
 
-from kedro.utils import KedroExperimentalWarning, experimental, load_obj
+from kedro.utils import (
+    KedroExperimentalWarning,
+    experimental,
+    get_close_matches,
+    load_obj,
+)
 
 T = TypeVar("T")
 
 
 class DummyClass:
     pass
+
+
+class TestGetCloseMatches:
+    def test_string_input_returns_close_matches(self):
+        result = get_close_matches(
+            "defult", ["default", "data_science", "data_processing"]
+        )
+        assert result == ["default"]
+
+    def test_list_input_returns_list(self):
+        result = get_close_matches(
+            ["data_scnce", "data_enginering"], ["data_science", "data_engineering"]
+        )
+        print(result)
+        assert result == ["data_science", "data_engineering"]
 
 
 class TestExtractObject:

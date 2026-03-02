@@ -59,7 +59,7 @@ def inspect_registered_pipeline() -> None:
         pipeline_obj = pipelines.get(pipeline_name)
         nodes = []
         for node in pipeline_obj.nodes:
-            nodes.append(f"{node.name} ({node._func_name}), inputs: {node.inputs}, outputs: {node.outputs, parameters: {node.parameters}}")
+            nodes.append(f"{node.name} ({node._func_name}), inputs: {node.inputs}, outputs: {node.outputs}")
         result = {"Nodes": nodes}
         click.echo(yaml.dump(result))
         click.echo("-" * 100)

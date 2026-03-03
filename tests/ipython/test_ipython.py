@@ -338,6 +338,25 @@ import logging.config  # noqa Dummy import"""
         for cell, expected_cell in zip(cells_list, expected_cells):
             assert cell == expected_cell
 
+    def test_load_node_executes_with_same_module_helper_dependency(
+        self,
+        mocker,
+        dummy_pipelines_with_same_module_helper,
+    ):
+        mock_pipeline_values = dummy_pipelines_with_same_module_helper.values()
+        mocker.patch.object(pipelines, "values", return_value=mock_pipeline_values)
+
+        cells = _load_node("dummy_node_using_same_module_helper", pipelines)
+        combined_cell = "\n\n".join(cells)
+
+        class Catalog:
+            @staticmethod
+            def load(_name):
+                return True
+
+        namespace = {"catalog": Catalog()}
+        exec(combined_cell, namespace)  # noqa: S102
+
     def test_find_node(self, dummy_pipelines, dummy_node):
         node_to_find = "dummy_node"
         result = _find_node(node_to_find, dummy_pipelines)

@@ -8,6 +8,7 @@ import pytest
 
 from kedro.validation.model_factory import ModelFactory
 from kedro.validation.source_filters import ParameterSourceFilter
+from kedro.validation.type_extractor import TypeExtractor
 
 
 @dataclasses.dataclass
@@ -36,3 +37,8 @@ def source_filter():
 @pytest.fixture
 def model_factory():
     return ModelFactory()
+
+
+@pytest.fixture
+def type_extractor():
+    return TypeExtractor(ParameterSourceFilter())

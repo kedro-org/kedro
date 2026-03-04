@@ -17,7 +17,7 @@ from kedro.framework.cli.starters import (
     _parse_yes_no_to_bool,
     _validate_tool_selection,
 )
-from tests.framework.cli.starters.conftest import (
+from tests.framework.cli.starters.utils import (
     _assert_template_ok,
     _make_cli_prompt_input,
 )

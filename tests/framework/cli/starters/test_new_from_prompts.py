@@ -8,7 +8,7 @@ import pytest
 from click.testing import CliRunner
 
 from kedro.framework.cli.starters import _fetch_validate_parse_config_from_user_prompts
-from tests.framework.cli.starters.conftest import (
+from tests.framework.cli.starters.utils import (
     _assert_requirements_ok,
     _assert_template_ok,
     _make_cli_prompt_input,

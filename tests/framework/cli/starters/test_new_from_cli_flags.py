@@ -8,7 +8,7 @@ import pytest
 from click.testing import CliRunner
 
 from kedro.framework.cli.starters import _convert_tool_short_names_to_numbers
-from tests.framework.cli.starters.conftest import (
+from tests.framework.cli.starters.utils import (
     _assert_name_ok,
     _assert_requirements_ok,
     _assert_template_ok,

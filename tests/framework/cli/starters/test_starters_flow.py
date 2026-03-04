@@ -131,17 +131,17 @@ class TestParseYesNoToBools:
         "input",
         ["yes", "YES", "y", "Y", "yEs"],
     )
-    def parse_yes_no_to_bool_responds_true(self, input):
+    def test_parse_yes_no_to_bool_responds_true(self, input):
         assert _parse_yes_no_to_bool(input) is True
 
     @pytest.mark.parametrize(
         "input",
         ["no", "NO", "n", "N", "No", ""],
     )
-    def parse_yes_no_to_bool_responds_false(self, input):
+    def test_parse_yes_no_to_bool_responds_false(self, input):
         assert _parse_yes_no_to_bool(input) is False
 
-    def parse_yes_no_to_bool_responds_none(self):
+    def test_parse_yes_no_to_bool_responds_none(self):
         assert _parse_yes_no_to_bool(None) is None
 
 

@@ -1,7 +1,6 @@
 """Tests for tools parsing."""
-from __future__ import annotations
 
-from unittest.mock import patch
+from __future__ import annotations
 
 import pytest
 
@@ -11,6 +10,7 @@ from kedro.framework.cli.starters import (
     _parse_yes_no_to_bool,
     _validate_tool_selection,
 )
+
 
 class TestParseToolsInput:
     @pytest.mark.parametrize(

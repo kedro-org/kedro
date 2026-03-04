@@ -9,6 +9,7 @@ from click.testing import CliRunner
 
 from kedro.framework.cli.starters import _convert_tool_short_names_to_numbers
 from tests.framework.cli.starters.utils import (
+    VALID_TOOLS_PARAMETERS,
     _assert_name_ok,
     _assert_requirements_ok,
     _assert_template_ok,
@@ -19,32 +20,7 @@ from tests.framework.cli.starters.utils import (
 
 @pytest.mark.usefixtures("chdir_to_tmp", "patch_cookiecutter_args")
 class TestToolsAndExampleFromCLI:
-    @pytest.mark.parametrize(
-        "tools",
-        [
-            "lint",
-            "test",
-            "tests",
-            "log",
-            "logs",
-            "docs",
-            "doc",
-            "data",
-            "pyspark",
-            "tests,logs,doc",
-            "test,data,lint",
-            "log,docs,data,test,lint",
-            "log, docs, data, test, lint",
-            "log,       docs,     data,   test,     lint",
-            "all",
-            "LINT",
-            "ALL",
-            "TEST, LOG, DOCS",
-            "test, DATA, liNt",
-            "none",
-            "NONE",
-        ],
-    )
+    @pytest.mark.parametrize("tools", VALID_TOOLS_PARAMETERS)
     @pytest.mark.parametrize("example_pipeline", ["Yes", "No"])
     def test_valid_tools_flag(self, fake_kedro_cli, tools, example_pipeline):
         result = CliRunner().invoke(

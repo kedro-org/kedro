@@ -26,6 +26,31 @@ from kedro.framework.cli.starters import (
 # the default src/ package structure.
 FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
 
+# Valid tools parameter values for parametrized tests (CLI flags and config file).
+VALID_TOOLS_PARAMETERS = [
+    "lint",
+    "test",
+    "tests",
+    "log",
+    "logs",
+    "docs",
+    "doc",
+    "data",
+    "pyspark",
+    "tests,logs,doc",
+    "test,data,lint",
+    "log,docs,data,test,lint",
+    "log, docs, data, test, lint",
+    "log,       docs,     data,   test,     lint",
+    "all",
+    "LINT",
+    "ALL",
+    "TEST, LOG, DOCS",
+    "test, DATA, liNt",
+    "none",
+    "NONE",
+]
+
 
 def _is_github_host(url: str) -> bool:
     """Check if URL hostname is github.com (avoids substring matching issues)."""

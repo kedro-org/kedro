@@ -6,6 +6,7 @@ import dataclasses
 
 import pytest
 
+from kedro.validation.model_factory import ModelFactory
 from kedro.validation.source_filters import ParameterSourceFilter
 
 
@@ -30,3 +31,8 @@ except ImportError:
 @pytest.fixture
 def source_filter():
     return ParameterSourceFilter()
+
+
+@pytest.fixture
+def model_factory():
+    return ModelFactory()

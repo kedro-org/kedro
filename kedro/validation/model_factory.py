@@ -46,6 +46,8 @@ class ModelFactory:
                 )
                 return raw_value
 
+        except ModelInstantiationError:
+            raise
         except Exception as exc:
             raise ModelInstantiationError(
                 f"Failed to instantiate {model_type.__name__} for "

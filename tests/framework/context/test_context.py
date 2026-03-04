@@ -271,7 +271,12 @@ class TestKedroContext:
     )
     def test_params(self, dummy_context, runtime_params):
         runtime_params = runtime_params or {}
-        expected = {"param1": 1, "param2": 2, "param3": {"param4": 3}, **runtime_params}
+        expected = {
+            "param1": 1,
+            "param2": 2,
+            "param3": {"param4": 3},
+            **runtime_params,
+        }
         assert dummy_context.params == expected
 
     @pytest.mark.parametrize(
@@ -323,6 +328,86 @@ class TestKedroContext:
         log_messages = [record.getMessage() for record in caplog.records]
         expected_msg = "Credentials not found in your Kedro project config."
         assert any(expected_msg in log_message for log_message in log_messages)
+
+    def test_get_parameters_with_pydantic_model(self, dummy_context, mocker):
+        """Verify Pydantic models are registered with nested paths preserved."""
+        from pydantic import BaseModel
+
+        class ModelOptions(BaseModel):
+            test_size: float
+            random_state: int
+
+        model_instance = ModelOptions(test_size=0.2, random_state=3)
+
+        mocker.patch.object(
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(
+                lambda self: {"model_options": model_instance}
+            ),
+        )
+
+        result = dummy_context._get_parameters()
+
+        assert result["params:model_options"] == model_instance
+        assert result["params:model_options.test_size"] == 0.2
+        assert result["params:model_options.random_state"] == 3
+
+    def test_get_parameters_with_dataclass(self, dummy_context, mocker):
+        """Verify dataclasses are registered with nested paths preserved."""
+        import dataclasses
+
+        @dataclasses.dataclass
+        class EvalConfig:
+            metric: str
+            threshold: float
+
+        dc_instance = EvalConfig(metric="rmse", threshold=0.5)
+
+        mocker.patch.object(
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(lambda self: {"eval_config": dc_instance}),
+        )
+
+        result = dummy_context._get_parameters()
+
+        assert result["params:eval_config"] == dc_instance
+        assert result["params:eval_config.metric"] == "rmse"
+        assert result["params:eval_config.threshold"] == 0.5
+
+    def test_get_parameters_with_nested_pydantic_preserves_types(
+        self, dummy_context, mocker
+    ):
+        """Verify nested Pydantic sub-models are preserved, not flattened to dicts."""
+        from pydantic import BaseModel
+
+        class InnerModel(BaseModel):
+            value: int
+
+        class OuterModel(BaseModel):
+            inner: InnerModel
+
+        outer = OuterModel(inner=InnerModel(value=42))
+
+        mocker.patch.object(
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(lambda self: {"outer": outer}),
+        )
+
+        result = dummy_context._get_parameters()
+
+        assert result["params:outer"] == outer
+        assert isinstance(result["params:outer.inner"], InnerModel)
+        assert result["params:outer.inner"].value == 42
+        assert result["params:outer.inner.value"] == 42
+
+    def test_validated_params_cache(self, dummy_context):
+        """Verify params are cached after first access."""
+        first = dummy_context.params
+        second = dummy_context.params
+        assert first is second
 
 
 @pytest.mark.parametrize(

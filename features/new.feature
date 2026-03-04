@@ -5,6 +5,11 @@ Feature: New Kedro project
     When I run a non-interactive kedro new without starter
     Then the expected project directories and files should be created
 
+  Scenario: Create a new kedro project with --checkout flag and no starter
+    Given I have prepared a config file without starter
+    When I run a non-interactive kedro new without starter and checkout "some-checkout"
+    Then the expected project directories and files should be created
+
   Scenario: Create a new kedro project with example code
     Given I have prepared a config file
     When I run a non-interactive kedro new with starter "default"

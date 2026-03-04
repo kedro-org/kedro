@@ -120,7 +120,9 @@ class TestApplyValidation:
         raw = {"model_options": {"test_size": 0.2, "random_state": 3}}
         requirements = {"model_options": SamplePydanticModel}
 
-        with caplog.at_level(logging.DEBUG, logger="kedro.validation.parameter_validator"):
+        with caplog.at_level(
+            logging.DEBUG, logger="kedro.validation.parameter_validator"
+        ):
             parameter_validator.apply_validation(raw, requirements)
 
         assert "Successfully instantiated 1 parameter models" in caplog.text

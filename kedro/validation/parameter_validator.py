@@ -6,18 +6,16 @@ import copy
 import logging
 from typing import Any
 
-from kedro.framework.validation import (
-    ModelFactory,
-    ParameterSourceFilter,
-    TypeExtractor,
-    ValidationError,
-)
+from .exceptions import ValidationError
+from .model_factory import ModelFactory
+from .source_filters import ParameterSourceFilter
+from .type_extractor import TypeExtractor
 
 logger = logging.getLogger(__name__)
 
 
 class ParameterValidator:
-    """Parameter validator that combines type extraction and model instantiation."""
+    """Orchestrates type extraction and model instantiation for parameters."""
 
     def __init__(self) -> None:
         """Initialize parameter validator."""
@@ -25,11 +23,7 @@ class ParameterValidator:
         self.model_factory = ModelFactory()
 
     def get_pipeline_requirements(self) -> dict[str, type]:
-        """Get all parameter type requirements from available pipelines.
-
-        Returns:
-            Dictionary mapping parameter keys to their expected types.
-        """
+        """Get all parameter type requirements from available pipelines."""
         return self.type_extractor.extract_types_from_pipelines()
 
     def apply_validation(self, raw_params: dict, requirements: dict) -> dict:
@@ -43,18 +37,15 @@ class ParameterValidator:
             Transformed parameters dictionary with validated models.
 
         Raises:
-            ValidationError: If validation fails.
+            ValidationError: If any parameter fails validation.
         """
-        # Work on a deep copy to avoid modifying the original
         transformed_params = copy.deepcopy(raw_params)
 
         validation_errors = []
         instantiated_count = 0
 
-        # Process each parameter requirement
         for param_key, expected_type in requirements.items():
             try:
-                # Get the raw parameter value
                 raw_value = self.type_extractor.resolve_nested_path(
                     raw_params, param_key
                 )
@@ -66,12 +57,10 @@ class ParameterValidator:
                     )
                     continue
 
-                # Attempt to instantiate the model
                 validated_instance = self.model_factory.instantiate(
                     param_key, raw_value, expected_type
                 )
 
-                # Only update if actual model instantiation occurred
                 if validated_instance is not raw_value:
                     self.type_extractor.set_nested_value(
                         transformed_params, param_key, validated_instance
@@ -88,34 +77,31 @@ class ParameterValidator:
                 validation_errors.append(error_msg)
                 logger.error(error_msg)
 
-        # Log success summary
         if instantiated_count > 0:
             logger.debug(
                 "Successfully instantiated %d parameter models", instantiated_count
             )
 
-        # Handle validation errors
         if validation_errors:
             error_message = "Parameter validation failed:\n" + "\n".join(
                 f"- {error}" for error in validation_errors
             )
-            raise ValidationError(error_message, errors=validation_errors)
+            raise ValidationError(error_message)
 
         return transformed_params
 
     def validate_raw_params(self, raw_params: dict) -> dict[str, Any]:
-        """Validate raw parameters before they are assigned to context.
+        """Validate raw parameters and return transformed dictionary.
 
         Args:
-            raw_params: Parameters from config loader (includes config and runtime parameters).
+            raw_params: Parameters from config loader (merged with runtime params).
 
         Returns:
-            Dictionary of validated and transformed parameters.
+            Validated and transformed parameters.
 
         Raises:
             ValidationError: If validation fails.
         """
-        # Get parameter requirements
         requirements = self.get_pipeline_requirements()
 
         if not requirements:
@@ -124,5 +110,4 @@ class ParameterValidator:
             )
             return raw_params
 
-        # Apply validation and transformation
         return self.apply_validation(raw_params, requirements)

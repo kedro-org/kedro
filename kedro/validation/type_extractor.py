@@ -1,4 +1,4 @@
-"""Type extractor for extracting type hints from various sources."""
+"""Type extractor for extracting type hints from pipeline node signatures."""
 
 from __future__ import annotations
 
@@ -18,21 +18,25 @@ logger = logging.getLogger(__name__)
 
 
 class TypeExtractor:
-    """Extracts type requirements from various sources like pipeline nodes."""
+    """Extracts parameter type requirements from pipeline node signatures."""
 
     def __init__(self, source_filter: SourceFilter) -> None:
         """Initialize the type extractor.
 
         Args:
-            source_filters: List of source filters to use for extraction.
+            source_filter: Source filter to determine which node inputs to process.
         """
         self.source_filter = source_filter
 
     def extract_types_from_pipelines(self) -> dict[str, type]:
-        """Extract all type requirements from available pipelines using configured source filters.
+        """Extract all type requirements from registered pipelines.
+
+        Walks all pipelines (except ``__default__``) and inspects node
+        function signatures for type-annotated inputs that match the
+        configured source filter.
 
         Returns:
-            Dictionary mapping source keys to their expected types
+            Dictionary mapping source keys to their expected types.
         """
         try:
             from kedro.framework.project import pipelines
@@ -48,13 +52,11 @@ class TypeExtractor:
         all_type_requirements: dict[str, type] = {}
 
         for pipeline_name, pipeline in pipeline_dict.items():
-            # Skip __default__ pipeline to avoid duplicate processing
             if pipeline_name == "__default__":
                 continue
 
             pipeline_type_requirements = self._extract_types_from_pipeline(pipeline)
 
-            # Check for conflicting type requirements
             for key, new_type in pipeline_type_requirements.items():
                 if key in all_type_requirements:
                     existing_type = all_type_requirements[key]
@@ -79,14 +81,7 @@ class TypeExtractor:
         return all_type_requirements
 
     def _extract_types_from_pipeline(self, pipeline: Pipeline) -> dict[str, type]:
-        """Extract type requirements from a single pipeline.
-
-        Args:
-            pipeline: Pipeline object to analyze.
-
-        Returns:
-            Dictionary mapping source keys to their expected types.
-        """
+        """Extract type requirements from a single pipeline."""
         type_requirements: dict[str, type] = {}
 
         for node in getattr(pipeline, "nodes", []):
@@ -96,23 +91,10 @@ class TypeExtractor:
         return type_requirements
 
     def _extract_types_from_node(self, node: Node) -> dict[str, type]:
-        """Extract typed requirements from a single node using the configured source filter.
+        """Extract typed requirements from a single node.
 
-        Inspects the node's function signature and maps type-annotated parameter
-        inputs to their expected types.
-
-        Args:
-            node: Node object to analyze.
-
-        Returns:
-            Dictionary mapping source keys to their expected types.
-
-        Example:
-        ```python
-        # Given a node with: def my_func(data: pd.DataFrame, opts: ModelOptions)
-        # and inputs=["companies", "params:model_options"]
-        # Returns: {"model_options": ModelOptions}
-        ```
+        Inspects the node's function signature and maps type-annotated
+        inputs to their expected types via the configured source filter.
         """
         func = getattr(node, "func", None)
         if func is None:
@@ -129,10 +111,8 @@ class TypeExtractor:
             )
             return {}
 
-        # Map dataset names to argument names
         dataset_to_arg = self._build_dataset_to_arg_mapping(node, sig)
 
-        # Extract requirements using configured source filter
         all_requirements: dict[str, type] = {}
 
         for ds_name, arg_name in dataset_to_arg.items():
@@ -143,10 +123,11 @@ class TypeExtractor:
             if self.source_filter.should_process(ds_name):
                 source_key = self.source_filter.extract_key(ds_name)
                 all_requirements[source_key] = expected_type
-                log_message = self.source_filter.get_log_message(
-                    source_key, expected_type.__name__
+                logger.debug(
+                    self.source_filter.get_log_message(
+                        source_key, expected_type.__name__
+                    )
                 )
-                logger.debug(log_message)
 
         return all_requirements
 
@@ -155,26 +136,8 @@ class TypeExtractor:
     ) -> dict[str, str]:
         """Build mapping from dataset names to function argument names.
 
-        Kedro nodes accept inputs as either a list/tuple of dataset names
-        (positionally mapped to function arguments) or a dict mapping dataset
-        names to argument names. This method normalises both formats.
-
-        Args:
-            node: Node object.
-            signature: Function signature of the node's function.
-
-        Returns:
-            Dictionary mapping dataset names to argument names.
-
-        Example:
-        ```python
-        # List inputs: ["companies", "params:model_options"]
-        # Function: def my_func(data, opts)
-        # Returns: {"companies": "data", "params:model_options": "opts"}
-
-        # Dict inputs: {"params:model_options": "opts"}
-        # Returns: {"params:model_options": "opts"}
-        ```
+        Node inputs can be a list/tuple (positionally mapped) or a dict
+        (explicitly mapped). This normalises both into ``{dataset: arg_name}``.
         """
         dataset_to_arg: dict[str, str] = {}
         node_inputs = getattr(node, "inputs", None)
@@ -190,21 +153,9 @@ class TypeExtractor:
         return dataset_to_arg
 
     def resolve_nested_path(self, data: dict, path: str) -> Any:
-        """Resolve a dot-separated path to a value in a nested dictionary.
+        """Resolve a dot-separated path in a nested dictionary.
 
-        Args:
-            data: Data dictionary.
-            path: Dot-separated path (e.g. ``"model.options.test_size"``).
-
-        Returns:
-            Value at the specified path, or None if not found.
-
-        Example:
-        ```python
-        data = {"model": {"options": {"test_size": 0.2}}}
-        resolve_nested_path(data, "model.options.test_size")  # 0.2
-        resolve_nested_path(data, "model.missing")  # None
-        ```
+        Returns None if any key in the path is missing.
         """
         if "." not in path:
             return data.get(path)
@@ -221,24 +172,10 @@ class TypeExtractor:
         return value
 
     def set_nested_value(self, data: dict, path: str, value: Any) -> None:
-        """Set a value at a dot-separated path in a nested dictionary.
-
-        Creates intermediate dictionaries as needed.
-
-        Args:
-            data: Data dictionary to modify.
-            path: Dot-separated path (e.g. ``"model.options.test_size"``).
-            value: Value to set.
+        """Set a value at a dot-separated path, creating intermediate dicts as needed.
 
         Raises:
-            ValidationError: If an intermediate key exists but is not a dictionary.
-
-        Example:
-        ```python
-        data = {}
-        set_nested_value(data, "model.options.test_size", 0.3)
-        # data == {"model": {"options": {"test_size": 0.3}}}
-        ```
+            ValidationError: If an intermediate key is not a dictionary.
         """
         if "." not in path:
             data[path] = value
@@ -247,16 +184,14 @@ class TypeExtractor:
         keys = path.split(".")
         current = data
 
-        # Navigate to the parent dictionary
         for key in keys[:-1]:
             if key not in current:
                 current[key] = {}
             elif not isinstance(current[key], dict):
-                # Can't set nested value if intermediate value is not a dict
                 raise ValidationError(
-                    f"Cannot set nested value '{path}': intermediate key '{key}' is not a dictionary"
+                    f"Cannot set nested value '{path}': "
+                    f"intermediate key '{key}' is not a dictionary"
                 )
             current = current[key]
 
-        # Set the final value
         current[keys[-1]] = value

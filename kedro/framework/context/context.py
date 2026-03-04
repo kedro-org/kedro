@@ -14,10 +14,10 @@ from attrs import define, field
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.context import CatalogCommandsMixin
-from kedro.framework.validation.utils import is_pydantic_model
-from kedro.framework.validation.validators import ParameterValidator
 from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
+from kedro.validation.parameter_validator import ParameterValidator
+from kedro.validation.utils import is_pydantic_model
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -218,21 +218,17 @@ class KedroContext:
         Returns:
             Validated and transformed parameters with model instantiation.
         """
-        # Return cached result if available
         if self._validated_params_cache is not None:
             return self._validated_params_cache
 
-        # Get raw parameters note: config loader includes runtime params
         try:
             raw_params = self.config_loader["parameters"]
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
             raw_params = self._runtime_params or {}
 
-        # Validate parameters
         validated_params = self._parameter_validator.validate_raw_params(raw_params)
 
-        # Cache the result
         self._validated_params_cache = validated_params
 
         return validated_params
@@ -300,32 +296,18 @@ class KedroContext:
         return catalog
 
     def _get_parameters(self) -> dict[str, Any]:
-        """Returns a dictionary with data to be added in memory as `MemoryDataset`` instances.
+        """Returns a dictionary with data to be added in memory as ``MemoryDataset`` instances.
         Keys represent parameter names and the values are parameter values."""
         params = self.params
-        params_dict = {"parameters": params}
+        params_dict: dict[str, Any] = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:
-            """This recursively adds parameter paths that are defined in `parameters.yml`
-            with the addition of any extra parameters passed at initialization to the `params_dict`,
-            whenever `param_value` is a dictionary itself, so that users can
-            specify specific nested parameters in their node inputs.
-
-            Example:
-            ``` python
-            param_name = "a"
-            param_value = {"b": 1}
-            _add_param_to_params_dict(param_name, param_value)
-            assert params_dict["params:a"] == {"b": 1}
-            assert params_dict["params:a.b"] == 1
-            ```
-            """
             key = f"params:{param_name}"
             params_dict[key] = param_value
 
-            # Convert typed objects to dicts for nested path registration.
-            # Use shallow field access (not model_dump/asdict) to preserve
-            # nested typed objects like Pydantic sub-models.
+            # Convert typed objects for nested path registration.
+            # Use shallow field access to preserve nested typed objects
+            # like Pydantic sub-models.
             nested_dict = None
             if isinstance(param_value, dict):
                 nested_dict = param_value

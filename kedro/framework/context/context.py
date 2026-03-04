@@ -15,6 +15,8 @@ from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.context import CatalogCommandsMixin
 from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
+from kedro.validation.parameter_validator import ParameterValidator
+from kedro.validation.utils import get_typed_fields
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -192,6 +194,10 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
+    _parameter_validator: ParameterValidator = field(
+        init=False, factory=ParameterValidator
+    )
+    _validated_params_cache: dict[str, Any] | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -205,21 +211,37 @@ class KedroContext:
         """
         return self._get_catalog()
 
+    def _get_validated_params(self) -> dict[str, Any]:
+        """Get validated parameters with caching support.
+
+        Returns:
+            Validated and transformed parameters with model instantiation.
+        """
+        if self._validated_params_cache is not None:
+            return self._validated_params_cache
+
+        try:
+            raw_params = self.config_loader["parameters"]
+        except MissingConfigException as exc:
+            warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
+            raw_params = self._runtime_params or {}
+
+        validated_params = self._parameter_validator.validate_raw_params(raw_params)
+
+        self._validated_params_cache = validated_params
+
+        return validated_params
+
     @property
     def params(self) -> dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
 
         Returns:
             Parameters defined in `parameters.yml` with the addition of any
-                extra parameters passed at initialization.
+                extra parameters passed at initialization. Parameters are validated
+                and transformed according to pipeline node type hints.
         """
-        try:
-            params = self.config_loader["parameters"]
-        except MissingConfigException as exc:
-            warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
-            params = {}
-        _update_nested_dict(params, self._runtime_params or {})
-        return params  # type: ignore
+        return self._get_validated_params()
 
     def _get_catalog(
         self,
@@ -273,30 +295,23 @@ class KedroContext:
         return catalog
 
     def _get_parameters(self) -> dict[str, Any]:
-        """Returns a dictionary with data to be added in memory as `MemoryDataset`` instances.
+        """Returns a dictionary with data to be added in memory as ``MemoryDataset`` instances.
         Keys represent parameter names and the values are parameter values."""
         params = self.params
-        params_dict = {"parameters": params}
+        params_dict: dict[str, Any] = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:
-            """This recursively adds parameter paths that are defined in `parameters.yml`
-            with the addition of any extra parameters passed at initialization to the `params_dict`,
-            whenever `param_value` is a dictionary itself, so that users can
-            specify specific nested parameters in their node inputs.
-
-            Example:
-            ``` python
-            param_name = "a"
-            param_value = {"b": 1}
-            _add_param_to_params_dict(param_name, param_value)
-            assert params_dict["params:a"] == {"b": 1}
-            assert params_dict["params:a.b"] == 1
-            ```
-            """
             key = f"params:{param_name}"
             params_dict[key] = param_value
+
+            nested_dict: dict[str, Any] | None = None
             if isinstance(param_value, dict):
-                for key, val in param_value.items():
+                nested_dict = param_value
+            else:
+                nested_dict = get_typed_fields(param_value)
+
+            if nested_dict is not None:
+                for key, val in nested_dict.items():
                     _add_param_to_params_dict(f"{param_name}.{key}", val)
 
         for param_name, param_value in params.items():

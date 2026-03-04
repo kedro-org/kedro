@@ -373,11 +373,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if key == "parameters":
             # Merge with runtime parameters only for "parameters"
             return OmegaConf.to_container(
-                OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
+                OmegaConf.unsafe_merge(*aggregate_config, self.runtime_params),
+                resolve=True,
             )
 
         merged_config_container = OmegaConf.to_container(
-            OmegaConf.merge(*aggregate_config), resolve=True
+            OmegaConf.unsafe_merge(*aggregate_config), resolve=True
         )
         return {
             k: v for k, v in merged_config_container.items() if not k.startswith("_")
@@ -588,7 +589,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         config: dict[str, Any], env_config: dict[str, Any], env_path: str | None = None
     ) -> Any:
         # Soft merge the two env dirs. The chosen env will override base if keys clash.
-        return OmegaConf.to_container(OmegaConf.merge(config, env_config))
+        return OmegaConf.to_container(OmegaConf.unsafe_merge(config, env_config))
 
     def _is_hidden(self, path_str: str) -> bool:
         """Check if path contains any hidden directory or is a hidden file"""

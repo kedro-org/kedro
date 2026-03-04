@@ -6,17 +6,10 @@ https://docs.pytest.org/en/latest/fixture.html
 """
 
 import shutil
-import sys
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
-if sys.version_info >= (3, 11):
-    pass
-else:
-    pass
-
 
 from kedro.framework.cli.starters import (
     TEMPLATE_PATH,

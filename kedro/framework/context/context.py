@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import dataclasses
 import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -17,7 +16,7 @@ from kedro.framework.context import CatalogCommandsMixin
 from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
 from kedro.validation.parameter_validator import ParameterValidator
-from kedro.validation.utils import is_pydantic_model
+from kedro.validation.utils import get_typed_fields
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -305,24 +304,10 @@ class KedroContext:
             key = f"params:{param_name}"
             params_dict[key] = param_value
 
-            # Convert typed objects for nested path registration.
-            # Use shallow field access to preserve nested typed objects
-            # like Pydantic sub-models.
-            nested_dict = None
             if isinstance(param_value, dict):
                 nested_dict = param_value
-            elif is_pydantic_model(param_value):
-                nested_dict = {
-                    field_name: getattr(param_value, field_name)
-                    for field_name in param_value.model_fields
-                }
-            elif dataclasses.is_dataclass(param_value) and not isinstance(
-                param_value, type
-            ):
-                nested_dict = {
-                    f.name: getattr(param_value, f.name)
-                    for f in dataclasses.fields(param_value)
-                }
+            else:
+                nested_dict = get_typed_fields(param_value)
 
             if nested_dict is not None:
                 for key, val in nested_dict.items():

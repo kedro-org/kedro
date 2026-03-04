@@ -8,8 +8,8 @@ import pytest
 from kedro.utils import (
     KedroExperimentalWarning,
     experimental,
-    get_close_matches,
     find_config_file,
+    get_close_matches,
     load_obj,
 )
 

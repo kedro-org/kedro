@@ -293,6 +293,7 @@ def get_close_matches(
             _init_matches.extend(_matches)
     return _init_matches[:max_suggestions]
 
+
 def find_config_file(
     filename: str, extensions: tuple[str, ...] = _CONFIG_EXTENSIONS
 ) -> Path | None:

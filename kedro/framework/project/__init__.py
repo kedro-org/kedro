@@ -21,6 +21,7 @@ from dynaconf.validator import ValidationError, Validator
 
 from kedro.io import CatalogProtocol
 from kedro.pipeline import Pipeline, pipeline
+from kedro.utils import find_config_file
 
 if TYPE_CHECKING:
     import types
@@ -242,7 +243,7 @@ class _ProjectLogging(UserDict):
         environment variable KEDRO_LOGGING_CONFIG (defaults to conf/logging.yml)."""
         logger = logging.getLogger(__name__)
         user_logging_path = os.environ.get("KEDRO_LOGGING_CONFIG")
-        project_logging_path = Path("conf/logging.yml")
+        project_logging_path = find_config_file("conf/logging")
         default_logging_path = Path(
             Path(__file__).parent / "rich_logging.yml"
             if importlib.util.find_spec("rich")
@@ -254,7 +255,7 @@ class _ProjectLogging(UserDict):
         if user_logging_path:
             path = user_logging_path
 
-        elif project_logging_path.exists():
+        elif project_logging_path is not None:
             path = project_logging_path
             msg = "You can change this by setting the KEDRO_LOGGING_CONFIG environment variable accordingly."
         else:

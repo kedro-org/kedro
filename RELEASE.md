@@ -13,6 +13,7 @@
 ## Bug fixes and other changes
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
 * Added a warning when a node returns a value but is defined with `outputs=None`, clarifying that the return value is ignored.
+* Added util method `find_config_file()` to handle different config file extensions (.yml, .yaml)
 
 ## Documentation changes
 ## Community contributions
@@ -65,6 +66,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Aseem Sangalay](https://github.com/aseemsangalay)
 * [Chris Schopp](https://github.com/chrisschopp)
 * [Yaroslav Halchenko](https://github.com/yarikoptic)
+* [Camille Coeurjoly] (https://github.com/Camille1992)
 
 # Release 1.0.0
 ## Major features and improvements

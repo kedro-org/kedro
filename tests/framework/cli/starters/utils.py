@@ -1,28 +1,31 @@
 """
 This file contains the shared helper functions for starter tests.
 """
+
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
 import yaml
+
 if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib
 
+from kedro import __version__ as version
 from kedro.framework.cli.starters import (
     TEMPLATE_PATH,
     _make_cookiecutter_args_and_fetch_template,
     _parse_tools_input,
     _parse_yes_no_to_bool,
 )
-from kedro import __version__ as version
 
 # Number of files in the base template when no tools are selected.
 # Includes: .gitignore, README.md, requirements.txt, pyproject.toml, and
 # the default src/ package structure.
 FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
+
 
 def _is_github_host(url: str) -> bool:
     """Check if URL hostname is github.com (avoids substring matching issues)."""
@@ -49,6 +52,7 @@ def _mock_determine_repo_dir_impl(*args, **kwargs):
         # Local path or non-GitHub URL - return as-is
         return str(template), None
     return str(TEMPLATE_PATH), None
+
 
 # Shared helper functions for starter tests
 def _create_example_pipeline_files(

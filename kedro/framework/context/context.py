@@ -304,6 +304,7 @@ class KedroContext:
             key = f"params:{param_name}"
             params_dict[key] = param_value
 
+            nested_dict: dict[str, Any] | None = None
             if isinstance(param_value, dict):
                 nested_dict = param_value
             else:

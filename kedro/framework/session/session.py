@@ -9,6 +9,7 @@ import os
 import subprocess
 import sys
 import traceback
+from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -73,6 +74,48 @@ def _jsonify_cli_context(ctx: click.core.Context) -> dict[str, Any]:
     }
 
 
+class AbstractSession(ABC):
+    """``AbstractSession`` is the base class for all Kedro session implementations.
+
+    Subclasses must implement the ``create``, ``store``, ``close``, and ``run`` methods.
+    """
+
+    @classmethod
+    @abstractmethod
+    def create(
+        cls,
+        project_path: Path | str | None = None,
+        save_on_close: bool = True,
+        env: str | None = None,
+        runtime_params: dict[str, Any] | None = None,
+        conf_source: str | None = None,
+    ) -> AbstractSession:
+        """Create a new instance of the session."""
+        ...
+
+    @property
+    @abstractmethod
+    def store(self) -> dict[str, Any]:
+        """Return a copy of internal store."""
+        ...
+
+    @abstractmethod
+    def close(self) -> None:
+        """Close the current session."""
+        ...
+
+    @abstractmethod
+    def run(self, **kwargs: Any) -> dict[str, Any]:
+        """Run the pipeline."""
+        ...
+
+    def __enter__(self) -> AbstractSession:
+        return self
+
+    def __exit__(self, _exc_type: Any, _exc_value: Any, _tb: Any) -> None:
+        self.close()
+
+
 class KedroSessionError(Exception):
     """``KedroSessionError`` raised by ``KedroSession``
     in the case that multiple runs are attempted in one session.
@@ -81,7 +124,7 @@ class KedroSessionError(Exception):
     pass
 
 
-class KedroSession:
+class KedroSession(AbstractSession):
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
     a context manager to construct a new KedroSession with session data

@@ -3,6 +3,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
+from kedro.framework.project import settings
+from kedro.framework.session import KedroSession
+
 
 @pytest.fixture
 def runner():
@@ -11,6 +14,7 @@ def runner():
 
 @pytest.fixture
 def mock_session():
+    settings.set("SESSION_CLASS", KedroSession)
     with patch("kedro.framework.session.KedroSession.create") as mock_create_session:
         mock_context = MagicMock()
         mock_catalog = MagicMock()

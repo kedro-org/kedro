@@ -2,6 +2,6 @@
 project lifecycle.
 """
 
-from .session import KedroSession
+from .session import AbstractSession, KedroSession
 
-__all__ = ["KedroSession"]
+__all__ = ["AbstractSession", "KedroSession"]

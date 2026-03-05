@@ -402,9 +402,9 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
     https://docs.kedro.org/en/stable/build/pipeline_registry/
 
     Args:
+        raise_errors: If ``True``, raise an error upon failed discovery.
         pipelines_to_find: Optional list of pipeline names to load selectively.
             If ``None`` or contains ``"__default__"``, all pipelines are loaded.
-        raise_errors: If ``True``, raise an error upon failed discovery.
 
     Returns:
         A generated mapping from pipeline names to ``Pipeline`` objects.

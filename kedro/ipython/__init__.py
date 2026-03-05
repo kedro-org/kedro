@@ -40,8 +40,8 @@ from kedro.framework.project import (
     _ProjectPipelines,
     configure_project,
     pipelines,
+    settings,
 )
-from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 from kedro.pipeline.node import Node
 from kedro.utils import _is_databricks, find_kedro_project
@@ -126,7 +126,7 @@ def reload_kedro(
     _remove_cached_modules(metadata.package_name)
     configure_project(metadata.package_name)
 
-    session = KedroSession.create(
+    session = settings.SESSION_CLASS.create(
         project_path,
         env=env,
         runtime_params=runtime_params,

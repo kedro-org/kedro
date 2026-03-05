@@ -326,27 +326,6 @@ def create_project_without_starter(context):
     telemetry_file.write_text("consent: false", encoding="utf-8")
 
 
-@when('I run a non-interactive kedro new without starter and checkout "{checkout_ref}"')
-def create_project_without_starter_with_checkout(context, checkout_ref):
-    """Behave step to run kedro new with --checkout but no --starter."""
-    res = run(
-        [
-            context.kedro,
-            "new",
-            "-c",
-            str(context.config_file),
-            "--checkout",
-            checkout_ref,
-        ],
-        env=context.env,
-        cwd=context.temp_dir,
-    )
-    assert res.returncode == OK_EXIT_CODE, res
-    # prevent telemetry from prompting for input during e2e tests
-    telemetry_file = context.root_project_dir / ".telemetry"
-    telemetry_file.write_text("consent: false", encoding="utf-8")
-
-
 @given("I have added the project directory to staging")
 @when("I add the project directory to staging")
 def add_proj_dir_to_staging(context):

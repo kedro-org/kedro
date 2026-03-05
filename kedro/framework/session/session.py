@@ -105,7 +105,7 @@ class AbstractSession(ABC):
         ...
 
     @abstractmethod
-    def run(self, **kwargs: Any) -> dict[str, Any]:
+    def run(self) -> dict[str, Any]:
         """Run the pipeline."""
         ...
 

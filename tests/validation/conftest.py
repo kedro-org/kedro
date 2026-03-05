@@ -1,0 +1,50 @@
+"""Shared fixtures for validation framework tests."""
+
+from __future__ import annotations
+
+import dataclasses
+
+import pytest
+
+from kedro.validation.model_factory import ModelFactory
+from kedro.validation.parameter_validator import ParameterValidator
+from kedro.validation.source_filters import ParameterSourceFilter
+from kedro.validation.type_extractor import TypeExtractor
+
+
+@dataclasses.dataclass
+class SampleDataclass:
+    name: str
+    value: float
+
+
+try:
+    from pydantic import BaseModel
+
+    class SamplePydanticModel(BaseModel):
+        test_size: float
+        random_state: int
+
+    PYDANTIC_AVAILABLE = True
+except ImportError:
+    PYDANTIC_AVAILABLE = False
+
+
+@pytest.fixture
+def source_filter():
+    return ParameterSourceFilter()
+
+
+@pytest.fixture
+def model_factory():
+    return ModelFactory()
+
+
+@pytest.fixture
+def type_extractor():
+    return TypeExtractor(ParameterSourceFilter())
+
+
+@pytest.fixture
+def parameter_validator():
+    return ParameterValidator()

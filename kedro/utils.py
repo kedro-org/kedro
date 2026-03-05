@@ -272,7 +272,7 @@ def get_close_matches(
     """Get close matches from targets for inputs.
 
     Args:
-        inputs: Inputs to get close matches for as a single string or list of strings.
+        input: Inputs to get close matches for as a single string or list of strings.
         targets: Targets to get close matches from as a list of strings.
         max_suggestions: Maximum number of suggestions to return, defaults to 3.
         cutoff: Cutoff value for the similarity ratio, defaults to 0.6.

@@ -124,7 +124,7 @@ class _ProjectSettings(LazySettings):
     )
     _SESSION_CLASS = _IsSubclassValidator(
         "SESSION_CLASS",
-        default=_get_default_class("kedro.framework.session.AbstractSession"),
+        default=_get_default_class("kedro.framework.session.KedroSession"),
     )
     _SESSION_STORE_CLASS = _IsSubclassValidator(
         "SESSION_STORE_CLASS",

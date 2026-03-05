@@ -3,8 +3,6 @@ import inspect
 import pytest
 from IPython.testing.globalipapp import get_ipython
 
-from kedro.framework.project import settings
-from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from kedro.ipython import (
     load_ipython_extension,
@@ -62,10 +60,6 @@ def mock_kedro_project(mocker, fake_metadata):
     mocker.patch("kedro.ipython.bootstrap_project", return_value=fake_metadata)
     mocker.patch("kedro.ipython.configure_project")
     mocker.patch("kedro.framework.session.KedroSession.create")
-    original_session_class = settings.SESSION_CLASS
-    settings.set("SESSION_CLASS", KedroSession)
-    yield
-    settings.set("SESSION_CLASS", original_session_class)
 
 
 @pytest.fixture

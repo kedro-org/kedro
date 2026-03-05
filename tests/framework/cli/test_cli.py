@@ -27,7 +27,6 @@ from kedro.framework.cli.utils import (
     forward_command,
     validate_conf_source,
 )
-from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
 
@@ -68,7 +67,6 @@ def requirements_file(tmp_path):
 
 @fixture
 def fake_session(mocker):
-    settings.set("SESSION_CLASS", KedroSession)
     mock_session_create = mocker.patch.object(KedroSession, "create")
     mocked_session = mock_session_create.return_value.__enter__.return_value
     return mocked_session

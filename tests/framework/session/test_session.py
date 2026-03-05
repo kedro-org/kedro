@@ -885,6 +885,27 @@ class TestKedroSession:
                 session.run(runner=mock_runner, pipeline_name="doesnotexist")
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_non_existent_pipeline_with_suggestion(
+        self, fake_project, mock_runner, mocker
+    ):
+        """When a non-existent pipeline name has close matches, error includes suggestions."""
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent",
+            return_value=False,
+        )
+        mocker.patch(
+            "kedro.framework.session.session.get_close_matches",
+            return_value=["__default__", "data_engineering"],
+        )
+        with pytest.raises(ValueError) as exc_info:
+            with KedroSession.create(fake_project) as session:
+                session.run(runner=mock_runner, pipeline_name="__defult__")
+        msg = str(exc_info.value)
+        assert "Failed to find the pipeline named '__defult__'" in msg
+        assert "Did you mean one of these?" in msg
+        assert "__default__" in msg
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
     def test_run_exception(
         self,

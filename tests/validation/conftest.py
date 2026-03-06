@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import dataclasses
 
+from pydantic import BaseModel
+
 
 @dataclasses.dataclass
 class SampleDataclass:
@@ -11,13 +13,6 @@ class SampleDataclass:
     value: float
 
 
-try:
-    from pydantic import BaseModel
-
-    class SamplePydanticModel(BaseModel):
-        test_size: float
-        random_state: int
-
-    PYDANTIC_AVAILABLE = True
-except ImportError:
-    PYDANTIC_AVAILABLE = False
+class SamplePydanticModel(BaseModel):
+    test_size: float
+    random_state: int

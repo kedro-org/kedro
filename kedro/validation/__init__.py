@@ -1,11 +1,11 @@
 """Kedro validation framework."""
 
-from .exceptions import ModelInstantiationError, ValidationError
+from .exceptions import ModelInstantiationError, ParameterValidationError
 from .utils import is_pydantic_class, is_pydantic_model
 
 __all__ = [
     "ModelInstantiationError",
-    "ValidationError",
+    "ParameterValidationError",
     "is_pydantic_class",
     "is_pydantic_model",
 ]

@@ -1,6 +1,8 @@
 # Upcoming Release
 ## Major features and improvements
+* Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
 ## Bug fixes and other changes
+
 ## Documentation changes
 ## Community contributions
 

@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, Any
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.framework import project as kedro_project
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
@@ -24,11 +23,11 @@ from kedro.framework.project import (
     settings,
     validate_settings,
 )
+from kedro.framework.session.abstract_session import AbstractSession
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
-from kedro.utils import find_kedro_project
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -81,7 +80,7 @@ class KedroSessionError(Exception):
     pass
 
 
-class KedroSession:
+class KedroSession(AbstractSession):
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
     a context manager to construct a new KedroSession with session data
@@ -112,13 +111,21 @@ class KedroSession:
         save_on_close: bool = False,
         conf_source: str | None = None,
     ):
-        self._project_path = Path(
-            project_path or find_kedro_project(Path.cwd()) or Path.cwd()
-        ).resolve()
-        self.session_id = session_id
-        self.save_on_close = save_on_close
-        self._package_name = package_name or kedro_project.PACKAGE_NAME
-        self._store = self._init_store()
+        # self._project_path = Path(
+        #     project_path or find_kedro_project(Path.cwd()) or Path.cwd()
+        # ).resolve()
+        # self.session_id = session_id
+        # self.save_on_close = save_on_close
+        # self._package_name = package_name or kedro_project.PACKAGE_NAME
+        # self._store = self._init_store()
+        super().__init__(
+            session_id=session_id,
+            package_name=package_name,
+            project_path=project_path,
+            save_on_close=save_on_close,
+            conf_source=conf_source,
+        )
+
         self._run_called = False
 
         hook_manager = _create_hook_manager()
@@ -213,25 +220,16 @@ class KedroSession:
                 f"\n{err}.\nFailed to instantiate session store of type '{classpath}'."
             ) from err
 
-    def _log_exception(self, exc_type: Any, exc_value: Any, exc_tb: Any) -> None:
-        type_ = [] if exc_type.__module__ == "builtins" else [exc_type.__module__]
-        type_.append(exc_type.__qualname__)
+    # def _log_exception(self, exc_type: Any, exc_value: Any, exc_tb: Any) -> None:
+    #     type_ = [] if exc_type.__module__ == "builtins" else [exc_type.__module__]
+    #     type_.append(exc_type.__qualname__)
 
-        exc_data = {
-            "type": ".".join(type_),
-            "value": str(exc_value),
-            "traceback": traceback.format_tb(exc_tb),
-        }
-        self._store["exception"] = exc_data
-
-    @property
-    def _logger(self) -> logging.Logger:
-        return logging.getLogger(__name__)
-
-    @property
-    def store(self) -> dict[str, Any]:
-        """Return a copy of internal store."""
-        return dict(self._store)
+    #     exc_data = {
+    #         "type": ".".join(type_),
+    #         "value": str(exc_value),
+    #         "traceback": traceback.format_tb(exc_tb),
+    #     }
+    #     self._store["exception"] = exc_data
 
     def load_context(self) -> KedroContext:
         """An instance of the project context."""
@@ -264,20 +262,20 @@ class KedroSession:
             **settings.CONFIG_LOADER_ARGS,
         )
 
-    def close(self) -> None:
-        """Close the current session and save its store to disk
-        if `save_on_close` attribute is True.
-        """
-        if self.save_on_close:
-            self._store.save()
+    # def close(self) -> None:
+    #     """Close the current session and save its store to disk
+    #     if `save_on_close` attribute is True.
+    #     """
+    #     if self.save_on_close:
+    #         self._store.save()
 
-    def __enter__(self) -> KedroSession:
-        return self
+    # def __enter__(self) -> KedroSession:
+    #     return self
 
-    def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
-        if exc_type:
-            self._log_exception(exc_type, exc_value, tb_)
-        self.close()
+    # def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
+    #     if exc_type:
+    #         self._log_exception(exc_type, exc_value, tb_)
+    #     self.close()
 
     def run(  # noqa: PLR0913
         self,

@@ -16,6 +16,8 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
 
+from kedro.framework.session.service_session import KedroServiceSession
+
 if TYPE_CHECKING:
     from collections import OrderedDict
     from collections.abc import Callable
@@ -126,13 +128,13 @@ def reload_kedro(
     _remove_cached_modules(metadata.package_name)
     configure_project(metadata.package_name)
 
-    session = KedroSession.create(
+    session = KedroServiceSession.create(
         project_path,
         env=env,
-        runtime_params=runtime_params,
+        # runtime_params=runtime_params,
         conf_source=conf_source,
     )
-    context = session.load_context()
+    context = session.load_context(runtime_params)
     catalog = context.catalog
 
     get_ipython().push(  # type: ignore[no-untyped-call]

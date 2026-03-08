@@ -246,7 +246,7 @@ class Node:
 
     def __str__(self) -> str:
         def _set_to_str(xset: set | list[str]) -> str:
-            return f"[{';'.join(xset)}]"
+            return f"\[{';'.join(xset)}\]"
 
         out_str = _set_to_str(self.outputs) if self._outputs else "None"
         in_str = _set_to_str(self.inputs) if self._inputs else "None"

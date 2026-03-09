@@ -369,7 +369,7 @@ class KedroSession:
                 raise ValueError(
                     f"Failed to find the pipeline named '{name}'. "
                     f"It needs to be generated and returned "
-                    f"by the 'register_pipelines' function."
+                    f"by the 'register_pipelines' function. "
                     f"{suggestion}"
                 ) from exc
 

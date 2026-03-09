@@ -361,8 +361,9 @@ class KedroSession:
             except KeyError as exc:
                 matches = get_close_matches(name, pipelines.keys())
                 if matches:
-                    suggestion = "Did you mean one of these instead?\n" + textwrap.indent(
-                        "\n".join(matches), " " * 4
+                    suggestion = (
+                        "Did you mean one of these instead?\n"
+                        + textwrap.indent("\n".join(matches), " " * 4)
                     )
                 else:
                     suggestion = ""

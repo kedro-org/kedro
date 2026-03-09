@@ -59,7 +59,9 @@ CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This
 must supply  the keys required by the template's prompts.yml. When not using a starter,
 these are `project_name`, `repo_name` and `python_package`."""
 CHECKOUT_ARG_HELP = (
-    "An optional tag, branch or commit to checkout in the starter repository."
+    "An optional tag, branch or commit to checkout in the starter repository. "
+    "Only applies when using one of the following flags:"
+    " --starter, --tools=pyspark, or --example=yes."
 )
 DIRECTORY_ARG_HELP = (
     "An optional directory inside the repository where the starter resides."
@@ -824,6 +826,13 @@ def _make_cookiecutter_args_and_fetch_template(
     else:
         # Use the default template path for non PySpark or example options:
         starter_path = template_path
+        if checkout:
+            warnings.warn(
+                "The --checkout flag has no effect when using the default template "
+                "without one of the following flags:"
+                "--starter, --tools=pyspark, or --example=yes.",
+                UserWarning,
+            )
 
     return cookiecutter_args, starter_path
 

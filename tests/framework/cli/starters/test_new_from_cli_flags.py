@@ -301,7 +301,7 @@ class TestCheckoutWithoutStarter:
     def test_checkout_without_starter_tools_pyspark(
         self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter
     ):
-        CliRunner().invoke(
+        result = CliRunner().invoke(
             fake_kedro_cli,
             [
                 "new",
@@ -315,6 +315,7 @@ class TestCheckoutWithoutStarter:
                 "my-project",
             ],
         )
+        assert result.exit_code == 0, result.output
         kwargs = {
             "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": "my_checkout",
@@ -325,7 +326,7 @@ class TestCheckoutWithoutStarter:
     def test_checkout_without_starter_example(
         self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter
     ):
-        CliRunner().invoke(
+        result = CliRunner().invoke(
             fake_kedro_cli,
             [
                 "new",
@@ -339,6 +340,7 @@ class TestCheckoutWithoutStarter:
                 "my-project",
             ],
         )
+        assert result.exit_code == 0, result.output
         kwargs = {
             "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": "my_checkout",
@@ -349,23 +351,29 @@ class TestCheckoutWithoutStarter:
     def test_checkout_without_starter_blank_template(
         self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter
     ):
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            [
-                "new",
-                "--checkout",
-                "my_checkout",
-                "--name",
-                "my-project",
-                "--tools",
-                "none",
-                "--example",
-                "no",
-            ],
-        )
-        assert (
-            "Cannot use the --checkout flag without a --starter value."
-            not in result.output
-        )
+        import warnings
+
+        with warnings.catch_warnings(record=True) as caught_warnings:
+            warnings.simplefilter("always")
+            result = CliRunner().invoke(
+                fake_kedro_cli,
+                [
+                    "new",
+                    "--checkout",
+                    "my_checkout",
+                    "--name",
+                    "my-project",
+                    "--tools",
+                    "none",
+                    "--example",
+                    "no",
+                ],
+            )
+        assert result.exit_code == 0, result.output
         assert mock_cookiecutter.call_args[1]["template"] == str(TEMPLATE_PATH)
         assert mock_cookiecutter.call_args[1]["checkout"] == "my_checkout"
+        assert any(
+            "The --checkout flag has no effect" in str(w.message)
+            for w in caught_warnings
+            if issubclass(w.category, UserWarning)
+        )

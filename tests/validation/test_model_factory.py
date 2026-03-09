@@ -6,14 +6,10 @@ import pytest
 
 from kedro.validation.exceptions import ModelInstantiationError
 
-from .conftest import PYDANTIC_AVAILABLE, SampleDataclass
-
-if PYDANTIC_AVAILABLE:
-    from .conftest import SamplePydanticModel
+from .conftest import SampleDataclass, SamplePydanticModel
 
 
 class TestModelFactory:
-    @pytest.mark.skipif(not PYDANTIC_AVAILABLE, reason="Pydantic not installed")
     def test_instantiate_pydantic_model(self, model_factory):
         raw = {"test_size": 0.2, "random_state": 3}
         result = model_factory.instantiate("model_options", raw, SamplePydanticModel)
@@ -21,7 +17,6 @@ class TestModelFactory:
         assert result.test_size == 0.2
         assert result.random_state == 3
 
-    @pytest.mark.skipif(not PYDANTIC_AVAILABLE, reason="Pydantic not installed")
     def test_instantiate_pydantic_invalid_data(self, model_factory):
         raw = {"test_size": "banana", "random_state": 3}
         with pytest.raises(ModelInstantiationError):
@@ -40,7 +35,7 @@ class TestModelFactory:
             model_factory.instantiate("config", raw, SampleDataclass)
 
     def test_instantiate_dataclass_non_dict(self, model_factory):
-        """Non-dict raw value falls back to empty instantiation, which fails."""
+        """Non-dict raw value raises ModelInstantiationError."""
         with pytest.raises(ModelInstantiationError):
             model_factory.instantiate("config", "not a dict", SampleDataclass)
 

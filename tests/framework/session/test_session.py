@@ -902,7 +902,7 @@ class TestKedroSession:
                 session.run(runner=mock_runner, pipeline_name="__defult__")
         msg = str(exc_info.value)
         assert "Failed to find the pipeline named '__defult__'" in msg
-        assert "Did you mean one of these?" in msg
+        assert "Did you mean one of these instead?" in msg
         assert "__default__" in msg
 
     @pytest.mark.usefixtures("mock_settings_context_class")

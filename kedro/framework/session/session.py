@@ -9,7 +9,6 @@ import os
 import subprocess
 import sys
 import traceback
-from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -25,6 +24,7 @@ from kedro.framework.project import (
     settings,
     validate_settings,
 )
+from kedro.framework.session.abstract_session import AbstractSession
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline.pipeline import Pipeline
@@ -72,42 +72,6 @@ def _jsonify_cli_context(ctx: click.core.Context) -> dict[str, Any]:
         "command_name": ctx.command.name,
         "command_path": " ".join(["kedro"] + sys.argv[1:]),
     }
-
-
-class AbstractSession(ABC):
-    """``AbstractSession`` is the base class for all Kedro session implementations.
-
-    Subclasses must implement the ``create``, ``close``, and ``run`` methods.
-    """
-
-    @classmethod
-    @abstractmethod
-    def create(
-        cls,
-        project_path: Path | str | None = None,
-        save_on_close: bool = True,
-        env: str | None = None,
-        runtime_params: dict[str, Any] | None = None,
-        conf_source: str | None = None,
-    ) -> AbstractSession:
-        """Create a new instance of the session."""
-        ...
-
-    @abstractmethod
-    def close(self) -> None:
-        """Close the current session."""
-        ...
-
-    @abstractmethod
-    def run(self) -> dict[str, Any]:
-        """Run the pipeline."""
-        ...
-
-    def __enter__(self) -> AbstractSession:
-        return self
-
-    def __exit__(self, _exc_type: Any, _exc_value: Any, _tb: Any) -> None:
-        self.close()
 
 
 class KedroSessionError(Exception):

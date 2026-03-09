@@ -77,7 +77,7 @@ def _jsonify_cli_context(ctx: click.core.Context) -> dict[str, Any]:
 class AbstractSession(ABC):
     """``AbstractSession`` is the base class for all Kedro session implementations.
 
-    Subclasses must implement the ``create``, ``store``, ``close``, and ``run`` methods.
+    Subclasses must implement the ``create``, ``close``, and ``run`` methods.
     """
 
     @classmethod

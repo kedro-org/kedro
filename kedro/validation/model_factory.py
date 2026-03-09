@@ -53,12 +53,17 @@ class ModelFactory:
             ) from exc
 
     def _instantiate_pydantic(self, raw_value: Any, model_type: type) -> Any:
-        """Handle Pydantic model instantiation."""
+        """Handle Pydantic model instantiation.
+
+        Note: Requires Pydantic v2+ (uses `model_validate`).
+        """
         return model_type.model_validate(raw_value)  # type: ignore[attr-defined]
 
     def _instantiate_dataclass(self, raw_value: Any, model_type: type) -> Any:
         """Handle dataclass instantiation."""
         if isinstance(raw_value, dict):
             return model_type(**raw_value)
-        else:
-            return model_type()
+        raise ModelInstantiationError(
+            f"Expected dict for dataclass {model_type.__name__}, "
+            f"got {type(raw_value).__name__}"
+        )

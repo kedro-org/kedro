@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
+from pydantic import BaseModel
 
 from kedro.validation.utils import (
     get_typed_fields,
@@ -12,27 +13,21 @@ from kedro.validation.utils import (
     is_pydantic_model,
 )
 
-from .conftest import PYDANTIC_AVAILABLE, SampleDataclass
-
-if PYDANTIC_AVAILABLE:
-    from .conftest import SamplePydanticModel
+from .conftest import SampleDataclass, SamplePydanticModel
 
 
 class TestIsPydanticModel:
-    @pytest.mark.skipif(not PYDANTIC_AVAILABLE, reason="Pydantic not installed")
-    def test_pydantic_instance_returns_true(self):
-        instance = SamplePydanticModel(test_size=0.2, random_state=3)
-        assert is_pydantic_model(instance) is True
-
-    def test_dict_returns_false(self):
-        assert is_pydantic_model({"x": 1}) is False
-
-    def test_dataclass_returns_false(self):
-        instance = SampleDataclass(name="test", value=1.0)
-        assert is_pydantic_model(instance) is False
-
-    def test_string_returns_false(self):
-        assert is_pydantic_model("hello") is False
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            (SamplePydanticModel(test_size=0.2, random_state=3), True),
+            ({"x": 1}, False),
+            (SampleDataclass(name="test", value=1.0), False),
+            ("hello", False),
+        ],
+    )
+    def test_is_pydantic_model(self, value, expected):
+        assert is_pydantic_model(value) is expected
 
     def test_returns_false_when_pydantic_not_installed(self):
         with patch.dict("sys.modules", {"pydantic": None}):
@@ -40,18 +35,17 @@ class TestIsPydanticModel:
 
 
 class TestIsPydanticClass:
-    @pytest.mark.skipif(not PYDANTIC_AVAILABLE, reason="Pydantic not installed")
-    def test_pydantic_class_returns_true(self):
-        assert is_pydantic_class(SamplePydanticModel) is True
-
-    def test_dataclass_returns_false(self):
-        assert is_pydantic_class(SampleDataclass) is False
-
-    def test_builtin_type_returns_false(self):
-        assert is_pydantic_class(str) is False
-
-    def test_dict_type_returns_false(self):
-        assert is_pydantic_class(dict) is False
+    @pytest.mark.parametrize(
+        "cls,expected",
+        [
+            (SamplePydanticModel, True),
+            (SampleDataclass, False),
+            (str, False),
+            (dict, False),
+        ],
+    )
+    def test_is_pydantic_class(self, cls, expected):
+        assert is_pydantic_class(cls) is expected
 
     def test_returns_false_when_pydantic_not_installed(self):
         with patch.dict("sys.modules", {"pydantic": None}):
@@ -59,7 +53,6 @@ class TestIsPydanticClass:
 
 
 class TestGetTypedFields:
-    @pytest.mark.skipif(not PYDANTIC_AVAILABLE, reason="Pydantic not installed")
     def test_pydantic_model(self):
         instance = SamplePydanticModel(test_size=0.2, random_state=3)
         result = get_typed_fields(instance)
@@ -70,19 +63,17 @@ class TestGetTypedFields:
         result = get_typed_fields(instance)
         assert result == {"name": "test", "value": 1.5}
 
-    def test_dict_returns_none(self):
-        assert get_typed_fields({"x": 1}) is None
-
-    def test_string_returns_none(self):
-        assert get_typed_fields("hello") is None
+    @pytest.mark.parametrize(
+        "value",
+        [{"x": 1}, "hello", 42, None],
+    )
+    def test_non_structured_returns_none(self, value):
+        assert get_typed_fields(value) is None
 
     def test_dataclass_type_returns_none(self):
         assert get_typed_fields(SampleDataclass) is None
 
-    @pytest.mark.skipif(not PYDANTIC_AVAILABLE, reason="Pydantic not installed")
     def test_preserves_nested_pydantic(self):
-        from pydantic import BaseModel
-
         class Inner(BaseModel):
             value: int
 
@@ -96,3 +87,4 @@ class TestGetTypedFields:
     def test_returns_none_when_pydantic_not_installed(self):
         with patch.dict("sys.modules", {"pydantic": None}):
             assert get_typed_fields({"x": 1}) is None
+ 

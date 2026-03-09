@@ -64,6 +64,7 @@ test = [
     "pandas>=2.0,<4.0",
     "pluggy>=1.0",
     "pre-commit>=2.9.2,<5.0",  # The hook `mypy` requires pre-commit version 2.9.2.
+    "pydantic",
     "pytest-cov>=3,<8",
     "pytest-mock>=1.7.1,<4.0",
     "pytest-xdist[psutil]>=2.2.1,<4.0",

@@ -5,6 +5,7 @@ from __future__ import annotations
 import dataclasses
 
 import pytest
+from pydantic import BaseModel
 
 from kedro.validation.source_filters import ParameterSourceFilter
 
@@ -15,16 +16,9 @@ class SampleDataclass:
     value: float
 
 
-try:
-    from pydantic import BaseModel
-
-    class SamplePydanticModel(BaseModel):
-        test_size: float
-        random_state: int
-
-    PYDANTIC_AVAILABLE = True
-except ImportError:
-    PYDANTIC_AVAILABLE = False
+class SamplePydanticModel(BaseModel):
+    test_size: float
+    random_state: int
 
 
 @pytest.fixture

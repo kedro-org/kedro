@@ -30,6 +30,8 @@ from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 
+from .abstract_session import AbstractSession
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -81,7 +83,7 @@ class KedroSessionError(Exception):
     pass
 
 
-class KedroSession:
+class KedroSession(AbstractSession):
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
     a context manager to construct a new KedroSession with session data

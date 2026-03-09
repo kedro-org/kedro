@@ -93,12 +93,6 @@ class AbstractSession(ABC):
         """Create a new instance of the session."""
         ...
 
-    @property
-    @abstractmethod
-    def store(self) -> dict[str, Any]:
-        """Return a copy of internal store."""
-        ...
-
     @abstractmethod
     def close(self) -> None:
         """Close the current session."""

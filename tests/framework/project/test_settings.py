@@ -7,7 +7,7 @@ import pytest
 from kedro.config import OmegaConfigLoader
 from kedro.framework.context.context import KedroContext
 from kedro.framework.project import configure_project, settings, validate_settings
-from kedro.framework.session import KedroSession
+from kedro.framework.session import AbstractSession
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io import DataCatalog
 
@@ -20,7 +20,7 @@ class MyDataCatalog(DataCatalog):
     pass
 
 
-class MyKedroSession(KedroSession):
+class MyKedroSession(AbstractSession):
     pass
 
 

@@ -122,7 +122,7 @@ class _ProjectSettings(LazySettings):
         "CONTEXT_CLASS",
         default=_get_default_class("kedro.framework.context.KedroContext"),
     )
-    _SESSION_CLASS = _IsSubclassValidator(
+    _SESSION_CLASS = _HasSharedParentClassValidator(
         "SESSION_CLASS",
         default=_get_default_class("kedro.framework.session.KedroSession"),
     )

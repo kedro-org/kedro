@@ -37,10 +37,6 @@ class _MinimalSession(AbstractSession):
     def create(cls, **kwargs):
         return cls()
 
-    @property
-    def store(self):
-        return {}
-
     def close(self):
         pass
 

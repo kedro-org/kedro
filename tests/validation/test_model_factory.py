@@ -51,5 +51,8 @@ class TestModelFactory:
 
     def test_error_message_includes_context(self, model_factory):
         raw = {"wrong_field": "value"}
-        with pytest.raises(ModelInstantiationError, match="SampleDataclass"):
+        with pytest.raises(
+            ModelInstantiationError,
+            match="Failed to instantiate SampleDataclass for source 'config'",
+        ):
             model_factory.instantiate("config", raw, SampleDataclass)

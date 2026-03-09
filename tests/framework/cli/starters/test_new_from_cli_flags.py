@@ -7,7 +7,10 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.starters import _convert_tool_short_names_to_numbers
+from kedro.framework.cli.starters import (
+    TEMPLATE_PATH,
+    _convert_tool_short_names_to_numbers,
+)
 from tests.framework.cli.starters.utils import (
     VALID_TOOLS_PARAMETERS,
     _assert_name_ok,
@@ -247,17 +250,6 @@ class TestTelemetryCLIFlag:
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestFlagsNotAllowed:
-    def test_checkout_flag_without_starter(self, fake_kedro_cli):
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new", "--checkout", "some-checkout"],
-            input=_make_cli_prompt_input_without_tools(),
-        )
-        assert result.exit_code != 0
-        assert (
-            "Cannot use the --checkout flag without a --starter value." in result.output
-        )
-
     def test_directory_flag_without_starter(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,
@@ -301,4 +293,87 @@ class TestFlagsNotAllowed:
         assert (
             "Cannot use the --starter flag with the --example and/or --tools flag."
             in result.output
+        )
+
+
+@pytest.mark.usefixtures("chdir_to_tmp")
+class TestCheckoutWithoutStarter:
+    def test_checkout_without_starter_tools_pyspark(
+        self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "--tools",
+                "pyspark",
+                "--example",
+                "no",
+                "--checkout",
+                "my_checkout",
+                "--name",
+                "my-project",
+            ],
+        )
+        assert result.exit_code == 0, result.output
+        kwargs = {
+            "template": "git+https://github.com/kedro-org/kedro-starters.git",
+            "checkout": "my_checkout",
+            "directory": "spaceflights-pyspark",
+        }
+        assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
+
+    def test_checkout_without_starter_example(
+        self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "--tools",
+                "none",
+                "--example",
+                "yes",
+                "--checkout",
+                "my_checkout",
+                "--name",
+                "my-project",
+            ],
+        )
+        assert result.exit_code == 0, result.output
+        kwargs = {
+            "template": "git+https://github.com/kedro-org/kedro-starters.git",
+            "checkout": "my_checkout",
+            "directory": "spaceflights-pandas",
+        }
+        assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
+
+    def test_checkout_without_starter_blank_template(
+        self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter
+    ):
+        import warnings
+
+        with warnings.catch_warnings(record=True) as caught_warnings:
+            warnings.simplefilter("always")
+            result = CliRunner().invoke(
+                fake_kedro_cli,
+                [
+                    "new",
+                    "--checkout",
+                    "my_checkout",
+                    "--name",
+                    "my-project",
+                    "--tools",
+                    "none",
+                    "--example",
+                    "no",
+                ],
+            )
+        assert result.exit_code == 0, result.output
+        assert mock_cookiecutter.call_args[1]["template"] == str(TEMPLATE_PATH)
+        assert mock_cookiecutter.call_args[1]["checkout"] == "my_checkout"
+        assert any(
+            "The --checkout flag has no effect" in str(w.message)
+            for w in caught_warnings
+            if issubclass(w.category, UserWarning)
         )

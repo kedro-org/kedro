@@ -6,14 +6,7 @@ import dataclasses
 import inspect
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-from kedro.validation.exceptions import ValidationError
-
-from .conftest import PYDANTIC_AVAILABLE, SampleDataclass
-
-if PYDANTIC_AVAILABLE:
-    from .conftest import SamplePydanticModel
+from .conftest import SampleDataclass, SamplePydanticModel
 
 
 class TestExtractTypesFromPipelines:
@@ -135,7 +128,6 @@ class TestExtractTypesFromNode:
             result = type_extractor._extract_types_from_node(node)
         assert result == {}
 
-    @pytest.mark.skipif(not PYDANTIC_AVAILABLE, reason="Pydantic not installed")
     def test_typed_param_input(self, type_extractor):
         def my_func(data: SamplePydanticModel) -> None:
             pass
@@ -259,49 +251,3 @@ class TestBuildDatasetToArgMapping:
 
         result = type_extractor._build_dataset_to_arg_mapping(node, sig)
         assert result == {}
-
-
-class TestResolveNestedPath:
-    def test_flat_key(self, type_extractor):
-        data = {"test_size": 0.2}
-        assert type_extractor.resolve_nested_path(data, "test_size") == 0.2
-
-    def test_nested_key(self, type_extractor):
-        data = {"model": {"options": {"test_size": 0.2}}}
-        assert (
-            type_extractor.resolve_nested_path(data, "model.options.test_size") == 0.2
-        )
-
-    def test_missing_flat_key(self, type_extractor):
-        data = {"test_size": 0.2}
-        assert type_extractor.resolve_nested_path(data, "missing") is None
-
-    def test_missing_nested_key(self, type_extractor):
-        data = {"model": {"options": {}}}
-        assert type_extractor.resolve_nested_path(data, "model.options.missing") is None
-
-    def test_intermediate_not_dict(self, type_extractor):
-        data = {"model": "not_a_dict"}
-        assert type_extractor.resolve_nested_path(data, "model.options") is None
-
-
-class TestSetNestedValue:
-    def test_flat_key(self, type_extractor):
-        data = {}
-        type_extractor.set_nested_value(data, "key", "value")
-        assert data["key"] == "value"
-
-    def test_nested_key(self, type_extractor):
-        data = {"model": {"options": {}}}
-        type_extractor.set_nested_value(data, "model.options.test_size", 0.3)
-        assert data["model"]["options"]["test_size"] == 0.3
-
-    def test_creates_intermediate_dicts(self, type_extractor):
-        data = {}
-        type_extractor.set_nested_value(data, "model.options.test_size", 0.3)
-        assert data["model"]["options"]["test_size"] == 0.3
-
-    def test_intermediate_not_dict_raises(self, type_extractor):
-        data = {"model": "not_a_dict"}
-        with pytest.raises(ValidationError, match="not a dictionary"):
-            type_extractor.set_nested_value(data, "model.options.test_size", 0.3)

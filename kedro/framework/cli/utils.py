@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import difflib
 import importlib
 import logging
 import shlex
@@ -25,6 +24,8 @@ from typing import IO, Any
 
 import click
 from omegaconf import OmegaConf
+
+from kedro.utils import get_close_matches
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
@@ -91,7 +92,7 @@ def forward_command(
 def _suggest_cli_command(
     original_command_name: str, existing_command_names: Iterable[str]
 ) -> str:
-    matches = difflib.get_close_matches(
+    matches = get_close_matches(
         original_command_name, existing_command_names, MAX_SUGGESTIONS, CUTOFF
     )
 

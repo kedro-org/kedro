@@ -12,14 +12,14 @@ from .utils import is_pydantic_class
 logger = logging.getLogger(__name__)
 
 
-def instantiate_model(source_key: str, raw_value: Any, model_type: type) -> Any:
+def instantiate_model(param_key: str, raw_value: Any, model_type: type) -> Any:
     """Instantiate a typed model from a raw value.
 
     Supports Pydantic models and dataclasses. Returns the raw value
     unchanged for unsupported types.
 
     Args:
-        source_key: The source key being processed.
+        param_key: The parameter key being processed (e.g. `"model_options"`).
         raw_value: The raw value from config.
         model_type: The target model type to instantiate.
 
@@ -36,9 +36,9 @@ def instantiate_model(source_key: str, raw_value: Any, model_type: type) -> Any:
             return _instantiate_dataclass(raw_value, model_type)
         else:
             logger.debug(
-                "Source '%s' type %s is not a Pydantic model or dataclass, "
+                "Parameter '%s' type %s is not a Pydantic model or dataclass, "
                 "skipping validation",
-                source_key,
+                param_key,
                 model_type.__name__,
             )
             return raw_value
@@ -48,7 +48,7 @@ def instantiate_model(source_key: str, raw_value: Any, model_type: type) -> Any:
     except Exception as exc:
         raise ModelInstantiationError(
             f"Failed to instantiate {model_type.__name__} for "
-            f"source '{source_key}': {exc}"
+            f"parameter '{param_key}': {exc}"
         ) from exc
 
 

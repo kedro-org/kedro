@@ -10,7 +10,7 @@ import re
 import warnings
 from collections.abc import Callable, Iterable
 from functools import wraps
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -314,16 +314,9 @@ def find_config_file(
 
 
 def _is_unsafe_version(version: str) -> bool:
-    """Return True if the version string contains path traversal or absolute path components.
+    """Return True if the version string is not a safe single path component.
 
-    Checks against both POSIX and Windows path semantics to ensure platform-independent
-    protection against directory traversal attacks.
+    A valid version must be a non-empty string with no path separators (``/`` or ``\\``)
+    and must not be a dot-only component (``.`` or ``..``).
     """
-    posix = PurePosixPath(version)
-    windows = PureWindowsPath(version)
-    return (
-        posix.is_absolute()
-        or ".." in posix.parts
-        or windows.is_absolute()
-        or ".." in windows.parts
-    )
+    return not version or "/" in version or "\\" in version or version in (".", "..")

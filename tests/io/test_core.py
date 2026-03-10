@@ -743,12 +743,17 @@ class TestAbstractVersionedDataset:
             "..\\..\\..\\secrets",  # Windows traversal
             "/etc/passwd",  # POSIX absolute
             "C:\\Users\\secrets",  # Windows absolute
+            ".",  # single dot
+            "..",  # double dot
+            "",  # empty string
+            "foo/bar",  # subdirectory via POSIX separator
+            "foo\\bar",  # subdirectory via Windows separator
         ],
     )
     def test_get_versioned_path_rejects_unsafe_versions(
         self, my_versioned_dataset, unsafe_version
     ):
-        """Unsafe version strings (traversal or absolute) must raise DatasetError."""
+        """Unsafe version strings (traversal, absolute, dot, separator) must raise DatasetError."""
         with pytest.raises(DatasetError, match="not allowed"):
             my_versioned_dataset._get_versioned_path(unsafe_version)
 

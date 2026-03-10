@@ -279,12 +279,11 @@ def test_find_config_file(tmp_path, monkeypatch, filename, expected_suffix):
 @pytest.mark.parametrize(
     "version",
     [
-        # POSIX traversal
+        # Traversal via POSIX separators
         "../../../secrets",
         "../../etc/passwd",
-        "..",
         "valid/../../../escape",
-        # Windows backslash traversal
+        # Traversal via Windows separators
         "..\\..\\..\\secrets",
         "valid\\..\\..\\escape",
         # POSIX absolute
@@ -294,6 +293,14 @@ def test_find_config_file(tmp_path, monkeypatch, filename, expected_suffix):
         "C:\\Users\\secrets",
         "C:/Users/secrets",
         "\\\\server\\share",
+        # Dot components
+        "..",
+        ".",
+        # Empty string
+        "",
+        # Subdirectory creation via separators
+        "foo/bar",
+        "foo\\bar",
     ],
 )
 def test_is_unsafe_version_rejects(version):

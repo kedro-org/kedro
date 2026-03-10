@@ -507,7 +507,8 @@ def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str
         if _is_unsafe_version(version):
             raise KedroCliError(
                 f"Version string '{version}' is not allowed. "
-                "Version strings must not be absolute paths or contain '..' components."
+                "Version strings must be a single non-empty path component with no "
+                "path separators ('/' or '\\') and must not be '.' or '..'."
             )
         load_versions_dict[load_version_list[0]] = version
 

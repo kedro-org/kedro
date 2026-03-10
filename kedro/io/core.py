@@ -829,7 +829,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         if _is_unsafe_version(version):
             raise DatasetError(
                 f"Version string '{version}' is not allowed. "
-                "Version strings must not be absolute paths or contain '..' components."
+                "Version strings must be a single non-empty path component with no "
+                "path separators ('/' or '\\') and must not be '.' or '..'."
             )
         return self._filepath / version / self._filepath.name
 

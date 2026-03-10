@@ -1038,6 +1038,10 @@ class TestRunCommand:
             "dataset1:..\\..\\..\\secrets",  # Windows traversal
             "dataset1:/absolute/path",  # POSIX absolute
             "dataset1:C:\\Users\\secrets",  # Windows absolute
+            "dataset1:.",  # single dot
+            "dataset1:..",  # double dot
+            "dataset1:foo/bar",  # subdirectory via POSIX separator
+            "dataset1:foo\\bar",  # subdirectory via Windows separator
         ],
     )
     def test_fail_split_load_versions_path_traversal(

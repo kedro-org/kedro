@@ -282,6 +282,10 @@ class CatalogConfigResolver:
         Raises:
             DatasetError: when keys used in the configuration do not present in the dataset pattern name.
 
+        Note:
+            Only built-in ``list`` and ``tuple`` types are traversed. Subclasses of
+            these types are treated as opaque values and not recursed into.
+        
         Example:
         ``` python
         pattern = "{namespace}.int_{name}"
@@ -336,7 +340,11 @@ class CatalogConfigResolver:
 
         Returns:
             The resolved dataset configuration.
-
+        
+        Note:
+            Only built-in ``list`` and ``tuple`` types are traversed. Subclasses of
+            these types are treated as opaque values and not recursed into.
+        
         Example:
         ``` python
         pattern = "{namespace}.int_{name}"

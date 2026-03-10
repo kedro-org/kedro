@@ -162,7 +162,7 @@ class TestCommandCollection:
     def test_not_found_closest_match(self, mocker):
         """Check that calling a nonexistent command with a close match returns the close match"""
         patched_difflib = mocker.patch(
-            "kedro.framework.cli.utils.difflib.get_close_matches",
+            "kedro.framework.cli.utils.get_close_matches",
             return_value=["suggestion_1", "suggestion_2"],
         )
 
@@ -182,7 +182,7 @@ class TestCommandCollection:
     def test_not_found_closet_match_singular(self, mocker):
         """Check that calling a nonexistent command with a close match has the proper wording"""
         patched_difflib = mocker.patch(
-            "kedro.framework.cli.utils.difflib.get_close_matches",
+            "kedro.framework.cli.utils.get_close_matches",
             return_value=["suggestion_1"],
         )
 

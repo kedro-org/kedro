@@ -35,6 +35,7 @@ from typing_extensions import Self
 from kedro.utils import (  # noqa: F401
     CLOUD_PROTOCOLS,
     HTTP_PROTOCOLS,
+    _is_unsafe_version,
     _parse_filepath,
     load_obj,
 )
@@ -825,6 +826,12 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         return versioned_path
 
     def _get_versioned_path(self, version: str) -> PurePosixPath:
+        if _is_unsafe_version(version):
+            raise DatasetError(
+                f"Version string '{version}' is not allowed. "
+                "Version strings must be a single non-empty path component with no "
+                "path separators ('/' or '\\') and must not be '.' or '..'."
+            )
         return self._filepath / version / self._filepath.name
 
     def _get_version_from_path(self, path: str) -> str:

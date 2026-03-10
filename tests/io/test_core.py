@@ -736,6 +736,28 @@ class TestAbstractVersionedDataset:
         expected = sorted(versions, reverse=True)
         assert result == expected
 
+    @pytest.mark.parametrize(
+        "unsafe_version",
+        [
+            "../../../secrets",  # POSIX traversal
+            "..\\..\\..\\secrets",  # Windows traversal
+            "/etc/passwd",  # POSIX absolute
+            "C:\\Users\\secrets",  # Windows absolute
+        ],
+    )
+    def test_get_versioned_path_rejects_unsafe_versions(
+        self, my_versioned_dataset, unsafe_version
+    ):
+        """Unsafe version strings (traversal or absolute) must raise DatasetError."""
+        with pytest.raises(DatasetError, match="not allowed"):
+            my_versioned_dataset._get_versioned_path(unsafe_version)
+
+    def test_get_versioned_path_allows_valid_version(self, my_versioned_dataset):
+        """A legitimate timestamp version string must be accepted."""
+        version = "2024-01-15T10.00.00.000Z"
+        path = my_versioned_dataset._get_versioned_path(version)
+        assert version in str(path)
+
 
 class MyLegacyDataset(AbstractDataset):
     def __init__(self, filepath="", save_args=None, fs_args=None, var=None):

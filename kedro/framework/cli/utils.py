@@ -25,7 +25,7 @@ from typing import IO, Any
 import click
 from omegaconf import OmegaConf
 
-from kedro.utils import get_close_matches
+from kedro.utils import _is_unsafe_version, get_close_matches
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
@@ -503,7 +503,13 @@ def _split_load_versions(ctx: click.Context, param: Any, value: str) -> dict[str
                 f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
                 f"found {load_version} instead"
             )
-        load_versions_dict[load_version_list[0]] = load_version_list[1]
+        version = load_version_list[1]
+        if _is_unsafe_version(version):
+            raise KedroCliError(
+                f"Version string '{version}' is not allowed. "
+                "Version strings must not be absolute paths or contain '..' components."
+            )
+        load_versions_dict[load_version_list[0]] = version
 
     return load_versions_dict
 

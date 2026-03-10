@@ -10,7 +10,7 @@ import re
 import warnings
 from collections.abc import Callable, Iterable
 from functools import wraps
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -310,4 +310,20 @@ def find_config_file(
     return next(
         (path.with_suffix(ext) for ext in extensions if path.with_suffix(ext).exists()),
         None,
+    )
+
+
+def _is_unsafe_version(version: str) -> bool:
+    """Return True if the version string contains path traversal or absolute path components.
+
+    Checks against both POSIX and Windows path semantics to ensure platform-independent
+    protection against directory traversal attacks.
+    """
+    posix = PurePosixPath(version)
+    windows = PureWindowsPath(version)
+    return (
+        posix.is_absolute()
+        or ".." in posix.parts
+        or windows.is_absolute()
+        or ".." in windows.parts
     )

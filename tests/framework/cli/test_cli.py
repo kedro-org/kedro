@@ -979,6 +979,17 @@ class TestRunCommand:
                 "dataset1:time1, dataset2:time2",
                 {"dataset1": "time1", "dataset2": "time2"},
             ],
+            [
+                "dataset1:2024-01-15T10.00.00.000Z",
+                {"dataset1": "2024-01-15T10.00.00.000Z"},
+            ],
+            [
+                "dataset1:2024-01-15T10.00.00.000Z,dataset2:2024-01-16T10.00.00.000Z",
+                {
+                    "dataset1": "2024-01-15T10.00.00.000Z",
+                    "dataset2": "2024-01-16T10.00.00.000Z",
+                },
+            ],
         ],
     )
     def test_split_load_versions(
@@ -1019,6 +1030,26 @@ class TestRunCommand:
             f"found {load_version} instead\n"
         )
         assert expected_output in result.output
+
+    @mark.parametrize(
+        "unsafe_version",
+        [
+            "dataset1:../../../secrets",  # POSIX traversal
+            "dataset1:..\\..\\..\\secrets",  # Windows traversal
+            "dataset1:/absolute/path",  # POSIX absolute
+            "dataset1:C:\\Users\\secrets",  # Windows absolute
+        ],
+    )
+    def test_fail_split_load_versions_path_traversal(
+        self, fake_project_cli, fake_metadata, unsafe_version
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--load-versions", unsafe_version],
+            obj=fake_metadata,
+        )
+        assert result.exit_code
+        assert "not allowed" in result.output
 
     @mark.parametrize(
         "from_nodes, expected",

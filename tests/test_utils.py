@@ -7,6 +7,7 @@ import pytest
 
 from kedro.utils import (
     KedroExperimentalWarning,
+    _is_unsafe_version,
     experimental,
     find_config_file,
     get_close_matches,
@@ -273,3 +274,41 @@ def test_find_config_file(tmp_path, monkeypatch, filename, expected_suffix):
 
     assert result is not None
     assert result.suffix == expected_suffix
+
+
+@pytest.mark.parametrize(
+    "version",
+    [
+        # POSIX traversal
+        "../../../secrets",
+        "../../etc/passwd",
+        "..",
+        "valid/../../../escape",
+        # Windows backslash traversal
+        "..\\..\\..\\secrets",
+        "valid\\..\\..\\escape",
+        # POSIX absolute
+        "/etc/passwd",
+        "/absolute/path",
+        # Windows absolute
+        "C:\\Users\\secrets",
+        "C:/Users/secrets",
+        "\\\\server\\share",
+    ],
+)
+def test_is_unsafe_version_rejects(version):
+    assert _is_unsafe_version(version) is True
+
+
+@pytest.mark.parametrize(
+    "version",
+    [
+        "2024-01-15T10.00.00.000Z",
+        "2019-01-01T23.59.59.999Z",
+        "my-custom-version",
+        "version1",
+        "*",
+    ],
+)
+def test_is_unsafe_version_allows(version):
+    assert _is_unsafe_version(version) is False

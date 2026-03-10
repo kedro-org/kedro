@@ -122,8 +122,9 @@ class TypeExtractor:
 
         return all_requirements
 
+    @staticmethod
     def _build_dataset_to_arg_mapping(
-        self, node: Node, signature: inspect.Signature
+        node: Node, signature: inspect.Signature
     ) -> dict[str, str]:
         """Build mapping from dataset names to function argument names.
 

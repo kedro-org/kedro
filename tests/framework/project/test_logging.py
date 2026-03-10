@@ -40,8 +40,12 @@ def test_project_logging_in_default_logging_config(default_logging_config_with_p
     assert logging.getLogger("test_project").level == logging.INFO
 
 
-def test_environment_variable_logging_config(monkeypatch, tmp_path):
-    config_path = Path(tmp_path) / "logging.yml"
+@pytest.mark.parametrize(
+    "logging_filename",
+    ["logging.yml", "logging.yaml"],
+)
+def test_environment_variable_logging_config(monkeypatch, tmp_path, logging_filename):
+    config_path = Path(tmp_path) / logging_filename
     monkeypatch.setenv("KEDRO_LOGGING_CONFIG", config_path.absolute())
     logging_config = {"version": 1, "loggers": {"kedro": {"level": "WARNING"}}}
     with config_path.open("w", encoding="utf-8") as f:
@@ -172,8 +176,12 @@ def test_has_rich_handler():
         assert not _has_rich_handler(test_logger)
 
 
-def test_default_logging_info_emission(monkeypatch, tmp_path, caplog):
-    config_path = (Path(tmp_path) / "conf" / "logging.yml").absolute()
+@pytest.mark.parametrize(
+    "logging_filename",
+    ["logging.yml", "logging.yaml"],
+)
+def test_default_logging_info_emission(monkeypatch, tmp_path, caplog, logging_filename):
+    config_path = (Path(tmp_path) / "conf" / logging_filename).absolute()
     config_path.parent.mkdir(parents=True)
     logging_config = {"version": 1, "loggers": {"kedro": {"level": "DEBUG"}}}
     with config_path.open("w", encoding="utf-8") as f:
@@ -216,6 +224,49 @@ def test_logger_without_rich_markup():
 
     for record in custom_handler.records:
         assert "[dark_orange]" not in record.message
+
+
+def test_configure_project_preserve_logging_keeps_runtime_handlers():
+    """Runtime-added handlers should survive configure_project() when preserve_logging=True.
+
+    Regression test for https://github.com/kedro-org/kedro/issues/4606:
+    calling configure_project() triggers dictConfig(), which resets the logging
+    state and silently discards any handlers added after the initial LOGGING setup.
+    """
+    custom_handler = logging.StreamHandler()
+    custom_handler.name = "custom_runtime_handler"
+    root_logger = logging.getLogger()
+    root_logger.addHandler(custom_handler)
+
+    try:
+        configure_project("test_project_preserve", preserve_logging=True)
+
+        handler_names = {h.name for h in root_logger.handlers}
+        assert "custom_runtime_handler" in handler_names
+        # The package logger should still be registered in LOGGING.data
+        assert "test_project_preserve" in LOGGING.data.get("loggers", {})
+    finally:
+        root_logger.removeHandler(custom_handler)
+
+
+def test_configure_project_overwrites_runtime_handlers_by_default():
+    """Without preserve_logging=True, configure_project() wipes runtime-added handlers.
+
+    This documents the existing (pre-fix) default behaviour and ensures we haven't
+    accidentally changed it.
+    """
+    custom_handler = logging.StreamHandler()
+    custom_handler.name = "custom_runtime_handler_default"
+    root_logger = logging.getLogger()
+    root_logger.addHandler(custom_handler)
+
+    try:
+        configure_project("test_project_no_preserve")
+
+        handler_names = {h.name for h in root_logger.handlers}
+        assert "custom_runtime_handler_default" not in handler_names
+    finally:
+        root_logger.removeHandler(custom_handler)
 
 
 def test_logger_with_invalid_markup_args():

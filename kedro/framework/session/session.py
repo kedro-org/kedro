@@ -30,7 +30,7 @@ from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project
 
-from .abstract_session import AbstractSession
+from .abstract_session import AbstractSession, KedroSessionError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -73,14 +73,6 @@ def _jsonify_cli_context(ctx: click.core.Context) -> dict[str, Any]:
         "command_name": ctx.command.name,
         "command_path": " ".join(["kedro"] + sys.argv[1:]),
     }
-
-
-class KedroSessionError(Exception):
-    """``KedroSessionError`` raised by ``KedroSession``
-    in the case that multiple runs are attempted in one session.
-    """
-
-    pass
 
 
 class KedroSession(AbstractSession):

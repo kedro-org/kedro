@@ -681,6 +681,88 @@ class TestAbstractVersionedDataset:
         ):
             my_versioned_dataset._fetch_latest_load_version()
 
+    def test_list_versions(self, my_versioned_dataset):
+        data = "test"
+
+        # First test no versions at all
+        assert len(my_versioned_dataset.list_versions()) == 0
+        assert my_versioned_dataset.list_versions(full_path=False) == []
+
+        # Now test with 3 versions
+        versions = ["version1", "version2", "version3"]
+
+        for version in versions:
+            my_versioned_dataset._version = Version(load=None, save=version)
+            my_versioned_dataset.save(data)
+
+        versions.reverse()
+
+        # Test with full_path=False (should return only version names)
+        assert versions == my_versioned_dataset.list_versions(full_path=False)
+
+        # Test with full_path=True (should return full paths)
+        full_paths = my_versioned_dataset.list_versions(full_path=True)
+        assert len(full_paths) == 3
+
+        # Verify paths end with expected pattern: <version>/<filename>
+        for i, full_path in enumerate(full_paths):
+            assert versions[i] in full_path
+            assert full_path.endswith("test.csv")
+
+    def test_get_version_from_path(self, my_versioned_dataset):
+        """Test that _get_version_from_path correctly extracts version from paths."""
+        # Test standard versioned path with forward slashes
+        path = "data/model.pkl/2024-01-15T10.30.00.000Z/model.pkl"
+        version = my_versioned_dataset._get_version_from_path(path)
+        assert version == "2024-01-15T10.30.00.000Z"
+
+    def test_list_versions_sorted(self, my_versioned_dataset):
+        """Test that list_versions returns versions in reverse chronological order."""
+        data = "test"
+
+        # Save versions in non-chronological order
+        versions = [
+            "2024-01-10T10.00.00.000Z",
+            "2024-01-15T10.00.00.000Z",
+            "2024-01-12T10.00.00.000Z",
+        ]
+
+        for version in versions:
+            my_versioned_dataset._version = Version(load=None, save=version)
+            my_versioned_dataset.save(data)
+
+        # Should be sorted in reverse chronological order (newest first)
+        result = my_versioned_dataset.list_versions(full_path=False)
+        expected = sorted(versions, reverse=True)
+        assert result == expected
+
+    @pytest.mark.parametrize(
+        "unsafe_version",
+        [
+            "../../../secrets",  # POSIX traversal
+            "..\\..\\..\\secrets",  # Windows traversal
+            "/etc/passwd",  # POSIX absolute
+            "C:\\Users\\secrets",  # Windows absolute
+            ".",  # single dot
+            "..",  # double dot
+            "",  # empty string
+            "foo/bar",  # subdirectory via POSIX separator
+            "foo\\bar",  # subdirectory via Windows separator
+        ],
+    )
+    def test_get_versioned_path_rejects_unsafe_versions(
+        self, my_versioned_dataset, unsafe_version
+    ):
+        """Unsafe version strings (traversal, absolute, dot, separator) must raise DatasetError."""
+        with pytest.raises(DatasetError, match="not allowed"):
+            my_versioned_dataset._get_versioned_path(unsafe_version)
+
+    def test_get_versioned_path_allows_valid_version(self, my_versioned_dataset):
+        """A legitimate timestamp version string must be accepted."""
+        version = "2024-01-15T10.00.00.000Z"
+        path = my_versioned_dataset._get_versioned_path(version)
+        assert version in str(path)
+
 
 class MyLegacyDataset(AbstractDataset):
     def __init__(self, filepath="", save_args=None, fs_args=None, var=None):

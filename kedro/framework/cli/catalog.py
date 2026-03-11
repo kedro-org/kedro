@@ -9,15 +9,15 @@ import yaml
 from click import secho
 
 from kedro.framework.cli.utils import env_option, split_string
-from kedro.framework.session import KedroSession
+from kedro.framework.project import settings
 
 if TYPE_CHECKING:
     from kedro.framework.startup import ProjectMetadata
 
 
-def _create_session(package_name: str, **kwargs: Any) -> KedroSession:
+def _create_session(package_name: str, **kwargs: Any) -> settings.SESSION_CLASS:  # type: ignore
     kwargs.setdefault("save_on_close", False)
-    return KedroSession.create(**kwargs)
+    return settings.SESSION_CLASS.create(**kwargs)
 
 
 @click.group(name="kedro")

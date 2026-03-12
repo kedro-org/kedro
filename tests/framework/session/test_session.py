@@ -24,10 +24,37 @@ from kedro.framework.project import (
     _HasSharedParentClassValidator,
     _ProjectSettings,
 )
-from kedro.framework.session import KedroSession
+from kedro.framework.session import AbstractSession, KedroSession
 from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.store import BaseSessionStore
 from kedro.utils import _has_rich_handler
+
+
+class _MinimalSession(AbstractSession):
+    """Minimal implementation of AbstractSession for testing."""
+
+    @classmethod
+    def create(cls, **kwargs):
+        return cls()
+
+    def close(self):
+        pass
+
+    def run(self, **kwargs):
+        return {}
+
+
+class TestAbstractSession:
+    def test_enter_returns_self(self):
+        session = _MinimalSession()
+        assert session.__enter__() is session
+
+    def test_exit_calls_close(self, mocker):
+        session = _MinimalSession()
+        mock_close = mocker.patch.object(session, "close")
+        session.__exit__(None, None, None)
+        mock_close.assert_called_once_with()
+
 
 _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"

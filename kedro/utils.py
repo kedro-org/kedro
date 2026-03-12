@@ -311,3 +311,12 @@ def find_config_file(
         (path.with_suffix(ext) for ext in extensions if path.with_suffix(ext).exists()),
         None,
     )
+
+
+def _is_unsafe_version(version: str) -> bool:
+    """Return True if the version string is not a safe single path component.
+
+    A valid version must be a non-empty string with no path separators (``/`` or ``\\``)
+    and must not be a dot-only component (``.`` or ``..``).
+    """
+    return not version or "/" in version or "\\" in version or version in (".", "..")

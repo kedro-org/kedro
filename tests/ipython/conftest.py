@@ -59,7 +59,7 @@ def fake_metadata(tmp_path):
 def mock_kedro_project(mocker, fake_metadata):
     mocker.patch("kedro.ipython.bootstrap_project", return_value=fake_metadata)
     mocker.patch("kedro.ipython.configure_project")
-    mocker.patch("kedro.ipython.KedroSession.create")
+    mocker.patch("kedro.framework.session.KedroSession.create")
 
 
 @pytest.fixture

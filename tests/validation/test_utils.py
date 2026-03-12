@@ -12,8 +12,8 @@ from kedro.validation.utils import (
     get_typed_fields,
     is_pydantic_class,
     is_pydantic_model,
-    resolve_nested_path,
-    set_nested_value,
+    resolve_nested_dict_path,
+    set_nested_dict_value,
 )
 
 from .conftest import SampleDataclass, SamplePydanticModel
@@ -92,45 +92,45 @@ class TestGetTypedFields:
             assert get_typed_fields({"x": 1}) is None
 
 
-class TestResolveNestedPath:
+class TestResolveNestedDictPath:
     def test_flat_key(self):
         data = {"test_size": 0.2}
-        assert resolve_nested_path(data, "test_size") == 0.2
+        assert resolve_nested_dict_path(data, "test_size") == 0.2
 
     def test_nested_key(self):
         data = {"model": {"options": {"test_size": 0.2}}}
-        assert resolve_nested_path(data, "model.options.test_size") == 0.2
+        assert resolve_nested_dict_path(data, "model.options.test_size") == 0.2
 
     def test_missing_flat_key(self):
         data = {"test_size": 0.2}
-        assert resolve_nested_path(data, "missing") is None
+        assert resolve_nested_dict_path(data, "missing") is None
 
     def test_missing_nested_key(self):
         data = {"model": {"options": {}}}
-        assert resolve_nested_path(data, "model.options.missing") is None
+        assert resolve_nested_dict_path(data, "model.options.missing") is None
 
     def test_intermediate_not_dict(self):
         data = {"model": "not_a_dict"}
-        assert resolve_nested_path(data, "model.options") is None
+        assert resolve_nested_dict_path(data, "model.options") is None
 
 
-class TestSetNestedValue:
+class TestSetNestedDictValue:
     def test_flat_key(self):
         data = {}
-        set_nested_value(data, "key", "value")
+        set_nested_dict_value(data, "key", "value")
         assert data["key"] == "value"
 
     def test_nested_key(self):
         data = {"model": {"options": {}}}
-        set_nested_value(data, "model.options.test_size", 0.3)
+        set_nested_dict_value(data, "model.options.test_size", 0.3)
         assert data["model"]["options"]["test_size"] == 0.3
 
     def test_creates_intermediate_dicts(self):
         data = {}
-        set_nested_value(data, "model.options.test_size", 0.3)
+        set_nested_dict_value(data, "model.options.test_size", 0.3)
         assert data["model"]["options"]["test_size"] == 0.3
 
     def test_intermediate_not_dict_raises(self):
         data = {"model": "not_a_dict"}
         with pytest.raises(ParameterValidationError, match="not a dictionary"):
-            set_nested_value(data, "model.options.test_size", 0.3)
+            set_nested_dict_value(data, "model.options.test_size", 0.3)

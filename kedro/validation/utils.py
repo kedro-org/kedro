@@ -43,7 +43,7 @@ def get_typed_fields(value: Any) -> dict[str, Any] | None:
     return None
 
 
-def resolve_nested_path(data: dict, path: str) -> Any:
+def resolve_nested_dict_path(data: dict, path: str) -> Any:
     """Resolve a dot-separated path in a nested dictionary.
 
     Returns None if any key in the path is missing.
@@ -63,7 +63,7 @@ def resolve_nested_path(data: dict, path: str) -> Any:
     return value
 
 
-def set_nested_value(data: dict, path: str, value: Any) -> None:
+def set_nested_dict_value(data: dict, path: str, value: Any) -> None:
     """Set a value at a dot-separated path, creating intermediate dicts as needed.
 
     Raises:

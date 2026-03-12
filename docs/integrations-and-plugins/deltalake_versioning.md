@@ -166,7 +166,7 @@ weather@delta:
   filepath: s3a://my_bucket/03_primary/weather
 ```
 
-If you are using the legacy `spark.SparkDataset` instead of `spark.SparkDatasetV2`, the catalog configuration is the same, but you will need to install the `hdfs` and `s3fs` dependencies explicitly, as they are not pulled in by the `spark-sparkdataset` extra:
+If you are using the legacy `spark.SparkDataset` instead of `spark.SparkDatasetV2`, the catalog configuration is the same. However, you will need to install the `hdfs` and `s3fs` dependencies explicitly. They are not pulled in by the `spark-sparkdataset` extra:
 
 ```bash
 kedro-datasets[spark-sparkdataset, hdfs-base, s3fs-base]

@@ -62,7 +62,7 @@ class TestProjectMetadataSnapshot:
         assert result["kedro_version"] == "1.2.0"
 
 
-class TestInspectProjectMetadata:
+class TestBuildProjectMetadataSnapshot:
     def test_builder_populates_all_fields(self, project_metadata):
         snapshot = _build_project_metadata_snapshot(project_metadata)
         assert snapshot.project_name == project_metadata.project_name

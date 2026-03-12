@@ -9,7 +9,7 @@ import pytest
 
 from kedro.framework.startup import ProjectMetadata
 from kedro.inspection.models import ProjectMetadataSnapshot
-from kedro.inspection.snapshot import inspect_project_metadata
+from kedro.inspection.snapshot import _build_project_metadata_snapshot
 
 
 @pytest.fixture
@@ -64,20 +64,20 @@ class TestProjectMetadataSnapshot:
 
 class TestInspectProjectMetadata:
     def test_builder_populates_all_fields(self, project_metadata):
-        snapshot = inspect_project_metadata(project_metadata)
+        snapshot = _build_project_metadata_snapshot(project_metadata)
         assert snapshot.project_name == project_metadata.project_name
         assert snapshot.package_name == project_metadata.package_name
 
     def test_kedro_version_matches_metadata(self, project_metadata):
-        snapshot = inspect_project_metadata(project_metadata)
+        snapshot = _build_project_metadata_snapshot(project_metadata)
         assert snapshot.kedro_version == project_metadata.kedro_init_version
 
     def test_returns_snapshot_instance(self, project_metadata):
-        snapshot = inspect_project_metadata(project_metadata)
+        snapshot = _build_project_metadata_snapshot(project_metadata)
         assert isinstance(snapshot, ProjectMetadataSnapshot)
 
     def test_no_file_io(self, project_metadata, mocker):
         """Builder must not perform any file I/O."""
         mock_open = mocker.patch("builtins.open")
-        inspect_project_metadata(project_metadata)
+        _build_project_metadata_snapshot(project_metadata)
         mock_open.assert_not_called()

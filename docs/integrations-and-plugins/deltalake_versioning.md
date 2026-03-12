@@ -12,7 +12,7 @@ In this example, you will use the `spaceflights-pandas` starter project which ha
 kedro new --starter spaceflights-pandas
 ```
 
-Kedro offers various connectors in the `kedro-datasets` package to interact with Delta tables: [`pandas.DeltaTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.DeltaTableDataset/), [`spark.DeltaTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/spark.DeltaTableDataset/), [`spark.SparkDatasetV2`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/spark.SparkDatasetV2/), [`spark.SparkDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/spark.SparkDataset/), [`databricks.ManagedTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/databricks.ManagedTableDataset/), and [`ibis.FileDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/ibis.FileDataset/) support the delta table format. In this tutorial, we will use the `pandas.DeltaTableDataset` connector to interact with Delta tables using Pandas DataFrames. To install `kedro-datasets` along with dependencies required for Delta Lake, add the following line to your `requirements.txt`:
+Kedro offers various connectors in the `kedro-datasets` package to interact with Delta tables: [`pandas.DeltaTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.DeltaTableDataset/), [`spark.DeltaTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/spark.DeltaTableDataset/), [`spark.SparkDatasetV2`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/spark.SparkDatasetV2/),[`databricks.ManagedTableDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/databricks.ManagedTableDataset/), and [`ibis.FileDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/ibis.FileDataset/) support the delta table format. In this tutorial, we will use the `pandas.DeltaTableDataset` connector to interact with Delta tables using Pandas DataFrames. To install `kedro-datasets` along with dependencies required for Delta Lake, add the following line to your `requirements.txt`:
 
 ```bash
 kedro-datasets[pandas-deltatabledataset]
@@ -166,35 +166,6 @@ weather@delta:
   filepath: s3a://my_bucket/03_primary/weather
 ```
 
-If you are using the legacy `spark.SparkDataset`, the catalog YAML looks the same. Unlike `SparkDatasetV2`, `SparkDataset` passes all `save_args`, including `mode` and `partitionBy`, as keyword arguments directly to `.save()`. You will also need to install `hdfs` and `s3fs` explicitly, as they are not pulled in by the `spark-sparkdataset` extra:
-
-```bash
-kedro-datasets[spark-sparkdataset, hdfs-base, s3fs-base]
-```
-
-```yaml
-temperature:
-  type: spark.SparkDataset
-  filepath: data/01_raw/data.csv
-  file_format: "csv"
-  load_args:
-    header: True
-    inferSchema: True
-  save_args:
-    sep: '|'
-    header: True
-
-weather@spark:
-  type: spark.SparkDataset
-  filepath: s3a://my_bucket/03_primary/weather
-  file_format: "delta"
-  save_args:
-    mode: "overwrite"
-
-weather@delta:
-  type: spark.DeltaTableDataset
-  filepath: s3a://my_bucket/03_primary/weather
-```
 
 !!! note
     The `DeltaTableDataset` does not support `save()` operation. Instead, pick the operation you want to perform (`DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`) and write it in your node code instead.

@@ -47,32 +47,6 @@ Create a configuration environment `conf/aws_batch` containing a `catalog.yml` f
 
     Internal datasets such as `data_processing.preprocessed_companies` and `data_processing.preprocessed_shuttles` are not listed here because they are produced and consumed within the `data_processing` namespace job and can remain in memory.
 
-Your `pipeline_registry.py` should register pipelines using the `Pipeline()` function with a `namespace` argument. For spaceflights this looks like:
-
-```python
-from kedro.pipeline import Pipeline
-
-from kedro_tutorial.pipelines import data_processing, data_science
-
-
-def register_pipelines():
-    dp_pipeline = Pipeline(
-        data_processing.create_pipeline(),
-        namespace="data_processing",
-        inputs={"companies", "shuttles", "reviews"},
-        outputs={"model_input_table"},
-    )
-    ds_pipeline = Pipeline(
-        data_science.create_pipeline(),
-        namespace="data_science",
-        inputs={"model_input_table"},
-    )
-    return {
-        "__default__": dp_pipeline + ds_pipeline,
-        "data_processing": dp_pipeline,
-        "data_science": ds_pipeline,
-    }
-```
 
 ## Run a Kedro pipeline with AWS Batch
 
@@ -80,7 +54,7 @@ def register_pipelines():
 
 Containerise your Kedro project with a preferred container solution (for example, [Docker](https://www.docker.com/)) to build an image for AWS Batch.
 
-This walk-through assumes a Docker workflow. Use the [Kedro-Docker plugin](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to streamline the build. [Instructions are in the plugin README](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
+This walk-through assumes a Docker workflow. Use the [Kedro-Docker plugin](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to streamline the build. [Instructions are in the plugin README](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-docker/README.md).
 
 After you build the Docker image locally, [transfer the image to a container registry](../single_machine.md#how-to-use-container-registry), such as [AWS ECR](https://aws.amazon.com/ecr/). You can follow Amazon's [ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html) or open the repository in the [ECR dashboard](https://console.aws.amazon.com/ecr) and click `View push commands` for tailored steps.
 

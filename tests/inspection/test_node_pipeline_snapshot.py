@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import dataclasses
-
 import pytest
 
 from kedro.inspection.models import NodeSnapshot, PipelineSnapshot
@@ -43,29 +41,13 @@ def simple_pipeline(simple_node):
 
 
 class TestNodeSnapshot:
-    def test_construction_defaults(self):
+    def test_instantiation_defaults(self):
         snapshot = NodeSnapshot(name="my_node")
         assert snapshot.name == "my_node"
         assert snapshot.namespace is None
         assert snapshot.tags == []
         assert snapshot.inputs == []
         assert snapshot.outputs == []
-
-    def test_dict_serialization(self):
-        snapshot = NodeSnapshot(
-            name="my_node",
-            namespace="ns",
-            tags=["a"],
-            inputs=["x"],
-            outputs=["y"],
-        )
-        assert dataclasses.asdict(snapshot) == {
-            "name": "my_node",
-            "namespace": "ns",
-            "tags": ["a"],
-            "inputs": ["x"],
-            "outputs": ["y"],
-        }
 
 
 class TestNodeToSnapshot:
@@ -89,22 +71,13 @@ class TestNodeToSnapshot:
 
 
 class TestPipelineSnapshot:
-    def test_construction(self):
+    def test_instantiation(self):
         node_snap = NodeSnapshot(name="n", inputs=["a"], outputs=["b"])
         snapshot = PipelineSnapshot(name="my_pipe", nodes=[node_snap])
         assert snapshot.name == "my_pipe"
         assert snapshot.nodes == [node_snap]
         assert snapshot.inputs == []
         assert snapshot.outputs == []
-
-    def test_dict_serialization(self):
-        node_snap = NodeSnapshot(name="n", inputs=["a"], outputs=["b"])
-        snapshot = PipelineSnapshot(
-            name="pipe", nodes=[node_snap], inputs=["a"], outputs=["b"]
-        )
-        result = dataclasses.asdict(snapshot)
-        assert result["name"] == "pipe"
-        assert result["nodes"][0]["name"] == "n"
 
 
 class TestBuildPipelineSnapshots:

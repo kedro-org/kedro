@@ -1,69 +1,35 @@
-"""Tests for DatasetSnapshot model and _build_catalog_snapshot builder."""
+"""Tests for DatasetSnapshot model and _build_dataset_snapshots builder."""
 
 from __future__ import annotations
 
 import pytest
-import yaml
 
 from kedro.config import MissingConfigException
-from kedro.inspection import snapshot as inspection_snapshot
 from kedro.inspection.models import DatasetSnapshot
-from kedro.inspection.snapshot import _build_catalog_snapshot, _is_parameter
+from kedro.inspection.snapshot import _build_dataset_snapshots
 
 
 @pytest.fixture
-def configured_inspection_settings(monkeypatch):
-    monkeypatch.setattr(inspection_snapshot.settings, "CONF_SOURCE", "conf")
-    monkeypatch.setattr(
-        inspection_snapshot.settings,
-        "CONFIG_LOADER_ARGS",
-        {"base_env": "base", "default_run_env": "local"},
-    )
+def config_loader(mocker):
+    return mocker.MagicMock()
 
 
 @pytest.fixture
-def project_dir(tmp_path):
-    """Create a minimal project directory with catalog and parameters config."""
-    conf_base = tmp_path / "conf" / "base"
-    conf_base.mkdir(parents=True)
-
-    catalog = {
+def catalog_config():
+    return {
         "companies": {
             "type": "pandas.CSVDataset",
             "filepath": "data/01_raw/companies.csv",
-        },
-        "reviews": {
-            "type": "pandas.CSVDataset",
-            "filepath": "data/01_raw/reviews.csv",
         },
         "shuttles": {
             "type": "pandas.ExcelDataset",
             "filepath": "data/01_raw/shuttles.xlsx",
         },
     }
-    (conf_base / "catalog.yml").write_text(yaml.safe_dump(catalog))
-
-    parameters = {
-        "model_options": {
-            "test_size": 0.2,
-            "features": ["engine", "passenger_capacity"],
-        },
-        "train_fraction": 0.8,
-    }
-    (conf_base / "parameters.yml").write_text(yaml.safe_dump(parameters))
-
-    return tmp_path
-
-
-@pytest.fixture
-def empty_project_dir(tmp_path):
-    conf_base = tmp_path / "conf" / "base"
-    conf_base.mkdir(parents=True)
-    return tmp_path
 
 
 class TestDatasetSnapshot:
-    def test_construction(self):
+    def test_instantiation(self):
         snapshot = DatasetSnapshot(
             name="companies",
             type="pandas.CSVDataset",
@@ -73,84 +39,68 @@ class TestDatasetSnapshot:
         assert snapshot.type == "pandas.CSVDataset"
         assert snapshot.filepath == "data/01_raw/companies.csv"
 
-    def test_filepath_default_none(self):
-        snapshot = DatasetSnapshot(name="x", type="t")
+    def test_filepath_defaults_to_none(self):
+        snapshot = DatasetSnapshot(name="x", type="kedro.io.MemoryDataset")
         assert snapshot.filepath is None
 
 
-class TestIsParameter:
-    def test_identifies_parameter_names(self):
-        assert _is_parameter("parameters")
-        assert _is_parameter("params:model_options")
-        assert not _is_parameter("companies")
+class TestBuildDatasetSnapshots:
+    def test_datasets_populated(self, config_loader, catalog_config):
+        config_loader.__getitem__.return_value = catalog_config
+        snapshots = _build_dataset_snapshots(config_loader)
+        assert set(snapshots.keys()) == {"companies", "shuttles"}
 
+    def test_returns_dataset_snapshot_instances(self, config_loader, catalog_config):
+        config_loader.__getitem__.return_value = catalog_config
+        snapshots = _build_dataset_snapshots(config_loader)
+        assert all(isinstance(s, DatasetSnapshot) for s in snapshots.values())
 
-@pytest.mark.usefixtures("configured_inspection_settings")
-class TestBuildCatalogSnapshot:
-    def test_datasets_populated(self, project_dir):
-        datasets, _ = _build_catalog_snapshot(project_dir, "base")
-        assert set(datasets.keys()) == {"companies", "reviews", "shuttles"}
-        assert isinstance(datasets["companies"], DatasetSnapshot)
-        assert datasets["companies"].type == "pandas.CSVDataset"
-        assert datasets["shuttles"].type == "pandas.ExcelDataset"
-        assert datasets["companies"].filepath == "data/01_raw/companies.csv"
+    def test_type_and_filepath_correct(self, config_loader, catalog_config):
+        config_loader.__getitem__.return_value = catalog_config
+        snapshots = _build_dataset_snapshots(config_loader)
+        assert snapshots["companies"].type == "pandas.CSVDataset"
+        assert snapshots["companies"].filepath == "data/01_raw/companies.csv"
+        assert snapshots["shuttles"].type == "pandas.ExcelDataset"
 
-    def test_parameter_keys_sorted_names_only(self, project_dir):
-        _, parameter_keys = _build_catalog_snapshot(project_dir, "base")
-        assert parameter_keys == [
-            "parameters",
-            "params:model_options",
-            "params:model_options.features",
-            "params:model_options.test_size",
-            "params:train_fraction",
-        ]
-
-    def test_empty_catalog(self, empty_project_dir):
-        """Returns empty dict when catalog.yml is missing."""
-        datasets, _ = _build_catalog_snapshot(empty_project_dir, "base")
-        assert datasets == {}
-
-    def test_missing_parameters_graceful(self, empty_project_dir):
-        """Returns empty parameter_keys list when parameters.yml is missing."""
-        _, parameter_keys = _build_catalog_snapshot(empty_project_dir, "base")
-        assert parameter_keys == []
-
-    def test_factory_patterns_are_excluded_from_dataset_snapshots(self, tmp_path):
-        conf_base = tmp_path / "conf" / "base"
-        conf_base.mkdir(parents=True)
-        catalog = {
-            "{namespace}.int_{name}": {
-                "type": "pandas.CSVDataset",
-                "filepath": "data/01_raw/{name}.csv",
-            },
-            "companies": {
-                "type": "pandas.CSVDataset",
-                "filepath": "data/01_raw/companies.csv",
-            },
+    def test_missing_type_defaults_to_empty_string(self, config_loader):
+        config_loader.__getitem__.return_value = {
+            "memory_ds": {"filepath": "data.csv"},
         }
-        (conf_base / "catalog.yml").write_text(yaml.safe_dump(catalog))
+        snapshots = _build_dataset_snapshots(config_loader)
+        assert snapshots["memory_ds"].type == ""
 
-        datasets, _ = _build_catalog_snapshot(tmp_path, "base")
+    def test_missing_filepath_defaults_to_none(self, config_loader):
+        config_loader.__getitem__.return_value = {
+            "memory_ds": {"type": "kedro.io.MemoryDataset"},
+        }
+        snapshots = _build_dataset_snapshots(config_loader)
+        assert snapshots["memory_ds"].filepath is None
 
-        assert set(datasets) == {"companies"}
+    def test_empty_catalog_on_key_error(self, config_loader):
+        config_loader.__getitem__.side_effect = KeyError("catalog")
+        assert _build_dataset_snapshots(config_loader) == {}
 
-    def test_missing_config_sections_are_handled_gracefully(self, tmp_path, mocker):
-        config_loader = mocker.MagicMock()
+    def test_empty_catalog_on_missing_config(self, config_loader):
+        config_loader.__getitem__.side_effect = MissingConfigException("catalog")
+        assert _build_dataset_snapshots(config_loader) == {}
 
-        def _get_config_value(key):
-            if key == "catalog":
-                raise KeyError("catalog")
-            if key in {"credentials", "parameters"}:
-                raise MissingConfigException(key)
-            return {}
+    def test_yaml_interpolation_anchors_excluded(self, config_loader):
+        config_loader.__getitem__.return_value = {
+            "_csv_default": {"type": "pandas.CSVDataset"},
+            "companies": {"type": "pandas.CSVDataset", "filepath": "companies.csv"},
+        }
+        snapshots = _build_dataset_snapshots(config_loader)
+        assert "_csv_default" not in snapshots
+        assert "companies" in snapshots
 
-        config_loader.__getitem__.side_effect = _get_config_value
-        mocker.patch(
-            "kedro.inspection.snapshot._make_config_loader",
-            return_value=config_loader,
-        )
-
-        datasets, parameter_keys = _build_catalog_snapshot(tmp_path, "base")
-
-        assert datasets == {}
-        assert parameter_keys == []
+    def test_factory_patterns_included(self, config_loader):
+        config_loader.__getitem__.return_value = {
+            "{namespace}.{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{name}.csv",
+            },
+            "companies": {"type": "pandas.CSVDataset", "filepath": "companies.csv"},
+        }
+        snapshots = _build_dataset_snapshots(config_loader)
+        assert "{namespace}.{name}" in snapshots
+        assert snapshots["{namespace}.{name}"].type == "pandas.CSVDataset"

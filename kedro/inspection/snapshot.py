@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from kedro.framework.project import pipelines
@@ -13,6 +12,8 @@ from kedro.inspection.models import (
 )
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from kedro.framework.startup import ProjectMetadata
     from kedro.pipeline.node import Node
 

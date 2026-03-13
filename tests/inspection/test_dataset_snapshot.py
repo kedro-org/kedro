@@ -7,8 +7,20 @@ import dataclasses
 import pytest
 import yaml
 
+from kedro.config import MissingConfigException
+from kedro.inspection import snapshot as inspection_snapshot
 from kedro.inspection.models import DatasetSnapshot
-from kedro.inspection.snapshot import _build_catalog_snapshot
+from kedro.inspection.snapshot import _build_catalog_snapshot, _is_parameter
+
+
+@pytest.fixture
+def configured_inspection_settings(monkeypatch):
+    monkeypatch.setattr(inspection_snapshot.settings, "CONF_SOURCE", "conf")
+    monkeypatch.setattr(
+        inspection_snapshot.settings,
+        "CONFIG_LOADER_ARGS",
+        {"base_env": "base", "default_run_env": "local"},
+    )
 
 
 @pytest.fixture
@@ -31,7 +43,7 @@ def project_dir(tmp_path):
             "filepath": "data/01_raw/shuttles.xlsx",
         },
     }
-    (conf_base / "catalog.yml").write_text(yaml.dump(catalog))
+    (conf_base / "catalog.yml").write_text(yaml.safe_dump(catalog))
 
     parameters = {
         "model_options": {
@@ -40,8 +52,15 @@ def project_dir(tmp_path):
         },
         "train_fraction": 0.8,
     }
-    (conf_base / "parameters.yml").write_text(yaml.dump(parameters))
+    (conf_base / "parameters.yml").write_text(yaml.safe_dump(parameters))
 
+    return tmp_path
+
+
+@pytest.fixture
+def empty_project_dir(tmp_path):
+    conf_base = tmp_path / "conf" / "base"
+    conf_base.mkdir(parents=True)
     return tmp_path
 
 
@@ -74,84 +93,85 @@ class TestDatasetSnapshot:
         }
 
 
+class TestIsParameter:
+    def test_identifies_parameter_names(self):
+        assert _is_parameter("parameters")
+        assert _is_parameter("params:model_options")
+        assert not _is_parameter("companies")
+
+
+@pytest.mark.usefixtures("configured_inspection_settings")
 class TestBuildCatalogSnapshot:
-    def test_datasets_populated(self, project_dir, mocker):
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONF_SOURCE", "conf"
-        )
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONFIG_LOADER_ARGS",
-            {"base_env": "base", "default_run_env": "local"},
-        )
+    def test_datasets_populated(self, project_dir):
         datasets, _ = _build_catalog_snapshot(project_dir, "base")
         assert set(datasets.keys()) == {"companies", "reviews", "shuttles"}
+        assert isinstance(datasets["companies"], DatasetSnapshot)
 
-    def test_type_resolved_correctly(self, project_dir, mocker):
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONF_SOURCE", "conf"
-        )
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONFIG_LOADER_ARGS",
-            {"base_env": "base", "default_run_env": "local"},
-        )
+    def test_type_resolved_correctly(self, project_dir):
         datasets, _ = _build_catalog_snapshot(project_dir, "base")
         assert datasets["companies"].type == "pandas.CSVDataset"
         assert datasets["shuttles"].type == "pandas.ExcelDataset"
 
-    def test_filepath_resolved_correctly(self, project_dir, mocker):
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONF_SOURCE", "conf"
-        )
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONFIG_LOADER_ARGS",
-            {"base_env": "base", "default_run_env": "local"},
-        )
+    def test_filepath_resolved_correctly(self, project_dir):
         datasets, _ = _build_catalog_snapshot(project_dir, "base")
         assert datasets["companies"].filepath == "data/01_raw/companies.csv"
 
-    def test_parameter_keys_sorted_names_only(self, project_dir, mocker):
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONF_SOURCE", "conf"
-        )
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONFIG_LOADER_ARGS",
-            {"base_env": "base", "default_run_env": "local"},
-        )
+    def test_parameter_keys_sorted_names_only(self, project_dir):
         _, parameter_keys = _build_catalog_snapshot(project_dir, "base")
-        assert parameter_keys == sorted(parameter_keys)
-        assert "parameters" in parameter_keys
-        assert "params:model_options" in parameter_keys
-        assert "params:train_fraction" in parameter_keys
-        assert "params:model_options.test_size" in parameter_keys
-        assert "params:model_options.features" in parameter_keys
-        # Values must never appear
-        assert 0.2 not in parameter_keys
-        assert 0.8 not in parameter_keys
+        assert parameter_keys == [
+            "parameters",
+            "params:model_options",
+            "params:model_options.features",
+            "params:model_options.test_size",
+            "params:train_fraction",
+        ]
 
-    def test_empty_catalog(self, tmp_path, mocker):
+    def test_empty_catalog(self, empty_project_dir):
         """Returns empty dict when catalog.yml is missing."""
-        conf_base = tmp_path / "conf" / "base"
-        conf_base.mkdir(parents=True)
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONF_SOURCE", "conf"
-        )
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONFIG_LOADER_ARGS",
-            {"base_env": "base", "default_run_env": "local"},
-        )
-        datasets, _ = _build_catalog_snapshot(tmp_path, "base")
+        datasets, _ = _build_catalog_snapshot(empty_project_dir, "base")
         assert datasets == {}
 
-    def test_missing_parameters_graceful(self, tmp_path, mocker):
+    def test_missing_parameters_graceful(self, empty_project_dir):
         """Returns empty parameter_keys list when parameters.yml is missing."""
+        _, parameter_keys = _build_catalog_snapshot(empty_project_dir, "base")
+        assert parameter_keys == []
+
+    def test_factory_patterns_are_excluded_from_dataset_snapshots(self, tmp_path):
         conf_base = tmp_path / "conf" / "base"
         conf_base.mkdir(parents=True)
+        catalog = {
+            "{namespace}.int_{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/01_raw/{name}.csv",
+            },
+            "companies": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        (conf_base / "catalog.yml").write_text(yaml.safe_dump(catalog))
+
+        datasets, _ = _build_catalog_snapshot(tmp_path, "base")
+
+        assert set(datasets) == {"companies"}
+
+    def test_missing_config_sections_are_handled_gracefully(self, tmp_path, mocker):
+        config_loader = mocker.MagicMock()
+
+        def _get_config_value(key):
+            if key == "catalog":
+                raise KeyError("catalog")
+            if key in {"credentials", "parameters"}:
+                raise MissingConfigException(key)
+            return {}
+
+        config_loader.__getitem__.side_effect = _get_config_value
         mocker.patch(
-            "kedro.inspection.snapshot.settings.CONF_SOURCE", "conf"
+            "kedro.inspection.snapshot._make_config_loader",
+            return_value=config_loader,
         )
-        mocker.patch(
-            "kedro.inspection.snapshot.settings.CONFIG_LOADER_ARGS",
-            {"base_env": "base", "default_run_env": "local"},
-        )
-        _, parameter_keys = _build_catalog_snapshot(tmp_path, "base")
+
+        datasets, parameter_keys = _build_catalog_snapshot(tmp_path, "base")
+
+        assert datasets == {}
         assert parameter_keys == []

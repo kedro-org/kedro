@@ -9,11 +9,13 @@ from kedro.inspection.models import (
     NodeSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
+    DatasetSnapshot, 
+    ProjectMetadataSnapshot
 )
+from kedro.config import MissingConfigException
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
+    from kedro.config import AbstractConfigLoader
     from kedro.framework.startup import ProjectMetadata
     from kedro.pipeline.node import Node
 
@@ -21,13 +23,16 @@ if TYPE_CHECKING:
 def _build_project_metadata_snapshot(
     metadata: ProjectMetadata,
 ) -> ProjectMetadataSnapshot:
-    """Build `ProjectMetadataSnapshot` from `ProjectMetadata` NamedTuple.
+    """Build a ``ProjectMetadataSnapshot`` from a ``ProjectMetadata`` namedtuple.
+
+    Performs no file I/O; all information is taken directly from *metadata*,
+    which is produced by :func:`kedro.framework.startup.bootstrap_project`.
 
     Args:
-        metadata: Project metadata NamedTuple.
+        metadata: Project metadata namedtuple returned by ``bootstrap_project()``.
 
     Returns:
-        Read-only snapshot of the project's metadata.
+        Read-only snapshot of the project's identity metadata.
     """
     return ProjectMetadataSnapshot(
         project_name=metadata.project_name,
@@ -73,3 +78,29 @@ def _build_pipeline_snapshots() -> list[PipelineSnapshot]:
             )
         )
     return snapshots
+
+def _build_dataset_snapshots(
+    config_loader: AbstractConfigLoader,
+) -> dict[str, DatasetSnapshot]:
+    """Build a ``DatasetSnapshot`` for every entry in the catalog configuration.
+
+    Args:
+        config_loader: Config loader instance.
+
+    Returns:
+        Mapping of dataset name to its snapshot.
+    """
+    try:
+        conf_catalog: dict[str, Any] = config_loader["catalog"]
+    except (KeyError, MissingConfigException):
+        return {}
+
+    return {
+        ds_name: DatasetSnapshot(
+            name=ds_name,
+            type=ds_config.get("type", ""),
+            filepath=ds_config.get("filepath"),
+        )
+        for ds_name, ds_config in conf_catalog.items()
+        if not ds_name.startswith("_")  # skip YAML interpolation anchors
+    }

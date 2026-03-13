@@ -70,6 +70,25 @@ Two IAM roles are required:
 
 2. **Job role** (`batchJobRole`) — grants the container access to your data. If you store datasets in S3, create an IAM role and attach the `AmazonS3FullAccess` policy (or a scoped-down policy following least-privilege). This role is specified on the job definition as the **job role**, not the execution role.
 
+Role A: ECS Task Execution Role
+
+Go to IAM → Roles → Create role
+Trusted entity: AWS service, use case: Elastic Container Service → Elastic Container Service Task
+Attach the managed policy: AmazonECSTaskExecutionRolePolicy
+Name it something like ecsTaskExecutionRole
+Create the role
+
+This lets Batch/ECS pull your image from ECR and write to CloudWatch.
+Role B: Job Role (batchJobRole)
+
+Go to IAM → Roles → Create role
+Trusted entity: AWS service, use case: Elastic Container Service → Elastic Container Service Task (same as above — Batch jobs run as ECS tasks)
+Attach AmazonS3FullAccess (or a scoped-down S3 policy if you prefer least-privilege)
+Name it batchJobRole
+Create the role
+
+This is what your container uses at runtime to read/write S3 datasets.
+
 #### Create AWS Batch job definition
 
 Job definitions specify the resources needed to run a job. Create a job definition named `kedro_run`:
@@ -94,7 +113,7 @@ Job definitions specify the resources needed to run a job. Create a job definiti
 
 #### Create AWS Batch compute environment
 
-Create a managed, on-demand EC2 compute environment named `spaceflights_env`. Let AWS create the service and instance roles if none exist. A managed environment lets AWS scale instances automatically.
+Create a managed, on-demand EC2 compute environment named `spaceflights_env`. Let AWS create the service and instance roles if none exist, you have to follow the steps in the UI for this. A managed environment lets AWS scale instances automatically.
 
 !!! note
     The compute environment contains no instances until you trigger the pipeline run, so creating it does not incur immediate cost.

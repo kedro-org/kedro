@@ -28,6 +28,13 @@ def catalog_config():
     }
 
 
+@pytest.fixture
+def empty_project_dir(tmp_path):
+    conf_base = tmp_path / "conf" / "base"
+    conf_base.mkdir(parents=True)
+    return tmp_path
+
+
 class TestDatasetSnapshot:
     def test_instantiation(self):
         snapshot = DatasetSnapshot(

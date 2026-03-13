@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from pathlib import Path
 
 from kedro.framework.project import pipelines
 from kedro.framework.startup import bootstrap_project

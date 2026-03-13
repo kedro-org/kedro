@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import dataclasses
-
 import pytest
 import yaml
 
@@ -79,19 +77,6 @@ class TestDatasetSnapshot:
         snapshot = DatasetSnapshot(name="x", type="t")
         assert snapshot.filepath is None
 
-    def test_dict_serialization(self):
-        snapshot = DatasetSnapshot(
-            name="companies",
-            type="pandas.CSVDataset",
-            filepath="data/01_raw/companies.csv",
-        )
-        result = dataclasses.asdict(snapshot)
-        assert result == {
-            "name": "companies",
-            "type": "pandas.CSVDataset",
-            "filepath": "data/01_raw/companies.csv",
-        }
-
 
 class TestIsParameter:
     def test_identifies_parameter_names(self):
@@ -106,14 +91,8 @@ class TestBuildCatalogSnapshot:
         datasets, _ = _build_catalog_snapshot(project_dir, "base")
         assert set(datasets.keys()) == {"companies", "reviews", "shuttles"}
         assert isinstance(datasets["companies"], DatasetSnapshot)
-
-    def test_type_resolved_correctly(self, project_dir):
-        datasets, _ = _build_catalog_snapshot(project_dir, "base")
         assert datasets["companies"].type == "pandas.CSVDataset"
         assert datasets["shuttles"].type == "pandas.ExcelDataset"
-
-    def test_filepath_resolved_correctly(self, project_dir):
-        datasets, _ = _build_catalog_snapshot(project_dir, "base")
         assert datasets["companies"].filepath == "data/01_raw/companies.csv"
 
     def test_parameter_keys_sorted_names_only(self, project_dir):

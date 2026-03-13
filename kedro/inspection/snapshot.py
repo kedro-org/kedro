@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from kedro.config import MissingConfigException
@@ -12,6 +11,8 @@ from kedro.inspection.models import DatasetSnapshot, ProjectMetadataSnapshot
 from kedro.io.catalog_config_resolver import CatalogConfigResolver
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from kedro.framework.startup import ProjectMetadata
 
 
@@ -61,6 +62,14 @@ def _make_config_loader(project_path: Path, env: str) -> OmegaConfigLoader:
     )
 
 
+def _load_config_section(config_loader: OmegaConfigLoader, key: str) -> dict[str, Any]:
+    """Load a configuration section, returning an empty dict when absent."""
+    try:
+        return config_loader[key]
+    except (KeyError, MissingConfigException):
+        return {}
+
+
 def _flatten_parameter_keys(params: dict[str, Any], prefix: str = "") -> list[str]:
     """Recursively collect parameter keys in ``params:`` notation.
 
@@ -93,18 +102,8 @@ def _build_catalog_snapshot(
         A tuple of (datasets dict, sorted parameter keys).
     """
     config_loader = _make_config_loader(project_path, env)
-
-    # Load catalog config
-    try:
-        conf_catalog = config_loader["catalog"]
-    except (KeyError, MissingConfigException):
-        conf_catalog = {}
-
-    # Load credentials
-    try:
-        conf_creds = config_loader["credentials"]
-    except (KeyError, MissingConfigException):
-        conf_creds = {}
+    conf_catalog = _load_config_section(config_loader, "catalog")
+    conf_creds = _load_config_section(config_loader, "credentials")
 
     # Resolve catalog entries
     datasets: dict[str, DatasetSnapshot] = {}
@@ -121,12 +120,7 @@ def _build_catalog_snapshot(
                 filepath=ds_config.get("filepath"),
             )
 
-    # Load parameters and build keys
-    try:
-        params = config_loader["parameters"]
-    except (KeyError, MissingConfigException):
-        params = {}
-
+    params = _load_config_section(config_loader, "parameters")
     parameter_keys: list[str] = []
     if params:
         parameter_keys.append("parameters")

@@ -99,22 +99,26 @@ class TestExtractTypesFromPipelines:
         assert result["eval_config"] == SampleDataclass
 
     def test_conflicting_types_warns(self, type_extractor, caplog):
-        """When two pipelines define different types for the same key, warn.
+        """When two pipelines define different types for the same key, warn."""
 
-        Uses MagicMock because get_type_hints cannot resolve types
-        defined inside a function scope.
-        """
-        node_a = MagicMock()
-        node_a.func = lambda opts: None
-        node_a.func.__annotations__ = {"opts": _TypeA}
-        node_a.func.__name__ = "func_a"
-        node_a.inputs = ["params:shared_config"]
+        def func_a(opts: _TypeA) -> None:
+            pass
 
-        node_b = MagicMock()
-        node_b.func = lambda opts: None
-        node_b.func.__annotations__ = {"opts": _TypeB}
-        node_b.func.__name__ = "func_b"
-        node_b.inputs = ["params:shared_config"]
+        def func_b(opts: _TypeB) -> None:
+            pass
+
+        node_a = kedro_node(
+            func=func_a,
+            inputs="params:shared_config",
+            outputs="output_a",
+            name="node_a",
+        )
+        node_b = kedro_node(
+            func=func_b,
+            inputs="params:shared_config",
+            outputs="output_b",
+            name="node_b",
+        )
 
         pipeline_a = MagicMock()
         pipeline_a.nodes = [node_a]

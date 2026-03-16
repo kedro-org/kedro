@@ -7,6 +7,7 @@ import dataclasses
 import pytest
 from pydantic import BaseModel
 
+from kedro.validation.parameter_validator import ParameterValidator
 from kedro.validation.type_extractor import TypeExtractor
 
 
@@ -24,3 +25,8 @@ class SamplePydanticModel(BaseModel):
 @pytest.fixture
 def type_extractor():
     return TypeExtractor()
+
+
+@pytest.fixture
+def parameter_validator():
+    return ParameterValidator()

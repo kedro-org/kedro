@@ -6,10 +6,10 @@ import copy
 import logging
 from typing import Any
 
-from .exceptions import ValidationError
-from .model_factory import ModelFactory
-from .source_filters import ParameterSourceFilter
+from .exceptions import ParameterValidationError
+from .model_factory import instantiate_model
 from .type_extractor import TypeExtractor
+from .utils import resolve_nested_dict_path, set_nested_dict_value
 
 logger = logging.getLogger(__name__)
 
@@ -19,14 +19,13 @@ class ParameterValidator:
 
     def __init__(self) -> None:
         """Initialize parameter validator."""
-        self.type_extractor = TypeExtractor(ParameterSourceFilter())
-        self.model_factory = ModelFactory()
+        self.type_extractor = TypeExtractor()
 
-    def get_pipeline_requirements(self) -> dict[str, type]:
+    def _get_pipeline_requirements(self) -> dict[str, type]:
         """Get all parameter type requirements from available pipelines."""
         return self.type_extractor.extract_types_from_pipelines()
 
-    def apply_validation(self, raw_params: dict, requirements: dict) -> dict:
+    def _apply_validation(self, raw_params: dict, requirements: dict) -> dict:
         """Apply validation to parameters and return transformed dictionary.
 
         Args:
@@ -37,7 +36,7 @@ class ParameterValidator:
             Transformed parameters dictionary with validated models.
 
         Raises:
-            ValidationError: If any parameter fails validation.
+            ParameterValidationError: If any parameter fails validation.
         """
         transformed_params = copy.deepcopy(raw_params)
 
@@ -46,9 +45,7 @@ class ParameterValidator:
 
         for param_key, expected_type in requirements.items():
             try:
-                raw_value = self.type_extractor.resolve_nested_path(
-                    raw_params, param_key
-                )
+                raw_value = resolve_nested_dict_path(raw_params, param_key)
 
                 if raw_value is None:
                     logger.debug(
@@ -57,12 +54,12 @@ class ParameterValidator:
                     )
                     continue
 
-                validated_instance = self.model_factory.instantiate(
+                validated_instance = instantiate_model(
                     param_key, raw_value, expected_type
                 )
 
                 if validated_instance is not raw_value:
-                    self.type_extractor.set_nested_value(
+                    set_nested_dict_value(
                         transformed_params, param_key, validated_instance
                     )
                     instantiated_count += 1
@@ -86,7 +83,7 @@ class ParameterValidator:
             error_message = "Parameter validation failed:\n" + "\n".join(
                 f"- {error}" for error in validation_errors
             )
-            raise ValidationError(error_message)
+            raise ParameterValidationError(error_message)
 
         return transformed_params
 
@@ -100,9 +97,9 @@ class ParameterValidator:
             Validated and transformed parameters.
 
         Raises:
-            ValidationError: If validation fails.
+            ParameterValidationError: If validation fails.
         """
-        requirements = self.get_pipeline_requirements()
+        requirements = self._get_pipeline_requirements()
 
         if not requirements:
             logger.info(
@@ -110,4 +107,4 @@ class ParameterValidator:
             )
             return raw_params
 
-        return self.apply_validation(raw_params, requirements)
+        return self._apply_validation(raw_params, requirements)

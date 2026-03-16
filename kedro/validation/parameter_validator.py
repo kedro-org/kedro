@@ -21,10 +21,6 @@ class ParameterValidator:
         """Initialize parameter validator."""
         self.type_extractor = TypeExtractor()
 
-    def _get_pipeline_requirements(self) -> dict[str, type]:
-        """Get all parameter type requirements from available pipelines."""
-        return self.type_extractor.extract_types_from_pipelines()
-
     def _apply_validation(self, raw_params: dict, requirements: dict) -> dict:
         """Apply validation to parameters and return transformed dictionary.
 
@@ -99,7 +95,7 @@ class ParameterValidator:
         Raises:
             ParameterValidationError: If validation fails.
         """
-        requirements = self._get_pipeline_requirements()
+        requirements = self.type_extractor.extract_types_from_pipelines()
 
         if not requirements:
             logger.info(

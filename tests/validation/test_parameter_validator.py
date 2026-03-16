@@ -15,7 +15,9 @@ from .conftest import SampleDataclass, SamplePydanticModel
 class TestParameterValidator:
     def test_validate_raw_params_no_requirements(self, parameter_validator):
         with patch.object(
-            parameter_validator, "_get_pipeline_requirements", return_value={}
+            parameter_validator.type_extractor,
+            "extract_types_from_pipelines",
+            return_value={},
         ):
             result = parameter_validator.validate_raw_params({"key": "value"})
         assert result == {"key": "value"}
@@ -25,20 +27,13 @@ class TestParameterValidator:
         requirements = {"model_options": SamplePydanticModel}
 
         with patch.object(
-            parameter_validator, "_get_pipeline_requirements", return_value=requirements
+            parameter_validator.type_extractor,
+            "extract_types_from_pipelines",
+            return_value=requirements,
         ):
             result = parameter_validator.validate_raw_params(raw)
 
         assert isinstance(result["model_options"], SamplePydanticModel)
-
-    def test_get_pipeline_requirements(self, parameter_validator):
-        with patch.object(
-            parameter_validator.type_extractor,
-            "extract_types_from_pipelines",
-            return_value={"model_options": SampleDataclass},
-        ):
-            result = parameter_validator._get_pipeline_requirements()
-        assert "model_options" in result
 
 
 class TestApplyValidation:

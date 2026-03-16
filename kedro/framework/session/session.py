@@ -8,6 +8,7 @@ import logging.config
 import os
 import subprocess
 import sys
+import textwrap
 import traceback
 from copy import deepcopy
 from pathlib import Path
@@ -24,11 +25,12 @@ from kedro.framework.project import (
     settings,
     validate_settings,
 )
+from kedro.framework.session.abstract_session import AbstractSession
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
-from kedro.utils import find_kedro_project
+from kedro.utils import find_kedro_project, get_close_matches
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -81,7 +83,7 @@ class KedroSessionError(Exception):
     pass
 
 
-class KedroSession:
+class KedroSession(AbstractSession):
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
     a context manager to construct a new KedroSession with session data
@@ -358,10 +360,19 @@ class KedroSession:
             try:
                 combined_pipelines += pipelines[name]
             except KeyError as exc:
+                matches = get_close_matches(name, pipelines.keys())
+                if matches:
+                    suggestion = (
+                        "Did you mean one of these instead?\n"
+                        + textwrap.indent("\n".join(matches), " " * 4)
+                    )
+                else:
+                    suggestion = ""
                 raise ValueError(
                     f"Failed to find the pipeline named '{name}'. "
                     f"It needs to be generated and returned "
-                    f"by the 'register_pipelines' function."
+                    f"by the 'register_pipelines' function. "
+                    f"{suggestion}"
                 ) from exc
 
         filtered_pipeline = combined_pipelines.filter(

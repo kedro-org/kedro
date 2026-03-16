@@ -75,7 +75,9 @@ class TestLoadKedroObjects:
         mocker,
         ipython,
     ):
-        mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
+        mock_session_create = mocker.patch(
+            "kedro.framework.session.KedroSession.create"
+        )
         pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
         my_pipelines = {"ds": pipeline([])}
@@ -107,7 +109,9 @@ class TestLoadKedroObjects:
         assert variables["pipelines"] == my_pipelines
 
     def test_ipython_load_objects_with_args(self, mocker, fake_metadata, ipython):
-        mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
+        mock_session_create = mocker.patch(
+            "kedro.framework.session.KedroSession.create"
+        )
         pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
         my_pipelines = {"ds": pipeline([])}

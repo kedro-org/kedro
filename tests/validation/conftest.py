@@ -5,10 +5,9 @@ from __future__ import annotations
 import dataclasses
 
 import pytest
+from pydantic import BaseModel
 
-from kedro.validation.model_factory import ModelFactory
 from kedro.validation.parameter_validator import ParameterValidator
-from kedro.validation.source_filters import ParameterSourceFilter
 from kedro.validation.type_extractor import TypeExtractor
 
 
@@ -18,31 +17,14 @@ class SampleDataclass:
     value: float
 
 
-try:
-    from pydantic import BaseModel
-
-    class SamplePydanticModel(BaseModel):
-        test_size: float
-        random_state: int
-
-    PYDANTIC_AVAILABLE = True
-except ImportError:
-    PYDANTIC_AVAILABLE = False
-
-
-@pytest.fixture
-def source_filter():
-    return ParameterSourceFilter()
-
-
-@pytest.fixture
-def model_factory():
-    return ModelFactory()
+class SamplePydanticModel(BaseModel):
+    test_size: float
+    random_state: int
 
 
 @pytest.fixture
 def type_extractor():
-    return TypeExtractor(ParameterSourceFilter())
+    return TypeExtractor()
 
 
 @pytest.fixture

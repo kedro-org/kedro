@@ -7,8 +7,10 @@ import pytest
 
 from kedro.utils import (
     KedroExperimentalWarning,
+    _is_unsafe_version,
     experimental,
     find_config_file,
+    get_close_matches,
     load_obj,
 )
 
@@ -17,6 +19,21 @@ T = TypeVar("T")
 
 class DummyClass:
     pass
+
+
+class TestGetCloseMatches:
+    def test_string_input_returns_close_matches(self):
+        result = get_close_matches(
+            "defult", ["default", "data_science", "data_processing"]
+        )
+        assert result == ["default"]
+
+    def test_list_input_returns_list(self):
+        result = get_close_matches(
+            ["data_scnce", "data_enginering"], ["data_science", "data_engineering"]
+        )
+        print(result)
+        assert result == ["data_science", "data_engineering"]
 
 
 class TestExtractObject:
@@ -257,3 +274,48 @@ def test_find_config_file(tmp_path, monkeypatch, filename, expected_suffix):
 
     assert result is not None
     assert result.suffix == expected_suffix
+
+
+@pytest.mark.parametrize(
+    "version",
+    [
+        # Traversal via POSIX separators
+        "../../../secrets",
+        "../../etc/passwd",
+        "valid/../../../escape",
+        # Traversal via Windows separators
+        "..\\..\\..\\secrets",
+        "valid\\..\\..\\escape",
+        # POSIX absolute
+        "/etc/passwd",
+        "/absolute/path",
+        # Windows absolute
+        "C:\\Users\\secrets",
+        "C:/Users/secrets",
+        "\\\\server\\share",
+        # Dot components
+        "..",
+        ".",
+        # Empty string
+        "",
+        # Subdirectory creation via separators
+        "foo/bar",
+        "foo\\bar",
+    ],
+)
+def test_is_unsafe_version_rejects(version):
+    assert _is_unsafe_version(version) is True
+
+
+@pytest.mark.parametrize(
+    "version",
+    [
+        "2024-01-15T10.00.00.000Z",
+        "2019-01-01T23.59.59.999Z",
+        "my-custom-version",
+        "version1",
+        "*",
+    ],
+)
+def test_is_unsafe_version_allows(version):
+    assert _is_unsafe_version(version) is False

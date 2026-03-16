@@ -24,10 +24,37 @@ from kedro.framework.project import (
     _HasSharedParentClassValidator,
     _ProjectSettings,
 )
-from kedro.framework.session import KedroSession
+from kedro.framework.session import AbstractSession, KedroSession
 from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.store import BaseSessionStore
 from kedro.utils import _has_rich_handler
+
+
+class _MinimalSession(AbstractSession):
+    """Minimal implementation of AbstractSession for testing."""
+
+    @classmethod
+    def create(cls, **kwargs):
+        return cls()
+
+    def close(self):
+        pass
+
+    def run(self, **kwargs):
+        return {}
+
+
+class TestAbstractSession:
+    def test_enter_returns_self(self):
+        session = _MinimalSession()
+        assert session.__enter__() is session
+
+    def test_exit_calls_close(self, mocker):
+        session = _MinimalSession()
+        mock_close = mocker.patch.object(session, "close")
+        session.__exit__(None, None, None)
+        mock_close.assert_called_once_with()
+
 
 _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
@@ -883,6 +910,27 @@ class TestKedroSession:
         with pytest.raises(ValueError, match=re.escape(pattern)):
             with KedroSession.create(fake_project) as session:
                 session.run(runner=mock_runner, pipeline_name="doesnotexist")
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_non_existent_pipeline_with_suggestion(
+        self, fake_project, mock_runner, mocker
+    ):
+        """When a non-existent pipeline name has close matches, error includes suggestions."""
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent",
+            return_value=False,
+        )
+        mocker.patch(
+            "kedro.framework.session.session.get_close_matches",
+            return_value=["__default__", "data_engineering"],
+        )
+        with pytest.raises(ValueError) as exc_info:
+            with KedroSession.create(fake_project) as session:
+                session.run(runner=mock_runner, pipeline_name="__defult__")
+        msg = str(exc_info.value)
+        assert "Failed to find the pipeline named '__defult__'" in msg
+        assert "Did you mean one of these instead?" in msg
+        assert "__default__" in msg
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])

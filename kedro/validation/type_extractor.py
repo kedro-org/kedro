@@ -4,39 +4,28 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, Any, get_type_hints
-
-from .exceptions import ValidationError
+from typing import TYPE_CHECKING, get_type_hints
 
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
 
-    from .source_filters import SourceFilter
-
 logger = logging.getLogger(__name__)
+
+_PARAMS_PREFIX = "params:"
 
 
 class TypeExtractor:
     """Extracts parameter type requirements from pipeline node signatures."""
 
-    def __init__(self, source_filter: SourceFilter) -> None:
-        """Initialize the type extractor.
-
-        Args:
-            source_filter: Source filter to determine which node inputs to process.
-        """
-        self.source_filter = source_filter
-
     def extract_types_from_pipelines(self) -> dict[str, type]:
         """Extract all type requirements from registered pipelines.
 
         Walks all pipelines (except ``__default__``) and inspects node
-        function signatures for type-annotated inputs that match the
-        configured source filter.
+        function signatures for type-annotated ``params:`` inputs.
 
         Returns:
-            Dictionary mapping source keys to their expected types.
+            Dictionary mapping parameter keys to their expected types.
         """
         try:
             from kedro.framework.project import pipelines
@@ -91,10 +80,10 @@ class TypeExtractor:
         return type_requirements
 
     def _extract_types_from_node(self, node: Node) -> dict[str, type]:
-        """Extract typed requirements from a single node.
+        """Extract typed parameter requirements from a single node.
 
         Inspects the node's function signature and maps type-annotated
-        inputs to their expected types via the configured source filter.
+        ``params:`` inputs to their expected types.
         """
         func = getattr(node, "func", None)
         if func is None:
@@ -120,19 +109,22 @@ class TypeExtractor:
             if not expected_type:
                 continue
 
-            if self.source_filter.should_process(ds_name):
-                source_key = self.source_filter.extract_key(ds_name)
-                all_requirements[source_key] = expected_type
-                logger.debug(
-                    self.source_filter.get_log_message(
-                        source_key, expected_type.__name__
-                    )
-                )
+            if not ds_name.startswith(_PARAMS_PREFIX):
+                continue
+
+            param_key = ds_name.split(":", 1)[1]
+            all_requirements[param_key] = expected_type
+            logger.debug(
+                "Found parameter requirement: %s -> %s",
+                param_key,
+                expected_type.__name__,
+            )
 
         return all_requirements
 
+    @staticmethod
     def _build_dataset_to_arg_mapping(
-        self, node: Node, signature: inspect.Signature
+        node: Node, signature: inspect.Signature
     ) -> dict[str, str]:
         """Build mapping from dataset names to function argument names.
 
@@ -151,47 +143,3 @@ class TypeExtractor:
                     dataset_to_arg[ds] = sig_param_names[idx]
 
         return dataset_to_arg
-
-    def resolve_nested_path(self, data: dict, path: str) -> Any:
-        """Resolve a dot-separated path in a nested dictionary.
-
-        Returns None if any key in the path is missing.
-        """
-        if "." not in path:
-            return data.get(path)
-
-        keys = path.split(".")
-        value = data
-
-        for key in keys:
-            if isinstance(value, dict) and key in value:
-                value = value[key]
-            else:
-                return None
-
-        return value
-
-    def set_nested_value(self, data: dict, path: str, value: Any) -> None:
-        """Set a value at a dot-separated path, creating intermediate dicts as needed.
-
-        Raises:
-            ValidationError: If an intermediate key is not a dictionary.
-        """
-        if "." not in path:
-            data[path] = value
-            return
-
-        keys = path.split(".")
-        current = data
-
-        for key in keys[:-1]:
-            if key not in current:
-                current[key] = {}
-            elif not isinstance(current[key], dict):
-                raise ValidationError(
-                    f"Cannot set nested value '{path}': "
-                    f"intermediate key '{key}' is not a dictionary"
-                )
-            current = current[key]
-
-        current[keys[-1]] = value

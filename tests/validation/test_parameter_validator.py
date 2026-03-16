@@ -3,35 +3,40 @@
 from __future__ import annotations
 
 import logging
-from unittest.mock import patch
+from unittest.mock import MagicMock
 
 import pytest
 
+from kedro.pipeline import node as kedro_node
 from kedro.validation.exceptions import ParameterValidationError
+from kedro.validation.parameter_validator import ParameterValidator
 
 from .conftest import SampleDataclass, SamplePydanticModel
 
 
 class TestParameterValidator:
-    def test_validate_raw_params_no_requirements(self, parameter_validator):
-        with patch.object(
-            parameter_validator.type_extractor,
-            "extract_types_from_pipelines",
-            return_value={},
-        ):
-            result = parameter_validator.validate_raw_params({"key": "value"})
+    def test_validate_raw_params_no_requirements(self):
+        validator = ParameterValidator(pipelines={})
+        result = validator.validate_raw_params({"key": "value"})
         assert result == {"key": "value"}
 
-    def test_validate_raw_params_with_requirements(self, parameter_validator):
-        raw = {"model_options": {"test_size": 0.2, "random_state": 3}}
-        requirements = {"model_options": SamplePydanticModel}
+    def test_validate_raw_params_with_requirements(self):
+        def my_func(model_options: SamplePydanticModel) -> None:
+            pass
 
-        with patch.object(
-            parameter_validator.type_extractor,
-            "extract_types_from_pipelines",
-            return_value=requirements,
-        ):
-            result = parameter_validator.validate_raw_params(raw)
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:model_options",
+            outputs="output",
+            name="test_node",
+        )
+
+        pipeline = MagicMock()
+        pipeline.nodes = [test_node]
+
+        validator = ParameterValidator(pipelines={"data_science": pipeline})
+        raw = {"model_options": {"test_size": 0.2, "random_state": 3}}
+        result = validator.validate_raw_params(raw)
 
         assert isinstance(result["model_options"], SamplePydanticModel)
 

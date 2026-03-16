@@ -194,9 +194,6 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
-    _parameter_validator: ParameterValidator = field(
-        init=False, factory=ParameterValidator
-    )
     _validated_params_cache: dict[str, Any] | None = None
 
     @property
@@ -226,7 +223,18 @@ class KedroContext:
             warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
             raw_params = self._runtime_params or {}
 
-        validated_params = self._parameter_validator.validate_raw_params(raw_params)
+        try:
+            from kedro.framework.project import pipelines as project_pipelines
+
+            pipeline_dict = dict(project_pipelines)
+        except ImportError:
+            logging.getLogger(__name__).warning(
+                "Could not import pipelines, skipping parameter validation"
+            )
+            pipeline_dict = {}
+
+        validator = ParameterValidator(pipeline_dict)
+        validated_params = validator.validate_raw_params(raw_params)
 
         self._validated_params_cache = validated_params
 

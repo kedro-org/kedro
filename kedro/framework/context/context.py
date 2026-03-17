@@ -15,7 +15,6 @@ from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.context import CatalogCommandsMixin
 from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
-from kedro.validation.parameter_validator import ParameterValidator
 from kedro.validation.utils import get_typed_fields
 
 if TYPE_CHECKING:
@@ -225,6 +224,7 @@ class KedroContext:
 
         try:
             from kedro.framework.project import pipelines as project_pipelines
+            from kedro.validation.parameter_validator import ParameterValidator
 
             pipeline_dict = dict(project_pipelines)
         except ImportError:
@@ -312,14 +312,14 @@ class KedroContext:
             key = f"params:{param_name}"
             params_dict[key] = param_value
 
-            nested_dict: dict[str, Any] | None = None
+            child_fields: dict[str, Any] | None = None
             if isinstance(param_value, dict):
-                nested_dict = param_value
+                child_fields = param_value
             else:
-                nested_dict = get_typed_fields(param_value)
+                child_fields = get_typed_fields(param_value)
 
-            if nested_dict is not None:
-                for key, val in nested_dict.items():
+            if child_fields is not None:
+                for key, val in child_fields.items():
                     _add_param_to_params_dict(f"{param_name}.{key}", val)
 
         for param_name, param_value in params.items():

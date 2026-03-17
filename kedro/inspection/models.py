@@ -12,7 +12,7 @@ class ProjectMetadataSnapshot:
     Attributes:
         project_name: Human-readable project name.
         package_name: Python package name for the project.
-        kedro_version: Kedro package version currently running.
+        kedro_version: Kedro package version from project metadata (``pyproject.toml``).
     """
 
     project_name: str

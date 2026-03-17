@@ -464,6 +464,8 @@ nav:
         #   - Release notes: about/release_notes.md
           - Migration guide: about/migration.md
           - Kedro telemetry: about/telemetry.md
+          - Legal:
+              - Cookie Policy: legal/cookie_policy.md
   - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/stable/
 

@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Added opt-in parameter validation framework that inspects pipeline node type hints and automatically validates and instantiates Pydantic models and dataclasses from YAML config. Projects without type-annotated parameters are completely unaffected.
 ## Bug fixes and other changes
 ## Documentation changes
 ## Community contributions

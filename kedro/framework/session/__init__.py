@@ -1,4 +1,4 @@
-"""``kedro.framework.session`` provides access to KedroSession responsible for
+"""``kedro.framhttps://github.com/kedro-org/kedro/pull/5441ework.session`` provides access to KedroSession responsible for
 project lifecycle.
 """
 

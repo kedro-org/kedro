@@ -196,8 +196,8 @@ class TestBuildProjectSnapshot:
             "kedro.inspection.snapshot._make_config_loader",
             return_value=self.mock_config_loader,
         )
-        _build_project_snapshot(self.project_path)
-        mock_make_loader.assert_called_once_with(self.project_path)
+        _build_project_snapshot(self.project_path, env="staging")
+        mock_make_loader.assert_called_once_with(self.project_path, env="staging")
 
     def test_config_loader_reused_for_datasets_and_params(self, mocker):
         """The same config loader instance is passed to both downstream builders."""

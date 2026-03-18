@@ -32,10 +32,11 @@ class TestMakeConfigLoader:
             ),
         )
 
-        _make_config_loader(tmp_path)
+        _make_config_loader(tmp_path, env="staging")
 
         mock_loader_class.assert_called_once_with(
             conf_source=str(tmp_path / "conf"),
+            env="staging",
             base_env="base",
             default_run_env="local",
         )

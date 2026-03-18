@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from kedro.pipeline import node as kedro_node
 from kedro.validation.type_extractor import TypeExtractor
@@ -130,8 +130,6 @@ class TestExtractTypesFromNode:
         assert result == {}
 
     def test_signature_extraction_error(self, type_extractor):
-        from unittest.mock import patch
-
         def bad_func() -> None:
             pass
 

@@ -18,11 +18,16 @@ if TYPE_CHECKING:
     from kedro.inspection.models import PipelineSnapshot
 
 
-def _make_config_loader(project_path: Path) -> AbstractConfigLoader:
+def _make_config_loader(
+    project_path: Path, env: str | None = None
+) -> AbstractConfigLoader:
     """Instantiate the project's configured config loader.
 
     Args:
         project_path: Absolute path to the project root directory.
+        env: Optional run environment override (e.g. ``"staging"``).
+            When ``None`` the default run environment from
+            ``CONFIG_LOADER_ARGS`` is used.
 
     Returns:
         An initialised config loader instance.
@@ -31,6 +36,7 @@ def _make_config_loader(project_path: Path) -> AbstractConfigLoader:
     config_loader_class = settings.CONFIG_LOADER_CLASS
     return config_loader_class(  # type: ignore[no-any-return]
         conf_source=conf_source,
+        env=env,
         **settings.CONFIG_LOADER_ARGS,
     )
 

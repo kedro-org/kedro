@@ -111,12 +111,17 @@ def _build_dataset_snapshots(
     }
 
 
-def _build_project_snapshot(project_path: str | Path) -> ProjectSnapshot:
+def _build_project_snapshot(
+    project_path: str | Path, env: str | None = None
+) -> ProjectSnapshot:
     """Build a ``ProjectSnapshot`` for the Kedro project at project_path.
 
     Args:
         project_path: Path to the project root directory (the directory that
             contains ``pyproject.toml``).
+        env: Optional run environment override (e.g. ``"staging"``).
+            When ``None`` the default run environment from the project
+            settings is used.
 
     Returns:
         A fully populated ``ProjectSnapshot``.
@@ -124,7 +129,7 @@ def _build_project_snapshot(project_path: str | Path) -> ProjectSnapshot:
     project_path = Path(project_path)
 
     metadata = bootstrap_project(project_path)
-    config_loader = _make_config_loader(project_path)
+    config_loader = _make_config_loader(project_path, env=env)
 
     metadata_snapshot = _build_project_metadata_snapshot(metadata)
     pipeline_snapshots = _build_pipeline_snapshots()

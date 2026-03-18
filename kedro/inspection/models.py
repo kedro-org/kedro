@@ -54,3 +54,17 @@ class PipelineSnapshot:
     nodes: list[NodeSnapshot]
     inputs: list[str] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
+
+
+class DatasetSnapshot:
+    """Read-only snapshot of a catalog dataset entry.
+
+    Attributes:
+        name: Dataset name as it appears in the catalog.
+        type: Dataset type string (e.g. ``"pandas.CSVDataset"``).
+        filepath: File path if present in config, or ``None``.
+    """
+
+    name: str
+    type: str
+    filepath: str | None = None

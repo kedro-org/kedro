@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import configparser
+import dataclasses
 import json
 import logging
 import re
@@ -12,6 +13,7 @@ import pytest
 import tomli_w
 import yaml
 from pandas.testing import assert_frame_equal
+from pydantic import BaseModel
 
 from kedro import __version__ as kedro_version
 from kedro.config import MissingConfigException
@@ -331,7 +333,6 @@ class TestKedroContext:
 
     def test_get_parameters_with_pydantic_model(self, dummy_context, mocker):
         """Verify Pydantic models are registered with nested paths preserved."""
-        from pydantic import BaseModel
 
         class ModelOptions(BaseModel):
             test_size: float
@@ -355,7 +356,6 @@ class TestKedroContext:
 
     def test_get_parameters_with_dataclass(self, dummy_context, mocker):
         """Verify dataclasses are registered with nested paths preserved."""
-        import dataclasses
 
         @dataclasses.dataclass
         class EvalConfig:
@@ -380,7 +380,6 @@ class TestKedroContext:
         self, dummy_context, mocker
     ):
         """Verify nested Pydantic sub-models are preserved, not flattened to dicts."""
-        from pydantic import BaseModel
 
         class InnerModel(BaseModel):
             value: int
@@ -405,7 +404,9 @@ class TestKedroContext:
 
     def test_validated_params_cache(self, dummy_context):
         """Verify params are cached after first access."""
+        assert dummy_context._validated_params_cache is None
         first = dummy_context.params
+        assert dummy_context._validated_params_cache is not None
         second = dummy_context.params
         assert first is second
 

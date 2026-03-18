@@ -227,14 +227,13 @@ class KedroContext:
             from kedro.validation.parameter_validator import ParameterValidator
 
             pipeline_dict = dict(project_pipelines)
+            validator = ParameterValidator(pipeline_dict)
+            validated_params = validator.validate_raw_params(raw_params)
         except ImportError:
             logging.getLogger(__name__).warning(
                 "Could not import pipelines, skipping parameter validation"
             )
-            pipeline_dict = {}
-
-        validator = ParameterValidator(pipeline_dict)
-        validated_params = validator.validate_raw_params(raw_params)
+            validated_params = raw_params
 
         self._validated_params_cache = validated_params
 
@@ -309,18 +308,32 @@ class KedroContext:
         params_dict: dict[str, Any] = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:
+            """This recursively adds parameter paths that are defined in `parameters.yml`
+            with the addition of any extra parameters passed at initialization to the `params_dict`,
+            whenever `param_value` is a dictionary itself, so that users can
+            specify specific nested parameters in their node inputs.
+
+            Example:
+            ``` python
+            param_name = "a"
+            param_value = {"b": 1}
+            _add_param_to_params_dict(param_name, param_value)
+            assert params_dict["params:a"] == {"b": 1}
+            assert params_dict["params:a.b"] == 1
+            ```
+            """
             key = f"params:{param_name}"
             params_dict[key] = param_value
 
-            child_fields: dict[str, Any] | None = None
+            param_fields: dict[str, Any] | None = None
             if isinstance(param_value, dict):
-                child_fields = param_value
+                param_fields = param_value
             else:
-                child_fields = get_typed_fields(param_value)
+                param_fields = get_typed_fields(param_value)
 
-            if child_fields is not None:
-                for key, val in child_fields.items():
-                    _add_param_to_params_dict(f"{param_name}.{key}", val)
+            if param_fields is not None:
+                for field_name, field_value in param_fields.items():
+                    _add_param_to_params_dict(f"{param_name}.{field_name}", field_value)
 
         for param_name, param_value in params.items():
             _add_param_to_params_dict(param_name, param_value)

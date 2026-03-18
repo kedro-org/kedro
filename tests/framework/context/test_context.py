@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import configparser
+import dataclasses
 import json
 import logging
 import re
@@ -12,6 +13,7 @@ import pytest
 import tomli_w
 import yaml
 from pandas.testing import assert_frame_equal
+from pydantic import BaseModel
 
 from kedro import __version__ as kedro_version
 from kedro.config import MissingConfigException
@@ -19,7 +21,6 @@ from kedro.framework.context import KedroContext
 from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
     _is_relative_path,
-    _update_nested_dict,
 )
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.project import (
@@ -271,7 +272,12 @@ class TestKedroContext:
     )
     def test_params(self, dummy_context, runtime_params):
         runtime_params = runtime_params or {}
-        expected = {"param1": 1, "param2": 2, "param3": {"param4": 3}, **runtime_params}
+        expected = {
+            "param1": 1,
+            "param2": 2,
+            "param3": {"param4": 3},
+            **runtime_params,
+        }
         assert dummy_context.params == expected
 
     @pytest.mark.parametrize(
@@ -323,6 +329,85 @@ class TestKedroContext:
         log_messages = [record.getMessage() for record in caplog.records]
         expected_msg = "Credentials not found in your Kedro project config."
         assert any(expected_msg in log_message for log_message in log_messages)
+
+    def test_get_parameters_with_pydantic_model(self, dummy_context, mocker):
+        """Verify Pydantic models are registered with nested paths preserved."""
+
+        class ModelOptions(BaseModel):
+            test_size: float
+            random_state: int
+
+        model_instance = ModelOptions(test_size=0.2, random_state=3)
+
+        mocker.patch.object(
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(
+                lambda self: {"model_options": model_instance}
+            ),
+        )
+
+        result = dummy_context._get_parameters()
+
+        assert result["params:model_options"] == model_instance
+        assert result["params:model_options.test_size"] == 0.2
+        assert result["params:model_options.random_state"] == 3
+
+    def test_get_parameters_with_dataclass(self, dummy_context, mocker):
+        """Verify dataclasses are registered with nested paths preserved."""
+
+        @dataclasses.dataclass
+        class EvalConfig:
+            metric: str
+            threshold: float
+
+        dc_instance = EvalConfig(metric="rmse", threshold=0.5)
+
+        mocker.patch.object(
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(lambda self: {"eval_config": dc_instance}),
+        )
+
+        result = dummy_context._get_parameters()
+
+        assert result["params:eval_config"] == dc_instance
+        assert result["params:eval_config.metric"] == "rmse"
+        assert result["params:eval_config.threshold"] == 0.5
+
+    def test_get_parameters_with_nested_pydantic_preserves_types(
+        self, dummy_context, mocker
+    ):
+        """Verify nested Pydantic sub-models are preserved, not flattened to dicts."""
+
+        class InnerModel(BaseModel):
+            value: int
+
+        class OuterModel(BaseModel):
+            inner: InnerModel
+
+        outer = OuterModel(inner=InnerModel(value=42))
+
+        mocker.patch.object(
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(lambda self: {"outer": outer}),
+        )
+
+        result = dummy_context._get_parameters()
+
+        assert result["params:outer"] == outer
+        assert isinstance(result["params:outer.inner"], InnerModel)
+        assert result["params:outer.inner"].value == 42
+        assert result["params:outer.inner.value"] == 42
+
+    def test_validated_params_cache(self, dummy_context):
+        """Verify params are cached after first access."""
+        assert dummy_context._validated_params_cache is None
+        first = dummy_context.params
+        assert dummy_context._validated_params_cache is not None
+        second = dummy_context.params
+        assert first is second
 
 
 @pytest.mark.parametrize(
@@ -424,35 +509,3 @@ def test_convert_paths_to_absolute_posix_converts_full_windows_path_to_posix(
     project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
-
-
-@pytest.mark.parametrize(
-    "old_dict, new_dict, expected",
-    [
-        (
-            {
-                "a": 1,
-                "b": 2,
-                "c": {
-                    "d": 3,
-                },
-            },
-            {"c": {"d": 5, "e": 4}},
-            {
-                "a": 1,
-                "b": 2,
-                "c": {"d": 5, "e": 4},
-            },
-        ),
-        ({"a": 1}, {"b": 2}, {"a": 1, "b": 2}),
-        ({"a": 1, "b": 2}, {"b": 3}, {"a": 1, "b": 3}),
-        (
-            {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3}}},
-            {"a": {"a.c": {"a.c.b": 4}}},
-            {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3, "a.c.b": 4}}},
-        ),
-    ],
-)
-def test_update_nested_dict(old_dict: dict, new_dict: dict, expected: dict):
-    _update_nested_dict(old_dict, new_dict)  # _update_nested_dict change dict in place
-    assert old_dict == expected

@@ -18,6 +18,14 @@ _PARAMS_PREFIX = "params:"
 class TypeExtractor:
     """Extracts parameter type requirements from pipeline node signatures."""
 
+    def __init__(self, pipelines: dict[str, Pipeline]) -> None:
+        """Initialise the type extractor.
+
+        Args:
+            pipelines: Dictionary of registered pipelines to inspect.
+        """
+        self._pipelines = pipelines
+
     def extract_types_from_pipelines(self) -> dict[str, type]:
         """Extract all type requirements from registered pipelines.
 
@@ -27,20 +35,9 @@ class TypeExtractor:
         Returns:
             Dictionary mapping parameter keys to their expected types.
         """
-        try:
-            from kedro.framework.project import pipelines
-
-            pipeline_dict = dict(pipelines)
-        except ImportError:
-            logger.warning("Could not import pipelines from kedro.framework.project")
-            return {}
-        except Exception as exc:
-            logger.warning("Error importing pipelines: %s", exc)
-            return {}
-
         all_type_requirements: dict[str, type] = {}
 
-        for pipeline_name, pipeline in pipeline_dict.items():
+        for pipeline_name, pipeline in self._pipelines.items():
             if pipeline_name == "__default__":
                 continue
 

@@ -146,21 +146,6 @@ def _expand_full_path(project_path: str | Path) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
-def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:
-    """Update a nested dict with values of new_dict.
-    Args:
-        old_dict: dict to be updated
-        new_dict: dict to use for updating old_dict
-    """
-    for key, value in new_dict.items():
-        if key not in old_dict:
-            old_dict[key] = value
-        elif isinstance(old_dict[key], dict) and isinstance(value, dict):
-            _update_nested_dict(old_dict[key], value)
-        else:
-            old_dict[key] = value
-
-
 @define(slots=False)  # Enable setting new attributes to `KedroContext`
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and

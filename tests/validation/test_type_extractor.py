@@ -7,6 +7,7 @@ import inspect
 from unittest.mock import MagicMock, patch
 
 from kedro.pipeline import node as kedro_node
+from kedro.validation.type_extractor import TypeExtractor
 
 from .conftest import SampleDataclass, SamplePydanticModel
 
@@ -22,25 +23,12 @@ class _TypeB:
 
 
 class TestExtractTypesFromPipelines:
-    def test_import_error_returns_empty(self, type_extractor):
-        with patch.dict("sys.modules", {"kedro.framework.project": None}):
-            result = type_extractor.extract_types_from_pipelines()
+    def test_empty_pipelines(self):
+        extractor = TypeExtractor(pipelines={})
+        result = extractor.extract_types_from_pipelines()
         assert result == {}
 
-    def test_general_exception_returns_empty(self, type_extractor):
-        with patch(
-            "kedro.framework.project.pipelines",
-            new_callable=lambda: type(
-                "BadPipelines",
-                (),
-                {"__iter__": lambda self: (_ for _ in ()).throw(RuntimeError("boom"))},
-            ),
-            create=True,
-        ):
-            result = type_extractor.extract_types_from_pipelines()
-        assert result == {}
-
-    def test_skips_default_pipeline(self, type_extractor):
+    def test_skips_default_pipeline(self):
         def my_func(options: SampleDataclass) -> None:
             pass
 
@@ -66,16 +54,18 @@ class TestExtractTypesFromPipelines:
         data_science_pipeline = MagicMock()
         data_science_pipeline.nodes = [data_science_node]
 
-        with patch(
-            "kedro.framework.project.pipelines",
-            {"__default__": default_pipeline, "data_science": data_science_pipeline},
-        ):
-            result = type_extractor.extract_types_from_pipelines()
+        extractor = TypeExtractor(
+            pipelines={
+                "__default__": default_pipeline,
+                "data_science": data_science_pipeline,
+            }
+        )
+        result = extractor.extract_types_from_pipelines()
 
         assert "eval_config" in result
         assert "default_only" not in result
 
-    def test_successful_extraction(self, type_extractor):
+    def test_successful_extraction(self):
         def my_func(options: SampleDataclass) -> None:
             pass
 
@@ -89,16 +79,13 @@ class TestExtractTypesFromPipelines:
         pipeline = MagicMock()
         pipeline.nodes = [test_node]
 
-        with patch(
-            "kedro.framework.project.pipelines",
-            {"data_science": pipeline},
-        ):
-            result = type_extractor.extract_types_from_pipelines()
+        extractor = TypeExtractor(pipelines={"data_science": pipeline})
+        result = extractor.extract_types_from_pipelines()
 
         assert "eval_config" in result
         assert result["eval_config"] == SampleDataclass
 
-    def test_conflicting_types_warns(self, type_extractor, caplog):
+    def test_conflicting_types_warns(self, caplog):
         """When two pipelines define different types for the same key, warn."""
 
         def func_a(opts: _TypeA) -> None:
@@ -125,14 +112,12 @@ class TestExtractTypesFromPipelines:
         pipeline_b = MagicMock()
         pipeline_b.nodes = [node_b]
 
-        with (
-            patch(
-                "kedro.framework.project.pipelines",
-                {"pipeline_a": pipeline_a, "pipeline_b": pipeline_b},
-            ),
-            caplog.at_level("WARNING"),
-        ):
-            result = type_extractor.extract_types_from_pipelines()
+        extractor = TypeExtractor(
+            pipelines={"pipeline_a": pipeline_a, "pipeline_b": pipeline_b}
+        )
+
+        with caplog.at_level("WARNING"):
+            result = extractor.extract_types_from_pipelines()
 
         assert "shared_config" in result
         assert "Conflicting type requirements" in caplog.text
@@ -203,6 +188,11 @@ class TestExtractTypesFromNode:
         assert result == {}
 
     def test_dict_inputs(self, type_extractor):
+        """Uses MagicMock because real Node validates dict keys against
+        function signature, which conflicts with the dataset->arg mapping
+        format used by the type extractor.
+        """
+
         def my_func(options: SampleDataclass) -> None:
             pass
 
@@ -241,6 +231,10 @@ class TestExtractTypesFromPipeline:
 
 class TestBuildDatasetToArgMapping:
     def test_dict_inputs(self, type_extractor):
+        """Uses MagicMock because real Node validates dict keys against
+        function signature.
+        """
+
         def my_func(a, b):
             pass
 

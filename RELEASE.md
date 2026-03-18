@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
 ## Bug fixes and other changes
 ## Documentation changes
 ## Community contributions

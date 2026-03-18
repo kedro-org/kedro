@@ -25,7 +25,6 @@ from kedro.framework.project import (
     settings,
     validate_settings,
 )
-from kedro.framework.session.abstract_session import AbstractSession
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline.pipeline import Pipeline
@@ -75,14 +74,6 @@ def _jsonify_cli_context(ctx: click.core.Context) -> dict[str, Any]:
         "command_name": ctx.command.name,
         "command_path": " ".join(["kedro"] + sys.argv[1:]),
     }
-
-
-class KedroSessionError(Exception):
-    """``KedroSessionError`` raised by ``KedroSession``
-    in the case that multiple runs are attempted in one session.
-    """
-
-    pass
 
 
 class KedroSession(AbstractSession):

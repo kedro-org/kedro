@@ -24,9 +24,9 @@ class SamplePydanticModel(BaseModel):
 
 @pytest.fixture
 def type_extractor():
-    return TypeExtractor()
+    return TypeExtractor(pipelines={})
 
 
 @pytest.fixture
 def parameter_validator():
-    return ParameterValidator()
+    return ParameterValidator(pipelines={})

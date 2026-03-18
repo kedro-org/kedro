@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .exceptions import ParameterValidationError
 from .model_factory import instantiate_model
 from .type_extractor import TypeExtractor
 from .utils import resolve_nested_dict_path, set_nested_dict_value
+
+if TYPE_CHECKING:
+    from kedro.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +20,13 @@ logger = logging.getLogger(__name__)
 class ParameterValidator:
     """Orchestrates type extraction and model instantiation for parameters."""
 
-    def __init__(self) -> None:
-        """Initialize parameter validator."""
-        self.type_extractor = TypeExtractor()
+    def __init__(self, pipelines: dict[str, Pipeline]) -> None:
+        """Initialise parameter validator.
+
+        Args:
+            pipelines: Dictionary of registered pipelines to inspect for type hints.
+        """
+        self.type_extractor = TypeExtractor(pipelines)
 
     def _apply_validation(self, raw_params: dict, requirements: dict) -> dict:
         """Apply validation to parameters and return transformed dictionary.

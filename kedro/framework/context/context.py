@@ -15,6 +15,7 @@ from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.context import CatalogCommandsMixin
 from kedro.io import CatalogProtocol, DataCatalog
 from kedro.pipeline.transcoding import _transcode_split
+from kedro.validation.utils import get_typed_fields
 
 if TYPE_CHECKING:
     from pluggy import PluginManager
@@ -145,21 +146,6 @@ def _expand_full_path(project_path: str | Path) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
-def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:
-    """Update a nested dict with values of new_dict.
-    Args:
-        old_dict: dict to be updated
-        new_dict: dict to use for updating old_dict
-    """
-    for key, value in new_dict.items():
-        if key not in old_dict:
-            old_dict[key] = value
-        elif isinstance(old_dict[key], dict) and isinstance(value, dict):
-            _update_nested_dict(old_dict[key], value)
-        else:
-            old_dict[key] = value
-
-
 @define(slots=False)  # Enable setting new attributes to `KedroContext`
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
@@ -192,6 +178,7 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
+    _validated_params_cache: dict[str, Any] | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -205,21 +192,48 @@ class KedroContext:
         """
         return self._get_catalog()
 
+    def _get_validated_params(self) -> dict[str, Any]:
+        """Get validated parameters with caching support.
+
+        Returns:
+            Validated and transformed parameters with model instantiation.
+        """
+        if self._validated_params_cache is not None:
+            return self._validated_params_cache
+
+        try:
+            raw_params = self.config_loader["parameters"]
+        except MissingConfigException as exc:
+            warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
+            raw_params = self._runtime_params or {}
+
+        try:
+            from kedro.framework.project import pipelines as project_pipelines
+            from kedro.validation.parameter_validator import ParameterValidator
+
+            pipeline_dict = dict(project_pipelines)
+            validator = ParameterValidator(pipeline_dict)
+            validated_params = validator.validate_raw_params(raw_params)
+        except ImportError:
+            logging.getLogger(__name__).warning(
+                "Could not import pipelines, skipping parameter validation"
+            )
+            validated_params = raw_params
+
+        self._validated_params_cache = validated_params
+
+        return validated_params
+
     @property
     def params(self) -> dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
 
         Returns:
             Parameters defined in `parameters.yml` with the addition of any
-                extra parameters passed at initialization.
+                extra parameters passed at initialization. Parameters are validated
+                and transformed according to pipeline node type hints.
         """
-        try:
-            params = self.config_loader["parameters"]
-        except MissingConfigException as exc:
-            warn(f"Parameters not found in your Kedro project config.\n{exc!s}")
-            params = {}
-        _update_nested_dict(params, self._runtime_params or {})
-        return params  # type: ignore
+        return self._get_validated_params()
 
     def _get_catalog(
         self,
@@ -273,10 +287,10 @@ class KedroContext:
         return catalog
 
     def _get_parameters(self) -> dict[str, Any]:
-        """Returns a dictionary with data to be added in memory as `MemoryDataset`` instances.
+        """Returns a dictionary with data to be added in memory as ``MemoryDataset`` instances.
         Keys represent parameter names and the values are parameter values."""
         params = self.params
-        params_dict = {"parameters": params}
+        params_dict: dict[str, Any] = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:
             """This recursively adds parameter paths that are defined in `parameters.yml`
@@ -295,9 +309,16 @@ class KedroContext:
             """
             key = f"params:{param_name}"
             params_dict[key] = param_value
+
+            param_fields: dict[str, Any] | None = None
             if isinstance(param_value, dict):
-                for key, val in param_value.items():
-                    _add_param_to_params_dict(f"{param_name}.{key}", val)
+                param_fields = param_value
+            else:
+                param_fields = get_typed_fields(param_value)
+
+            if param_fields is not None:
+                for field_name, field_value in param_fields.items():
+                    _add_param_to_params_dict(f"{param_name}.{field_name}", field_value)
 
         for param_name, param_value in params.items():
             _add_param_to_params_dict(param_name, param_value)

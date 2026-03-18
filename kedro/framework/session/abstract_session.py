@@ -1,3 +1,7 @@
+"""This module implements the abstract session class."""
+
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -5,12 +9,14 @@ from typing import Any
 class AbstractSession(ABC):
     """``AbstractSession`` is the base class for all Kedro session implementations.
 
-    Subclasses must implement the ``create``, ``store``, ``close``, and ``run`` methods.
+    Subclasses must implement the ``create``, ``close``, and ``run`` methods.
     """
 
     @classmethod
     @abstractmethod
-    def create(cls):
+    def create(
+        cls,
+    ) -> AbstractSession:
         """Create a new instance of the session."""
         ...
 
@@ -24,7 +30,7 @@ class AbstractSession(ABC):
         """Run the pipeline."""
         ...
 
-    def __enter__(self):
+    def __enter__(self) -> AbstractSession:
         return self
 
     def __exit__(self, _exc_type: Any, _exc_value: Any, _tb: Any) -> None:

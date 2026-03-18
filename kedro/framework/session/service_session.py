@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import logging.config
-import os
 import traceback
 import uuid
 from pathlib import Path
@@ -34,14 +33,14 @@ if TYPE_CHECKING:
 
 class KedroServiceSession(AbstractSession):
     """
-    KedroServiceSession offers a session implementation that allows for multiple runs and data injecttion.
+    KedroServiceSession offers a session implementation that allows for multiple runs and data injection.
     """
 
     def __init__(
         self,
         session_id: str,
-        package_name: str,
-        project_path: str,
+        package_name: str | None = None,
+        project_path: Path | str | None = None,
         conf_source: Path | str | None = None,
         env: str | None = None,
     ):
@@ -54,7 +53,8 @@ class KedroServiceSession(AbstractSession):
         _register_hooks(hook_manager, settings.HOOKS)
         _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager
-        self.env = env or os.getenv
+        self.pipelines = pipelines
+        self.env = env
         self._conf_source = conf_source or str(
             self._project_path / settings.CONF_SOURCE
         )
@@ -67,7 +67,7 @@ class KedroServiceSession(AbstractSession):
         project_path: Path | str | None = None,
         env: str | None = None,
         conf_source: Path | str | None = None,
-    ):
+    ) -> KedroServiceSession:
         """Create a new instance of the session."""
         validate_settings()
 
@@ -79,7 +79,7 @@ class KedroServiceSession(AbstractSession):
             env=env,
         )
         ## Preload pipelines?
-        session.pipelines = pipelines
+        # session.pipelines = pipelines
         session.pipelines._load_data()
         return session
 
@@ -92,13 +92,13 @@ class KedroServiceSession(AbstractSession):
             "value": str(exc_value),
             "traceback": traceback.format_tb(exc_tb),
         }
-        self._store["exception"] = exc_data
+        self._logger.debug("Service session exception: %s", exc_data)
 
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    def __enter__(self):
+    def __enter__(self) -> KedroServiceSession:
         return self
 
     def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
@@ -166,7 +166,7 @@ class KedroServiceSession(AbstractSession):
 
         context = self.load_context(runtime_params)
         pipeline_names = pipeline_names or ["__default__"]
-        combined_pipeline = Pipeline()
+        combined_pipeline = Pipeline([])
         for name in pipeline_names:
             try:
                 combined_pipeline += self.pipelines[name]

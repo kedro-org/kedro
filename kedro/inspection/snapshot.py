@@ -2,15 +2,23 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from kedro.config import MissingConfigException
 from kedro.framework.project import pipelines
+from kedro.framework.startup import bootstrap_project
+from kedro.inspection.helper import (
+    _get_parameter_keys,
+    _make_config_loader,
+    _resolve_factory_patterns,
+)
 from kedro.inspection.models import (
     DatasetSnapshot,
     NodeSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
+    ProjectSnapshot,
 )
 
 if TYPE_CHECKING:
@@ -101,3 +109,41 @@ def _build_dataset_snapshots(
         for ds_name, ds_config in conf_catalog.items()
         if not ds_name.startswith("_")  # skip YAML interpolation anchors
     }
+
+
+def _build_project_snapshot(
+    project_path: str | Path, env: str | None = None
+) -> ProjectSnapshot:
+    """Build a ``ProjectSnapshot`` for the Kedro project at project_path.
+
+    Args:
+        project_path: Path to the project root directory (the directory that
+            contains ``pyproject.toml``).
+        env: Optional run environment override (e.g. ``"staging"``).
+            When ``None`` the default run environment from the project
+            settings is used.
+
+    Returns:
+        A fully populated ``ProjectSnapshot``.
+    """
+    project_path = Path(project_path)
+
+    metadata = bootstrap_project(project_path)
+    config_loader = _make_config_loader(project_path, env=env)
+
+    metadata_snapshot = _build_project_metadata_snapshot(metadata)
+    pipeline_snapshots = _build_pipeline_snapshots()
+    dataset_snapshots = _build_dataset_snapshots(config_loader)
+
+    # [TODO: Need to confirm with the team if we should resolve it or
+    # keep patterns as is for snapshot as patterns are runtime resolutions]
+    dataset_snapshots = _resolve_factory_patterns(dataset_snapshots, pipeline_snapshots)
+
+    parameter_keys = _get_parameter_keys(config_loader)
+
+    return ProjectSnapshot(
+        metadata=metadata_snapshot,
+        pipelines=pipeline_snapshots,
+        datasets=dataset_snapshots,
+        parameters=parameter_keys,
+    )

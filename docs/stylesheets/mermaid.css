@@ -1,0 +1,34 @@
+/* Mermaid dark mode fix - targets exact class names */
+[data-md-color-scheme="slate"] #__mermaid_0 .label text,
+[data-md-color-scheme="slate"] [id^="__mermaid"] .label text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-md-color-scheme="slate"] [id^="__mermaid"] span.nodeLabel,
+[data-md-color-scheme="slate"] [id^="__mermaid"] span.nodeLabel p {
+  color: #ffffff !important;
+}
+
+[data-md-color-scheme="slate"] [id^="__mermaid"] polygon.label-container {
+  fill: #2d3748 !important;
+  stroke: #90cdf4 !important;
+}
+
+[data-md-color-scheme="slate"] [id^="__mermaid"] .node rect {
+  fill: #2d3748 !important;
+  stroke: #90cdf4 !important;
+}
+
+[data-md-color-scheme="slate"] [id^="__mermaid"] .edgePath path {
+  stroke: #90cdf4 !important;
+}
+
+[data-md-color-scheme="slate"] [id^="__mermaid"] .arrowheadPath {
+  fill: #90cdf4 !important;
+}
+
+[data-md-color-scheme="slate"] [id^="__mermaid"] .edgeLabel span {
+  color: #ffffff !important;
+  background-color: #2d3748 !important;
+}

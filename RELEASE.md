@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
 ## Bug fixes and other changes
 ## Documentation changes
 ## Community contributions
@@ -11,6 +12,7 @@
 * Added `list_versions()` method for versioned datasets to list available dataset versions.
 * Added `pipelines_to_find` parameter to `find_pipelines()`, allowing users to selectively run a subset of existing pipelines by modifying the pipeline registry.
 * The CLI `--checkout` flag can now be used on a new Kedro project from the default template, without a starter.
+* Added `SESSION_CLASS` as a configurable project setting, allowing users to define a custom KedroSession subclass
 
 ## Bug fixes and other changes
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
@@ -18,6 +20,7 @@
 * Added `preserve_logging` flag to `configure_project()` to prevent runtime-added logging handlers from being overwritten when `configure_project()` is called after custom handlers have been attached (e.g. in a long-running server process such as FastAPI).
 * Added util method `find_config_file()` to handle different config file extensions (.yml, .yaml)
 * Added reusable suggestion functionality for mistyped pipeline names using `kedro run`
+* Added a fix for `CatalogConfigResolver` splitting sqlalchemy URL during pattern resolution.
 
 ## Documentation changes
 ## Community contributions
@@ -25,6 +28,7 @@
 * [zhubaobao2024](https://github.com/zhubaobao2024)
 * [Camille Coeurjoly](https://github.com/Camille1992)
 * [sinanpl](https://github.com/sinanpl)
+* [Mr-Neutr0n](https://github.com/Mr-Neutr0n)
 
 # Release 1.2.0
 ## Major features and improvements

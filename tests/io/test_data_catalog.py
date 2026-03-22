@@ -96,6 +96,15 @@ class TestDataCatalog:
         with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 
+    def test_load_without_save_error(self, data_catalog):
+        """Check the error when attempting to load a dataset
+        which was not saved to yet"""
+        name = "access_without_load"
+        catalog = DataCatalog(datasets={name: MemoryDataset()})
+        pattern = rf"{name}: Data for MemoryDataset has not been saved yet"
+        with pytest.raises(DatasetError, match=pattern):
+            catalog.load(name)
+
     def test_add_dataset_twice(self, data_catalog, dataset, caplog):
         """Check the warning when attempting to add the dataset twice"""
         data_catalog["test"] = dataset

@@ -1055,7 +1055,7 @@ class DataCatalog(CatalogProtocol):
         try:
             ds_contents = dataset.load()
         except DatasetError as e:
-            raise DatasetError(f"{ds_name}: {e}")
+            raise DatasetError(f"{ds_name}: {e}") from e
 
         return ds_contents
 

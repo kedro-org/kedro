@@ -238,7 +238,6 @@ class KedroServiceSession(AbstractSession):
                 run_id=run_id,
                 only_missing_outputs=only_missing_outputs,
             )
-            self._run_called = True
         except Exception as error:
             hook_manager.hook.on_pipeline_error(
                 error=error,

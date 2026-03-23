@@ -89,8 +89,14 @@ def _node_to_snapshot(node: Node) -> NodeSnapshot:
     )
 
 
-def _build_pipeline_snapshots() -> list[PipelineSnapshot]:
+def _build_pipeline_snapshots(
+    pipelines: dict[str, Any],
+) -> list[PipelineSnapshot]:
     """Build a ``PipelineSnapshot`` for every registered pipeline.
+
+    Args:
+        pipelines: Dictionary of pipeline name to ``Pipeline`` object,
+            as returned by ``dict(kedro.framework.project.pipelines)``.
 
     Returns:
         List of pipeline snapshots in registry iteration order.
@@ -131,7 +137,7 @@ def _build_project_snapshot(
     config_loader = _make_config_loader(project_path, env=env)
 
     metadata_snapshot = _build_project_metadata_snapshot(metadata)
-    pipeline_snapshots = _build_pipeline_snapshots()
+    pipeline_snapshots = _build_pipeline_snapshots(dict(pipelines))
     dataset_snapshots = _build_dataset_snapshots(config_loader)
 
     # [TODO: Need to confirm with the team if we should resolve it or

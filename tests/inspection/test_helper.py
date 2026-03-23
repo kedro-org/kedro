@@ -225,6 +225,21 @@ class TestResolveFactoryPatterns:
         result = _resolve_factory_patterns(datasets, [])
         assert result == datasets
 
+    def test_filepath_when_placeholder_unresolvable(self):
+        """Falls back to the raw filepath when it contains a key absent from the pattern."""
+        datasets = {
+            "{name}": DatasetSnapshot(
+                name="{name}",
+                type="pandas.CSVDataset",
+                filepath="data/{name}/{unknown}.csv",
+            ),
+        }
+        pipelines = [
+            _make_pipeline_snapshot([_make_node_snapshot(["companies"], ["out"])])
+        ]
+        result = _resolve_factory_patterns(datasets, pipelines)
+        assert result["companies"].filepath == "data/{name}/{unknown}.csv"
+
     def test_more_specific_pattern_wins_regardless_of_catalog_order(self):
         """Pattern with higher specificity is chosen even when defined after a generic one."""
         # Less-specific pattern declared FIRST in the dict (catalog order)

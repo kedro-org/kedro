@@ -81,42 +81,31 @@ class TestPipelineSnapshot:
 
 
 class TestBuildPipelineSnapshots:
-    def test_returns_correct_name(self, mocker, simple_pipeline):
-        mocker.patch(
-            "kedro.inspection.snapshot.pipelines",
-            {"data_processing": simple_pipeline},
-        )
-        snapshots = _build_pipeline_snapshots()
+    def test_returns_correct_name(self, simple_pipeline):
+        snapshots = _build_pipeline_snapshots({"data_processing": simple_pipeline})
         assert len(snapshots) == 1
         assert snapshots[0].name == "data_processing"
 
-    def test_nodes_in_execution_order(self, mocker):
+    def test_nodes_in_execution_order(self):
         n1 = node(_identity, inputs="raw", outputs="intermediate", name="n1")
         n2 = node(_identity, inputs="intermediate", outputs="final", name="n2")
         pipeline = Pipeline([n2, n1])  # intentionally reversed
-        mocker.patch("kedro.inspection.snapshot.pipelines", {"__default__": pipeline})
 
-        snapshots = _build_pipeline_snapshots()
+        snapshots = _build_pipeline_snapshots({"__default__": pipeline})
         node_names = [n.name for n in snapshots[0].nodes]
         assert node_names == [n.name for n in pipeline.nodes]
 
-    def test_pipeline_inputs_and_outputs(self, mocker, simple_pipeline):
-        mocker.patch(
-            "kedro.inspection.snapshot.pipelines", {"__default__": simple_pipeline}
-        )
-        snapshots = _build_pipeline_snapshots()
+    def test_pipeline_inputs_and_outputs(self, simple_pipeline):
+        snapshots = _build_pipeline_snapshots({"__default__": simple_pipeline})
         assert snapshots[0].inputs == sorted(simple_pipeline.inputs())
         assert snapshots[0].outputs == sorted(simple_pipeline.outputs())
 
-    def test_empty_registry_returns_empty_list(self, mocker):
-        mocker.patch("kedro.inspection.snapshot.pipelines", {})
-        assert _build_pipeline_snapshots() == []
+    def test_empty_registry_returns_empty_list(self):
+        assert _build_pipeline_snapshots({}) == []
 
-    def test_none_pipelines_are_skipped(self, mocker, simple_pipeline):
-        mocker.patch(
-            "kedro.inspection.snapshot.pipelines",
-            {"__default__": simple_pipeline, "broken": None},
+    def test_none_pipelines_are_skipped(self, simple_pipeline):
+        snapshots = _build_pipeline_snapshots(
+            {"__default__": simple_pipeline, "broken": None}
         )
-        snapshots = _build_pipeline_snapshots()
         assert len(snapshots) == 1
         assert snapshots[0].name == "__default__"

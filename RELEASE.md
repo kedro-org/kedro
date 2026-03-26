@@ -2,9 +2,10 @@
 ## Major features and improvements
 * Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
 ## Bug fixes and other changes
-* The `DatasetError` exception that is raised after calling `.load()` on a dataset now includes the name of the dataset for easier debugging.
+* `DataCatalog.load()` now raises a `DatasetError` that includes the dataset name for easier debugging.
 ## Documentation changes
 ## Community contributions
+* [mvhensbergen](https://github.com/mvhensbergen)
 
 
 # Release 1.3.0

@@ -1028,6 +1028,7 @@ class DataCatalog(CatalogProtocol):
         Raises:
             DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
+            DatasetError: When an error occurs during loading the dataset.
 
         Example:
         ```python

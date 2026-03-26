@@ -575,6 +575,69 @@ class TestNodeInputOutputNameValidation:
                 namespace="namespace",
             )
 
+    def test_dotted_dataset_name_warns_only_once_for_same_name(self):
+        """Test that the same dotted dataset name only triggers a warning once."""
+        import warnings
+
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+
+            node(
+                func=self.dummy_function,
+                inputs="repeated.dataset",
+                outputs="output_dataset",
+            )
+            node(
+                func=self.dummy_function,
+                inputs="repeated.dataset",
+                outputs="another_output",
+            )
+
+        dot_warnings = [
+            w
+            for w in warning_list
+            if issubclass(w.category, UserWarning)
+            and "repeated.dataset" in str(w.message)
+        ]
+        assert len(dot_warnings) == 1
+
+    def test_dotted_dataset_name_warns_once_per_unique_name(self):
+        """Test that each unique dotted dataset name warns exactly once."""
+        import warnings
+
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+
+            node(
+                func=self.dummy_function,
+                inputs="first.dataset",
+                outputs="output_dataset",
+            )
+            node(
+                func=self.dummy_function,
+                inputs="second.dataset",
+                outputs="output_dataset2",
+            )
+            # Repeat both — should not add more warnings
+            node(
+                func=self.dummy_function,
+                inputs="first.dataset",
+                outputs="output_dataset3",
+            )
+            node(
+                func=self.dummy_function,
+                inputs="second.dataset",
+                outputs="output_dataset4",
+            )
+
+        dot_warnings = [
+            w
+            for w in warning_list
+            if issubclass(w.category, UserWarning)
+            and "contains '.' characters" in str(w.message)
+        ]
+        assert len(dot_warnings) == 2
+
 
 class TestNodePreviewPayload:
     def test_text_preview(self):

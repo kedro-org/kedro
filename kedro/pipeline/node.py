@@ -23,6 +23,8 @@ from kedro.utils import KedroExperimentalWarning
 
 from .transcoding import _strip_transcoding
 
+_warned_dotted_dataset_names: set[str] = set()
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable
 
@@ -763,12 +765,15 @@ def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
         if not namespace or not name_namespace.startswith(
             namespace.split(".")[0]
         ):  # match with top level namespace
-            warnings.warn(
-                f"Dataset name '{name}' contains '.' characters, which is "
-                f"not recommended as the dot notation is reserved for automatic "
-                f"namespacing in Kedro. Consider using a different naming convention.",
-                UserWarning,
-            )
+            if name not in _warned_dotted_dataset_names:
+                _warned_dotted_dataset_names.add(name)
+                warnings.warn(
+                    f"Dataset name '{name}' contains '.' characters, which is "
+                    f"not recommended as the dot notation is reserved for automatic "
+                    f"namespacing in Kedro. Consider using a different naming convention.",
+                    UserWarning,
+                    stacklevel=3,
+                )
 
 
 def node(  # noqa: PLR0913

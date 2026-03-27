@@ -275,12 +275,14 @@ class _ProjectLogging(UserDict):
         logger.info(msg)
 
     def _sanitise_logging_config(self, config: Any) -> Any:
-        """Recursively sanitise the logging configuration by removing dangerous '()' factory keys."""
+        """Recursively check the logging configuration and raise an error if dangerous '()' factory keys are encountered."""
         if isinstance(config, dict):
+            if "()" in config:
+                raise ValueError(
+                    "The '()' key is not allowed in logging configuration as it poses a security risk."
+                )
             sanitised = {}
             for k, v in config.items():
-                if k == "()":
-                    continue
                 sanitised[k] = self._sanitise_logging_config(v)
             return sanitised
         elif isinstance(config, list):

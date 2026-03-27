@@ -1,12 +1,13 @@
-import sys
-
 import pytest
 
 
 @pytest.fixture(autouse=True)
-def reset_warned_dotted_dataset_names():
-    """Reset the dotted dataset name warning set before and after each test."""
-    node_module = sys.modules["kedro.pipeline.node"]
-    node_module._warned_dotted_dataset_names.clear()
+def reset_dotted_dataset_name_warned():
+    """Reset the dotted dataset name warning flag before and after each test."""
+    from kedro.pipeline.node import Node
+
+    if hasattr(Node, "__dotted_dataset_name_warned__"):
+        delattr(Node, "__dotted_dataset_name_warned__")
     yield
-    node_module._warned_dotted_dataset_names.clear()
+    if hasattr(Node, "__dotted_dataset_name_warned__"):
+        delattr(Node, "__dotted_dataset_name_warned__")

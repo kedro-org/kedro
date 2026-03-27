@@ -374,10 +374,10 @@ def test_rich_format_with_invalid_type():
         ),
     ],
 )
-def test_sanitize_logging_config_removes_factory_keys(input_config, expected):
-    """Test that _sanitize_logging_config removes '()' factory keys to prevent RCE."""
+def test_sanitise_logging_config_removes_factory_keys(input_config, expected):
+    """Test that _sanitise_logging_config removes '()' factory keys to prevent RCE."""
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
-    sanitized = logging_instance._sanitize_logging_config(input_config)
+    sanitized = logging_instance._sanitise_logging_config(input_config)
     assert sanitized == expected

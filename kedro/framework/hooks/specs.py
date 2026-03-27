@@ -155,9 +155,11 @@ class PipelineSpecs:
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "runtime_params": Optional[Dict[str, Any]]
-                     "pipeline_name": str,
-                     "namespace": Optional[str],
+                     "pipeline_names": Optional[List[str]],
+                     "namespaces": Optional[List[str]],
                      "runner": str,
+                     "only_missing_outputs": bool,
+
                    }
 
             pipeline: The ``Pipeline`` that will be run.
@@ -192,9 +194,11 @@ class PipelineSpecs:
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "runtime_params": Optional[Dict[str, Any]]
-                     "pipeline_name": str,
-                     "namespace": Optional[str],
+                     "pipeline_names": Optional[List[str]],
+                     "namespaces": Optional[List[str]],
                      "runner": str,
+                     "only_missing_outputs": bool,
+
                    }
 
             run_result: The output of ``Pipeline`` run.
@@ -233,9 +237,10 @@ class PipelineSpecs:
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "runtime_params": Optional[Dict[str, Any]]
-                     "pipeline_name": str,
-                     "namespace": Optional[str],
+                     "pipeline_names": Optional[List[str]],
+                     "namespaces": Optional[List[str]],
                      "runner": str,
+                     "only_missing_outputs": bool,
                    }
 
             pipeline: The ``Pipeline`` that will was run.

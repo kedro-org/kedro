@@ -9,7 +9,7 @@ This feature is **opt-in**: add a type hint to enable validation for that parame
 ### Prerequisites
 
 - **Pydantic models**: Requires [Pydantic v2+](https://docs.pydantic.dev/latest/) (`pip install pydantic`).
-- **Dataclasses**: No extra dependencies — uses the built-in `dataclasses` module.
+- **Dataclasses**: No extra dependencies. Uses the built-in `dataclasses` module.
 
 ### Minimal example
 
@@ -42,7 +42,7 @@ def split_data(data, params: ModelOptions):
     return X_train, X_test
 ```
 
-Define the pipeline as usual — no changes needed:
+Define the pipeline as usual. No changes needed:
 
 ```python
 from kedro.pipeline import node, pipeline
@@ -144,7 +144,7 @@ training:
     learning_rate: 0.001
 ```
 
-Nested sub-models are preserved as typed objects — `params.optimizer` is an `OptimizerConfig` instance with attribute access and its own validation.
+Nested sub-models are preserved as typed objects. `params.optimizer` is an `OptimizerConfig` instance with attribute access and its own validation.
 
 ### Custom validators
 
@@ -223,7 +223,7 @@ eval:
 1. When you access `context.params` (which happens before any node runs), Kedro loads your `parameters.yml` as a dictionary.
 2. Kedro inspects the signatures of all registered pipeline node functions. For any `params:` input with a Pydantic model or dataclass type hint, it records the expected type.
 3. For each typed parameter, Kedro converts the raw dictionary into the declared type using `model_validate` (Pydantic) or keyword-argument instantiation (dataclasses).
-4. If any conversion fails, Kedro raises a `ParameterValidationError` with details about the failure — before any node runs.
+4. If any conversion fails, Kedro raises a `ParameterValidationError` with details about the failure, before any node runs.
 5. Validated parameters are cached, so repeated access to `context.params` does not re-validate.
 
 This **fail-fast** behaviour means configuration errors are caught early, not halfway through a long pipeline run.
@@ -264,7 +264,7 @@ You can use typed parameters alongside untyped ones in the same project. Nodes w
 def train(data, params: TrainingParams):
     ...
 
-# This node gets a plain dict — no validation
+# This node gets a plain dict, no validation
 def preprocess(data, params):
     lr = params["learning_rate"]
     ...

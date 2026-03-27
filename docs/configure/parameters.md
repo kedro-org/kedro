@@ -174,7 +174,7 @@ Since key-value pairs are split on the first equals sign, values can contain equ
 
 Kedro can automatically validate your parameters against type-annotated node functions. If you add a [Pydantic model](https://docs.pydantic.dev/latest/) or [dataclass](https://docs.python.org/3/library/dataclasses.html) type hint to a `params:` input, Kedro converts the raw YAML dictionary into a validated, typed object before any node runs.
 
-This is entirely **opt-in** — projects without type hints continue to work as before.
+This is entirely **opt-in**. Projects without type hints continue to work as before.
 
 ```python
 from pydantic import BaseModel, Field
@@ -200,6 +200,6 @@ model_options:
   random_state: 3
 ```
 
-If validation fails — for example, `test_size: 5.0` exceeds the `le=0.5` constraint — Kedro raises an error before any node runs, with a clear message showing which field failed and why.
+If validation fails (for example, `test_size: 5.0` exceeds the `le=0.5` constraint), Kedro raises an error before any node runs, with a clear message showing which field failed and why.
 
 For more details, including dataclass support, nested models, and advanced usage, see the [Parameter validation reference](parameter_validation.md).

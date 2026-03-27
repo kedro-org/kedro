@@ -85,19 +85,19 @@ def _node_to_snapshot(node: Node) -> NodeSnapshot:
 
 
 def _build_pipeline_snapshots(
-    pipelines: dict[str, Any],
+    pipeline_dict: dict[str, Any],
 ) -> list[PipelineSnapshot]:
     """Build a ``PipelineSnapshot`` for every registered pipeline.
 
     Args:
-        pipelines: Dictionary of pipeline name to ``Pipeline`` object,
+        pipeline_dict: Dictionary of pipeline name to ``Pipeline`` object,
             as returned by ``dict(kedro.framework.project.pipelines)``.
 
     Returns:
         List of pipeline snapshots in registry iteration order.
     """
     snapshots = []
-    for pipeline_id, pipeline in pipelines.items():
+    for pipeline_id, pipeline in pipeline_dict.items():
         if pipeline is None:
             continue
         snapshots.append(

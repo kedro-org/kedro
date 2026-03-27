@@ -111,13 +111,13 @@ class TestBuildProjectSnapshot:
         """Patch every sub-component so _build_project_snapshot runs in isolation."""
         self.project_path = tmp_path
 
-        mocker.patch(
+        self.mock_bootstrap = mocker.patch(
             "kedro.inspection.snapshot.bootstrap_project",
             return_value=project_metadata,
         )
 
         self.mock_config_loader = mocker.MagicMock()
-        mocker.patch(
+        self.mock_make_config_loader = mocker.patch(
             "kedro.inspection.snapshot._make_config_loader",
             return_value=self.mock_config_loader,
         )
@@ -175,30 +175,15 @@ class TestBuildProjectSnapshot:
         result = _build_project_snapshot(self.project_path)
         assert result.parameters == ["model_options", "test_size"]
 
-    def test_bootstrap_called_with_project_path(self, mocker):
-        mock_bootstrap = mocker.patch(
-            "kedro.inspection.snapshot.bootstrap_project",
-            return_value=pytest.importorskip("kedro.framework.startup").ProjectMetadata(
-                config_file=self.project_path / "pyproject.toml",
-                package_name="my_package",
-                project_name="My Project",
-                project_path=self.project_path,
-                source_dir=self.project_path / "src",
-                kedro_init_version="1.2.0",
-                tools=None,
-                example_pipeline=None,
-            ),
-        )
+    def test_bootstrap_called_with_project_path(self):
         _build_project_snapshot(self.project_path)
-        mock_bootstrap.assert_called_once_with(self.project_path)
+        self.mock_bootstrap.assert_called_once_with(self.project_path)
 
-    def test_config_loader_created_with_project_path(self, mocker):
-        mock_make_loader = mocker.patch(
-            "kedro.inspection.snapshot._make_config_loader",
-            return_value=self.mock_config_loader,
-        )
+    def test_config_loader_created_with_project_path(self):
         _build_project_snapshot(self.project_path, env="staging")
-        mock_make_loader.assert_called_once_with(self.project_path, env="staging")
+        self.mock_make_config_loader.assert_called_once_with(
+            self.project_path, env="staging"
+        )
 
     def test_catalog_loaded_from_config_loader_and_passed_downstream(self, mocker):
         """Catalog config is loaded from the config loader and passed to both

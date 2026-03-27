@@ -297,7 +297,7 @@ class _ProjectLogging(UserDict):
         """
         sanitised_config = self._sanitise_logging_config(logging_config)
         logging.config.dictConfig(sanitised_config)
-        self.data = logging_config
+        self.data = sanitised_config
 
     def set_project_logging(
         self, package_name: str, preserve_logging: bool = False

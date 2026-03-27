@@ -2,6 +2,7 @@
 ## Major features and improvements
 * Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
 ## Bug fixes and other changes
+* Align the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
 ## Documentation changes
 ## Community contributions
 

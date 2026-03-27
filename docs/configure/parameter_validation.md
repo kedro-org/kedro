@@ -216,7 +216,7 @@ eval:
 ```
 
 !!! note
-    Dataclasses do not have built-in field validation like Pydantic. Kedro instantiates the dataclass from the dictionary and checks that the required fields are present. However, it does not enforce constraints like `ge`, `le`, or custom validators. Use Pydantic models if you need richer validation.
+    Dataclasses do not have built-in field validation like Pydantic. Kedro instantiates the dataclass from the dictionary and checks that the required fields are present, but it does not enforce constraints like `ge`, `le`, or custom validators. Use Pydantic models if you need richer validation.
 
 ## How it works
 
@@ -278,10 +278,10 @@ Runtime parameters specified with `--params` are merged into the configuration b
 kedro run --params="training.learning_rate:0.1"
 ```
 
-The merged value is validated against the type hint, so invalid runtime overrides are caught just like invalid YAML values.
+The merged value is validated against the type hint, so invalid runtime overrides are caught the same way as invalid YAML values.
 
 ## Known limitations
 
-- **Validates across all pipelines**: Kedro currently inspects all registered pipelines for type hints, not just the pipeline you are running. This means a validation error in an unrelated pipeline can block your run. See [GitHub issue #5443](https://github.com/kedro-org/kedro/issues/5443) for progress on scoping validation to the target pipeline.
+- **Validates across all pipelines**: Kedro inspects all registered pipelines for type hints, not only the pipeline you are running. This means a validation error in an unrelated pipeline can block your run. See [GitHub issue #5443](https://github.com/kedro-org/kedro/issues/5443) for progress on scoping validation to the target pipeline.
 - **Pydantic v1 is not supported**: The validation framework uses `model_validate`, which is a Pydantic v2+ API. If your project uses Pydantic v1, you need to upgrade to v2.
-- **Only `params:` inputs are validated**: Validation applies to parameters loaded via the `params:` prefix. Dataset inputs are not affected by this feature.
+- **`params:` inputs are validated**: Validation applies to parameters loaded through the `params:` prefix. Dataset inputs are not affected by this feature.

@@ -22,7 +22,6 @@ from kedro.inspection.models import (
 )
 
 if TYPE_CHECKING:
-    from kedro.config import AbstractConfigLoader
     from kedro.framework.startup import ProjectMetadata
     from kedro.pipeline.node import Node
 
@@ -46,30 +45,26 @@ def _build_project_metadata_snapshot(
 
 
 def _build_dataset_snapshots(
-    config_loader: AbstractConfigLoader,
+    catalog_config: dict[str, Any],
 ) -> dict[str, DatasetSnapshot]:
     """Build a ``DatasetSnapshot`` for every entry in the catalog configuration.
 
     Args:
-        config_loader: Config loader instance.
+        catalog_config: Raw catalog configuration dict.
 
     Returns:
         Mapping of dataset name to its snapshot.
     """
-    try:
-        conf_catalog: dict[str, Any] = config_loader["catalog"]
-    except (KeyError, MissingConfigException):
-        return {}
-
     return {
         ds_name: DatasetSnapshot(
             name=ds_name,
             type=ds_config.get("type", ""),
             filepath=ds_config.get("filepath"),
         )
-        for ds_name, ds_config in conf_catalog.items()
+        for ds_name, ds_config in catalog_config.items()
         if not ds_name.startswith("_")  # skip YAML interpolation anchors
     }
+
 
 def _node_to_snapshot(node: Node) -> NodeSnapshot:
     """Convert a live ``Node`` object to a ``NodeSnapshot``.
@@ -136,13 +131,19 @@ def _build_project_snapshot(
     metadata = bootstrap_project(project_path)
     config_loader = _make_config_loader(project_path, env=env)
 
+    try:
+        conf_catalog: dict[str, Any] = config_loader["catalog"]
+    except (KeyError, MissingConfigException):
+        conf_catalog = {}
+
     metadata_snapshot = _build_project_metadata_snapshot(metadata)
     pipeline_snapshots = _build_pipeline_snapshots(dict(pipelines))
-    dataset_snapshots = _build_dataset_snapshots(config_loader)
+    dataset_snapshots = _build_dataset_snapshots(conf_catalog)
 
-    # [TODO: Need to confirm with the team if we should resolve it or
-    # keep patterns as is for snapshot as patterns are runtime resolutions]
-    dataset_snapshots = _resolve_factory_patterns(dataset_snapshots, pipeline_snapshots)
+    # resolve factory patterns
+    dataset_snapshots = _resolve_factory_patterns(
+        conf_catalog, dataset_snapshots, pipeline_snapshots
+    )
 
     parameter_keys = _get_parameter_keys(config_loader)
 

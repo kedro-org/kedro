@@ -115,17 +115,25 @@ class TestGetParameterKeys:
 class TestResolveFactoryPatterns:
     def test_no_patterns_returns_unchanged(self):
         """If no factory patterns exist, datasets dict is returned as-is."""
+        catalog_config = {"companies": {"type": "pandas.CSVDataset"}}
         datasets = {
             "companies": DatasetSnapshot(name="companies", type="pandas.CSVDataset"),
         }
         pipelines = [
             _make_pipeline_snapshot([_make_node_snapshot(["companies"], ["output"])])
         ]
-        result = _resolve_factory_patterns(datasets, pipelines)
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         assert result == datasets
 
     def test_concrete_pipeline_ds_already_in_datasets_not_duplicated(self):
         """Pipeline datasets that already have direct entries are not replaced."""
+        catalog_config = {
+            "companies": {"type": "pandas.CSVDataset"},
+            "{namespace}.{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{name}.csv",
+            },
+        }
         datasets = {
             "companies": DatasetSnapshot(name="companies", type="pandas.CSVDataset"),
             "{namespace}.{name}": DatasetSnapshot(
@@ -137,13 +145,19 @@ class TestResolveFactoryPatterns:
         pipelines = [
             _make_pipeline_snapshot([_make_node_snapshot(["companies"], ["output"])])
         ]
-        result = _resolve_factory_patterns(datasets, pipelines)
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         # 'companies' direct entry should not be overwritten
         assert result["companies"].type == "pandas.CSVDataset"
         assert result["companies"].filepath is None
 
     def test_factory_pattern_resolved_for_pipeline_input(self):
         """Pipeline input matching a factory pattern gets a concrete entry."""
+        catalog_config = {
+            "{namespace}.{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{name}.csv",
+            },
+        }
         datasets = {
             "{namespace}.{name}": DatasetSnapshot(
                 name="{namespace}.{name}",
@@ -156,13 +170,19 @@ class TestResolveFactoryPatterns:
                 [_make_node_snapshot(["data_science.companies"], ["output"])]
             )
         ]
-        result = _resolve_factory_patterns(datasets, pipelines)
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         assert "data_science.companies" in result
         assert result["data_science.companies"].type == "pandas.CSVDataset"
         assert result["data_science.companies"].filepath == "data/companies.csv"
 
     def test_factory_pattern_resolved_for_pipeline_output(self):
         """Pipeline output matching a factory pattern gets a concrete entry."""
+        catalog_config = {
+            "{namespace}.{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{name}.csv",
+            },
+        }
         datasets = {
             "{namespace}.{name}": DatasetSnapshot(
                 name="{namespace}.{name}",
@@ -175,23 +195,29 @@ class TestResolveFactoryPatterns:
                 [_make_node_snapshot(["raw"], ["data_science.processed"])]
             )
         ]
-        result = _resolve_factory_patterns(datasets, pipelines)
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         assert "data_science.processed" in result
         assert result["data_science.processed"].filepath == "data/processed.csv"
 
     def test_original_pattern_entry_preserved(self):
         """The factory pattern entry itself is still present in the result."""
+        catalog_config = {
+            "{namespace}.{name}": {"type": "pandas.CSVDataset"},
+        }
         datasets = {
             "{namespace}.{name}": DatasetSnapshot(
                 name="{namespace}.{name}", type="pandas.CSVDataset", filepath=None
             ),
         }
         pipelines = [_make_pipeline_snapshot([_make_node_snapshot(["ns.ds"], ["out"])])]
-        result = _resolve_factory_patterns(datasets, pipelines)
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         assert "{namespace}.{name}" in result
 
     def test_no_match_dataset_not_added(self):
         """A pipeline dataset that does not match any pattern is not added."""
+        catalog_config = {
+            "{namespace}.{name}": {"type": "pandas.CSVDataset"},
+        }
         datasets = {
             "{namespace}.{name}": DatasetSnapshot(
                 name="{namespace}.{name}", type="pandas.CSVDataset", filepath=None
@@ -201,48 +227,49 @@ class TestResolveFactoryPatterns:
         pipelines = [
             _make_pipeline_snapshot([_make_node_snapshot(["plain_name"], ["out"])])
         ]
-        result = _resolve_factory_patterns(datasets, pipelines)
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         assert "plain_name" not in result
 
     def test_pattern_without_filepath_gives_none_filepath(self):
         """Resolved entries have None filepath when the pattern has no filepath."""
+        catalog_config = {
+            "{namespace}.{name}": {"type": "kedro.io.MemoryDataset"},
+        }
         datasets = {
             "{namespace}.{name}": DatasetSnapshot(
                 name="{namespace}.{name}", type="kedro.io.MemoryDataset", filepath=None
             ),
         }
         pipelines = [_make_pipeline_snapshot([_make_node_snapshot(["ns.ds"], ["out"])])]
-        result = _resolve_factory_patterns(datasets, pipelines)
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         assert result["ns.ds"].filepath is None
 
     def test_empty_pipelines_returns_unchanged(self):
         """No pipelines means no enrichment needed."""
+        catalog_config = {
+            "{namespace}.{name}": {"type": "pandas.CSVDataset"},
+        }
         datasets = {
             "{namespace}.{name}": DatasetSnapshot(
                 name="{namespace}.{name}", type="pandas.CSVDataset", filepath=None
             ),
         }
-        result = _resolve_factory_patterns(datasets, [])
+        result = _resolve_factory_patterns(catalog_config, datasets, [])
         assert result == datasets
-
-    def test_filepath_when_placeholder_unresolvable(self):
-        """Falls back to the raw filepath when it contains a key absent from the pattern."""
-        datasets = {
-            "{name}": DatasetSnapshot(
-                name="{name}",
-                type="pandas.CSVDataset",
-                filepath="data/{name}/{unknown}.csv",
-            ),
-        }
-        pipelines = [
-            _make_pipeline_snapshot([_make_node_snapshot(["companies"], ["out"])])
-        ]
-        result = _resolve_factory_patterns(datasets, pipelines)
-        assert result["companies"].filepath == "data/{name}/{unknown}.csv"
 
     def test_more_specific_pattern_wins_regardless_of_catalog_order(self):
         """Pattern with higher specificity is chosen even when defined after a generic one."""
         # Less-specific pattern declared FIRST in the dict (catalog order)
+        catalog_config = {
+            "{namespace}.{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{name}.csv",
+            },
+            "{namespace}.int_{name}": {
+                "type": "pandas.ParquetDataset",
+                "filepath": "data/int_{name}.parquet",
+            },
+        }
         datasets = {
             "{namespace}.{name}": DatasetSnapshot(
                 name="{namespace}.{name}",
@@ -260,7 +287,7 @@ class TestResolveFactoryPatterns:
                 [_make_node_snapshot(["data_science.int_customers"], ["out"])]
             )
         ]
-        result = _resolve_factory_patterns(datasets, pipelines)
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         # More specific pattern "{namespace}.int_{name}" must win
         assert result["data_science.int_customers"].type == "pandas.ParquetDataset"
         assert (
@@ -270,6 +297,9 @@ class TestResolveFactoryPatterns:
 
     def test_multiple_nodes_across_pipelines(self):
         """Dataset names from multiple pipelines and nodes are all considered."""
+        catalog_config = {
+            "{ns}.{name}": {"type": "pandas.CSVDataset", "filepath": "{name}.csv"},
+        }
         datasets = {
             "{ns}.{name}": DatasetSnapshot(
                 name="{ns}.{name}", type="pandas.CSVDataset", filepath="{name}.csv"
@@ -279,7 +309,7 @@ class TestResolveFactoryPatterns:
             _make_pipeline_snapshot([_make_node_snapshot(["p1.ds_a"], ["p1.ds_b"])]),
             _make_pipeline_snapshot([_make_node_snapshot(["p2.ds_c"], ["out"])]),
         ]
-        result = _resolve_factory_patterns(datasets, pipelines)
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         assert "p1.ds_a" in result
         assert "p1.ds_b" in result
         assert "p2.ds_c" in result

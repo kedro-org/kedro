@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from kedro.config import MissingConfigException
 from kedro.framework.startup import ProjectMetadata
 from kedro.inspection.models import (
     DatasetSnapshot,
@@ -199,32 +200,27 @@ class TestBuildProjectSnapshot:
         _build_project_snapshot(self.project_path, env="staging")
         mock_make_loader.assert_called_once_with(self.project_path, env="staging")
 
-    def test_config_loader_reused_for_datasets_and_params(self, mocker):
-        """The same config loader instance is passed to both downstream builders."""
-        calls_with_loader = []
+    def test_catalog_loaded_from_config_loader_and_passed_downstream(self, mocker):
+        """Catalog config is loaded from the config loader and passed to both
+        _build_dataset_snapshots and _resolve_factory_patterns."""
+        catalog_data = {"companies": {"type": "pandas.CSVDataset"}}
+        self.mock_config_loader.__getitem__.return_value = catalog_data
 
-        def capture_loader(loader):
-            calls_with_loader.append(loader)
-            return {}
-
+        captured_ds = []
         mocker.patch(
             "kedro.inspection.snapshot._build_dataset_snapshots",
-            side_effect=capture_loader,
+            side_effect=lambda conf: captured_ds.append(conf) or {},
         )
-
-        def capture_params_loader(loader):
-            calls_with_loader.append(loader)
-            return []
-
+        captured_rfp = []
         mocker.patch(
-            "kedro.inspection.snapshot._get_parameter_keys",
-            side_effect=capture_params_loader,
+            "kedro.inspection.snapshot._resolve_factory_patterns",
+            side_effect=lambda conf, ds, pipes: captured_rfp.append(conf) or ds,
         )
 
         _build_project_snapshot(self.project_path)
 
-        assert len(calls_with_loader) == 2
-        assert calls_with_loader[0] is calls_with_loader[1]
+        assert captured_ds == [catalog_data]
+        assert captured_rfp == [catalog_data]
 
     def test_accepts_string_path(self, mocker):
         """A string project_path is accepted and converted internally."""
@@ -232,12 +228,38 @@ class TestBuildProjectSnapshot:
         assert isinstance(result, ProjectSnapshot)
 
     def test_factory_patterns_resolved(self, mocker):
-        """_resolve_factory_patterns is called with datasets and pipelines."""
+        """_resolve_factory_patterns is called with catalog_config, datasets, and pipelines."""
         mock_resolve = mocker.patch(
             "kedro.inspection.snapshot._resolve_factory_patterns",
             return_value=self.dataset_snapshots,
         )
         _build_project_snapshot(self.project_path)
         mock_resolve.assert_called_once_with(
-            self.dataset_snapshots, self.pipeline_snapshots
+            self.mock_config_loader["catalog"],
+            self.dataset_snapshots,
+            self.pipeline_snapshots,
         )
+
+    def test_missing_catalog_key_error_falls_back_to_empty(self, mocker):
+        """When config_loader['catalog'] raises KeyError, an empty dict is used."""
+        self.mock_config_loader.__getitem__.side_effect = KeyError("catalog")
+        captured = []
+        mocker.patch(
+            "kedro.inspection.snapshot._build_dataset_snapshots",
+            side_effect=lambda conf: captured.append(conf) or {},
+        )
+        _build_project_snapshot(self.project_path)
+        assert captured == [{}]
+
+    def test_missing_catalog_missing_config_falls_back_to_empty(self, mocker):
+        """When config_loader['catalog'] raises MissingConfigException, an empty dict is used."""
+        self.mock_config_loader.__getitem__.side_effect = MissingConfigException(
+            "catalog"
+        )
+        captured = []
+        mocker.patch(
+            "kedro.inspection.snapshot._build_dataset_snapshots",
+            side_effect=lambda conf: captured.append(conf) or {},
+        )
+        _build_project_snapshot(self.project_path)
+        assert captured == [{}]

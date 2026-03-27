@@ -274,19 +274,19 @@ class _ProjectLogging(UserDict):
         self.configure(yaml.safe_load(logging_config))
         logger.info(msg)
 
-    def _sanitise_logging_config(self, config: Any) -> Any:
+    def _validate_logging_config(self, config: Any) -> Any:
         """Recursively check the logging configuration and raise an error if dangerous '()' factory keys are encountered."""
         if isinstance(config, dict):
             if "()" in config:
                 raise ValueError(
                     "The '()' key is not allowed in logging configuration as it poses a security risk."
                 )
-            sanitised = {}
+            validated = {}
             for k, v in config.items():
-                sanitised[k] = self._sanitise_logging_config(v)
-            return sanitised
+                validated[k] = self._validate_logging_config(v)
+            return validated
         elif isinstance(config, list):
-            return [self._sanitise_logging_config(item) for item in config]
+            return [self._validate_logging_config(item) for item in config]
         else:
             return config
 
@@ -295,9 +295,9 @@ class _ProjectLogging(UserDict):
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
         """
-        sanitised_config = self._sanitise_logging_config(logging_config)
-        logging.config.dictConfig(sanitised_config)
-        self.data = sanitised_config
+        validated_config = self._validate_logging_config(logging_config)
+        logging.config.dictConfig(validated_config)
+        self.data = validated_config
 
     def set_project_logging(
         self, package_name: str, preserve_logging: bool = False

@@ -145,7 +145,7 @@ class TestBuildProjectSnapshot:
         )
 
         # _resolve_factory_patterns returns the datasets unchanged by default
-        mocker.patch(
+        self.mock_resolve_factory_patterns = mocker.patch(
             "kedro.inspection.snapshot._resolve_factory_patterns",
             return_value=self.dataset_snapshots,
         )
@@ -207,19 +207,15 @@ class TestBuildProjectSnapshot:
         assert captured_ds == [catalog_data]
         assert captured_rfp == [catalog_data]
 
-    def test_accepts_string_path(self, mocker):
+    def test_accepts_string_path(self):
         """A string project_path is accepted and converted internally."""
         result = _build_project_snapshot(str(self.project_path))
         assert isinstance(result, ProjectSnapshot)
 
-    def test_factory_patterns_resolved(self, mocker):
+    def test_factory_patterns_resolved(self):
         """_resolve_factory_patterns is called with catalog_config, datasets, and pipelines."""
-        mock_resolve = mocker.patch(
-            "kedro.inspection.snapshot._resolve_factory_patterns",
-            return_value=self.dataset_snapshots,
-        )
         _build_project_snapshot(self.project_path)
-        mock_resolve.assert_called_once_with(
+        self.mock_resolve_factory_patterns.assert_called_once_with(
             self.mock_config_loader["catalog"],
             self.dataset_snapshots,
             self.pipeline_snapshots,

@@ -187,7 +187,7 @@ ParameterValidationError: Parameter validation failed:
     Input should be less than or equal to 0.5 [type=less_than_equal, ...]
 ```
 
-The error includes the parameter key name and the full Pydantic validation output, so you can quickly identify which field has an invalid value.
+The error includes the parameter key name and the full Pydantic validation output, making it straightforward to identify which field has an invalid value.
 
 ## Dataclasses
 
@@ -216,7 +216,7 @@ eval:
 ```
 
 !!! note
-    Dataclasses do not have built-in field validation like Pydantic. Kedro instantiates the dataclass from the dictionary, which checks that the required fields are present and that the values match the declared types at instantiation time, but it does not enforce constraints like `ge`, `le`, or custom validators. Use Pydantic models if you need richer validation.
+    Dataclasses do not have built-in field validation like Pydantic. Kedro instantiates the dataclass from the dictionary and checks that the required fields are present. However, it does not enforce constraints like `ge`, `le`, or custom validators. Use Pydantic models if you need richer validation.
 
 ## How it works
 
@@ -249,11 +249,11 @@ node(
 
 ### Same parameter used by multiple nodes
 
-If multiple nodes reference the same `params:` key with the same type, validation and instantiation happen once. All nodes receive the same validated instance.
+If multiple nodes reference the same `params:` key with the same type, validation and instantiation happen a single time. All nodes receive the same validated instance.
 
 ### Conflicting types across pipelines
 
-If two pipelines declare different types for the same parameter key (for example, `params:training` typed as `TrainingParamsA` in one pipeline and `TrainingParamsB` in another), Kedro logs a warning and uses the type from the last pipeline processed. Avoid this by using consistent types for the same parameter key.
+If two pipelines declare different types for the same parameter key, Kedro logs a warning and uses the type from the last pipeline processed. For example, `params:training` typed as `TrainingParamsA` in one pipeline and `TrainingParamsB` in another triggers this warning. Avoid this by using consistent types for the same parameter key.
 
 ### Mixing typed and untyped parameters
 

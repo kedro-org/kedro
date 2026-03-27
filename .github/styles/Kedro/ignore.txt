@@ -71,6 +71,7 @@ pluggy
 Polars
 polars
 Pydantic
+Pydantic's
 Printify
 Pylint
 pyenv
@@ -97,6 +98,7 @@ transcode
 transcoded
 transcoding
 untyped
+validators
 Unsplash
 uv
 VSCode

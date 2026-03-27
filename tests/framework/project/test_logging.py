@@ -315,3 +315,69 @@ def test_rich_format_with_invalid_type():
         TypeError, match="rich_format only accept non-empty list as an argument"
     ):
         root_logger.warning("value: %s", "val", extra={"rich_format": "red"})
+
+
+@pytest.mark.parametrize(
+    "input_config,expected",
+    [
+        # Test case 1: Simple dict with '()' key
+        (
+            {
+                "version": 1,
+                "handlers": {
+                    "console": {
+                        "class": "logging.StreamHandler",
+                        "()": "os.system",  # Dangerous factory
+                        "args": ["echo pwned"],
+                    }
+                },
+                "loggers": {"kedro": {"level": "INFO"}},
+            },
+            {
+                "version": 1,
+                "handlers": {
+                    "console": {
+                        "class": "logging.StreamHandler",
+                        "args": ["echo pwned"],
+                    }
+                },
+                "loggers": {"kedro": {"level": "INFO"}},
+            },
+        ),
+        # Test case 2: Nested dict with '()' in list
+        (
+            {
+                "handlers": [
+                    {"class": "logging.StreamHandler", "()": "subprocess.call"},
+                    {"class": "logging.FileHandler", "filename": "log.txt"},
+                ]
+            },
+            {
+                "handlers": [
+                    {"class": "logging.StreamHandler"},
+                    {"class": "logging.FileHandler", "filename": "log.txt"},
+                ]
+            },
+        ),
+        # Test case 3: No '()' keys - should remain unchanged
+        (
+            {
+                "version": 1,
+                "handlers": {"console": {"class": "logging.StreamHandler"}},
+                "loggers": {"kedro": {"level": "INFO"}},
+            },
+            {
+                "version": 1,
+                "handlers": {"console": {"class": "logging.StreamHandler"}},
+                "loggers": {"kedro": {"level": "INFO"}},
+            },
+        ),
+    ],
+)
+def test_sanitize_logging_config_removes_factory_keys(input_config, expected):
+    """Test that _sanitize_logging_config removes '()' factory keys to prevent RCE."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    sanitized = logging_instance._sanitize_logging_config(input_config)
+    assert sanitized == expected

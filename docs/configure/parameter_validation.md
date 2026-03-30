@@ -4,16 +4,51 @@ Kedro can validate parameters from your YAML configuration against type hints on
 
 This feature is **opt-in**: add a type hint to enable validation for that parameter, or leave it untyped to keep the existing behaviour.
 
-## Getting started
+## Concepts
 
-### Prerequisites
+### Supported types
 
-You need one of the following (not both):
+Parameter validation supports two kinds of typed objects:
 
-- **Pydantic models**: Requires [Pydantic v2+](https://docs.pydantic.dev/latest/) (`pip install pydantic`).
-- **Dataclasses**: No extra dependencies. Uses the built-in `dataclasses` module.
+- **Pydantic models** (v2+): Full validation with field constraints, nested models, and custom validators. Requires `pip install pydantic`.
+- **Dataclasses**: Basic type checking using Python's built-in `dataclasses` module. No extra dependencies needed.
 
-### Minimal example
+!!! note
+    You can use either Pydantic models or dataclasses. You do not need both.
+
+Raw values (`int`, `str`, `float`, etc.) are passed through unchanged with no validation applied.
+
+### How validation works
+
+1. When you execute a Kedro run or access `context.params` directly, Kedro loads your `parameters.yml` as a dictionary.
+2. Kedro inspects the signatures of all registered pipeline node functions. For any `params:` input with a Pydantic model or dataclass type hint, it records the expected type.
+3. For each typed parameter, Kedro converts the raw dictionary into the declared type using `model_validate` (Pydantic) or keyword-argument instantiation (dataclasses).
+4. If any conversion fails, Kedro raises a `ParameterValidationError` with details about the failure, before any node runs.
+5. Validated parameters are cached, so repeated access to `context.params` does not re-validate.
+
+### Fail-fast behaviour
+
+Validation runs before any node executes. This **fail-fast** behaviour means configuration errors are caught early, not halfway through a long pipeline run.
+
+### Pydantic vs. dataclasses
+
+Pydantic models provide richer validation: field constraints (`ge`, `le`, `gt`, `lt`), custom validators, nested model support, and detailed error messages. Dataclasses check that required fields are present and can be instantiated from the dictionary, but do not enforce value constraints. Use Pydantic models if you need validation beyond basic type checking.
+
+### Conflicting types across pipelines
+
+If two pipelines declare different types for the same parameter key, Kedro logs a warning and uses the type from the last pipeline processed. The run still executes without error. For example, `params:training` typed as `TrainingParamsA` in one pipeline and `TrainingParamsB` in another triggers this warning. Avoid this by using consistent types for the same parameter key.
+
+### Known limitations
+
+- **Validates across all pipelines**: Kedro inspects all registered pipelines for type hints, regardless of which pipeline you are running. This means a validation error in an unrelated pipeline can block your run. See [GitHub issue #5443](https://github.com/kedro-org/kedro/issues/5443) for progress on scoping validation to the target pipeline.
+- **Pydantic v1 is not supported**: The validation framework uses `model_validate`, which is a Pydantic v2+ API. If your project uses Pydantic v1, you need to upgrade to v2.
+- **Dataset inputs are not validated**: Validation applies to parameters loaded through the `params:` prefix. It does not cover dataset inputs.
+
+---
+
+## How to validate parameters in Kedro
+
+### Basic Pydantic model
 
 Define a Pydantic model for your parameters:
 
@@ -71,34 +106,9 @@ model_options:
   random_state: 3
 ```
 
-When you run `kedro run`, Kedro validates `model_options` against the `ModelOptions` schema. If `test_size` is outside the `0.1`–`0.5` range, Kedro raises an error before any node executes.
+When you run `kedro run`, Kedro validates `model_options` against the `ModelOptions` schema. If `test_size` is outside the `0.1`-`0.5` range, Kedro raises an error before any node executes.
 
-## Pydantic models
-
-### Basic example
-
-```python
-from pydantic import BaseModel
-
-
-class TrainingParams(BaseModel):
-    learning_rate: float
-    epochs: int
-    batch_size: int = 32  # default value
-
-
-def train_model(X_train, y_train, params: TrainingParams):
-    print(f"Training for {params.epochs} epochs at lr={params.learning_rate}")
-    ...
-```
-
-```yaml
-training:
-  learning_rate: 0.01
-  epochs: 10
-```
-
-### Field constraints
+### Use field constraints
 
 Use Pydantic's `Field` to add validation constraints:
 
@@ -114,7 +124,7 @@ class TrainingParams(BaseModel):
 
 See the [Pydantic field documentation](https://docs.pydantic.dev/latest/concepts/fields/) for the full list of constraints.
 
-### Nested models
+### Use nested models
 
 If your configuration has nested structure, define nested Pydantic models:
 
@@ -148,7 +158,7 @@ training:
 
 Nested sub-models are preserved as typed objects. `params.optimizer` is an `OptimizerConfig` instance with attribute access and its own validation.
 
-### Custom validators
+### Use custom validators
 
 You can use Pydantic's `@field_validator` for custom validation logic:
 
@@ -170,30 +180,9 @@ class SplitParams(BaseModel):
 
 See the [Pydantic validators documentation](https://docs.pydantic.dev/latest/concepts/validators/) for more patterns.
 
-### Validation error messages
+### Use dataclasses
 
-When validation fails, Kedro raises a `ParameterValidationError` with details about which field failed and why:
-
-```yaml
-# conf/base/parameters.yml
-model_options:
-  test_size: 5.0  # exceeds le=0.5 constraint
-  random_state: 3
-```
-
-```
-ParameterValidationError: Parameter validation failed:
-- Parameter 'model_options': Failed to instantiate ModelOptions for parameter 'model_options':
-  1 validation error for ModelOptions
-  test_size
-    Input should be less than or equal to 0.5 [type=less_than_equal, ...]
-```
-
-The error includes the parameter key name and the full Pydantic validation output, making it straightforward to identify which field has an invalid value.
-
-## Dataclasses
-
-You can also use Python's built-in `dataclasses`:
+You can use Python's built-in `dataclasses` instead of Pydantic:
 
 ```python
 from dataclasses import dataclass
@@ -220,19 +209,7 @@ eval:
 !!! note
     Dataclasses do not have built-in field validation like Pydantic. Kedro instantiates the dataclass from the dictionary and checks that the required fields are present, but it does not enforce constraints like `ge`, `le`, or custom validators. Use Pydantic models if you need richer validation.
 
-## How it works
-
-1. When you execute a Kedro run or access `context.params` directly, Kedro loads your `parameters.yml` as a dictionary.
-2. Kedro inspects the signatures of all registered pipeline node functions. For any `params:` input with a Pydantic model or dataclass type hint, it records the expected type.
-3. For each typed parameter, Kedro converts the raw dictionary into the declared type using `model_validate` (Pydantic) or keyword-argument instantiation (dataclasses).
-4. If any conversion fails, Kedro raises a `ParameterValidationError` with details about the failure, before any node runs.
-5. Validated parameters are cached, so repeated access to `context.params` does not re-validate.
-
-This **fail-fast** behaviour means configuration errors are caught early, not halfway through a long pipeline run.
-
-## Advanced usage
-
-### Multiple typed parameters in one node
+### Use multiple typed parameters in one node
 
 A node can have multiple `params:` inputs, each with its own type:
 
@@ -249,15 +226,7 @@ node(
 )
 ```
 
-### Same parameter used by multiple nodes
-
-If multiple nodes reference the same `params:` key with the same type, validation and instantiation happen a single time. All nodes receive the same validated instance.
-
-### Conflicting types across pipelines
-
-If two pipelines declare different types for the same parameter key, Kedro logs a warning and uses the type from the last pipeline processed. The run still executes without error. For example, `params:training` typed as `TrainingParamsA` in one pipeline and `TrainingParamsB` in another triggers this warning. Avoid this by using consistent types for the same parameter key.
-
-### Mixing typed and untyped parameters
+### Mix typed and untyped parameters
 
 You can use typed parameters alongside untyped ones in the same project. Nodes without type hints receive plain dictionaries as before:
 
@@ -272,7 +241,7 @@ def preprocess(data, params):
     ...
 ```
 
-### Runtime parameters
+### Use runtime parameters with validation
 
 Runtime parameters specified with `--params` are merged into the configuration before validation runs:
 
@@ -282,8 +251,23 @@ kedro run --params="training.learning_rate:0.1"
 
 The merged value is validated against the type hint, so invalid runtime overrides are caught the same way as invalid YAML values.
 
-## Known limitations
+### Read validation error messages
 
-- **Validates across all pipelines**: Kedro inspects all registered pipelines for type hints, regardless of which pipeline you are running. This means a validation error in an unrelated pipeline can block your run. See [GitHub issue #5443](https://github.com/kedro-org/kedro/issues/5443) for progress on scoping validation to the target pipeline.
-- **Pydantic v1 is not supported**: The validation framework uses `model_validate`, which is a Pydantic v2+ API. If your project uses Pydantic v1, you need to upgrade to v2.
-- **Dataset inputs are not validated**: Validation applies to parameters loaded through the `params:` prefix. It does not cover dataset inputs.
+When validation fails, Kedro raises a `ParameterValidationError` with details about which field failed and why:
+
+```yaml
+# conf/base/parameters.yml
+model_options:
+  test_size: 5.0  # exceeds le=0.5 constraint
+  random_state: 3
+```
+
+```
+ParameterValidationError: Parameter validation failed:
+- Parameter 'model_options': Failed to instantiate ModelOptions for parameter 'model_options':
+  1 validation error for ModelOptions
+  test_size
+    Input should be less than or equal to 0.5 [type=less_than_equal, ...]
+```
+
+The error includes the parameter key name and the full Pydantic validation output, making it straightforward to identify which field has an invalid value.

@@ -4,6 +4,6 @@
 behave>=1.2.6,<2.0
 pandas~=1.3
 psutil~=7.2
-requests~=2.32
+requests~=2.33
 PyYAML>=4.2, <7.0
 packaging>=20.0

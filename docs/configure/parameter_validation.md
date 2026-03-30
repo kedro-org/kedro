@@ -8,6 +8,8 @@ This feature is **opt-in**: add a type hint to enable validation for that parame
 
 ### Prerequisites
 
+You need one of the following (not both):
+
 - **Pydantic models**: Requires [Pydantic v2+](https://docs.pydantic.dev/latest/) (`pip install pydantic`).
 - **Dataclasses**: No extra dependencies. Uses the built-in `dataclasses` module.
 
@@ -220,7 +222,7 @@ eval:
 
 ## How it works
 
-1. When you access `context.params` (which happens before any node runs), Kedro loads your `parameters.yml` as a dictionary.
+1. When you execute a Kedro run or access `context.params` directly, Kedro loads your `parameters.yml` as a dictionary.
 2. Kedro inspects the signatures of all registered pipeline node functions. For any `params:` input with a Pydantic model or dataclass type hint, it records the expected type.
 3. For each typed parameter, Kedro converts the raw dictionary into the declared type using `model_validate` (Pydantic) or keyword-argument instantiation (dataclasses).
 4. If any conversion fails, Kedro raises a `ParameterValidationError` with details about the failure, before any node runs.
@@ -253,7 +255,7 @@ If multiple nodes reference the same `params:` key with the same type, validatio
 
 ### Conflicting types across pipelines
 
-If two pipelines declare different types for the same parameter key, Kedro logs a warning and uses the type from the last pipeline processed. For example, `params:training` typed as `TrainingParamsA` in one pipeline and `TrainingParamsB` in another triggers this warning. Avoid this by using consistent types for the same parameter key.
+If two pipelines declare different types for the same parameter key, Kedro logs a warning and uses the type from the last pipeline processed. The run still executes successfully. For example, `params:training` typed as `TrainingParamsA` in one pipeline and `TrainingParamsB` in another triggers this warning. Avoid this by using consistent types for the same parameter key.
 
 ### Mixing typed and untyped parameters
 
@@ -284,4 +286,4 @@ The merged value is validated against the type hint, so invalid runtime override
 
 - **Validates across all pipelines**: Kedro inspects all registered pipelines for type hints, regardless of which pipeline you are running. This means a validation error in an unrelated pipeline can block your run. See [GitHub issue #5443](https://github.com/kedro-org/kedro/issues/5443) for progress on scoping validation to the target pipeline.
 - **Pydantic v1 is not supported**: The validation framework uses `model_validate`, which is a Pydantic v2+ API. If your project uses Pydantic v1, you need to upgrade to v2.
-- **`params:` inputs are validated**: Validation applies to parameters loaded through the `params:` prefix. Dataset inputs are not affected by this feature.
+- **Dataset inputs are not validated**: Validation applies to parameters loaded through the `params:` prefix. It does not cover dataset inputs.

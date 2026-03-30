@@ -3,6 +3,7 @@
 * Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
 ## Bug fixes and other changes
 ## Documentation changes
+* Added parameter validation documentation covering Pydantic model and dataclass support for typed parameters.
 ## Community contributions
 
 

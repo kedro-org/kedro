@@ -92,11 +92,12 @@ class TestDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a dataset
         from nonexistent source"""
-        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.csv_dataset.CSVDataset"
+        name = "test"
+        pattern = rf"{name}: Failed while loading data from dataset kedro_datasets.pandas.csv_dataset.CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
-            data_catalog.load("test")
+            data_catalog.load(name)
 
-    def test_load_without_save_error(self, data_catalog):
+    def test_load_dataset_includes_name_in_error(self, data_catalog):
         """Check the error when attempting to load a dataset
         which was not saved to yet"""
         name = "access_without_load"

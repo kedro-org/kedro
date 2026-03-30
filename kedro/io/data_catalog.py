@@ -1054,11 +1054,9 @@ class DataCatalog(CatalogProtocol):
         )
 
         try:
-            ds_contents = dataset.load()
+            return dataset.load()
         except DatasetError as e:
             raise DatasetError(f"{ds_name}: {e}") from e
-
-        return ds_contents
 
     def release(self, ds_name: str) -> None:
         """Release any cached data associated with a dataset

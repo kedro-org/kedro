@@ -744,6 +744,9 @@ def _node_error_message(msg: str) -> str:
     )
 
 
+_DOTTED_DATASET_NAME_WARNED = "__dotted_dataset_name_warned__"
+
+
 def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
     """Validate the dataset name. The node inputs and outputs should not contain
     '.' characters. This is to ensure that the dot notation is reserved for Kedro's
@@ -763,8 +766,8 @@ def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
         if not namespace or not name_namespace.startswith(
             namespace.split(".")[0]
         ):  # match with top level namespace
-            if not getattr(Node, "__dotted_dataset_name_warned__", False):
-                setattr(Node, "__dotted_dataset_name_warned__", True)
+            if not getattr(Node, _DOTTED_DATASET_NAME_WARNED, False):
+                setattr(Node, _DOTTED_DATASET_NAME_WARNED, True)
                 warnings.warn(
                     "One or more dataset names contain '.' characters, which is "
                     "not recommended as the dot notation is reserved for automatic "

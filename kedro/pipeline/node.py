@@ -764,7 +764,7 @@ def _node_dataset_name_validation(name: str, namespace: str | None) -> None:
             namespace.split(".")[0]
         ):  # match with top level namespace
             if not getattr(Node, "__dotted_dataset_name_warned__", False):
-                Node.__dotted_dataset_name_warned__ = True
+                setattr(Node, "__dotted_dataset_name_warned__", True)
                 warnings.warn(
                     "One or more dataset names contain '.' characters, which is "
                     "not recommended as the dot notation is reserved for automatic "

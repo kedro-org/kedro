@@ -255,7 +255,7 @@ If multiple nodes reference the same `params:` key with the same type, validatio
 
 ### Conflicting types across pipelines
 
-If two pipelines declare different types for the same parameter key, Kedro logs a warning and uses the type from the last pipeline processed. The run still executes successfully. For example, `params:training` typed as `TrainingParamsA` in one pipeline and `TrainingParamsB` in another triggers this warning. Avoid this by using consistent types for the same parameter key.
+If two pipelines declare different types for the same parameter key, Kedro logs a warning and uses the type from the last pipeline processed. The run still executes without error. For example, `params:training` typed as `TrainingParamsA` in one pipeline and `TrainingParamsB` in another triggers this warning. Avoid this by using consistent types for the same parameter key.
 
 ### Mixing typed and untyped parameters
 

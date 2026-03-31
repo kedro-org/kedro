@@ -2,11 +2,13 @@
 ## Major features and improvements
 * Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
 ## Bug fixes and other changes
+* `DataCatalog.load()` now raises a `DatasetError` that includes the dataset name for easier debugging.
 * Align the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
 * Fixed remote code execution vulnerability in the logging configuration.
 ## Documentation changes
 * Added parameter validation documentation covering Pydantic model and dataclass support for typed parameters.
 ## Community contributions
+* [mvhensbergen](https://github.com/mvhensbergen)
 
 
 # Release 1.3.0

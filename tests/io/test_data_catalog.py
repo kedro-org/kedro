@@ -92,9 +92,19 @@ class TestDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a dataset
         from nonexistent source"""
-        pattern = r"Failed while loading data from dataset kedro_datasets.pandas.csv_dataset.CSVDataset"
+        name = "test"
+        pattern = rf"{name}: Failed while loading data from dataset kedro_datasets.pandas.csv_dataset.CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
-            data_catalog.load("test")
+            data_catalog.load(name)
+
+    def test_load_dataset_includes_name_in_error(self, data_catalog):
+        """Check the error when attempting to load a dataset
+        which was not saved to yet"""
+        name = "access_without_load"
+        catalog = DataCatalog(datasets={name: MemoryDataset()})
+        pattern = rf"{name}: Data for MemoryDataset has not been saved yet"
+        with pytest.raises(DatasetError, match=pattern):
+            catalog.load(name)
 
     def test_add_dataset_twice(self, data_catalog, dataset, caplog):
         """Check the warning when attempting to add the dataset twice"""

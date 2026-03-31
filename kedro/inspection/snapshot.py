@@ -56,11 +56,7 @@ def _build_dataset_snapshots(
         Mapping of dataset name to its snapshot.
     """
     return {
-        ds_name: DatasetSnapshot(
-            name=ds_name,
-            type=ds_config.get("type", ""),
-            filepath=ds_config.get("filepath"),
-        )
+        ds_name: DatasetSnapshot.from_config(ds_name, ds_config)
         for ds_name, ds_config in catalog_config.items()
         if not ds_name.startswith("_")  # skip YAML interpolation anchors
     }

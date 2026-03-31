@@ -34,6 +34,16 @@ class DatasetSnapshot:
     type: str
     filepath: str | None = None
 
+    @classmethod
+    def from_config(cls, name: str, config: dict) -> DatasetSnapshot:
+        """Construct a ``DatasetSnapshot`` from a raw catalog config entry."""
+        return cls(
+            name=name,
+            type=config.get("type", ""),
+            filepath=config.get("filepath"),
+        )
+
+
 @dataclass
 class NodeSnapshot:
     """Read-only snapshot of a single pipeline node.

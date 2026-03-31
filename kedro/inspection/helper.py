@@ -108,10 +108,6 @@ def _resolve_factory_patterns(
             ds_name, matched, copy.deepcopy(sorted_patterns[matched])
         )
 
-        result[ds_name] = DatasetSnapshot(
-            name=ds_name,
-            type=resolved_config.get("type", ""),
-            filepath=resolved_config.get("filepath"),
-        )
+        result[ds_name] = DatasetSnapshot.from_config(ds_name, resolved_config)
 
     return result

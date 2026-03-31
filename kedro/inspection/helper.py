@@ -72,8 +72,7 @@ def _resolve_factory_patterns(
         pipelines: List of pipeline snapshots whose node inputs/outputs are inspected.
 
     Returns:
-        A new mapping that contains all original entries plus any newly resolved
-        concrete dataset entries derived from factory patterns.
+        A new mapping containing only concrete dataset entries
     """
     pattern_configs = {
         name: config
@@ -92,7 +91,12 @@ def _resolve_factory_patterns(
             pipeline_ds_names.update(node_snapshot.inputs)
             pipeline_ds_names.update(node_snapshot.outputs)
 
-    result = dict(datasets)
+    # Start from non-pattern entries
+    result = {
+        name: snap
+        for name, snap in datasets.items()
+        if not CatalogConfigResolver.is_pattern(name)
+    }
 
     for ds_name in pipeline_ds_names:
         if ds_name in result:

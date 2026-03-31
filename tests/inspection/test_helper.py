@@ -149,6 +149,8 @@ class TestResolveFactoryPatterns:
         # 'companies' direct entry should not be overwritten
         assert result["companies"].type == "pandas.CSVDataset"
         assert result["companies"].filepath is None
+        # factory pattern key is stripped
+        assert "{namespace}.{name}" not in result
 
     def test_factory_pattern_resolved_for_pipeline_input(self):
         """Pipeline input matching a factory pattern gets a concrete entry."""
@@ -199,8 +201,8 @@ class TestResolveFactoryPatterns:
         assert "data_science.processed" in result
         assert result["data_science.processed"].filepath == "data/processed.csv"
 
-    def test_original_pattern_entry_preserved(self):
-        """The factory pattern entry itself is still present in the result."""
+    def test_pattern_entry_removed_from_result(self):
+        """Factory pattern keys are stripped; only concrete resolved entries remain."""
         catalog_config = {
             "{namespace}.{name}": {"type": "pandas.CSVDataset"},
         }
@@ -211,7 +213,8 @@ class TestResolveFactoryPatterns:
         }
         pipelines = [_make_pipeline_snapshot([_make_node_snapshot(["ns.ds"], ["out"])])]
         result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
-        assert "{namespace}.{name}" in result
+        assert "{namespace}.{name}" not in result
+        assert "ns.ds" in result
 
     def test_no_match_dataset_not_added(self):
         """A pipeline dataset that does not match any pattern is not added."""
@@ -229,6 +232,7 @@ class TestResolveFactoryPatterns:
         ]
         result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         assert "plain_name" not in result
+        assert "{namespace}.{name}" not in result
 
     def test_pattern_without_filepath_gives_none_filepath(self):
         """Resolved entries have None filepath when the pattern has no filepath."""
@@ -244,8 +248,8 @@ class TestResolveFactoryPatterns:
         result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
         assert result["ns.ds"].filepath is None
 
-    def test_empty_pipelines_returns_unchanged(self):
-        """No pipelines means no enrichment needed."""
+    def test_empty_pipelines_strips_patterns(self):
+        """No pipelines means no concrete datasets are resolved; patterns are still stripped."""
         catalog_config = {
             "{namespace}.{name}": {"type": "pandas.CSVDataset"},
         }
@@ -255,7 +259,7 @@ class TestResolveFactoryPatterns:
             ),
         }
         result = _resolve_factory_patterns(catalog_config, datasets, [])
-        assert result == datasets
+        assert result == {}
 
     def test_more_specific_pattern_wins_regardless_of_catalog_order(self):
         """Pattern with higher specificity is chosen even when defined after a generic one."""
@@ -294,6 +298,9 @@ class TestResolveFactoryPatterns:
             result["data_science.int_customers"].filepath
             == "data/int_customers.parquet"
         )
+        # both pattern keys are stripped
+        assert "{namespace}.{name}" not in result
+        assert "{namespace}.int_{name}" not in result
 
     def test_multiple_nodes_across_pipelines(self):
         """Dataset names from multiple pipelines and nodes are all considered."""
@@ -313,3 +320,4 @@ class TestResolveFactoryPatterns:
         assert "p1.ds_a" in result
         assert "p1.ds_b" in result
         assert "p2.ds_c" in result
+        assert "{ns}.{name}" not in result

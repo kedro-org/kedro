@@ -1,9 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
-* Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
 ## Bug fixes and other changes
-* Align the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
-* Fixed remote code execution vulnerability in the logging configuration.
 ## Documentation changes
 ## Community contributions
 
@@ -11,12 +8,17 @@
 # Release 1.3.0
 
 ## Major features and improvements
+* Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
 * Added `list_versions()` method for versioned datasets to list available dataset versions.
 * Added `pipelines_to_find` parameter to `find_pipelines()`, allowing users to selectively run a subset of existing pipelines by modifying the pipeline registry.
 * The CLI `--checkout` flag can now be used on a new Kedro project from the default template, without a starter.
 * Added `SESSION_CLASS` as a configurable project setting, allowing users to define a custom KedroSession subclass
 
 ## Bug fixes and other changes
+* `DataCatalog.load()` and `DataCatalog.save()` now raise a `DatasetError` that includes the dataset name for easier debugging.
+* Aligned the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
+* Fixed a path traversal vulnerability in versioned dataset loading that could allow unauthorized file access via unsanitized version strings.
+* Fixed remote code execution vulnerability in the logging configuration.
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
 * Added a warning when a node returns a value but is defined with `outputs=None`, clarifying that the return value is ignored.
 * Added `preserve_logging` flag to `configure_project()` to prevent runtime-added logging handlers from being overwritten when `configure_project()` is called after custom handlers have been attached (e.g. in a long-running server process such as FastAPI).
@@ -25,12 +27,15 @@
 * Added a fix for `CatalogConfigResolver` splitting sqlalchemy URL during pattern resolution.
 
 ## Documentation changes
+* Added parameter validation documentation covering Pydantic model and dataclass support for typed parameters.
+
 ## Community contributions
 * [aziq](https://github.com/aziq)
 * [zhubaobao2024](https://github.com/zhubaobao2024)
 * [Camille Coeurjoly](https://github.com/Camille1992)
 * [sinanpl](https://github.com/sinanpl)
 * [Mr-Neutr0n](https://github.com/Mr-Neutr0n)
+* [mvhensbergen](https://github.com/mvhensbergen)
 
 # Release 1.2.0
 ## Major features and improvements

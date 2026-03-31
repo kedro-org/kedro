@@ -179,10 +179,16 @@ class TestBuildProjectSnapshot:
         _build_project_snapshot(self.project_path)
         self.mock_bootstrap.assert_called_once_with(self.project_path)
 
-    def test_config_loader_created_with_project_path(self):
+    def test_config_loader_created_with_explicit_env(self):
         _build_project_snapshot(self.project_path, env="staging")
         self.mock_make_config_loader.assert_called_once_with(
             self.project_path, env="staging"
+        )
+
+    def test_config_loader_created_with_default_env(self):
+        _build_project_snapshot(self.project_path)
+        self.mock_make_config_loader.assert_called_once_with(
+            self.project_path, env=None
         )
 
     def test_catalog_loaded_from_config_loader_and_passed_downstream(self, mocker):

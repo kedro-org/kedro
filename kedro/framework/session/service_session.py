@@ -71,7 +71,7 @@ class KedroServiceSession(AbstractSession):
 
         session = cls(
             project_path=project_path,
-            session_id=session_id or uuid.uuid4(),
+            session_id=session_id or str(uuid.uuid4()),
             conf_source=conf_source,
             env=env,
         )

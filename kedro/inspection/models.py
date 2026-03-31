@@ -34,6 +34,16 @@ class DatasetSnapshot:
     type: str
     filepath: str | None = None
 
+    @classmethod
+    def from_config(cls, name: str, config: dict) -> DatasetSnapshot:
+        """Construct a ``DatasetSnapshot`` from a raw catalog config entry."""
+        return cls(
+            name=name,
+            type=config.get("type", ""),
+            filepath=config.get("filepath"),
+        )
+
+
 @dataclass
 class NodeSnapshot:
     """Read-only snapshot of a single pipeline node.
@@ -68,3 +78,21 @@ class PipelineSnapshot:
     nodes: list[NodeSnapshot]
     inputs: list[str] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
+
+
+@dataclass
+class ProjectSnapshot:
+    """Read-only snapshot of an entire Kedro project.
+
+    Attributes:
+        metadata: Snapshot of the project's metadata (name, package, Kedro version).
+        pipelines: Ordered list of snapshots for every registered pipeline.
+        datasets: Mapping from dataset name to its snapshot, including entries
+            resolved from factory patterns.
+        parameters: Sorted list of parameter key strings (values are not stored).
+    """
+
+    metadata: ProjectMetadataSnapshot
+    pipelines: list[PipelineSnapshot]
+    datasets: dict[str, DatasetSnapshot]
+    parameters: list[str]

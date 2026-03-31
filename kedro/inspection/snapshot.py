@@ -2,19 +2,26 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from kedro.config import MissingConfigException
 from kedro.framework.project import pipelines
+from kedro.framework.startup import bootstrap_project
+from kedro.inspection.helper import (
+    _get_parameter_keys,
+    _make_config_loader,
+    _resolve_factory_patterns,
+)
 from kedro.inspection.models import (
     DatasetSnapshot,
     NodeSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
+    ProjectSnapshot,
 )
 
 if TYPE_CHECKING:
-    from kedro.config import AbstractConfigLoader
     from kedro.framework.startup import ProjectMetadata
     from kedro.pipeline.node import Node
 
@@ -38,30 +45,22 @@ def _build_project_metadata_snapshot(
 
 
 def _build_dataset_snapshots(
-    config_loader: AbstractConfigLoader,
+    catalog_config: dict[str, Any],
 ) -> dict[str, DatasetSnapshot]:
     """Build a ``DatasetSnapshot`` for every entry in the catalog configuration.
 
     Args:
-        config_loader: Config loader instance.
+        catalog_config: Raw catalog configuration dict.
 
     Returns:
         Mapping of dataset name to its snapshot.
     """
-    try:
-        conf_catalog: dict[str, Any] = config_loader["catalog"]
-    except (KeyError, MissingConfigException):
-        return {}
-
     return {
-        ds_name: DatasetSnapshot(
-            name=ds_name,
-            type=ds_config.get("type", ""),
-            filepath=ds_config.get("filepath"),
-        )
-        for ds_name, ds_config in conf_catalog.items()
+        ds_name: DatasetSnapshot.from_config(ds_name, ds_config)
+        for ds_name, ds_config in catalog_config.items()
         if not ds_name.startswith("_")  # skip YAML interpolation anchors
     }
+
 
 def _node_to_snapshot(node: Node) -> NodeSnapshot:
     """Convert a live ``Node`` object to a ``NodeSnapshot``.
@@ -81,14 +80,20 @@ def _node_to_snapshot(node: Node) -> NodeSnapshot:
     )
 
 
-def _build_pipeline_snapshots() -> list[PipelineSnapshot]:
+def _build_pipeline_snapshots(
+    pipeline_dict: dict[str, Any],
+) -> list[PipelineSnapshot]:
     """Build a ``PipelineSnapshot`` for every registered pipeline.
+
+    Args:
+        pipeline_dict: Dictionary of pipeline name to ``Pipeline`` object,
+            as returned by ``dict(kedro.framework.project.pipelines)``.
 
     Returns:
         List of pipeline snapshots in registry iteration order.
     """
     snapshots = []
-    for pipeline_id, pipeline in pipelines.items():
+    for pipeline_id, pipeline in pipeline_dict.items():
         if pipeline is None:
             continue
         snapshots.append(
@@ -100,3 +105,47 @@ def _build_pipeline_snapshots() -> list[PipelineSnapshot]:
             )
         )
     return snapshots
+
+
+def _build_project_snapshot(
+    project_path: str | Path, env: str | None = None
+) -> ProjectSnapshot:
+    """Build a ``ProjectSnapshot`` for the Kedro project at project_path.
+
+    Args:
+        project_path: Path to the project root directory (the directory that
+            contains ``pyproject.toml``).
+        env: Optional run environment override (e.g. ``"staging"``).
+            When ``None`` the default run environment from the project
+            settings is used.
+
+    Returns:
+        A fully populated ``ProjectSnapshot``.
+    """
+    project_path = Path(project_path)
+
+    metadata = bootstrap_project(project_path)
+    config_loader = _make_config_loader(project_path, env=env)
+
+    try:
+        conf_catalog: dict[str, Any] = config_loader["catalog"]
+    except (KeyError, MissingConfigException):
+        conf_catalog = {}
+
+    metadata_snapshot = _build_project_metadata_snapshot(metadata)
+    pipeline_snapshots = _build_pipeline_snapshots(dict(pipelines))
+    dataset_snapshots = _build_dataset_snapshots(conf_catalog)
+
+    # resolve factory patterns
+    dataset_snapshots = _resolve_factory_patterns(
+        conf_catalog, dataset_snapshots, pipeline_snapshots
+    )
+
+    parameter_keys = _get_parameter_keys(config_loader)
+
+    return ProjectSnapshot(
+        metadata=metadata_snapshot,
+        pipelines=pipeline_snapshots,
+        datasets=dataset_snapshots,
+        parameters=parameter_keys,
+    )

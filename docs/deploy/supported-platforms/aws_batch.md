@@ -62,6 +62,10 @@ After you build the Docker image locally, [transfer the image to a container reg
 
 Provision the following resources before deploying your pipeline to AWS Batch:
 
+### Create the S3 bucket
+Create the S3 bucket for the pipeline to store the data and upload any input data into the bucket. In the case of the spaceflights tutorial, the input data to upload into the bucket are the companies.csv, reviews.csv, and shuttles.xlsx files.
+
+
 #### Create the IAM roles
 
 Two IAM roles are required:

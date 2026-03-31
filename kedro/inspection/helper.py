@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from parse import parse
+import copy
+from typing import TYPE_CHECKING, Any
 
 from kedro.config import MissingConfigException
 from kedro.framework.project import settings
@@ -59,27 +58,31 @@ def _get_parameter_keys(config_loader: AbstractConfigLoader) -> list[str]:
 
 
 def _resolve_factory_patterns(
+    catalog_config: dict[str, Any],
     datasets: dict[str, DatasetSnapshot],
     pipelines: list[PipelineSnapshot],
 ) -> dict[str, DatasetSnapshot]:
     """Enrich the datasets mapping with concrete entries derived from factory patterns.
 
     Args:
+        catalog_config: Raw catalog configuration dict, used to extract factory
+            pattern configs for full placeholder interpolation.
         datasets: Mapping of dataset name (or factory pattern) to its snapshot,
             as returned by ``_build_dataset_snapshots``.
         pipelines: List of pipeline snapshots whose node inputs/outputs are inspected.
 
     Returns:
-        A new mapping that contains all original entries plus any newly resolved
-        concrete dataset entries derived from factory patterns.
+        A new mapping containing only concrete dataset entries
     """
-    factory_patterns = {
-        ds_key: ds_value
-        for ds_key, ds_value in datasets.items()
-        if CatalogConfigResolver.is_pattern(ds_key)
+    pattern_configs = {
+        name: config
+        for name, config in catalog_config.items()
+        if CatalogConfigResolver.is_pattern(name)
     }
-    if not factory_patterns:
+    if not pattern_configs:
         return datasets
+
+    sorted_patterns = CatalogConfigResolver._sort_patterns(pattern_configs)
 
     # Collect every concrete dataset name referenced across all pipeline nodes.
     pipeline_ds_names: set[str] = set()
@@ -88,42 +91,27 @@ def _resolve_factory_patterns(
             pipeline_ds_names.update(node_snapshot.inputs)
             pipeline_ds_names.update(node_snapshot.outputs)
 
-    # Sort patterns using the same specificity rules as CatalogConfigResolver
-    sorted_factory_patterns = sorted(
-        factory_patterns.items(),
-        key=lambda item: (
-            -CatalogConfigResolver._pattern_specificity(item[0]),
-            -item[0].count("{"),
-            item[0],
-        ),
-    )
-
-    result = dict(datasets)
+    # Start from non-pattern entries
+    result = {
+        name: snap
+        for name, snap in datasets.items()
+        if not CatalogConfigResolver.is_pattern(name)
+    }
 
     for ds_name in pipeline_ds_names:
         if ds_name in result:
             continue  # direct catalog entry
 
-        for pattern, pattern_snapshot in sorted_factory_patterns:
-            parsed = parse(pattern, ds_name)
-            if parsed is None:
-                continue
+        matched = next(
+            CatalogConfigResolver._get_matches(sorted_patterns, ds_name), None
+        )
+        if matched is None:
+            continue
 
-            # Interpolate the filepath template if present.
-            resolved_filepath: str | None = None
-            if pattern_snapshot.filepath:
-                try:
-                    resolved_filepath = pattern_snapshot.filepath.format_map(
-                        parsed.named
-                    )
-                except KeyError:
-                    resolved_filepath = pattern_snapshot.filepath
+        resolved_config = CatalogConfigResolver._resolve_dataset_config(
+            ds_name, matched, copy.deepcopy(sorted_patterns[matched])
+        )
 
-            result[ds_name] = DatasetSnapshot(
-                name=ds_name,
-                type=pattern_snapshot.type,
-                filepath=resolved_filepath,
-            )
-            break  # use the first (most specific) matching pattern
+        result[ds_name] = DatasetSnapshot.from_config(ds_name, resolved_config)
 
     return result

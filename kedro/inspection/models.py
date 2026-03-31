@@ -21,6 +21,30 @@ class ProjectMetadataSnapshot:
 
 
 @dataclass
+class DatasetSnapshot:
+    """Read-only snapshot of a catalog dataset entry.
+
+    Attributes:
+        name: Dataset name as it appears in the catalog.
+        type: Dataset type string (e.g. ``"pandas.CSVDataset"``).
+        filepath: File path if present in config, or ``None``.
+    """
+
+    name: str
+    type: str
+    filepath: str | None = None
+
+    @classmethod
+    def from_config(cls, name: str, config: dict) -> DatasetSnapshot:
+        """Construct a ``DatasetSnapshot`` from a raw catalog config entry."""
+        return cls(
+            name=name,
+            type=config.get("type", ""),
+            filepath=config.get("filepath"),
+        )
+
+
+@dataclass
 class NodeSnapshot:
     """Read-only snapshot of a single pipeline node.
 
@@ -54,21 +78,6 @@ class PipelineSnapshot:
     nodes: list[NodeSnapshot]
     inputs: list[str] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
-
-
-@dataclass
-class DatasetSnapshot:
-    """Read-only snapshot of a catalog dataset entry.
-
-    Attributes:
-        name: Dataset name as it appears in the catalog.
-        type: Dataset type string (e.g. ``"pandas.CSVDataset"``).
-        filepath: File path if present in config, or ``None``.
-    """
-
-    name: str
-    type: str
-    filepath: str | None = None
 
 
 @dataclass

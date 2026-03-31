@@ -123,12 +123,20 @@ plugins:
           - create/new_project_tools.md: Tools included in new projects
           - create/starters.md: Using and creating Kedro starters (project templates)
 
-        Configuration:
-          - configure/configuration_basics.md: Configuration management fundamentals
-          - configure/config_loader_migration.md: Migrating between config loaders
-          - configure/advanced_configuration.md: Advanced configuration patterns
-          - configure/parameters.md: Managing pipeline parameters
-          - configure/credentials.md: Handling sensitive credentials securely
+        Configuration Concepts:
+          - configure/01_configuration_basics.md: Configuration management fundamentals
+          - configure/02_configuration_environments.md: Using base, local, and custom environments
+          - configure/03_parameters_and_credentials.md: Understanding parameters and credentials
+          - configure/04_templating_with_omegaconfigloader.md: Variable interpolation and templating
+
+        Configuration How-to:
+          - configure/quick_start.md: 5-minute quick start with spaceflights project
+          - configure/how_to_configure_project.md: Configuring project settings and environments
+          - configure/how_to_work_with_parameters.md: Defining and using parameters
+          - configure/how_to_manage_credentials.md: Securely managing credentials
+          - configure/how_to_use_templating.md: Using templating and resolvers
+          - configure/how_to_migrate_config_loaders.md: Migrating between config loaders
+          - configure/reference.md: Configuration syntax and API reference
 
         Data Management:
           - catalog-data/introduction.md: Introduction to the Data Catalog
@@ -321,13 +329,6 @@ nav:
           - Customise a new project: create/customise_project.md
           - Kedro tools: create/new_project_tools.md
           - Kedro starters: create/starters.md
-      - Configure:
-          - Project configuration and settings:
-              - Configuration basics: configure/configuration_basics.md
-              - Migration guide for config loaders: configure/config_loader_migration.md
-              - Advanced configuration: configure/advanced_configuration.md
-          - Parameters: configure/parameters.md
-          - Credentials: configure/credentials.md
       - Catalog Data:
           - Introduction: catalog-data/introduction.md
           - Kedro data catalog: catalog-data/data_catalog.md
@@ -383,6 +384,7 @@ nav:
           - Custom plugins: extend/plugins.md
           - Custom starters: extend/create_a_starter.md
       - Reference:
+          - Configuration: configure/reference.md
           - Kedro API:
               - Overview: api/index.md
               - kedro.config:
@@ -464,6 +466,20 @@ nav:
         #   - Release notes: about/release_notes.md
           - Migration guide: about/migration.md
           - Kedro telemetry: about/telemetry.md
+  - Concepts:
+      - Configuration:
+          - Configuration basics: configure/01_configuration_basics.md
+          - Configuration environments: configure/02_configuration_environments.md
+          - Parameters and credentials: configure/03_parameters_and_credentials.md
+          - Templating: configure/04_templating_with_omegaconfigloader.md
+  - How-to Guides:
+      - Configuration:
+          - Quick start: configure/quick_start.md
+          - Configure your project: configure/how_to_configure_project.md
+          - Work with parameters: configure/how_to_work_with_parameters.md
+          - Manage credentials: configure/how_to_manage_credentials.md
+          - Use templating: configure/how_to_use_templating.md
+          - Migrate config loaders: configure/how_to_migrate_config_loaders.md
   - Kedro-Viz: https://docs.kedro.org/projects/kedro-viz/en/stable/
   - Kedro-Datasets: https://docs.kedro.org/projects/kedro-datasets/en/stable/
 

@@ -16,7 +16,7 @@ Parameter validation supports two kinds of typed objects:
 !!! note
     You can use either Pydantic models or dataclasses. You do not need both.
 
-Raw values (`int`, `str`, `float`, etc.) are passed through unchanged with no validation applied.
+Raw values (`int`, `str`, `float`, and others) are passed through unchanged with no validation applied.
 
 ### How validation works
 
@@ -42,13 +42,20 @@ If two pipelines declare different types for the same parameter key, Kedro logs 
 
 - **Validates across all pipelines**: Kedro inspects all registered pipelines for type hints, regardless of which pipeline you are running. This means a validation error in an unrelated pipeline can block your run. See [GitHub issue #5443](https://github.com/kedro-org/kedro/issues/5443) for progress on scoping validation to the target pipeline.
 - **Pydantic v1 is not supported**: The validation framework uses `model_validate`, which is a Pydantic v2+ API. If your project uses Pydantic v1, you need to upgrade to v2.
-- **Dataset inputs are not validated**: Validation applies to parameters loaded through the `params:` prefix. It does not cover dataset inputs.
+- **Dataset inputs are not validated**: Validation applies to parameters loaded through `params:` or `parameters`. It does not cover dataset inputs.
 
 ---
 
 ## How to validate parameters in Kedro
 
-### Basic Pydantic model
+There are two approaches to parameter validation:
+
+- **With Pydantic models**: Provides field constraints, nested model support, and custom validators. Requires installing Pydantic (`pip install pydantic`).
+- **With dataclasses**: Uses Python's built-in `dataclasses` module with no extra dependencies, but without constraint validation.
+
+The sections below cover Pydantic first, then [dataclasses](#use-dataclasses).
+
+### Set up a basic Pydantic model
 
 Define a Pydantic model for your parameters:
 

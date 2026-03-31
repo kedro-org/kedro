@@ -37,6 +37,23 @@ class TestDatasetSnapshot:
         snapshot = DatasetSnapshot(name="x", type="kedro.io.MemoryDataset")
         assert snapshot.filepath is None
 
+    def test_from_config(self):
+        snapshot = DatasetSnapshot.from_config(
+            "companies",
+            {"type": "pandas.CSVDataset", "filepath": "data/01_raw/companies.csv"},
+        )
+        assert snapshot.name == "companies"
+        assert snapshot.type == "pandas.CSVDataset"
+        assert snapshot.filepath == "data/01_raw/companies.csv"
+
+    def test_from_config_missing_defaults(self):
+        snapshot = DatasetSnapshot.from_config("ds", {"filepath": "data.csv"})
+        assert snapshot.type == ""
+
+    def test_from_config_missing_filepath(self):
+        snapshot = DatasetSnapshot.from_config("ds", {"type": "kedro.io.MemoryDataset"})
+        assert snapshot.filepath is None
+
 
 class TestBuildDatasetSnapshots:
     def test_datasets_populated(self, catalog_config):

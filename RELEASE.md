@@ -16,7 +16,7 @@
 
 ## Bug fixes and other changes
 * `DataCatalog.load()` and `DataCatalog.save()` now raise a `DatasetError` that includes the dataset name for easier debugging.
-* Align the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
+* Aligned the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
 * Fixed a path traversal vulnerability in versioned dataset loading that could allow unauthorized file access via unsanitized version strings.
 * Fixed remote code execution vulnerability in the logging configuration.
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.

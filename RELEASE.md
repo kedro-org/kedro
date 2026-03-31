@@ -17,7 +17,6 @@
 ## Bug fixes and other changes
 * `DataCatalog.load()` and `DataCatalog.save()` now raise a `DatasetError` that includes the dataset name for easier debugging.
 * Align the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
-* Fixed remote code execution vulnerability in the logging configuration.
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
 * Added a warning when a node returns a value but is defined with `outputs=None`, clarifying that the return value is ignored.
 * Added `preserve_logging` flag to `configure_project()` to prevent runtime-added logging handlers from being overwritten when `configure_project()` is called after custom handlers have been attached (e.g. in a long-running server process such as FastAPI).

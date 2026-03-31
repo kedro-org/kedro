@@ -128,6 +128,7 @@ plugins:
           - configure/config_loader_migration.md: Migrating between config loaders
           - configure/advanced_configuration.md: Advanced configuration patterns
           - configure/parameters.md: Managing pipeline parameters
+          - configure/parameter_validation.md: Validating parameters with Pydantic models and dataclasses
           - configure/credentials.md: Handling sensitive credentials securely
 
         Data Management:
@@ -327,6 +328,7 @@ nav:
               - Migration guide for config loaders: configure/config_loader_migration.md
               - Advanced configuration: configure/advanced_configuration.md
           - Parameters: configure/parameters.md
+          - Parameter validation: configure/parameter_validation.md
           - Credentials: configure/credentials.md
       - Catalog Data:
           - Introduction: catalog-data/introduction.md

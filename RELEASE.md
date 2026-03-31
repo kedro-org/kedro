@@ -6,6 +6,7 @@
 * Align the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
 * Fixed remote code execution vulnerability in the logging configuration.
 ## Documentation changes
+* Added parameter validation documentation covering Pydantic model and dataclass support for typed parameters.
 ## Community contributions
 * [mvhensbergen](https://github.com/mvhensbergen)
 

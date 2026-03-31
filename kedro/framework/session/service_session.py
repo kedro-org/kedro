@@ -53,7 +53,6 @@ class KedroServiceSession(AbstractSession):
         _register_hooks(hook_manager, settings.HOOKS)
         _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager
-        self.pipelines = pipelines
         self.env = env
         self._conf_source = conf_source or str(
             self._project_path / settings.CONF_SOURCE
@@ -62,8 +61,7 @@ class KedroServiceSession(AbstractSession):
     @classmethod
     def create(
         cls,
-        session_id: str
-        | None = None,  ## Customisable session id? https://github.com/kedro-org/kedro/issues/1731
+        session_id: str | None = None,
         project_path: Path | str | None = None,
         env: str | None = None,
         conf_source: Path | str | None = None,
@@ -73,14 +71,10 @@ class KedroServiceSession(AbstractSession):
 
         session = cls(
             project_path=project_path,
-            session_id=session_id
-            or generate_timestamp(),  ## Should this be uuid instead?
+            session_id=session_id or uuid.uuid4(),
             conf_source=conf_source,
             env=env,
         )
-        ## Preload pipelines?
-        # session.pipelines = pipelines
-        session.pipelines._load_data()
         return session
 
     def _log_exception(self, exc_type: Any, exc_value: Any, exc_tb: Any) -> None:
@@ -121,7 +115,6 @@ class KedroServiceSession(AbstractSession):
             **settings.CONFIG_LOADER_ARGS,
         )
 
-    # TODO: Maybe the merging of runtime params and config params should be done here instead of in the context?
     def load_context(
         self, runtime_params: dict[str, Any] | None = None
     ) -> KedroContext:
@@ -157,19 +150,19 @@ class KedroServiceSession(AbstractSession):
         runtime_params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Run the pipeline."""
-        run_id = run_id or str(uuid.uuid4())  ## Should this be a timestamp instead?
+        run_id = run_id or generate_timestamp()
         project_name = self._package_name or self._project_path.name
         self._logger.info("Kedro project %s", project_name)
         self._logger.info("Session ID: %s", self.session_id)
         self._logger.info("Run ID: %s", run_id)
-        save_version = self.session_id + "_" + run_id
+        save_version = run_id
 
         context = self.load_context(runtime_params)
         pipeline_names = pipeline_names or ["__default__"]
         combined_pipeline = Pipeline([])
         for name in pipeline_names:
             try:
-                combined_pipeline += self.pipelines[name]
+                combined_pipeline += pipelines[name]
             except KeyError as exc:
                 raise ValueError(
                     f"Failed to find the pipeline named '{name}'. "
@@ -189,7 +182,7 @@ class KedroServiceSession(AbstractSession):
         runner = runner or SequentialRunner()
         if not isinstance(runner, AbstractRunner):
             raise KedroSessionError(
-                "KedroSession expect an instance of Runner instead of a class."
+                "KedroServiceSession expect an instance of Runner instead of a class."
                 "Have you forgotten the `()` at the end of the statement?"
             )
 

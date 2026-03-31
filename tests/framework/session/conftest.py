@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import logging
+import sys
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from unittest.mock import create_autospec
 
 import pytest
 import tomli_w
@@ -21,16 +24,16 @@ from kedro.framework.session import KedroSession
 from kedro.pipeline import Pipeline, pipeline
 from kedro.pipeline.node import Node, node
 from tests.test_utils import identity
+from kedro.framework.context.context import KedroContext
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
-    from kedro.framework.context.context import KedroContext
+    
     from kedro.io import DataCatalog
 
 logger = logging.getLogger(__name__)
 
 MOCK_PACKAGE_NAME = "fake_package"
+_FAKE_PROJECT_NAME = "fake_project"
 
 
 @pytest.fixture
@@ -380,3 +383,64 @@ def mock_validate_settings(mocker):
     # importing it. settings.py does not actually exists as part of this test suite
     # since we are testing session in isolation, so the validation is patched.
     mocker.patch("kedro.framework.session.session.validate_settings")
+    mocker.patch("kedro.framework.session.service_session.validate_settings")
+
+
+@pytest.fixture
+def fake_project(tmp_path, mock_package_name):
+    fake_project_dir = Path(tmp_path) / "fake_project"
+    (fake_project_dir / "src").mkdir(parents=True)
+
+    pyproject_toml_path = fake_project_dir / "pyproject.toml"
+    payload = {
+        "tool": {
+            "kedro": {
+                "kedro_init_version": kedro_version,
+                "project_name": _FAKE_PROJECT_NAME,
+                "package_name": mock_package_name,
+            }
+        }
+    }
+    with pyproject_toml_path.open("wb") as f:
+        tomli_w.dump(payload, f)
+
+    (fake_project_dir / "conf" / "base").mkdir(parents=True)
+    (fake_project_dir / "conf" / "local").mkdir()
+    return fake_project_dir
+
+
+ATTRS_ATTRIBUTE = "__attrs_attrs__"
+NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
+
+
+def create_attrs_autospec(spec: type, spec_set: bool = True) -> Any:
+    """Creates a mock of an attr class (creates mocks recursively on all attributes).
+    https://github.com/python-attrs/attrs/issues/462#issuecomment-1134656377
+
+    :param spec: the spec to mock
+    :param spec_set: if True, AttributeError will be raised if an attribute that is not in the spec is set.
+    """
+
+    if not hasattr(spec, ATTRS_ATTRIBUTE):
+        raise TypeError(f"{spec!r} is not an attrs class")
+    mock = create_autospec(spec, spec_set=spec_set)
+    for attribute in getattr(spec, ATTRS_ATTRIBUTE):
+        attribute_type = attribute.type
+        if NEW_TYPING:
+            # A[T] does not get a copy of __dict__ from A(Generic[T]) anymore, use __origin__ to get it
+            while hasattr(attribute_type, "__origin__"):
+                attribute_type = attribute_type.__origin__
+        if hasattr(attribute_type, ATTRS_ATTRIBUTE):
+            mock_attribute = create_attrs_autospec(attribute_type, spec_set)
+        else:
+            mock_attribute = create_autospec(attribute_type, spec_set=spec_set)
+        object.__setattr__(mock, attribute.name, mock_attribute)
+    return mock
+
+
+@pytest.fixture
+def mock_context_class(mocker):
+    mock_cls = create_attrs_autospec(KedroContext)
+    return mocker.patch(
+        "kedro.framework.context.KedroContext", autospec=True, return_value=mock_cls
+    )

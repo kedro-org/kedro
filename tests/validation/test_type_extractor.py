@@ -142,10 +142,21 @@ class TestExtractTypesFromPipelines:
             pass
 
         nodes = [
-            kedro_node(func=pydantic_func, inputs="params:pydantic_cfg", outputs="o1", name="n1"),
-            kedro_node(func=dataclass_func, inputs="params:dc_cfg", outputs="o2", name="n2"),
-            kedro_node(func=builtin_func, inputs="params:threshold", outputs="o3", name="n3"),
-            kedro_node(func=union_func, inputs="params:union_cfg", outputs="o4", name="n4"),
+            kedro_node(
+                func=pydantic_func,
+                inputs="params:pydantic_cfg",
+                outputs="o1",
+                name="n1",
+            ),
+            kedro_node(
+                func=dataclass_func, inputs="params:dc_cfg", outputs="o2", name="n2"
+            ),
+            kedro_node(
+                func=builtin_func, inputs="params:threshold", outputs="o3", name="n3"
+            ),
+            kedro_node(
+                func=union_func, inputs="params:union_cfg", outputs="o4", name="n4"
+            ),
         ]
 
         pipeline = MagicMock()

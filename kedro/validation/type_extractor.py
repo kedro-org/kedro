@@ -113,7 +113,10 @@ class TypeExtractor:
                 continue
 
             # Only record types we can actually validate (Pydantic models or dataclasses)
-            if not (is_pydantic_class(expected_type) or dataclasses.is_dataclass(expected_type)):
+            if not (
+                is_pydantic_class(expected_type)
+                or dataclasses.is_dataclass(expected_type)
+            ):
                 continue
 
             param_key = ds_name.split(":", 1)[1]

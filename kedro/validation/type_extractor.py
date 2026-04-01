@@ -29,7 +29,7 @@ def _unwrap_optional(tp: type) -> type:
     if origin is Union or isinstance(tp, types.UnionType):
         args = [a for a in get_args(tp) if a is not type(None)]
         if len(args) == 1:
-            return args[0]
+            return args[0]  # type: ignore[no-any-return]
     return tp
 
 

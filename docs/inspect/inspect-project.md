@@ -1,6 +1,6 @@
 # Inspect a Kedro project
 
-The inspection API lets you read the structure of a Kedro project without running it. It returns a read-only [`ProjectSnapshot`][kedro.inspection.models.ProjectSnapshot] that captures:
+The inspection API lets you read the structure of a Kedro project without running it. It returns a [`ProjectSnapshot`][kedro.inspection.models.ProjectSnapshot] that captures:
 
 - Project metadata (name, package, Kedro version)
 - All registered pipelines and their nodes in topological order
@@ -27,7 +27,7 @@ Use `get_project_snapshot` when you need to read the structure of a Kedro projec
 - **Programmatic access**: query project structure in scripts or notebooks
 
 !!! note
-    The inspection API reads configuration and pipeline definitions only. It does not load datasets, execute nodes, or write any data.
+    The inspection API reads configuration and pipeline definitions. It does not load datasets, execute nodes, or write data.
 
 ## How to get a project snapshot
 
@@ -48,7 +48,7 @@ from kedro.inspection import get_project_snapshot
 snapshot = get_project_snapshot(Path.cwd())
 ```
 
-The returned [`ProjectSnapshot`][kedro.inspection.models.ProjectSnapshot] is a read-only dataclass with four attributes: `metadata`, `pipelines`, `datasets`, and `parameters`.
+The returned [`ProjectSnapshot`][kedro.inspection.models.ProjectSnapshot] is a data class with four attributes: `metadata`, `pipelines`, `datasets`, and `parameters`.
 
 ## How to access project metadata
 
@@ -129,11 +129,11 @@ print(iris.filepath)  # "data/01_raw/iris.csv"
 ```
 
 !!! note
-    Datasets resolved from [dataset factory patterns](../catalog-data/kedro_dataset_factories.md) are included in the snapshot. Datasets that exist only as node inputs or outputs but have no catalog entry are not included.
+    Datasets resolved from [dataset factory patterns](../catalog-data/kedro_dataset_factories.md) are included in the snapshot. Datasets that appear as node inputs or outputs but have no catalog entry are not included.
 
 ## How to list parameter keys
 
-The `parameters` attribute is a sorted list of parameter key strings. Parameter values are not stored — the inspection API reads only the structure of your project:
+The `parameters` attribute is a sorted list of parameter key strings.Parameter values are not stored
 
 ```python
 print(snapshot.parameters)

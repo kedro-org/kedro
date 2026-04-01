@@ -315,3 +315,53 @@ def test_rich_format_with_invalid_type():
         TypeError, match="rich_format only accept non-empty list as an argument"
     ):
         root_logger.warning("value: %s", "val", extra={"rich_format": "red"})
+
+
+def test_validate_safe_config():
+    """Test that _validate_logging_config passes safe configs unchanged."""
+    from kedro.framework.project import _ProjectLogging
+
+    input_config = {
+        "version": 1,
+        "handlers": {"console": {"class": "logging.StreamHandler"}},
+        "loggers": {"kedro": {"level": "INFO"}},
+    }
+
+    logging_instance = _ProjectLogging()
+    result = logging_instance._validate_logging_config(input_config)
+    assert result == input_config
+
+
+@pytest.mark.parametrize(
+    "input_config",
+    [
+        # Simple dict with '()' key
+        {
+            "version": 1,
+            "handlers": {
+                "console": {
+                    "class": "logging.StreamHandler",
+                    "()": "os.system",  # Dangerous factory
+                    "args": ["echo pwned"],
+                }
+            },
+            "loggers": {"kedro": {"level": "INFO"}},
+        },
+        # Nested dict with '()' in list
+        {
+            "handlers": [
+                {"class": "logging.StreamHandler", "()": "subprocess.call"},
+                {"class": "logging.FileHandler", "filename": "log.txt"},
+            ]
+        },
+    ],
+)
+def test_validate_raises_error_on_factory_keys(input_config):
+    """Test that _validate_logging_config raises ValueError on '()' factory keys."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(
+        ValueError, match="The '\\(\\)\\' key is not allowed in logging configuration"
+    ):
+        logging_instance.configure(input_config)

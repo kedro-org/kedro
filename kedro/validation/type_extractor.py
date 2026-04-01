@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import dataclasses
 import inspect
 import logging
 from typing import TYPE_CHECKING, get_type_hints
+
+from .utils import is_pydantic_class
 
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
@@ -52,10 +55,10 @@ class TypeExtractor:
                             "%s (existing) vs %s (from pipeline '%s'). "
                             "Using %s.",
                             key,
-                            existing_type.__name__,
-                            new_type.__name__,
+                            getattr(existing_type, "__name__", str(existing_type)),
+                            getattr(new_type, "__name__", str(new_type)),
                             pipeline_name,
-                            new_type.__name__,
+                            getattr(new_type, "__name__", str(new_type)),
                         )
 
             all_type_requirements.update(pipeline_type_requirements)
@@ -107,6 +110,10 @@ class TypeExtractor:
                 continue
 
             if not ds_name.startswith(_PARAMS_PREFIX):
+                continue
+
+            # Only record types we can actually validate (Pydantic models or dataclasses)
+            if not (is_pydantic_class(expected_type) or dataclasses.is_dataclass(expected_type)):
                 continue
 
             param_key = ds_name.split(":", 1)[1]

@@ -22,6 +22,10 @@ class _TypeB:
     y: str
 
 
+# Module-level types for tests
+_UnionType = list[str] | None
+
+
 class TestExtractTypesFromPipelines:
     def test_empty_pipelines(self):
         extractor = TypeExtractor(pipelines={})
@@ -122,6 +126,41 @@ class TestExtractTypesFromPipelines:
         assert "shared_config" in result
         assert "Conflicting type requirements" in caplog.text
 
+    def test_mixed_type_hints_only_records_validatable(self):
+        """Only Pydantic/dataclass types should be recorded, not builtins or unions."""
+
+        def pydantic_func(config: SamplePydanticModel) -> None:
+            pass
+
+        def dataclass_func(opts: SampleDataclass) -> None:
+            pass
+
+        def builtin_func(threshold: int) -> None:
+            pass
+
+        def union_func(data: _UnionType) -> None:
+            pass
+
+        nodes = [
+            kedro_node(func=pydantic_func, inputs="params:pydantic_cfg", outputs="o1", name="n1"),
+            kedro_node(func=dataclass_func, inputs="params:dc_cfg", outputs="o2", name="n2"),
+            kedro_node(func=builtin_func, inputs="params:threshold", outputs="o3", name="n3"),
+            kedro_node(func=union_func, inputs="params:union_cfg", outputs="o4", name="n4"),
+        ]
+
+        pipeline = MagicMock()
+        pipeline.nodes = nodes
+
+        extractor = TypeExtractor(pipelines={"test_pipeline": pipeline})
+        result = extractor.extract_types_from_pipelines()
+
+        assert "pydantic_cfg" in result
+        assert result["pydantic_cfg"] == SamplePydanticModel
+        assert "dc_cfg" in result
+        assert result["dc_cfg"] == SampleDataclass
+        assert "threshold" not in result
+        assert "union_cfg" not in result
+
 
 class TestExtractTypesFromNode:
     def test_no_func_attribute(self, type_extractor):
@@ -203,6 +242,48 @@ class TestExtractTypesFromNode:
         result = type_extractor._extract_types_from_node(node)
         assert "eval_config" in result
         assert result["eval_config"] == SampleDataclass
+
+    def test_union_type_hint_skipped(self, type_extractor):
+        def my_func(data: _UnionType) -> None:
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:config",
+            outputs="output",
+            name="test_node",
+        )
+
+        result = type_extractor._extract_types_from_node(test_node)
+        assert result == {}
+
+    def test_builtin_type_hint_skipped(self, type_extractor):
+        def my_func(data: int) -> None:
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:threshold",
+            outputs="output",
+            name="test_node",
+        )
+
+        result = type_extractor._extract_types_from_node(test_node)
+        assert result == {}
+
+    def test_plain_dict_type_hint_skipped(self, type_extractor):
+        def my_func(data: dict) -> None:
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:config",
+            outputs="output",
+            name="test_node",
+        )
+
+        result = type_extractor._extract_types_from_node(test_node)
+        assert result == {}
 
 
 class TestExtractTypesFromPipeline:

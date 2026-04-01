@@ -25,8 +25,7 @@ def _unwrap_optional(tp: type) -> type:
     If the type is a union of exactly one non-None type and ``NoneType``,
     return the non-None type. Otherwise return the original type unchanged.
     """
-    origin = get_origin(tp)
-    if origin is Union or isinstance(tp, types.UnionType):
+    if get_origin(tp) is Union or isinstance(tp, types.UnionType):
         args = [a for a in get_args(tp) if a is not type(None)]
         if len(args) == 1:
             return args[0]  # type: ignore[no-any-return]
@@ -135,6 +134,16 @@ class TypeExtractor:
                 is_pydantic_class(expected_type)
                 or dataclasses.is_dataclass(expected_type)
             ):
+                if get_origin(expected_type) is Union or isinstance(
+                    expected_type, types.UnionType
+                ):
+                    logger.warning(
+                        "Parameter '%s' has a union type hint (%s) which is not "
+                        "supported for validation. The parameter will be passed "
+                        "as a raw dictionary.",
+                        ds_name.split(":", 1)[1],
+                        expected_type,
+                    )
                 continue
 
             param_key = ds_name.split(":", 1)[1]

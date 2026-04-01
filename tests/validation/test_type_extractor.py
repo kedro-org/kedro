@@ -26,6 +26,7 @@ class _TypeB:
 _UnionType = list[str] | None
 _OptionalPydantic = SamplePydanticModel | None
 _OptionalDataclass = SampleDataclass | None
+_MultiModelUnion = SamplePydanticModel | SampleDataclass
 
 
 class TestExtractTypesFromPipelines:
@@ -369,6 +370,27 @@ class TestExtractTypesFromNode:
 
         result = type_extractor._extract_types_from_node(test_node)
         assert result == {}
+
+    def test_multi_model_union_warns(self, type_extractor, caplog):
+        """A union of multiple models should warn that validation is skipped."""
+
+        def my_func(options: _MultiModelUnion) -> None:
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:split_options",
+            outputs="output",
+            name="test_node",
+        )
+
+        with caplog.at_level("WARNING"):
+            result = type_extractor._extract_types_from_node(test_node)
+
+        assert result == {}
+        assert "split_options" in caplog.text
+        assert "union type hint" in caplog.text
+        assert "raw dictionary" in caplog.text
 
 
 class TestExtractTypesFromPipeline:

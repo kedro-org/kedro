@@ -24,6 +24,8 @@ class _TypeB:
 
 # Module-level types for tests
 _UnionType = list[str] | None
+_OptionalPydantic = SamplePydanticModel | None
+_OptionalDataclass = SampleDataclass | None
 
 
 class TestExtractTypesFromPipelines:
@@ -126,8 +128,35 @@ class TestExtractTypesFromPipelines:
         assert "shared_config" in result
         assert "Conflicting type requirements" in caplog.text
 
+    def test_conflicting_types_getattr_fallback(self, caplog):
+        """The warning should not crash if a type lacks __name__."""
+        nameless_type = list[str] | int  # UnionType has no __name__
+
+        pipeline_a = MagicMock()
+        pipeline_b = MagicMock()
+
+        extractor = TypeExtractor(
+            pipelines={"pipeline_a": pipeline_a, "pipeline_b": pipeline_b}
+        )
+
+        # Patch _extract_types_from_pipeline to return types without __name__
+        returns = iter([{"key": nameless_type}, {"key": _TypeA}])
+        with patch.object(
+            extractor,
+            "_extract_types_from_pipeline",
+            side_effect=lambda _: next(returns),
+        ):
+            with caplog.at_level("WARNING"):
+                result = extractor.extract_types_from_pipelines()
+
+        assert "Conflicting type requirements" in caplog.text
+        assert "list[str] | int" in caplog.text
+        assert "key" in result
+
     def test_mixed_type_hints_only_records_validatable(self):
-        """Only Pydantic/dataclass types should be recorded, not builtins or unions."""
+        """Only Pydantic/dataclass types should be recorded, not builtins or unions.
+        Optional[Model] should be unwrapped and recorded.
+        """
 
         def pydantic_func(config: SamplePydanticModel) -> None:
             pass
@@ -139,6 +168,9 @@ class TestExtractTypesFromPipelines:
             pass
 
         def union_func(data: _UnionType) -> None:
+            pass
+
+        def optional_func(cfg: _OptionalPydantic) -> None:
             pass
 
         nodes = [
@@ -157,6 +189,12 @@ class TestExtractTypesFromPipelines:
             kedro_node(
                 func=union_func, inputs="params:union_cfg", outputs="o4", name="n4"
             ),
+            kedro_node(
+                func=optional_func,
+                inputs="params:optional_cfg",
+                outputs="o5",
+                name="n5",
+            ),
         ]
 
         pipeline = MagicMock()
@@ -169,6 +207,8 @@ class TestExtractTypesFromPipelines:
         assert result["pydantic_cfg"] == SamplePydanticModel
         assert "dc_cfg" in result
         assert result["dc_cfg"] == SampleDataclass
+        assert "optional_cfg" in result
+        assert result["optional_cfg"] == SamplePydanticModel
         assert "threshold" not in result
         assert "union_cfg" not in result
 
@@ -267,6 +307,40 @@ class TestExtractTypesFromNode:
 
         result = type_extractor._extract_types_from_node(test_node)
         assert result == {}
+
+    def test_optional_pydantic_unwrapped(self, type_extractor):
+        """Optional[PydanticModel] should unwrap to PydanticModel and be recorded."""
+
+        def my_func(config: _OptionalPydantic) -> None:
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:config",
+            outputs="output",
+            name="test_node",
+        )
+
+        result = type_extractor._extract_types_from_node(test_node)
+        assert "config" in result
+        assert result["config"] == SamplePydanticModel
+
+    def test_optional_dataclass_unwrapped(self, type_extractor):
+        """Optional[Dataclass] should unwrap to Dataclass and be recorded."""
+
+        def my_func(config: _OptionalDataclass) -> None:
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:config",
+            outputs="output",
+            name="test_node",
+        )
+
+        result = type_extractor._extract_types_from_node(test_node)
+        assert "config" in result
+        assert result["config"] == SampleDataclass
 
     def test_builtin_type_hint_skipped(self, type_extractor):
         def my_func(data: int) -> None:

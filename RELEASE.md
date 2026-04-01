@@ -1,7 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
-* Fixed `AttributeError` when node functions have non-Pydantic/dataclass type hints (e.g. `list[str] | None`) on `params:` inputs. The parameter validation framework now correctly skips types it cannot validate.
+* Fixed `AttributeError` when node functions have non-Pydantic/dataclass type hints on `params:` inputs. The parameter validation framework now correctly skips types it cannot validate.
 
 ## Documentation changes
 ## Community contributions

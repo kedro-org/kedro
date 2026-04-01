@@ -5,7 +5,8 @@ from __future__ import annotations
 import dataclasses
 import inspect
 import logging
-from typing import TYPE_CHECKING, get_type_hints
+import types
+from typing import TYPE_CHECKING, Union, get_args, get_origin, get_type_hints
 
 from .utils import is_pydantic_class
 
@@ -16,6 +17,20 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _PARAMS_PREFIX = "params:"
+
+
+def _unwrap_optional(tp: type) -> type:
+    """Unwrap ``Optional[X]`` / ``X | None`` to ``X``.
+
+    If the type is a union of exactly one non-None type and ``NoneType``,
+    return the non-None type. Otherwise return the original type unchanged.
+    """
+    origin = get_origin(tp)
+    if origin is Union or isinstance(tp, types.UnionType):
+        args = [a for a in get_args(tp) if a is not type(None)]
+        if len(args) == 1:
+            return args[0]
+    return tp
 
 
 class TypeExtractor:
@@ -112,6 +127,9 @@ class TypeExtractor:
             if not ds_name.startswith(_PARAMS_PREFIX):
                 continue
 
+            # Unwrap Optional[X] / X | None so we validate against the inner type
+            expected_type = _unwrap_optional(expected_type)
+
             # Only record types we can actually validate (Pydantic models or dataclasses)
             if not (
                 is_pydantic_class(expected_type)
@@ -124,7 +142,7 @@ class TypeExtractor:
             logger.debug(
                 "Found parameter requirement: %s -> %s",
                 param_key,
-                expected_type.__name__,
+                getattr(expected_type, "__name__", str(expected_type)),
             )
 
         return all_requirements

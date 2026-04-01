@@ -35,4 +35,4 @@ def get_project_snapshot(
     Returns:
         A fully populated ``ProjectSnapshot``.
     """
-    return _build_project_snapshot(project_path, env=env)
+    return _build_project_snapshot(project_path=project_path, env=env)

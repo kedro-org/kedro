@@ -60,32 +60,6 @@ class BadStore:
     """
 
 
-class BadConfigLoader:
-    """
-    ConfigLoader class that doesn't subclass `AbstractConfigLoader`, for testing only.
-    """
-
-
-@pytest.fixture
-def mock_runner(mocker):
-    mock_runner = mocker.patch(
-        "kedro.runner.sequential_runner.SequentialRunner",
-        autospec=True,
-    )
-    mock_runner.__name__ = "MockRunner"
-    return mock_runner
-
-
-@pytest.fixture
-def mock_thread_runner(mocker):
-    mock_runner = mocker.patch(
-        "kedro.runner.thread_runner.ThreadRunner",
-        autospec=True,
-    )
-    mock_runner.__name__ = "MockThreadRunner`"
-    return mock_runner
-
-
 def _mock_imported_settings_paths(mocker, mock_settings):
     for path in [
         "kedro.framework.project.settings",
@@ -101,17 +75,6 @@ def mock_settings(mocker):
 
 
 @pytest.fixture
-def mock_settings_context_class(mocker, mock_context_class):
-    class MockSettings(_ProjectSettings):
-        # dynaconf automatically deleted some attribute when the class is MagicMock
-        _CONTEXT_CLASS = Validator(
-            "CONTEXT_CLASS", default=lambda *_: mock_context_class
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
 def mock_settings_omega_config_loader_class(mocker):
     class MockSettings(_ProjectSettings):
         _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
@@ -119,42 +82,6 @@ def mock_settings_omega_config_loader_class(mocker):
         )
 
     return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
-def mock_settings_config_loader_args(mocker):
-    class MockSettings(_ProjectSettings):
-        _CONFIG_LOADER_ARGS = Validator(
-            "CONFIG_LOADER_ARGS",
-            default={"config_patterns": {"spark": ["spark/*"]}},
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
-def mock_settings_config_loader_args_env(mocker):
-    class MockSettings(_ProjectSettings):
-        _CONFIG_LOADER_ARGS = Validator(
-            "CONFIG_LOADER_ARGS",
-            default={"base_env": "something_new"},
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
-def mock_settings_file_bad_config_loader_class(tmpdir):
-    mock_settings_file = tmpdir.join("mock_settings_file.py")
-    mock_settings_file.write(
-        textwrap.dedent(
-            f"""
-            from {__name__} import BadConfigLoader
-            CONFIG_LOADER_CLASS = BadConfigLoader
-            """
-        )
-    )
-    return mock_settings_file
 
 
 @pytest.fixture
@@ -383,7 +310,7 @@ class TestKedroSession:
 
     def test_broken_config_loader(self, mock_settings_file_bad_config_loader_class):
         pattern = (
-            "Invalid value 'tests.framework.session.test_session.BadConfigLoader' received "
+            "Invalid value 'tests.framework.session.conftest.BadConfigLoader' received "
             "for setting 'CONFIG_LOADER_CLASS'. "
             "It must be a subclass of 'kedro.config.abstract_config.AbstractConfigLoader'."
         )

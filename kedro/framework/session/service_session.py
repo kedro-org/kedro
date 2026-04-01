@@ -212,7 +212,7 @@ class KedroServiceSession(AbstractSession):
             "from_inputs": from_inputs,
             "to_outputs": to_outputs,
             "load_versions": load_versions,
-            "runtime_params": runtime_params,
+            "runtime_params": runtime_params or {},
             "pipeline_names": pipeline_names,
             "namespaces": namespaces,
             "runner": getattr(runner, "__name__", str(runner)),

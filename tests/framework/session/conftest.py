@@ -14,8 +14,12 @@ import yaml
 from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
+from kedro.config import AbstractConfigLoader
+from kedro.config.abstract_config import AbstractConfigLoader
+from kedro.framework.context.context import KedroContext
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
+    _HasSharedParentClassValidator,
     _ProjectPipelines,
     _ProjectSettings,
     configure_project,
@@ -24,10 +28,8 @@ from kedro.framework.session import KedroSession
 from kedro.pipeline import Pipeline, pipeline
 from kedro.pipeline.node import Node, node
 from tests.test_utils import identity
-from kedro.framework.context.context import KedroContext
 
 if TYPE_CHECKING:
-    
     from kedro.io import DataCatalog
 
 logger = logging.getLogger(__name__)
@@ -350,6 +352,7 @@ def mock_pipelines(mocker, mock_pipeline):
 def _mock_imported_settings_paths(mocker, mock_settings):
     for path in [
         "kedro.framework.session.session.settings",
+        "kedro.framework.session.service_session.settings",
         "kedro.framework.project.settings",
         "kedro.runner.task.settings",
     ]:
@@ -444,3 +447,27 @@ def mock_context_class(mocker):
     return mocker.patch(
         "kedro.framework.context.KedroContext", autospec=True, return_value=mock_cls
     )
+
+
+@pytest.fixture
+def mock_settings_custom_context_class(mocker):
+    class MyContext(KedroContext):
+        pass
+
+    class MockSettings(_ProjectSettings):
+        _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext)
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_custom_config_loader_class(mocker):
+    class MyConfigLoader(AbstractConfigLoader):
+        pass
+
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
+            "CONFIG_LOADER_CLASS", default=lambda *_: MyConfigLoader
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())

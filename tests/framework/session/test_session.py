@@ -112,30 +112,6 @@ def mock_settings_context_class(mocker, mock_context_class):
 
 
 @pytest.fixture
-def mock_settings_custom_context_class(mocker):
-    class MyContext(KedroContext):
-        pass
-
-    class MockSettings(_ProjectSettings):
-        _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext)
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
-def mock_settings_custom_config_loader_class(mocker):
-    class MyConfigLoader(AbstractConfigLoader):
-        pass
-
-    class MockSettings(_ProjectSettings):
-        _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
-            "CONFIG_LOADER_CLASS", default=lambda *_: MyConfigLoader
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
 def mock_settings_omega_config_loader_class(mocker):
     class MockSettings(_ProjectSettings):
         _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(

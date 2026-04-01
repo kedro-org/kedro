@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import logging.config
+import os
 import traceback
 import uuid
 from pathlib import Path
@@ -68,7 +69,7 @@ class KedroServiceSession(AbstractSession):
     ) -> KedroServiceSession:
         """Create a new instance of the session."""
         validate_settings()
-
+        env = env or os.getenv("KEDRO_ENV")
         session = cls(
             project_path=project_path,
             session_id=session_id or str(uuid.uuid4()),

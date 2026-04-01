@@ -64,7 +64,7 @@ Kedro validates `params` against `TrainingParams` even though the hint is `Train
 - **Validates across all pipelines**: Kedro inspects all registered pipelines for type hints, regardless of which pipeline you are running. This means a validation error in an unrelated pipeline can block your run. See [GitHub issue #5443](https://github.com/kedro-org/kedro/issues/5443) for progress on scoping validation to the target pipeline.
 - **Pydantic v1 is not supported**: The validation framework uses `model_validate`, which is a Pydantic v2+ API. If your project uses Pydantic v1, you need to upgrade to v2.
 - **Dataset inputs are not validated**: Validation applies to parameters loaded through `params:` or `parameters`. It does not cover dataset inputs.
-- **Multi-type unions are not validated**: Union type hints with multiple non-None types (e.g. `ModelA | ModelB`) are silently skipped. Only `Optional[Model]` (one model type plus `None`) is unwrapped and validated. Support for multi-type unions may be added in a future release.
+- **Multi-type unions are not validated**: Union type hints with multiple non-None types (for example `ModelA | ModelB`) are skipped and no validation is applied. `Optional[Model]` (one model type plus `None`) is unwrapped and validated. Support for multi-type unions may be added in a future release.
 
 ---
 

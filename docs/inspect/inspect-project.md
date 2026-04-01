@@ -7,17 +7,7 @@ The inspection API lets you read the structure of a Kedro project without runnin
 - Catalog dataset configurations
 - Parameter key names (not values)
 
-The following sections explain how to use the inspection API:
-
-- [When to use the inspection API](#when-to-use-the-inspection-api)
-- [How to get a project snapshot](#how-to-get-a-project-snapshot)
-- [How to access project metadata](#how-to-access-project-metadata)
-- [How to explore pipeline structure](#how-to-explore-pipeline-structure)
-- [How to inspect catalog datasets](#how-to-inspect-catalog-datasets)
-- [How to list parameter keys](#how-to-list-parameter-keys)
-- [How to inspect a specific environment](#how-to-inspect-a-specific-environment)
-
-## When to use the inspection API
+# When to use the inspection API
 
 Use `get_project_snapshot` when you need to read the structure of a Kedro project from Python code without running any nodes or loading any data. Common use cases include:
 
@@ -28,6 +18,15 @@ Use `get_project_snapshot` when you need to read the structure of a Kedro projec
 
 !!! note
     The inspection API reads configuration and pipeline definitions. It does not load datasets, execute nodes, or write data.
+
+The following sections explain how to use the inspection API:
+
+- [How to get a project snapshot](#how-to-get-a-project-snapshot)
+- [How to access project metadata](#how-to-access-project-metadata)
+- [How to explore pipeline structure](#how-to-explore-pipeline-structure)
+- [How to inspect catalog datasets](#how-to-inspect-catalog-datasets)
+- [How to list parameter keys](#how-to-list-parameter-keys)
+- [How to inspect a specific environment](#how-to-inspect-a-specific-environment)
 
 ## How to get a project snapshot
 

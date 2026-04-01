@@ -1,34 +1,18 @@
-/* Mermaid dark mode fix - targets exact class names */
-[data-md-color-scheme="slate"] #__mermaid_0 .label text,
-[data-md-color-scheme="slate"] [id^="__mermaid"] .label text {
-  fill: #ffffff !important;
-  color: #ffffff !important;
+/* Mermaid light mode - Kedro branding */
+[data-md-color-scheme="default"] {
+  --md-mermaid-node-bg-color: #FFF7E2;
+  --md-mermaid-node-fg-color: #FFC900;
+  --md-mermaid-label-bg-color: #FFF7E2;
+  --md-mermaid-label-fg-color: #000000;
+  --md-mermaid-edge-color: #000000;
 }
 
-[data-md-color-scheme="slate"] [id^="__mermaid"] span.nodeLabel,
-[data-md-color-scheme="slate"] [id^="__mermaid"] span.nodeLabel p {
-  color: #ffffff !important;
+/* Mermaid dark mode - Kedro branding */
+[data-md-color-scheme="slate"] {
+  --md-mermaid-node-bg-color: #636363;
+  --md-mermaid-node-fg-color: #FFC900;
+  --md-mermaid-label-bg-color: #636363;
+  --md-mermaid-label-fg-color: #FFFFFF;
+  --md-mermaid-edge-color: #FFFFFF;
 }
 
-[data-md-color-scheme="slate"] [id^="__mermaid"] polygon.label-container {
-  fill: #2d3748 !important;
-  stroke: #90cdf4 !important;
-}
-
-[data-md-color-scheme="slate"] [id^="__mermaid"] .node rect {
-  fill: #2d3748 !important;
-  stroke: #90cdf4 !important;
-}
-
-[data-md-color-scheme="slate"] [id^="__mermaid"] .edgePath path {
-  stroke: #90cdf4 !important;
-}
-
-[data-md-color-scheme="slate"] [id^="__mermaid"] .arrowheadPath {
-  fill: #90cdf4 !important;
-}
-
-[data-md-color-scheme="slate"] [id^="__mermaid"] .edgeLabel span {
-  color: #ffffff !important;
-  background-color: #2d3748 !important;
-}

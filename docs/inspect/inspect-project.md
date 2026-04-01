@@ -57,7 +57,7 @@ The `metadata` attribute is a [`ProjectMetadataSnapshot`][kedro.inspection.model
 ```python
 print(snapshot.metadata.project_name)   # "My Project"
 print(snapshot.metadata.package_name)   # "my_project"
-print(snapshot.metadata.kedro_version)  # "0.19.x"
+print(snapshot.metadata.kedro_version)  # "1.0.0"
 ```
 
 ## How to explore pipeline structure

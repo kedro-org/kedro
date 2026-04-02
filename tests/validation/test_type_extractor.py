@@ -392,6 +392,34 @@ class TestExtractTypesFromNode:
         assert "union type hint" in caplog.text
         assert "raw dictionary" in caplog.text
 
+    def test_multi_model_union_warns_once(self, type_extractor, caplog):
+        """The union warning should only fire once per parameter key."""
+
+        def func_a(options: _MultiModelUnion) -> None:
+            pass
+
+        def func_b(options: _MultiModelUnion) -> None:
+            pass
+
+        node_a = kedro_node(
+            func=func_a,
+            inputs="params:split_options",
+            outputs="output_a",
+            name="node_a",
+        )
+        node_b = kedro_node(
+            func=func_b,
+            inputs="params:split_options",
+            outputs="output_b",
+            name="node_b",
+        )
+
+        with caplog.at_level("WARNING"):
+            type_extractor._extract_types_from_node(node_a)
+            type_extractor._extract_types_from_node(node_b)
+
+        assert caplog.text.count("split_options") == 1
+
 
 class TestExtractTypesFromPipeline:
     def test_pipeline_with_nodes(self, type_extractor):

@@ -42,6 +42,7 @@ class TypeExtractor:
             pipelines: Dictionary of registered pipelines to inspect.
         """
         self._pipelines = pipelines
+        self._warned_union_keys: set[str] = set()
 
     def extract_types_from_pipelines(self) -> dict[str, type]:
         """Extract all type requirements from registered pipelines.
@@ -134,14 +135,17 @@ class TypeExtractor:
                 is_pydantic_class(expected_type)
                 or dataclasses.is_dataclass(expected_type)
             ):
-                if get_origin(expected_type) is Union or isinstance(
-                    expected_type, types.UnionType
-                ):
+                param_key = ds_name.split(":", 1)[1]
+                if (
+                    get_origin(expected_type) is Union
+                    or isinstance(expected_type, types.UnionType)
+                ) and param_key not in self._warned_union_keys:
+                    self._warned_union_keys.add(param_key)
                     logger.warning(
                         "Parameter '%s' has a union type hint (%s) which is not "
                         "supported for validation. The parameter will be passed "
                         "as a raw dictionary.",
-                        ds_name.split(":", 1)[1],
+                        param_key,
                         expected_type,
                     )
                 continue

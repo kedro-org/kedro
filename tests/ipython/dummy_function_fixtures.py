@@ -41,3 +41,11 @@ def dummy_function_with_loop(dummy_list):
 
 def dummy_function_with_variable_length(dummy_input, my_input, *args, **kwargs):
     pass
+
+
+def same_module_helper(value):
+    return not value
+
+
+def dummy_function_using_same_module_helper(dummy_input):
+    return same_module_helper(dummy_input)

@@ -14,6 +14,9 @@ Cookiecutter
 Dagster
 Databricks
 Dask
+dataclass
+dataclasses
+Dataclasses
 dataframe
 dataframes
 dbt
@@ -67,6 +70,8 @@ Plotly
 pluggy
 Polars
 polars
+Pydantic
+Pydantic's
 Printify
 Pylint
 pyenv
@@ -92,6 +97,8 @@ tracebacks
 transcode
 transcoded
 transcoding
+untyped
+validators
 Unsplash
 uv
 VSCode

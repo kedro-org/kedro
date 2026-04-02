@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 import click
 
-import kedro
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
@@ -114,6 +113,7 @@ def create_pipeline(
     project_root = metadata.project_path / metadata.project_name
     conf_source = settings.CONF_SOURCE
     project_conf_path = metadata.project_path / conf_source
+    kedro_version = metadata.kedro_init_version
     base_env = settings.CONFIG_LOADER_ARGS.get("base_env", "base")
     env = env or base_env
     if not skip_config and not (project_conf_path / env).exists():
@@ -130,7 +130,15 @@ def create_pipeline(
 
         if not template_path.exists():
             # and if that folder doesn't exist fall back to the global default
-            template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
+            import importlib.util
+            from importlib.metadata import version
+
+            spec = importlib.util.find_spec("kedro")
+            kedro_version = version("kedro")
+            if spec and spec.origin:
+                template_path = Path(spec.origin).parent / "templates" / "pipeline"
+            else:
+                raise KedroCliError("Unable to locate Kedro package.")
 
     click.secho(f"Using pipeline template at: '{template_path}'")
 
@@ -138,7 +146,7 @@ def create_pipeline(
     pipelines_dir = package_dir / "pipelines"
     _ensure_pipelines_init_file(pipelines_dir)
 
-    result_path = _create_pipeline(name, template_path, pipelines_dir)
+    result_path = _create_pipeline(name, template_path, pipelines_dir, kedro_version)
     _copy_pipeline_tests(name, result_path, project_root)
     _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
@@ -222,10 +230,12 @@ def _echo_deletion_warning(message: str, **paths: list[Path]) -> None:
         click.echo(indent(paths_str, " " * 2))
 
 
-def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
+def _create_pipeline(
+    name: str, template_path: Path, output_dir: Path, kedro_version: str
+) -> Path:
     from cookiecutter.main import cookiecutter
 
-    cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
+    cookie_context = {"pipeline_name": name, "kedro_version": kedro_version}
 
     click.echo(f"Creating the pipeline '{name}': ", nl=False)
 

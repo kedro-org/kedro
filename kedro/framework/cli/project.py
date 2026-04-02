@@ -269,7 +269,6 @@ def run(  # noqa: PLR0913
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)
     tuple_node_names = tuple(node_names)
-
     with settings.SESSION_CLASS.create(
         env=env, conf_source=conf_source, runtime_params=params
     ) as session:

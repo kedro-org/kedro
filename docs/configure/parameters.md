@@ -169,3 +169,37 @@ Since key-value pairs are split on the first equals sign, values can contain equ
 
 !!! note
     To **override parameters and other configurations**, such as catalog entries or file paths, or to specify upfront that certain parameters must be set at runtime, use `$runtime_params` with the `OmegaConfigLoader`. Introduced in Kedro `0.18.14`, this feature allows dynamic overrides of various configuration types using the `--params` CLI option. Use it when you need to switch data sources or adjust runtime settings. [Learn more about `$runtime_params`.](advanced_configuration.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
+
+## Parameter validation with type hints
+
+Kedro can automatically validate your parameters against type-annotated node functions. If you add a [Pydantic model](https://docs.pydantic.dev/latest/) or [dataclass](https://docs.python.org/3/library/dataclasses.html) type hint to a `params:` input, Kedro converts the raw YAML dictionary into a validated, typed object before any node runs.
+
+This is entirely **opt-in**. Projects without type hints continue to work as before.
+
+```python
+from pydantic import BaseModel, Field
+
+
+class ModelOptions(BaseModel):
+    test_size: float = Field(ge=0.1, le=0.5)
+    random_state: int = Field(ge=0)
+
+
+def split_data(data, params: ModelOptions):
+    # params is a validated ModelOptions instance, not a dict
+    X_train, X_test = train_test_split(
+        data, test_size=params.test_size, random_state=params.random_state
+    )
+    return X_train, X_test
+```
+
+```yaml
+# conf/base/parameters.yml
+model_options:
+  test_size: 0.2
+  random_state: 3
+```
+
+If validation fails (for example, `test_size: 5.0` exceeds the `le=0.5` constraint), Kedro raises an error before any node runs, with a clear message showing which field failed and why.
+
+For more details, including dataclass support, nested models, and advanced usage, see the [Parameter validation reference](parameter_validation.md).

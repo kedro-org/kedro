@@ -22,6 +22,7 @@ else:
 import kedro
 from features.steps import util
 from features.steps.sh_run import ChildTerminatingPopen, check_run, run
+from kedro.inspection import get_project_snapshot
 
 OK_EXIT_CODE = 0
 
@@ -780,21 +781,7 @@ def delete_project_file(context, filepath):
 @when("I call get_project_snapshot on the project")
 def call_get_project_snapshot(context):
     """Call get_project_snapshot on the test project and store the result in context."""
-    from kedro.inspection import get_project_snapshot
-
     context.snapshot = get_project_snapshot(context.root_project_dir)
-
-
-@then("the snapshot is a valid ProjectSnapshot")
-def check_snapshot_is_valid(context):
-    from kedro.inspection.models import ProjectSnapshot
-
-    assert isinstance(context.snapshot, ProjectSnapshot)
-
-
-@then('the snapshot metadata {field} is "{value}"')
-def check_snapshot_metadata_field(context, field, value):
-    assert getattr(context.snapshot.metadata, field) == value
 
 
 @then("the snapshot pipelines include {names:CSV}")

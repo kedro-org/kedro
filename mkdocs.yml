@@ -8,13 +8,13 @@ theme:
   custom_dir: docs/overrides/
   palette:
     # Palette toggle for light mode
-    - scheme: light
+    - scheme: default
       toggle:
         icon: material/white-balance-sunny
         name: Switch to dark mode
 
     # Palette toggle for dark mode
-    - scheme: dark
+    - scheme: slate
       toggle:
         icon: material/white-balance-sunny
         name: Switch to light mode
@@ -51,7 +51,7 @@ theme:
 plugins:
   - search
   - autorefs
-  - mermaid2
+  - mermaid2:
   - redirects:
       redirect_maps:
         'configuration/telemetry.md': 'about/telemetry.md'
@@ -128,6 +128,7 @@ plugins:
           - configure/config_loader_migration.md: Migrating between config loaders
           - configure/advanced_configuration.md: Advanced configuration patterns
           - configure/parameters.md: Managing pipeline parameters
+          - configure/parameter_validation.md: Validating parameters with Pydantic models and dataclasses
           - configure/credentials.md: Handling sensitive credentials securely
 
         Data Management:
@@ -286,10 +287,12 @@ extra_css:
   - stylesheets/themes.css
   - stylesheets/footer.css
   - stylesheets/welcome.css
+   - stylesheets/mermaid.css
 
 extra_javascript:
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
+
 
 
 nav:
@@ -327,6 +330,7 @@ nav:
               - Migration guide for config loaders: configure/config_loader_migration.md
               - Advanced configuration: configure/advanced_configuration.md
           - Parameters: configure/parameters.md
+          - Parameter validation: configure/parameter_validation.md
           - Credentials: configure/credentials.md
       - Catalog Data:
           - Introduction: catalog-data/introduction.md

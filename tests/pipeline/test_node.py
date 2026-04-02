@@ -486,7 +486,7 @@ class TestNodeInputOutputNameValidation:
         """Test that inputs with mismatched namespaces raise a ValueError."""
         with pytest.warns(
             UserWarning,
-            match="Dataset name 'wrong_namespace.input_dataset' contains '.' characters",
+            match="One or more dataset names contain '.' characters",
         ):
             node(
                 func=self.dummy_function,
@@ -499,7 +499,7 @@ class TestNodeInputOutputNameValidation:
         """Test that outputs with mismatched namespaces raise a ValueError."""
         with pytest.warns(
             UserWarning,
-            match="Dataset name 'wrong_namespace.output_dataset' contains '.' characters",
+            match="One or more dataset names contain '.' characters",
         ):
             node(
                 func=self.dummy_function,
@@ -521,7 +521,7 @@ class TestNodeInputOutputNameValidation:
     def test_invalid_inputs_with_dot_no_namespace(self):
         """Test that inputs with '.' but no namespace raise a ValueError."""
         with pytest.warns(
-            UserWarning, match="Dataset name 'input.dataset' contains '.' characters"
+            UserWarning, match="One or more dataset names contain '.' characters"
         ):
             node(
                 func=self.dummy_function,
@@ -532,7 +532,7 @@ class TestNodeInputOutputNameValidation:
     def test_invalid_outputs_with_dot_no_namespace(self):
         """Test that outputs with '.' but no namespace raise a ValueError."""
         with pytest.warns(
-            UserWarning, match="Dataset name 'output.dataset' contains '.' characters"
+            UserWarning, match="One or more dataset names contain '.' characters"
         ):
             node(
                 func=self.dummy_function,
@@ -566,7 +566,7 @@ class TestNodeInputOutputNameValidation:
         """Test that mismatched namespaces in inputs and outputs raise a UserWarning."""
         with pytest.warns(
             UserWarning,
-            match="Dataset name 'other_namespace.output_dataset' contains '.' characters",
+            match="One or more dataset names contain '.' characters",
         ):
             node(
                 func=self.dummy_function,
@@ -574,6 +574,37 @@ class TestNodeInputOutputNameValidation:
                 outputs="other_namespace.output_dataset",
                 namespace="namespace",
             )
+
+    def test_dotted_dataset_name_warns_only_once(self):
+        """Test that the dotted dataset name warning is only triggered once per run."""
+        import warnings
+
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+
+            node(
+                func=self.dummy_function,
+                inputs="first.dataset",
+                outputs="output_dataset",
+            )
+            node(
+                func=self.dummy_function,
+                inputs="second.dataset",
+                outputs="output_dataset2",
+            )
+            node(
+                func=self.dummy_function,
+                inputs="third.dataset",
+                outputs="output_dataset3",
+            )
+
+        dot_warnings = [
+            w
+            for w in warning_list
+            if issubclass(w.category, UserWarning)
+            and "contain '.' characters" in str(w.message)
+        ]
+        assert len(dot_warnings) == 1
 
 
 class TestNodePreviewPayload:

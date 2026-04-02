@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import os
 import sys
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import click
 
+from kedro import KedroDeprecationWarning
 from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
@@ -23,6 +25,7 @@ from kedro.framework.cli.utils import (
     validate_conf_source,
 )
 from kedro.framework.project import settings
+from kedro.framework.session.session import KedroSession
 from kedro.utils import load_obj
 
 if TYPE_CHECKING:
@@ -263,28 +266,41 @@ def run(  # noqa: PLR0913
         raise KedroCliError(
             "Options '--pipeline' and '--pipelines' cannot be used together"
         )
+    if pipeline:
+        # raise deprecated warning if --pipeline is used, as it will be removed in a future release
+        warnings.warn(
+            "Option '--pipeline' is deprecated and will be removed in a future release. "
+            "Please use '--pipelines' instead.",
+            KedroDeprecationWarning,
+        )
+        pipelines_to_run = [pipeline]
 
-    pipelines_to_run = list(set(pipelines)) if pipelines else None
+    else:
+        pipelines_to_run = list(set(pipelines)) if pipelines else None
 
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)
     tuple_node_names = tuple(node_names)
+    create_kwargs = {"env": env, "conf_source": conf_source}
+    run_kwargs = {
+        "tags": tuple_tags,
+        "runner": runner_obj(is_async=is_async),
+        "node_names": tuple_node_names,
+        "from_nodes": from_nodes,
+        "to_nodes": to_nodes,
+        "from_inputs": from_inputs,
+        "to_outputs": to_outputs,
+        "load_versions": load_versions,
+        "pipeline_name": pipeline,
+        "pipeline_names": pipelines_to_run,
+        "namespaces": namespaces,
+        "only_missing_outputs": only_missing_outputs,
+    }
+    if settings.SESSION_CLASS == KedroSession:
+        create_kwargs["runtime_params"] = params
+    else:
+        run_kwargs["runtime_params"] = params
 
-    with settings.SESSION_CLASS.create(
-        env=env, conf_source=conf_source, runtime_params=params
-    ) as session:
-        result: dict[str, Any] = session.run(
-            tags=tuple_tags,
-            runner=runner_obj(is_async=is_async),
-            node_names=tuple_node_names,
-            from_nodes=from_nodes,
-            to_nodes=to_nodes,
-            from_inputs=from_inputs,
-            to_outputs=to_outputs,
-            load_versions=load_versions,
-            pipeline_name=pipeline,
-            pipeline_names=pipelines_to_run,
-            namespaces=namespaces,
-            only_missing_outputs=only_missing_outputs,
-        )
-        return result
+    with settings.SESSION_CLASS.create(**create_kwargs) as session:
+        result: dict[str, Any] = session.run(**run_kwargs)
+    return result

@@ -5,7 +5,6 @@ import textwrap
 from collections.abc import Mapping
 
 import pytest
-import yaml
 from omegaconf import OmegaConf
 
 from kedro import __version__ as kedro_version
@@ -1113,17 +1112,6 @@ class TestKedroSession:
             pipeline=mock_pipeline,
             catalog=mock_catalog,
         )
-
-
-@pytest.fixture
-def fake_project_with_logging_file_handler(fake_project):
-    logging_config = {
-        "version": 1,
-        "handlers": {"info_file_handler": {"filename": "logs/info.log"}},
-    }
-    logging_yml = fake_project / "conf" / "logging.yml"
-    logging_yml.write_text(yaml.dump(logging_config))
-    return fake_project
 
 
 def get_all_values(mapping: Mapping):

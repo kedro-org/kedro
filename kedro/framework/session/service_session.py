@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import logging
 import logging.config
-import textwrap
 import os
-import traceback
+import textwrap
 import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -79,17 +78,6 @@ class KedroServiceSession(AbstractSession):
         )
         return session
 
-    def _log_exception(self, exc_type: Any, exc_value: Any, exc_tb: Any) -> None:
-        type_ = [] if exc_type.__module__ == "builtins" else [exc_type.__module__]
-        type_.append(exc_type.__qualname__)
-
-        exc_data = {
-            "type": ".".join(type_),
-            "value": str(exc_value),
-            "traceback": traceback.format_tb(exc_tb),
-        }
-        self._logger.debug("Service session exception: %s", exc_data)
-
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
@@ -98,8 +86,6 @@ class KedroServiceSession(AbstractSession):
         return self
 
     def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
-        if exc_type:
-            self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
     def close(self) -> None:

@@ -14,6 +14,7 @@ from kedro.framework.project import (
     _ProjectSettings,
 )
 from kedro.framework.session import KedroServiceSession
+from kedro.framework.session.abstract_session import KedroSessionError
 
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
@@ -26,6 +27,10 @@ def fake_run_id(mocker):
         return_value=run_id,
     )
     return run_id
+
+
+class FakeException(Exception):
+    """Fake exception class for testing purposes"""
 
 
 class TestKedroServiceSession:
@@ -390,7 +395,7 @@ class TestKedroServiceSession:
             return_value=False,
         )
         mocker.patch(
-            "kedro.framework.session.session.get_close_matches",
+            "kedro.framework.session.service_session.get_close_matches",
             return_value=["__default__", "data_engineering"],
         )
         with pytest.raises(ValueError) as exc_info:
@@ -400,3 +405,128 @@ class TestKedroServiceSession:
         assert "Failed to find the pipeline named '__defult__'" in msg
         assert "Did you mean one of these instead?" in msg
         assert "__default__" in msg
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.parametrize("fake_pipeline_name", [None, [_FAKE_PIPELINE_NAME]])
+    def test_run_exception(
+        self,
+        fake_project,
+        fake_run_id,
+        fake_pipeline_name,
+        mock_context_class,
+        mock_runner,
+        mocker,
+        caplog,
+    ):
+        """Test exception being raised during the run"""
+        mock_hook = mocker.patch(
+            "kedro.framework.session.service_session._create_hook_manager"
+        ).return_value.hook
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.service_session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_context = mock_context_class.return_value
+        mock_catalog = mock_context._get_catalog.return_value
+        error = FakeException("You shall not pass!")
+        mock_runner.run.side_effect = error  # runner.run() raises an error
+        mock_pipeline = (
+            mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
+        )
+
+        with pytest.raises(FakeException) as exc_info:
+            session = KedroServiceSession.create(
+                project_path=fake_project, session_id="fake_id"
+            )
+            session.run(runner=mock_runner, pipeline_names=fake_pipeline_name)
+
+        record_data = {
+            "session_id": "fake_id",
+            "run_id": fake_run_id,
+            "project_path": fake_project.as_posix(),
+            "env": mock_context.env,
+            "kedro_version": kedro_version,
+            "tags": None,
+            "from_nodes": None,
+            "to_nodes": None,
+            "node_names": None,
+            "from_inputs": None,
+            "to_outputs": None,
+            "load_versions": None,
+            "runtime_params": {},
+            "pipeline_names": fake_pipeline_name or ["__default__"],
+            "namespaces": None,
+            "runner": mock_runner.__name__,
+            "only_missing_outputs": False,
+        }
+
+        mock_hook.on_pipeline_error.assert_called_once_with(
+            error=error,
+            run_params=record_data,
+            pipeline=mock_pipeline,
+            catalog=mock_catalog,
+        )
+
+        mock_hook.after_pipeline_run.assert_not_called()
+        msg = str(exc_info.value)
+        assert "You shall not pass!" in msg
+        assert isinstance(exc_info.value, FakeException)
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_session_raise_error_with_invalid_runner_instance(
+        self, fake_project, mocker
+    ):
+        mocker.patch(
+            "kedro.framework.session.service_session.pipelines",
+            return_value={
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_runner_class = mocker.patch("kedro.runner.SequentialRunner")
+
+        session = KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id"
+        )
+        with pytest.raises(
+            KedroSessionError,
+            match="KedroServiceSession expect an instance of Runner instead of a class.",
+        ):
+            # Execute run with SequentialRunner class instead of SequentialRunner()
+            session.run(runner=mock_runner_class)
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_multiple_runs(self, fake_project, mock_runner, mocker):
+        """Test that running multiple times in the same session works and generates different run_ids."""
+        mocker.patch(
+            "kedro.framework.session.service_session._create_hook_manager"
+        ).return_value.hook
+        mocker.patch(
+            "kedro.framework.session.service_session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_runner.__name__ = "SequentialRunner"
+
+        with KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id"
+        ) as session:
+            session.run(runner=mock_runner, pipeline_names=_FAKE_PIPELINE_NAME)
+            first_run_id = (
+                session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
+                    "run_params"
+                ]["run_id"]
+            )
+
+            session.run(runner=mock_runner, pipeline_names=_FAKE_PIPELINE_NAME)
+            second_run_id = (
+                session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
+                    "run_params"
+                ]["run_id"]
+            )
+
+        assert first_run_id != second_run_id

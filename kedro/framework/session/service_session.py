@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import logging
 import logging.config
+import os
 import textwrap
-import traceback
 import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -69,7 +69,7 @@ class KedroServiceSession(AbstractSession):
     ) -> KedroServiceSession:
         """Create a new instance of the session."""
         validate_settings()
-
+        env = env or os.getenv("KEDRO_ENV")
         session = cls(
             project_path=project_path,
             session_id=session_id or str(uuid.uuid4()),
@@ -77,17 +77,6 @@ class KedroServiceSession(AbstractSession):
             env=env,
         )
         return session
-
-    def _log_exception(self, exc_type: Any, exc_value: Any, exc_tb: Any) -> None:
-        type_ = [] if exc_type.__module__ == "builtins" else [exc_type.__module__]
-        type_.append(exc_type.__qualname__)
-
-        exc_data = {
-            "type": ".".join(type_),
-            "value": str(exc_value),
-            "traceback": traceback.format_tb(exc_tb),
-        }
-        self._logger.debug("Service session exception: %s", exc_data)
 
     @property
     def _logger(self) -> logging.Logger:
@@ -97,8 +86,6 @@ class KedroServiceSession(AbstractSession):
         return self
 
     def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
-        if exc_type:
-            self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
     def close(self) -> None:
@@ -221,7 +208,7 @@ class KedroServiceSession(AbstractSession):
             "from_inputs": from_inputs,
             "to_outputs": to_outputs,
             "load_versions": load_versions,
-            "runtime_params": runtime_params,
+            "runtime_params": runtime_params or {},
             "pipeline_names": pipeline_names,
             "namespaces": namespaces,
             "runner": getattr(runner, "__name__", str(runner)),

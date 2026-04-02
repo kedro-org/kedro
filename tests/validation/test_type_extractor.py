@@ -388,12 +388,11 @@ class TestExtractTypesFromNode:
             result = type_extractor._extract_types_from_node(test_node)
 
         assert result == {}
-        assert "split_options" in caplog.text
-        assert "union type hint" in caplog.text
-        assert "raw dictionary" in caplog.text
+        assert "SamplePydanticModel | SampleDataclass" in caplog.text
+        assert "not supported for validation" in caplog.text
 
     def test_multi_model_union_warns_once(self, type_extractor, caplog):
-        """The union warning should only fire once per parameter key."""
+        """The union warning should only fire once per union type."""
 
         def func_a(options: _MultiModelUnion) -> None:
             pass
@@ -409,7 +408,7 @@ class TestExtractTypesFromNode:
         )
         node_b = kedro_node(
             func=func_b,
-            inputs="params:split_options",
+            inputs="params:ns.split_options",
             outputs="output_b",
             name="node_b",
         )
@@ -418,7 +417,7 @@ class TestExtractTypesFromNode:
             type_extractor._extract_types_from_node(node_a)
             type_extractor._extract_types_from_node(node_b)
 
-        assert caplog.text.count("split_options") == 1
+        assert caplog.text.count("SamplePydanticModel | SampleDataclass") == 1
 
 
 class TestExtractTypesFromPipeline:

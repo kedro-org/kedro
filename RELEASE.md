@@ -2,6 +2,7 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 ## Documentation changes
+* Updated `kedro-dagster` plugin references to the `stateful-y` organization.
 ## Community contributions
 
 

@@ -46,16 +46,19 @@ class TypeExtractor:
             for key, new_type in pipeline_type_requirements.items():
                 if key in all_type_requirements:
                     existing_type = all_type_requirements[key]
+                    # typing.Union has __name__ (returns 'Union') but types.UnionType (int | str) does not,
+                    # causing AttributeError. Hence, Fall back to str() for a readable representation.
                     if existing_type != new_type:
                         logger.warning(
                             "Conflicting type requirements for parameter '%s': "
                             "%s (existing) vs %s (from pipeline '%s'). "
                             "Using %s.",
                             key,
-                            existing_type.__name__,
-                            new_type.__name__,
+                            getattr(existing_type, '__name__', str(existing_type)),
+                            getattr(new_type, '__name__', str(new_type)),
                             pipeline_name,
-                            new_type.__name__,
+                            getattr(new_type, '__name__', str(new_type))
+
                         )
 
             all_type_requirements.update(pipeline_type_requirements)
@@ -111,10 +114,12 @@ class TypeExtractor:
 
             param_key = ds_name.split(":", 1)[1]
             all_requirements[param_key] = expected_type
+            # typing.Union has __name__ (returns 'Union') but types.UnionType (int | str) does not,
+            # causing AttributeError. Hence, Fall back to str() for a readable representation.
             logger.debug(
                 "Found parameter requirement: %s -> %s",
                 param_key,
-                expected_type.__name__,
+                getattr(expected_type, '__name__', str(expected_type))
             )
 
         return all_requirements

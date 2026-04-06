@@ -66,9 +66,11 @@ class ParameterValidator:
                         transformed_params, param_key, validated_instance
                     )
                     instantiated_count += 1
+                    # typing.Union has __name__ (returns 'Union') but types.UnionType (int | str) does not,
+                    # causing AttributeError. Hence, Fall back to str() for a readable representation.
                     logger.debug(
                         "Successfully instantiated %s for parameter '%s'",
-                        expected_type.__name__,
+                        getattr(expected_type, '__name__', str(expected_type)),
                         param_key,
                     )
 

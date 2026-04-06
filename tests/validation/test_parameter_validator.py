@@ -129,3 +129,12 @@ class TestApplyValidation:
 
         parameter_validator._apply_validation(raw, requirements)
         assert isinstance(raw["config"], dict)
+
+    def test_union_type_annotation_does_not_crash(self, parameter_validator):
+        """types.UnionType (int | str) lacks __name__; _apply_validation must not raise AttributeError."""
+        # 42 is just an example value that can be successfully validated as int or str
+        raw = {"threshold": 42}
+        requirements = {"threshold": int | str}
+
+        result = parameter_validator._apply_validation(raw, requirements)
+        assert result["threshold"] == 42

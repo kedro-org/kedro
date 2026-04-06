@@ -39,7 +39,7 @@ def instantiate_model(param_key: str, raw_value: Any, model_type: type) -> Any:
                 "Parameter '%s' type %s is not a Pydantic model or dataclass, "
                 "skipping validation",
                 param_key,
-                model_type.__name__,
+                getattr(model_type, '__name__', str(model_type))
             )
             return raw_value
 
@@ -47,7 +47,7 @@ def instantiate_model(param_key: str, raw_value: Any, model_type: type) -> Any:
         raise
     except Exception as exc:
         raise ModelInstantiationError(
-            f"Failed to instantiate {model_type.__name__} for "
+            f"Failed to instantiate {getattr(model_type, '__name__', str(model_type))} for "
             f"parameter '{param_key}': {exc}"
         ) from exc
 

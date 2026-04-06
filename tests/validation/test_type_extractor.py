@@ -122,6 +122,64 @@ class TestExtractTypesFromPipelines:
         assert "shared_config" in result
         assert "Conflicting type requirements" in caplog.text
 
+    def test_union_type_annotation_does_not_crash(self):
+        """types.UnionType (int | str) lacks __name__; extraction must not raise AttributeError."""
+
+        def my_func(value: int | str) -> None:
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:my_param",
+            outputs="output",
+            name="test_node",
+        )
+
+        pipeline = MagicMock()
+        pipeline.nodes = [test_node]
+
+        extractor = TypeExtractor(pipelines={"pipeline_a": pipeline})
+        result = extractor.extract_types_from_pipelines()
+
+        assert "my_param" in result
+
+    def test_conflicting_union_type_annotations_does_not_crash(self, caplog):
+        """Conflicting types.UnionType annotations across pipelines must not raise AttributeError."""
+
+        def func_a(value: int | str) -> None:
+            pass
+
+        def func_b(value: int | float) -> None:
+            pass
+
+        node_a = kedro_node(
+            func=func_a,
+            inputs="params:shared_param",
+            outputs="out_a",
+            name="node_a",
+        )
+        node_b = kedro_node(
+            func=func_b,
+            inputs="params:shared_param",
+            outputs="out_b",
+            name="node_b",
+        )
+
+        pipeline_a = MagicMock()
+        pipeline_a.nodes = [node_a]
+        pipeline_b = MagicMock()
+        pipeline_b.nodes = [node_b]
+
+        extractor = TypeExtractor(
+            pipelines={"pipeline_a": pipeline_a, "pipeline_b": pipeline_b}
+        )
+
+        with caplog.at_level("WARNING"):
+            result = extractor.extract_types_from_pipelines()
+
+        assert "shared_param" in result
+        assert "Conflicting type requirements" in caplog.text
+
 
 class TestExtractTypesFromNode:
     def test_no_func_attribute(self, type_extractor):

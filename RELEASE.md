@@ -1,6 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+* Fixed `AttributeError` when node functions use Python 3.10+ union type syntax (`int | str`) in `params:` annotations, caused by `types.UnionType` lacking `__name__`.
 ## Documentation changes
 ## Community contributions
 

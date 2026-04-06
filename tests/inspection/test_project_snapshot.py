@@ -134,6 +134,10 @@ class TestBuildProjectSnapshot:
 
         self.pipeline_snapshots = [pipeline_snapshot]
         mocker.patch(
+            "kedro.inspection.snapshot.pipelines",
+            new={},
+        )
+        mocker.patch(
             "kedro.inspection.snapshot._build_pipeline_snapshots",
             return_value=self.pipeline_snapshots,
         )

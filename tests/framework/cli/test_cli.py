@@ -29,6 +29,7 @@ from kedro.framework.cli.utils import (
     validate_conf_source,
 )
 from kedro.framework.session import KedroSession
+from kedro.framework.session.service_session import KedroServiceSession
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
@@ -1115,6 +1116,18 @@ class TestRunCommand:
             " does not exist."
         )
         assert expected_output in result.output
+
+    def test_run_with_service_session(self, fake_project_cli, fake_metadata, mocker):
+        mocker.patch(
+            "kedro.framework.cli.project.settings.SESSION_CLASS",
+            new=KedroServiceSession,
+        )
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--params", "foo=bar"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0
 
 
 class TestValidateConfSource:

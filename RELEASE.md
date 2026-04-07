@@ -12,6 +12,10 @@
 
 ## Documentation changes
 * Added documentation for `Optional[Model]` support and multi-type union limitations in parameter validation.
+* Improved Mermaid diagram visibility in dark mode.
+
+## Community contributions
+* [SayantanDutt](https://github.com/SayantanDutt)
 
 # Release 1.3.0
 

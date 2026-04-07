@@ -10,6 +10,7 @@ from click.testing import CliRunner
 from omegaconf import OmegaConf
 from pytest import fixture, mark, raises
 
+from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.cli import (
@@ -805,13 +806,12 @@ class TestRunCommand:
     def test_pipeline_name_deprecation_warning(
         self, fake_project_cli, fake_metadata, caplog
     ):
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["run", "--pipeline", "pipe1"],
-            obj=fake_metadata,
-        )
-        print(result.stdout)
-        assert "deprecated" in result.stdout
+        with pytest.warns(KedroDeprecationWarning):
+            CliRunner().invoke(
+                fake_project_cli,
+                ["run", "--pipeline", "pipe1"],
+                obj=fake_metadata,
+            )
 
     @mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_invalid_config(

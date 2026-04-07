@@ -267,7 +267,6 @@ def run(  # noqa: PLR0913
             "Options '--pipeline' and '--pipelines' cannot be used together"
         )
     if pipeline:
-        # raise deprecated warning if --pipeline is used, as it will be removed in a future release
         warnings.warn(
             "Option '--pipeline' is deprecated and will be removed in a future release. "
             "Please use '--pipelines' instead.",

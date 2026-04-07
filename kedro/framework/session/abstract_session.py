@@ -38,8 +38,8 @@ class AbstractSession(ABC):
 
 
 class KedroSessionError(Exception):
-    """``KedroSessionError`` raised by ``KedroSession``
-    in the case that multiple runs are attempted in one session.
+    """``KedroSessionError`` raised by ``KedroSession`` and ``KedroServiceSession``
+    when they encounter an error.
     """
 
     pass

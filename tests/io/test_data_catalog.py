@@ -106,6 +106,14 @@ class TestDataCatalog:
         with pytest.raises(DatasetError, match=pattern):
             catalog.load(name)
 
+    def test_save_error_includes_dataset_name(self, data_catalog):
+        """Check the error when attempting to save None includes
+        the dataset name"""
+        name = "test"
+        pattern = rf"{name}: Saving 'None' to a 'Dataset' is not allowed"
+        with pytest.raises(DatasetError, match=pattern):
+            data_catalog.save(name, None)
+
     def test_add_dataset_twice(self, data_catalog, dataset, caplog):
         """Check the warning when attempting to add the dataset twice"""
         data_catalog["test"] = dataset

@@ -576,7 +576,6 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
             pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
@@ -618,7 +617,6 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
             pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
@@ -660,7 +658,6 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
             pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
@@ -693,7 +690,6 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
             pipeline_names=None,
             namespaces=["fake_namespace"],
             only_missing_outputs=False,
@@ -719,7 +715,6 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
             pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
@@ -761,8 +756,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name="pipeline1",
-            pipeline_names=None,
+            pipeline_names=["pipeline1"],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -778,7 +772,6 @@ class TestRunCommand:
 
         assert not result.exit_code
         assert fake_session.run.call_count == 1
-        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
 
         pipelines = fake_session.run.call_args.kwargs["pipeline_names"]
         assert "pipe1" in pipelines
@@ -795,7 +788,6 @@ class TestRunCommand:
 
         assert not result.exit_code
         assert fake_session.run.call_count == 1
-        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
         assert fake_session.run.call_args.kwargs["pipeline_names"] == ["pipe1"]
 
     def test_pipeline_and_pipelines_mutually_exclusive(
@@ -813,13 +805,13 @@ class TestRunCommand:
     def test_pipeline_name_deprecation_warning(
         self, fake_project_cli, fake_metadata, caplog
     ):
-        CliRunner().invoke(
+        result = CliRunner().invoke(
             fake_project_cli,
             ["run", "--pipeline", "pipe1"],
             obj=fake_metadata,
         )
-
-        assert "deprecated" in caplog.text.lower()
+        print(result.stdout)
+        assert "deprecated" in result.stdout
 
     @mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_invalid_config(
@@ -882,8 +874,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name="pipeline1",
-            pipeline_names=None,
+            pipeline_names=["pipeline1"],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -1009,7 +1000,6 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions=lv_dict,
-            pipeline_name=None,
             pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
@@ -1097,7 +1087,6 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
             pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,

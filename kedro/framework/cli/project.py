@@ -291,7 +291,6 @@ def run(  # noqa: PLR0913
         "from_inputs": from_inputs,
         "to_outputs": to_outputs,
         "load_versions": load_versions,
-        "pipeline_name": pipeline,
         "pipeline_names": pipelines_to_run,
         "namespaces": namespaces,
         "only_missing_outputs": only_missing_outputs,

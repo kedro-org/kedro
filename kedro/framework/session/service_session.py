@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 class KedroServiceSession(AbstractSession):
     """
     KedroServiceSession offers a session implementation that allows for multiple runs and data injection.
+    NOTE: This session implementation is under active development and may occasionally contain breaking changes.
     """
 
     def __init__(
@@ -106,7 +107,7 @@ class KedroServiceSession(AbstractSession):
     def load_context(
         self, runtime_params: dict[str, Any] | None = None
     ) -> KedroContext:
-        """An instance of the project context."""
+        """An instance of the project context with runtime parameters injected."""
         config_loader = self._get_config_loader(runtime_params)
         context_class = settings.CONTEXT_CLASS
         context = context_class(

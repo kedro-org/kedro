@@ -515,18 +515,48 @@ class TestKedroServiceSession:
         with KedroServiceSession.create(
             project_path=fake_project, session_id="fake_id"
         ) as session:
-            session.run(runner=mock_runner, pipeline_names=_FAKE_PIPELINE_NAME)
+            session.run(
+                runner=mock_runner,
+                pipeline_names=_FAKE_PIPELINE_NAME,
+                runtime_params={"param1": "value1"},
+            )
             first_run_id = (
                 session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
                     "run_params"
                 ]["run_id"]
             )
+            first_runtime_params = (
+                session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
+                    "run_params"
+                ]["runtime_params"]
+            )
+            first_session_id = (
+                session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
+                    "run_params"
+                ]["session_id"]
+            )
 
-            session.run(runner=mock_runner, pipeline_names=_FAKE_PIPELINE_NAME)
+            session.run(
+                runner=mock_runner,
+                pipeline_names=_FAKE_PIPELINE_NAME,
+                runtime_params={"param2": "value2"},
+            )
             second_run_id = (
                 session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
                     "run_params"
                 ]["run_id"]
             )
-
+            second_runtime_params = (
+                session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
+                    "run_params"
+                ]["runtime_params"]
+            )
+            second_session_id = (
+                session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
+                    "run_params"
+                ]["session_id"]
+            )
+        assert first_session_id == second_session_id
         assert first_run_id != second_run_id
+        assert first_runtime_params == {"param1": "value1"}
+        assert second_runtime_params == {"param2": "value2"}

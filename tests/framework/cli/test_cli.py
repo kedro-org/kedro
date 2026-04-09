@@ -1127,24 +1127,6 @@ class TestRunCommand:
         )
         assert expected_output in result.output
 
-<<<<<<< Updated upstream
-=======
-    def test_run_with_service_session(self, fake_project_cli, fake_metadata, mocker):
-        mock_session_run = mocker.patch.object(KedroServiceSession, "run")
-
-        mocker.patch(
-            "kedro.framework.cli.project.settings.SESSION_CLASS",
-            new=KedroServiceSession,
-        )
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["run", "--params", "foo=bar"],
-            obj=fake_metadata,
-        )
-        assert mock_session_run.called_
-        assert result.exit_code == 0
-
->>>>>>> Stashed changes
 
 class TestValidateConfSource:
     def test_remote_url_validation(self):

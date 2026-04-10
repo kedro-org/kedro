@@ -1,5 +1,5 @@
 /* Mermaid light mode - Kedro branding */
-[data-md-color-scheme="default"] {
+[data-md-color-scheme="light"] {
   --md-mermaid-node-bg-color: #FFF7E2;
   --md-mermaid-node-fg-color: #FFC900;
   --md-mermaid-label-bg-color: #FFF7E2;
@@ -8,7 +8,7 @@
 }
 
 /* Mermaid dark mode - Kedro branding */
-[data-md-color-scheme="slate"] {
+[data-md-color-scheme="dark"] {
   --md-mermaid-node-bg-color: #636363;
   --md-mermaid-node-fg-color: #FFC900;
   --md-mermaid-label-bg-color: #636363;

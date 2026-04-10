@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 MOCK_PACKAGE_NAME = "fake_package"
-_FAKE_PROJECT_NAME = "fake_project"
+MOCK_PROJECT_NAME = "fake_project"
 
 
 class BadConfigLoader:
@@ -408,7 +408,7 @@ def mock_validate_settings(mocker):
 
 @pytest.fixture
 def fake_project(tmp_path, mock_package_name):
-    fake_project_dir = Path(tmp_path) / "fake_project"
+    fake_project_dir = Path(tmp_path) / MOCK_PROJECT_NAME
     (fake_project_dir / "src").mkdir(parents=True)
 
     pyproject_toml_path = fake_project_dir / "pyproject.toml"
@@ -416,7 +416,7 @@ def fake_project(tmp_path, mock_package_name):
         "tool": {
             "kedro": {
                 "kedro_init_version": kedro_version,
-                "project_name": _FAKE_PROJECT_NAME,
+                "project_name": MOCK_PROJECT_NAME,
                 "package_name": mock_package_name,
             }
         }

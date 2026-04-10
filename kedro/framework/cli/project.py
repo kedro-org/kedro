@@ -275,13 +275,13 @@ def run(  # noqa: PLR0913
         pipelines_to_run = [pipeline]
 
     else:
-        pipelines_to_run = list(set(pipelines)) if pipelines else None
+        pipelines_to_run = list(set(pipelines)) if pipelines else []
 
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)
     tuple_node_names = tuple(node_names)
-    create_kwargs = {"env": env, "conf_source": conf_source}
-    run_kwargs = {
+    create_kwargs: dict[str, Any] = {"env": env, "conf_source": conf_source}
+    run_kwargs: dict[str, Any] = {
         "tags": tuple_tags,
         "runner": runner_obj(is_async=is_async),
         "node_names": tuple_node_names,

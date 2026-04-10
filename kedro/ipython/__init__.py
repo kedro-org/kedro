@@ -128,7 +128,7 @@ def reload_kedro(
     _remove_cached_modules(metadata.package_name)
     configure_project(metadata.package_name)
     is_kedrosession = settings.SESSION_CLASS == KedroSession
-    create_args = {
+    create_args: dict[str, Any] = {
         "project_path": project_path,
         "env": env,
         "conf_source": conf_source,

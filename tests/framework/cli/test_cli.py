@@ -1122,6 +1122,15 @@ class TestRunCommand:
             "kedro.framework.cli.project.settings.SESSION_CLASS",
             new=KedroServiceSession,
         )
+        (
+            mocker.patch(
+                "kedro.framework.cli.project.settings.SESSION_CLASS.create",
+                return_value=MagicMock(),
+            ),
+        )
+        mocker.patch(
+            "kedro.framework.cli.project.settings.SESSION_CLASS.run", return_value=None
+        )
         result = CliRunner().invoke(
             fake_project_cli,
             ["run", "--params", "foo=bar"],

@@ -578,7 +578,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -619,7 +619,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -660,7 +660,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -692,7 +692,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=["fake_namespace"],
             only_missing_outputs=False,
         )
@@ -717,7 +717,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -1001,7 +1001,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions=lv_dict,
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -1088,7 +1088,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )

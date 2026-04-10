@@ -256,8 +256,6 @@ class TestKedroServiceSession:
         # Change the current working directory to the outside directory
         monkeypatch.chdir(outside_dir)
 
-        # Create a session and set run called to True - no need to run a full session, we can verify the logging message
-        # from trying to execute a second run in the same session.
         mocker.patch(
             "kedro.framework.session.service_session._create_hook_manager"
         ).return_value.hook
@@ -517,7 +515,7 @@ class TestKedroServiceSession:
         ) as session:
             session.run(
                 runner=mock_runner,
-                pipeline_names=_FAKE_PIPELINE_NAME,
+                pipeline_names=[_FAKE_PIPELINE_NAME],
                 runtime_params={"param1": "value1"},
             )
             first_run_id = (

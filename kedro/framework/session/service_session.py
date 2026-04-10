@@ -33,8 +33,27 @@ if TYPE_CHECKING:
 
 
 class KedroServiceSession(AbstractSession):
-    """
-    KedroServiceSession offers a session implementation that allows for multiple runs and data injection.
+    """``KedroServiceSession`` is the object that is responsible for managing the lifecycle
+    of multiple Kedro runs. Use `KedroServiceSession.create()` as
+    a context manager to construct a new KedroServiceSession with session data
+    provided (see the example below).
+
+
+
+    Example:
+    ``` python
+    from kedro.framework.session import KedroServiceSession
+    from kedro.framework.startup import bootstrap_project
+    from pathlib import Path
+
+    # If you are creating a session outside of a Kedro project (i.e. not using
+    # `kedro run` or `kedro jupyter`), you need to run `bootstrap_project` to
+    # let Kedro find your configuration.
+    bootstrap_project(Path("<project_root>"))
+    with KedroServiceSession.create() as session:
+        run_1 = session.run(runtime_params={"param1": "value1"})
+        run_2 = session.run(runtime_params={"param1": "value2"})
+    ```
     NOTE: This session implementation is under active development and may occasionally contain breaking changes.
     """
 
@@ -82,12 +101,6 @@ class KedroServiceSession(AbstractSession):
     @property
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
-
-    def __enter__(self) -> KedroServiceSession:
-        return self
-
-    def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
-        self.close()
 
     def close(self) -> None:
         self._logger.info("Closing session %s", self.session_id)

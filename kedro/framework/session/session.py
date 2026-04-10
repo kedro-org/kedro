@@ -266,9 +266,6 @@ class KedroSession(AbstractSession):
         if self.save_on_close:
             self._store.save()
 
-    def __enter__(self) -> KedroSession:
-        return self
-
     def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
         if exc_type:
             self._log_exception(exc_type, exc_value, tb_)

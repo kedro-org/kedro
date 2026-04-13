@@ -274,13 +274,62 @@ class _ProjectLogging(UserDict):
         self.configure(yaml.safe_load(logging_config))
         logger.info(msg)
 
+    def _validate_logging_class(self, class_path: str) -> None:
+        """Validate that a class referenced in logging configuration is a legitimate
+        logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
+        logging.Filter).
+
+        Args:
+            class_path: Dotted import path to the class, e.g. ``logging.StreamHandler``.
+
+        Raises:
+            ValueError: If the class cannot be imported or is not a logging base class.
+        """
+        _LOGGING_BASE_CLASSES = (
+            logging.Handler,
+            logging.Formatter,
+            logging.Filter,
+        )
+
+        module_path, _, class_name = class_path.rpartition(".")
+        if not module_path:
+            # Bare name (e.g. "StreamHandler") resolved internally by logging machinery.
+            return
+
+        try:
+            module = importlib.import_module(module_path)
+        except ImportError as exc:
+            raise ValueError(
+                f"Cannot import module '{module_path}' specified as a logging class: {exc}"
+            ) from exc
+
+        cls = getattr(module, class_name, None)
+        if cls is None:
+            raise ValueError(
+                f"Class '{class_name}' not found in module '{module_path}' "
+                f"as specified in logging configuration."
+            )
+
+        if not (isinstance(cls, type) and issubclass(cls, _LOGGING_BASE_CLASSES)):
+            raise ValueError(
+                f"Invalid logging class '{class_path}'. "
+                f"Classes used in logging configuration must be subclasses of "
+                f"'logging.Handler', 'logging.Formatter', or 'logging.Filter'. "
+                f"Got '{cls}' instead. If you need a "
+                f"custom logging class, ensure it inherits from one of these base classes."
+            )
+
     def _validate_logging_config(self, config: Any) -> Any:
-        """Recursively check the logging configuration and raise an error if dangerous '()' factory keys are encountered."""
+        """Recursively check the logging configuration and raise an error if dangerous
+        '()' factory keys are encountered or if any 'class' value is not a legitimate
+        logging class."""
         if isinstance(config, dict):
             if "()" in config:
                 raise ValueError(
                     "The '()' key is not allowed in logging configuration as it poses a security risk."
                 )
+            if "class" in config:
+                self._validate_logging_class(config["class"])
             validated = {}
             for k, v in config.items():
                 validated[k] = self._validate_logging_config(v)

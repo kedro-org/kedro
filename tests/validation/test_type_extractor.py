@@ -6,6 +6,8 @@ import dataclasses
 import inspect
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from kedro.pipeline import node as kedro_node
 from kedro.validation.type_extractor import TypeExtractor
 
@@ -212,6 +214,102 @@ class TestExtractTypesFromPipelines:
         assert result["optional_cfg"] == SamplePydanticModel
         assert "threshold" not in result
         assert "union_cfg" not in result
+
+    def test_scoped_to_single_pipeline(self):
+        """When pipeline_name is given, only that pipeline is inspected."""
+
+        def ds_func(opts: SampleDataclass) -> None:
+            pass
+
+        def pydantic_func(cfg: SamplePydanticModel) -> None:
+            pass
+
+        node_a = kedro_node(
+            func=ds_func,
+            inputs="params:config_a",
+            outputs="o1",
+            name="node_a",
+        )
+        node_b = kedro_node(
+            func=pydantic_func,
+            inputs="params:config_b",
+            outputs="o2",
+            name="node_b",
+        )
+
+        pipeline_a = MagicMock()
+        pipeline_a.nodes = [node_a]
+        pipeline_b = MagicMock()
+        pipeline_b.nodes = [node_b]
+
+        extractor = TypeExtractor(
+            pipelines={"pipeline_a": pipeline_a, "pipeline_b": pipeline_b}
+        )
+
+        result = extractor.extract_types_from_pipelines(pipeline_name="pipeline_a")
+
+        assert "config_a" in result
+        assert result["config_a"] == SampleDataclass
+        assert "config_b" not in result
+
+    def test_scoped_pipeline_not_found_raises(self):
+        """KeyError is raised when the requested pipeline doesn't exist."""
+        extractor = TypeExtractor(pipelines={"data_science": MagicMock()})
+
+        with pytest.raises(KeyError, match="Pipeline 'nonexistent' not found"):
+            extractor.extract_types_from_pipelines(pipeline_name="nonexistent")
+
+    def test_scoped_to_default_pipeline_is_allowed(self):
+        """Explicitly requesting __default__ should work (skip logic is for unscoped)."""
+
+        def my_func(opts: SampleDataclass) -> None:
+            pass
+
+        node = kedro_node(
+            func=my_func,
+            inputs="params:config",
+            outputs="output",
+            name="node",
+        )
+        default_pipeline = MagicMock()
+        default_pipeline.nodes = [node]
+
+        extractor = TypeExtractor(
+            pipelines={"__default__": default_pipeline, "other": MagicMock()}
+        )
+
+        result = extractor.extract_types_from_pipelines(pipeline_name="__default__")
+        assert "config" in result
+
+    def test_none_pipeline_name_extracts_all(self):
+        """Passing None explicitly behaves the same as the default (all pipelines)."""
+
+        def func_a(opts: SampleDataclass) -> None:
+            pass
+
+        def func_b(cfg: SamplePydanticModel) -> None:
+            pass
+
+        node_a = kedro_node(
+            func=func_a, inputs="params:config_a", outputs="o1", name="n1"
+        )
+        node_b = kedro_node(
+            func=func_b, inputs="params:config_b", outputs="o2", name="n2"
+        )
+
+        pipeline_a = MagicMock()
+        pipeline_a.nodes = [node_a]
+        pipeline_b = MagicMock()
+        pipeline_b.nodes = [node_b]
+
+        extractor = TypeExtractor(
+            pipelines={"pipeline_a": pipeline_a, "pipeline_b": pipeline_b}
+        )
+
+        result = extractor.extract_types_from_pipelines(pipeline_name=None)
+
+        assert "config_a" in result
+        assert "config_b" in result
 
 
 class TestExtractTypesFromNode:

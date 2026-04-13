@@ -40,6 +40,49 @@ class TestParameterValidator:
 
         assert isinstance(result["model_options"], SamplePydanticModel)
 
+    def test_validate_raw_params_scoped_to_pipeline(self):
+        """Only validate params from the target pipeline."""
+
+        def ds_func(opts: SampleDataclass) -> None:
+            pass
+
+        def pydantic_func(cfg: SamplePydanticModel) -> None:
+            pass
+
+        node_a = kedro_node(
+            func=ds_func,
+            inputs="params:config_a",
+            outputs="o1",
+            name="node_a",
+        )
+        node_b = kedro_node(
+            func=pydantic_func,
+            inputs="params:config_b",
+            outputs="o2",
+            name="node_b",
+        )
+
+        pipeline_a = MagicMock()
+        pipeline_a.nodes = [node_a]
+        pipeline_b = MagicMock()
+        pipeline_b.nodes = [node_b]
+
+        validator = ParameterValidator(
+            pipelines={"pipeline_a": pipeline_a, "pipeline_b": pipeline_b}
+        )
+
+        raw = {
+            "config_a": {"name": "test", "value": 1.5},
+            "config_b": {"test_size": 0.2, "random_state": 3},
+        }
+
+        result = validator.validate_raw_params(raw, pipeline_name="pipeline_a")
+
+        # config_a should be validated (it's in pipeline_a)
+        assert isinstance(result["config_a"], SampleDataclass)
+        # config_b should remain a raw dict (pipeline_b was not inspected)
+        assert isinstance(result["config_b"], dict)
+
 
 class TestApplyValidation:
     def test_pydantic_model_success(self, parameter_validator):

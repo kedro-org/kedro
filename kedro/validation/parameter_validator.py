@@ -90,11 +90,15 @@ class ParameterValidator:
 
         return transformed_params
 
-    def validate_raw_params(self, raw_params: dict) -> dict[str, Any]:
+    def validate_raw_params(
+        self, raw_params: dict, pipeline_name: str | None = None
+    ) -> dict[str, Any]:
         """Validate raw parameters and return transformed dictionary.
 
         Args:
             raw_params: Parameters from config loader (merged with runtime params).
+            pipeline_name: Optional name of a specific pipeline to validate
+                against. When ``None``, all registered pipelines are inspected.
 
         Returns:
             Validated and transformed parameters.
@@ -102,7 +106,7 @@ class ParameterValidator:
         Raises:
             ParameterValidationError: If validation fails.
         """
-        requirements = self.type_extractor.extract_types_from_pipelines()
+        requirements = self.type_extractor.extract_types_from_pipelines(pipeline_name)
 
         if not requirements:
             logger.info(

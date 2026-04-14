@@ -31,6 +31,12 @@ IMPORT_ERROR_MESSAGE = (
     "defined therein will be returned by 'find_pipelines'.\n\n{tb_exc}"
 )
 
+_LOGGING_BASE_CLASSES = (
+    logging.Handler,
+    logging.Formatter,
+    logging.Filter,
+)
+
 
 def _get_default_class(class_import_path: str) -> Any:
     module, _, class_name = class_import_path.rpartition(".")
@@ -285,11 +291,6 @@ class _ProjectLogging(UserDict):
         Raises:
             ValueError: If the class cannot be imported or is not a logging base class.
         """
-        _LOGGING_BASE_CLASSES = (
-            logging.Handler,
-            logging.Formatter,
-            logging.Filter,
-        )
 
         module_path, _, class_name = class_path.rpartition(".")
         if not module_path:
@@ -311,11 +312,10 @@ class _ProjectLogging(UserDict):
             )
 
         if not (isinstance(cls, type) and issubclass(cls, _LOGGING_BASE_CLASSES)):
-              raise ValueError(                                                                                                                                                                                                                                
-      f"Invalid logging class '{class_path}'. "                                                                                                                                                                                                    
-      f"Must be a subclass of logging.Handler, logging.Formatter, or logging.Filter. "                                                                                                                                                             
-      f"Got {type(cls).__name__!r}."                                                                                                                                                                                                               
-  )   
+            raise ValueError(
+                f"Invalid logging class '{class_path}'. "
+                f"Must be a subclass of logging.Handler, logging.Formatter, or logging.Filter. "
+                f"Got {type(cls).__name__!r}."
             )
 
     def _validate_logging_config(self, config: Any) -> Any:

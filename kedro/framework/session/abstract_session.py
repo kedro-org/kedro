@@ -35,3 +35,11 @@ class AbstractSession(ABC):
 
     def __exit__(self, _exc_type: Any, _exc_value: Any, _tb: Any) -> None:
         self.close()
+
+
+class KedroSessionError(Exception):
+    """``KedroSessionError`` raised by ``KedroSession`` and ``KedroServiceSession``
+    when they encounter an error.
+    """
+
+    pass

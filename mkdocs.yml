@@ -8,13 +8,13 @@ theme:
   custom_dir: docs/overrides/
   palette:
     # Palette toggle for light mode
-    - scheme: default
+    - scheme: light
       toggle:
         icon: material/white-balance-sunny
         name: Switch to dark mode
 
     # Palette toggle for dark mode
-    - scheme: slate
+    - scheme: dark
       toggle:
         icon: material/white-balance-sunny
         name: Switch to light mode
@@ -287,7 +287,7 @@ extra_css:
   - stylesheets/themes.css
   - stylesheets/footer.css
   - stylesheets/welcome.css
-   - stylesheets/mermaid.css
+  - stylesheets/mermaid.css
 
 extra_javascript:
   - javascript/readthedocs.js

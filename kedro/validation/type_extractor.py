@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import dataclasses
 import inspect
 import logging
-from typing import TYPE_CHECKING, get_type_hints
+import types
+from typing import TYPE_CHECKING, Union, get_args, get_origin, get_type_hints
+
+from .utils import is_pydantic_class
 
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
@@ -13,6 +17,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _PARAMS_PREFIX = "params:"
+
+
+def _unwrap_optional(tp: type) -> type:
+    """Unwrap ``Optional[X]`` / ``X | None`` to ``X``.
+
+    If the type is a union of exactly one non-None type and ``NoneType``,
+    return the non-None type. Otherwise return the original type unchanged.
+    """
+    if get_origin(tp) is Union or isinstance(tp, types.UnionType):
+        args = [a for a in get_args(tp) if a is not type(None)]
+        if len(args) == 1:
+            return args[0]  # type: ignore[no-any-return]
+    return tp
 
 
 class TypeExtractor:
@@ -25,6 +42,7 @@ class TypeExtractor:
             pipelines: Dictionary of registered pipelines to inspect.
         """
         self._pipelines = pipelines
+        self._warned_union_types: set[type] = set()
 
     def extract_types_from_pipelines(self) -> dict[str, type]:
         """Extract all type requirements from registered pipelines.
@@ -52,10 +70,10 @@ class TypeExtractor:
                             "%s (existing) vs %s (from pipeline '%s'). "
                             "Using %s.",
                             key,
-                            existing_type.__name__,
-                            new_type.__name__,
+                            getattr(existing_type, "__name__", str(existing_type)),
+                            getattr(new_type, "__name__", str(new_type)),
                             pipeline_name,
-                            new_type.__name__,
+                            getattr(new_type, "__name__", str(new_type)),
                         )
 
             all_type_requirements.update(pipeline_type_requirements)
@@ -109,12 +127,37 @@ class TypeExtractor:
             if not ds_name.startswith(_PARAMS_PREFIX):
                 continue
 
+            # Unwrap Optional[X] / X | None so we validate against the inner type
+            expected_type = _unwrap_optional(expected_type)
+
+            # Only record types we can actually validate (Pydantic models or dataclasses)
+            if not (
+                is_pydantic_class(expected_type)
+                or dataclasses.is_dataclass(expected_type)
+            ):
+                if (
+                    get_origin(expected_type) is Union
+                    or isinstance(expected_type, types.UnionType)
+                ) and expected_type not in self._warned_union_types:
+                    self._warned_union_types.add(expected_type)
+                    type_names = " | ".join(
+                        getattr(type_arg, "__name__", str(type_arg))
+                        for type_arg in get_args(expected_type)
+                    )
+                    logger.warning(
+                        "Union type hint (%s) is not supported for validation. "
+                        "Parameters with this type will be passed as raw "
+                        "dictionaries.",
+                        type_names,
+                    )
+                continue
+
             param_key = ds_name.split(":", 1)[1]
             all_requirements[param_key] = expected_type
             logger.debug(
                 "Found parameter requirement: %s -> %s",
                 param_key,
-                expected_type.__name__,
+                getattr(expected_type, "__name__", str(expected_type)),
             )
 
         return all_requirements

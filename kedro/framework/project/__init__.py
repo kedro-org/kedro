@@ -311,12 +311,11 @@ class _ProjectLogging(UserDict):
             )
 
         if not (isinstance(cls, type) and issubclass(cls, _LOGGING_BASE_CLASSES)):
-            raise ValueError(
-                f"Invalid logging class '{class_path}'. "
-                f"Classes used in logging configuration must be subclasses of "
-                f"'logging.Handler', 'logging.Formatter', or 'logging.Filter'. "
-                f"Got '{cls}' instead. If you need a "
-                f"custom logging class, ensure it inherits from one of these base classes."
+              raise ValueError(                                                                                                                                                                                                                                
+      f"Invalid logging class '{class_path}'. "                                                                                                                                                                                                    
+      f"Must be a subclass of logging.Handler, logging.Formatter, or logging.Filter. "                                                                                                                                                             
+      f"Got {type(cls).__name__!r}."                                                                                                                                                                                                               
+  )   
             )
 
     def _validate_logging_config(self, config: Any) -> Any:

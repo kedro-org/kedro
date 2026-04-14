@@ -132,7 +132,7 @@ print(iris.filepath)  # "data/01_raw/iris.csv"
 
 ## How to list parameter keys
 
-The `parameters` attribute is a sorted list of parameter key strings.Parameter values are not stored
+The `parameters` attribute is a sorted list of parameter key strings. Parameter values are not stored.
 
 ```python
 print(snapshot.parameters)

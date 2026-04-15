@@ -1,16 +1,17 @@
 import os
+from pathlib import Path
 
 import click
 
 from kedro.framework.cli.utils import CONTEXT_SETTINGS, KedroCliError
-from kedro.framework.startup import bootstrap_project, ProjectMetadata
+from kedro.framework.startup import ProjectMetadata, bootstrap_project
 from kedro.server.utils import (
     DEFAULT_HOST,
     DEFAULT_HTTP_PORT,
     KEDRO_PROJECT_PATH_ENV,
 )
 from kedro.utils import find_kedro_project
-from pathlib import Path
+
 
 def _resolve_project_path(metadata: ProjectMetadata | None) -> Path:
     """Resolve and validate the Kedro project path.

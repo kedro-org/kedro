@@ -3,21 +3,18 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import AsyncGenerator
-from contextlib import asynccontextmanager
-from pathlib import Path
 import time
 import traceback
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI
 
 from kedro import __version__ as kedro_version
-from kedro.framework.session.abstract_session import AbstractSession
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
 from kedro.io.core import generate_timestamp
-from kedro.server.utils import get_project_path, is_debug_mode
 from kedro.server.models import (
     ErrorDetail,
     HealthResponse,
@@ -26,10 +23,13 @@ from kedro.server.models import (
     RunRequest,
     RunResponse,
 )
+from kedro.server.utils import get_project_path, is_debug_mode
 from kedro.utils import load_obj
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+
+    from .abstract_session import AbstractSession
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # # Create and store the session
     # session = KedroServiceSession.create(project_path=project_path)
     # app.state.session = session
-    
+
     yield
     # Cleanup on shutdown (if needed in future)
     logger.info("Kedro server shutting down")
@@ -99,11 +99,10 @@ def create_http_server() -> FastAPI:
             RunResponse with run_id, status, duration, and optional error details.
         """
         project_path = get_project_path()
-        
+
         # create a session and assign to app state if not already created
         if not hasattr(app.state, "session"):
             app.state.session = KedroServiceSession.create(project_path=project_path)
-        
 
         result = execute_pipeline(
             session=app.state.session,
@@ -141,8 +140,9 @@ def create_http_server() -> FastAPI:
 
     return app
 
-def execute_pipeline(
-    session: AbstractSession,  # noqa: PLR0913
+
+def execute_pipeline(  # noqa: PLR0913
+    session: AbstractSession,
     *,
     pipeline_names: list[str] | None = None,
     env: str | None = None,
@@ -197,26 +197,25 @@ def execute_pipeline(
     run_id: str | None = generate_timestamp()
 
     try:
-        
         runner_name = runner or "SequentialRunner"
         runner_class = load_obj(runner_name, "kedro.runner")
         runner_obj = runner_class(is_async=is_async)
 
         session.run(
-                run_id=run_id,
-                pipeline_names=pipeline_names,
-                tags=tuple(tags) if tags else None,
-                runner=runner_obj,
-                node_names=tuple(node_names) if node_names else None,
-                from_nodes=from_nodes,
-                to_nodes=to_nodes,
-                from_inputs=from_inputs,
-                to_outputs=to_outputs,
-                load_versions=load_versions,
-                namespaces=namespaces,
-                only_missing_outputs=only_missing_outputs,
-                runtime_params=params,
-            )
+            run_id=run_id,
+            pipeline_names=pipeline_names,
+            tags=tuple(tags) if tags else None,
+            runner=runner_obj,
+            node_names=tuple(node_names) if node_names else None,
+            from_nodes=from_nodes,
+            to_nodes=to_nodes,
+            from_inputs=from_inputs,
+            to_outputs=to_outputs,
+            load_versions=load_versions,
+            namespaces=namespaces,
+            only_missing_outputs=only_missing_outputs,
+            runtime_params=params,
+        )
 
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.info("Pipeline run %s completed in %.2fms", run_id, duration_ms)

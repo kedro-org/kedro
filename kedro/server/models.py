@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
+
 
 @dataclass
 class PipelineExecutionError:
@@ -121,7 +122,7 @@ class RunResponse(BaseModel):
     """Response model for pipeline execution."""
 
     run_id: str = Field(description="Unique identifier for this pipeline run.")
-    status: Literal['success', 'failure'] = Field(description="Run status.")
+    status: Literal["success", "failure"] = Field(description="Run status.")
     duration_ms: float = Field(description="Total execution time in milliseconds.")
     error: ErrorDetail | None = Field(
         default=None,
@@ -132,7 +133,9 @@ class RunResponse(BaseModel):
 class HealthResponse(BaseModel):
     """Response model for health check endpoint."""
 
-    status: Literal['healthy', 'unhealthy'] = Field(default="healthy", description="Server health status.")
+    status: Literal["healthy", "unhealthy"] = Field(
+        default="healthy", description="Server health status."
+    )
     kedro_version: str = Field(description="Kedro version.")
     project_path: str | None = Field(
         default=None,

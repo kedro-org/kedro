@@ -227,7 +227,7 @@ class RuntimeConfigHook:
             run_params["env"] = self._runtime_env
 ```
 
-This pattern is especially useful when migrating older projects that passed `context` through custom integrations, or when coordinating configuration and runtime behavior across multiple Hook points.
+This pattern is useful when migrating older projects that passed `context` through custom integrations, or when coordinating configuration and runtime behaviour across multiple Hook points.
 
 ## Use Hooks to read `metadata` from `DataCatalog`
 Use the `after_catalog_created` Hook to access `metadata` to extend Kedro.

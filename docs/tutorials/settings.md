@@ -5,14 +5,15 @@
 A Kedro project's `settings.py` file contains the application settings for the project, including registration of Hooks and library components. This page explains how settings work, and which settings are available.
 
 !!! note
-    Application settings is distinct from [run time configuration](../configure/configuration_basics.md), which is stored in the `conf` folder and can vary by configuration environment, and [pyproject.toml](#project-metadata) , which provides project metadata and build configuration.
+    Application settings differ from [runtime configuration](../configure/configuration_basics.md), which lives in the `conf` folder and varies by environment. They also differ from [pyproject.toml](#project-metadata), which provides project metadata and build configuration.
 
-By default, all code in `settings.py` is commented out. When settings are not supplied, Kedro chooses sensible default values. You only need to edit `settings.py` if you wish to change to values other than the defaults.
+By default, all code in `settings.py` is commented out. When settings are not supplied, Kedro chooses sensible default values. Edit `settings.py` if you wish to change to values other than the defaults.
 
 | Setting                     | Default value                                     | Use                                                                                                                |
 | --------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `HOOKS`                     | `tuple()`                                         | Inject additional behaviour into the execution timeline with [project Hooks](../extend/hooks/introduction.md).            |
 | `DISABLE_HOOKS_FOR_PLUGINS` | `tuple()`                                         | Disable [auto-registration of Hooks from plugins](../extend/hooks/introduction.md#disable-auto-registered-plugins-hooks). |
+| `SESSION_CLASS` | `kedro.framework.session.KedroSession` | Customise how the [Kedro Session](../extend/session.md) is handled|
 | `SESSION_STORE_CLASS`       | `kedro.framework.session.session.BaseSessionStore`| Customise how [session data](../extend/session.md) is stored.                                                                |
 | `SESSION_STORE_ARGS`        | `dict()`                                          | Keyword arguments for the `SESSION_STORE_CLASS` constructor.                                                       |
 | `CONTEXT_CLASS`             | `kedro.framework.context.KedroContext`            | Customise how Kedro library components are managed.                                                                |

@@ -105,13 +105,13 @@ model_options:
   random_state: 3
 ```
 
-and a file containing the template values called `parameters_globals.yml`:
+and a file containing the template values called `parameters_variables.yml`. The file name can be anything as long as it matches the config pattern for parameters:
 ```yaml
 data:
   size: 0.2
 ```
 
-Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders as expected.
+Since both of the file names (`parameters.yml` and `parameters_variables.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders as expected.
 
 #### Catalog
 From Kedro `0.18.10` templating also works for catalog files. To enable templating in the catalog you need to ensure that the template values are within the catalog files or the name of the file that contains the template values follows the same config pattern specified for catalogs.
@@ -127,13 +127,13 @@ companies:
   filepath: data/01_raw/companies.csv
 ```
 
-and a file containing the template values called `catalog_globals.yml`:
+and a file containing the template values called `catalog_variables.yml`:
 ```yaml
 _pandas:
   type: pandas.CSVDataset
 ```
 
-Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the config pattern for catalogs, the `OmegaConfigLoader` will load the files and resolve the placeholders as expected.
+Since both of the file names (`catalog.yml` and `catalog_variables.yml`) match the config pattern for catalogs, the `OmegaConfigLoader` will load the files and resolve the placeholders as expected.
 
 #### Other configuration files
 It's also possible to use variable interpolation in configuration files other than parameters and catalog, such as custom Spark or MLflow configuration. This works in the same way as variable interpolation in parameter files. You can still use the underscore for the templated values if you want, but it's not mandatory like it is for catalog files.

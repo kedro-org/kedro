@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 import click
 
 from kedro.framework.cli.utils import (
+    KedroCliError,
     _check_module_importable,
     _config_file_callback,
     _split_load_versions,
@@ -22,7 +23,6 @@ from kedro.framework.cli.utils import (
     validate_conf_source,
 )
 from kedro.framework.project import settings
-from kedro.framework.session import KedroSession
 from kedro.utils import load_obj
 
 if TYPE_CHECKING:
@@ -52,6 +52,9 @@ CONFIG_FILE_HELP = """Specify a YAML configuration file to load the run
 command arguments from. If command line arguments are provided, they will
 override the loaded ones."""
 PIPELINE_ARG_HELP = """Name of the registered pipeline to run.
+If not set, the '__default__' pipeline is run."""
+PIPELINES_ARG_HELP = """Comma-separated names of registered pipelines to run.
+Example: --pipelines data_engineering,feature_engineering
 If not set, the '__default__' pipeline is run."""
 NAMESPACES_ARG_HELP = """Run only node namespaces with specified names."""
 PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
@@ -201,6 +204,9 @@ def package(metadata: ProjectMetadata) -> None:
 )
 @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
 @click.option(
+    "--pipelines", type=str, default="", help=PIPELINES_ARG_HELP, callback=split_string
+)
+@click.option(
     "--namespaces",
     "-ns",
     type=str,
@@ -244,6 +250,7 @@ def run(  # noqa: PLR0913
     to_outputs: str,
     load_versions: dict[str, str] | None,
     pipeline: str,
+    pipelines: list[str],
     config: str,
     conf_source: str,
     params: dict[str, Any],
@@ -252,14 +259,21 @@ def run(  # noqa: PLR0913
 ) -> dict[str, Any]:
     """Run the pipeline."""
 
+    if pipeline and pipelines:
+        raise KedroCliError(
+            "Options '--pipeline' and '--pipelines' cannot be used together"
+        )
+
+    pipelines_to_run = list(set(pipelines)) if pipelines else None
+
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
     tuple_tags = tuple(tags)
     tuple_node_names = tuple(node_names)
 
-    with KedroSession.create(
+    with settings.SESSION_CLASS.create(
         env=env, conf_source=conf_source, runtime_params=params
     ) as session:
-        return session.run(
+        result: dict[str, Any] = session.run(
             tags=tuple_tags,
             runner=runner_obj(is_async=is_async),
             node_names=tuple_node_names,
@@ -269,6 +283,8 @@ def run(  # noqa: PLR0913
             to_outputs=to_outputs,
             load_versions=load_versions,
             pipeline_name=pipeline,
+            pipeline_names=pipelines_to_run,
             namespaces=namespaces,
             only_missing_outputs=only_missing_outputs,
         )
+        return result

@@ -40,13 +40,13 @@ Let us explore what this looks like in practice. Consider the node function `spl
         return X_train, X_test, y_train, y_test
     ```
 
-The function takes a pandas `DataFrame` and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following [pytest's anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into four  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
+The function takes a pandas `DataFrame` and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following [the pytest anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into four  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
 
 1. Arrange: Prepare the inputs `data` and `parameters`.
 2. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
 3. Assert: Ensure that the length of the outputs are the same as the expected lengths
 
-The cleanup step becomes necessary in a test when any of the previous steps make modifications that may influence other tests - for example, by modifying a file used as input for several tests. This is not the case for the example tests below, and so the cleanup step is omitted.
+Use a cleanup step when earlier steps update shared resources, such as input files reused in other tests. The example tests below do not require cleanup, so that step is omitted.
 
 Remember to import the function being tested and any necessary modules at the top of the file.
 
@@ -90,7 +90,7 @@ When we put these steps together, we have the following test:
     ```
 
 
-This test is an example of positive testing - it tests that a valid input produces the expected output. The inverse, testing that an invalid output will be appropriately rejected, is called negative testing and is equally as important.
+This test is an example of positive testing - it confirms that a valid input produces the expected output. The inverse, testing that an invalid input is rejected, is called negative testing and is as important.
 
 Using the same steps as above, we can write the following test to validate an error is thrown when price data is not available:
 
@@ -135,6 +135,7 @@ Writing tests for each node ensures each node will behave as expected when run i
 
 Consider the data science pipeline as a whole:
 
+<!-- vale off -->
 ??? example "View code"
     ```python
     from kedro.pipeline import Node, Pipeline
@@ -165,10 +166,11 @@ Consider the data science pipeline as a whole:
             ]
         )
     ```
+<!-- vale on -->
 
-The pipeline takes a pandas `DataFrame` and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and evaluate a regression model. With an integration test, we can validate that this sequence of nodes runs as expected.
+The pipeline takes a pandas `DataFrame` and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and assess a regression model. With an integration test, we can confirm that this sequence of nodes runs as expected.
 
-From earlier in this tutorial we know a successful pipeline run will conclude with the message `Pipeline execution completed successfully` being logged. To validate this is being logged in our tests we make use of pytest's [`caplog`](https://docs.pytest.org/en/7.1.x/how-to/logging.html#caplog-fixture) feature to capture logs generated during the execution.
+From earlier in this tutorial we know a successful pipeline run will conclude with the message `Pipeline execution completed successfully` being logged. To validate this behaviour we make use of the [`caplog`](https://docs.pytest.org/en/7.1.x/how-to/logging.html#caplog-fixture) feature provided by pytest to capture logs generated during the execution.
 
 As we did with our unit tests, we break this down into several steps:
 
@@ -254,7 +256,7 @@ tests
 
 ### Using fixtures
 
-In our tests, we can see that `dummy_data` and `dummy_parameters` have been defined three times with (mostly) the same values. Instead, we can define these outside of our tests as [pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html#fixture):
+In our tests, we can see that `dummy_data` and `dummy_parameters` have been defined three times with almost the same values. Instead, we can define these outside of our tests as [pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html#fixture):
 
 ??? example "View code"
     ```python
@@ -292,7 +294,7 @@ def test_split_data(dummy_data, dummy_parameters):
 
 ### Pipeline slicing
 
-In the test `test_data_science_pipeline` we test the data science pipeline, as currently defined, can be run successfully. Though, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../build/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
+In the test `test_data_science_pipeline` we check that the data science pipeline, as defined, runs without errors. Though, as pipelines are not static, this test is not robust. Instead we should be specific with how we define the pipeline to be tested; we do this by using [pipeline slicing](../build/slice_a_pipeline.md#slice-a-pipeline-by-running-specified-nodes) to specify the pipeline's start and end:
 
 ```python
 def test_data_science_pipeline(self):

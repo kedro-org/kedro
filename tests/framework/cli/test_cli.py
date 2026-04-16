@@ -162,7 +162,7 @@ class TestCommandCollection:
     def test_not_found_closest_match(self, mocker):
         """Check that calling a nonexistent command with a close match returns the close match"""
         patched_difflib = mocker.patch(
-            "kedro.framework.cli.utils.difflib.get_close_matches",
+            "kedro.framework.cli.utils.get_close_matches",
             return_value=["suggestion_1", "suggestion_2"],
         )
 
@@ -182,7 +182,7 @@ class TestCommandCollection:
     def test_not_found_closet_match_singular(self, mocker):
         """Check that calling a nonexistent command with a close match has the proper wording"""
         patched_difflib = mocker.patch(
-            "kedro.framework.cli.utils.difflib.get_close_matches",
+            "kedro.framework.cli.utils.get_close_matches",
             return_value=["suggestion_1"],
         )
 
@@ -577,6 +577,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -618,6 +619,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -659,6 +661,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -691,6 +694,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=["fake_namespace"],
             only_missing_outputs=False,
         )
@@ -716,6 +720,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -757,9 +762,64 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
+
+    def test_run_multiple_pipelines(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipelines", "pipe1,pipe2"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert fake_session.run.call_count == 1
+        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
+
+        pipelines = fake_session.run.call_args.kwargs["pipeline_names"]
+        assert "pipe1" in pipelines
+        assert "pipe2" in pipelines
+
+    def test_run_multiple_pipelines_with_duplicate_name(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipelines", "pipe1,pipe1"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        assert fake_session.run.call_count == 1
+        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
+        assert fake_session.run.call_args.kwargs["pipeline_names"] == ["pipe1"]
+
+    def test_pipeline_and_pipelines_mutually_exclusive(
+        self, fake_project_cli, fake_metadata
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipeline", "pipe1", "--pipelines", "pipe2"],
+            obj=fake_metadata,
+        )
+
+        assert result.exit_code != 0
+        assert "cannot be used together" in result.output.lower()
+
+    def test_pipeline_name_deprecation_warning(
+        self, fake_project_cli, fake_metadata, caplog
+    ):
+        CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--pipeline", "pipe1"],
+            obj=fake_metadata,
+        )
+
+        assert "deprecated" in caplog.text.lower()
 
     @mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_invalid_config(
@@ -823,6 +883,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -918,6 +979,17 @@ class TestRunCommand:
                 "dataset1:time1, dataset2:time2",
                 {"dataset1": "time1", "dataset2": "time2"},
             ],
+            [
+                "dataset1:2024-01-15T10.00.00.000Z",
+                {"dataset1": "2024-01-15T10.00.00.000Z"},
+            ],
+            [
+                "dataset1:2024-01-15T10.00.00.000Z,dataset2:2024-01-16T10.00.00.000Z",
+                {
+                    "dataset1": "2024-01-15T10.00.00.000Z",
+                    "dataset2": "2024-01-16T10.00.00.000Z",
+                },
+            ],
         ],
     )
     def test_split_load_versions(
@@ -938,6 +1010,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions=lv_dict,
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -957,6 +1030,30 @@ class TestRunCommand:
             f"found {load_version} instead\n"
         )
         assert expected_output in result.output
+
+    @mark.parametrize(
+        "unsafe_version",
+        [
+            "dataset1:../../../secrets",  # POSIX traversal
+            "dataset1:..\\..\\..\\secrets",  # Windows traversal
+            "dataset1:/absolute/path",  # POSIX absolute
+            "dataset1:C:\\Users\\secrets",  # Windows absolute
+            "dataset1:.",  # single dot
+            "dataset1:..",  # double dot
+            "dataset1:foo/bar",  # subdirectory via POSIX separator
+            "dataset1:foo\\bar",  # subdirectory via Windows separator
+        ],
+    )
+    def test_fail_split_load_versions_path_traversal(
+        self, fake_project_cli, fake_metadata, unsafe_version
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--load-versions", unsafe_version],
+            obj=fake_metadata,
+        )
+        assert result.exit_code
+        assert "not allowed" in result.output
 
     @mark.parametrize(
         "from_nodes, expected",
@@ -1001,6 +1098,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            pipeline_names=None,
             namespaces=[],
             only_missing_outputs=False,
         )

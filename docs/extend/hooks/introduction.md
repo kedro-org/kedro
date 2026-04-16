@@ -96,6 +96,23 @@ class DataCatalogHooks:
 
 We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file that you create in your project.
 
+!!! Warning
+    Do not use default argument values in hook implementations
+
+Hook parameters must be defined **without default values**. Due to how [pluggy](https://pluggy.readthedocs.io/en/stable/) (the underlying plugin system) passes arguments, parameters with defaults will receive the default value instead of the actual value passed by Kedro.
+
+```python
+# Wrong: run_params will always be an empty dict
+@hook_impl
+def before_pipeline_run(self, run_params: Dict[str, Any] = {}):
+    print(run_params)  # Prints: {}
+
+# Correct: run_params receives the actual value
+@hook_impl
+def before_pipeline_run(self, run_params: Dict[str, Any]):
+    print(run_params)  # Prints the actual run parameters
+```
+
 ### Registering the Hook implementation with Kedro
 
 Hook implementations should be registered with Kedro using the [`src/<package_name>/settings.py`](../../tutorials/settings.md) file under the `HOOKS` key.

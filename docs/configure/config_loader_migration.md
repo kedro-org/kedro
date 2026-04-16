@@ -120,7 +120,7 @@ Templating of values is done through native [variable interpolation in `OmegaCon
 The variable interpolation is scoped to a specific configuration type and environment. If you want to share templated values across configuration types and environments, [you will need to use globals](#7-globals).
 
 Suppose you are migrating a templated **catalog** file from using `TemplatedConfigLoader` to `OmegaConfigLoader` you would do the following:
-1. Rename `conf/base/globals.yml` to match the patterns specified for catalog (`["catalog*", "catalog*/**", "**/catalog*"]`), for example `conf/base/catalog_globals.yml`
+1. Rename `conf/base/globals.yml` to match the patterns specified for catalog (`["catalog*", "catalog*/**", "**/catalog*"]`), for example `conf/base/catalog_variables.yml`
 2. Add an underscore `_` to any catalog template values. This is needed because of how catalog entries are validated.
 
 ```diff

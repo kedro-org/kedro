@@ -197,7 +197,7 @@ From this point, when you execute `kedro run` you will see the validation logs:
 
 ### What happens when validation fails?
 
-Let's make one schema rule to deliberately fail so you can see Pandera in action.
+Let's make one schema rule fail on purpose so you can see Pandera in action.
 
 In `src/spaceflights_pandera/schemas/raw.py`, change the `total_fleet_count` column check:
 
@@ -311,7 +311,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 
 - Use a validation node when you want the validation step visible in the DAG and to create explicit validated outputs (you can also make validation nodes pass data through by returning validated data).
-- Prefer loading schemas from the `schemas` module (as shown) or from config; avoid hardcoding rules inside hook/node bodies.
+- Prefer loading schemas from the `schemas` module (as shown) or from config; avoid hard-coding rules inside hook/node bodies.
 - Decide on eager vs. lazy behaviour: this example uses `lazy=True` to collect all errors; you can switch to `lazy=False` for fail-fast behaviour.
 
 ## Advanced use cases
@@ -540,7 +540,7 @@ shuttles_schema = DataFrameSchema(
 
 !!! tip
     **Distribution checks and hypothesis testing**
-    Beyond simple rules, Pandera supports **statistical hypothesis tests** (for example two-sample tests) to validate whether two datasets come from the same distribution.
+    Beyond basic rules, Pandera supports **statistical hypothesis tests** (for example two-sample tests) to validate whether two datasets come from the same distribution.
     This is useful for detecting **data drift** between training and serving environments.
     See [Hypothesis Testing](https://pandera.readthedocs.io/en/stable/hypothesis.html).
 

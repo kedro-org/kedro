@@ -51,7 +51,7 @@ theme:
 plugins:
   - search
   - autorefs
-  - mermaid2
+  - mermaid2:
   - redirects:
       redirect_maps:
         'configuration/telemetry.md': 'about/telemetry.md'
@@ -128,6 +128,7 @@ plugins:
           - configure/config_loader_migration.md: Migrating between config loaders
           - configure/advanced_configuration.md: Advanced configuration patterns
           - configure/parameters.md: Managing pipeline parameters
+          - configure/parameter_validation.md: Validating parameters with Pydantic models and dataclasses
           - configure/credentials.md: Handling sensitive credentials securely
 
         Data Management:
@@ -147,6 +148,7 @@ plugins:
           - build/namespaces.md: Reusing pipelines with namespaces
           - build/pipeline_registry.md: Registering and discovering pipelines
           - build/slice_a_pipeline.md: Slicing pipelines for partial execution
+          - build/llm_context_node.md: Using LLM Context Nodes to construct LLMContext
 
         Development Practices:
           - develop/dependencies.md: Managing project dependencies
@@ -169,12 +171,7 @@ plugins:
           - deploy/supported-platforms/azure.md: Azure ML pipelines deployment
           - deploy/supported-platforms/dagster.md: Dagster deployment
           - deploy/supported-platforms/dask.md: Dask integration for parallel computing
-          - deploy/supported-platforms/databricks/index.md: Databricks overview
-          - deploy/supported-platforms/databricks/databricks_notebooks_development_workflow.md: Databricks notebooks workflow
-          - deploy/supported-platforms/databricks/databricks_ide_databricks_asset_bundles_workflow.md: Databricks asset bundles
-          - deploy/supported-platforms/databricks/databricks_deployment_workflow.md: Databricks deployment guide
-          - deploy/supported-platforms/databricks/databricks_dbx_workflow.md: Using dbx with Databricks
-          - deploy/supported-platforms/databricks/databricks_visualisation.md: Databricks visualization
+          - deploy/supported-platforms/databricks.md: Databricks deployment
           - deploy/supported-platforms/kubeflow.md: Kubeflow Pipelines integration
           - deploy/supported-platforms/prefect.md: Prefect workflow orchestration
           - deploy/supported-platforms/vertexai.md: Google VertexAI deployment
@@ -290,10 +287,12 @@ extra_css:
   - stylesheets/themes.css
   - stylesheets/footer.css
   - stylesheets/welcome.css
+  - stylesheets/mermaid.css
 
 extra_javascript:
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
+
 
 
 nav:
@@ -331,6 +330,7 @@ nav:
               - Migration guide for config loaders: configure/config_loader_migration.md
               - Advanced configuration: configure/advanced_configuration.md
           - Parameters: configure/parameters.md
+          - Parameter validation: configure/parameter_validation.md
           - Credentials: configure/credentials.md
       - Catalog Data:
           - Introduction: catalog-data/introduction.md
@@ -348,6 +348,7 @@ nav:
           - Reusing pipelines (namespaces): build/namespaces.md
           - Pipeline registry: build/pipeline_registry.md
           - Slice a pipeline: build/slice_a_pipeline.md
+          - LLM context node (experimental): build/llm_context_node.md
       - Develop:
           - Dependency management: develop/dependencies.md
           - Logging: develop/logging.md
@@ -355,6 +356,8 @@ nav:
           - Code formatting and linting: develop/linting.md
           - Debugging: develop/debugging.md
           - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
+      - Inspect:
+          - Inspect a project: inspect/inspect-project.md
       - Deploy:
           - Overview: deploy/index.md
           - How to package your project: deploy/package_a_project.md
@@ -369,13 +372,7 @@ nav:
               - Azure ML pipelines: deploy/supported-platforms/azure.md
               - Dagster: deploy/supported-platforms/dagster.md
               - Dask: deploy/supported-platforms/dask.md
-              - Databricks:
-                - Overview: deploy/supported-platforms/databricks/index.md
-                - Use a Databricks workspace to develop a Kedro project: deploy/supported-platforms/databricks/databricks_notebooks_development_workflow.md
-                - Use an IDE and Databricks asset Bundles to deploy a Kedro project: deploy/supported-platforms/databricks/databricks_ide_databricks_asset_bundles_workflow.md
-                - Use a Databricks job to deploy a Kedro project: deploy/supported-platforms/databricks/databricks_deployment_workflow.md
-                - Use an IDE, dbx and Databricks Repos to develop a Kedro project: deploy/supported-platforms/databricks/databricks_dbx_workflow.md
-                - Databricks visualisation: deploy/supported-platforms/databricks/databricks_visualisation.md
+              - Databricks: deploy/supported-platforms/databricks.md
               - Kubeflow Pipelines: deploy/supported-platforms/kubeflow.md
               - Prefect: deploy/supported-platforms/prefect.md
               - VertexAI: deploy/supported-platforms/vertexai.md
@@ -433,12 +430,16 @@ nav:
                   - Overview: api/pipeline/kedro.pipeline.md
                   - Node: api/pipeline/kedro.pipeline.node.md
                   - Pipeline: api/pipeline/kedro.pipeline.Pipeline.md
+                  - LLM context node: api/pipeline/kedro.pipeline.llm_context.md
               - kedro.runner:
                   - Overview: api/runner/kedro.runner.md
                   - AbstractRunner: api/runner/kedro.runner.AbstractRunner.md
                   - SequentialRunner: api/runner/kedro.runner.SequentialRunner.md
                   - ParallelRunner: api/runner/kedro.runner.ParallelRunner.md
                   - ThreadRunner: api/runner/kedro.runner.ThreadRunner.md
+              - kedro.inspection:
+                  - Overview: api/inspection/kedro.inspection.md
+                  - Models: api/inspection/kedro.inspection.models.md
               - kedro.utils: api/kedro.utils.md
               - kedro.load_ipython_extension: api/kedro.load_ipython_extension.md
               - kedro.KedroDeprecationWarning: api/kedro.KedroDeprecationWarning.md

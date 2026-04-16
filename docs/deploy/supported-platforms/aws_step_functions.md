@@ -8,7 +8,7 @@ A major problem when data pipelines move to production is to build and maintain 
 
 [Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/) and [AWS Lambda](https://aws.amazon.com/lambda/) are good examples of this solution, but others are available. Services like [AWS Step Functions](https://aws.amazon.com/step-functions/) offer a managed orchestration capability that helps you sequence serverless functions and multiple cloud-native services into business-critical applications.
 
-From a Kedro perspective, this means the ability to run each node and retain the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure. Another benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider, such as the use of the [feature store for Amazon SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.
+From a Kedro perspective, this means the ability to run each node and keep the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure. Another benefit of running a Kedro pipeline in a serverless computing platform is the ability to use other services from the same provider, such as the [feature store for Amazon SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.
 
 The following discusses how to run the Kedro pipeline from the [spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) on [AWS Step Functions](https://aws.amazon.com/step-functions/).
 

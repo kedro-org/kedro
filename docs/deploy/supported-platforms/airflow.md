@@ -6,7 +6,7 @@ Apache Airflow is a popular open-source workflow management platform. It is a su
 
 The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an [Airflow task](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) while the whole pipeline is converted to an [Airflow DAG](https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html). This approach mirrors the principles of [running Kedro in a distributed environment](../distributed.md).
 
-Each node will be executed within a new Kedro session, which implies that `MemoryDataset`s cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`DataCatalog`](https://docs.kedro.org/en/stable/catalog-data/data_catalog/) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
+Each node will be executed within a new Kedro session, which implies that `MemoryDatasets` cannot serve as storage for the intermediate results of nodes. Instead, all datasets must be registered in the [`DataCatalog`](https://docs.kedro.org/en/stable/catalog-data/data_catalog/) and stored in persistent storage. This approach enables nodes to access the results from preceding nodes.
 
 This guide describes how to run a Kedro pipeline on different Airflow platforms. Jump to any of the sections below to learn how to run a Kedro pipeline on:
 
@@ -57,7 +57,7 @@ In this section, you will create a new Kedro project equipped with an example pi
 
 In the example here we assume that all Airflow tasks share one disk, but for distributed environments you would need to use non-local file paths.
 
-Starting with `kedro-airflow` release 0.9.0, you can adopt a different strategy instead of following steps 2-3: group nodes that use intermediate `MemoryDataset`s into larger tasks. This approach allows intermediate data manipulation to occur within a single task, eliminating the need to transfer data between nodes. Enable this behaviour by running `kedro airflow create` with the `--group-in-memory` flag on Step 6.
+Starting with `kedro-airflow` release 0.9.0, you can adopt a different strategy instead of following steps 2-3: group nodes that use intermediate `MemoryDatasets` into larger tasks using `--group-by memory`. This approach allows intermediate data manipulation to occur within a single task, eliminating the need to transfer data between nodes. Enable this behaviour by running `kedro airflow create` with the `--group-by memory` flag on Step 6.
 
 4. Open `conf/logging.yml` and change the `root: handlers` section to `[console]` at the end of the file. By default, Kedro uses the [Rich library](https://rich.readthedocs.io/en/stable/index.html) to enhance log output with sophisticated formatting. Some deployment systems, including Airflow, do not work well with Rich, so update the logging configuration to a simpler console version. For more information on logging in Kedro, see the [Kedro docs](https://docs.kedro.org/en/stable/develop/logging/).
 
@@ -83,6 +83,10 @@ kedro airflow create --target-dir=dags/ --env=airflow
 ```
 
 This step should produce a `.py` file called `new_kedro_project_airflow_dag.py` located at `dags/`.
+
+Optionally, you can use the `--group-by` flag to group nodes:
+- `--group-by memory`: Groups nodes connected through `MemoryDatasets`
+- `--group-by namespace`: Groups nodes by their namespace
 
 ### Deployment process with Astro CLI
 
@@ -261,8 +265,10 @@ If you want to execute your DAG in an isolated environment on Airflow using a Ku
    ```
    This will create a DAG file that includes the `KedroOperator()` by default.
 
+   Optionally, use `--group-by memory` or `--group-by namespace` to group nodes into fewer tasks.
+
 4. **Update the DAG to use `KubernetesPodOperator`**
-   To execute each Kedro node in an isolated Kubernetes pod, replace `KedroOperator()` with `KubernetesPodOperator()`, as shown in the example below:
+   To execute each Kedro node (or group of nodes) in an isolated Kubernetes pod, replace `KedroOperator()` with `KubernetesPodOperator()`, as shown in the example below:
 
    ```python
    from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
@@ -287,7 +293,13 @@ If you want to execute your DAG in an isolated environment on Airflow using a Ku
 
 ### Run multiple nodes in a single container
 
-By default, this approach runs each node in an isolated Docker container. To reduce computational overhead, you can run multiple nodes together within the same container. If you opt for this, update the DAG to adjust task dependencies and execution order.
+By default, this approach runs each node in an isolated Docker container. To reduce computational overhead, you can run multiple nodes together within the same container.
+
+The `--group-by` option in `kedro airflow create` provides an automated way to group nodes:
+- `--group-by memory`: Groups nodes connected through `MemoryDatasets`
+- `--group-by namespace`: Groups nodes by their namespace
+
+If you opt for manual grouping or need to customise the generated DAG, update it to adjust task dependencies and execution order.
 
 For example, in the [`spaceflights-pandas` tutorial](../../tutorials/spaceflights_tutorial.md), if you want to execute the first two nodes together, your DAG may look like this:
 
@@ -323,3 +335,37 @@ tasks["preprocess-companies-and-shuttles"] >> tasks["create-model-input-table-no
 ```
 
 This ordering ensures that the `create-model-input-table-node` task runs after `preprocess-companies-and-shuttles` has completed.
+
+## Grouping nodes in Airflow tasks
+
+By default, `kedro airflow create` converts each Kedro node into a separate Airflow task. If you need to group multiple nodes into a single task to reduce scheduling overhead or to handle datasets that cannot be shared across distributed workers.
+
+The `--group-by` option provides two grouping strategies:
+
+### Grouping by memory
+
+When running Kedro nodes using Airflow, `MemoryDatasets` are not shared across operators, which can cause the DAG run to fail. Nodes connected through  can be grouped together using the `--group-by memory` flag:
+
+```bash
+kedro airflow create --group-by memory
+```
+
+This combines nodes that share `MemoryDatasets` into single Airflow tasks, preserving the logical separation in Kedro while avoiding data persistence issues.
+
+### Grouping by namespace
+
+If your Kedro pipeline uses [namespaces](https://docs.kedro.org/en/stable/build/namespaces/) to organise nodes, you can group all nodes within the same namespace into a single Airflow task:
+
+```bash
+kedro airflow create --group-by namespace
+```
+
+This is useful when:
+
+* You have logically grouped nodes using namespaces and want to execute them together
+* You want to reduce the number of Airflow tasks while maintaining the namespace structure
+* Your namespaced nodes share intermediate data that doesn't need to be persisted between tasks
+
+Nodes without a namespace will each be converted to individual Airflow tasks.
+
+For more information about node grouping strategies in Kedro, see the [node grouping guide](../nodes_grouping.md).

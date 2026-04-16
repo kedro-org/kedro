@@ -1,6 +1,6 @@
 # Set up PyCharm
 
-This section will present a quick guide on how to configure [PyCharm](https://www.jetbrains.com/pycharm/) as a development environment for working on Kedro projects.
+This section provides a short guide on how to configure [PyCharm](https://www.jetbrains.com/pycharm/) as a development environment for working on Kedro projects.
 
 Open a new project directory in PyCharm. You will need to add your **Project Interpreter**, so go to **PyCharm | Preferences** for macOS or **File | Settings** for Windows and Linux:
 
@@ -18,7 +18,7 @@ Select **Conda Environment**:
 
 ![](../meta/images/pycharm_add_conda_env.png)
 
-Choose **Existing environment** and navigate your way to find your existing environment. If you don't see your `conda` environment in the dropdown menu then you need to open a `terminal` / `command prompt` with your `conda` environment activated and run:
+Choose **Existing environment** and navigate your way to find your existing environment. If you don't see your `conda` environment in the dropdown menu, open a `terminal` / `command prompt` with your `conda` environment activated and run:
 
 ```console
 # macOS / Linux
@@ -31,14 +31,14 @@ Paste the interpreter path into the file picker and click **OK**: <br />
 
 ![](../meta/images/pycharm_select_conda_interpreter.png)
 
-Finally, in the **Project Explorer** right-click on `src` and then go to **Mark Directory as | Sources Root**:
+Lastly, in the **Project Explorer** right-click on `src` and then go to **Mark Directory as | Sources Root**:
 
 ![](../meta/images/pycharm_mark_dir_as_sources_root.png)
 
 
-## Set up Run configurations
+## Set up run configurations
 
-[PyCharm Run configurations](https://www.jetbrains.com/help/pycharm/creating-run-debug-configuration-for-tests.html) allow you to execute preconfigured scripts rapidly in your IDE with a click of a button. This may be useful for testing, running and packaging your Kedro projects.
+[PyCharm Run configurations](https://www.jetbrains.com/help/pycharm/creating-run-debug-configuration-for-tests.html) allow you to execute ready-made scripts with a click. This helps with testing, running, and packaging your Kedro projects.
 
 Here we will walk you through an example of how to set up Run configuration for the Kedro CLI `run` command. It is also applicable to other Kedro commands, such as `test` or `install`.
 
@@ -71,12 +71,12 @@ You may also select **Run** from the toolbar and execute from there. <br />
 
 ![](../meta/images/pycharm_conf_run_dropdown.png)
 
-For other `kedro` commands, follow same steps but replace `run` in the `Parameters` field with the other commands that are to be used (for example, `jupyter`, `package`, `registry` etc.).
+For other `kedro` commands, follow the same steps but replace `run` in the `Parameters` field with the other commands that are to be used (for example, `jupyter`, `package`, `registry`, and others).
 
 
 ## Debugging
 
-To debug, simply click the line number in the source where you want execution to break:
+To debug, click the line number in the source where you want execution to break:
 
 ![](../meta/images/pycharm_add_breakpoint.png)
 
@@ -87,10 +87,10 @@ Then click the bug button in the toolbar (![](../meta/images/pycharm_debugger_bu
 >For more information about debugging with PyCharm take a look at the [debugging guide on jetbrains.com](https://www.jetbrains.com/help/pycharm/part-1-debugging-python-code.html).
 
 
-## Advanced: Remote SSH interpreter
+## Advanced: remote SSH interpreter
 
 !!! note
-    This section uses features supported in PyCharm Professional Edition only.
+    This section covers features available in PyCharm Professional Edition.
 
 Firstly, add an SSH interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **SSH Interpreter** and fill in details of the remote computer:
 
@@ -104,7 +104,7 @@ Click **Next** and add the path of the remote interpreter. Assuming a Unix-like 
 
 ![](../meta/images/pycharm_ssh_interpreter_3.png)
 
-Click **Finish**. Go to **Run / Debug Configurations** to add a **Remote Run**. Select the remote interpreter that you have just created. For the script path, get the path of the Kedro CLI on the remote computer by running `which kedro` (macOS / Linux) in the appropriate environment.
+Click **Finish**. Go to **Run / Debug Configurations** to add a **Remote Run**. Select the remote interpreter that you have created. For the script path, get the path of the Kedro CLI on the remote computer by running `which kedro` (macOS / Linux) in the appropriate environment.
 
 ![](../meta/images/pycharm_ssh_runner.png)
 
@@ -118,7 +118,7 @@ Click **OK** and then select **Remote Run** from the toolbar and click **Run** t
 ## Advanced: Docker interpreter
 
 !!! note
-    This section uses features supported by PyCharm Professional Edition only.
+    This section covers features available in PyCharm Professional Edition.
 
 First, add a Docker interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **Docker Interpreter** and then choose the target Docker image:
 
@@ -138,9 +138,9 @@ Click **OK** and then select your run configuration from the toolbar and click *
 
 [To debug, click the debugger button as described above](#debugging).
 
-## Configure Python Console
+## Configure Python console
 
-You can configure PyCharm's IPython to load Kedro's Extension.
+You can configure PyCharm's IPython integration to load Kedro's extension.
 
 Click **PyCharm | Preferences** for macOS or **File | Settings**, inside **Build, Execution, Deployment** and **Console**, enter the **Python Console** configuration.
 
@@ -150,13 +150,13 @@ You can append the configuration necessary to use Kedro IPython to the **Startin
 %load_ext kedro.ipython
 ```
 
-With this configuration, when you create a Python Console you should be able to use context, session and catalog.
+With this configuration, when you create a Python Console you should be able to use context, session, and catalog.
 
 ![](../meta/images/pycharm_ipython_working_example.png)
 
 ## Configuring the Kedro catalog validation schema
 
-You can enable the Kedro catalog validation schema in your PyCharm IDE to enable real-time validation, autocompletion and see information about the different fields in your `catalog` as you write it. To enable this, open a `catalog.yml` file and you should see "No JSON Schema" in the bottom right corner of your window. Click it and select "Edit Schema Mapping".
+You can enable the Kedro catalog validation schema in your PyCharm IDE to enable real-time validation, autocompletion, and see documentation about the different fields in your `catalog` as you write it. To enable this, open a `catalog.yml` file and you should see "No JSON Schema" in the bottom right corner of your window. Click it and select "Edit Schema Mapping".
 
 ![](../meta/images/pycharm_edit_schema_mapping.png)
 

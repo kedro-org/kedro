@@ -1,19 +1,19 @@
 # How to validate data in your Kedro workflow using Great Expectations
 
 [Great Expectations](https://docs.greatexpectations.io/docs/home/) (GE) is an open-source data quality framework that helps you validate, document, and profile your data.
-It allows you to define expectations—assertions about your data's structure and content—and verify that these hold true at runtime.
+It allows you to define expectations—assertions about the structure and content of your data—and verify that these hold true at runtime.
 
-### The core concept: Expectations
+### The core concept: expectations
 
 In Great Expectations, rules for data validation are called an **expectation**.
 An expectation is a falsifiable, verifiable statement about your data. For example:
 - "This column should never be null"
 - "Values in this column should be between 0 and 100"
-- "This column should only contain these specific categories"
+- "This column should contain these specific categories"
 
-When you run validations, Great Expectations checks if your data meets these expectations and tells you exactly what passed or failed.
+When you run validations, Great Expectations checks if your data meets these expectations and tells you what passed or failed.
 
-All of the types of expectations that are available can be found in the [expectations reference document](https://greatexpectations.io/expectations/).
+All the types of expectations that are available can be found in the [expectations reference document](https://greatexpectations.io/expectations/).
 
 ## Prerequisites
 
@@ -93,7 +93,7 @@ When you validate data, Great Expectations:
 - During quick interactive work you may use an ephemeral GX Data Context (no files persisted between runs). This is fine for exploration and iterative expectation creation.
 - For production runs, persist expectation suites and use a file-based Data Context so suites, validation results and histories are reproducible and shareable.
 
-## Integration Options
+## Integration options
 
 In this section, we're going to use Great Expectations for data validation in two ways:
 
@@ -102,9 +102,9 @@ In this section, we're going to use Great Expectations for data validation in tw
 
 ### Defining expectations
 
-To keep the project organized, we can define data expectations in a dedicated Python module.
+To keep the project organised, we can define data expectations in a dedicated Python module.
 
-This separation has a few key advantages:
+This separation has several key advantages:
 
 - **Reusability**: the same expectations can be used in hooks, in dedicated validation nodes, during ad-hoc testing, or even in CI.
 - **Maintainability**: all validation rules live in one place, making them easier to update and review.
@@ -149,7 +149,7 @@ Kedro hooks are functions that run automatically at specific points in your pipe
 
 By placing validation logic in hooks, you create a "safety net" that catches bad data without cluttering your pipeline definitions.
 
-To implement a hook, create or edit a file named hooks.py inside your project’s `src/spaceflights_great_expectations/` directory.
+Create or edit a file named hooks.py inside your project’s `src/spaceflights_great_expectations/` directory to add the hook.
 
 ```py
 from typing import Any
@@ -207,8 +207,8 @@ class DataValidationHooks:
 
 1. **Configuration**: The `EXPECTATIONS` dictionary maps dataset names to lists of expectations
 2. **Automatic triggering**: Before/after each node runs, the hooks check if any inputs/outputs need validation
-3. **Selective validation**: Only validates datasets you've explicitly configured
-4. **Fail-fast behaviour**: If validation fails, the pipeline stops immediately with a clear error message
+3. **Selective validation**: Validates datasets you've explicitly configured.
+4. **Fail-fast behaviour**: If validation fails, the pipeline stops before running downstream nodes and provides a clear error message.
 
 Register your custom hook in `src/spaceflights_great_expectations/settings.py`:
 
@@ -252,7 +252,7 @@ Pipeline nodes offer several advantages:
 
 - **Visibility**: Validation nodes appear in [Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/), making it clear where quality gates exist
 - **Control**: Easy to run or skip validation using features like [tags](../deploy/nodes_grouping.md#grouping-by-tags) or [running pipelines by name](../getting-started/commands_reference.md#kedro-run).
-- **Flexibility**: Place validation at any point—before preprocessing, after transformations, before modeling, etc.
+- **Flexibility**: Place validation at any point—before preprocessing, after transformations, before modelling, and at other stages.
 - **Data lineage**: Validated datasets appear explicitly in your data catalog
 
 As an example, let's create a data validation node and add it to our `data_processing` pipeline.
@@ -342,7 +342,7 @@ The pipeline now has an explicit validation gate at the beginning:
 
 If validation fails, the preprocessing nodes never run, saving computation time and preventing bad data from propagating.
 
-### Alternative: Individual validation nodes
+### Alternative: individual validation nodes
 
 Instead of one node that validates everything, you can create separate validation nodes:
 
@@ -383,11 +383,11 @@ This approach:
 - Allows parallel validation of different datasets
 - Makes it easier to skip validation for specific datasets
 
-It is possible to start with a hook-based approach for minimal changes, and add pipeline nodes when you want explicit visibility in Kedro-Viz or need to control execution order strictly. Also decide whether validations should stop the run immediately or report multiple failures before failing.
+You can start with a hook-based approach for minimal changes. Add pipeline nodes when you want explicit visibility in Kedro-Viz or need to control execution order strictly. Also decide whether validations should stop the run after the first failure or report multiple issues before raising an error.
 
 ### Alternative: Using a file data context
 
-If you prefer not to hardcode expectations inside your Kedro hooks or nodes, you can maintain your Great Expectations data context externally as a file.
+If you prefer not to hard-code expectations inside your Kedro hooks or nodes, you can maintain your Great Expectations data context externally as a file.
 This approach lets you separate data validation configuration from code and makes it easier to reuse the same expectations across environments or projects.
 
 Start by creating a local Great Expectations workspace. From your project root:
@@ -396,7 +396,7 @@ Start by creating a local Great Expectations workspace. From your project root:
 mkdir great_expectations
 ```
 
-Then, initialize a context in Python:
+Then, initialise a context in Python:
 
 ```py
 import great_expectations as gx

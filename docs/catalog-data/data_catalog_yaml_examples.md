@@ -208,7 +208,7 @@ scooters_query:
 
 When you use [pandas.SQLTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.SQLTableDataset/), or [pandas.SQLQueryDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.SQLQueryDataset/) you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
 
-`scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataset` only).
+`scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` when using `pandas.SQLTableDataset`.
 
 
 ## Load data from an API endpoint
@@ -399,7 +399,7 @@ for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the seco
 
 ### How *not* to use transcoding
 
-Kedro pipelines automatically resolve the node execution order and check to ensure there are no circular dependencies in the pipeline. It is during this process that the transcoded datasets are resolved and the transcoding notation `@...` is stripped. This means within the pipeline the datasets `my_dataframe@spark` and `my_dataframe@pandas` are considered to be one `my_dataframe` dataset. The `DataCatalog`, though, treats transcoded entries as separate datasets, as they are only resolved as part of the pipeline resolution process. This results in differences between your defined pipeline in `pipeline.py` and the resolved pipeline that is run by Kedro, and these differences may lead to unintended behaviours. Thus, it is important to be aware of this when using transcoding.
+Kedro pipelines automatically resolve the node execution order and check to ensure there are no circular dependencies in the pipeline. It is during this process that the transcoded datasets are resolved and the transcoding notation `@...` is stripped. This means within the pipeline the datasets `my_dataframe@spark` and `my_dataframe@pandas` are considered to be one `my_dataframe` dataset. The `DataCatalog`, though, treats transcoded entries as separate datasets because they are resolved as part of the pipeline resolution process. This results in differences between your defined pipeline in `pipeline.py` and the resolved pipeline that is run by Kedro, and these differences may lead to unintended behaviours. Thus, it is important to be aware of this when using transcoding.
 
 ```{caution}
 Below are some examples where transcoding may produce unwanted side effects and raise errors.

@@ -1,15 +1,81 @@
 # Upcoming Release
+
 ## Major features and improvements
-* Added `@experimental` decorator to mark unstable or early-stage public APIs.
-* Added the new `support-agent-langgraph` starter. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
+* Added the first iteration of the `KedroServiceSession`, a new session implementation that allows for multiple runs and data injection.
+NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
+* Added inspection API to get project snapshot.
 
 ## Bug fixes and other changes
+## Documentation changes
+## Community contributions
+
+
+# Release 1.3.1
+
+## Bug fixes and other changes
+* Fixed `AttributeError` when node functions have non-Pydantic/dataclass type hints on `params:` inputs. The parameter validation framework now correctly skips types it cannot validate.
+
+## Documentation changes
+* Added documentation for `Optional[Model]` support and multi-type union limitations in parameter validation.
+* Improved Mermaid diagram visibility in dark mode.
+
+## Community contributions
+* [SayantanDutt](https://github.com/SayantanDutt)
+
+# Release 1.3.0
+
+## Major features and improvements
+* Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
+* Added `list_versions()` method for versioned datasets to list available dataset versions.
+* Added `pipelines_to_find` parameter to `find_pipelines()`, allowing users to selectively run a subset of existing pipelines by modifying the pipeline registry.
+* The CLI `--checkout` flag can now be used on a new Kedro project from the default template, without a starter.
+* Added `SESSION_CLASS` as a configurable project setting, allowing users to define a custom KedroSession subclass
+
+## Bug fixes and other changes
+* `DataCatalog.load()` and `DataCatalog.save()` now raise a `DatasetError` that includes the dataset name for easier debugging.
+* Aligned the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
+* Fixed a path traversal vulnerability in versioned dataset loading that could allow unauthorized file access via unsanitized version strings.
+* Fixed remote code execution vulnerability in the logging configuration.
+* Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
+* Added a warning when a node returns a value but is defined with `outputs=None`, clarifying that the return value is ignored.
+* Added `preserve_logging` flag to `configure_project()` to prevent runtime-added logging handlers from being overwritten when `configure_project()` is called after custom handlers have been attached (e.g. in a long-running server process such as FastAPI).
+* Added util method `find_config_file()` to handle different config file extensions (.yml, .yaml)
+* Added reusable suggestion functionality for mistyped pipeline names using `kedro run`
+* Added a fix for `CatalogConfigResolver` splitting sqlalchemy URL during pattern resolution.
+
+## Documentation changes
+* Added parameter validation documentation covering Pydantic model and dataclass support for typed parameters.
+
+## Community contributions
+* [aziq](https://github.com/aziq)
+* [zhubaobao2024](https://github.com/zhubaobao2024)
+* [Camille Coeurjoly](https://github.com/Camille1992)
+* [sinanpl](https://github.com/sinanpl)
+* [Mr-Neutr0n](https://github.com/Mr-Neutr0n)
+* [mvhensbergen](https://github.com/mvhensbergen)
+
+# Release 1.2.0
+## Major features and improvements
+* Added `@experimental` decorator to mark unstable or early-stage public APIs.
+* Added support for running multiple pipelines in a single Kedro session run via the `--pipelines` CLI option and `pipeline_names` argument in `KedroSession.run()` method.
+* Updated the `spaceflights-pyspark` starter to use the new `SparkDatasetV2` integration, enabling local, Databricks-native, and remote Spark execution workflows.
+
+## Experimental features
+* Added experimental `llm_context_node` and `LLMContextNode` for assembling LLMs, prompts, and tools into a runtime `LLMContext` within Kedro pipelines.
+* Added experimental `preview_fn` argument to `Node` class to add support for user-injectable node preview functions.
+* Added new experimental `support-agent-langgraph` starter, which supports the above experimental features. This starter contains pipelines that leverage LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
+
+## Bug fixes and other changes
+* Set `raise_errors=True` in `find_pipelines()` calls in the project template's `pipeline_registry.py` to ensure pipeline discovery errors are raised during project runs.
+* Fixed packaged runs logging the current working directory name; they now log the installed package name (or project path) instead.
 
 ## Documentation changes
 * Added beginner-friendly notes on `uvx` installation.
-
+* Updated Databricks deployment docs to cover `Spark Connect` and `Unity Catalog` – first workflows, and local-to-remote development.
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Mohmn](https://github.com/Mohmn)
 
 # Release 1.1.1
 ## Bug fixes and other changes
@@ -36,6 +102,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Aseem Sangalay](https://github.com/aseemsangalay)
 * [Chris Schopp](https://github.com/chrisschopp)
 * [Yaroslav Halchenko](https://github.com/yarikoptic)
+
 
 # Release 1.0.0
 ## Major features and improvements

@@ -2,13 +2,17 @@
 
 If you like to learn from video, you can follow our [hands-on course "Introduction to Kedro: Building Maintainable Data Pipelines" on YouTube](https://www.youtube.com/playlist?list=PL-JJgymPjK5LddZXbIzp9LWurkLGgB-nY).
 
-The course is structured into sections and these are each broken into short videos that cover specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) and get hands-on with the example. Along the way, you'll learn key Kedro concepts like datasets and the Kedro Data Catalog, nodes and pipelines, and configuration management.
+The course is structured into sections and these are each broken into short videos that cover specific Kedro topics. You'll walk through the [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) and get hands-on with the example. Along the way, you'll learn key Kedro concepts:
+
+- datasets and the Kedro Data Catalog
+- nodes and pipelines
+- configuration management
 
 <iframe width="100%" height="460" src="https://www.youtube.com/embed/DD7JuYKp6BA" frameborder="0" allowfullscreen></iframe>
 
 ## Who is this course for?
 
-This course is for data scientists, data engineers and machine learning engineers. You can be junior, mid-level or senior in your field of work. You're likely to be hands-on with projects, or a decision-maker who regularly makes design and implementation choices about Python data products.
+This course is for data scientists, data engineers and machine learning engineers. You can be junior, mid-level or senior in your field of work. You may be hands-on with projects, or a decision-maker who often makes design and implementation choices about Python data products.
 
 We assume you know these concepts:
 
@@ -26,7 +30,7 @@ Please note that we do expect users to have Git installed, as it is a prerequisi
 In short, you'll learn answers to the following:
 
 - Introduction to Kedro
-- What is Kedro? How does it help you create maintainable, reusable data science code?
+- What is Kedro? How does it help you create maintainable, reusable data engineering and data science code?
 - How does Kedro fit into the data science ecosystem?
 - What do you need to do to create a Kedro project?
 - How can you refactor a Jupyter notebook to a Kedro project?
@@ -37,20 +41,20 @@ In short, you'll learn answers to the following:
 - What are Kedro plugins?
 - How can you contribute to Kedro?
 
-You don't need to register for the course and you can skip around the sections to find help on a particular area as you pick up the skills needed to build your own Kedro projects.
+You do not need to register for the course. Skip to the sections that help with a particular area as you pick up the skills needed to build your own Kedro projects.
 
 ## Index of videos
 
 [Introduction to Kedro: Building Maintainable Data Pipelines](https://www.youtube.com/playlist?list=PL-JJgymPjK5LddZXbIzp9LWurkLGgB-nY) is split into the following videos:
 
-### Part 0: Introduction
+### Part 0: introduction
 
 1. <a href="https://www.youtube.com/watch?v=DD7JuYKp6BA" target="_blank" rel="noopener">Data science in production: the good, the bad and the ugly</a>
 1. <a href="https://www.youtube.com/watch?v=PdNkECqvI58" target="_blank" rel="noopener">What is Kedro?</a>
 1. <a href="https://www.youtube.com/watch?v=_HH8SCmCP_Q" target="_blank" rel="noopener">Kedro and data orchestrators</a>
 1. <a href="https://www.youtube.com/watch?v=nAyUqORd9R8" target="_blank" rel="noopener">How does Kedro fit into the data science ecosystem?</a>
 
-### Part 1: Get started with Kedro
+### Part 1: get started with Kedro
 
 1. <a href="https://www.youtube.com/watch?v=YBY2Lcz7Gw4" target="_blank" rel="noopener">Create a Kedro project from scratch?</a>
 1. <a href="https://www.youtube.com/watch?v=K6PhgVyXhWE" target="_blank" rel="noopener">The spaceflights starter</a>
@@ -63,7 +67,7 @@ You don't need to register for the course and you can skip around the sections t
 1. <a href="https://www.youtube.com/watch?v=sll_LhZE-p8" target="_blank" rel="noopener">Run your Kedro pipeline</a>
 1. <a href="https://www.youtube.com/watch?v=KWqSzbHgNW4" target="_blank" rel="noopener">Visualise your data pipeline with Kedro-Viz</a>
 
-### Part 2: Make complex Kedro pipelines
+### Part 2: make complex Kedro pipelines
 
 1. <a href="https://www.youtube.com/watch?v=ctTFAeL4JgU" target="_blank" rel="noopener">Merge different dataframes in Kedro</a>
 1. <a href="https://www.youtube.com/watch?v=Y4JvVO2DOJA" target="_blank" rel="noopener">Predict prices using machine learning</a>
@@ -74,7 +78,7 @@ You don't need to register for the course and you can skip around the sections t
 1. <a href="https://www.youtube.com/watch?v=_B6R2uOj3-s" target="_blank" rel="noopener">Kedro pipeline runners</a>
 1. <a href="https://www.youtube.com/watch?v=tNE-tdvHNP8" target="_blank" rel="noopener">Create Kedro datasets dynamically using factories</a>
 
-### Part 3: Ship your Kedro project to production
+### Part 3: ship your Kedro project to production
 
 1. <a href="https://www.youtube.com/watch?v=9quRBGDOFq8" target="_blank" rel="noopener">Define your own Kedro environments</a>
 1. <a href="https://www.youtube.com/watch?v=TkoBEQIdHbA" target="_blank" rel="noopener">Use S3 and MinIO cloud storage with Kedro</a>
@@ -82,6 +86,6 @@ You don't need to register for the course and you can skip around the sections t
 1. <a href="https://www.youtube.com/watch?v=lA-Ivuxmakw&list=PL-JJgymPjK5LddZXbIzp9LWurkLGgB-nY&index=26&t=1s&pp=gAQBiAQB" target="_blank" rel="noopener">Turn your Kedro project into a Docker container</a>
 1. <a href="https://www.youtube.com/watch?v=AhCcnJ1Au70" target="_blank" rel="noopener">Deploy your Kedro project to Apache Airflow</a>
 
-### Part 4: Where next?
+### Part 4: where next?
 
 <a href="https://www.youtube.com/watch?v=JvXhv8_0tlE" target="_blank" rel="noopener">Continue your Kedro journey</a>

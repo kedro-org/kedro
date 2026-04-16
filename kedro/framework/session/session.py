@@ -8,6 +8,7 @@ import logging.config
 import os
 import subprocess
 import sys
+import textwrap
 import traceback
 from copy import deepcopy
 from pathlib import Path
@@ -16,6 +17,7 @@ from typing import TYPE_CHECKING, Any
 import click
 
 from kedro import __version__ as kedro_version
+from kedro.framework import project as kedro_project
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
@@ -25,8 +27,11 @@ from kedro.framework.project import (
 )
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
+from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
-from kedro.utils import find_kedro_project
+from kedro.utils import find_kedro_project, get_close_matches
+
+from .abstract_session import AbstractSession, KedroSessionError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -71,15 +76,7 @@ def _jsonify_cli_context(ctx: click.core.Context) -> dict[str, Any]:
     }
 
 
-class KedroSessionError(Exception):
-    """``KedroSessionError`` raised by ``KedroSession``
-    in the case that multiple runs are attempted in one session.
-    """
-
-    pass
-
-
-class KedroSession:
+class KedroSession(AbstractSession):
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
     a context manager to construct a new KedroSession with session data
@@ -115,7 +112,7 @@ class KedroSession:
         ).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
-        self._package_name = package_name
+        self._package_name = package_name or kedro_project.PACKAGE_NAME
         self._store = self._init_store()
         self._run_called = False
 
@@ -269,9 +266,6 @@ class KedroSession:
         if self.save_on_close:
             self._store.save()
 
-    def __enter__(self) -> KedroSession:
-        return self
-
     def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
         if exc_type:
             self._log_exception(exc_type, exc_value, tb_)
@@ -280,6 +274,7 @@ class KedroSession:
     def run(  # noqa: PLR0913
         self,
         pipeline_name: str | None = None,
+        pipeline_names: list[str] | None = None,
         tags: Iterable[str] | None = None,
         runner: AbstractRunner | None = None,
         node_names: Iterable[str] | None = None,
@@ -295,6 +290,7 @@ class KedroSession:
 
         Args:
             pipeline_name: Name of the pipeline that is being run.
+            pipeline_names: Name of the pipelines that is being run.
             tags: An optional list of node tags which should be used to
                 filter the nodes of the ``Pipeline``. If specified, only the nodes
                 containing *any* of these tags will be run.
@@ -327,7 +323,14 @@ class KedroSession:
             and values are dataset objects.
         """
         # Report project name
-        self._logger.info("Kedro project %s", self._project_path.name)
+        project_name = self._package_name or self._project_path.name
+        self._logger.info("Kedro project %s", project_name)
+        if pipeline_name:
+            self._logger.warning(
+                "`pipeline_name` is deprecated and will be removed in a future release. "
+                "Please use `pipeline_names` instead."
+            )
+            pipeline_names = [pipeline_name]
 
         if self._run_called:
             raise KedroSessionError(
@@ -341,18 +344,28 @@ class KedroSession:
         runtime_params = self.store.get("runtime_params") or {}
         context = self.load_context()
 
-        name = pipeline_name or "__default__"
+        names = pipeline_names or ["__default__"]
+        combined_pipelines = Pipeline([])
+        for name in names:
+            try:
+                combined_pipelines += pipelines[name]
+            except KeyError as exc:
+                matches = get_close_matches(name, pipelines.keys())
+                if matches:
+                    suggestion = (
+                        "Did you mean one of these instead?\n"
+                        + textwrap.indent("\n".join(matches), " " * 4)
+                    )
+                else:
+                    suggestion = ""
+                raise ValueError(
+                    f"Failed to find the pipeline named '{name}'. "
+                    f"It needs to be generated and returned "
+                    f"by the 'register_pipelines' function. "
+                    f"{suggestion}"
+                ) from exc
 
-        try:
-            pipeline = pipelines[name]
-        except KeyError as exc:
-            raise ValueError(
-                f"Failed to find the pipeline named '{name}'. "
-                f"It needs to be generated and returned "
-                f"by the 'register_pipelines' function."
-            ) from exc
-
-        filtered_pipeline = pipeline.filter(
+        filtered_pipeline = combined_pipelines.filter(
             tags=tags,
             from_nodes=from_nodes,
             to_nodes=to_nodes,
@@ -363,7 +376,7 @@ class KedroSession:
         )
 
         record_data = {
-            "session_id": session_id,
+            "run_id": session_id,
             "project_path": self._project_path.as_posix(),
             "env": context.env,
             "kedro_version": kedro_version,
@@ -375,7 +388,7 @@ class KedroSession:
             "to_outputs": to_outputs,
             "load_versions": load_versions,
             "runtime_params": runtime_params,
-            "pipeline_name": pipeline_name,
+            "pipeline_names": pipeline_names,
             "namespaces": namespaces,
             "runner": getattr(runner, "__name__", str(runner)),
             "only_missing_outputs": only_missing_outputs,

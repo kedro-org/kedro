@@ -282,6 +282,10 @@ class CatalogConfigResolver:
         Raises:
             DatasetError: when keys used in the configuration do not present in the dataset pattern name.
 
+        Note:
+            Only built-in ``list`` and ``tuple`` types are traversed. Subclasses of
+            these types are treated as opaque values and not recursed into.
+
         Example:
         ``` python
         pattern = "{namespace}.int_{name}"
@@ -304,7 +308,7 @@ class CatalogConfigResolver:
             if isinstance(config, dict):
                 for value in config.values():
                     _traverse_config(value)
-            elif isinstance(config, (list | tuple)):
+            elif type(config) in (list, tuple):
                 for value in config:
                     _traverse_config(value)
             elif isinstance(config, str) and "}" in config:
@@ -337,6 +341,10 @@ class CatalogConfigResolver:
         Returns:
             The resolved dataset configuration.
 
+        Note:
+            Only built-in ``list`` and ``tuple`` types are traversed. Subclasses of
+            these types are treated as opaque values and not recursed into.
+
         Example:
         ``` python
         pattern = "{namespace}.int_{name}"
@@ -353,7 +361,7 @@ class CatalogConfigResolver:
         if isinstance(config, dict):
             for key, value in config.items():
                 config[key] = cls._resolve_dataset_config(ds_name, pattern, value)
-        elif isinstance(config, (list | tuple)):
+        elif type(config) in (list, tuple):
             config = [
                 cls._resolve_dataset_config(ds_name, pattern, value) for value in config
             ]

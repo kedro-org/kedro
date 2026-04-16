@@ -5,22 +5,22 @@ It provides tools for tracking experiments, packaging code into reproducible run
 MLflow supports machine learning frameworks such as TensorFlow, PyTorch, and scikit-learn.
 
 Adding MLflow to a Kedro project enables you to track and manage your machine learning experiments and models.
-For example, you can log metrics, parameters, and artifacts from your Kedro pipeline runs to MLflow, then compare and reproduce the results. When collaborating with others on a Kedro project, MLflow's model registry and deployment tools help you to share and deploy machine learning models.
+For example, you can log metrics, parameters, and artifacts from your Kedro pipeline runs to MLflow, then compare and reproduce the results. When collaborating with others on a Kedro project, the MLflow model registry and deployment tools help you share and deploy machine learning models.
 
 ## Prerequisites
 
 You will need the following:
 
-- A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas-viz` starter. If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
+- A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas` starter. If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
 - The MLflow client installed into the same virtual environment. For the purposes of this tutorial,
   you can use [MLflow](https://mlflow.org/docs/latest/)`in its simplest configuration <tracking>`.
 
 To set yourself up, create a new Kedro project:
 
 ```
-$ kedro new --starter=spaceflights-pandas-viz --name spaceflights-mlflow
+$ kedro new --starter=spaceflights-pandas --name spaceflights-mlflow
 $ cd spaceflights-mlflow
-$ python -m venv && source .venv/bin/activate
+$ python -m venv .venv && source .venv/bin/activate
 (.venv) $ pip install -r requirements.txt
 ```
 
@@ -35,9 +35,11 @@ This will make MLflow record metadata and artifacts for each run
 to a local directory called `mlflow_runs`.
 
 !!! note
-    If you want to use a more sophisticated setup, have a look at the documentation of
-[MLflow tracking server](https://mlflow.org/docs/latest/tracking/server/), [the official MLflow tracking server 5 minute overview](https://mlflow.org/docs/latest/getting-started/tracking-server-overview/),
-and [the MLflow tracking server documentation](https://mlflow.org/docs/latest/tracking/server).
+    If you want to use a more sophisticated setup, review these MLflow guides:
+
+    - [MLflow tracking server](https://mlflow.org/docs/latest/tracking/server/)
+    - [The official MLflow tracking server five-minute overview](https://mlflow.org/docs/latest/getting-started/tracking-server-overview/)
+    - [The MLflow tracking server documentation](https://mlflow.org/docs/latest/tracking/server)
 
 
 ## Simple use cases
@@ -99,9 +101,9 @@ Use of this dataset has the advantage that the preview capabilities of the MLflo
 
 !!! warning
     This will work for datasets that are outputs of a node,
-    and will have no effect for datasets that are free inputs (hence are only loaded).
+    and will have no effect for datasets that are free inputs because they are loaded without modification.
 
-For example, if you modify the a `matplotlib.MatplotlibDataset` dataset like this:
+For example, if you change a `matplotlib.MatplotlibDataset` dataset like this:
 
 ```diff
  # conf/base/catalog.yml
@@ -116,7 +118,7 @@ For example, if you modify the a `matplotlib.MatplotlibDataset` dataset like thi
 +    filepath: data/08_reporting/dummy_confusion_matrix.png
 ```
 
-Then the image would be logged as part of the artifacts of the run
+Then the image would be logged as part of the artifacts of the run,
 and you would be able to preview it in the MLflow web UI:
 
 ![MLflow image preview thanks to the artifact tracking capabilities of kedro-mlflow](../meta/images/mlflow-artifact-preview-image.png)
@@ -126,7 +128,7 @@ and you would be able to preview it in the MLflow web UI:
     it's probably because you had already executed `kedro run` while the dataset was marked as `versioned: true`.
     The solution is to clean up the old `data/08_reporting/dummy_confusion_matrix.png` directory.
 
-Check out {external+kedro-mlflow:doc}`the official kedro-mlflow documentation on versioning Kedro datasets <source/04_experimentation_tracking/03_version_datasets>`
+Check out [the official kedro-mlflow documentation on versioning Kedro datasets](https://kedro-mlflow.readthedocs.io/en/stable/source/03_experiment_tracking/01_experiment_tracking/03_version_datasets.html)
 for more information.
 
 ### Model registry in MLflow using `kedro-mlflow`
@@ -137,10 +139,11 @@ The `kedro-mlflow` plugin introduces a special artifact, `MlflowModelTrackingDat
 that you can use to load and save your models as MLflow artifacts.
 
 For example, if you have a dataset corresponding to a scikit-learn model,
-you can modify it as follows:
+you can change it as follows:
 
 ```diff
- regressor:
+# conf/base/catalog.yml
+regressor:
 -  type: pickle.PickleDataset
 -  filepath: data/06_models/regressor.pickle
 -  versioned: true
@@ -156,6 +159,7 @@ If you also want to _register_ it
 you can add a `registered_model_name` parameter:
 
 ```yaml
+# conf/base/catalog.yml
 regressor:
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
   flavor: mlflow.sklearn
@@ -171,7 +175,8 @@ To load a model from a specific run, you can specify the `run_id`.
 For that, you can make use of {ref}`runtime parameters <runtime-params>`:
 
 ```yaml
-# Add the intermediate datasets to run only the inference
+# conf/base/catalog.yml
+# Add the intermediate datasets to run the inference pipeline
 X_test:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/X_test.parquet
@@ -198,7 +203,7 @@ $ kedro run --from-nodes=evaluate_model_node --params mlflow_run_id=4cba84...
 
 !!! note
     Notice that MLflow runs are immutable for reproducibility purposes,
-therefore you cannot _save_ a model in an existing run.
+so you cannot _save_ a model in an existing run.
 
 
 ## Advanced use cases

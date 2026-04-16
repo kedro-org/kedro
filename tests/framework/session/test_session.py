@@ -1,16 +1,10 @@
 import logging
 import re
 import subprocess
-import sys
 import textwrap
 from collections.abc import Mapping
-from pathlib import Path
-from typing import Any
-from unittest.mock import create_autospec
 
 import pytest
-import tomli_w
-import yaml
 from omegaconf import OmegaConf
 
 from kedro import __version__ as kedro_version
@@ -24,12 +18,38 @@ from kedro.framework.project import (
     _HasSharedParentClassValidator,
     _ProjectSettings,
 )
-from kedro.framework.session import KedroSession
+from kedro.framework.session import AbstractSession, KedroSession
 from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.store import BaseSessionStore
 from kedro.utils import _has_rich_handler
 
-_FAKE_PROJECT_NAME = "fake_project"
+
+class _MinimalSession(AbstractSession):
+    """Minimal implementation of AbstractSession for testing."""
+
+    @classmethod
+    def create(cls, **kwargs):
+        return cls()
+
+    def close(self):
+        pass
+
+    def run(self, **kwargs):
+        return {}
+
+
+class TestAbstractSession:
+    def test_enter_returns_self(self):
+        session = _MinimalSession()
+        assert session.__enter__() is session
+
+    def test_exit_calls_close(self, mocker):
+        session = _MinimalSession()
+        mock_close = mocker.patch.object(session, "close")
+        session.__exit__(None, None, None)
+        mock_close.assert_called_once_with()
+
+
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
 
@@ -37,70 +57,6 @@ class BadStore:
     """
     Store class that doesn't subclass `BaseSessionStore`, for testing only.
     """
-
-
-class BadConfigLoader:
-    """
-    ConfigLoader class that doesn't subclass `AbstractConfigLoader`, for testing only.
-    """
-
-
-ATTRS_ATTRIBUTE = "__attrs_attrs__"
-
-NEW_TYPING = sys.version_info[:3] >= (3, 7, 0)  # PEP 560
-
-
-def create_attrs_autospec(spec: type, spec_set: bool = True) -> Any:
-    """Creates a mock of an attr class (creates mocks recursively on all attributes).
-    https://github.com/python-attrs/attrs/issues/462#issuecomment-1134656377
-
-    :param spec: the spec to mock
-    :param spec_set: if True, AttributeError will be raised if an attribute that is not in the spec is set.
-    """
-
-    if not hasattr(spec, ATTRS_ATTRIBUTE):
-        raise TypeError(f"{spec!r} is not an attrs class")
-    mock = create_autospec(spec, spec_set=spec_set)
-    for attribute in getattr(spec, ATTRS_ATTRIBUTE):
-        attribute_type = attribute.type
-        if NEW_TYPING:
-            # A[T] does not get a copy of __dict__ from A(Generic[T]) anymore, use __origin__ to get it
-            while hasattr(attribute_type, "__origin__"):
-                attribute_type = attribute_type.__origin__
-        if hasattr(attribute_type, ATTRS_ATTRIBUTE):
-            mock_attribute = create_attrs_autospec(attribute_type, spec_set)
-        else:
-            mock_attribute = create_autospec(attribute_type, spec_set=spec_set)
-        object.__setattr__(mock, attribute.name, mock_attribute)
-    return mock
-
-
-@pytest.fixture
-def mock_runner(mocker):
-    mock_runner = mocker.patch(
-        "kedro.runner.sequential_runner.SequentialRunner",
-        autospec=True,
-    )
-    mock_runner.__name__ = "MockRunner"
-    return mock_runner
-
-
-@pytest.fixture
-def mock_thread_runner(mocker):
-    mock_runner = mocker.patch(
-        "kedro.runner.thread_runner.ThreadRunner",
-        autospec=True,
-    )
-    mock_runner.__name__ = "MockThreadRunner`"
-    return mock_runner
-
-
-@pytest.fixture
-def mock_context_class(mocker):
-    mock_cls = create_attrs_autospec(KedroContext)
-    return mocker.patch(
-        "kedro.framework.context.KedroContext", autospec=True, return_value=mock_cls
-    )
 
 
 def _mock_imported_settings_paths(mocker, mock_settings):
@@ -118,41 +74,6 @@ def mock_settings(mocker):
 
 
 @pytest.fixture
-def mock_settings_context_class(mocker, mock_context_class):
-    class MockSettings(_ProjectSettings):
-        # dynaconf automatically deleted some attribute when the class is MagicMock
-        _CONTEXT_CLASS = Validator(
-            "CONTEXT_CLASS", default=lambda *_: mock_context_class
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
-def mock_settings_custom_context_class(mocker):
-    class MyContext(KedroContext):
-        pass
-
-    class MockSettings(_ProjectSettings):
-        _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext)
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
-def mock_settings_custom_config_loader_class(mocker):
-    class MyConfigLoader(AbstractConfigLoader):
-        pass
-
-    class MockSettings(_ProjectSettings):
-        _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
-            "CONFIG_LOADER_CLASS", default=lambda *_: MyConfigLoader
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
 def mock_settings_omega_config_loader_class(mocker):
     class MockSettings(_ProjectSettings):
         _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
@@ -160,42 +81,6 @@ def mock_settings_omega_config_loader_class(mocker):
         )
 
     return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
-def mock_settings_config_loader_args(mocker):
-    class MockSettings(_ProjectSettings):
-        _CONFIG_LOADER_ARGS = Validator(
-            "CONFIG_LOADER_ARGS",
-            default={"config_patterns": {"spark": ["spark/*"]}},
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
-def mock_settings_config_loader_args_env(mocker):
-    class MockSettings(_ProjectSettings):
-        _CONFIG_LOADER_ARGS = Validator(
-            "CONFIG_LOADER_ARGS",
-            default={"base_env": "something_new"},
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
-def mock_settings_file_bad_config_loader_class(tmpdir):
-    mock_settings_file = tmpdir.join("mock_settings_file.py")
-    mock_settings_file.write(
-        textwrap.dedent(
-            f"""
-            from {__name__} import BadConfigLoader
-            CONFIG_LOADER_CLASS = BadConfigLoader
-            """
-        )
-    )
-    return mock_settings_file
 
 
 @pytest.fixture
@@ -240,29 +125,6 @@ def fake_session_id(mocker):
         "kedro.framework.session.session.generate_timestamp", return_value=session_id
     )
     return session_id
-
-
-@pytest.fixture
-def fake_project(tmp_path, mock_package_name):
-    fake_project_dir = Path(tmp_path) / "fake_project"
-    (fake_project_dir / "src").mkdir(parents=True)
-
-    pyproject_toml_path = fake_project_dir / "pyproject.toml"
-    payload = {
-        "tool": {
-            "kedro": {
-                "kedro_init_version": kedro_version,
-                "project_name": _FAKE_PROJECT_NAME,
-                "package_name": mock_package_name,
-            }
-        }
-    }
-    with pyproject_toml_path.open("wb") as f:
-        tomli_w.dump(payload, f)
-
-    (fake_project_dir / "conf" / "base").mkdir(parents=True)
-    (fake_project_dir / "conf" / "local").mkdir()
-    return fake_project_dir
 
 
 @pytest.fixture
@@ -447,7 +309,7 @@ class TestKedroSession:
 
     def test_broken_config_loader(self, mock_settings_file_bad_config_loader_class):
         pattern = (
-            "Invalid value 'tests.framework.session.test_session.BadConfigLoader' received "
+            "Invalid value 'tests.framework.session.conftest.BadConfigLoader' received "
             "for setting 'CONFIG_LOADER_CLASS'. "
             "It must be a subclass of 'kedro.config.abstract_config.AbstractConfigLoader'."
         )
@@ -632,13 +494,14 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
-        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
-
+        mock_pipeline = (
+            mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
+        )
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
 
         record_data = {
-            "session_id": fake_session_id,
+            "run_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
             "kedro_version": kedro_version,
@@ -650,7 +513,7 @@ class TestKedroSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
-            "pipeline_name": fake_pipeline_name,
+            "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
             "runner": mock_runner.__name__,
             "only_missing_outputs": False,
@@ -672,6 +535,35 @@ class TestKedroSession:
             pipeline=mock_pipeline,
             catalog=mock_catalog,
         )
+
+    def test_run_logs_package_name_when_outside_project(
+        self, tmp_path, mock_package_name, caplog, monkeypatch
+    ):
+        """Session run should log configured package name, not current directory."""
+        from kedro.framework import project as kedro_project
+
+        monkeypatch.setattr(kedro_project, "PACKAGE_NAME", mock_package_name)
+
+        # Create a temporary directory outside of the project
+        outside_dir = tmp_path / "outside"
+        outside_dir.mkdir()
+        pyproject_path = tmp_path / "pyproject.toml"
+        if pyproject_path.exists():
+            pyproject_path.unlink()
+
+        # Change the current working directory to the outside directory
+        monkeypatch.chdir(outside_dir)
+
+        # Create a session and set run called to True - no need to run a full session, we can verify the logging message
+        # from trying to execute a second run in the same session.
+        session = KedroSession.create(save_on_close=False)
+        session._run_called = True
+
+        caplog.set_level(logging.INFO, logger=SESSION_LOGGER_NAME)
+        with pytest.raises(KedroSessionError):
+            session.run()
+
+        assert f"Kedro project {mock_package_name}" in caplog.text
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
@@ -705,6 +597,9 @@ class TestKedroSession:
         ds_mock.datasets.return_value = ["ds_1", "ds_2"]
 
         filter_mock = mocker.Mock()
+        filter_mock.__add__ = mocker.Mock(return_value=ds_mock)
+        filter_mock.__radd__ = mocker.Mock(return_value=ds_mock)
+
         filter_mock.filter.return_value = ds_mock
 
         pipelines_ret = {
@@ -722,7 +617,7 @@ class TestKedroSession:
 
         mock_context = mock_context_class.return_value
         record_data = {
-            "session_id": fake_session_id,
+            "run_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
             "kedro_version": kedro_version,
@@ -734,13 +629,13 @@ class TestKedroSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
-            "pipeline_name": fake_pipeline_name,
+            "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
             "runner": mock_thread_runner.__name__,
             "only_missing_outputs": False,
         }
         mock_catalog = mock_context._get_catalog.return_value
-        mock_pipeline = filter_mock.filter()
+        mock_pipeline = filter_mock.filter().filter()
 
         mock_hook.before_pipeline_run.assert_called_once_with(
             run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
@@ -784,7 +679,9 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+        mock_pipeline = (
+            mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
+        )
 
         message = (
             "A run has already been completed as part of the active KedroSession. "
@@ -797,7 +694,7 @@ class TestKedroSession:
                 session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
 
         record_data = {
-            "session_id": fake_session_id,
+            "run_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
             "kedro_version": kedro_version,
@@ -809,7 +706,7 @@ class TestKedroSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
-            "pipeline_name": fake_pipeline_name,
+            "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
             "runner": mock_runner.__name__,
             "only_missing_outputs": False,
@@ -850,6 +747,27 @@ class TestKedroSession:
                 session.run(runner=mock_runner, pipeline_name="doesnotexist")
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_non_existent_pipeline_with_suggestion(
+        self, fake_project, mock_runner, mocker
+    ):
+        """When a non-existent pipeline name has close matches, error includes suggestions."""
+        mocker.patch(
+            "kedro_telemetry.plugin._check_for_telemetry_consent",
+            return_value=False,
+        )
+        mocker.patch(
+            "kedro.framework.session.session.get_close_matches",
+            return_value=["__default__", "data_engineering"],
+        )
+        with pytest.raises(ValueError) as exc_info:
+            with KedroSession.create(fake_project) as session:
+                session.run(runner=mock_runner, pipeline_name="__defult__")
+        msg = str(exc_info.value)
+        assert "Failed to find the pipeline named '__defult__'" in msg
+        assert "Did you mean one of these instead?" in msg
+        assert "__default__" in msg
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
     def test_run_exception(
         self,
@@ -875,13 +793,15 @@ class TestKedroSession:
         mock_catalog = mock_context._get_catalog.return_value
         error = FakeException("You shall not pass!")
         mock_runner.run.side_effect = error  # runner.run() raises an error
-        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+        mock_pipeline = (
+            mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
+        )
 
         with pytest.raises(FakeException), KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
 
         record_data = {
-            "session_id": fake_session_id,
+            "run_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
             "kedro_version": kedro_version,
@@ -893,7 +813,7 @@ class TestKedroSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
-            "pipeline_name": fake_pipeline_name,
+            "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
             "runner": mock_runner.__name__,
             "only_missing_outputs": False,
@@ -947,14 +867,16 @@ class TestKedroSession:
         broken_runner.__name__ = "BrokenRunner"
         error = FakeException("You shall not pass!")
         broken_runner.run.side_effect = error  # runner.run() raises an error
-        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+        mock_pipeline = (
+            mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
+        )
 
         with pytest.raises(FakeException):
             # Execute run with broken runner
             session.run(runner=broken_runner, pipeline_name=fake_pipeline_name)
 
         record_data = {
-            "session_id": fake_session_id,
+            "run_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
             "kedro_version": kedro_version,
@@ -966,7 +888,7 @@ class TestKedroSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
-            "pipeline_name": fake_pipeline_name,
+            "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
             "runner": broken_runner.__name__,
             "only_missing_outputs": False,
@@ -1051,7 +973,9 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
-        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+        mock_pipeline = (
+            mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
+        )
 
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, only_missing_outputs=True)
@@ -1066,7 +990,7 @@ class TestKedroSession:
         )
 
         record_data = {
-            "session_id": fake_session_id,
+            "run_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
             "kedro_version": kedro_version,
@@ -1078,7 +1002,7 @@ class TestKedroSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
-            "pipeline_name": None,
+            "pipeline_names": None,
             "namespaces": None,
             "runner": mock_runner.__name__,
             "only_missing_outputs": True,
@@ -1112,8 +1036,9 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
-        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
-
+        mock_pipeline = (
+            mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
+        )
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, only_missing_outputs=False)
 
@@ -1147,7 +1072,9 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
-        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+        mock_pipeline = (
+            mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
+        )
 
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, only_missing_outputs=True)
@@ -1162,7 +1089,7 @@ class TestKedroSession:
         )
 
         record_data = {
-            "session_id": fake_session_id,
+            "run_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
             "kedro_version": kedro_version,
@@ -1174,7 +1101,7 @@ class TestKedroSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
-            "pipeline_name": None,
+            "pipeline_names": None,
             "namespaces": None,
             "runner": mock_runner.__name__,
             "only_missing_outputs": True,
@@ -1185,17 +1112,6 @@ class TestKedroSession:
             pipeline=mock_pipeline,
             catalog=mock_catalog,
         )
-
-
-@pytest.fixture
-def fake_project_with_logging_file_handler(fake_project):
-    logging_config = {
-        "version": 1,
-        "handlers": {"info_file_handler": {"filename": "logs/info.log"}},
-    }
-    logging_yml = fake_project / "conf" / "logging.yml"
-    logging_yml.write_text(yaml.dump(logging_config))
-    return fake_project
 
 
 def get_all_values(mapping: Mapping):

@@ -1,10 +1,10 @@
 # Kedro's command line interface
 
-Kedro's command line interface (CLI) is used to give commands to Kedro via a terminal shell (such as the terminal app on macOS, or cmd.exe or PowerShell on Windows). You need to use the CLI to set up a new Kedro project, and to run it.
+Kedro's command line interface (CLI) lets you run Kedro commands through a terminal shell, such as the terminal app on macOS or cmd.exe and PowerShell on Windows. Use the CLI to set up a new Kedro project and to run it.
 
 ## Autocompletion (optional)
 
-If you are using macOS or Linux, you can set up your shell to autocomplete `kedro` commands. If you don't know the type of shell you are using, first type the following:
+If you are using macOS or Linux, you can set up your shell to autocomplete `kedro` commands. If you do not know which shell you are using, first type the following:
 
 ```bash
 echo $0
@@ -13,7 +13,7 @@ echo $0
 
 === "If you are using Bash"
     <br/>
-    Add the following to your <code>~/.bashrc</code> (or just run it on the command line):
+    Add the following to your <code>~/.bashrc</code> (or run it on the command line):
 
     ```bash
     eval "$(_KEDRO_COMPLETE=bash_source kedro)"
@@ -49,8 +49,9 @@ python -m kedro
 Kedro provides a set of CLI commands, which are automatically grouped and documented below using their inline docstrings.
 
 - **Global commands** can be run from anywhere and are not tied to any specific Kedro project.
-- **Project commands** must be run from within a Kedro project directory and apply only to that project.
+- **Project commands** must be run from within a Kedro project directory and apply to that project.
 
+<!-- vale off -->
 ### Global Kedro commands
 ::: mkdocs-click
     :module: kedro.framework.cli.cli
@@ -65,6 +66,7 @@ Kedro provides a set of CLI commands, which are automatically grouped and docume
     :command: project_commands
     :depth: 2
     :style: plain
+<!-- vale on -->
 
 ## Customise or override project-specific Kedro commands
 
@@ -73,8 +75,9 @@ Kedro provides a set of CLI commands, which are automatically grouped and docume
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
-The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it via the [`plugin` framework](../extend/plugins.md). Find the template for the `cli.py` file below.
+The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it through the [`plugin` framework](../extend/plugins.md). Find the template for the `cli.py` file below.
 
+<!-- vale off -->
 ??? example "View code"
     ```python
     """Command line tools for manipulating a Kedro project.
@@ -239,3 +242,4 @@ The commands a project supports are specified on the framework side. If you want
                 only_missing_outputs=only_missing_outputs,
             )
     ```
+<!-- vale on -->

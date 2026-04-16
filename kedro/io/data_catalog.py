@@ -989,6 +989,7 @@ class DataCatalog(CatalogProtocol):
         Raises:
             DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
+            DatasetError: When an error occurs during saving the dataset.
 
         Example:
         ```python
@@ -1012,7 +1013,10 @@ class DataCatalog(CatalogProtocol):
             extra={"markup": True},
         )
 
-        dataset.save(data)
+        try:
+            dataset.save(data)
+        except DatasetError as e:
+            raise DatasetError(f"{ds_name}: {e}") from e
 
     def load(self, ds_name: str, version: str | None = None) -> Any:
         """Loads a registered dataset.
@@ -1028,6 +1032,7 @@ class DataCatalog(CatalogProtocol):
         Raises:
             DatasetNotFoundError: When a dataset with the given name
                 has not yet been registered.
+            DatasetError: When an error occurs during loading the dataset.
 
         Example:
         ```python
@@ -1052,7 +1057,10 @@ class DataCatalog(CatalogProtocol):
             extra={"markup": True},
         )
 
-        return dataset.load()
+        try:
+            return dataset.load()
+        except DatasetError as e:
+            raise DatasetError(f"{ds_name}: {e}") from e
 
     def release(self, ds_name: str) -> None:
         """Release any cached data associated with a dataset

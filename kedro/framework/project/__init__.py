@@ -21,6 +21,7 @@ from dynaconf.validator import ValidationError, Validator
 
 from kedro.io import CatalogProtocol
 from kedro.pipeline import Pipeline, pipeline
+from kedro.utils import find_config_file
 
 if TYPE_CHECKING:
     import types
@@ -121,6 +122,10 @@ class _ProjectSettings(LazySettings):
         "CONTEXT_CLASS",
         default=_get_default_class("kedro.framework.context.KedroContext"),
     )
+    _SESSION_CLASS = _HasSharedParentClassValidator(
+        "SESSION_CLASS",
+        default=_get_default_class("kedro.framework.session.KedroSession"),
+    )
     _SESSION_STORE_CLASS = _IsSubclassValidator(
         "SESSION_STORE_CLASS",
         default=_get_default_class("kedro.framework.session.store.BaseSessionStore"),
@@ -145,6 +150,7 @@ class _ProjectSettings(LazySettings):
                 self._CONF_SOURCE,
                 self._HOOKS,
                 self._CONTEXT_CLASS,
+                self._SESSION_CLASS,
                 self._SESSION_STORE_CLASS,
                 self._SESSION_STORE_ARGS,
                 self._DISABLE_HOOKS_FOR_PLUGINS,
@@ -242,7 +248,7 @@ class _ProjectLogging(UserDict):
         environment variable KEDRO_LOGGING_CONFIG (defaults to conf/logging.yml)."""
         logger = logging.getLogger(__name__)
         user_logging_path = os.environ.get("KEDRO_LOGGING_CONFIG")
-        project_logging_path = Path("conf/logging.yml")
+        project_logging_path = find_config_file("conf/logging")
         default_logging_path = Path(
             Path(__file__).parent / "rich_logging.yml"
             if importlib.util.find_spec("rich")
@@ -254,7 +260,7 @@ class _ProjectLogging(UserDict):
         if user_logging_path:
             path = user_logging_path
 
-        elif project_logging_path.exists():
+        elif project_logging_path is not None:
             path = project_logging_path
             msg = "You can change this by setting the KEDRO_LOGGING_CONFIG environment variable accordingly."
         else:
@@ -268,25 +274,53 @@ class _ProjectLogging(UserDict):
         self.configure(yaml.safe_load(logging_config))
         logger.info(msg)
 
+    def _validate_logging_config(self, config: Any) -> Any:
+        """Recursively check the logging configuration and raise an error if dangerous '()' factory keys are encountered."""
+        if isinstance(config, dict):
+            if "()" in config:
+                raise ValueError(
+                    "The '()' key is not allowed in logging configuration as it poses a security risk."
+                )
+            validated = {}
+            for k, v in config.items():
+                validated[k] = self._validate_logging_config(v)
+            return validated
+        elif isinstance(config, list):
+            return [self._validate_logging_config(item) for item in config]
+        else:
+            return config
+
     def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
         """
-        logging.config.dictConfig(logging_config)
-        self.data = logging_config
+        validated_config = self._validate_logging_config(logging_config)
+        logging.config.dictConfig(validated_config)
+        self.data = validated_config
 
-    def set_project_logging(self, package_name: str) -> None:
+    def set_project_logging(
+        self, package_name: str, preserve_logging: bool = False
+    ) -> None:
         """Add the project level logging to the loggers upon provision of a package name.
         Checks if project logger already exists to prevent overwriting, if none exists
-        it defaults to setting project logs at INFO level."""
+        it defaults to setting project logs at INFO level.
+
+        Args:
+            package_name: The name of the project package.
+            preserve_logging: If True, skip re-applying the logging configuration via
+                ``dictConfig``. This prevents runtime-added handlers from being wiped
+                when ``configure_project()`` is called after custom handlers have been
+                attached (e.g. in a long-running server process).
+        """
         loggers = self.data.get("loggers", {})
         if not loggers:
             self.data["loggers"] = {}  # pragma: no cover
 
         if package_name not in self.data["loggers"]:
             self.data["loggers"][package_name] = {"level": "INFO"}
-            self.configure(self.data)
+            if not preserve_logging:
+                self.configure(self.data)
 
 
 PACKAGE_NAME = None
@@ -297,9 +331,16 @@ settings = _ProjectSettings()
 pipelines = _ProjectPipelines()
 
 
-def configure_project(package_name: str) -> None:
+def configure_project(package_name: str, preserve_logging: bool = False) -> None:
     """Configure a Kedro project by populating its settings with values
     defined in user's settings.py and pipeline_registry.py.
+
+    Args:
+        package_name: The name of the project package.
+        preserve_logging: If True, skip re-applying the logging configuration when
+            setting up the project logger. Useful in long-running processes (e.g.
+            FastAPI apps) where custom handlers are added at runtime and must not
+            be overwritten on repeated calls to ``configure_project()``.
     """
     settings_module = f"{package_name}.settings"
     settings.configure(settings_module)
@@ -315,7 +356,7 @@ def configure_project(package_name: str) -> None:
     PACKAGE_NAME = package_name
 
     if PACKAGE_NAME:
-        LOGGING.set_project_logging(PACKAGE_NAME)
+        LOGGING.set_project_logging(PACKAGE_NAME, preserve_logging=preserve_logging)
 
 
 def configure_logging(logging_config: dict[str, Any]) -> None:
@@ -368,7 +409,9 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: PLR0912
+def find_pipelines(  # noqa: PLR0912, PLR0915
+    raise_errors: bool = False, pipelines_to_find: list[str] | None = None
+) -> dict[str, Pipeline]:
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.
@@ -382,11 +425,15 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
 
     Args:
         raise_errors: If ``True``, raise an error upon failed discovery.
+        pipelines_to_find: Optional list of pipeline names to load selectively.
+            If ``None`` or contains ``"__default__"``, all pipelines are loaded.
 
     Returns:
         A generated mapping from pipeline names to ``Pipeline`` objects.
 
     Raises:
+        RuntimeError: When the project has not been configured (i.e.
+            ``PACKAGE_NAME`` is ``None``).
         ImportError: When a module does not expose a ``create_pipeline``
             function, the ``create_pipeline`` function does not return a
             ``Pipeline`` object, or if the module import fails up front.
@@ -398,37 +445,57 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
             ``Pipeline`` object, or if the module import fails up front.
             If ``raise_errors`` is ``True``, see Raises section instead.
     """
-    pipeline_obj = None
+    if PACKAGE_NAME is None:
+        raise RuntimeError(
+            "'find_pipelines' cannot be called before the project is configured. "
+            "Call 'configure_project' first."
+        )
 
-    # Handle the simplified project structure found in several starters.
-    pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
-    try:
-        pipeline_module = importlib.import_module(pipeline_module_name)
-    except Exception as exc:
-        if str(exc) != f"No module named '{pipeline_module_name}'":
-            if raise_errors:
-                raise ImportError(
-                    f"An error occurred while importing the "
-                    f"'{pipeline_module_name}' module."
-                ) from exc
+    # Determine if specific pipelines were requested
+    load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
+    requested_pipelines: set[str] | None = None if load_all else set(pipelines_to_find)  # type: ignore[arg-type]
 
-            warnings.warn(
-                IMPORT_ERROR_MESSAGE.format(
-                    module=pipeline_module_name, tb_exc=traceback.format_exc()
+    pipelines_dict: dict[str, Pipeline] = {}
+
+    if load_all:
+        # Handle the simplified project structure found in several starters.
+        pipeline_obj = None
+        pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
+        try:
+            pipeline_module = importlib.import_module(pipeline_module_name)
+        except Exception as exc:
+            if str(exc) != f"No module named '{pipeline_module_name}'":
+                if raise_errors:
+                    raise ImportError(
+                        f"An error occurred while importing the "
+                        f"'{pipeline_module_name}' module."
+                    ) from exc
+
+                warnings.warn(
+                    IMPORT_ERROR_MESSAGE.format(
+                        module=pipeline_module_name, tb_exc=traceback.format_exc()
+                    )
                 )
-            )
-    else:
-        pipeline_obj = _create_pipeline(pipeline_module)
+        else:
+            pipeline_obj = _create_pipeline(pipeline_module)
 
-    pipelines_dict = {"__default__": pipeline_obj or pipeline([])}
+        pipelines_dict["__default__"] = pipeline_obj or pipeline([])
 
     # Handle the case that a project doesn't have a pipelines directory.
     try:
         pipelines_package = importlib.resources.files(f"{PACKAGE_NAME}.pipelines")
     except ModuleNotFoundError as exc:
         if str(exc) == f"No module named '{PACKAGE_NAME}.pipelines'":
+            if requested_pipelines is not None:
+                missing_str = ", ".join(sorted(requested_pipelines))
+                error_msg = f"Pipeline(s) not found: {missing_str}"
+                if raise_errors:
+                    raise KeyError(error_msg) from exc
+                warnings.warn(error_msg)
+                return {}
             return pipelines_dict
 
+    seen: set[str] = set()
     for pipeline_dir in pipelines_package.iterdir():
         if not pipeline_dir.is_dir():
             continue
@@ -440,6 +507,10 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
         if pipeline_name.startswith("."):
             continue
 
+        if requested_pipelines is not None and pipeline_name not in requested_pipelines:
+            continue
+
+        seen.add(pipeline_name)
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
@@ -460,4 +531,17 @@ def find_pipelines(raise_errors: bool = False) -> dict[str, Pipeline]:  # noqa: 
         pipeline_obj = _create_pipeline(pipeline_module)
         if pipeline_obj is not None:
             pipelines_dict[pipeline_name] = pipeline_obj
+        elif raise_errors:
+            raise KeyError(f"Pipeline '{pipeline_name}' not found")
+
+    if requested_pipelines is not None:
+        for pipeline_name in requested_pipelines - seen:
+            pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+            error_msg = f"An error occurred while importing the '{pipeline_module_name}' module."
+            if raise_errors:
+                raise ImportError(error_msg)
+            warnings.warn(
+                f"{error_msg} Nothing defined therein will be returned by 'find_pipelines'."
+            )
+
     return pipelines_dict

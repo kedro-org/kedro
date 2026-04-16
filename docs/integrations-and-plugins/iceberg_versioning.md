@@ -1,6 +1,12 @@
 # Data versioning with Iceberg
 
-[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets. Iceberg tables offer features such as schema evolution, hidden partitioning, partition layout evolution, time travel, and version rollback. This guide explains how to use Iceberg tables with Kedro. For this tutorial, we will use [`pyiceberg`](https://py.iceberg.apache.org/) which is a library that allows you to interact with Iceberg tables using Python, without the need of a JVM. It is important to note that `pyiceberg` is a fast evolving project and does not support the full range of features that Iceberg tables offer. You can use this tutorial as inspiration to extend the functionality using different compute engines such as [Spark](https://iceberg.apache.org/docs/nightly/spark-getting-started/), or dataframe technologies such as [Apache Arrow, DuckDB, and more](https://py.iceberg.apache.org/api/#query-the-data) by [creating your own custom datasets](../extend/how_to_create_a_custom_dataset.md).
+[Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets.
+Iceberg tables offer features such as schema evolution, hidden partitioning, partition layout evolution, time travel, and version rollback.
+This guide explains how to use Iceberg tables with Kedro.
+For this tutorial, we use [`pyiceberg`](https://py.iceberg.apache.org/), a Python library that works without a JVM.
+The project continues to evolve and does not yet support every Iceberg capability.
+Use this tutorial as inspiration to extend the functionality with compute engines such as [Spark](https://iceberg.apache.org/docs/nightly/spark-getting-started/).
+You can also use dataframe technologies such as [Apache Arrow, DuckDB, and more](https://py.iceberg.apache.org/api/#query-the-data) by [creating your own custom datasets](../extend/how_to_create_a_custom_dataset.md).
 
 ## Prerequisites
 
@@ -23,7 +29,7 @@ pip install -r requirements.txt
 ```
 ### Set up the Iceberg catalog
 
-Iceberg tables are managed by a catalog which is responsible for managing the metadata of the tables. In production, this could be a Hive, Glue, or [other catalog supported by Apache Iceberg](https://py.iceberg.apache.org/configuration/#catalogs). Iceberg also supports various storage options such as S3, HDFS, and more. There are multiple ways you can configure the catalog, credentials, and object storage to suit your needs by referring to the [configuration guide](https://py.iceberg.apache.org/configuration/). For this tutorial, we will use the `SQLCatalog` which stores the metadata in a local `sqlite` database and uses the local filesystem for storage.
+Iceberg tables are managed by a catalog that maintains table metadata. In production, this could be a Hive, Glue, or [other catalog supported by Apache Iceberg](https://py.iceberg.apache.org/configuration/#catalogs). Iceberg also supports various storage options such as S3, HDFS, and more. There are multiple ways you can configure the catalog, credentials, and object storage to suit your needs by referring to the [configuration guide](https://py.iceberg.apache.org/configuration/). For this tutorial, we will use the `SQLCatalog` which stores the metadata in a local `sqlite` database and uses the local filesystem for storage.
 
 Create a temporary location for Iceberg tables by running the following command:
 
@@ -219,7 +225,7 @@ parent_id: [[null,9089827653240705573,5091346767047746426]]
 is_current_ancestor: [[true,true,true]]
 ```
 
-Alternatively, you can also call the `history()` method from the `pyiceberg.table.Table` object directly which shows a more concise output:
+You can also call the `history()` method from the `pyiceberg.table.Table` object directly, which shows a more concise output:
 
 ```python
 In [4]: model_input_table.table.history()

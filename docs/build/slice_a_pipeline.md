@@ -37,6 +37,7 @@ Let's look again at the example pipeline from the [pipeline introduction documen
 
 The `Pipeline.describe()` method returns the following output:
 
+<!--vale off-->
 ??? example "View code"
     ```console
     #### Pipeline execution order ####
@@ -51,7 +52,7 @@ The `Pipeline.describe()` method returns the following output:
     Outputs: v
     ##################################
     ```
-
+<!--vale on-->
 ## Slice a pipeline by providing inputs
 One way to slice a pipeline is to provide a set of pre-calculated inputs which should serve as a start of the pipeline. For example, to slice the pipeline to run from input `m2` downstream you can specify it like this:
 
@@ -96,7 +97,7 @@ Slicing the pipeline from inputs `m` and `xs` results in the following pipeline:
     ##################################
     ```
 
-As you can see, adding `m` in the `from_inputs` list does not guarantee that it will not be recomputed if another input like `xs` is specified.
+Adding `m` in the `from_inputs` list does not guarantee that it will not be recomputed if another input like `xs` is specified.
 
 ## Slice a pipeline by specifying nodes
 Another way of slicing a pipeline is to specify the nodes which should be used as a start of the new pipeline. For example:
@@ -120,7 +121,7 @@ Another way of slicing a pipeline is to specify the nodes which should be used a
     ##################################
     ```
 
-As you can see, this will slice the pipeline and run it from the specified node to all other nodes downstream.
+This command slices the pipeline and runs it from the specified node to all other nodes downstream.
 
 You can run the resulting pipeline slice by running the following command in your terminal window:
 
@@ -150,7 +151,7 @@ Similarly, you can specify the nodes which should be used to end a pipeline. For
         ##################################
     ```
 
-As you can see, this will slice the pipeline, so it runs from the beginning and ends with the specified node:
+This slices the pipeline so it runs from the beginning and ends with the specified node:
 
 ```bash
 kedro run --to-nodes=mean_node
@@ -214,7 +215,7 @@ To slice a pipeline from nodes that have tag `mean` *OR* tag `variance`:
     ```
 
 ## Slice a pipeline by running specified nodes
-Sometimes you might need to run only some of the nodes in a pipeline, as follows:
+Sometimes you might need to run a subset of the nodes in a pipeline, as follows:
 
 ??? example "View code"
     ```python
@@ -266,8 +267,9 @@ Kedro can automatically generate a sliced pipeline from existing node outputs. T
     ##################################
     ```
 
-To demonstrate this, let us save the intermediate output `n` using a `JSONDataset`.
+To illustrate this, let us save the intermediate output `n` using a `JSONDataset`.
 
+<!--vale off-->
 ??? example "View code"
     ```python
     from kedro_datasets.pandas import JSONDataset
@@ -277,7 +279,7 @@ To demonstrate this, let us save the intermediate output `n` using a `JSONDatase
     io = DataCatalog(dict(xs=MemoryDataset([1, 2, 3]), n=n_json))
     ```
 
-Because `n` was not saved previously, checking for its existence returns `False`:
+Because `n` had not been saved, checking for its existence returns `False`:
 
 ??? example "View code"
     ```python
@@ -313,7 +315,7 @@ Running the pipeline calculates `n` and saves the result to disk:
     Out[17]: True
     ```
 
-We can avoid re-calculating `n` (and all other results that have already been saved) by using the `Runner.run_only_missing` method. Note that the first node of the original pipeline (`len([xs]) -> [n]`) has not been run:
+We can avoid re-calculating `n` (and all other results that have already been saved) by using the `Runner.run_only_missing` method. **Note**: the first node of the original pipeline (`len([xs]) -> [n]`) has not been run:
 
 ??? example "View code"
     ```python

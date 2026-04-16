@@ -1,0 +1,225 @@
+name: Security Scanning
+
+# Performs comprehensive security scanning with SAST (Semgrep) and dependency
+# vulnerability scanning (pip-audit). PR scans focus on changed files for speed,
+# while weekly deep scans check the entire repository.
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 9 * * 1'  # Monday 9:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
+
+jobs:
+  pr-scan:
+    name: PR Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+
+      # ──────────────────────────────────────────────────────────────────────
+      # Dependency vulnerability scanning
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Run pip-audit
+        id: pip-audit
+        continue-on-error: true
+        run: |
+          pip-audit --format json --output pip-audit-report.json . || echo "::warning::pip-audit scan encountered issues"
+
+      - name: Check pip-audit results
+        id: pip-audit-check
+        continue-on-error: true
+        run: |
+          tools/github_actions/check-pip-audit.sh \
+            pip-audit-report.json \
+            0 \
+            0
+
+      # ──────────────────────────────────────────────────────────────────────
+      # SAST scanning (changed files only)
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Run Semgrep
+        id: semgrep
+        uses: returntocorp/semgrep-action@v1
+        continue-on-error: true
+        with:
+          config: >-
+            p/python
+            p/secrets
+            p/command-injection
+            p/yaml
+          scanDependencies: false
+          publishToken: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
+          publishDeployment: ${{ secrets.SEMGREP_DEPLOYMENT_ID || '' }}
+          generateSarif: 'true'
+        env:
+          SEMGREP_TIMEOUT: 300
+
+      - name: Check Semgrep results
+        id: semgrep-check
+        continue-on-error: true
+        run: |
+          tools/github_actions/check-semgrep.sh \
+            semgrep.sarif \
+            0 \
+            diff
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('semgrep.sarif') != ''
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep-pr-scan
+
+      # ──────────────────────────────────────────────────────────────────────
+      # Generate summary and fail check
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Generate security summary
+        if: always()
+        run: |
+          {
+            echo "## :shield: Security Scan Summary"
+            echo ""
+            echo "**Scope:** Changed files only | **Full scan:** Weekly deep-scan job"
+            echo ""
+            echo "| Tool | Critical | High | Error | Warning | Note | Status |"
+            echo "|------|----------|------|-------|---------|------|--------|"
+            echo "| pip-audit | ${{ steps.pip-audit-check.outputs.critical || 0 }} | ${{ steps.pip-audit-check.outputs.high || 0 }} | - | - | - | ${{ steps.pip-audit-check.outputs.blocking == 'true' && '🔴 Failed' || '✅ Passed' }} |"
+            echo "| Semgrep | - | - | ${{ steps.semgrep-check.outputs.error || 0 }} | ${{ steps.semgrep-check.outputs.warning || 0 }} | ${{ steps.semgrep-check.outputs.note || 0 }} | ${{ steps.semgrep-check.outputs.blocking == 'true' && '🔴 Failed' || '✅ Passed' }} |"
+            echo ""
+            echo "**Blocking Thresholds:** Critical ≤ 0, High ≤ 0, Errors ≤ 0"
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail on security issues
+        if: |
+          steps.pip-audit-check.outputs.blocking == 'true' ||
+          steps.semgrep-check.outputs.blocking == 'true'
+        run: |
+          echo "::error::Security scan failed - review job summary for details"
+          exit 1
+
+  deep-scan:
+    name: Deep Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+
+      - name: Set scan date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      # ──────────────────────────────────────────────────────────────────────
+      # Deep SAST scan (full repository)
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Run Semgrep deep scan
+        id: semgrep-deep
+        uses: returntocorp/semgrep-action@v1
+        continue-on-error: true
+        with:
+          config: auto
+          scanDependencies: false
+          publishToken: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
+          publishDeployment: ${{ secrets.SEMGREP_DEPLOYMENT_ID || '' }}
+          generateSarif: 'true'
+        env:
+          SEMGREP_TIMEOUT: 600
+
+      - name: Parse Semgrep deep results
+        id: semgrep-parse
+        if: always()
+        run: |
+          tools/github_actions/check-semgrep.sh \
+            semgrep.sarif \
+            999999 \
+            auto || true
+
+      # ──────────────────────────────────────────────────────────────────────
+      # Deep dependency scan
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Run pip-audit deep scan
+        id: pip-audit-deep
+        continue-on-error: true
+        run: |
+          pip-audit --format json --output pip-audit-deep-report.json --verbose . || true
+
+      - name: Parse pip-audit deep results
+        id: pip-audit-parse
+        if: always()
+        run: |
+          tools/github_actions/check-pip-audit.sh \
+            pip-audit-deep-report.json \
+            999999 \
+            999999 || true
+
+      # ──────────────────────────────────────────────────────────────────────
+      # Generate deep scan summary
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Generate deep scan summary
+        if: always()
+        run: |
+          {
+            echo "## :microscope: Deep Security Scan"
+            echo ""
+            echo "**Scan Date:** ${{ steps.date.outputs.date }}"
+            echo ""
+            echo "| Tool | Total Findings | Critical | High | Errors | Warnings |"
+            echo "|------|----------------|----------|------|--------|----------|"
+            echo "| Semgrep (auto) | ${{ steps.semgrep-parse.outputs.total || 0 }} | - | - | ${{ steps.semgrep-parse.outputs.error || 0 }} | ${{ steps.semgrep-parse.outputs.warning || 0 }} |"
+            echo "| pip-audit | ${{ steps.pip-audit-parse.outputs.vuln_count || 0 }} | ${{ steps.pip-audit-parse.outputs.critical || 0 }} | ${{ steps.pip-audit-parse.outputs.high || 0 }} | - | - |"
+            echo ""
+            echo "> **Note:** Weekly comprehensive scan. Results are informational and non-blocking."
+            echo "> Review uploaded artifacts for detailed findings."
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload deep scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-deep-scan-${{ steps.date.outputs.date }}
+          path: |
+            semgrep.sarif
+            pip-audit-deep-report.json
+          retention-days: 30
+          if-no-files-found: warn

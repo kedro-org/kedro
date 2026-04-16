@@ -10,7 +10,7 @@ This feature is **opt-in**: add a type hint to enable validation for that parame
 
 Parameter validation supports two kinds of typed objects:
 
-- **Pydantic models** (v2+): Full validation with field constraints, nested models, and custom validators. Requires `pip install "kedro[pydantic]`.
+- **Pydantic models** (v2+): Full validation with field constraints, nested models, and custom validators. Requires `pip install "kedro[pydantic]"`.
 - **Dataclasses**: Basic type checking using Python's built-in `dataclasses` module. No extra dependencies needed.
 
 !!! note

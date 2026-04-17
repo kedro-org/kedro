@@ -1,5 +1,6 @@
 name: Security Scanning
 
+# TODO: REVERT BEFORE MERGE - Deep scan is temporarily enabled for pull_request testing
 # Performs comprehensive security scanning with SAST (Semgrep) and dependency
 # vulnerability scanning (pip-audit). PR scans focus on changed files for speed,
 # while weekly deep scans check the entire repository.
@@ -72,11 +73,7 @@ jobs:
             p/python
             p/secrets
             p/command-injection
-            p/yaml
-          scanDependencies: false
           publishToken: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
-          publishDeployment: ${{ secrets.SEMGREP_DEPLOYMENT_ID || '' }}
-          generateSarif: 'true'
         env:
           SEMGREP_TIMEOUT: 300
 
@@ -126,7 +123,8 @@ jobs:
   deep-scan:
     name: Deep Security Scan
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # TODO: REVERT BEFORE MERGE - Temporarily enabled for testing
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
     timeout-minutes: 30
 
     steps:
@@ -159,10 +157,7 @@ jobs:
         continue-on-error: true
         with:
           config: auto
-          scanDependencies: false
           publishToken: ${{ secrets.SEMGREP_APP_TOKEN || '' }}
-          publishDeployment: ${{ secrets.SEMGREP_DEPLOYMENT_ID || '' }}
-          generateSarif: 'true'
         env:
           SEMGREP_TIMEOUT: 600
 

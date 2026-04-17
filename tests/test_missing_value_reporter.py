@@ -31,6 +31,7 @@ class TestMissingValueReporter:
         assert report["columns"]["Name"]["null_count"] == 2
         assert report["columns"]["Name"]["null_pct"] == 50.0
         assert report["columns"]["Age"]["null_count"] == 0
+        assert "Name" in report["flagged_columns"]              #Tests null count, percentage and flagging
 
     def test_all_missing_values(self):                                  #An entire column is completely empty
         df = pd.DataFrame({                                             #Create a table where score column is all blank 

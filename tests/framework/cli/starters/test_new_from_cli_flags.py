@@ -16,6 +16,7 @@ from tests.framework.cli.starters.utils import (
     _assert_name_ok,
     _assert_requirements_ok,
     _assert_template_ok,
+    _make_cli_prompt_input,
     _make_cli_prompt_input_without_name,
     _make_cli_prompt_input_without_tools,
 )
@@ -373,6 +374,56 @@ class TestCheckoutWithoutStarter:
         assert mock_cookiecutter.call_args[1]["template"] == str(TEMPLATE_PATH)
         assert mock_cookiecutter.call_args[1]["checkout"] == "my_checkout"
         assert any(
+            "The --checkout flag has no effect" in str(w.message)
+            for w in caught_warnings
+            if issubclass(w.category, UserWarning)
+        )
+
+    def test_no_warning_when_starter_used_without_checkout(
+        self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter
+    ):
+        """--starter without --checkout should not trigger the checkout warning.
+
+        checkout is auto-set to the kedro version when using an official starter,
+        which previously caused the warning to fire spuriously.
+        """
+        import warnings
+
+        with warnings.catch_warnings(record=True) as caught_warnings:
+            warnings.simplefilter("always")
+            result = CliRunner().invoke(
+                fake_kedro_cli,
+                ["new", "--starter", "spaceflights-pandas"],
+                input=_make_cli_prompt_input(),
+            )
+        assert result.exit_code == 0, result.output
+        assert not any(
+            "The --checkout flag has no effect" in str(w.message)
+            for w in caught_warnings
+            if issubclass(w.category, UserWarning)
+        )
+
+    def test_no_warning_when_starter_used_with_explicit_checkout(
+        self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter
+    ):
+        """--starter with explicit --checkout should not trigger the checkout warning."""
+        import warnings
+
+        with warnings.catch_warnings(record=True) as caught_warnings:
+            warnings.simplefilter("always")
+            result = CliRunner().invoke(
+                fake_kedro_cli,
+                [
+                    "new",
+                    "--starter",
+                    "spaceflights-pandas",
+                    "--checkout",
+                    "my_checkout",
+                ],
+                input=_make_cli_prompt_input(),
+            )
+        assert result.exit_code == 0, result.output
+        assert not any(
             "The --checkout flag has no effect" in str(w.message)
             for w in caught_warnings
             if issubclass(w.category, UserWarning)

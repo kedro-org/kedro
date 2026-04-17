@@ -48,8 +48,13 @@ def resolve_nested_dict_path(data: dict, path: str) -> Any:
 
     Returns None if any key in the path is missing.
     """
+    # If namespaced params use flat dotted keys (e.g. "demo.config"),
+    # check for a literal match before treating dots as path separators.
+    if path in data:
+        return data[path]
+
     if "." not in path:
-        return data.get(path)
+        return None
 
     keys = path.split(".")
     value = data
@@ -69,6 +74,10 @@ def set_nested_dict_value(data: dict, path: str, value: Any) -> None:
     Raises:
         ParameterValidationError: If an intermediate key is not a dictionary.
     """
+    if path in data:
+        data[path] = value
+        return
+
     if "." not in path:
         data[path] = value
         return

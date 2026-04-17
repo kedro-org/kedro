@@ -142,7 +142,7 @@ jobs:
       - name: Install security tools
         run: |
           python -m pip install --upgrade pip
-          pip install pip-audit semgrep
+          pip install pip-audit
 
       - name: Set scan date
         id: date
@@ -155,10 +155,14 @@ jobs:
         id: semgrep-deep
         continue-on-error: true
         run: |
-          # Force full repository scan by running CLI directly
-          semgrep scan --config auto --sarif --output semgrep.sarif --timeout 600 . || true
-        env:
-          SEMGREP_TIMEOUT: 600
+          # Force full repository scan using Docker
+          docker run --rm -v "${PWD}:/src" \
+            -e SEMGREP_TIMEOUT=600 \
+            returntocorp/semgrep semgrep scan \
+            --config auto \
+            --sarif \
+            --output /src/semgrep.sarif \
+            /src || true
 
       - name: Parse Semgrep deep results
         id: semgrep-parse

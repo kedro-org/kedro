@@ -113,6 +113,14 @@ class TestResolveNestedDictPath:
         data = {"model": "not_a_dict"}
         assert resolve_nested_dict_path(data, "model.options") is None
 
+    def test_flat_dotted_key(self):
+        data = {"demo.config": {"test_size": 0.2}}
+        assert resolve_nested_dict_path(data, "demo.config") == {"test_size": 0.2}
+
+    def test_flat_dotted_key_preferred_over_nested(self):
+        data = {"demo.config": "flat", "demo": {"config": "nested"}}
+        assert resolve_nested_dict_path(data, "demo.config") == "flat"
+
 
 class TestSetNestedDictValue:
     def test_flat_key(self):
@@ -134,3 +142,8 @@ class TestSetNestedDictValue:
         data = {"model": "not_a_dict"}
         with pytest.raises(ParameterValidationError, match="not a dictionary"):
             set_nested_dict_value(data, "model.options.test_size", 0.3)
+
+    def test_flat_dotted_key(self):
+        data = {"demo.config": "old"}
+        set_nested_dict_value(data, "demo.config", "new")
+        assert data["demo.config"] == "new"

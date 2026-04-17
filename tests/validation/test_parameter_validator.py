@@ -40,6 +40,33 @@ class TestParameterValidator:
 
         assert isinstance(result["model_options"], SamplePydanticModel)
 
+    def test_validate_raw_params_namespaced_pipeline(self):
+        """End-to-end: namespaced pipeline produces flat dotted keys that are validated."""
+        from kedro.pipeline import Pipeline
+
+        def my_func(model_options: SamplePydanticModel) -> None:
+            pass
+
+        inner = Pipeline(
+            [
+                kedro_node(
+                    func=my_func,
+                    inputs="params:model_options",
+                    outputs="output",
+                    name="test_node",
+                )
+            ]
+        )
+        wrapped = Pipeline(inner, namespace="demo")
+
+        raw = {"demo.model_options": {"test_size": 0.2, "random_state": 3}}
+
+        validator = ParameterValidator({"demo_pipeline": wrapped})
+        result = validator.validate_raw_params(raw)
+
+        assert isinstance(result["demo.model_options"], SamplePydanticModel)
+        assert result["demo.model_options"].test_size == 0.2
+
 
 class TestApplyValidation:
     def test_pydantic_model_success(self, parameter_validator):
@@ -129,3 +156,12 @@ class TestApplyValidation:
 
         parameter_validator._apply_validation(raw, requirements)
         assert isinstance(raw["config"], dict)
+
+    def test_namespaced_flat_key(self, parameter_validator):
+        """Params stored under a flat dotted key (namespaced pipeline) are validated."""
+        raw = {"demo.model_options": {"test_size": 0.2, "random_state": 3}}
+        requirements = {"demo.model_options": SamplePydanticModel}
+
+        result = parameter_validator._apply_validation(raw, requirements)
+        assert isinstance(result["demo.model_options"], SamplePydanticModel)
+        assert result["demo.model_options"].test_size == 0.2

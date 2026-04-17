@@ -48,7 +48,7 @@ def resolve_nested_dict_path(data: dict, path: str) -> Any:
 
     Returns None if any key in the path is missing.
     """
-    # If namespaced params use flat dotted keys (e.g. "demo.config"),
+    # If namespaced params use flat dotted keys (e.g. "name.config"),
     # check for a literal match before treating dots as path separators.
     if path in data:
         return data[path]

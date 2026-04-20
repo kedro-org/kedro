@@ -122,7 +122,6 @@ def create_http_server() -> FastAPI:
             namespaces=request.namespaces,
             only_missing_outputs=request.only_missing_outputs,
         )
-
         error_detail = None
         if result.error:
             error_detail = ErrorDetail(
@@ -131,12 +130,14 @@ def create_http_server() -> FastAPI:
                 traceback=result.error.traceback,
             )
 
-        return RunResponse(
+        res = RunResponse(
             run_id=result.run_id,
             status=result.status,
             duration_ms=result.duration_ms,
             error=error_detail,
+            result_config=result.result_config,
         )
+        return res
 
     return app
 
@@ -201,7 +202,7 @@ def execute_pipeline(  # noqa: PLR0913
         runner_class = load_obj(runner_name, "kedro.runner")
         runner_obj = runner_class(is_async=is_async)
 
-        session.run(
+        result = session.run(
             run_id=run_id,
             pipeline_names=pipeline_names,
             tags=tuple(tags) if tags else None,
@@ -219,12 +220,19 @@ def execute_pipeline(  # noqa: PLR0913
 
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.info("Pipeline run %s completed in %.2fms", run_id, duration_ms)
-
-        return PipelineExecutionResult(
+        result_config = {}
+        for key, value in result.items():
+            result_config[key] = value._init_config() if value else None
+        # print(result)
+        # print(result_config)
+        response = PipelineExecutionResult(
             run_id=run_id,
             status="success",
             duration_ms=round(duration_ms, 2),
+            result_config=result_config,
         )
+        # print(response)
+        return response
 
     except Exception as exc:
         duration_ms = (time.perf_counter() - start_time) * 1000
@@ -246,4 +254,5 @@ def execute_pipeline(  # noqa: PLR0913
             status="failure",
             duration_ms=round(duration_ms, 2),
             error=error,
+            result_config=None,
         )

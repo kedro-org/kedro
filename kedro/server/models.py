@@ -25,6 +25,7 @@ class PipelineExecutionResult:
     status: str  # "success" | "failed"
     duration_ms: float
     error: PipelineExecutionError | None = None
+    result_config: dict[str, Any] = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to a plain dictionary, omitting None values."""
@@ -128,6 +129,7 @@ class RunResponse(BaseModel):
         default=None,
         description="Error details if status is 'failed'.",
     )
+    result_config: dict[str, Any] | None = None
 
 
 class HealthResponse(BaseModel):

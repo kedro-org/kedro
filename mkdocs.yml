@@ -290,6 +290,7 @@ extra_css:
   - stylesheets/mermaid.css
 
 extra_javascript:
+  - https://kedro.org/consent/kedro-consent.js
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
 

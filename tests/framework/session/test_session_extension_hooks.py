@@ -30,11 +30,12 @@ from tests.framework.session.conftest import (
     assert_exceptions_equal,
 )
 
-# Window and MacOS(Python>3.7) default with `spawn` process which reload modules
-# and cause test fails
+# Windows and macOS use `spawn` by default; Python 3.14+ Linux uses `forkserver`.
+# Both methods don't inherit file descriptors, so log records from subprocesses
+# can't reach the test's QueueHandler, causing hook count assertions to fail.
 SKIP_ON_WINDOWS_AND_MACOS = pytest.mark.skipif(
-    multiprocessing.get_start_method() == "spawn",
-    reason="Due to bug in parallel runner",
+    multiprocessing.get_start_method() in ("spawn", "forkserver"),
+    reason="Due to bug in parallel runner with non-fork start methods",
 )
 
 logger = logging.getLogger("tests.framework.session.conftest")

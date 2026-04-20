@@ -19,6 +19,18 @@ logger = logging.getLogger(__name__)
 _PARAMS_PREFIX = "params:"
 
 
+def _type_name(tp: type) -> str:
+    """Return a human-readable name for a type, using str() for union types.
+
+    In Python 3.14, types.UnionType gained __name__ == "Union", so
+    getattr(tp, "__name__", str(tp)) would return "Union" instead of
+    the full representation like "list[str] | int".
+    """
+    if isinstance(tp, types.UnionType) or get_origin(tp) is Union:
+        return str(tp)
+    return getattr(tp, "__name__", str(tp))
+
+
 def _unwrap_optional(tp: type) -> type:
     """Unwrap ``Optional[X]`` / ``X | None`` to ``X``.
 
@@ -70,10 +82,10 @@ class TypeExtractor:
                             "%s (existing) vs %s (from pipeline '%s'). "
                             "Using %s.",
                             key,
-                            getattr(existing_type, "__name__", str(existing_type)),
-                            getattr(new_type, "__name__", str(new_type)),
+                            _type_name(existing_type),
+                            _type_name(new_type),
                             pipeline_name,
-                            getattr(new_type, "__name__", str(new_type)),
+                            _type_name(new_type),
                         )
 
             all_type_requirements.update(pipeline_type_requirements)

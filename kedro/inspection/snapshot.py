@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -24,6 +25,9 @@ from kedro.inspection.models import (
 if TYPE_CHECKING:
     from kedro.framework.startup import ProjectMetadata
     from kedro.pipeline.node import Node
+
+
+_ENV_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
 def _build_project_metadata_snapshot(
@@ -58,7 +62,8 @@ def _build_dataset_snapshots(
     return {
         ds_name: DatasetSnapshot.from_config(ds_name, ds_config)
         for ds_name, ds_config in catalog_config.items()
-        if not ds_name.startswith("_")  # skip YAML interpolation anchors
+        if not ds_name.startswith("_")
+        and isinstance(ds_config, dict)  # skip YAML anchors and non-dict entries
     }
 
 
@@ -122,7 +127,12 @@ def _build_project_snapshot(
     Returns:
         A fully populated ``ProjectSnapshot``.
     """
-    project_path = Path(project_path)
+    project_path = Path(project_path).resolve()
+
+    if env is not None and not _ENV_RE.match(env):
+        raise ValueError(
+            f"Invalid env value {env!r}: must contain only letters, digits, hyphens, and underscores."
+        )
 
     metadata = bootstrap_project(project_path)
     config_loader = _make_config_loader(project_path, env=env)

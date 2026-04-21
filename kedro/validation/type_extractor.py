@@ -44,21 +44,42 @@ class TypeExtractor:
         self._pipelines = pipelines
         self._warned_union_types: set[type] = set()
 
-    def extract_types_from_pipelines(self) -> dict[str, type]:
-        """Extract all type requirements from registered pipelines.
+    def extract_types_from_pipelines(
+        self, pipeline_name: str | None = None
+    ) -> dict[str, type]:
+        """Extract type requirements from registered pipelines.
 
-        Walks all pipelines (except ``__default__``) and inspects node
-        function signatures for type-annotated ``params:`` inputs.
+        When *pipeline_name* is given, only that pipeline is inspected.
+        Otherwise all pipelines (except ``__default__``) are walked.
+
+        Args:
+            pipeline_name: Optional name of a specific pipeline to inspect.
+                When ``None``, all registered pipelines are inspected.
 
         Returns:
             Dictionary mapping parameter keys to their expected types.
+
+        Raises:
+            KeyError: If *pipeline_name* is given but not found in the
+                registered pipelines.
         """
+        if pipeline_name is not None:
+            if pipeline_name not in self._pipelines:
+                raise KeyError(
+                    f"Pipeline '{pipeline_name}' not found. "
+                    f"Available pipelines: {sorted(self._pipelines.keys())}"
+                )
+            target = {pipeline_name: self._pipelines[pipeline_name]}
+        else:
+            target = {
+                name: pipe
+                for name, pipe in self._pipelines.items()
+                if name != "__default__"
+            }
+
         all_type_requirements: dict[str, type] = {}
 
-        for pipeline_name, pipeline in self._pipelines.items():
-            if pipeline_name == "__default__":
-                continue
-
+        for name, pipeline in target.items():
             pipeline_type_requirements = self._extract_types_from_pipeline(pipeline)
 
             for key, new_type in pipeline_type_requirements.items():
@@ -72,15 +93,16 @@ class TypeExtractor:
                             key,
                             getattr(existing_type, "__name__", str(existing_type)),
                             getattr(new_type, "__name__", str(new_type)),
-                            pipeline_name,
+                            name,
                             getattr(new_type, "__name__", str(new_type)),
                         )
 
             all_type_requirements.update(pipeline_type_requirements)
 
         logger.debug(
-            "Found %d type requirements across all pipelines",
+            "Found %d type requirements across %s",
             len(all_type_requirements),
+            f"pipeline '{pipeline_name}'" if pipeline_name else "all pipelines",
         )
         return all_type_requirements
 

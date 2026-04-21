@@ -409,6 +409,47 @@ class TestKedroContext:
         second = dummy_context.params
         assert first is second
 
+    def test_validated_params_cache_keyed_by_pipeline(self, dummy_context):
+        """Different pipeline names should cache independently."""
+        # Access with no pipeline (default)
+        dummy_context._get_validated_params()
+        assert None in dummy_context._validated_params_cache
+
+        # Access with a specific pipeline name
+        dummy_context._get_validated_params(pipeline_name="data_science")
+        assert "data_science" in dummy_context._validated_params_cache
+
+        # Both should be cached independently
+        assert len(dummy_context._validated_params_cache) == 2
+
+    def test_get_catalog_with_pipeline_name(self, dummy_context, mocker):
+        """Verify _get_catalog passes pipeline_name to _get_parameters."""
+        spy = mocker.spy(dummy_context, "_get_parameters")
+        dummy_context._get_catalog(pipeline_name="data_science")
+        spy.assert_called_once_with(pipeline_name="data_science")
+
+    def test_get_parameters_with_pipeline_name(self, dummy_context, mocker):
+        """Verify _get_parameters calls _get_validated_params directly
+        when pipeline_name is provided, bypassing self.params."""
+        spy = mocker.spy(dummy_context, "_get_validated_params")
+        dummy_context._get_parameters(pipeline_name="data_science")
+        spy.assert_called_once_with(pipeline_name="data_science")
+
+    def test_get_parameters_without_pipeline_name_uses_params_property(
+        self, dummy_context, mocker
+    ):
+        """Verify _get_parameters() with no pipeline_name uses self.params."""
+        mocker.patch.object(
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(
+                lambda self: {"param1": 1, "param2": 2, "param3": {"param4": 3}}
+            ),
+        )
+        result = dummy_context._get_parameters()
+        assert "parameters" in result
+        assert result["parameters"]["param1"] == 1
+
 
 @pytest.mark.parametrize(
     "path_string,expected",

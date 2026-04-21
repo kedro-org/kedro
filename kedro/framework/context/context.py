@@ -178,7 +178,7 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
-    _validated_params_cache: dict[str, Any] | None = None
+    _validated_params_cache: dict[str | None, dict[str, Any]] | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -192,14 +192,21 @@ class KedroContext:
         """
         return self._get_catalog()
 
-    def _get_validated_params(self) -> dict[str, Any]:
+    def _get_validated_params(self, pipeline_name: str | None = None) -> dict[str, Any]:
         """Get validated parameters with caching support.
+
+        Args:
+            pipeline_name: Optional pipeline name to scope validation to.
+                When ``None``, all registered pipelines are inspected.
 
         Returns:
             Validated and transformed parameters with model instantiation.
         """
-        if self._validated_params_cache is not None:
-            return self._validated_params_cache
+        if self._validated_params_cache is None:
+            self._validated_params_cache = {}
+
+        if pipeline_name in self._validated_params_cache:
+            return self._validated_params_cache[pipeline_name]
 
         try:
             raw_params = self.config_loader["parameters"]
@@ -213,14 +220,16 @@ class KedroContext:
 
             pipeline_dict = dict(project_pipelines)
             validator = ParameterValidator(pipeline_dict)
-            validated_params = validator.validate_raw_params(raw_params)
+            validated_params = validator.validate_raw_params(
+                raw_params, pipeline_name=pipeline_name
+            )
         except ImportError:
             logging.getLogger(__name__).warning(
                 "Could not import pipelines, skipping parameter validation"
             )
             validated_params = raw_params
 
-        self._validated_params_cache = validated_params
+        self._validated_params_cache[pipeline_name] = validated_params
 
         return validated_params
 
@@ -240,8 +249,17 @@ class KedroContext:
         catalog_class: type = DataCatalog,
         save_version: str | None = None,
         load_versions: dict[str, str] | None = None,
+        pipeline_name: str | None = None,
     ) -> CatalogProtocol:
         """A hook for changing the creation of a catalog instance.
+
+        Args:
+            catalog_class: The catalog class to use.
+            save_version: Version string to use for ``save`` operations.
+            load_versions: Mapping of dataset names to version strings
+                for ``load`` operations.
+            pipeline_name: Optional pipeline name to scope parameter
+                validation to.
 
         Returns:
             catalog defined in `catalog.yml`.
@@ -268,7 +286,7 @@ class KedroContext:
             save_version=save_version,
         )
 
-        parameters = self._get_parameters()
+        parameters = self._get_parameters(pipeline_name=pipeline_name)
 
         # Add parameters data to catalog.
         for param_name, param_value in parameters.items():
@@ -286,10 +304,19 @@ class KedroContext:
         )
         return catalog
 
-    def _get_parameters(self) -> dict[str, Any]:
+    def _get_parameters(self, pipeline_name: str | None = None) -> dict[str, Any]:
         """Returns a dictionary with data to be added in memory as ``MemoryDataset`` instances.
-        Keys represent parameter names and the values are parameter values."""
-        params = self.params
+        Keys represent parameter names and the values are parameter values.
+
+        Args:
+            pipeline_name: Optional pipeline name to scope parameter
+                validation to. When ``None``, uses the ``params`` property
+                (validates all pipelines).
+        """
+        if pipeline_name is not None:
+            params = self._get_validated_params(pipeline_name=pipeline_name)
+        else:
+            params = self.params
         params_dict: dict[str, Any] = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:

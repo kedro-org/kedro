@@ -333,6 +333,91 @@ def test_validate_safe_config():
 
 
 @pytest.mark.parametrize(
+    "class_path",
+    [
+        "logging.StreamHandler",
+        "logging.FileHandler",
+        "logging.handlers.RotatingFileHandler",
+        "logging.Formatter",
+        "logging.Filter",
+        "kedro.logging.RichHandler",
+    ],
+)
+def test_validate_logging_class_allows_legitimate_classes(class_path):
+    """Legitimate logging classes must pass validation without error."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    # Should not raise
+    logging_instance._validate_logging_class(class_path)
+
+
+@pytest.mark.parametrize(
+    "class_path",
+    [
+        "subprocess.Popen",
+        "os.system",
+        "builtins.eval",
+        "builtins.exec",
+    ],
+)
+def test_validate_logging_class_blocks_non_logging_classes(class_path):
+    """Non-logging classes (e.g. subprocess.Popen) must be rejected."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="Invalid logging class"):
+        logging_instance._validate_logging_class(class_path)
+
+
+def test_validate_logging_class_blocks_nonexistent_class():
+    """A class that doesn't exist in its module must be rejected."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="not found in module"):
+        logging_instance._validate_logging_class("logging.NonExistentHandler")
+
+
+def test_validate_logging_class_blocks_nonexistent_module():
+    """A class from a non-importable module must be rejected."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="Cannot import module"):
+        logging_instance._validate_logging_class("totally.fake.module.Handler")
+
+
+def test_validate_logging_class_bare_name_passes():
+    """A bare class name with no module prefix must pass (logging resolves it)."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    logging_instance._validate_logging_class("StreamHandler")  # should not raise
+
+
+def test_validate_config_blocks_rce_via_class():
+    """The subprocess.Popen RCE vector via the 'class' key must be blocked."""
+    from kedro.framework.project import _ProjectLogging
+
+    malicious_config = {
+        "version": 1,
+        "handlers": {
+            "rce": {
+                "class": "subprocess.Popen",
+                "args": "id",
+                "shell": True,
+            }
+        },
+        "root": {"handlers": ["rce"]},
+    }
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="Invalid logging class"):
+        logging_instance.configure(malicious_config)
+
+
+@pytest.mark.parametrize(
     "input_config",
     [
         # Simple dict with '()' key

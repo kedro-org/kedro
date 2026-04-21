@@ -178,7 +178,7 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
-    _validated_params_cache: dict[str, Any] | None = None
+    _validated_params_cache: dict[str | None, dict[str, Any]] | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -192,9 +192,7 @@ class KedroContext:
         """
         return self._get_catalog()
 
-    def _get_validated_params(
-        self, pipeline_name: str | None = None
-    ) -> dict[str, Any]:
+    def _get_validated_params(self, pipeline_name: str | None = None) -> dict[str, Any]:
         """Get validated parameters with caching support.
 
         Args:

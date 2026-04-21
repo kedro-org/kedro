@@ -412,13 +412,11 @@ class TestKedroContext:
     def test_validated_params_cache_keyed_by_pipeline(self, dummy_context):
         """Different pipeline names should cache independently."""
         # Access with no pipeline (default)
-        default_params = dummy_context._get_validated_params()
+        dummy_context._get_validated_params()
         assert None in dummy_context._validated_params_cache
 
         # Access with a specific pipeline name
-        scoped_params = dummy_context._get_validated_params(
-            pipeline_name="data_science"
-        )
+        dummy_context._get_validated_params(pipeline_name="data_science")
         assert "data_science" in dummy_context._validated_params_cache
 
         # Both should be cached independently
@@ -441,7 +439,7 @@ class TestKedroContext:
         self, dummy_context, mocker
     ):
         """Verify _get_parameters() with no pipeline_name uses self.params."""
-        params_spy = mocker.patch.object(
+        mocker.patch.object(
             type(dummy_context),
             "params",
             new_callable=lambda: property(

@@ -39,7 +39,7 @@ For the `ParallelRunner`, it is possible to manually select which multiprocessin
 
 - `fork`: The child process is created as a copy of the parent process. This is fast but can cause issues with libraries that use threads or manage internal state. Default on Linux up to Python 3.13.
 
-- `forkserver`: A pre-spawned server process forks new workers on demand. Avoids the threading hazards of `fork` while being faster to start than `spawn`. Default on Linux from Python 3.14 onwards.
+- `forkserver`: A pre-spawned server process forks new workers on demand. Default on Linux on Python 3.14 and above.
 
 - `spawn`: The child process starts fresh, importing the main module and inheriting the necessary resources. This is safer and more compatible with several libraries, but requires all objects to be pickleable. Default on Windows and macOS.
 

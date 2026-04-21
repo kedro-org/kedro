@@ -6,8 +6,11 @@ NOTE: This session implementation is under active development and may occasional
 * Added inspection API to get project snapshot.
 
 ## Bug fixes and other changes
+* Fixed `SequentialRunner` iterating over iterable-but-non-generator node outputs (e.g. `mne.Epochs`, `numpy.ndarray`, `torch.utils.data.IterableDataset`) before saving them. Streaming behaviour is now restricted to actual generator objects, so custom business objects are passed to `catalog.save` unchanged.
+
 ## Documentation changes
 ## Community contributions
+* [victor-cali](https://github.com/victor-cali)
 
 
 # Release 1.3.1

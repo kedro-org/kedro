@@ -124,12 +124,15 @@ plugins:
           - create/starters.md: Using and creating Kedro starters (project templates)
 
         Configuration:
-          - configure/configuration_basics.md: Configuration management fundamentals
+          - configure/configuration_explanation.md: Configuration management fundamentals
+          - configure/parameters_and_credentials_explanation.md: Understanding pipeline parameters and credentials
+          - configure/templating_explanation.md: Understanding templating with OmegaConfigLoader
+          - configure/how_to_configure_project.md: How to configure your Kedro project
+          - configure/how_to_use_parameters.md: How to work with parameters
+          - configure/how_to_validate_parameters.md: How to validate parameters with Pydantic and dataclasses
+          - configure/how_to_manage_credentials.md: How to manage credentials securely
+          - configure/how_to_advanced_configuration.md: Advanced configuration techniques
           - configure/config_loader_migration.md: Migrating between config loaders
-          - configure/advanced_configuration.md: Advanced configuration patterns
-          - configure/parameters.md: Managing pipeline parameters
-          - configure/parameter_validation.md: Validating parameters with Pydantic models and dataclasses
-          - configure/credentials.md: Handling sensitive credentials securely
 
         Data Management:
           - catalog-data/introduction.md: Introduction to the Data Catalog
@@ -325,13 +328,17 @@ nav:
           - Kedro tools: create/new_project_tools.md
           - Kedro starters: create/starters.md
       - Configure:
-          - Project configuration and settings:
-              - Configuration basics: configure/configuration_basics.md
-              - Migration guide for config loaders: configure/config_loader_migration.md
-              - Advanced configuration: configure/advanced_configuration.md
-          - Parameters: configure/parameters.md
-          - Parameter validation: configure/parameter_validation.md
-          - Credentials: configure/credentials.md
+          - Understanding Configuration:
+              - Configuration concepts: configure/configuration_explanation.md
+              - Parameters and credentials concepts: configure/parameters_and_credentials_explanation.md
+              - Templating concepts: configure/templating_explanation.md
+          - How-to Guides:
+              - Configure your project: configure/how_to_configure_project.md
+              - Work with parameters: configure/how_to_use_parameters.md
+              - Validate parameters: configure/how_to_validate_parameters.md
+              - Manage credentials: configure/how_to_manage_credentials.md
+              - Use advanced configuration: configure/how_to_advanced_configuration.md
+              - Migrate config loaders: configure/config_loader_migration.md
       - Catalog Data:
           - Introduction: catalog-data/introduction.md
           - Kedro data catalog: catalog-data/data_catalog.md

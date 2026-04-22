@@ -127,12 +127,15 @@ def reload_kedro(
     metadata = bootstrap_project(project_path)
     _remove_cached_modules(metadata.package_name)
     configure_project(metadata.package_name)
-    is_kedrosession = settings.SESSION_CLASS == KedroSession
+    is_kedrosession = issubclass(settings.SESSION_CLASS, KedroSession)
     create_args: dict[str, Any] = {
         "project_path": project_path,
         "env": env,
         "conf_source": conf_source,
     }
+    # This conditioning is needed because KedroSession accepts runtime_params in create() method,
+    # while KedroServiceSession accepts them in run() method. This is temporary solution until
+    # KedroSession is removed in favor of KedroServiceSession.
     if is_kedrosession:
         create_args["runtime_params"] = runtime_params
 

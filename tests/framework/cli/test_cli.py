@@ -1122,14 +1122,9 @@ class TestRunCommand:
             "kedro.framework.cli.project.settings.SESSION_CLASS",
             new=KedroServiceSession,
         )
-        (
-            mocker.patch(
-                "kedro.framework.cli.project.settings.SESSION_CLASS.create",
-                return_value=MagicMock(),
-            ),
-        )
-        mocker.patch(
-            "kedro.framework.cli.project.settings.SESSION_CLASS.run", return_value=None
+        mock_create = mocker.patch(
+            "kedro.framework.cli.project.settings.SESSION_CLASS.create",
+            return_value=MagicMock(),
         )
         result = CliRunner().invoke(
             fake_project_cli,
@@ -1137,6 +1132,10 @@ class TestRunCommand:
             obj=fake_metadata,
         )
         assert result.exit_code == 0
+        mock_create.assert_called_once()
+        call_kwargs = mock_create.call_args[1]
+        print(call_kwargs)
+        assert "runtime_params" not in call_kwargs
 
 
 class TestValidateConfSource:

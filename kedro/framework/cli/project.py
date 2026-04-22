@@ -294,7 +294,10 @@ def run(  # noqa: PLR0913
         "namespaces": namespaces,
         "only_missing_outputs": only_missing_outputs,
     }
-    if settings.SESSION_CLASS == KedroSession:
+    # This conditioning is needed because KedroSession accepts runtime_params in create() method,
+    # while KedroServiceSession accepts them in run() method. This is temporary solution until
+    # KedroSession is removed in favor of KedroServiceSession.
+    if issubclass(settings.SESSION_CLASS, KedroSession):
         create_kwargs["runtime_params"] = params
     else:
         run_kwargs["runtime_params"] = params

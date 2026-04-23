@@ -21,15 +21,19 @@ gh pr view --json number,title,body,baseRefName,headRefName
 
 If the user provides a PR URL or number, use that instead.
 
-### 2. Gather the diff
+### 2. Gather the diff and existing comments
 
 ```bash
 gh pr diff <number>
+gh pr view <number> --comments
+gh api repos/{owner}/{repo}/pulls/{number}/comments
 ```
+
+Read existing review comments and discussion. Don't repeat what's already been said — skip issues that are already covered by existing comments. If you agree with an existing comment, you can reference it. If you disagree, explain why.
 
 ### 3. Analyze
 
-Work through the general review guidelines first, then the Kedro-specific review areas. Focus only on changes introduced by this PR.
+Work through the general review guidelines first, then the Kedro-specific review areas. Focus only on changes introduced by this PR. Only flag issues not already raised in existing comments.
 
 ### 4. Format and deliver
 
@@ -220,15 +224,26 @@ After all findings, output the summary using the template below.
 
 ### Review and post — output to GitHub PR
 
-Post findings directly to the PR:
+Write a JSON file with the full review payload and post it via the script:
 
-**Inline comments** — post as a GitHub review with line-level comments using `gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews`. Build the request body as JSON with an array of comment objects, each containing `path`, `position` (diff line position), and `body`. Set `event` to `"COMMENT"`.
+```json
+{
+  "event": "COMMENT",
+  "body": "## Kedro PR Review\n...(summary)...",
+  "comments": [
+    { "path": "file.py", "line": 42, "side": "RIGHT", "body": "**Critical:** ..." },
+    { "path": "other.py", "line": 15, "side": "RIGHT", "body": "**Suggestion:** ..." }
+  ]
+}
+```
 
-**Summary** — post as a top-level PR comment via:
+Then post:
 
 ```bash
-bash .cursor/skills/review-kedro-pr/scripts/post_review.sh <temp_file>
+bash .cursor/skills/review-kedro-pr/scripts/post_review.sh <review_json_file>
 ```
+
+This creates one review with the summary as the main message and inline comments on specific lines.
 
 ### Summary template
 
@@ -236,6 +251,7 @@ Used in both modes:
 
 ```markdown
 ## Kedro PR Review
+> Generated with `review-kedro-pr` skill.
 
 ### Overview
 - **Critical:** <count> | **Suggestions:** <count>

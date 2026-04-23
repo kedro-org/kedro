@@ -40,7 +40,6 @@ Work through the general review guidelines first, then the Kedro-specific review
 Before delivering, go through every finding one by one and check:
 - Is this actually a problem, or a false positive?
 - Is the file path and line number correct?
-- Does the finding apply to the diff, not pre-existing code?
 - Is the severity (Critical vs Suggestion) appropriate?
 
 Drop anything you're not confident about. Fewer accurate findings are better than many noisy ones.

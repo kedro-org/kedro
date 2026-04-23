@@ -1,0 +1,266 @@
+---
+name: review-kedro-pr
+description: >-
+  Review a Kedro PR for checklist compliance, architecture, correctness, and
+  clarity. Optionally post findings as a GitHub PR comment. Use when the user
+  asks to review a PR, review this PR, or do a PR review.
+---
+# Review Kedro PR
+
+Review a Kedro pull request. Start with general review guidelines (any project), then apply Kedro-specific checks. Output findings to chat by default, or post to GitHub when asked.
+
+## Workflow
+
+### 1. Identify the PR
+
+Detect the PR from the current branch or accept a PR URL/number from the user:
+
+```bash
+gh pr view --json number,title,body,baseRefName,headRefName
+```
+
+If the user provides a PR URL or number, use that instead.
+
+### 2. Gather the diff
+
+```bash
+gh pr diff <number>
+```
+
+### 3. Analyze
+
+Work through the general review guidelines first, then the Kedro-specific review areas. Focus only on changes introduced by this PR.
+
+### 4. Format and deliver
+
+Format findings using the "Output format" section at the end of this file. Two modes:
+
+- **Review only (default):** Output all findings as chat messages. The user can read, edit, or discard before deciding whether to post.
+- **Review and post:** When the user explicitly says "post", "submit", or "review and post", post findings directly to the PR on GitHub. See "Output format" for the exact commands.
+
+---
+
+## General review guidelines
+
+These apply to any project. Work through them in order.
+
+### 1. Understand context and scope
+
+- Understand what problem the PR is solving.
+- Read the PR description thoroughly, including:
+  - Dev notes
+  - Linked issues
+  - Any prior discussions or comments
+
+### 2. Evaluate PR scope
+
+- Check if the PR is focused on a single purpose.
+- If there are too many changes or unrelated updates, suggest splitting into smaller PRs.
+- Verify the changes actually align with the stated goal.
+
+### 3. QA and validation
+
+- Check if QA/testing steps are mentioned in the PR description.
+- If not, ask the author to add clear steps to validate the changes.
+- Mentally walk through the described QA steps and verify:
+  - Expected functionality
+  - Edge cases and failure scenarios
+- Watch out for regressions or unintended side effects.
+
+### 4. Code review and readability
+
+- Go through the file changes and understand the logic.
+- Suggest improvements where needed:
+  - Better variable/function names
+  - Cleaner structure or readability
+
+### 5. Code design and modularity
+
+- Look for opportunities to improve structure:
+  - Can large functions be split?
+  - Can logic be broken into smaller, reusable pieces?
+- Suggest helper/utility functions if the same logic is repeated.
+- Aim for simple, maintainable code.
+
+### 6. Docstrings and inline documentation
+
+- Check if docstrings are present on new/changed classes, functions, and methods.
+- Docstrings must use Google style (`Args:`, `Returns:`, `Raises:`) to avoid rendering issues in the API docs.
+- For public APIs:
+  - Ensure inputs/outputs are clearly documented.
+  - Suggest adding examples if helpful.
+
+### 7. Testing and coverage
+
+- Check if there are enough unit tests.
+- Make sure tests cover:
+  - Core logic
+  - Edge cases
+- Tests should be meaningful and easy to follow, not just for coverage.
+
+---
+
+## Kedro-specific: PR checklist compliance
+
+Check the PR against the Kedro PR template requirements.
+
+### RELEASE.md entry
+
+Any change to code under `kedro/` must have a corresponding bullet in `RELEASE.md` under `# Upcoming Release`, in the correct H2 section:
+
+- `## Major features and improvements` — new features, significant enhancements
+- `## Bug fixes and other changes` — bug fixes, minor changes, dependency updates
+- `## Documentation changes` — docs-only changes
+- `## Community contributions` — added by maintainers for external contributors
+
+Format: `* Description of the change.`
+
+If the PR modifies `kedro/` files but `RELEASE.md` is not in the diff, flag as Critical.
+
+### Project documentation
+
+If the PR changes public API behavior or adds new features, check whether the Kedro project docs (`docs/`) are updated. Docs use MkDocs with standard markdown — check for correct formatting to avoid rendering issues.
+
+### Backward compatibility
+
+- Public API changes must not break existing callers without a migration path.
+- Check for: removed/renamed parameters, changed return types, changed default values, removed public classes/functions.
+- If breaking, there should be a deprecation warning or a migration note in `RELEASE.md`.
+
+### Kedro-Viz impact
+
+If the change affects pipeline structure, metadata, catalog behavior, or dataset output, flag for Viz team coordination.
+
+---
+
+## Kedro-specific: Architecture compliance
+
+Check **new and changed imports in the diff** against the import-linter contracts. Only flag imports in added or modified lines. Don't run `import-linter` — that's handled by `kedro-babysit`.
+
+### Layer hierarchy
+
+Higher layers may import from lower layers, not the reverse:
+
+```
+framework.cli  (highest)
+framework.session
+framework.context
+framework.project
+runner
+io
+pipeline
+config  (lowest)
+```
+
+All paths are under `kedro.`. For example, `kedro.runner` must not import from `kedro.framework.session`.
+
+Allowed exceptions:
+- `kedro.runner.task` may import from `kedro.framework.project`
+- `kedro.framework.hooks.specs` may import from `kedro.framework.context`
+- `kedro` (top-level `__init__`) may import from `kedro.ipython`
+
+### Independence
+
+`kedro.pipeline` and `kedro.io` must not import each other.
+
+### Config isolation
+
+- `kedro.config` must not import `kedro.runner`, `kedro.io`, or `kedro.pipeline` (no exceptions).
+- `kedro.runner`, `kedro.io`, and `kedro.pipeline` must not import `kedro.config`. Exceptions: `kedro.framework.context.context` and `kedro.framework.session.session` may import from `kedro.config`.
+
+For the full TOML contracts, see [reference.md](reference.md) section "Import-linter contracts".
+
+---
+
+## Kedro-specific: API usage
+
+Check that the PR uses Kedro abstractions correctly.
+
+- **Datasets** must subclass `AbstractDataset` and implement `load`, `save`, `_describe`. Versioned datasets subclass `AbstractVersionedDataset`.
+- **Runners** must subclass `AbstractRunner` and implement `_run` and `_get_executor`.
+- **Hooks** must use the `@hook_impl` marker from `kedro.framework.hooks`.
+- **Config loaders** must subclass `AbstractConfigLoader`.
+- **Naming conventions** should match existing patterns in the same module (method names, parameter names, class names).
+
+For full API signatures and the complete list of base classes, read [reference.md](reference.md) section "Kedro public API surface".
+
+**Non-obvious patterns:** Some files use complex patterns on purpose (e.g. `__getattr__`, `__init_subclass__` wrapping). If the PR touches `kedro/io/core.py`, `kedro/framework/hooks/manager.py`, or `kedro/io/shared_memory_dataset.py`, read [reference.md](reference.md) section "Non-obvious patterns" before flagging anything — those patterns are intentional.
+
+---
+
+## Out of scope
+
+Do NOT flag:
+
+- **Pre-existing issues** — only review changes in the diff.
+- **Security issues** — handled by the separate `kedro-security-review` skill.
+- **Anything CI already checks mechanically** — the following are handled by the `kedro-babysit` skill, which runs and fixes them automatically:
+  - Linting and formatting (ruff)
+  - Running unit tests (pytest)
+  - Import-linter contract execution
+  - DCO sign-off verification
+  - Any other CI check with a pass/fail outcome
+
+This skill is about reviewing code, not running checks.
+
+---
+
+## Output format
+
+Each finding gets an **inline comment** on the specific line, plus there's a **summary** of all findings. Delivery depends on the mode.
+
+### Review only (default) — output to chat
+
+Present all findings as chat messages. For each finding, include:
+- The file path and line number.
+- **Critical:** or **Suggestion:** prefix.
+- A concise explanation and suggested fix.
+
+After all findings, output the summary using the template below.
+
+### Review and post — output to GitHub PR
+
+Post findings directly to the PR:
+
+**Inline comments** — post as a GitHub review with line-level comments using `gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews`. Build the request body as JSON with an array of comment objects, each containing `path`, `position` (diff line position), and `body`. Set `event` to `"COMMENT"`.
+
+**Summary** — post as a top-level PR comment via:
+
+```bash
+bash .cursor/skills/review-kedro-pr/scripts/post_review.sh <temp_file>
+```
+
+### Summary template
+
+Used in both modes:
+
+```markdown
+## Kedro PR Review
+
+### Overview
+- **Critical:** <count> | **Suggestions:** <count>
+
+### Critical (must fix before merge)
+- [ ] `file/path.py:L42` — brief description
+
+### Suggestions (consider improving)
+- [ ] `file/path.py:L15` — brief description
+
+### Notes
+- General review: <summary or "no issues">
+- PR checklist: <summary or "no issues">
+- Architecture: <summary or "no issues">
+- API usage: <summary or "no issues">
+```
+
+### Classification
+
+- **Critical** = must fix before merge (violations, missing requirements, bugs).
+- **Suggestion** = worth improving but not blocking.
+- If a section has no findings, write "No issues found."
+
+### Communication guidelines
+
+- Keep feedback clear and constructive.
+- Ask questions instead of assuming.
+- Be respectful of the author's approach while suggesting improvements.

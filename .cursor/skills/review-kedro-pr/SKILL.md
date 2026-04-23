@@ -35,7 +35,17 @@ Read existing review comments and discussion. Don't repeat what's already been s
 
 Work through the general review guidelines first, then the Kedro-specific review areas. Focus only on changes introduced by this PR. Only flag issues not already raised in existing comments.
 
-### 4. Format and deliver
+### 4. Verify findings
+
+Before delivering, go through every finding one by one and check:
+- Is this actually a problem, or a false positive?
+- Is the file path and line number correct?
+- Does the finding apply to the diff, not pre-existing code?
+- Is the severity (Critical vs Suggestion) appropriate?
+
+Drop anything you're not confident about. Fewer accurate findings are better than many noisy ones.
+
+### 5. Format and deliver
 
 Format findings using the "Output format" section at the end of this file. Two modes:
 

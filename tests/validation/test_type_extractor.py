@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
+from typing import Optional, Union
 from unittest.mock import MagicMock, patch
 
 from kedro.pipeline import node as kedro_node
-from kedro.validation.type_extractor import TypeExtractor
+from kedro.validation.type_extractor import TypeExtractor, _type_name
 
 from .conftest import SampleDataclass, SamplePydanticModel
 
@@ -27,6 +28,30 @@ _UnionType = list[str] | None
 _OptionalPydantic = SamplePydanticModel | None
 _OptionalDataclass = SampleDataclass | None
 _MultiModelUnion = SamplePydanticModel | SampleDataclass
+
+
+class TestTypeName:
+    def test_regular_type_uses_name(self):
+        assert _type_name(int) == "int"
+
+    def test_class_uses_name(self):
+        assert _type_name(SampleDataclass) == "SampleDataclass"
+
+    def test_union_pipe_syntax_uses_str(self):
+        tp = list[str] | int
+        assert _type_name(tp) == "list[str] | int"
+
+    def test_typing_union_uses_str(self):
+        tp = Union[str, int]  # noqa: UP007
+        assert _type_name(tp) == "str | int"
+
+    def test_optional_uses_str(self):
+        tp = Optional[str]  # noqa: UP007
+        assert _type_name(tp) == "str | None"
+
+    def test_generic_alias_uses_name(self):
+        # list[str] is a GenericAlias with __name__ == "list"
+        assert _type_name(list[str]) == "list"
 
 
 class TestExtractTypesFromPipelines:

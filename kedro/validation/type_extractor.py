@@ -153,8 +153,7 @@ class TypeExtractor:
                 ) and expected_type not in self._warned_union_types:
                     self._warned_union_types.add(expected_type)
                     type_names = " | ".join(
-                        getattr(type_arg, "__name__", str(type_arg))
-                        for type_arg in get_args(expected_type)
+                        _type_name(type_arg) for type_arg in get_args(expected_type)
                     )
                     logger.warning(
                         "Union type hint (%s) is not supported for validation. "
@@ -169,7 +168,7 @@ class TypeExtractor:
             logger.debug(
                 "Found parameter requirement: %s -> %s",
                 param_key,
-                getattr(expected_type, "__name__", str(expected_type)),
+                _type_name(expected_type),
             )
 
         return all_requirements

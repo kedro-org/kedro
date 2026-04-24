@@ -42,12 +42,16 @@ class TestTypeName:
         assert _type_name(tp) == "list[str] | int"
 
     def test_typing_union_uses_str(self):
+        # str(Union[...]) format varies by Python version; verify str() is called, not __name__
         tp = Union[str, int]  # noqa: UP007
-        assert _type_name(tp) == "str | int"
+        assert _type_name(tp) == str(tp)
+        assert _type_name(tp) != "Union"
 
     def test_optional_uses_str(self):
+        # str(Optional[...]) format varies by Python version; verify str() is called, not __name__
         tp = Optional[str]  # noqa: UP007
-        assert _type_name(tp) == "str | None"
+        assert _type_name(tp) == str(tp)
+        assert _type_name(tp) != "Union"
 
     def test_generic_alias_uses_name(self):
         # list[str] is a GenericAlias with __name__ == "list"

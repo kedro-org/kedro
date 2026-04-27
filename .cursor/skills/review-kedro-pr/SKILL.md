@@ -41,6 +41,7 @@ Before delivering, go through every finding one by one and check:
 - Is this actually a problem, or a false positive?
 - Is the file path and line number correct?
 - Is the severity (Critical vs Suggestion) appropriate?
+- Is the change in scope? `gh pr diff` includes cherry-picked or rebased-in commits from other branches. Cross-check with `gh pr view <number> --json commits --jq '.commits[].messageHeadline'` — if a commit clearly belongs to a different PR (e.g. references a different `#NNNN`), drop findings on those changes.
 
 Drop anything you're not confident about. Fewer accurate findings are better than many noisy ones.
 

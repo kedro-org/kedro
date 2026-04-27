@@ -49,7 +49,7 @@ def server_cli() -> None:
 @server_cli.command(name="start", context_settings=CONTEXT_SETTINGS)
 @click.option(
     "--host",
-    "-h",
+    "-H",
     type=str,
     default=DEFAULT_HOST,
     help=f"Host to bind the server to. Default: {DEFAULT_HOST}",
@@ -93,9 +93,9 @@ def http_start(
 
     \b
     Examples:
-      kedro server http start
-      kedro server http start --host 0.0.0.0 --port 8080
-      kedro server http start --reload --debug
+      kedro server start
+      kedro server start --host 0.0.0.0 --port 8080
+      kedro server start --reload --debug
     """
     try:
         import uvicorn

@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Added the first iteration of the `KedroServiceSession`, a new session implementation that allows for multiple runs and data injection.
 NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
+* Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests, and exposes a new CLI command `kedro server start` to run the server.
 * Added inspection API to get project snapshot.
 
 ## Bug fixes and other changes

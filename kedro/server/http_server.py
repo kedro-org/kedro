@@ -102,13 +102,15 @@ def create_http_server() -> FastAPI:
 
         # create a session and assign to app state if not already created
         if not hasattr(app.state, "session"):
-            app.state.session = KedroServiceSession.create(project_path=project_path)
+            app.state.session = KedroServiceSession.create(
+                project_path=project_path,
+                env=request.env,
+                conf_source=request.conf_source,
+            )
 
         result = execute_pipeline(
             session=app.state.session,
             pipeline_names=request.pipelines,
-            env=request.env,
-            conf_source=request.conf_source,
             params=request.params,
             runner=request.runner,
             is_async=request.is_async,
@@ -135,7 +137,6 @@ def create_http_server() -> FastAPI:
             status=result.status,
             duration_ms=result.duration_ms,
             error=error_detail,
-            result_config=result.result_config,
         )
         return res
 
@@ -146,8 +147,6 @@ def execute_pipeline(  # noqa: PLR0913
     session: AbstractSession,
     *,
     pipeline_names: list[str] | None = None,
-    env: str | None = None,
-    conf_source: str | None = None,
     params: dict[str, Any] | None = None,
     runner: str | None = None,
     is_async: bool = False,
@@ -202,7 +201,7 @@ def execute_pipeline(  # noqa: PLR0913
         runner_class = load_obj(runner_name, "kedro.runner")
         runner_obj = runner_class(is_async=is_async)
 
-        result = session.run(
+        session.run(
             run_id=run_id,
             pipeline_names=pipeline_names,
             tags=tuple(tags) if tags else None,
@@ -220,18 +219,11 @@ def execute_pipeline(  # noqa: PLR0913
 
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.info("Pipeline run %s completed in %.2fms", run_id, duration_ms)
-        result_config = {}
-        for key, value in result.items():
-            result_config[key] = value._init_config() if value else None
-        # print(result)
-        # print(result_config)
         response = PipelineExecutionResult(
             run_id=run_id,
             status="success",
             duration_ms=round(duration_ms, 2),
-            result_config=result_config,
         )
-        # print(response)
         return response
 
     except Exception as exc:
@@ -254,5 +246,4 @@ def execute_pipeline(  # noqa: PLR0913
             status="failure",
             duration_ms=round(duration_ms, 2),
             error=error,
-            result_config=None,
         )

@@ -71,7 +71,7 @@ class TestServerStartCommand:
         uvicorn_run.assert_called_once_with(
             "kedro.server.http_server:create_http_server",
             factory=True,
-            host="2.2.2.2", # Random address to ensure options are passed through
+            host="2.2.2.2",  # Random address to ensure options are passed through
             port=9000,
             reload=True,
             log_level="info",

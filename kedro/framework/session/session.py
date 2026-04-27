@@ -25,12 +25,13 @@ from kedro.framework.project import (
     settings,
     validate_settings,
 )
-from kedro.framework.session.abstract_session import AbstractSession
 from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project, get_close_matches
+
+from .abstract_session import AbstractSession, KedroSessionError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -73,14 +74,6 @@ def _jsonify_cli_context(ctx: click.core.Context) -> dict[str, Any]:
         "command_name": ctx.command.name,
         "command_path": " ".join(["kedro"] + sys.argv[1:]),
     }
-
-
-class KedroSessionError(Exception):
-    """``KedroSessionError`` raised by ``KedroSession``
-    in the case that multiple runs are attempted in one session.
-    """
-
-    pass
 
 
 class KedroSession(AbstractSession):
@@ -272,9 +265,6 @@ class KedroSession(AbstractSession):
         """
         if self.save_on_close:
             self._store.save()
-
-    def __enter__(self) -> KedroSession:
-        return self
 
     def __exit__(self, exc_type: Any, exc_value: Any, tb_: Any) -> None:
         if exc_type:

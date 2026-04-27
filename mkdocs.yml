@@ -51,7 +51,7 @@ theme:
 plugins:
   - search
   - autorefs
-  - mermaid2
+  - mermaid2:
   - redirects:
       redirect_maps:
         'configuration/telemetry.md': 'about/telemetry.md'
@@ -287,10 +287,12 @@ extra_css:
   - stylesheets/themes.css
   - stylesheets/footer.css
   - stylesheets/welcome.css
+  - stylesheets/mermaid.css
 
 extra_javascript:
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
+
 
 
 nav:
@@ -354,6 +356,8 @@ nav:
           - Code formatting and linting: develop/linting.md
           - Debugging: develop/debugging.md
           - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
+      - Inspect:
+          - Inspect a project: inspect/inspect-project.md
       - Deploy:
           - Overview: deploy/index.md
           - How to package your project: deploy/package_a_project.md
@@ -433,6 +437,9 @@ nav:
                   - SequentialRunner: api/runner/kedro.runner.SequentialRunner.md
                   - ParallelRunner: api/runner/kedro.runner.ParallelRunner.md
                   - ThreadRunner: api/runner/kedro.runner.ThreadRunner.md
+              - kedro.inspection:
+                  - Overview: api/inspection/kedro.inspection.md
+                  - Models: api/inspection/kedro.inspection.models.md
               - kedro.utils: api/kedro.utils.md
               - kedro.load_ipython_extension: api/kedro.load_ipython_extension.md
               - kedro.KedroDeprecationWarning: api/kedro.KedroDeprecationWarning.md

@@ -1,9 +1,26 @@
 # Upcoming Release
+
 ## Major features and improvements
+* Added the first iteration of the `KedroServiceSession`, a new session implementation that allows for multiple runs and data injection.
+NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
+* Added inspection API to get project snapshot.
+
 ## Bug fixes and other changes
 ## Documentation changes
 ## Community contributions
 
+
+# Release 1.3.1
+
+## Bug fixes and other changes
+* Fixed `AttributeError` when node functions have non-Pydantic/dataclass type hints on `params:` inputs. The parameter validation framework now correctly skips types it cannot validate.
+
+## Documentation changes
+* Added documentation for `Optional[Model]` support and multi-type union limitations in parameter validation.
+* Improved Mermaid diagram visibility in dark mode.
+
+## Community contributions
+* [SayantanDutt](https://github.com/SayantanDutt)
 
 # Release 1.3.0
 

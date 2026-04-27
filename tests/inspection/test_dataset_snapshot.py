@@ -105,3 +105,59 @@ class TestBuildDatasetSnapshots:
         )
         assert "{namespace}.{name}" in snapshots
         assert snapshots["{namespace}.{name}"].type == "pandas.CSVDataset"
+
+    def test_non_dict_entry_excluded(self):
+        snapshots = _build_dataset_snapshots(
+            {
+                "companies": {"type": "pandas.CSVDataset", "filepath": "companies.csv"},
+                "bad_entry": "some_string_value",
+            }
+        )
+        assert "bad_entry" not in snapshots
+        assert "companies" in snapshots
+
+    def test_none_entry_excluded(self):
+        snapshots = _build_dataset_snapshots(
+            {
+                "companies": {"type": "pandas.CSVDataset"},
+                "null_entry": None,
+            }
+        )
+        assert "null_entry" not in snapshots
+        assert "companies" in snapshots
+
+
+class TestDatasetSnapshotCredentialScrubbing:
+    @pytest.mark.parametrize(
+        "raw_filepath, expected",
+        [
+            (
+                "s3://access_key:secret_key@my-bucket/data/file.csv",  # pragma: allowlist secret
+                "s3://<redacted>@my-bucket/data/file.csv",
+            ),
+            (
+                "postgresql://user:password@db-host:5432/mydb",  # pragma: allowlist secret
+                "postgresql://<redacted>@db-host:5432/mydb",
+            ),
+            (
+                "gs://svc_account:token123@bucket/path/file.parquet",  # pragma: allowlist secret
+                "gs://<redacted>@bucket/path/file.parquet",
+            ),
+        ],
+    )
+    def test_from_config_scrubs_embedded_credentials(self, raw_filepath, expected):
+        snapshot = DatasetSnapshot.from_config(
+            "ds", {"type": "pandas.CSVDataset", "filepath": raw_filepath}
+        )
+        assert snapshot.filepath == expected
+
+    def test_plain_filepath_is_unchanged(self):
+        filepath = "data/01_raw/companies.csv"
+        snapshot = DatasetSnapshot.from_config(
+            "ds", {"type": "pandas.CSVDataset", "filepath": filepath}
+        )
+        assert snapshot.filepath == filepath
+
+    def test_none_filepath_is_unchanged(self):
+        snapshot = DatasetSnapshot.from_config("ds", {"type": "kedro.io.MemoryDataset"})
+        assert snapshot.filepath is None

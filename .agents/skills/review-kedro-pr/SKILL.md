@@ -147,45 +147,6 @@ If the change affects pipeline structure, metadata, catalog behavior, or dataset
 
 ---
 
-## Kedro-specific: Architecture compliance
-
-Check **new and changed imports in the diff** against the import-linter contracts. Only flag imports in added or modified lines. Don't run `import-linter` — that's handled by `kedro-babysit`.
-
-### Layer hierarchy
-
-Higher layers may import from lower layers, not the reverse:
-
-```
-framework.cli  (highest)
-framework.session
-framework.context
-framework.project
-runner
-io
-pipeline
-config  (lowest)
-```
-
-All paths are under `kedro.`. For example, `kedro.runner` must not import from `kedro.framework.session`.
-
-Allowed exceptions:
-- `kedro.runner.task` may import from `kedro.framework.project`
-- `kedro.framework.hooks.specs` may import from `kedro.framework.context`
-- `kedro` (top-level `__init__`) may import from `kedro.ipython`
-
-### Independence
-
-`kedro.pipeline` and `kedro.io` must not import each other.
-
-### Config isolation
-
-- `kedro.config` must not import `kedro.runner`, `kedro.io`, or `kedro.pipeline` (no exceptions).
-- `kedro.runner`, `kedro.io`, and `kedro.pipeline` must not import `kedro.config`. Exceptions: `kedro.framework.context.context` and `kedro.framework.session.session` may import from `kedro.config`.
-
-For the full TOML contracts, see [reference.md](reference.md) section "Import-linter contracts".
-
----
-
 ## Kedro-specific: API usage
 
 Check that the PR uses Kedro abstractions correctly.
@@ -211,7 +172,7 @@ Do NOT flag:
 - **Anything CI already checks mechanically** — the following are handled by the `kedro-babysit` skill, which runs and fixes them automatically:
   - Linting and formatting (ruff)
   - Running unit tests (pytest)
-  - Import-linter contract execution
+  - Import-linter contract execution (architecture compliance)
   - DCO sign-off verification
   - Any other CI check with a pass/fail outcome
 
@@ -275,7 +236,6 @@ Used in both modes:
 ### Notes
 - General review: <summary or "no issues">
 - PR checklist: <summary or "no issues">
-- Architecture: <summary or "no issues">
 - API usage: <summary or "no issues">
 ```
 

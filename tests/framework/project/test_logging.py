@@ -210,9 +210,8 @@ def test_logger_without_rich_markup():
 
     data = ("dummy",)
     catalog = DataCatalog.from_config({"dummy": {"type": "MemoryDataset"}})
-    catalog._use_rich_markup = False
 
-    # Add a custom handler
+    # Add a custom handler (non-RichHandler)
     custom_handler = CustomHandler()
     root_logger = logging.getLogger()
     root_logger.addHandler(custom_handler)
@@ -223,6 +222,8 @@ def test_logger_without_rich_markup():
     assert custom_handler.records
 
     for record in custom_handler.records:
+        # Markup should never appear in the message itself with the new approach
+        # Markup is handled via rich_format extra attribute, which is ignored by non-RichHandler
         assert "[dark_orange]" not in record.message
 
 

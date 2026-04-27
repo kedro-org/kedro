@@ -49,7 +49,7 @@ class TestValidNode:
         assert test_node.func is decorated_identity
 
     def test_labelled(self):
-        assert "labeled_node: <lambda>([input1]) -> [output1]" in str(
+        assert r"labeled_node: <lambda>(\[input1\]) -> \[output1\]" in str(
             node(lambda x: None, "input1", "output1", name="labeled_node")
         )
 
@@ -82,12 +82,12 @@ class TestValidNode:
         assert actual == {"output": "hellohello"}
 
     def test_no_input(self):
-        assert "constant_output(None) -> [output1]" in str(
+        assert r"constant_output(None) -> \[output1\]" in str(
             node(constant_output, None, "output1")
         )
 
     def test_no_output(self):
-        assert "<lambda>([input1]) -> None" in str(node(lambda x: None, "input1", None))
+        assert r"<lambda>(\[input1\]) -> None" in str(node(lambda x: None, "input1", None))
 
     def test_inputs_none(self):
         dummy_node = node(constant_output, None, "output")
@@ -394,7 +394,7 @@ class TestTag:
 class TestNames:
     def test_named(self):
         n = node(identity, ["in"], ["out"], name="name")
-        assert str(n) == "name: identity([in]) -> [out]"
+        assert str(n) == r"name: identity(\[in\]) -> \[out\]"
         assert n.name == "name"
         assert n.short_name == "name"
 
@@ -410,7 +410,7 @@ class TestNames:
 
     def test_namespaced(self):
         n = node(identity, ["in"], ["out"], namespace="namespace")
-        assert str(n) == "identity([in]) -> [out]"
+        assert str(n) == r"identity(\[in\]) -> \[out\]"
         assert re.match(r"^namespace\.identity__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Identity"
 
@@ -427,31 +427,31 @@ class TestNames:
 
     def test_named_and_namespaced(self):
         n = node(identity, ["in"], ["out"], name="name", namespace="namespace")
-        assert str(n) == "name: identity([in]) -> [out]"
+        assert str(n) == r"name: identity(\[in\]) -> \[out\]"
         assert n.name == "namespace.name"
         assert n.short_name == "name"
 
     def test_function(self):
         n = node(identity, ["in"], ["out"])
-        assert str(n) == "identity([in]) -> [out]"
+        assert str(n) == r"identity(\[in\]) -> \[out\]"
         assert re.match(r"^identity__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Identity"
 
     def test_lambda(self):
         n = node(lambda a: a, ["in"], ["out"])
-        assert str(n) == "<lambda>([in]) -> [out]"
+        assert str(n) == r"<lambda>(\[in\]) -> \[out\]"
         assert re.match(r"^<lambda>__[0-9a-f]{8}$", n.name)
         assert n.short_name == "<Lambda>"
 
     def test_partial(self):
         n = node(partial(identity), ["in"], ["out"])
-        assert str(n) == "<partial>([in]) -> [out]"
+        assert str(n) == r"<partial>(\[in\]) -> \[out\]"
         assert re.match(r"^partial\(identity\)__[0-9a-f]{8}$", n.name)
         assert n.short_name == "<Partial>"
 
     def test_updated_partial(self):
         n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])
-        assert str(n) == "identity([in]) -> [out]"
+        assert str(n) == r"identity(\[in\]) -> \[out\]"
         assert re.match(r"^partial\(identity\)__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Identity"
 
@@ -461,7 +461,7 @@ class TestNames:
             {"input2": "in2"},
             ["out"],
         )
-        assert str(n) == "biconcat([in2]) -> [out]"
+        assert str(n) == r"biconcat(\[in2\]) -> \[out\]"
         assert re.match(r"^partial\(biconcat\)__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Biconcat"
 

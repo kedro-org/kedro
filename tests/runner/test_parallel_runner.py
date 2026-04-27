@@ -456,7 +456,7 @@ class TestMultiprocessingGetExecutorContextSelection:
         assert isinstance(executor, ProcessPoolExecutor)
         assert hasattr(executor, "_mp_context")
 
-    @pytest.mark.parametrize("context", ["fork", "spawn"])
+    @pytest.mark.parametrize("context", ["fork", "spawn", "forkserver"])
     def test_get_executor_valid_context(self, mocker, context):
         if sys.platform == "win32":
             pytest.skip("fork context is not available on Windows")

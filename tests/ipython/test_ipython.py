@@ -95,7 +95,7 @@ class TestLoadKedroObjects:
         reload_kedro()
 
         mock_session_create.assert_called_once_with(
-            None,
+            project_path=None,
             env=None,
             runtime_params=None,
             conf_source=None,
@@ -134,7 +134,7 @@ class TestLoadKedroObjects:
         )
 
         mock_session_create.assert_called_once_with(
-            fake_metadata.project_path,
+            project_path=fake_metadata.project_path,
             env=dummy_env,
             runtime_params=dummy_dict,
             conf_source=dummy_conf_source,

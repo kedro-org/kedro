@@ -8,7 +8,7 @@ from kedro.framework.cli.utils import KedroCliError
 from kedro.server.utils import DEFAULT_HOST, DEFAULT_HTTP_PORT, KEDRO_PROJECT_PATH_ENV
 
 
-class TestServerStartCommand:
+class TestServerCommand:
     def test_uses_metadata_project_path(self, fake_metadata):
         assert _resolve_project_path(fake_metadata) == fake_metadata.project_path
 
@@ -43,6 +43,8 @@ class TestServerStartCommand:
         assert result.exit_code == 0, result.output
         assert mock_environ[KEDRO_PROJECT_PATH_ENV] == str(fake_metadata.project_path)
         assert "KEDRO_SERVER_DEBUG" not in mock_environ
+        assert "KEDRO_SERVER_ENV" not in mock_environ
+        assert "KEDRO_SERVER_CONF_SOURCE" not in mock_environ
         uvicorn_run.assert_called_once_with(
             "kedro.server.http_server:create_http_server",
             factory=True,
@@ -55,19 +57,34 @@ class TestServerStartCommand:
     def test_server_with_custom_options(self, fake_metadata, fake_project_cli, mocker):
         mock_environ = mocker.patch("os.environ", {})
         uvicorn_run = mocker.Mock()
+        conf_source = fake_metadata.project_path / "conf"
         mocker.patch.dict(
             "sys.modules", {"uvicorn": types.SimpleNamespace(run=uvicorn_run)}
         )
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["start", "--host", "2.2.2.2", "--port", "9000", "--reload", "--debug"],
+            [
+                "start",
+                "--host",
+                "2.2.2.2",
+                "--port",
+                "9000",
+                "--reload",
+                "--debug",
+                "--env",
+                "local",
+                "--conf-source",
+                str(conf_source),
+            ],
             obj=fake_metadata,
         )
 
         assert result.exit_code == 0, result.output
         assert mock_environ[KEDRO_PROJECT_PATH_ENV] == str(fake_metadata.project_path)
         assert mock_environ["KEDRO_SERVER_DEBUG"] == "1"
+        assert mock_environ["KEDRO_SERVER_ENV"] == "local"
+        assert mock_environ["KEDRO_SERVER_CONF_SOURCE"] == str(conf_source.resolve())
         uvicorn_run.assert_called_once_with(
             "kedro.server.http_server:create_http_server",
             factory=True,

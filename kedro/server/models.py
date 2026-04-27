@@ -73,10 +73,6 @@ class RunRequest(BaseModel):
         default=False,
         description="Load and save node inputs and outputs asynchronously with threads.",
     )
-    env: str | None = Field(
-        default=None,
-        description="Kedro configuration environment to use.",
-    )
     tags: list[str] | None = Field(
         default=None,
         description="Construct the pipeline using only nodes which have this tag attached.",
@@ -92,10 +88,6 @@ class RunRequest(BaseModel):
     namespaces: list[str] | None = Field(
         default=None,
         description="Run only nodes within these namespaces.",
-    )
-    conf_source: str | None = Field(
-        default=None,
-        description="Path of a directory where project configuration is stored.",
     )
     params: dict[str, Any] | None = Field(
         default=None,

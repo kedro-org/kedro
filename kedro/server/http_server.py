@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import os
+from pathlib import Path
 import time
 import traceback
 from collections.abc import AsyncGenerator
@@ -33,6 +35,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+KEDRO_SERVER_ENV = "KEDRO_SERVER_ENV"
+KEDRO_SERVER_CONF_SOURCE = "KEDRO_SERVER_CONF_SOURCE"
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
@@ -40,30 +45,46 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     Bootstraps the Kedro project on startup.
     """
-    project_path = get_project_path()
+    project_path = app.state.project_path
     logger.info("Bootstrapping Kedro project at: %s", project_path)
     bootstrap_project(project_path)
     logger.info("Kedro server started successfully")
-    # # Create and store the session
-    # session = KedroServiceSession.create(project_path=project_path)
-    # app.state.session = session
-
+    
     yield
     # Cleanup on shutdown (if needed in future)
     logger.info("Kedro server shutting down")
 
 
-def create_http_server() -> FastAPI:
+def create_http_server(
+    project_path: str | None = None,
+    env: str | None = None,
+    conf_source: str | None = None,
+) -> FastAPI:
     """Create and configure the FastAPI HTTP server.
+
+    Programmatic values passed to this factory take precedence over
+    environment-variable defaults set by the CLI.
 
     Returns:
         Configured FastAPI application instance.
     """
+    resolved_env = env if env is not None else os.environ.get(KEDRO_SERVER_ENV)
+    resolved_conf_source = (
+        conf_source
+        if conf_source is not None
+        else os.environ.get(KEDRO_SERVER_CONF_SOURCE)
+    )
+
     app = FastAPI(
         title="Kedro Server",
         description="HTTP API for running Kedro pipelines",
         version=kedro_version,
         lifespan=lifespan,
+    )
+    app.state.default_env = resolved_env
+    app.state.default_conf_source = resolved_conf_source
+    app.state.project_path = (
+        Path(project_path).resolve() if project_path is not None else get_project_path()
     )
 
     @app.get("/health", response_model=HealthResponse, tags=["health"])
@@ -72,19 +93,12 @@ def create_http_server() -> FastAPI:
 
         Returns server status and Kedro version information.
         """
-        try:
-            project_path = get_project_path()
-            return HealthResponse(
-                status="healthy",
-                kedro_version=kedro_version,
-                project_path=str(project_path),
-            )
-        except Exception:
-            return HealthResponse(
-                status="healthy",
-                kedro_version=kedro_version,
-                project_path=None,
-            )
+        project_path = app.state.project_path
+        return HealthResponse(
+            status="healthy",
+            kedro_version=kedro_version,
+            project_path=str(project_path),
+        )
 
     @app.post("/run", response_model=RunResponse, tags=["pipeline"])
     async def run_pipeline(request: RunRequest) -> RunResponse:
@@ -98,14 +112,13 @@ def create_http_server() -> FastAPI:
         Returns:
             RunResponse with run_id, status, duration, and optional error details.
         """
-        project_path = get_project_path()
-
+        
         # create a session and assign to app state if not already created
         if not hasattr(app.state, "session"):
             app.state.session = KedroServiceSession.create(
-                project_path=project_path,
-                env=request.env,
-                conf_source=request.conf_source,
+                project_path=app.state.project_path,
+                env=app.state.default_env,
+                conf_source=app.state.default_conf_source,
             )
 
         result = execute_pipeline(
@@ -168,12 +181,10 @@ def execute_pipeline(  # noqa: PLR0913
     :class:`PipelineExecutionResult`.
 
     Args:
-        project_path: Path to the Kedro project root.
+        session: Kedro session to use for pipeline execution.
         pipeline_names: List of pipeline names (mutually exclusive with
             *pipeline*).  When *pipeline* is given it is normalised into
             this list internally.
-        env: Configuration environment (e.g. ``'base'``, ``'local'``).
-        conf_source: Path to a custom configuration directory.
         params: Runtime parameters for the pipeline context.
         runner: Runner class name: ``'SequentialRunner'``,
             ``'ParallelRunner'``, ``'ThreadRunner'``.

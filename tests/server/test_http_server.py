@@ -1,7 +1,9 @@
 from pathlib import Path
 
 from fastapi.testclient import TestClient
+import pytest
 
+from kedro.server import create_http_server as create_http_server_lazy
 from kedro.server.http_server import create_http_server, execute_pipeline
 from kedro.server.models import PipelineExecutionError, PipelineExecutionResult
 
@@ -11,17 +13,22 @@ class _FakeRunner:
         self.is_async = is_async
 
 
-class _FakeDataset:
-    def __init__(self, cfg):
-        self._cfg = cfg
+def test_lazy_import_wrapper(mocker):
+    app = mocker.Mock(name="app")
+    mock_create = mocker.patch(
+        "kedro.server.http_server.create_http_server", return_value=app
+    )
 
-    def _init_config(self):
-        return self._cfg
+    result = create_http_server_lazy()
+
+    mock_create.assert_called_once_with()
+    assert result is app
 
 
-def test_execute_pipeline_success_passes_expected_arguments(mocker):
+def test_execute_pipeline_success(mocker):
+    """Test that execute_pipeline returns success result and handles debug mode correctly."""
     session = mocker.Mock()
-    session.run.return_value = {"cars": _FakeDataset({"type": "memory"})}
+    session.run.return_value = {}
 
     mocker.patch("kedro.server.http_server.is_debug_mode", return_value=False)
     mocker.patch("kedro.server.http_server.generate_timestamp", return_value="run-123")
@@ -59,7 +66,8 @@ def test_execute_pipeline_success_passes_expected_arguments(mocker):
     assert kwargs["runner"].is_async is True
 
 
-def test_execute_pipeline_failure_without_debug_hides_traceback(mocker):
+def test_execute_pipeline_failure_hides_traceback(mocker):
+    """Test that execute_pipeline returns failure result and hides traceback when debug mode is off."""
     session = mocker.Mock()
     session.run.side_effect = ValueError("bad run")
 
@@ -76,7 +84,8 @@ def test_execute_pipeline_failure_without_debug_hides_traceback(mocker):
     assert result.error.traceback is None
 
 
-def test_execute_pipeline_failure_with_debug_includes_traceback(mocker):
+def test_execute_pipeline_failure_includes_traceback(mocker):
+    """Test that execute_pipeline returns failure result and includes traceback when debug mode is on."""
     session = mocker.Mock()
     session.run.side_effect = RuntimeError("boom")
 
@@ -91,7 +100,7 @@ def test_execute_pipeline_failure_with_debug_includes_traceback(mocker):
     assert result.error.traceback is not None
 
 
-def test_create_http_server_health_and_lifespan(mocker, tmp_path):
+def test_health_endpoint_with_lifespan(mocker, tmp_path):
     project_path = Path(tmp_path).resolve()
     mock_get_project_path = mocker.patch(
         "kedro.server.http_server.get_project_path", return_value=project_path
@@ -106,36 +115,19 @@ def test_create_http_server_health_and_lifespan(mocker, tmp_path):
     assert response.json()["status"] == "healthy"
     assert response.json()["project_path"] == str(project_path)
     mock_bootstrap_project.assert_called_once_with(project_path)
-    assert mock_get_project_path.call_count >= 2
 
 
-def test_create_http_server_health_handles_project_path_errors(mocker, tmp_path):
-    project_path = Path(tmp_path).resolve()
-
-    def _project_path_side_effect():
-        if not hasattr(_project_path_side_effect, "calls"):
-            _project_path_side_effect.calls = 0
-        _project_path_side_effect.calls += 1
-        if _project_path_side_effect.calls == 1:
-            return project_path
-        raise RuntimeError("cannot resolve project")
-
+def test_create_http_server_raises_on_bad_project_path(mocker, tmp_path):
     mocker.patch(
-        "kedro.server.http_server.get_project_path", side_effect=_project_path_side_effect
+        "kedro.server.http_server.get_project_path",
+        side_effect=RuntimeError("cannot resolve project"),
     )
-    mocker.patch("kedro.server.http_server.bootstrap_project")
 
-    app = create_http_server()
-    with TestClient(app) as client:
-        response = client.get("/health")
-
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["status"] == "healthy"
-    assert payload["project_path"] is None
+    with pytest.raises(RuntimeError, match="cannot resolve project"):
+        create_http_server()
 
 
-def test_run_endpoint_creates_and_reuses_service_session(mocker, tmp_path):
+def test_run_endpoint_reuses_service_session(mocker, tmp_path):
     project_path = Path(tmp_path).resolve()
     fake_session = mocker.Mock()
     mock_create_session = mocker.patch(
@@ -165,7 +157,107 @@ def test_run_endpoint_creates_and_reuses_service_session(mocker, tmp_path):
     assert mock_execute.call_count == 2
 
 
-def test_run_endpoint_returns_error_detail_when_pipeline_fails(mocker, tmp_path):
+def test_run_endpoint_uses_factory_defaults(mocker, tmp_path):
+    project_path = Path(tmp_path).resolve()
+    fake_session = mocker.Mock()
+    mock_create_session = mocker.patch(
+        "kedro.server.http_server.KedroServiceSession.create", return_value=fake_session
+    )
+    mocker.patch("kedro.server.http_server.bootstrap_project")
+    mocker.patch(
+        "kedro.server.http_server.execute_pipeline",
+        return_value=PipelineExecutionResult(
+            run_id="run-2",
+            status="success",
+            duration_ms=10.0,
+        ),
+    )
+
+    app = create_http_server(
+        project_path=str(project_path),
+        env="base",
+        conf_source="conf/base",
+    )
+    with TestClient(app) as client:
+        response = client.post("/run", json={})
+
+    assert response.status_code == 200
+    mock_create_session.assert_called_once_with(
+        project_path=project_path,
+        env="base",
+        conf_source="conf/base",
+    )
+
+
+def test_run_endpoint_uses_env_var_defaults(
+    mocker, tmp_path, monkeypatch
+):
+    project_path = Path(tmp_path).resolve()
+    fake_session = mocker.Mock()
+    mock_create_session = mocker.patch(
+        "kedro.server.http_server.KedroServiceSession.create", return_value=fake_session
+    )
+    mocker.patch("kedro.server.http_server.bootstrap_project")
+    mocker.patch(
+        "kedro.server.http_server.execute_pipeline",
+        return_value=PipelineExecutionResult(
+            run_id="run-3",
+            status="success",
+            duration_ms=10.0,
+        ),
+    )
+    monkeypatch.setenv("KEDRO_SERVER_ENV", "local")
+    monkeypatch.setenv("KEDRO_SERVER_CONF_SOURCE", "conf/local")
+
+    app = create_http_server(project_path=str(project_path))
+    with TestClient(app) as client:
+        response = client.post("/run", json={})
+
+    assert response.status_code == 200
+    mock_create_session.assert_called_once_with(
+        project_path=project_path,
+        env="local",
+        conf_source="conf/local",
+    )
+
+
+def test_run_endpoint_factory_defaults_override_env_vars(
+    mocker, tmp_path, monkeypatch
+):
+    project_path = Path(tmp_path).resolve()
+    fake_session = mocker.Mock()
+    mock_create_session = mocker.patch(
+        "kedro.server.http_server.KedroServiceSession.create", return_value=fake_session
+    )
+    mocker.patch("kedro.server.http_server.bootstrap_project")
+    mocker.patch(
+        "kedro.server.http_server.execute_pipeline",
+        return_value=PipelineExecutionResult(
+            run_id="run-4",
+            status="success",
+            duration_ms=10.0,
+        ),
+    )
+    monkeypatch.setenv("KEDRO_SERVER_ENV", "local")
+    monkeypatch.setenv("KEDRO_SERVER_CONF_SOURCE", "conf/local")
+
+    app = create_http_server(
+        project_path=str(project_path),
+        env="base",
+        conf_source="conf/base",
+    )
+    with TestClient(app) as client:
+        response = client.post("/run", json={})
+
+    assert response.status_code == 200
+    mock_create_session.assert_called_once_with(
+        project_path=project_path,
+        env="base",
+        conf_source="conf/base",
+    )
+
+
+def test_run_endpoint_returns_error_detail_on_failure(mocker, tmp_path):
     project_path = Path(tmp_path).resolve()
     fake_session = mocker.Mock()
 

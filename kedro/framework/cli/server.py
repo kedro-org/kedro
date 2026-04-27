@@ -3,7 +3,7 @@ from pathlib import Path
 
 import click
 
-from kedro.framework.cli.utils import CONTEXT_SETTINGS, KedroCliError
+from kedro.framework.cli.utils import CONTEXT_SETTINGS, KedroCliError, validate_conf_source
 from kedro.framework.startup import ProjectMetadata, bootstrap_project
 from kedro.server.utils import (
     DEFAULT_HOST,
@@ -73,6 +73,18 @@ def server_cli() -> None:
     default=False,
     help="Enable debug mode. Includes stack traces in error responses.",
 )
+@click.option(
+    "--env",
+    "-e",
+    type=str,
+    default=None,
+    help="Kedro configuration environment for server sessions.",
+)
+@click.option(
+    "--conf-source",
+    callback=validate_conf_source,
+    help="Path of a directory where project configuration is stored.",
+)
 @click.pass_obj
 def http_start(
     metadata: ProjectMetadata | None,
@@ -80,6 +92,8 @@ def http_start(
     port: int,
     reload: bool,
     debug: bool,
+    env: str | None,
+    conf_source: str | None,
 ) -> None:
     """Start the Kedro HTTP server.
 
@@ -112,6 +126,12 @@ def http_start(
 
     if debug:
         os.environ["KEDRO_SERVER_DEBUG"] = "1"
+
+    if env:
+        os.environ["KEDRO_SERVER_ENV"] = env
+
+    if conf_source:
+        os.environ["KEDRO_SERVER_CONF_SOURCE"] = conf_source
 
     click.echo(f"Starting Kedro HTTP server for project at: {project_path}")
     click.echo(f"Server running at: http://{host}:{port}")

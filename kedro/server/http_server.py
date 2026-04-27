@@ -25,7 +25,12 @@ from kedro.server.models import (
     RunRequest,
     RunResponse,
 )
-from kedro.server.utils import get_project_path, is_debug_mode
+from kedro.server.utils import (
+    KEDRO_SERVER_CONF_SOURCE,
+    KEDRO_SERVER_ENV,
+    get_project_path,
+    is_debug_mode,
+)
 from kedro.utils import load_obj
 
 if TYPE_CHECKING:
@@ -34,9 +39,6 @@ if TYPE_CHECKING:
     from .abstract_session import AbstractSession
 
 logger = logging.getLogger(__name__)
-
-KEDRO_SERVER_ENV = "KEDRO_SERVER_ENV"
-KEDRO_SERVER_CONF_SOURCE = "KEDRO_SERVER_CONF_SOURCE"
 
 
 @asynccontextmanager
@@ -56,7 +58,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_http_server(
-    project_path: str | None = None,
+    project_path: str | Path | None = None,
     env: str | None = None,
     conf_source: str | None = None,
 ) -> FastAPI:

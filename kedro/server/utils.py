@@ -7,6 +7,8 @@ from pathlib import Path
 
 # Environment variable name for project path
 KEDRO_PROJECT_PATH_ENV = "KEDRO_PROJECT_PATH"
+KEDRO_SERVER_ENV = "KEDRO_SERVER_ENV"
+KEDRO_SERVER_CONF_SOURCE = "KEDRO_SERVER_CONF_SOURCE"
 
 # Default server settings
 DEFAULT_HOST = "127.0.0.1"

@@ -13,6 +13,8 @@ from kedro.server.utils import (
     DEFAULT_HOST,
     DEFAULT_HTTP_PORT,
     KEDRO_PROJECT_PATH_ENV,
+    KEDRO_SERVER_CONF_SOURCE,
+    KEDRO_SERVER_ENV,
 )
 from kedro.utils import find_kedro_project
 
@@ -132,10 +134,10 @@ def http_start(  # noqa: PLR0913
         os.environ["KEDRO_SERVER_DEBUG"] = "1"
 
     if env:
-        os.environ["KEDRO_SERVER_ENV"] = env
+        os.environ[KEDRO_SERVER_ENV] = env
 
     if conf_source:
-        os.environ["KEDRO_SERVER_CONF_SOURCE"] = conf_source
+        os.environ[KEDRO_SERVER_CONF_SOURCE] = conf_source
 
     click.echo(f"Starting Kedro HTTP server for project at: {project_path}")
     click.echo(f"Server running at: http://{host}:{port}")

@@ -46,15 +46,7 @@ def server_cli() -> None:
     """Commands for running Kedro as a server."""
 
 
-# ──── HTTP sub-group ──────────────────────────────────────────────────────────
-
-
-@server_cli.group(name="http")
-def http_group() -> None:
-    """HTTP server commands."""
-
-
-@http_group.command(name="start", context_settings=CONTEXT_SETTINGS)
+@server_cli.command(name="start", context_settings=CONTEXT_SETTINGS)
 @click.option(
     "--host",
     "-h",
@@ -110,7 +102,7 @@ def http_start(
     except ImportError as exc:
         raise KedroCliError(
             "Kedro HTTP server requires 'uvicorn' and 'fastapi' packages. "
-            "Install them with: pip install kedro[http]"
+            "Install them with: pip install kedro[server]"
         ) from exc
 
     project_path = _resolve_project_path(metadata)

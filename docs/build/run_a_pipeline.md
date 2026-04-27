@@ -37,11 +37,13 @@ kedro run --runner=ParallelRunner
 
 For the `ParallelRunner`, it is possible to manually select which multiprocessing start method is going to be used.
 
-- `fork`: The child process is created as a copy of the parent process. This is fast but can cause issues with libraries that use threads or manage internal state. Default on most Unix systems.
+- `fork`: The child process is created as a copy of the parent process. This is fast but can cause issues with libraries that use threads or manage internal state. Default on Linux up to Python 3.13.
 
-- `spawn`: The child process starts fresh, importing the main module and inheriting the necessary resources. This is safer and more compatible with several libraries, but requires all objects to be pickleable. Default on Windows and macOS (Python 3.8+).
+- `forkserver`: A pre-spawned server process forks new workers on demand. Default on Linux on Python 3.14 and above.
 
-To control which multiprocessing start method is going to be used by `ParallelRunner`, you can set the value `spawn` or `fork` to the `KEDRO_MP_CONTEXT` environment variable. If neither of those is set, the runner will use the system's default.
+- `spawn`: The child process starts fresh, importing the main module and inheriting the necessary resources. This is safer and more compatible with several libraries, but requires all objects to be pickleable. Default on Windows and macOS.
+
+To control which multiprocessing start method is used by `ParallelRunner`, set `KEDRO_MP_CONTEXT` to `fork`, `forkserver`, or `spawn`. If the variable is not set, the runner uses the system default.
 
 #### Multithreading
 While `ParallelRunner` uses multiprocessing, you can also run the pipeline with multithreading for concurrent execution by specifying `ThreadRunner` as follows:

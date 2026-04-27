@@ -1,7 +1,7 @@
 # Set up Kedro
 
 ## Installation prerequisites
-* **Python**: Kedro works on macOS, Linux, and Windows and requires Python 3.9+. You should create a new virtual environment for *each* new Kedro project you work on to isolate its Python dependencies from those of other projects.
+* **Python**: Kedro works on macOS, Linux, and Windows and requires Python 3.10+. You should create a new virtual environment for *each* new Kedro project you work on to isolate its Python dependencies from those of other projects.
 
 * **git**: You must install `git` onto your machine if you do not already have it. Type `git -v` into your terminal window to confirm it is installed; it will return the version of `git` available or an error message. [You can download `git` from the official website](https://git-scm.com/).
 
@@ -355,7 +355,7 @@ kedro --version
 ## Summary
 
 * Kedro can be used on Windows, macOS or Linux.
-* Installation prerequisites include a Python 3.9+ and `git`.
+* Installation prerequisites include a Python 3.10+ and `git`.
 * The simplest way to get started with Kedro is to create a new project using our starters.
 * `uv` is a great choice for managing Kedro projects, but you can use other tools such as `pip`, `Poetry`, `conda`, and more.
 

@@ -30,11 +30,12 @@ from tests.framework.session.conftest import (
     assert_exceptions_equal,
 )
 
-# Window and MacOS(Python>3.7) default with `spawn` process which reload modules
-# and cause test fails
-SKIP_ON_WINDOWS_AND_MACOS = pytest.mark.skipif(
-    multiprocessing.get_start_method() == "spawn",
-    reason="Due to bug in parallel runner",
+# Windows and macOS use `spawn` by default; Python 3.14+ Linux uses `forkserver`.
+# Both methods don't inherit file descriptors, so log records from subprocesses
+# can't reach the test's QueueHandler, causing hook count assertions to fail.
+SKIP_WHEN_NON_FORK_START_METHOD = pytest.mark.skipif(
+    multiprocessing.get_start_method() in ("spawn", "forkserver"),
+    reason="Due to bug in parallel runner with non-fork start methods",
 )
 
 logger = logging.getLogger("tests.framework.session.conftest")
@@ -236,7 +237,7 @@ class TestNodeHooks:
         # sanity check a couple of important parameters
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
 
-    @SKIP_ON_WINDOWS_AND_MACOS
+    @SKIP_WHEN_NON_FORK_START_METHOD
     @pytest.mark.usefixtures("mock_broken_pipelines")
     def test_on_node_error_hook_parallel_runner(self, mock_session, logs_listener):
         with pytest.raises(ValueError, match="broken"):
@@ -257,7 +258,7 @@ class TestNodeHooks:
             expected_error = ValueError("broken")
             assert_exceptions_equal(call_record.error, expected_error)
 
-    @SKIP_ON_WINDOWS_AND_MACOS
+    @SKIP_WHEN_NON_FORK_START_METHOD
     @pytest.mark.usefixtures("mock_pipelines")
     def test_before_and_after_node_run_hooks_parallel_runner(
         self, mock_session, logs_listener, dummy_dataframe
@@ -325,7 +326,7 @@ class TestDatasetHooks:
         assert call_record.dataset_name == "cars"
         pd.testing.assert_frame_equal(call_record.data, dummy_dataframe)
 
-    @SKIP_ON_WINDOWS_AND_MACOS
+    @SKIP_WHEN_NON_FORK_START_METHOD
     @pytest.mark.usefixtures("mock_settings")
     def test_before_and_after_dataset_loaded_hooks_parallel_runner(
         self, mock_session, logs_listener, dummy_dataframe
@@ -391,7 +392,7 @@ class TestDatasetHooks:
         assert call_record.dataset_name == "planes"
         assert call_record.data.to_dict() == dummy_dataframe.to_dict()
 
-    @SKIP_ON_WINDOWS_AND_MACOS
+    @SKIP_WHEN_NON_FORK_START_METHOD
     def test_before_and_after_dataset_saved_hooks_parallel_runner(
         self, mock_session, logs_listener, dummy_dataframe
     ):
@@ -478,7 +479,7 @@ class TestBeforeNodeRunHookWithInputUpdates:
         assert isinstance(result["planes"].load(), MockDatasetReplacement)
         assert isinstance(result["ships"].load(), pd.DataFrame)
 
-    @SKIP_ON_WINDOWS_AND_MACOS
+    @SKIP_WHEN_NON_FORK_START_METHOD
     def test_correct_input_update_parallel(
         self,
         mock_session_with_before_node_run_hooks,
@@ -510,7 +511,7 @@ class TestBeforeNodeRunHookWithInputUpdates:
         with pytest.raises(TypeError, match=re.escape(pattern)):
             mock_session_with_broken_before_node_run_hooks.run()
 
-    @SKIP_ON_WINDOWS_AND_MACOS
+    @SKIP_WHEN_NON_FORK_START_METHOD
     def test_broken_input_update_parallel(
         self, mock_session_with_broken_before_node_run_hooks, dummy_dataframe
     ):

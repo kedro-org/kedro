@@ -6,7 +6,7 @@ NOTE: This session implementation is under active development and may occasional
 * Added inspection API to get project snapshot.
 
 ## Bug fixes and other changes
-* Added `review-kedro-pr` Cursor skill for Kedro-aware PR review with optional GitHub comment posting.
+* Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
 
 ## Documentation changes
 ## Community contributions

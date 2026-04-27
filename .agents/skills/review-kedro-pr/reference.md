@@ -96,24 +96,6 @@ Any change to dataset base behavior affects all subclasses implicitly.
 
 Turns dataset `type:` strings from catalog YAML into Python classes by trying different module path prefixes. This is how catalog YAML connects to actual code — changes here affect all dataset loading.
 
-### Module-level `__getattr__` in kedro/pipeline/pipeline.py
-
-Lazy deprecation of `TRANSCODING_SEPARATOR`:
-
-```python
-def __getattr__(name: str) -> Any:
-    if name == "TRANSCODING_SEPARATOR":
-        warnings.warn(
-            f"{name!r} has been moved to 'kedro.pipeline.transcoding', "
-            f"and the alias will be removed in Kedro 1.0.0.",
-            KedroDeprecationWarning,
-        )
-        return TRANSCODING_SEPARATOR
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-```
-
-This is intentional — not a code smell. Don't flag it.
-
 ### `_NullPluginManager.__getattr__` (kedro/framework/hooks/manager.py)
 
 Returns `self` for any attribute, so hook calls do nothing when there's no real `PluginManager`. This is intentional.

@@ -172,6 +172,9 @@ package-lock.json
 # Kedro-Datasets plugin
 kedro/datasets/*
 
+# Agent skill temp files
+.tmp/
+
 # Mise
 .mise.toml
 mise.toml

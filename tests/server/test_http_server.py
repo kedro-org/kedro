@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
 
 from kedro.server import create_http_server as create_http_server_lazy
 from kedro.server.http_server import create_http_server, execute_pipeline
@@ -90,7 +90,9 @@ def test_execute_pipeline_failure_includes_traceback(mocker):
     session.run.side_effect = RuntimeError("boom")
 
     mocker.patch("kedro.server.http_server.is_debug_mode", return_value=True)
-    mocker.patch("kedro.server.http_server.generate_timestamp", return_value="run-err-debug")
+    mocker.patch(
+        "kedro.server.http_server.generate_timestamp", return_value="run-err-debug"
+    )
     mocker.patch("kedro.server.http_server.load_obj", return_value=_FakeRunner)
 
     result = execute_pipeline(session)
@@ -102,9 +104,7 @@ def test_execute_pipeline_failure_includes_traceback(mocker):
 
 def test_health_endpoint_with_lifespan(mocker, tmp_path):
     project_path = Path(tmp_path).resolve()
-    mock_get_project_path = mocker.patch(
-        "kedro.server.http_server.get_project_path", return_value=project_path
-    )
+    mocker.patch("kedro.server.http_server.get_project_path", return_value=project_path)
     mock_bootstrap_project = mocker.patch("kedro.server.http_server.bootstrap_project")
 
     app = create_http_server()
@@ -153,7 +153,9 @@ def test_run_endpoint_reuses_service_session(mocker, tmp_path):
     assert second.status_code == 200
     assert first.json()["status"] == "success"
     assert second.json()["status"] == "success"
-    mock_create_session.assert_called_once_with(project_path=project_path, env=None, conf_source=None)
+    mock_create_session.assert_called_once_with(
+        project_path=project_path, env=None, conf_source=None
+    )
     assert mock_execute.call_count == 2
 
 
@@ -189,9 +191,7 @@ def test_run_endpoint_uses_factory_defaults(mocker, tmp_path):
     )
 
 
-def test_run_endpoint_uses_env_var_defaults(
-    mocker, tmp_path, monkeypatch
-):
+def test_run_endpoint_uses_env_var_defaults(mocker, tmp_path, monkeypatch):
     project_path = Path(tmp_path).resolve()
     fake_session = mocker.Mock()
     mock_create_session = mocker.patch(
@@ -221,9 +221,7 @@ def test_run_endpoint_uses_env_var_defaults(
     )
 
 
-def test_run_endpoint_factory_defaults_override_env_vars(
-    mocker, tmp_path, monkeypatch
-):
+def test_run_endpoint_factory_defaults_override_env_vars(mocker, tmp_path, monkeypatch):
     project_path = Path(tmp_path).resolve()
     fake_session = mocker.Mock()
     mock_create_session = mocker.patch(
@@ -261,7 +259,9 @@ def test_run_endpoint_returns_error_detail_on_failure(mocker, tmp_path):
     project_path = Path(tmp_path).resolve()
     fake_session = mocker.Mock()
 
-    mocker.patch("kedro.server.http_server.KedroServiceSession.create", return_value=fake_session)
+    mocker.patch(
+        "kedro.server.http_server.KedroServiceSession.create", return_value=fake_session
+    )
     mocker.patch("kedro.server.http_server.get_project_path", return_value=project_path)
     mocker.patch("kedro.server.http_server.bootstrap_project")
     mocker.patch(

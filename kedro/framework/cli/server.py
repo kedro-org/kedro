@@ -3,7 +3,11 @@ from pathlib import Path
 
 import click
 
-from kedro.framework.cli.utils import CONTEXT_SETTINGS, KedroCliError, validate_conf_source
+from kedro.framework.cli.utils import (
+    CONTEXT_SETTINGS,
+    KedroCliError,
+    validate_conf_source,
+)
 from kedro.framework.startup import ProjectMetadata, bootstrap_project
 from kedro.server.utils import (
     DEFAULT_HOST,
@@ -86,7 +90,7 @@ def server_cli() -> None:
     help="Path of a directory where project configuration is stored.",
 )
 @click.pass_obj
-def http_start(
+def http_start(  # noqa: PLR0913
     metadata: ProjectMetadata | None,
     host: str,
     port: int,

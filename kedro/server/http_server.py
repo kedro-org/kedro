@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import logging
 import os
-from pathlib import Path
 import time
 import traceback
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI
@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Bootstrapping Kedro project at: %s", project_path)
     bootstrap_project(project_path)
     logger.info("Kedro server started successfully")
-    
+
     yield
     # Cleanup on shutdown (if needed in future)
     logger.info("Kedro server shutting down")
@@ -112,7 +112,7 @@ def create_http_server(
         Returns:
             RunResponse with run_id, status, duration, and optional error details.
         """
-        
+
         # create a session and assign to app state if not already created
         if not hasattr(app.state, "session"):
             app.state.session = KedroServiceSession.create(

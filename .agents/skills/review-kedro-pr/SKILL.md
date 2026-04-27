@@ -214,7 +214,7 @@ Then post:
 bash .agents/skills/review-kedro-pr/scripts/post_review.sh <review_json_file>
 ```
 
-This creates one review with the summary as the main message and inline comments on specific lines.
+This creates one review with the summary as the main message and inline comments on specific lines. Delete the JSON file after posting.
 
 ### Summary template
 

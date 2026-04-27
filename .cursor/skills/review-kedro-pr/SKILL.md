@@ -284,6 +284,7 @@ Used in both modes:
 - **Critical** = must fix before merge (violations, missing requirements, bugs).
 - **Suggestion** = worth improving but not blocking.
 - If a section has no findings, write "No issues found."
+- If a section has multiple points, use bullet points for clarity.
 
 ### Communication guidelines
 

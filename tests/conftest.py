@@ -5,6 +5,7 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
+import multiprocessing
 import os
 import sys
 
@@ -12,6 +13,15 @@ import pandas as pd
 import pytest
 
 from kedro.io.core import AbstractDataset
+
+# Python 3.14 changed the default multiprocessing start method on Linux from
+# "fork" to "forkserver". The "forkserver" method is incompatible with
+# pytest-cov because coverage's sitecustomize injection fails in the forkserver
+# subprocess (os.path.realpath('.') raises FileNotFoundError). Use "spawn"
+# instead, which coverage handles correctly and which matches the behaviour
+# already tested on Windows/macOS.
+if sys.version_info >= (3, 14) and multiprocessing.get_start_method() == "forkserver":
+    multiprocessing.set_start_method("spawn", force=True)
 
 
 @pytest.fixture(autouse=True)

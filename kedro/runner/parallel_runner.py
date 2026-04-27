@@ -118,7 +118,7 @@ class ParallelRunner(AbstractRunner):
 
     def _get_executor(self, max_workers: int) -> Executor:
         context = os.environ.get("KEDRO_MP_CONTEXT")
-        if context and context not in {"fork", "spawn"}:
+        if context and context not in {"fork", "spawn", "forkserver"}:
             context = None
         ctx = get_context(context)
         return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx)

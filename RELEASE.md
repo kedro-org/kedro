@@ -6,6 +6,7 @@ NOTE: This session implementation is under active development and may occasional
 * Added inspection API to get project snapshot.
 
 ## Bug fixes and other changes
+* Added `catalog-config` AI agent skill and `AGENTS.md` to the project template so `kedro new` projects ship with catalog configuration guidance for Cursor, GitHub Copilot, Claude Code, and OpenAI Codex.
 ## Documentation changes
 ## Community contributions
 

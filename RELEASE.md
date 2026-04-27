@@ -7,6 +7,8 @@ NOTE: This session implementation is under active development and may occasional
 * Added inspection API to get project snapshot.
 
 ## Bug fixes and other changes
+* Added `pydantic` optional dependency extra. Users can now install Pydantic support via `pip install "kedro[pydantic]"`.
+
 ## Documentation changes
 ## Community contributions
 

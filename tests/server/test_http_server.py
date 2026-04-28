@@ -12,6 +12,7 @@ class _FakeRunner:
     def __init__(self, *, is_async):
         self.is_async = is_async
 
+
 class TestHTTPServer:
     def test_lazy_import_wrapper(self, mocker):
         app = mocker.Mock(name="app")

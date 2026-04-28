@@ -7,6 +7,8 @@ NOTE: This session implementation is under active development and may occasional
 * Added inspection API to get project snapshot.
 
 ## Bug fixes and other changes
+* Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
+
 ## Documentation changes
 ## Community contributions
 

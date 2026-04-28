@@ -62,6 +62,34 @@ class TestTask:
         mock_configure_project.assert_called_once_with(package_name)
 
     @pytest.mark.parametrize("is_async", [False, True])
+    def test_forkserver_bootstraps_subprocess(
+        self,
+        mock_logging,
+        mock_configure_project,
+        is_async,
+        mocker,
+    ):
+        mocker.patch("multiprocessing.get_start_method", return_value="forkserver")
+        node_ = mocker.sentinel.node
+        catalog = mocker.sentinel.catalog
+        run_id = "fake_run_id"
+        package_name = mocker.sentinel.package_name
+
+        task = Task(
+            node=node_,
+            catalog=catalog,
+            run_id=run_id,
+            is_async=is_async,
+            parallel=True,
+        )
+        task._run_node_synchronization(
+            package_name=package_name,
+            logging_config={"fake_logging_config": True},
+        )
+        mock_logging.assert_called_once_with({"fake_logging_config": True})
+        mock_configure_project.assert_called_once_with(package_name)
+
+    @pytest.mark.parametrize("is_async", [False, True])
     def test_package_name_not_provided(self, mock_logging, is_async, mocker):
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
         node_ = mocker.sentinel.node

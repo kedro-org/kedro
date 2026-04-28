@@ -22,7 +22,7 @@ class PipelineExecutionResult:
     """Result of a pipeline execution attempt."""
 
     run_id: str
-    status: str  # "success" | "failed"
+    status: Literal["success", "failure"]  # "success" | "failed"
     duration_ms: float
     error: PipelineExecutionError | None = None
 

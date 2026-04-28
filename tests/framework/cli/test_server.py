@@ -1,4 +1,5 @@
 import types
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -22,7 +23,7 @@ class TestServerCommand:
         )
 
         assert _resolve_project_path(None) == tmp_path
-        mock_find_project.assert_called_once_with()
+        mock_find_project.assert_called_once_with(Path.cwd())
         mock_bootstrap_project.assert_called_once_with(tmp_path)
 
     def test_raises_when_project_cannot_be_discovered(self, mocker):

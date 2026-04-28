@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Any
 
 import click
 
@@ -19,7 +20,7 @@ from kedro.server.utils import (
 from kedro.utils import find_kedro_project
 
 
-def _resolve_project_path(metadata: ProjectMetadata | None) -> Path:
+def _resolve_project_path(metadata: ProjectMetadata | None) -> Any:
     """Resolve and validate the Kedro project path.
 
     If metadata is provided (normal CLI flow), uses its project_path.

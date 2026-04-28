@@ -233,7 +233,7 @@ def execute_pipeline(  # noqa: PLR0913
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.info("Pipeline run %s completed in %.2fms", run_id, duration_ms)
         response = PipelineExecutionResult(
-            run_id=run_id,
+            run_id=run_id or "unknown",
             status="success",
             duration_ms=round(duration_ms, 2),
         )

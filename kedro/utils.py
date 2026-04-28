@@ -137,7 +137,7 @@ def is_kedro_project(project_path: str | Path) -> bool:
         return False
 
 
-def find_kedro_project(current_dir: Path) -> Any:  # pragma: no cover
+def find_kedro_project(current_dir: Path) -> Path | None:  # pragma: no cover
     """Given a path, find a Kedro project associated with it.
 
     Can be:

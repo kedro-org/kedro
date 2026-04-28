@@ -37,7 +37,7 @@ def _resolve_project_path(metadata: ProjectMetadata | None) -> Path:
     if metadata:
         return metadata.project_path
 
-    project_path = find_kedro_project()
+    project_path = find_kedro_project(Path.cwd())
     if not project_path:
         raise KedroCliError(
             "Could not find a Kedro project. "

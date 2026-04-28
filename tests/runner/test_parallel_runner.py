@@ -456,10 +456,10 @@ class TestMultiprocessingGetExecutorContextSelection:
         assert isinstance(executor, ProcessPoolExecutor)
         assert hasattr(executor, "_mp_context")
 
-    @pytest.mark.parametrize("context", ["fork", "spawn"])
+    @pytest.mark.parametrize("context", ["fork", "spawn", "forkserver"])
     def test_get_executor_valid_context(self, mocker, context):
         if sys.platform == "win32":
-            pytest.skip("fork context is not available on Windows")
+            pytest.skip("fork and forkserver contexts are not available on Windows")
         mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": context})
         runner = ParallelRunner()
         executor = runner._get_executor(2)

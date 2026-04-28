@@ -129,7 +129,10 @@ class Task:
             The node argument.
 
         """
-        if multiprocessing.get_start_method() == "spawn" and package_name:
+        if (
+            multiprocessing.get_start_method() in ("spawn", "forkserver")
+            and package_name
+        ):
             Task._bootstrap_subprocess(package_name, logging_config)
 
         hook_manager = _create_hook_manager()

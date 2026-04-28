@@ -13,6 +13,7 @@ on:
     paths-ignore:
       - "docs/**"
       - '**.md'
+      - '.secrets.baseline'
   pull_request:
     branches:
       - main
@@ -20,6 +21,7 @@ on:
     paths-ignore:
       - "docs/**"
       - '**.md'
+      - '.secrets.baseline'
 
 permissions:
   contents: read

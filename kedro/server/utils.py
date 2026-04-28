@@ -52,15 +52,3 @@ def get_project_path() -> Path:
         )
 
     return path
-
-
-def is_debug_mode() -> bool:
-    """Check if server is running in debug mode.
-
-    Debug mode enables additional error information like stack traces.
-
-    Returns:
-        True if KEDRO_SERVER_DEBUG is set to a truthy value.
-    """
-    debug_env = os.environ.get("KEDRO_SERVER_DEBUG", "").lower()
-    return debug_env in ("1", "true", "yes")

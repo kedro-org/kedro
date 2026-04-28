@@ -91,5 +91,3 @@ def create_http_server(
         )
 
     return app
-
-    

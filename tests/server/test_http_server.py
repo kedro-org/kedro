@@ -12,7 +12,6 @@ class _FakeRunner:
     def __init__(self, *, is_async):
         self.is_async = is_async
 
-
 class TestHTTPServer:
     def test_lazy_import_wrapper(self, mocker):
         app = mocker.Mock(name="app")
@@ -324,3 +323,5 @@ class TestModels:
         as_dict = result.to_dict()
 
         assert as_dict["error"]["traceback"] == ["line 1", "line 2"]
+        with pytest.raises(RuntimeError, match="cannot resolve project"):
+            create_http_server()

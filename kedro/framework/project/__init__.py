@@ -201,6 +201,16 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module: str | None = None
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
+        self._requested_pipelines: list[str] | None = None
+
+    def set_requested(self, pipeline_names: list[str] | None) -> None:
+        """Set which pipelines are needed before first dict access.
+        Invalidates the cache if the filter changes.
+        """
+        if self._requested_pipelines != pipeline_names:
+            self._is_data_loaded = False
+            self._content = {}
+        self._requested_pipelines = pipeline_names
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
@@ -457,7 +467,87 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines(  # noqa: PLR0912, PLR0915
+def _load_default_pipeline(raise_errors: bool) -> Pipeline:
+    """Load the pipeline from the simplified single-file project structure."""
+    pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
+    try:
+        pipeline_module = importlib.import_module(pipeline_module_name)
+    except Exception as exc:
+        if str(exc) != f"No module named '{pipeline_module_name}'":
+            if raise_errors:
+                raise ImportError(
+                    f"An error occurred while importing the '{pipeline_module_name}' module."
+                ) from exc
+            warnings.warn(
+                IMPORT_ERROR_MESSAGE.format(
+                    module=pipeline_module_name, tb_exc=traceback.format_exc()
+                )
+            )
+        return pipeline([])
+    return _create_pipeline(pipeline_module) or pipeline([])
+
+
+def _load_modular_pipelines(
+    pipelines_package: importlib.resources.abc.Traversable,
+    pipeline_filter: set[str] | None,
+    pipelines_dict: dict[str, Pipeline],
+    raise_errors: bool,
+) -> set[str]:
+    """Import each pipeline subdirectory, populating *pipelines_dict* in place.
+
+    Returns the set of pipeline names that were actually discovered on disk.
+    """
+    seen: set[str] = set()
+    for pipeline_dir in pipelines_package.iterdir():
+        if not pipeline_dir.is_dir():
+            continue
+        pipeline_name = pipeline_dir.name
+        if pipeline_name == "__pycache__" or pipeline_name.startswith("."):
+            continue
+        if pipeline_filter is not None and pipeline_name not in pipeline_filter:
+            continue
+
+        seen.add(pipeline_name)
+        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+        try:
+            pipeline_module = importlib.import_module(pipeline_module_name)
+        except Exception as exc:
+            if raise_errors:
+                raise ImportError(
+                    f"An error occurred while importing the '{pipeline_module_name}' module."
+                ) from exc
+            warnings.warn(
+                IMPORT_ERROR_MESSAGE.format(
+                    module=pipeline_module_name, tb_exc=traceback.format_exc()
+                )
+            )
+            continue
+
+        pipeline_obj = _create_pipeline(pipeline_module)
+        if pipeline_obj is not None:
+            pipelines_dict[pipeline_name] = pipeline_obj
+        elif raise_errors:
+            raise KeyError(f"Pipeline '{pipeline_name}' not found")
+
+    return seen
+
+
+def _report_missing_pipelines(
+    pipeline_filter: set[str], seen: set[str], raise_errors: bool
+) -> None:
+    """Warn or raise for each pipeline that was requested but not found on disk."""
+    for pipeline_name in sorted(pipeline_filter - seen):
+        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+        error_msg = (
+            f"An error occurred while importing the '{pipeline_module_name}' module. "
+            f"Nothing defined therein will be returned by 'find_pipelines'."
+        )
+        if raise_errors:
+            raise ImportError(error_msg)
+        warnings.warn(error_msg)
+
+
+def find_pipelines(
     raise_errors: bool = False, pipelines_to_find: list[str] | None = None
 ) -> dict[str, Pipeline]:
     """Automatically find modular pipelines having a ``create_pipeline``
@@ -499,43 +589,27 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
             "Call 'configure_project' first."
         )
 
-    # Determine if specific pipelines were requested
-    load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
-    requested_pipelines: set[str] | None = None if load_all else set(pipelines_to_find)  # type: ignore[arg-type]
+    # Explicit CLI flag takes precedence; fallback to the kwarg.
+    requested_pipelines = (
+        pipelines._requested_pipelines
+        if pipelines._requested_pipelines is not None
+        else pipelines_to_find
+    )
+    load_all = requested_pipelines is None or "__default__" in requested_pipelines
+    pipeline_filter: set[str] | None = None if load_all else set(requested_pipelines)  # type: ignore[arg-type]
 
     pipelines_dict: dict[str, Pipeline] = {}
 
     if load_all:
-        # Handle the simplified project structure found in several starters.
-        pipeline_obj = None
-        pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
-        try:
-            pipeline_module = importlib.import_module(pipeline_module_name)
-        except Exception as exc:
-            if str(exc) != f"No module named '{pipeline_module_name}'":
-                if raise_errors:
-                    raise ImportError(
-                        f"An error occurred while importing the "
-                        f"'{pipeline_module_name}' module."
-                    ) from exc
+        pipelines_dict["__default__"] = _load_default_pipeline(raise_errors)
 
-                warnings.warn(
-                    IMPORT_ERROR_MESSAGE.format(
-                        module=pipeline_module_name, tb_exc=traceback.format_exc()
-                    )
-                )
-        else:
-            pipeline_obj = _create_pipeline(pipeline_module)
-
-        pipelines_dict["__default__"] = pipeline_obj or pipeline([])
-
-    # Handle the case that a project doesn't have a pipelines directory.
+    # Handle projects that have no pipelines/ directory.
     try:
         pipelines_package = importlib.resources.files(f"{PACKAGE_NAME}.pipelines")
     except ModuleNotFoundError as exc:
         if str(exc) == f"No module named '{PACKAGE_NAME}.pipelines'":
-            if requested_pipelines is not None:
-                missing_str = ", ".join(sorted(requested_pipelines))
+            if pipeline_filter is not None:
+                missing_str = ", ".join(sorted(pipeline_filter))
                 error_msg = f"Pipeline(s) not found: {missing_str}"
                 if raise_errors:
                     raise KeyError(error_msg) from exc
@@ -543,53 +617,11 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
                 return {}
             return pipelines_dict
 
-    seen: set[str] = set()
-    for pipeline_dir in pipelines_package.iterdir():
-        if not pipeline_dir.is_dir():
-            continue
+    seen = _load_modular_pipelines(
+        pipelines_package, pipeline_filter, pipelines_dict, raise_errors
+    )
 
-        pipeline_name = pipeline_dir.name
-        if pipeline_name == "__pycache__":
-            continue
-        # Prevent imports of hidden directories/files
-        if pipeline_name.startswith("."):
-            continue
-
-        if requested_pipelines is not None and pipeline_name not in requested_pipelines:
-            continue
-
-        seen.add(pipeline_name)
-        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
-        try:
-            pipeline_module = importlib.import_module(pipeline_module_name)
-        except Exception as exc:
-            if raise_errors:
-                raise ImportError(
-                    f"An error occurred while importing the "
-                    f"'{pipeline_module_name}' module."
-                ) from exc
-
-            warnings.warn(
-                IMPORT_ERROR_MESSAGE.format(
-                    module=pipeline_module_name, tb_exc=traceback.format_exc()
-                )
-            )
-            continue
-
-        pipeline_obj = _create_pipeline(pipeline_module)
-        if pipeline_obj is not None:
-            pipelines_dict[pipeline_name] = pipeline_obj
-        elif raise_errors:
-            raise KeyError(f"Pipeline '{pipeline_name}' not found")
-
-    if requested_pipelines is not None:
-        for pipeline_name in requested_pipelines - seen:
-            pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
-            error_msg = f"An error occurred while importing the '{pipeline_module_name}' module."
-            if raise_errors:
-                raise ImportError(error_msg)
-            warnings.warn(
-                f"{error_msg} Nothing defined therein will be returned by 'find_pipelines'."
-            )
+    if pipeline_filter is not None:
+        _report_missing_pipelines(pipeline_filter, seen, raise_errors)
 
     return pipelines_dict

@@ -345,6 +345,7 @@ class KedroSession(AbstractSession):
         context = self.load_context()
 
         names = pipeline_names or ["__default__"]
+        pipelines.set_requested(names)
         combined_pipelines = Pipeline([])
         for name in names:
             try:

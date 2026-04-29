@@ -9,7 +9,7 @@ import yaml
 from click import secho
 
 from kedro.framework.cli.utils import env_option, split_string
-from kedro.framework.project import settings
+from kedro.framework.project import pipelines, settings
 
 if TYPE_CHECKING:
     from kedro.framework.startup import ProjectMetadata
@@ -52,6 +52,9 @@ def describe_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> Non
     - `factories`: Datasets resolved from dataset factory patterns.\n
     - `defaults`: Datasets that do not match any pattern or explicit definition.\n
     """
+    if pipeline:
+        pipelines.set_requested(pipeline)
+
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
@@ -97,6 +100,9 @@ def resolve_patterns(metadata: ProjectMetadata, pipeline: str, env: str) -> None
     It includes datasets explicitly defined in the catalog as well as those resolved
     from dataset factory patterns.
     """
+    if pipeline:
+        pipelines.set_requested(pipeline)
+
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 

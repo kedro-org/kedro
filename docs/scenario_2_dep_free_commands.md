@@ -4,52 +4,11 @@
 
 **Goal:** Read-only CLI commands (`kedro registry list`, `kedro registry describe`, `kedro catalog describe-datasets`, inspection API) should function even when heavy project dependencies (sklearn, torch, seaborn) are not installed.
 
-Four approaches address different layers of the stack — they are complementary, not mutually exclusive.
+Three approaches address different layers of the stack — they are complementary, not mutually exclusive.
 
 ---
 
-## Approach A — Filesystem-based Name Discovery
-
-**Command:** `kedro registry list`
-
-`kedro registry list` only needs pipeline names — no `Pipeline` or `Node` objects. Today iterating `pipelines` triggers `_load_data()`, constructing every `Node` and calling `inspect.signature()` on every function just to print names.
-
-`list_names()` bypasses `_load_data()` entirely by scanning the filesystem directly.
-
-> **Why not `importlib.resources.files()`?** It calls `importlib.import_module()` internally, which would import `my_project.pipelines`. `importlib.util.find_spec()` locates the package on disk without importing it.
-
-```python
-# kedro/framework/project/__init__.py — new method on _ProjectPipelines
-
-def list_names(self) -> list[str]:
-    """Return pipeline names by scanning the filesystem — no imports."""
-    spec = importlib.util.find_spec(PACKAGE_NAME)
-    if spec is None or spec.origin is None:
-        return list(self.keys())  # fallback to full load
-
-    pipelines_path = Path(spec.origin).parent / "pipelines"
-    if not pipelines_path.is_dir():
-        return list(self.keys())  # non-standard layout — fallback
-
-    names = [
-        d.name for d in pipelines_path.iterdir()
-        if d.is_dir() and not d.name.startswith(".") and d.name != "__pycache__"
-    ]
-    return sorted(["__default__", *names])
-```
-
-`list_names()` is **not** wrapped by `_load_data_wrapper`, so calling it never triggers `_load_data()`.
-
-```python
-# kedro/framework/cli/registry.py — AFTER
-@registry.command("list")
-def list_registered_pipelines() -> None:
-    click.echo(yaml.dump(pipelines.list_names()))  # zero imports
-```
-
----
-
-## Approach B — Defer `inspect.signature()` to `Node.run()`
+## Approach A — Defer `inspect.signature()` to `Node.run()`
 
 **Commands:** `kedro registry describe X`, `kedro catalog describe-datasets -p X`, inspection API
 
@@ -90,19 +49,11 @@ def validate(self) -> None:
     self._inputs_validated = True
 ```
 
-**What each combination defers:**
-
-| Approaches applied | What still loads at pipeline construction | What is deferred |
-|-------------------|-------------------------------------------|-----------------|
-| Scenario 1 only | Only X's `pipeline.py` → `nodes.py` → `sklearn` | All other pipelines' modules |
-| Scenario 1 + Approach B | Only X's `pipeline.py` → `nodes.py` → `sklearn` | `inspect.signature()` — never runs for non-execution commands |
-| Scenario 1 + Approach B + Approach D | Nothing at construction | Both `nodes.py` import and `inspect.signature()` |
-
-> **Key insight:** With Approach B, `inspect.signature()` is never called for commands like `registry describe` since `node.run()` is never invoked. However, `from nodes import train_model` at the top of `pipeline.py` still fires when `pipeline.py` is loaded. Only the signature validation overhead is eliminated — not the module import itself.
+> **Key insight:** With Approach A, `inspect.signature()` is never called for commands like `registry describe` since `node.run()` is never invoked. However, `from nodes import train_model` at the top of `pipeline.py` still fires when `pipeline.py` is loaded. Only the signature validation overhead is eliminated — not the module import itself.
 
 ---
 
-## Approach C — `sys.meta_path` Stubs for Missing Dependencies
+## Approach B — `sys.meta_path` Stubs for Missing Dependencies
 
 **When to use:** Project dependencies are genuinely not installed (e.g., `kedro run -p data_ingestion` when `seaborn` — required only by `reporting` — is absent).
 
@@ -195,7 +146,7 @@ def _load_data(self) -> None:
 
 ---
 
-## Approach D — String Function References in `Node` (future)
+## Approach C — String Function References in `Node` (future)
 
 Accept a dotted string path as `func`, deferring both the module import and signature inspection until `node.run()`. This is the deepest level of lazy loading — even `nodes.py` is not imported until execution.
 
@@ -247,49 +198,3 @@ def create_pipeline(**kwargs):
 ```
 
 > **Potential breaking API change.** Key design questions before shipping: backwards compatibility with live callables (must be unchanged), error surfacing (import errors surface at `node.run()` not `Pipeline()` construction — needs clear messages), `node.name` auto-derivation (today from `func.__name__`, needs a fallback for strings), IDE/type-checking support (string paths lose navigation), and `kedro-viz`/inspection tool compatibility.
-
----
-
-## Implementation Roadmap
-
-```mermaid
-gantt
-    title Scenario 2 — Implementation Phases
-    dateFormat  YYYY-MM-DD
-    section Low Risk
-    Approach A: list_names() for registry list   :s2a, 2026-04-20, 2d
-    section Medium Risk
-    Approach B: Defer inspect.signature()        :s2b, 2026-04-23, 5d
-    Approach C: sys.meta_path stubs              :s2c, after s2b, 5d
-    section High Risk
-    Approach D: String function references       :s2d, after s2c, 10d
-```
-
-### Dependency Graph
-
-```mermaid
-flowchart LR
-    S2A["Approach A\nlist_names()"]
-    S2B["Approach B\nDefer inspect.signature()"]
-    S2C["Approach C\nsys.meta_path stubs"]
-    S2D["Approach D\nString function references"]
-
-    S2B --> S2C
-    S2B --> S2D
-
-    style S2A fill:#4caf50,color:#fff
-    style S2B fill:#2196f3,color:#fff
-    style S2C fill:#2196f3,color:#fff
-    style S2D fill:#9c27b0,color:#fff
-```
-
-Approach A is fully independent. B must land before C or D (C/D both rely on the lazy-validation infrastructure B introduces).
-
-### Risk Assessment
-
-| Approach | Risk | Mitigation |
-|----------|------|-----------|
-| A: `list_names()` | Low — purely additive; never triggers `_load_data()` | Falls back to full load for non-standard layouts |
-| B: Defer `inspect.signature()` | Medium — `TypeError` surfaces at `node.run()` not construction | Expose explicit `node.validate()` for dry-runs and test suites |
-| C: `sys.meta_path` stubs | Medium — mutations to `sys.meta_path` can have subtle side effects | Scoped tightly to `_load_data()` with cleanup in `finally`; stub modules removed post-load |
-| D: String function references | High — API change, affects IDE tooling, kedro-viz | Gate behind feature flag; maintain backward compatibility with live callables |

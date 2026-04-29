@@ -100,6 +100,7 @@ benchmark = [
     "asv"
 ]
 server = [
+    "pydantic~=2.13",
     "fastapi>=0.100.0",
     "uvicorn>=0.20.0",
 ]

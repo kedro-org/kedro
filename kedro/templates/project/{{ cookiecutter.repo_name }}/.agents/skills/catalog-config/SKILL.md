@@ -32,7 +32,7 @@ Do not guess constructor arguments from training data — they change across ver
 pip show kedro-datasets
 ```
 
-If not installed, fall back to `latest` in the URL below.
+If not installed, fall back to `stable` in the URL below.
 
 **Step 2** — Fetch the docs page for the specific dataset type:
 
@@ -46,7 +46,7 @@ For experimental datasets:
 https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-{version}/api/kedro_datasets_experimental/{module}.{ClassName}/
 ```
 
-Replace `{version}` with the installed version (e.g. `9.3.0`) or `latest`. Replace `{module}.{ClassName}` with the dataset type (e.g. `pandas.CSVDataset`, `polars.PolarsDatabaseDataset`).
+Replace `{version}` with the installed version (e.g. `9.3.0`) or `stable`. Replace `{module}.{ClassName}` with the dataset type (e.g. `pandas.CSVDataset`, `polars.PolarsDatabaseDataset`).
 
 **Step 3** — Read the constructor parameters from the docs page, then write the catalog entry using only documented arguments.
 

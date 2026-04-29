@@ -15,17 +15,16 @@ Kedro provides two session classes, based on the abstract base class `AbstractSe
     * Allows you to run pipelines multiple times in the same session, with different runtime parameters for each run.
     * Ideal for service use cases, where you want to keep the session alive and run pipelines on demand, such as in a web service or API.
 
-```
+
 !!! note
     `KedroServiceSession` is currently in active development and might be subject to occassional breaking changes. We encourage you to try it out and share your feedback with us.
-```
 
 
 The main methods and properties of both `KedroSession` and `KedroServiceSession` are:
 
 - `create()`: Create a new instance of session class with session data
-- `load_context()`: Instantiate `KedroContext` object. For `KedroServiceSession`, this method accepts an optional `runtime_params` argument, which allows you to update the `KedroContext` parameters for that run.
-- `close()`: Close the current session — although we recommend that you [use the session object as a context manager](#create-a-kedrosession), which will call `close()` automatically, as opposed to calling the method explicitly
+- `load_context()`: Instantiate `KedroContext` object. For `KedroServiceSession`, this method accepts an optional `runtime_params` argument, which allows you to update the `KedroContext` parameters for that run
+- `close()`: Close the current session
 - `run()`: Run the pipeline with the arguments provided; see  [Running pipelines](../build/run_a_pipeline.md) for details
 
 

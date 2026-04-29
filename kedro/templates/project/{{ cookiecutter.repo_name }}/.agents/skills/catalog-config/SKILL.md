@@ -22,18 +22,49 @@ Two things agents get wrong:
 - **Wrong module**: `kedro.extras.datasets.*` is deprecated and removed — never generate it.
 - **Wrong casing**: since kedro-datasets 2.0, use lowercase `Dataset` (e.g. `CSVDataset`, not `CSVDataSet`).
 
-## Check installed version
+## Check the docs before writing an entry
 
-Before suggesting a dataset type or its arguments, run:
+Do not guess constructor arguments from training data — they change across versions. You MUST look up the dataset type docs before writing the catalog entry.
+
+**Step 1** — Get the installed version:
 
 ```bash
 pip show kedro-datasets
 ```
 
-Then refer to the docs for the installed version:
-https://docs.kedro.org/projects/kedro-datasets
+If not installed, fall back to `latest` in the URL below.
 
-Do not guess constructor arguments from training data — they change across versions.
+**Step 2** — Fetch the docs page for the specific dataset type:
+
+```
+https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-{version}/api/kedro_datasets/{module}.{ClassName}/
+```
+
+For experimental datasets:
+
+```
+https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-{version}/api/kedro_datasets_experimental/{module}.{ClassName}/
+```
+
+Replace `{version}` with the installed version (e.g. `9.3.0`) or `latest`. Replace `{module}.{ClassName}` with the dataset type (e.g. `pandas.CSVDataset`, `polars.PolarsDatabaseDataset`).
+
+**Step 3** — Read the constructor parameters from the docs page, then write the catalog entry using only documented arguments.
+
+## Dependencies
+
+When adding a dataset, ensure the required package is in `requirements.txt` (or `pyproject.toml`). Dataset types are shipped as extras of `kedro-datasets`:
+
+```
+kedro-datasets[pandas.CSVDataset]
+```
+
+For experimental types, the package is `kedro-datasets-experimental`:
+
+```
+kedro-datasets-experimental[polars.PolarsDatabaseDataset]
+```
+
+Suggest updating requirements when adding a new dataset type.
 
 ## load_args and save_args
 

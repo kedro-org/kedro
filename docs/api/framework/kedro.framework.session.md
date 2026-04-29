@@ -6,11 +6,11 @@
 
 | Module                          | Description                                                                 |
 |---------------------------------|-----------------------------------------------------------------------------|
-| [`kedro.framework.session.abstract_session.AbstractSession`](#kedro.framework.session.abstract_session.AbstractSession) | Implements Kedro session responsible for project lifecycle.               |
-| [`kedro.framework.session.session.KedroSession`](#kedro.framework.session.session.KedroSession) | Implements Kedro session responsible for project lifecycle.               |
-| [`kedro.framework.session.service_session.KedroServiceSession`](#kedro.framework.session.service_session.KedroServiceSession) | Implements Kedro service session responsible for project lifecycle.      |
-| [`kedro.framework.session.store.BaseSessionStore`](#kedro.framework.session.store.BaseSessionStore)     | Implements a dict-like store object used to persist Kedro sessions.       |
-| [`kedro.framework.session.abstract_session.KedroSessionError`](#kedro.framework.session.abstract_session.KedroSessionError) | Error occurred when loading project and running session pipeline. |ß
+| [`AbstractSession`](#kedro.framework.session.abstract_session.AbstractSession) | Implements Kedro session responsible for project lifecycle.               |
+| [`KedroSession`](#kedro.framework.session.session.KedroSession) | Implements Kedro session responsible for project lifecycle.               |
+| [`KedroServiceSession`](#kedro.framework.session.service_session.KedroServiceSession) | Implements Kedro service session responsible for project lifecycle.      |
+| [`BaseSessionStore`](#kedro.framework.session.store.BaseSessionStore)     | Implements a dict-like store object used to persist Kedro sessions.       |
+| [`KedroSessionError`](#kedro.framework.session.abstract_session.KedroSessionError) | Error occurred when loading project and running session pipeline. |ß
 
 
 ::: kedro.framework.session.abstract_session.AbstractSession

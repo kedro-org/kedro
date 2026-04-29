@@ -1,37 +1,11 @@
 import types
-from pathlib import Path
 
-import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.server import _resolve_project_path
-from kedro.framework.cli.utils import KedroCliError
 from kedro.server.utils import DEFAULT_HOST, DEFAULT_HTTP_PORT, KEDRO_PROJECT_PATH_ENV
 
 
 class TestServerCommand:
-    def test_uses_metadata_project_path(self, fake_metadata):
-        assert _resolve_project_path(fake_metadata) == fake_metadata.project_path
-
-    def test_falls_back_to_discovered_project(self, mocker, tmp_path):
-        mock_find_project = mocker.patch(
-            "kedro.framework.cli.server.find_kedro_project",
-            return_value=tmp_path,
-        )
-        mock_bootstrap_project = mocker.patch(
-            "kedro.framework.cli.server.bootstrap_project"
-        )
-
-        assert _resolve_project_path(None) == tmp_path
-        mock_find_project.assert_called_once_with(Path.cwd())
-        mock_bootstrap_project.assert_called_once_with(tmp_path)
-
-    def test_raises_when_project_cannot_be_discovered(self, mocker):
-        mocker.patch("kedro.framework.cli.server.find_kedro_project", return_value=None)
-
-        with pytest.raises(KedroCliError, match="Could not find a Kedro project"):
-            _resolve_project_path(None)
-
     def test_server_with_default_options(self, fake_metadata, fake_project_cli, mocker):
         mock_environ = mocker.patch("os.environ", {})
         uvicorn_run = mocker.Mock()

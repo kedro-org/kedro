@@ -1,6 +1,4 @@
 import os
-from pathlib import Path
-from typing import Any
 
 import click
 
@@ -9,7 +7,7 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     validate_conf_source,
 )
-from kedro.framework.startup import ProjectMetadata, bootstrap_project
+from kedro.framework.startup import ProjectMetadata
 from kedro.server.utils import (
     DEFAULT_HOST,
     DEFAULT_HTTP_PORT,
@@ -17,35 +15,6 @@ from kedro.server.utils import (
     KEDRO_SERVER_CONF_SOURCE,
     KEDRO_SERVER_ENV,
 )
-from kedro.utils import find_kedro_project
-
-
-def _resolve_project_path(metadata: ProjectMetadata | None) -> Any:
-    """Resolve and validate the Kedro project path.
-
-    If metadata is provided (normal CLI flow), uses its project_path.
-    Otherwise, discovers the project path from the current directory.
-
-    Args:
-        metadata: Project metadata from Kedro CLI, or None.
-
-    Returns:
-        Resolved path to the Kedro project.
-
-    Raises:
-        KedroCliError: If no Kedro project can be found.
-    """
-    if metadata:
-        return metadata.project_path
-
-    project_path = find_kedro_project(Path.cwd())
-    if not project_path:
-        raise KedroCliError(
-            "Could not find a Kedro project. "
-            "Make sure you're in a Kedro project directory."
-        )
-    bootstrap_project(project_path)
-    return project_path
 
 
 @click.group(name="server")
@@ -88,7 +57,7 @@ def server_cli() -> None:
 )
 @click.pass_obj
 def http_start(  # noqa: PLR0913
-    metadata: ProjectMetadata | None,
+    metadata: ProjectMetadata,
     host: str,
     port: int,
     reload: bool,
@@ -119,7 +88,7 @@ def http_start(  # noqa: PLR0913
             "Install them with: pip install kedro[server]"
         ) from exc
 
-    project_path = _resolve_project_path(metadata)
+    project_path = metadata.project_path
 
     # Set environment variables for the server process
     os.environ[KEDRO_PROJECT_PATH_ENV] = str(project_path)

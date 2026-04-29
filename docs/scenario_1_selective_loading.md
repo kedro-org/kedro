@@ -85,8 +85,6 @@ def find_pipelines(raise_errors: bool = False, pipelines_to_find: list[str] | No
 | `kedro catalog resolve-patterns -p X` | `catalog.py:104` | `pipelines.set_requested([pipeline])` | **Done** |
 | `inspection: get_project_snapshot(pipelines=["X"])` | `snapshot.py:136` | requires new `pipeline_names` parameter first | **Future** |
 
-> **Bug to fix in `catalog.py`:** The `--pipeline` option uses `callback=split_string` which already returns `list[str]`, so `pipeline` is e.g. `["data_science"]`. Wrapping it as `[pipeline]` produces `[["data_science"]]`. The correct call is `pipelines.set_requested(pipeline)` (without the extra list).
-
 ---
 
 ## Limitation — Custom `register_pipelines` Without `find_pipelines()`

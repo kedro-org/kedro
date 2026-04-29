@@ -1,6 +1,6 @@
 # Configuration
 
-This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters_explanation.md), [credentials](./credentials_explanation.md), the [data catalog](../catalog-data/data_catalog.md), and [logging information](../develop/logging.md).
+This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters_and_credentials_explanation.md#parameters), [credentials](./parameters_and_credentials_explanation.md#credentials), the [data catalog](../catalog-data/data_catalog.md), and [logging information](../develop/logging.md).
 
 Kedro makes use of a configuration loader to load any project configuration files, which you can access through [kedro.config.OmegaConfigLoader][].
 
@@ -35,7 +35,7 @@ from omegaconf import OmegaConf
 parameters = OmegaConf.load("/path/to/parameters.yml")
 ```
 
-When your configuration files are complex and contain credentials or templating, Kedro's `OmegaConfigLoader` is more suitable, as described in more detail in [How to load a data catalog with credentials in code?](how_to_configure_project.md#how-to-load-a-data-catalog-with-credentials-in-code) and [How to load a data catalog with templating in code?](how_to_advanced_configuration.md#how-to-load-a-data-catalog-with-templating-in-code).
+When your configuration files are complex and contain credentials or templating, Kedro's `OmegaConfigLoader` is more suitable, as described in more detail in [How to load a data catalog with credentials in code?](how_to_configure_project.md#how-to-load-a-data-catalog-with-credentials-in-code) and [How to load a data catalog with templating in code?](how_to_use_templating.md#how-to-load-a-data-catalog-with-templating-in-code).
 
 In summary, while both `OmegaConf` and Kedro's `OmegaConfigLoader` provide ways to manage configurations, your choice depends on the complexity of your configuration and whether you are working within the context of the Kedro framework.
 
@@ -99,4 +99,4 @@ config_patterns = {
 }
 ```
 
-If you want to change the way configuration is loaded, you can either [customise the config patterns](how_to_advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) or [bypass the configuration loading](how_to_advanced_configuration.md#how-to-bypass-the-configuration-loading-rules) as described in the advanced configuration how-to guide.
+If you want to change the way configuration is loaded, you can either [customise the config patterns](how_to_configure_project.md#how-to-change-which-configuration-files-are-loaded) or [bypass the configuration loading](how_to_configure_project.md#how-to-bypass-the-configuration-loading-rules) as described in the configuration how-to guide.

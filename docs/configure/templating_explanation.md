@@ -57,7 +57,7 @@ It's also possible to use variable interpolation in configuration files other th
 From Kedro `0.18.13`, you can use variable interpolation in your configurations using "globals" with `OmegaConfigLoader`.
 The benefit of using globals over regular variable interpolation is that the global variables are shared across different configuration types, such as catalog and parameters.
 By default, these global variables are assumed to be in files called `globals.yml` in any of your environments. If you want to configure the naming patterns for the files that contain your global variables,
-you can do so [by overwriting the `globals` key in `config_patterns`](how_to_advanced_configuration.md#how-to-change-which-configuration-files-are-loaded). You can also [bypass the configuration loading](how_to_advanced_configuration.md#how-to-bypass-the-configuration-loading-rules)
+you can do so [by overwriting the `globals` key in `config_patterns`](how_to_configure_project.md#how-to-change-which-configuration-files-are-loaded). You can also [bypass the configuration loading](how_to_configure_project.md#how-to-bypass-the-configuration-loading-rules)
 to directly set the global variables in `OmegaConfigLoader`.
 
 Suppose you have global variables located in the file `conf/base/globals.yml`:
@@ -86,7 +86,7 @@ overwrite the values in your base environment.
 
 ## Runtime parameters
 
-Kedro allows you to [specify runtime parameters for the `kedro run` command with the `--params` CLI option](how_to_use_parameters.md#how-to-specify-parameters-at-runtime). These runtime parameters
+Kedro allows you to [specify runtime parameters for the `kedro run` command with the `--params` CLI option](how_to_use_parameters_and_credentials.md#how-to-specify-parameters-at-runtime). These runtime parameters
 are added to the `KedroContext` and merged with parameters from the configuration files to be used in your project's pipelines and nodes. From Kedro `0.18.14`, you can use the
 `runtime_params` resolver to show that you want to override values of certain keys in your configuration with runtime parameters provided through the CLI option.
 This resolver can be used across different configuration types, such as parameters, catalog, and more, except for "globals".

@@ -13,23 +13,21 @@ This plan reorganizes the Configuration documentation to align with the Diataxis
 
 The reorganization creates:
 - **3 Explanation files** (understanding-oriented)
-- **6 How-to Guide files** (task-oriented)
+- **3 How-to Guide files** (task-oriented)
 - **Migration guide** kept as-is
 
 ### Navigation Structure (mkdocs.yml)
 ```yaml
 - Configure:
-    - Understanding Configuration:
-        - Configuration concepts: configure/configuration_explanation.md
-        - Parameters and credentials concepts: configure/parameters_and_credentials_explanation.md
-        - Templating concepts: configure/templating_explanation.md
+    - Concepts:
+        - Configuration: configure/configuration_explanation.md
+        - Parameters and credentials: configure/parameters_and_credentials_explanation.md
+        - Templating: configure/templating_explanation.md
     - How-to Guides:
-        - Configure your project: configure/how_to_configure_project.md
-        - Work with parameters: configure/how_to_use_parameters.md
-        - Validate parameters: configure/how_to_validate_parameters.md
-        - Manage credentials: configure/how_to_manage_credentials.md
-        - Use advanced configuration: configure/how_to_advanced_configuration.md
-        - Migrate config loaders: configure/config_loader_migration.md
+        - Configuration: configure/how_to_configure_project.md
+        - Parameters and credentials: configure/how_to_use_parameters_and_credentials.md
+        - Templating: configure/how_to_use_templating.md
+        - Config loader migration: configure/config_loader_migration.md
 ```
 
 ---
@@ -181,9 +179,9 @@ The reorganization creates:
 
 ---
 
-### 6. HOW-TO GUIDE: Work with Parameters (`how_to_use_parameters.md`)
+### 6. HOW-TO GUIDE: Work with Parameters and Credentials (`how_to_use_parameters_and_credentials.md`)
 
-**Purpose**: Step-by-step guides for working with parameters
+**Purpose**: Step-by-step guides for working with parameters and credentials
 
 **Content to move from `parameters.md`:**
 
@@ -203,17 +201,6 @@ The reorganization creates:
 - [original content moved] Lines 107-172
 
 #### Parameter validation
-- [new content to be reviewed] Brief intro to validation with reference to dedicated guide
-
----
-
-### 7. HOW-TO GUIDE: Validate Parameters (`how_to_validate_parameters.md`)
-
-**Purpose**: Comprehensive guide to parameter validation with Pydantic and dataclasses
-
-**Content to move from `parameter_validation.md`:**
-
-#### How to validate parameters
 - [original content moved] All content from `parameter_validation.md` (Lines 1-303):
   - Introduction
   - Supported types (Pydantic models, dataclasses)
@@ -233,16 +220,7 @@ The reorganization creates:
   - Use runtime parameters with validation
   - Read validation error messages
 
----
-
-### 8. HOW-TO GUIDE: Manage Credentials (`how_to_manage_credentials.md`)
-
-**Purpose**: Step-by-step guides for working with credentials
-
 **Content to move from `credentials.md`:**
-
-#### Introduction
-- [new content to be reviewed] Brief intro
 
 #### How to load credentials in code
 - [original content moved] Lines 9-46
@@ -250,28 +228,20 @@ The reorganization creates:
 #### How to work with AWS credentials
 - [original content moved] Lines 48-51
 
----
+### 7. HOW-TO GUIDE: Work with Templating (`how_to_use_templating.md`)
 
-### 9. HOW-TO GUIDE: Use Advanced Configuration (`how_to_advanced_configuration.md`)
-
-**Purpose**: Step-by-step guides for advanced configuration scenarios
+**Purpose**: Step-by-step guides for working with templating
 
 **Content to move from `advanced_configuration.md`:**
 
-#### Introduction
-- [original content moved] Lines 1-18 (modified to remove conceptual parts)
+#### How to template parameters
+- [original content moved] Parameter templating section
 
-#### How to use a custom configuration loader
-- [original content moved] Lines 21-46
+#### How to template catalog files
+- [original content moved] Catalog templating section
 
-#### How to change which configuration files are loaded
-- [original content moved] Lines 49-61
-
-#### How to ensure non default configuration files get loaded
-- [original content moved] Lines 63-73
-
-#### How to bypass the configuration loading rules
-- [original content moved] Lines 75-94
+#### How to template other configuration files
+- [original content moved] Other configuration files templating section
 
 #### How to load a data catalog with templating in code
 - [original content moved] Lines 141-163 (practical code example)
@@ -285,18 +255,7 @@ The reorganization creates:
 #### How to use resolvers in the OmegaConfigLoader
 - [original content moved] Lines 249-296 (practical examples)
 
-#### How to load credentials through environment variables
-- [original content moved] Lines 312-324
-
-#### How to change the merge strategy used by OmegaConfigLoader
-- [original content moved] Lines 326-347
-
-#### Advanced configuration without a full Kedro project
-- [original content moved] Lines 349-428
-
----
-
-### 10. HOW-TO GUIDE: Migrate Config Loaders (`config_loader_migration.md`)
+### 8. HOW-TO GUIDE: Migrate Config Loaders (`config_loader_migration.md`)
 
 **Status**: Keep as-is ✅
 
@@ -313,10 +272,8 @@ This file is already perfectly structured as a how-to guide and doesn't need reo
 
 2. **Create new how-to guide files:**
    - `configure/how_to_configure_project.md`
-   - `configure/how_to_use_parameters.md`
-   - `configure/how_to_validate_parameters.md` (separated)
-   - `configure/how_to_manage_credentials.md`
-   - `configure/how_to_advanced_configuration.md`
+   - `configure/how_to_use_parameters_and_credentials.md`
+   - `configure/how_to_use_templating.md`
 
 3. **Update `mkdocs.yml`** navigation to reflect new structure
 

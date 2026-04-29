@@ -154,4 +154,4 @@ By default, `get_project_snapshot` uses the project's default run environment (`
 snapshot = get_project_snapshot(project_path = "/path/to/my_project", env="staging")
 ```
 
-This follows the same environment resolution rules as `kedro run --env staging`. See [Configuration basics](../configure/configuration_basics.md) for details on how environments work.
+This follows the same environment resolution rules as `kedro run --env staging`. See [Configuration](../configure/configuration_explanation.md#configuration-environments) for details on how environments work.

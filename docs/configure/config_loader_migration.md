@@ -5,7 +5,7 @@ This migration guide outlines the primary distinctions between the old loaders a
 ## `ConfigLoader` to `OmegaConfigLoader`
 
 ### 1. Install the required library
-The [`OmegaConfigLoader`](configuration_basics.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). To use it you need Kedro (version `0.18.5` or later) and `omegaconf` installed.
+The [`OmegaConfigLoader`](configuration_explanation.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). To use it you need Kedro (version `0.18.5` or later) and `omegaconf` installed.
 You can install both using `pip`:
 
 ```bash
@@ -42,7 +42,7 @@ Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoa
 
 ### 5. Load configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `ConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
-When you migrate to use `OmegaConfigLoader` it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
+When you migrate to use `OmegaConfigLoader` it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_explanation.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](how_to_configure_project.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
 
 ```diff
 - conf_path = str(project_path / settings.CONF_SOURCE)
@@ -64,7 +64,7 @@ For error and exception handling, most errors are the same. Those you need to be
 ## `TemplatedConfigLoader` to `OmegaConfigLoader`
 
 ### 1. Install the required library
-The [`OmegaConfigLoader`](configuration_basics.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). Features that replace `TemplatedConfigLoader` functionality have been released in later versions, so we recommend users
+The [`OmegaConfigLoader`](configuration_explanation.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). Features that replace `TemplatedConfigLoader` functionality have been released in later versions, so we recommend users
 install Kedro version `0.18.13` or later to properly replace the `TemplatedConfigLoader` with `OmegaConfigLoader`.
 You can install both this Kedro version and `omegaconf` using `pip`:
 
@@ -101,7 +101,7 @@ Replace the import statement for `TemplatedConfigLoader` with the one for `Omega
 
 ### 5. Load configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `TemplatedConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
-When you migrate to use `OmegaConfigLoader` it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
+When you migrate to use `OmegaConfigLoader` it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_explanation.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](how_to_configure_project.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
 
 ```diff
 - conf_path = str(project_path / settings.CONF_SOURCE)
@@ -116,7 +116,7 @@ When you migrate to use `OmegaConfigLoader` it  requires you to fetch configurat
 In this example, the `"catalog"` key points to the default catalog patterns specified in the `OmegaConfigLoader` class.
 
 ### 6. Templating of values
-Templating of values is done through native [variable interpolation in `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader). With `TemplatedConfigLoader` you had to provide the template values in a `globals` file or dictionary. `OmegaConfigLoader` lets you keep these values within the same file that has the placeholders or in a file whose name follows [the same config pattern specified](configuration_basics.md#configuration-patterns).
+Templating of values is done through native [variable interpolation in `OmegaConfigLoader`](how_to_use_templating.md#how-to-template-catalog-files). With `TemplatedConfigLoader` you had to provide the template values in a `globals` file or dictionary. `OmegaConfigLoader` lets you keep these values within the same file that has the placeholders or in a file whose name follows [the same config pattern specified](configuration_explanation.md#configuration-patterns).
 The variable interpolation is scoped to a specific configuration type and environment. If you want to share templated values across configuration types and environments, [you will need to use globals](#7-globals).
 
 Suppose you are migrating a templated **catalog** file from using `TemplatedConfigLoader` to `OmegaConfigLoader` you would do the following:
@@ -164,7 +164,7 @@ boats:
 ```
 
 ### 7. Globals
-If you want to share variables across configuration types (for example parameters and catalog) and environments, use [the custom globals resolver with the `OmegaConfigLoader`](advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader).
+If you want to share variables across configuration types (for example parameters and catalog) and environments, use [the custom globals resolver with the `OmegaConfigLoader`](how_to_use_templating.md#how-to-use-global-variables-with-the-omegaconfigloader).
 The `OmegaConfigLoader` requires global values to be provided in a `globals.yml` file.
 Using a `globals_dict` to provide globals is not supported with `OmegaConfigLoader`. The following section explains the differences between using globals with `TemplatedConfigLoader` and the `OmegaConfigLoader`.
 

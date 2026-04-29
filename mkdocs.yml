@@ -128,10 +128,8 @@ plugins:
           - configure/parameters_and_credentials_explanation.md: Understanding pipeline parameters and credentials
           - configure/templating_explanation.md: Understanding templating with OmegaConfigLoader
           - configure/how_to_configure_project.md: How to configure your Kedro project
-          - configure/how_to_use_parameters.md: How to work with parameters
-          - configure/how_to_validate_parameters.md: How to validate parameters with Pydantic and dataclasses
-          - configure/how_to_manage_credentials.md: How to manage credentials securely
-          - configure/how_to_advanced_configuration.md: Advanced configuration techniques
+          - configure/how_to_use_parameters_and_credentials.md: How to work with parameters and credentials
+          - configure/how_to_use_templating.md: How to work with templating
           - configure/config_loader_migration.md: Migrating between config loaders
 
         Data Management:
@@ -328,17 +326,15 @@ nav:
           - Kedro tools: create/new_project_tools.md
           - Kedro starters: create/starters.md
       - Configure:
-          - Understanding Configuration:
-              - Configuration concepts: configure/configuration_explanation.md
-              - Parameters and credentials concepts: configure/parameters_and_credentials_explanation.md
-              - Templating concepts: configure/templating_explanation.md
+          - Concepts:
+              - Configuration: configure/configuration_explanation.md
+              - Parameters and credentials: configure/parameters_and_credentials_explanation.md
+              - Templating: configure/templating_explanation.md
           - How-to Guides:
-              - Configure your project: configure/how_to_configure_project.md
-              - Work with parameters: configure/how_to_use_parameters.md
-              - Validate parameters: configure/how_to_validate_parameters.md
-              - Manage credentials: configure/how_to_manage_credentials.md
-              - Use advanced configuration: configure/how_to_advanced_configuration.md
-              - Migrate config loaders: configure/config_loader_migration.md
+              - Configuration: configure/how_to_configure_project.md
+              - Parameters and credentials: configure/how_to_use_parameters_and_credentials.md
+              - Templating: configure/how_to_use_templating.md
+              - Config loader migration: configure/config_loader_migration.md
       - Catalog Data:
           - Introduction: catalog-data/introduction.md
           - Kedro data catalog: catalog-data/data_catalog.md

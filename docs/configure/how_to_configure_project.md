@@ -2,6 +2,24 @@
 
 This guide shows you how to configure your Kedro project for different scenarios.
 
+## On this page
+
+- [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
+- [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
+- [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
+- [How to read configuration from remote storage](#how-to-read-configuration-from-remote-storage)
+- [How to access configuration in code](#how-to-access-configuration-in-code)
+- [How to load a data catalog with credentials in code](#how-to-load-a-data-catalog-with-credentials-in-code)
+- [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
+- [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
+- [How to use a single configuration environment](#how-to-use-a-single-configuration-environment)
+- [How to use a custom configuration loader](#how-to-use-a-custom-configuration-loader)
+- [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
+- [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
+- [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
+- [How to change the merge strategy used by `OmegaConfigLoader`](#how-to-change-the-merge-strategy-used-by-omegaconfigloader)
+- [Advanced configuration without a full Kedro project](#advanced-configuration-without-a-full-kedro-project)
+
 ## How to change the setting for a configuration source folder
 To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md) as follows:
 
@@ -188,4 +206,154 @@ Customise the configuration loader arguments in `settings.py` as follows if your
 
 ```python
 CONFIG_LOADER_ARGS = {"default_run_env": "base"}
+```
+
+## How to use a custom configuration loader
+
+You can build a custom configuration loader by extending the [kedro.config.AbstractConfigLoader][] class:
+
+```python
+from kedro.config import AbstractConfigLoader
+
+
+class CustomConfigLoader(AbstractConfigLoader):
+    def __init__(
+        self,
+        conf_source: str,
+        env: str = None,
+        runtime_params: Dict[str, Any] = None,
+    ):
+        super().__init__(
+            conf_source=conf_source, env=env, runtime_params=runtime_params
+        )
+
+        # Custom implementation
+```
+To use this custom configuration loader, set it as the project configuration loader in `src/<package_name>/settings.py` as follows:
+```python
+from package_name.custom_configloader import CustomConfigLoader
+
+CONFIG_LOADER_CLASS = CustomConfigLoader
+```
+
+## How to change which configuration files are loaded
+
+If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md).
+For example, if your `parameters` files are using a `params` naming convention instead of `parameters` (for example, `params.yml`) you need to update `CONFIG_LOADER_ARGS` as follows:
+
+```python
+CONFIG_LOADER_ARGS = {
+    "config_patterns": {
+        "parameters": ["params*", "params*/**", "**/params*"],
+    }
+}
+```
+
+By changing this setting, the default behaviour for loading parameters will be replaced, while the other configuration patterns will remain in their default state.
+
+## How to ensure non default configuration files get loaded
+
+You can add configuration patterns to match files other than `parameters`, `credentials`, and `catalog` by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md).
+For example, if you want to load Spark configuration files you need to update `CONFIG_LOADER_ARGS` as follows:
+
+```python
+CONFIG_LOADER_ARGS = {
+    "config_patterns": {
+        "spark": ["spark*/"],
+    }
+}
+```
+
+## How to bypass the configuration loading rules
+
+You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, and credentials) as well as additional configuration.
+
+For example, you can [use hooks to load external credentials](../extend/hooks/common_use_cases.md#use-hooks-to-load-external-credentials).
+
+If you are using a config loader as a standalone component, you can override configuration as follows:
+
+```python
+:lineno-start: 10
+:emphasize-lines: 8
+
+from kedro.config import OmegaConfigLoader
+from kedro.framework.project import settings
+
+conf_path = str(project_path / settings.CONF_SOURCE)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
+
+# Bypass configuration patterns by setting the key and values directly on the config loader instance.
+conf_loader["catalog"] = {"catalog_config": "something_new"}
+```
+
+## How to change the merge strategy used by `OmegaConfigLoader`
+
+By default, `OmegaConfigLoader` merges configuration [in different environments](configuration_explanation.md#configuration-environments) as well as runtime parameters in a destructive way. This means that whatever configuration resides in your overriding environment (`local` by default) takes precedence when the same top-level key is present in the base and overriding environment. Any configuration for that key **besides that given in the overriding environment** is discarded.
+The same behaviour applies to runtime parameters overriding any configuration in the `base` environment.
+You can change the merge strategy for each configuration type in your project's `src/<package_name>/settings.py`. The accepted merging strategies are `soft` and `destructive`.
+
+```python
+from kedro.config import OmegaConfigLoader
+
+CONFIG_LOADER_CLASS = OmegaConfigLoader
+
+CONFIG_LOADER_ARGS = {
+    "merge_strategy": {
+        "parameters": "soft",
+        "spark": "destructive",
+        "mlflow": "soft",
+    }
+}
+```
+
+If no merge strategy is defined, the default destructive strategy will be applied. **Note**: this merge strategy setting applies when configuration files are located in **different** environments.
+When files are part of the same environment, they are always merged in a soft way. An error is thrown when files in the same environment contain the same top-level keys.
+
+## Advanced configuration without a full Kedro project
+
+In some cases, you may want to use the `OmegaConfigLoader` without a Kedro project. By default, a Kedro project has a `base` and `local` environment.
+When you use the `OmegaConfigLoader` directly, it assumes *no* environment. You may find it useful to [add Kedro to your existing notebooks](../integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md).
+
+### Read configuration
+
+The config loader can work without a Kedro project structure.
+```bash
+tree .
+.
+└── parameters.yml
+```
+
+Consider the following `parameters.yml` file and example Python script:
+
+```yaml
+learning_rate: 0.01
+train_test_ratio: 0.7
+```
+
+```python
+from kedro.config import OmegaConfigLoader
+config_loader = OmegaConfigLoader(conf_source=".")
+
+# Optionally, you can also use environments
+# config_loader = OmegaConfigLoader(conf_source=".", base_env="base", default_run_env="local")
+
+print(config_loader["parameters"])
+```
+
+If you run it from the same directory where `parameters.yml` placed it gives the following output:
+
+```console
+{'learning_rate': 0.01, 'train_test_ratio': 0.7}
+```
+
+### How to ignore hidden files and directories with `OmegaConfigLoader`
+
+The `OmegaConfigLoader` provides an option to ignore hidden files and directories (those starting with a dot, for example, `.hidden_file` or `.hidden_folder`) when loading configuration files. This behaviour is controlled by the `ignore_hidden` parameter, which is set to `True` by default.
+
+If you want to include hidden files and directories in your configuration loading process, you can set `ignore_hidden` to False when instantiating the `OmegaConfigLoader`:
+
+```py
+from kedro.config import OmegaConfigLoader
+
+conf_loader = OmegaConfigLoader(conf_source="conf", ignore_hidden=False)
 ```

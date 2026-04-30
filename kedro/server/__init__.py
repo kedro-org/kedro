@@ -15,7 +15,7 @@ def create_http_server(**kwargs: Any) -> Any:
     try:
         from kedro.server.http_server import create_http_server as _create
     except ModuleNotFoundError as exc:
-        if exc.name == "fastapi":
+        if exc.name == "fastapi":  # pragma: no cover
             raise ModuleNotFoundError(
                 "The Kedro HTTP server requires optional dependencies. "
                 "Install them with `pip install 'kedro[server]'`."

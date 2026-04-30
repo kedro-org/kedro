@@ -17,10 +17,20 @@ kedro_datasets.<library>.<Type>Dataset
 
 Short form also works — Kedro resolves `pandas.CSVDataset` automatically.
 
-Two things agents get wrong:
+Three things agents get wrong:
 
 - **Wrong module**: `kedro.extras.datasets.*` is deprecated and removed — never generate it.
 - **Wrong casing**: since kedro-datasets 2.0, use lowercase `Dataset` (e.g. `CSVDataset`, not `CSVDataSet`).
+- **Top-level `layer:`**: deprecated since Kedro 0.19 and silently ignored. Use `metadata.kedro-viz.layer` instead:
+
+  ```yaml
+  companies:
+    type: pandas.CSVDataset
+    filepath: data/01_raw/companies.csv
+    metadata:
+      kedro-viz:
+        layer: raw
+  ```
 
 ## Check the docs before writing an entry
 
@@ -93,7 +103,7 @@ Use the `"{name}"` placeholder to create a single entry that matches multiple da
   filepath: data/01_raw/{my_pattern}.csv
 ```
 
-The placeholder inside the quotes becomes a wildcard matched at runtime.
+The placeholder inside the quotes becomes a wildcard matched at runtime. For advanced patterns (multiple placeholders, specificity ordering, partial matches), refer to: https://docs.kedro.org/en/stable/catalog-data/kedro_dataset_factories/
 
 ## Data directory structure
 
@@ -123,6 +133,10 @@ my_dataset:
 
 The key (`my_credentials`) must match an entry in `conf/local/credentials.yml`.
 
+**Never** create or edit credential files under `conf/base/` — that directory is version-controlled and secrets would be committed. Credentials belong **exclusively** in `conf/local/credentials.yml`, which is gitignored by the project template.
+
+For advanced credential patterns (nested `client_kwargs`, S3, SQL connection strings, per-environment overrides), refer to: https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/
+
 ## OmegaConf interpolation
 
-Values can be injected at runtime: `${globals:key}` (from `conf/base/globals.yml`), `${runtime_params:key}` (from CLI `--params`), `${oc.env:VAR}` (environment variable).
+Values can be injected at runtime: `${globals:key}` (from `conf/base/globals.yml`), `${runtime_params:key}` (from CLI `--params`), `${oc.env:VAR}` (environment variable). For advanced configuration patterns, refer to: https://docs.kedro.org/en/stable/configure/advanced_configuration/

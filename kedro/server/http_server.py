@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import os
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
@@ -18,11 +17,12 @@ from kedro.server.models import (
 from kedro.server.utils import (
     KEDRO_SERVER_CONF_SOURCE,
     KEDRO_SERVER_ENV,
-    get_project_path,
+    _resolve_project_path,
 )
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+    from pathlib import Path
 
 
 logger = logging.getLogger(__name__)
@@ -53,9 +53,9 @@ def create_http_server(
 
     Programmatic values passed to this factory take precedence over
     environment-variable defaults set by the CLI.
-    Arguments:
+    Args:
         project_path: Optional path to the Kedro project to serve. If not provided,
-            it will be resolved from environment variables or the current working directory.
+            it will be resolved from KEDRO_PROJECT_PATH environment variable.
         env: Optional Kedro environment to use. Overrides the KEDRO_SERVER_ENV environment variable if provided.
         conf_source: Optional configuration source to use. Overrides the KEDRO_SERVER_CONF_SOURCE environment variable if provided.
     Returns:
@@ -76,9 +76,7 @@ def create_http_server(
     )
     app.state.default_env = resolved_env
     app.state.default_conf_source = resolved_conf_source
-    app.state.project_path = (
-        Path(project_path).resolve() if project_path is not None else get_project_path()
-    )
+    app.state.project_path = _resolve_project_path(project_path)
 
     @app.get("/health", response_model=HealthResponse, tags=["health"])
     async def health() -> HealthResponse:

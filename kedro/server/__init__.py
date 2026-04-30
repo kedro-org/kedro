@@ -5,8 +5,8 @@ from typing import Any
 __all__ = ["create_http_server"]
 
 
-def create_http_server() -> Any:
+def create_http_server(**kwargs: Any) -> Any:
     """Create the HTTP server application (lazy import)."""
     from kedro.server.http_server import create_http_server as _create
 
-    return _create()
+    return _create(**kwargs)

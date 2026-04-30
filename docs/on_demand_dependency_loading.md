@@ -83,19 +83,18 @@ def _load_data(self) -> None:
 
 The selective loading capability **already exists** in `find_pipelines(pipelines_to_find=...)` from PR #5401, but `_load_data()` never passes a filter through.
 
-### Bottleneck 2: `Node.__init__._validate_inputs()` — Function Level
+### Bottleneck 2: Missing project dependencies at module load time — Import Level
+
+Even when `_load_data()` correctly filters which pipelines to load, importing `pipeline_registry.py` triggers the full import chain for every pipeline referenced at the top level:
 
 ```python
-# kedro/pipeline/node.py
-self._validate_inputs(func, inputs)  # called eagerly in __init__
-
-def _validate_inputs(self, func, inputs):
-    if not inspect.isbuiltin(func):
-        # ❌ Requires func to be a live callable — the module must already be imported
-        inspect.signature(func, follow_wrapped=False).bind(*args, **kwargs)
+# pipeline_registry.py — top-level import fires immediately
+from my_project.pipelines.reporting import create_pipeline
+#   → reporting/pipeline.py → from .nodes import train_model
+#   → reporting/nodes.py   → import seaborn  ← ModuleNotFoundError
 ```
 
-Every `node(my_function, ...)` call in every `create_pipeline()` body triggers `inspect.signature()`, which forces the module containing `my_function` to be fully imported.
+This happens before `register_pipelines()` is even called — before any filter can intervene.
 
 ### The Gap Visualised
 
@@ -108,12 +107,12 @@ flowchart LR
 
     subgraph "The Gap"
         C["_load_data() calls register_pipelines()\nwith NO filter"]
-        D["Node.__init__ calls inspect.signature()\nat construction time"]
+        D["pipeline_registry.py top-level imports\ntrigger full dep chain before any filter"]
     end
 
     subgraph "What We Need"
-        E["CLI --pipeline flag wired to\nfind_pipelines(pipelines_to_find=...)"]
-        F["Node defers signature validation\nto execution time"]
+        E["CLI calls pipelines.set_requested(names)\nfind_pipelines() reads _requested_pipelines\nwith CLI precedence over pipelines_to_find kwarg"]
+        F["safe_context() mocks missing deps\nin sys.modules before registry load"]
     end
 
     A -.->|"never wired to CLI"| C

@@ -4,197 +4,134 @@
 
 **Goal:** Read-only CLI commands (`kedro registry list`, `kedro registry describe`, `kedro catalog describe-datasets`, inspection API) should function even when heavy project dependencies (sklearn, torch, seaborn) are not installed.
 
-Three approaches address different layers of the stack — they are complementary, not mutually exclusive.
+---
+
+## Why This Is Hard
+
+The import chain fires before any framework filter can intervene:
+
+```
+pipeline_registry.py
+  → from my_project.pipelines.reporting import create_pipeline
+  → reporting/pipeline.py
+  → from .nodes import train_model
+  → reporting/nodes.py
+  → import seaborn          ← ModuleNotFoundError here
+```
+
+There is no hook between "load the pipeline registry" and "import seaborn" that the framework can exploit without changing user code.
 
 ---
 
-## Approach A — Defer `inspect.signature()` to `Node.run()`
+## Solution — `lite_shim`: AST Scan + `sys.modules` Mock
 
-**Commands:** `kedro registry describe X`, `kedro catalog describe-datasets -p X`, inspection API
+Stub the **missing dependency itself** before any pipeline code is loaded. When `nodes.py` runs `import seaborn`, Python checks `sys.modules["seaborn"]` first — if a mock is already there, the import is a no-op. The pipeline loads, `create_pipeline()` runs, the `Pipeline` structure is fully populated, and seaborn is never executed.
 
-For commands that construct `Pipeline` and `Node` objects but never execute them, the `inspect.signature()` call in `Node.__init__()` serves no purpose — it validates inputs against the function signature, which is only meaningful at execution time. Moving it to `Node.run()` means non-execution commands never trigger it.
+### Step 1 — AST-scan pipeline source files
 
-```python
-# kedro/pipeline/node.py — BEFORE
-def __init__(self, func, inputs, outputs, ...):
-    ...
-    self._validate_inputs(func, inputs)  # ← runs immediately, forces function module import
-    self._func = func
-
-# kedro/pipeline/node.py — AFTER
-def __init__(self, func, inputs, outputs, ...):
-    ...
-    self._func = func
-    self._inputs = inputs
-    self._inputs_validated = False  # NEW
-    # Structural checks that don't require imports still run eagerly:
-    self._validate_unique_outputs()
-    self._validate_inputs_dif_than_outputs()
-
-def run(self, inputs: dict[str, Any]) -> dict[str, Any]:
-    if not self._inputs_validated:
-        self._validate_inputs(self._func, self._inputs)  # func's module is loaded by now
-        self._inputs_validated = True
-    ...
-```
-
-Expose an explicit `validate()` for test suites and dry-runs that want eager validation:
+Parse every `pipelines/**/*.py` file and collect all **absolute** import names. Relative imports (`from .nodes import train_model`, `level > 0`) are explicitly excluded — they are project-internal and must never be mocked.
 
 ```python
-def validate(self) -> None:
-    """Validate inputs against the function signature.
-    Called automatically on first run(). Can be called earlier for dry-runs or tests.
-    """
-    self._validate_inputs(self._func, self._inputs)
-    self._inputs_validated = True
+def _collect_imports_from_file(file_path: Path) -> set[str]:
+    source = file_path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    modules: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if not alias.name.startswith("_"):
+                    modules.add(alias.name)
+        elif isinstance(node, ast.ImportFrom):
+            # level==0 means absolute import; skip relative imports (level > 0)
+            if node.module and not node.module.startswith("_") and node.level == 0:
+                modules.add(node.module)
+    return modules
 ```
 
-> **Key insight:** With Approach A, `inspect.signature()` is never called for commands like `registry describe` since `node.run()` is never invoked. However, `from nodes import train_model` at the top of `pipeline.py` still fires when `pipeline.py` is loaded. Only the signature validation overhead is eliminated — not the module import itself.
+### Step 2 — Filter to genuinely missing modules
+
+Check each candidate against `sys.modules`. Standard library modules (`os`, `re`, `datetime`, `functools`, …) are always loaded at Python startup and are always in `sys.modules` — they are filtered out implicitly. Only truly absent third-party packages remain.
+
+```python
+def _get_missing_modules(candidate_imports: set[str]) -> set[str]:
+    missing: set[str] = set()
+    for full_name in candidate_imports:
+        for part in _iter_parts(full_name):   # e.g. "sklearn.base" → ["sklearn", "sklearn.base"]
+            if part not in sys.modules:
+                missing.add(part)
+    return missing
+```
+
+Kedro's own packages (`kedro`, the project package itself) and known required deps (`yaml`) are excluded by a skip-list before this check, so they are never candidates for mocking.
+
+### Step 3 — Pre-populate `sys.modules` with `MagicMock`
+
+`MagicMock` is used rather than a plain `types.ModuleType` because it handles transitive attribute access automatically — `seaborn.lineplot(...)`, `torch.nn.Linear(10, 10)`, `sklearn.preprocessing.StandardScaler()` all return further `MagicMock` instances without raising `AttributeError`. Parent packages are given `__path__=[]` so the import system treats them as packages and submodule imports like `from sklearn.base import BaseEstimator` succeed.
+
+```python
+def _create_mock_modules(module_names: set[str]) -> dict[str, MagicMock]:
+    result: dict[str, MagicMock] = {}
+    for name in sorted(module_names):
+        for part in _iter_parts(name):
+            if part in result:
+                continue
+            is_package = "." not in part or any(
+                p != part and p.startswith(part + ".") for p in module_names
+            )
+            mock = MagicMock(__path__=[]) if is_package else MagicMock()
+            mock.__spec__ = importlib.machinery.ModuleSpec(part, None, is_package=is_package)
+            result[part] = mock
+    return result
+```
+
+### Step 4 — Scope with `patch.dict`
+
+`unittest.mock.patch.dict` installs the mocks and restores `sys.modules` exactly to its prior state on exit. No manual cleanup loop required.
+
+```python
+@contextmanager
+def safe_context(
+    project_path: Path | str, package_name: str
+) -> Generator[set[str], None, None]:
+    candidate_imports = _collect_pipeline_imports(project_path, package_name)
+    skip_prefixes = ("kedro", "importlib", "pathlib", "typing",
+                     "collections", "json", "yaml", package_name)
+    candidates = {
+        n for n in candidate_imports
+        if not any(n == p or n.startswith(p + ".") for p in skip_prefixes)
+    }
+    missing_modules = _get_missing_modules(candidates)
+    mock_modules = _create_mock_modules(missing_modules) if missing_modules else {}
+    with patch.dict("sys.modules", {**sys.modules, **mock_modules}, clear=False):
+        yield missing_modules
+```
 
 ---
 
-## Approach B — `sys.meta_path` Stubs for Missing Dependencies
+## Integration Points
 
-**When to use:** Project dependencies are genuinely not installed (e.g., `kedro run -p data_ingestion` when `seaborn` — required only by `reporting` — is absent).
-
-**Why Scenario 1 alone doesn't cover this:** The error occurs at `importlib.import_module(pipeline_registry_module)` inside `_get_pipelines_registry_callable` — importing `pipeline_registry.py` itself — before `find_pipelines()` or any filter can intervene:
-
-```python
-# pipeline_registry.py
-from my_project.pipelines.reporting import create_pipeline  # ← seaborn imported here
-# ↑ fires when pipeline_registry.py is imported, before register_pipelines() is called
-```
-
-**Fix:** Install a scoped `sys.meta_path` hook inside `_load_data()` that intercepts imports of non-requested pipeline sub-packages and returns stubs, preventing their dependencies from ever being needed.
+`safe_context` should wrap the `register_pipelines()` call inside `_load_data()` when the command is inspection-only (no runner active):
 
 ```python
 # kedro/framework/project/__init__.py
-
-@contextlib.contextmanager
-def _stub_non_requested_pipelines(package_name: str, requested: set[str] | None):
-    """Intercept imports of non-requested pipeline sub-packages during _load_data()
-    and return stubs so their dependencies are never needed."""
-    if requested is None or package_name is None:
-        yield
-        return
-
-    prefix = f"{package_name}.pipelines."
-
-    class _StubFinder(importlib.abc.MetaPathFinder):
-        def find_spec(self, fullname, path, target=None):
-            if not fullname.startswith(prefix):
-                return None
-            pipeline_name = fullname[len(prefix):].split(".")[0]
-            if pipeline_name not in requested:
-                return importlib.machinery.ModuleSpec(fullname, _StubLoader())
-            return None
-
-    class _StubLoader(importlib.abc.Loader):
-        def create_module(self, spec):
-            return types.ModuleType(spec.name)
-        def exec_module(self, module):
-            module.create_pipeline = lambda **kwargs: pipeline([])
-
-    finder = _StubFinder()
-    sys.meta_path.insert(0, finder)
-    try:
-        yield
-    finally:
-        sys.meta_path.remove(finder)
-        # Clean up so a subsequent full load works correctly
-        for key in list(sys.modules):
-            if key.startswith(prefix):
-                if key[len(prefix):].split(".")[0] not in (requested or set()):
-                    del sys.modules[key]
-```
-
-`_load_data()` activates the stub before importing `pipeline_registry.py`:
-
-```python
 def _load_data(self) -> None:
     if self._pipelines_module is None or self._is_data_loaded:
         return
 
-    requested = set(self._requested_pipelines) if self._requested_pipelines else None
+    if self._inspection_mode:
+        ctx = safe_context(PROJECT_PATH, PACKAGE_NAME)
+    else:
+        ctx = contextlib.nullcontext(set())
 
-    with _stub_non_requested_pipelines(PACKAGE_NAME, requested):
+    with ctx as mocked_deps:
         register_pipelines = self._get_pipelines_registry_callable(
-            self._pipelines_module          # ← pipeline_registry.py imported here
-        )                                   #   top-level imports hit stubs, not real modules
+            self._pipelines_module
+        )
         project_pipelines = register_pipelines()
 
     self._content = project_pipelines
+    self._mocked_dependencies = mocked_deps
     self._is_data_loaded = True
 ```
 
-**Trace through the failing scenario (`seaborn` not installed):**
-
-1. CLI: `kedro run -p data_ingestion` → `pipelines.set_requested(["data_ingestion"])`
-2. `pipelines["data_ingestion"]` triggers `_load_data()`
-3. Stub hook installed — intercepts `my_project.pipelines.reporting.*`, etc.
-4. `importlib.import_module("my_project.pipeline_registry")` runs
-5. `from my_project.pipelines.reporting import create_pipeline` → stub returns `lambda **kwargs: Pipeline([])` — **no seaborn import**
-6. `from my_project.pipelines.data_ingestion import create_pipeline` → not stubbed, real module loads normally
-7. `register_pipelines()` runs — stubs return empty pipelines for non-requested entries
-8. Stub hook removed, stubbed modules cleaned from `sys.modules`
-
-**Trade-offs:**
-- Works for **any** `register_pipelines` pattern — no user code changes needed
-- Scoped tightly to `_load_data()` — installed and removed in the same call
-- Stub cleanup ensures a subsequent full `kedro run` (no `--pipeline`) still loads everything correctly
-- Non-requested entries in the returned dict are empty `Pipeline([])` — acceptable since they are never accessed in a targeted run
-
----
-
-## Approach C — String Function References in `Node` (future)
-
-Accept a dotted string path as `func`, deferring both the module import and signature inspection until `node.run()`. This is the deepest level of lazy loading — even `nodes.py` is not imported until execution.
-
-```python
-# kedro/pipeline/node.py — future
-
-class Node:
-    def __init__(self, func: Callable | str, inputs, outputs, ...):
-        if isinstance(func, str):
-            self._func_path = func
-            self._func: Callable | None = None
-            # No import, no inspect.signature — deferred entirely
-        else:
-            self._func_path = None
-            self._func = func
-            self._validate_inputs(func, inputs)  # still eager for live callables
-
-    @property
-    def func(self) -> Callable:
-        """Resolve the function, importing its module on first access."""
-        if self._func is None:
-            module_path, func_name = self._func_path.rsplit(".", 1)
-            module = importlib.import_module(module_path)
-            self._func = getattr(module, func_name)
-        return self._func
-
-    def run(self, inputs):
-        result = self.func(...)  # .func resolves + imports here
-```
-
-Usage:
-
-```python
-# BEFORE — eager import at module load
-from my_project.pipelines.data_science.nodes import train_model
-
-def create_pipeline(**kwargs):
-    return pipeline([node(train_model, inputs="X_train", outputs="model")])
-
-# AFTER — deferred via string reference
-def create_pipeline(**kwargs):
-    return pipeline([
-        node(
-            "my_project.pipelines.data_science.nodes.train_model",
-            inputs="X_train",
-            outputs="model",
-        )
-    ])
-```
-
-> **Potential breaking API change.** Key design questions before shipping: backwards compatibility with live callables (must be unchanged), error surfacing (import errors surface at `node.run()` not `Pipeline()` construction — needs clear messages), `node.name` auto-derivation (today from `func.__name__`, needs a fallback for strings), IDE/type-checking support (string paths lose navigation), and `kedro-viz`/inspection tool compatibility.
+CLI commands that are inspection-only (`registry list`, `registry describe`, `catalog describe-datasets`) set `inspection_mode=True` before triggering `_load_data()`. Run commands never set it.

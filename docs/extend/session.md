@@ -8,7 +8,7 @@ Kedro provides two session classes, based on the abstract base class `AbstractSe
 * `KedroSession`:
     * Manages the lifecycle of a Kedro run, for single-run execution of Kedro pipelines.
     * Persists runtime parameters with corresponding session IDs.
-    * Tracebacks runtime parameters, such as CLI command flags and environment variables.
+    * Captures session metadata, including CLI context and environment information, alongside runtime parameters.
 
 * `KedroServiceSession`:
     * Manages the lifecycle of Kedro components in a multi-run execution environment.
@@ -17,14 +17,14 @@ Kedro provides two session classes, based on the abstract base class `AbstractSe
 
 
 !!! note
-    `KedroServiceSession` is currently in active development and might be subject to occassional breaking changes. We encourage you to try it out and share your feedback with us.
+    `KedroServiceSession` is currently in active development and might be subject to occasional breaking changes. We encourage you to try it out and share your feedback with us.
 
 
 The main methods and properties of both `KedroSession` and `KedroServiceSession` are:
 
 - `create()`: Create a new instance of session class with session data
 - `load_context()`: Instantiate `KedroContext` object. For `KedroServiceSession`, this method accepts an optional `runtime_params` argument, which allows you to update the `KedroContext` parameters for that run
-- `close()`: Close the current session
+- `close()`: Close the current session. For `KedroSession`, this also saves the session data to disk if `save_on_close` is set to `True`.
 - `run()`: Run the pipeline with the arguments provided; see  [Running pipelines](../build/run_a_pipeline.md) for details
 
 
@@ -37,7 +37,6 @@ from pathlib import Path
 
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
-from kedro.framework.project import configure_project
 from kedro.utils import find_kedro_project
 
 # Get project root
@@ -55,8 +54,7 @@ You can provide the following optional arguments in `KedroSession.create()`:
 - `project_path`: Path to the project root directory
 - `save_on_close`: A Boolean value that indicates whether to save the session to disk when it closes
 - `env`: Environment for the `KedroContext`
-- `runtime_params`: Optional dictionary containing runtime project parameters
-for the underlying **`KedroContext`**; if specified, this updates (and takes precedence over) parameters retrieved from the project configuration
+- `runtime_params`: Optional dictionary containing runtime project parameters for the underlying **`KedroContext`**; if specified, this updates (and takes precedence over) parameters retrieved from the project configuration
 - `conf_source`: Optional argument to specify the configuration source for the `KedroContext`
 
 ## Create a `KedroServiceSession`
@@ -67,7 +65,6 @@ from pathlib import Path
 
 from kedro.framework.session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
-from kedro.framework.project import configure_project
 from kedro.utils import find_kedro_project
 
 # Get project root

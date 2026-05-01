@@ -17,7 +17,9 @@ class TestHTTPServer:
 
         result = create_http_server_lazy()
 
-        mock_create.assert_called_once_with()
+        mock_create.assert_called_once_with(
+            project_path=None, env=None, conf_source=None
+        )
         assert result is app
 
     def test_create_http_server_resolves_env_from_argument_over_env_var(

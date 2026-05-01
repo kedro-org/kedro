@@ -5,12 +5,19 @@ Requires the `server` extra: ``pip install "kedro[server]"``.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 __all__ = ["create_http_server"]
 
 
-def create_http_server(**kwargs: Any) -> Any:
+def create_http_server(
+    project_path: str | Path | None = None,
+    env: str | None = None,
+    conf_source: str | None = None,
+) -> Any:
     """Create the HTTP server application (lazy import)."""
     try:
         from kedro.server.http_server import create_http_server as _create
@@ -22,4 +29,4 @@ def create_http_server(**kwargs: Any) -> Any:
             ) from exc
         raise
 
-    return _create(**kwargs)
+    return _create(project_path=project_path, env=env, conf_source=conf_source)

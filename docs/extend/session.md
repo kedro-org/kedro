@@ -83,13 +83,17 @@ session.run(runtime_params={"param1": "value2"})
 # close the session when done
 session.close()
 ```
+
 You can provide the following optional arguments in `KedroServiceSession.create()`:
+
 - `session_id`: Identifier for the session; if not provided, a unique session ID will be generated automatically
 - `project_path`: Path to the project root directory
 - `env`: Environment for the `KedroContext`
 - `conf_source`: Optional argument to specify the configuration source for the `KedroContext`
 
+
 The main differences in the `create()` method between `KedroSession` and `KedroServiceSession` are:
+
 - `KedroServiceSession` does not have the `save_on_close` argument.
 - `KedroServiceSession` does not have the `runtime_params` argument, as runtime parameters are provided in the `run()` method for each run, allowing you to update the `KedroContext` parameters for that specific run.
 

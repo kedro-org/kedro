@@ -22,6 +22,11 @@ def _resolve_project_path(project_path: str | Path | None = None) -> Path:
 
         The project path is expected to be set in the environment variable `KEDRO_PROJECT_PATH`,
         if not provided programmatically. This function validates that the path exists and is a directory.
+    """Resolve the Kedro project path from environment variable or function argument.
+
+    The project path is expected to be set in the environment variable `KEDRO_PROJECT_PATH`,
+    if not provided programmatically. This function validates that the path exists and is a directory.
+
     Args:
         project_path: Optional path to the Kedro project. If not provided, it will be resolved from the `KEDRO_PROJECT_PATH` environment variable.
 
@@ -29,7 +34,9 @@ def _resolve_project_path(project_path: str | Path | None = None) -> Path:
         Path to the Kedro project root.
 
     Raises:
-        ServerSettingsError: If KEDRO_PROJECT_PATH is not set.
+    Raises:
+        ServerSettingsError: If neither ``KEDRO_PROJECT_PATH`` nor ``project_path`` is
+            provided, or if the resolved path does not exist.
     """
     raw_path = (
         project_path
@@ -40,7 +47,8 @@ def _resolve_project_path(project_path: str | Path | None = None) -> Path:
     if not raw_path:
         raise ServerSettingsError(
             f"Environment variable '{KEDRO_PROJECT_PATH_ENV}' is not set or provided as arguments. "
-            "The Kedro server must be started using from within a Kedro project directory."
+            f"Environment variable '{KEDRO_PROJECT_PATH_ENV}' is not set or passed as an argument. "
+            "The Kedro server must be started from within a Kedro project directory."
         )
 
     path = Path(raw_path).resolve()

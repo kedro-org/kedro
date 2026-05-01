@@ -53,7 +53,20 @@ def create_http_server(
 
     Programmatic values passed to this factory take precedence over
     environment-variable defaults set by the CLI.
+    """Create and configure the FastAPI HTTP server.
+
+    Programmatic values passed to this factory take precedence over
+    environment-variable defaults set by the CLI.
+
     Args:
+        project_path: Optional path to the Kedro project to serve. If not provided,
+            it will be resolved from KEDRO_PROJECT_PATH environment variable.
+        env: Optional Kedro environment to use. Overrides the KEDRO_SERVER_ENV environment variable if provided.
+        conf_source: Optional configuration source to use. Overrides the KEDRO_SERVER_CONF_SOURCE environment variable if provided.
+
+    Returns:
+        Configured FastAPI application instance.
+    """
         project_path: Optional path to the Kedro project to serve. If not provided,
             it will be resolved from KEDRO_PROJECT_PATH environment variable.
         env: Optional Kedro environment to use. Overrides the KEDRO_SERVER_ENV environment variable if provided.

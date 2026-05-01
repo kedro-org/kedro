@@ -10,6 +10,8 @@ NOTE: This session implementation is under active development and may occasional
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
 
 ## Documentation changes
+* Added documentation for `KedroServiceSession`.
+
 ## Community contributions
 
 

@@ -202,8 +202,8 @@ HOOKS = (AzureSecretsHook(),)
 
 ## Use stateful Hooks to share context between Hook methods
 
-Hook implementations are classes, so you can store state on the Hook instance and reuse it in other Hook methods.
-This is useful when one Hook receives data that another Hook needs, for example saving `context` from `after_context_created` and reusing it in `before_pipeline_run`.
+Hook implementations are classes, so you can store state on the hook instance and reuse it in other hook methods.
+This is useful when one hook receives data that another hook needs, for example saving `context` from `after_context_created` and reusing it in `before_pipeline_run`.
 
 ```python
 from typing import Any

@@ -254,3 +254,21 @@ class TestBuildProjectSnapshot:
         )
         _build_project_snapshot(self.project_path)
         assert captured == [{}]
+
+    def test_project_path_is_resolved_before_bootstrap(self):
+        """Path with '..' segments is resolved before being passed to bootstrap_project."""
+        unresolved = self.project_path / "subdir" / ".."
+        expected = unresolved.resolve()
+        _build_project_snapshot(unresolved)
+        self.mock_bootstrap.assert_called_once_with(expected)
+
+    @pytest.mark.parametrize("env", ["staging/prod", "../prod", "bad env", "env!", ""])
+    def test_invalid_env_raises_value_error(self, env):
+        with pytest.raises(ValueError, match="Invalid env value"):
+            _build_project_snapshot(self.project_path, env=env)
+
+    @pytest.mark.parametrize(
+        "env", ["staging", "prod", "local", "staging-1", "my_env", "env2", None]
+    )
+    def test_valid_env_does_not_raise(self, env):
+        _build_project_snapshot(self.project_path, env=env)

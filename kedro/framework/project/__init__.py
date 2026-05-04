@@ -3,6 +3,7 @@ configure a Kedro project and access its settings."""
 
 from __future__ import annotations
 
+import contextlib
 import importlib.resources
 import logging.config
 import operator
@@ -19,6 +20,7 @@ import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
+from kedro.framework.project._lite_shim import safe_context
 from kedro.io import CatalogProtocol
 from kedro.pipeline import Pipeline, pipeline
 from kedro.utils import find_config_file
@@ -202,6 +204,7 @@ class _ProjectPipelines(MutableMapping):
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
         self._requested_pipelines: list[str] | None = None
+        self._inspection_mode: bool = False
 
     def set_requested(self, pipeline_names: list[str] | None) -> None:
         """Set which pipelines are needed before first dict access.
@@ -211,6 +214,28 @@ class _ProjectPipelines(MutableMapping):
             self._is_data_loaded = False
             self._content = {}
         self._requested_pipelines = pipeline_names
+
+    def set_inspection_mode(self, enabled: bool) -> None:
+        """Enable or disable inspection mode.
+
+        In inspection mode, missing project dependencies (e.g. seaborn, sklearn)
+        are mocked in ``sys.modules`` while the pipeline registry is loaded. This
+        allows read-only commands (``kedro registry list``, ``kedro registry describe``)
+        to return pipeline structure without requiring all project deps to be installed.
+
+        Invalidates the loaded pipeline cache when the mode changes so the next
+        access triggers a fresh load under the new mode.
+
+        Never enable inspection mode before ``kedro run`` — mocked packages
+        produce garbage output at execution time.
+
+        Args:
+            enabled: ``True`` to enable inspection mode, ``False`` to disable.
+        """
+        if self._inspection_mode != enabled:
+            self._is_data_loaded = False
+            self._content = {}
+        self._inspection_mode = enabled
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
@@ -226,10 +251,18 @@ class _ProjectPipelines(MutableMapping):
         if self._pipelines_module is None or self._is_data_loaded:
             return
 
-        register_pipelines = self._get_pipelines_registry_callable(
-            self._pipelines_module
-        )
-        project_pipelines = register_pipelines()
+        if self._inspection_mode and PACKAGE_NAME:
+            ctx: contextlib.AbstractContextManager[frozenset[str]] = safe_context(
+                PACKAGE_NAME
+            )
+        else:
+            ctx = contextlib.nullcontext(frozenset())
+
+        with ctx:
+            register_pipelines = self._get_pipelines_registry_callable(
+                self._pipelines_module
+            )
+            project_pipelines = register_pipelines()
 
         self._content = project_pipelines
         self._is_data_loaded = True
@@ -242,6 +275,7 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module = pipelines_module
         self._is_data_loaded = False
         self._content = {}
+        self._inspection_mode = False
 
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)

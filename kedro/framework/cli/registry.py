@@ -23,6 +23,7 @@ def registry() -> None:
 @registry.command("list")
 def list_registered_pipelines() -> None:
     """List all pipelines defined in your pipeline_registry.py file."""
+    pipelines.set_inspection_mode(True)
     click.echo(yaml.dump(sorted(pipelines)))
 
 
@@ -36,6 +37,7 @@ def describe_registered_pipeline(
     Defaults to the `__default__` pipeline.
     """
     pipelines.set_requested([name])
+    pipelines.set_inspection_mode(True)
     pipeline_obj = pipelines.get(name)
     if not pipeline_obj:
         all_pipeline_names = pipelines.keys()

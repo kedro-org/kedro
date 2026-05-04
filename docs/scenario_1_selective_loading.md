@@ -119,7 +119,3 @@ def register_pipelines():
            result["reporting"] = reporting.create_pipeline()
        return result
    ```
-
-3. **Use Scenario 2, Approach C** — the only zero-user-code-change path. `sys.meta_path` stubs intercept all non-requested pipeline module imports before `pipeline_registry.py` runs, regardless of how `register_pipelines` is written. See [scenario_2_dep_free_commands.md](scenario_2_dep_free_commands.md).
-
----

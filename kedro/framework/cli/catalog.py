@@ -55,6 +55,7 @@ def describe_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> Non
     if pipeline:
         pipelines.set_requested(pipeline)
 
+    pipelines.set_inspection_mode(True)
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 

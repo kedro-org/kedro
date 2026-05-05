@@ -284,9 +284,7 @@ class TestRunEndpoint:
             "traceback": ["Traceback line"],
         }
 
-    def test_run_endpoint_passes_parameters_to_execute_pipeline(
-        self, mocker, tmp_path
-    ):
+    def test_run_endpoint_passes_parameters_to_execute_pipeline(self, mocker, tmp_path):
         """Test that RunRequest parameters are passed to _execute_pipeline."""
         project_path = Path(tmp_path).resolve()
         fake_session = mocker.Mock()

@@ -1,13 +1,13 @@
 ---
 name: kedro-babysit
 description: >-
-  Get a Kedro PR merge-ready by fixing CI / test failures, resolving clear
-  merge conflicts, and ensuring RELEASE.md and DCO compliance. Use when the
-  user asks to babysit a PR, fix CI, or get this PR green.
+  Get a Kedro PR merge-ready by fixing failing CI checks (lint, tests,
+  detect-secrets, docs), resolving clear merge conflicts, and ensuring DCO
+  sign-off. Use when the user asks to babysit a PR, fix CI, or get this PR green.
 ---
 # Babysit Kedro PR
 
-Drive a Kedro PR to a merge-ready state. Fix mechanical CI failures, resolve clear merge conflicts, ensure `RELEASE.md` and DCO compliance. Use a conservative posture: stop and ask the user before every commit, push, force-push, and merge-conflict resolution.
+Drive a Kedro PR to a merge-ready state. Fix mechanical CI failures, resolve clear merge conflicts, ensure DCO sign-off. Use a conservative posture: stop and ask the user before every commit, push, force-push, and merge-conflict resolution.
 
 This skill complements `review-kedro-pr` (judgment-based code review). It does **not** triage PR review comments.
 
@@ -52,7 +52,6 @@ Show the user a one-screen summary:
 - Mergeable status (`CLEAN` / `BEHIND` / `DIRTY` / `BLOCKED`).
 - Failing CI checks, each annotated with the local Make target from [reference.md](reference.md) section "CI-to-local mapping".
 - Commits missing DCO `Signed-off-by:` trailer.
-- Whether `kedro/` files changed without a corresponding entry in `# Upcoming Release` of `RELEASE.md`.
 
 ### 4. Fix in this fixed order
 
@@ -67,14 +66,6 @@ Each sub-step ends with **stop and ask before staging / committing / pushing / a
 4. Apply the fix to the working tree only (no `git add` / `git commit`).
 5. Re-run the corresponding Make target locally to verify.
 6. Move to the next finding.
-
-**RELEASE.md.** If any `kedro/` file changed but `RELEASE.md` is not in the diff, draft a bullet:
-
-```bash
-bash scripts/add_release_entry.sh --section {major|fix|docs|community} "Description."
-```
-
-The script prints `git diff RELEASE.md` for review. Ask the user to confirm the section and wording before staging. See [reference.md](reference.md) section "RELEASE.md structure and rules".
 
 **DCO sign-off.** List commits without `Signed-off-by:`. Apply one of the recipes from [reference.md](reference.md) section "DCO sign-off recipes" (typically `git rebase <base> --signoff` for older commits). Ask the user before amending; **explicitly warn that amend requires a force-push** (`git push --force-with-lease`).
 
@@ -107,6 +98,7 @@ The script polls `gh pr checks --watch` until all checks complete and dumps `--l
 
 - **Comments triage** — PR review comments, reviewer asks, and bot-generated review feedback (such as Bugbot, the Cursor-style review bot that posts inline comments). The author handles reviewer feedback directly.
 - **Judgment-based code review** — defers to `review-kedro-pr`.
+- **`RELEASE.md` compliance** — adding or editing `RELEASE.md` entries is a reviewer convention, not a CI check (`gh pr checks` does not surface it). Defers to `review-kedro-pr`, which flags missing entries as Critical.
 - **Security review** — defers to a future `kedro-security-review` skill.
 - **Authoring features / large refactors** — out of scope; this skill only applies the smallest scoped fix to make a check pass.
 - **Performance regressions** — `pipeline-performance-test` (label-triggered on PRs with the `performance` label) reports timing, not pass/fail. The skill surfaces the timing delta and asks the user to investigate manually.

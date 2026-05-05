@@ -107,51 +107,6 @@ All other workflows in [.github/workflows/](../../../.github/workflows/) (`bench
 
 ---
 
-## RELEASE.md structure and rules
-
-Any change under `kedro/` must have a corresponding bullet in [RELEASE.md](../../../RELEASE.md) under `# Upcoming Release`. Use `scripts/add_release_entry.sh` to insert the entry in the right H2 section.
-
-### Sections under `# Upcoming Release`
-
-- `## Major features and improvements` — new features, significant enhancements
-- `## Bug fixes and other changes` — bug fixes, minor changes, dependency updates
-- `## Documentation changes` — docs-only changes
-- `## Community contributions` — added by maintainers for external contributors
-
-Bullet format: `* Description of the change.`
-
-### Full file structure
-
-```markdown
-# Upcoming Release
-
-## Major features and improvements
-* Description of new feature or significant enhancement.
-
-## Bug fixes and other changes
-* Description of bug fix or minor change.
-
-## Documentation changes
-* Description of docs change.
-
-## Community contributions
-* [Username](https://github.com/username)
-
-
-# Release X.Y.Z
-
-## Major features and improvements
-* ...
-```
-
-### Automation dependency
-
-Shipped releases must use the exact heading `# Release X.Y.Z`. The script `tools/github_actions/extract_release_notes.py` finds the first H1 matching that heading and extracts everything until the next H1. **Wrong heading format = broken GitHub Release.**
-
-The skill never edits past `# Release X.Y.Z` headings — only `# Upcoming Release`.
-
----
-
 ## DCO sign-off recipes
 
 Every commit must have a `Signed-off-by: Name <email>` trailer. The DCO GitHub App rejects PRs with unsigned commits.

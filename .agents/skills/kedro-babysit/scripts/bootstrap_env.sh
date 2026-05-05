@@ -268,7 +268,7 @@ if [[ -z "$ACTIVE_ENV_KIND" ]]; then
             echo
             echo "  Now activate the env and re-run this script:"
             echo "    source $NAME/bin/activate"
-            echo "    bash $0$RERUN_FLAGS"
+            echo "    bash \"$0\"$RERUN_FLAGS"
             ;;
         conda)
             if ! command -v conda >/dev/null 2>&1; then
@@ -284,7 +284,7 @@ if [[ -z "$ACTIVE_ENV_KIND" ]]; then
             echo
             echo "  Now activate the env and re-run this script:"
             echo "    conda activate $NAME"
-            echo "    bash $0$RERUN_FLAGS"
+            echo "    bash \"$0\"$RERUN_FLAGS"
             ;;
     esac
 

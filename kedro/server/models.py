@@ -22,7 +22,7 @@ class PipelineExecutionResult:
     """Result of a pipeline execution attempt."""
 
     run_id: str
-    status: Literal["success", "failure"]  # "success" | "failed"
+    status: Literal["success", "failure"]
     duration_ms: float
     error: PipelineExecutionError | None = None
 
@@ -31,7 +31,6 @@ class RunRequest(BaseModel):
     """Request model for pipeline execution.
 
     Mirrors the parameters available in `kedro run` CLI command.
-    Parameter order matches the CLI definition in project.py.
     """
 
     # Pipeline selection
@@ -81,7 +80,7 @@ class RunRequest(BaseModel):
     )
     params: dict[str, Any] | None = Field(
         default=None,
-        description="Extra parameters to pass to the context initialiser.",
+        description="Extra parameters to pass to the context at runtime.",
     )
     only_missing_outputs: bool = Field(
         default=False,
@@ -96,7 +95,7 @@ class ErrorDetail(BaseModel):
     message: str = Field(description="Error message.")
     traceback: list[str] | None = Field(
         default=None,
-        description="Stack trace lines (only included in debug mode).",
+        description="Stack trace lines, if available. Only included for errors raised during pipeline execution.",
     )
 
 
@@ -108,7 +107,7 @@ class RunResponse(BaseModel):
     duration_ms: float = Field(description="Total execution time in milliseconds.")
     error: ErrorDetail | None = Field(
         default=None,
-        description="Error details if status is 'failed'.",
+        description="Error details if status is 'failure'.",
     )
 
 

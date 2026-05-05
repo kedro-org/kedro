@@ -124,7 +124,7 @@ def create_http_server(
                 conf_source=app.state.default_conf_source,
             )
 
-        result = execute_pipeline(
+        result = _execute_pipeline(
             session=app.state.session,
             pipeline_names=request.pipeline_names,
             params=request.params,
@@ -159,7 +159,7 @@ def create_http_server(
     return app
 
 
-def execute_pipeline(  # noqa: PLR0913
+def _execute_pipeline(  # noqa: PLR0913
     session: AbstractSession,
     *,
     pipeline_names: list[str] | None = None,

@@ -179,12 +179,12 @@ def _execute_pipeline(  # noqa: PLR0913
     """Execute a Kedro pipeline and return a structured result.
 
     This is the shared execution core used by both the HTTP and MCP
-    server interfaces.  It creates a fresh ``KedroServiceSession``, resolves
+    server interfaces.  It receives a `KedroServiceSession` as input , resolves
     the runner, calls ``session.run()``, and returns a
-    :class:`PipelineExecutionResult`.
+    `PipelineExecutionResult`.
 
     Args:
-        session: Kedro session to use for pipeline execution.
+        session: Kedro service session to use for pipeline execution.
         pipeline_names: List of pipeline names (mutually exclusive with
             *pipeline*).  When *pipeline* is given it is normalised into
             this list internally.
@@ -203,7 +203,7 @@ def _execute_pipeline(  # noqa: PLR0913
         only_missing_outputs: Skip nodes whose outputs already exist.
 
     Returns:
-        A :class:`PipelineExecutionResult` with run id, status, duration,
+        A `PipelineExecutionResult` with run id, status, duration,
         and optional error details.
     """
     start_time = time.perf_counter()

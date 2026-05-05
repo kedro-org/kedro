@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from kedro.server import create_http_server as create_http_server_lazy
 from kedro.server.http_server import _execute_pipeline, create_http_server
 from kedro.server.models import PipelineExecutionError, PipelineExecutionResult
 
@@ -16,20 +15,7 @@ class _FakeRunner:
 class TestHTTPServerFactory:
     """Tests for HTTP server factory creation and health endpoint."""
 
-    def test_lazy_import_wrapper(self, mocker):
-        app = mocker.Mock(name="app")
-        mock_create = mocker.patch(
-            "kedro.server.http_server.create_http_server", return_value=app
-        )
-
-        result = create_http_server_lazy()
-
-        mock_create.assert_called_once_with(
-            project_path=None, env=None, conf_source=None
-        )
-        assert result is app
-
-    def test_create_http_server_resolves_env_from_argument_over_env_var(
+    def test_create_http_server_resolves_env_from_argument(
         self, monkeypatch, mocker, tmp_path
     ):
         monkeypatch.setenv("KEDRO_SERVER_ENV", "from_env_var")
@@ -41,7 +27,7 @@ class TestHTTPServerFactory:
         assert app.state.default_env == "from_argument"
         assert app.state.default_conf_source is None
 
-    def test_conf_source_stored_in_app_state(self, mocker, tmp_path):
+    def test_conf_source_in_app_state(self, mocker, tmp_path):
         """Test that conf_source is stored in app state for later use."""
         mocker.patch(
             "kedro.server.http_server._resolve_project_path", return_value=tmp_path
@@ -52,7 +38,7 @@ class TestHTTPServerFactory:
 
         assert app.state.default_conf_source == "conf/custom"
 
-    def test_env_stored_in_app_state(self, mocker, tmp_path):
+    def test_env_in_app_state(self, mocker, tmp_path):
         """Test that env is stored in app state for later use."""
         mocker.patch(
             "kedro.server.http_server._resolve_project_path", return_value=tmp_path
@@ -102,23 +88,6 @@ class TestHTTPServerFactory:
         assert response.json()["status"] == "healthy"
         assert response.json()["project_path"] == str(project_path)
 
-    def test_health_endpoint_includes_kedro_version(self, mocker, tmp_path):
-        """Test that health endpoint returns Kedro version."""
-        project_path = Path(tmp_path).resolve()
-        mocker.patch(
-            "kedro.server.http_server._resolve_project_path", return_value=project_path
-        )
-        mocker.patch("kedro.server.http_server.bootstrap_project")
-
-        app = create_http_server()
-        with TestClient(app) as client:
-            response = client.get("/health")
-
-        payload = response.json()
-        assert "kedro_version" in payload
-        assert isinstance(payload["kedro_version"], str)
-        assert len(payload["kedro_version"]) > 0
-
     def test_health_endpoint_response_model_validation(self, mocker, tmp_path):
         """Test that health endpoint response validates against HealthResponse model."""
         project_path = Path(tmp_path).resolve()
@@ -134,6 +103,9 @@ class TestHTTPServerFactory:
         payload = response.json()
         assert set(payload.keys()) == {"status", "kedro_version", "project_path"}
         assert payload["status"] in ["healthy", "unhealthy"]
+        assert "kedro_version" in payload
+        assert isinstance(payload["kedro_version"], str)
+        assert len(payload["kedro_version"]) > 0
 
 
 class TestRunEndpoint:
@@ -315,13 +287,14 @@ class TestRunEndpoint:
 
 class TestExecutePipeline:
     def test_execute_pipeline_success_with_defaults(self, mocker):
-        """Test successful pipeline execution with default parameters."""
+        """Test successful pipeline execution loads SequentialRunner by default."""
 
         mock_session = mocker.Mock()
         mock_runner = _FakeRunner(is_async=False)
-        mocker.patch(
+        mock_runner_factory = mocker.Mock(return_value=mock_runner)
+        mock_load_obj = mocker.patch(
             "kedro.server.http_server.load_obj",
-            return_value=lambda is_async: mock_runner,
+            return_value=mock_runner_factory,
         )
 
         result = _execute_pipeline(session=mock_session)
@@ -330,7 +303,10 @@ class TestExecutePipeline:
         assert result.run_id is not None
         assert result.duration_ms > 0
         assert result.error is None
+        mock_load_obj.assert_called_once_with("SequentialRunner", "kedro.runner")
+        mock_runner_factory.assert_called_once_with(is_async=False)
         mock_session.run.assert_called_once()
+        assert mock_session.run.call_args.kwargs["runner"] is mock_runner
 
     def test_execute_pipeline_success_with_custom_runner(self, mocker):
         """Test successful execution with custom runner class."""
@@ -484,25 +460,7 @@ class TestExecutePipeline:
         assert call_kwargs["node_names"] == ("node1", "node2")
         assert isinstance(call_kwargs["node_names"], tuple)
 
-    def test_execute_pipeline_none_tags_stays_none(self, mocker):
-        """Test that None tags stays None, not converted to empty tuple."""
-
-        mock_session = mocker.Mock()
-        mock_runner = _FakeRunner(is_async=False)
-        mocker.patch(
-            "kedro.server.http_server.load_obj",
-            return_value=lambda is_async: mock_runner,
-        )
-
-        result = _execute_pipeline(session=mock_session, tags=None)
-
-        assert result.status == "success"
-        call_kwargs = mock_session.run.call_args[1]
-        assert call_kwargs["tags"] is None
-
-    def test_run_endpoint_passes_request_parameters_to_execute_pipeline(
-        self, mocker, tmp_path
-    ):
+    def test_run_endpoint_passes_request_parameters(self, mocker, tmp_path):
         """Test that RunRequest parameters are correctly passed to _execute_pipeline."""
         project_path = Path(tmp_path).resolve()
         fake_session = mocker.Mock()

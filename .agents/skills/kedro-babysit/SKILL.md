@@ -86,7 +86,7 @@ Run the local checks:
 bash scripts/run_local_checks.sh
 ```
 
-The script auto-detects scope (`--code` / `--docs`) from the changed files. It refuses to run if no isolated env is active. Show the user the per-check pass/fail/skip summary.
+The script auto-detects scope from the changed files (`code`, `docs`, or `code+docs`). It refuses to run if no isolated env is active. Show the user the per-check pass/fail/skip summary.
 
 On user confirmation:
 - `git add` only the touched files.

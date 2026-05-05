@@ -17,24 +17,36 @@ An env is considered "active and isolated" when:
 
 `scripts/bootstrap_env.sh` checks both and prints the active env's path + Python version. `scripts/run_local_checks.sh` enforces the same rule with a hard guard (exit 64 if neither condition holds).
 
+### Python version
+
+Kedro supports **Python 3.10–3.14** (see [pyproject.toml `requires-python`](../../../pyproject.toml) and the [CI matrix in all-checks.yml](../../../.github/workflows/all-checks.yml)).
+
+`bootstrap_env.sh` resolves the env's Python version as follows, in order:
+
+1. `--python <version>` if explicitly passed (no validation; user's choice).
+2. Else, the version of the current `python` interpreter on PATH, **if** it's in 3.10–3.14.
+3. Else, falls back to **3.11** (the version the lint job uses on CI).
+
+For the install flow (env already active), the script prints a soft warning if the active env's Python is outside 3.10–3.14 — it does not refuse, since the user has already chosen.
+
 ### Create a venv (manual recipe)
 
 ```bash
-uv venv .venv --python 3.11
+uv venv .venv --python 3.11    # or any version in 3.10–3.14; omit --python to use the current
 source .venv/bin/activate
 ```
 
 Fallback if `uv` is not installed:
 
 ```bash
-python3.11 -m venv .venv
+python3.11 -m venv .venv       # or python3.10 / python3.12 / python3.13 / python3.14
 source .venv/bin/activate
 ```
 
 ### Create a conda env (manual recipe)
 
 ```bash
-conda create -n kedro-babysit python=3.11
+conda create -n kedro-babysit python=3.11    # or any version in 3.10–3.14
 conda activate kedro-babysit
 ```
 

@@ -23,7 +23,7 @@ There is no hook between "load the pipeline registry" and "import seaborn" that 
 
 ---
 
-## Solution — `lite_shim`: AST Scan + `sys.modules` Mock
+## Solution 1 — `lite_shim`: AST Scan + `sys.modules` Mock
 
 Stub the **missing dependency itself** before any pipeline code is loaded. When `nodes.py` runs `import seaborn`, Python checks `sys.modules["seaborn"]` first — if a mock is already there, the import is a no-op. The pipeline loads, `create_pipeline()` runs, the `Pipeline` structure is fully populated, and seaborn is never executed.
 
@@ -138,7 +138,7 @@ CLI commands that are inspection-only (`registry list`, `registry describe`, `ca
 
 ---
 
-## Alternative Considered — `sys.meta_path` Catch-All Stub Finder
+## Solution 2 — `sys.meta_path` Catch-All Stub Finder
 
 The `lite_shim` approach above is *proactive*: it scans first, then mocks what it predicts will be missing. A well-known alternative used by Sphinx is *reactive*: install a fallback finder that only fires for modules no other finder can locate.
 
@@ -216,8 +216,7 @@ This is the same mechanism that several major Python tools ship in production:
 
 - **mypy `--ignore-missing-imports`** — mypy avoids the problem entirely by never executing imports at runtime; it reads `.pyi` stubs and source AST only. Its `stubgen` tool ([source](https://github.com/python/mypy/blob/master/mypy/stubgen.py)) generates stubs without importing, which is why mypy recommends shipping `.pyi` files rather than runtime stubs. The mypy recommendation for library authors is explicit: stub out optional heavy dependencies in `.pyi` files so type checkers never need to import them ([mypy docs: missing stubs](https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports)).
 
-
-### Disadvantages and risks
+### Disadvantages
 
 - **Stubs all unknown modules unconditionally.** If a pipeline module tries to import a package that is simply misspelled or not yet installed intentionally, the stub silently succeeds rather than raising `ImportError`. The AST-scan approach only mocks modules it actively found in source files, which limits the blast radius.
 
@@ -227,6 +226,125 @@ This is the same mechanism that several major Python tools ship in production:
 
 - **Thread safety.** Mutating `sys.meta_path` is not thread-safe. In a multi-threaded server (e.g. FastAPI startup), concurrent imports during the `with safe_context_v2()` block could interact with the catch-all finder unexpectedly. The AST-scan approach mutates `sys.modules` via `patch.dict`, which has the same caveat.
 
-### Verdict
 
-For Kedro's use case the `sys.meta_path` catch-all is strictly more robust than AST scanning for catching transitive and dynamic imports. The main practical risk — silently succeeding on misspelled package names — is acceptable for inspection-only commands where the output is read-only pipeline structure. The AST-scan approach was chosen for the initial implementation because it provides an explicit, auditable list of what was mocked, which aids debugging during the spike. Either approach can replace the other; the integration point in `_load_data()` is identical.
+---
+
+## Solution 3 — Generated Pipeline Manifest
+
+Both `lite_shim` approaches above still execute Python imports (with mocked deps). A fundamentally different approach sidesteps the import chain entirely: **compute the pipeline structure once, serialize it, and serve read-only commands from the serialized form**.
+
+This is the pattern used by build tools and package managers that separate a "build phase" (expensive, executes code) from a "query phase" (cheap, reads metadata):
+
+| Tool | Build phase | Query phase |
+|---|---|---|
+| `cargo` | `cargo build` | `cargo metadata` reads `Cargo.lock` |
+| `npm` | `npm install` | `npm list` reads `package-lock.json` |
+| CMake | `cmake ..` | reads `CMakeCache.txt` |
+| **Kedro (proposed)** | `kedro inspect` | `registry list/describe` reads `.kedro/pipeline_manifest.json` |
+
+### How it works
+
+#### Step 1 — Generate the manifest via `kedro inspect`
+
+The manifest already has a natural generation point: **`kedro inspect`** (`kedro.inspection.get_project_snapshot`). This existing API initialises the project, loads all pipelines and configuration, and returns a [`ProjectSnapshot`](../inspect/inspect-project.md) — a dataclass that contains exactly the structure `registry list` and `registry describe` need: pipeline names, nodes, inputs, outputs, tags, datasets, and parameter keys.
+
+Serializing it to disk is straightforward because `ProjectSnapshot` and its nested types are plain dataclasses:
+
+```python
+# kedro/framework/project/_manifest.py
+import dataclasses
+import json
+from pathlib import Path
+
+from kedro.inspection import get_project_snapshot
+
+_MANIFEST_PATH = Path(".kedro") / "pipeline_manifest.json"
+
+
+def write_manifest(project_path: Path) -> None:
+    snapshot = get_project_snapshot(project_path)
+    payload = {
+        "schema_version": 1,
+        **dataclasses.asdict(snapshot),
+    }
+    _MANIFEST_PATH.parent.mkdir(exist_ok=True)
+    _MANIFEST_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+```
+
+`kedro inspect` is the single authoritative source: it already handles environment resolution, catalog loading, and pipeline registration. No parallel serialization logic is needed — the manifest is just a persisted `ProjectSnapshot`.
+
+The `kedro inspect` command can be run explicitly before inspection-only CI steps, or automatically as a post-hook after `kedro run` succeeds.
+
+#### Step 2 — Read-only commands consume the manifest
+
+`kedro registry list` and `kedro registry describe` check for the manifest first. If present and fresh, they read it directly — zero imports, zero mocking:
+
+```python
+def load_manifest() -> dict | None:
+    if not _MANIFEST_PATH.exists():
+        return None
+    return json.loads(_MANIFEST_PATH.read_text(encoding="utf-8"))
+```
+
+#### Step 3 — Freshness check (optional but recommended)
+
+Hash the pipeline source files at write time and re-check at read time. If the hash has changed, warn the user that the manifest is stale:
+
+```python
+import hashlib
+
+def _source_hash(package_name: str) -> str:
+    spec = importlib.util.find_spec(package_name)
+    package_dir = Path(spec.submodule_search_locations[0])
+    h = hashlib.sha256()
+    for path in sorted(package_dir.rglob("*.py")):
+        h.update(path.read_bytes())
+    return h.hexdigest()
+
+# Stored in the manifest JSON:
+# { "source_hash": "a3f2...", "pipelines": { ... } }
+```
+
+If `source_hash` differs, the CLI can either fall back to the live import path or print a clear warning:
+
+```
+Warning: pipeline_manifest.json is stale (source files changed).
+Run 'kedro inspect' to refresh, or install all project dependencies to load live.
+```
+
+### What the manifest covers
+
+`ProjectSnapshot` already contains everything `registry list`, `registry describe`, and `catalog describe-datasets` need — it was designed for exactly this kind of read-only introspection. See [`inspect-project.md`](../inspect/inspect-project.md) for the full schema.
+
+| CLI command | Served from manifest? | `ProjectSnapshot` field |
+|---|---|---|
+| `kedro registry list` | **Yes** | `snapshot.pipelines[*].name` |
+| `kedro registry describe --pipeline data_science` | **Yes** | `snapshot.pipelines[*].nodes` (name, inputs, outputs, tags) |
+| `kedro catalog describe-datasets` | **Yes** | `snapshot.datasets` (type, filepath) |
+| `kedro run` | **No** — always loads live; manifest is never used for execution | — |
+
+### Prior Usage
+
+- **`cargo metadata`** ([docs](https://doc.rust-lang.org/cargo/commands/cargo-metadata.html)) — outputs JSON describing the full workspace graph without building. Cargo computes this from `Cargo.toml` and `Cargo.lock`, never by executing Rust code.
+- **`npm pack --dry-run` / `npm list`** ([docs](https://docs.npmjs.com/cli/v10/commands/npm-list)) — queries the installed package graph from `node_modules/.package-lock.json` without executing any JavaScript.
+- **`pip inspect`** ([PEP 566](https://peps.python.org/pep-0566/), added in pip 22.2) — returns installed package metadata as JSON by reading wheel `.dist-info` directories, never importing the packages.
+- **pytest `--collect-only`** ([docs](https://docs.pytest.org/en/stable/how-to/usage.html#calling-pytest-through-python-m-pytest)) — collects test structure by importing test modules, but the conceptual separation (collection vs execution) is the same principle. Many CI pipelines cache the collection output separately from the run output.
+
+### Disadvantages
+
+- **Staleness.** The manifest reflects the last time pipelines were successfully loaded. If a user edits pipeline code and immediately runs `kedro registry list`, they see the old structure unless they re-run `kedro manifest build` or have the freshness check in place.
+- **Requires a successful prior import.** The first time a project is set up, or after installing a new heavy dependency, the manifest does not yet exist. The CLI must fall back to the import path (with mocking) for the first run, or instruct the user to run `kedro manifest build` first.
+- **Catalog serialization is harder.** `DataCatalog` entries can be parameterized via `globals.yml`, Jinja2 templates, and runtime credentials. Serializing a fully-resolved catalog to JSON is non-trivial and may expose secrets.
+- **New surface area.** Introduces a new command, a new file format, a schema version, and a migration story when the schema changes.
+
+### Summary
+
+The manifest approach is the only alternative that is **both truly import-free and covers `registry describe`**. It is the right long-term architecture if Kedro wants to fully decouple read-only CLI tooling from the project's Python environment. The main cost is the staleness problem and the cold-start requirement.
+
+For the import-with-mocking tier (`lite_shim` or `sys.meta_path`), which remains the fallback when no fresh manifest exists: the `sys.meta_path` catch-all is strictly more robust than AST scanning for catching transitive and dynamic imports, at the cost of silently succeeding on misspelled package names. The AST-scan approach was chosen for the initial implementation because it produces an explicit, auditable list of what was mocked. Either can replace the other; the integration point in `_load_data()` is identical.
+
+A practical incremental path that combines all three tiers:
+
+1. Serialize the `ProjectSnapshot` to `.kedro/pipeline_manifest.json` automatically after every successful `kedro run` (post-hook) and after every explicit `kedro inspect` call.
+2. `registry list` and `registry describe` consume the manifest when present and fresh — zero imports, zero mocking.
+3. When the manifest is absent or stale, fall back to `lite_shim` (or `sys.meta_path`) to load live with mocked deps.

@@ -6,9 +6,7 @@ import logging
 import os
 import time
 import traceback
-from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI
@@ -28,12 +26,13 @@ from kedro.server.models import (
 from kedro.server.utils import (
     KEDRO_SERVER_CONF_SOURCE,
     KEDRO_SERVER_ENV,
-    get_project_path,
+    _resolve_project_path,
 )
 from kedro.utils import load_obj
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+    from pathlib import Path
 
     from .abstract_session import AbstractSession
 
@@ -66,6 +65,11 @@ def create_http_server(
     Programmatic values passed to this factory take precedence over
     environment-variable defaults set by the CLI.
 
+    Args:
+        project_path: Optional path to the Kedro project to serve. If not provided,
+            it will be resolved from KEDRO_PROJECT_PATH environment variable.
+        env: Optional Kedro environment to use. Overrides the KEDRO_SERVER_ENV environment variable if provided.
+        conf_source: Optional configuration source to use. Overrides the KEDRO_SERVER_CONF_SOURCE environment variable if provided.
     Returns:
         Configured FastAPI application instance.
     """
@@ -84,9 +88,7 @@ def create_http_server(
     )
     app.state.default_env = resolved_env
     app.state.default_conf_source = resolved_conf_source
-    app.state.project_path = (
-        Path(project_path).resolve() if project_path is not None else get_project_path()
-    )
+    app.state.project_path = _resolve_project_path(project_path)
 
     @app.get("/health", response_model=HealthResponse, tags=["health"])
     async def health() -> HealthResponse:
@@ -122,9 +124,9 @@ def create_http_server(
                 conf_source=app.state.default_conf_source,
             )
 
-        result = execute_pipeline(
+        result = _execute_pipeline(
             session=app.state.session,
-            pipeline_names=request.pipelines,
+            pipeline_names=request.pipeline_names,
             params=request.params,
             runner=request.runner,
             is_async=request.is_async,
@@ -157,7 +159,7 @@ def create_http_server(
     return app
 
 
-def execute_pipeline(  # noqa: PLR0913
+def _execute_pipeline(  # noqa: PLR0913
     session: AbstractSession,
     *,
     pipeline_names: list[str] | None = None,
@@ -177,12 +179,12 @@ def execute_pipeline(  # noqa: PLR0913
     """Execute a Kedro pipeline and return a structured result.
 
     This is the shared execution core used by both the HTTP and MCP
-    server interfaces.  It creates a fresh ``KedroServiceSession``, resolves
+    server interfaces.  It receives a `KedroServiceSession` as input , resolves
     the runner, calls ``session.run()``, and returns a
-    :class:`PipelineExecutionResult`.
+    `PipelineExecutionResult`.
 
     Args:
-        session: Kedro session to use for pipeline execution.
+        session: Kedro service session to use for pipeline execution.
         pipeline_names: List of pipeline names (mutually exclusive with
             *pipeline*).  When *pipeline* is given it is normalised into
             this list internally.
@@ -201,7 +203,7 @@ def execute_pipeline(  # noqa: PLR0913
         only_missing_outputs: Skip nodes whose outputs already exist.
 
     Returns:
-        A :class:`PipelineExecutionResult` with run id, status, duration,
+        A `PipelineExecutionResult` with run id, status, duration,
         and optional error details.
     """
     start_time = time.perf_counter()

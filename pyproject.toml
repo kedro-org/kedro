@@ -51,7 +51,6 @@ dynamic = ["readme", "version"]
 [project.optional-dependencies]
 test = [
     "behave>=1.2.6,<2.0",
-    "chardet<6",  # Temporary: remove once requests supports chardet 6 (causes RequestsDependencyWarning)
     "coverage[toml]",
     "detect-secrets~=1.5.0",
     "fastapi>=0.100.0",
@@ -100,6 +99,7 @@ benchmark = [
     "asv"
 ]
 server = [
+    "pydantic~=2.13",
     "fastapi>=0.100.0",
     "uvicorn>=0.20.0",
 ]

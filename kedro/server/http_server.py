@@ -6,9 +6,7 @@ import logging
 import os
 import time
 import traceback
-from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI
@@ -28,12 +26,13 @@ from kedro.server.models import (
 from kedro.server.utils import (
     KEDRO_SERVER_CONF_SOURCE,
     KEDRO_SERVER_ENV,
-    get_project_path,
+    _resolve_project_path,
 )
 from kedro.utils import load_obj
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+    from pathlib import Path
 
     from .abstract_session import AbstractSession
 
@@ -127,7 +126,7 @@ def create_http_server(
 
         result = execute_pipeline(
             session=app.state.session,
-            pipeline_names=request.pipelines,
+            pipeline_names=request.pipeline_names,
             params=request.params,
             runner=request.runner,
             is_async=request.is_async,

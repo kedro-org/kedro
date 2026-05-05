@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -25,16 +25,6 @@ class PipelineExecutionResult:
     status: Literal["success", "failure"]  # "success" | "failed"
     duration_ms: float
     error: PipelineExecutionError | None = None
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to a plain dictionary, omitting None values."""
-        result = asdict(self)
-        if result["error"] is None:
-            del result["error"]
-        # Remove None traceback from error
-        elif result["error"]["traceback"] is None:
-            del result["error"]["traceback"]
-        return result
 
 
 class RunRequest(BaseModel):
@@ -79,11 +69,11 @@ class RunRequest(BaseModel):
     )
     load_versions: dict[str, str] | None = Field(
         default=None,
-        description="Specify a particular dataset version (timestamp) for loading.",
+        description="Specify a particular dataset version for loading.",
     )
-    pipelines: list[str] | None = Field(
+    pipeline_names: list[str] | None = Field(
         default=None,
-        description="List of registered pipeline names to run. Cannot be used together with 'pipeline'.",
+        description="List of registered pipeline names to run.",
     )
     namespaces: list[str] | None = Field(
         default=None,

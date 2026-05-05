@@ -4,15 +4,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from kedro.server import create_http_server as create_http_server_lazy
-from kedro.server.http_server import create_http_server, execute_pipeline
+from kedro.server.http_server import create_http_server
 from kedro.server.models import PipelineExecutionError, PipelineExecutionResult
 
 
 class _FakeRunner:
     def __init__(self, *, is_async):
         self.is_async = is_async
-from kedro.server.http_server import create_http_server
-from kedro.server.utils import ServerSettingsError
 
 
 class TestHTTPServer:
@@ -61,7 +59,7 @@ class TestHTTPServer:
 
     def test_create_http_server_raises_on_bad_project_path(self, mocker, tmp_path):
         mocker.patch(
-            "kedro.server.http_server.get_project_path",
+            "kedro.server.http_server._resolve_project_path",
             side_effect=RuntimeError("cannot resolve project"),
         )
 
@@ -76,7 +74,7 @@ class TestHTTPServer:
             return_value=fake_session,
         )
         mocker.patch(
-            "kedro.server.http_server.get_project_path", return_value=project_path
+            "kedro.server.http_server._resolve_project_path", return_value=project_path
         )
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mock_execute = mocker.patch(
@@ -209,7 +207,7 @@ class TestHTTPServer:
             return_value=fake_session,
         )
         mocker.patch(
-            "kedro.server.http_server.get_project_path", return_value=project_path
+            "kedro.server.http_server._resolve_project_path", return_value=project_path
         )
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mocker.patch(
@@ -240,55 +238,3 @@ class TestHTTPServer:
             "message": "bad run",
             "traceback": ["Traceback line"],
         }
-
-
-class TestModels:
-    def test_pipeline_execution_result_to_dict_omits_error_when_none(self):
-        result = PipelineExecutionResult(
-            run_id="run-1", status="success", duration_ms=12.3
-        )
-
-        as_dict = result.to_dict()
-
-        assert "error" not in as_dict
-        assert as_dict["run_id"] == "run-1"
-        assert as_dict["status"] == "success"
-
-    def test_pipeline_execution_result_to_dict_omits_none_traceback(self):
-        result = PipelineExecutionResult(
-            run_id="run-2",
-            status="failure",
-            duration_ms=9.4,
-            error=PipelineExecutionError(
-                type="ValueError", message="boom", traceback=None
-            ),
-        )
-
-        as_dict = result.to_dict()
-
-        assert as_dict["error"]["type"] == "ValueError"
-        assert as_dict["error"]["message"] == "boom"
-        assert "traceback" not in as_dict["error"]
-
-    def test_pipeline_execution_result_to_dict_keeps_traceback(self):
-        result = PipelineExecutionResult(
-            run_id="run-3",
-            status="failure",
-            duration_ms=7.1,
-            error=PipelineExecutionError(
-                type="RuntimeError", message="failed", traceback=["line 1", "line 2"]
-            ),
-        )
-
-        as_dict = result.to_dict()
-
-        assert as_dict["error"]["traceback"] == ["line 1", "line 2"]
-        with pytest.raises(RuntimeError, match="cannot resolve project"):
-    def test_create_http_server_raises_on_bad_project_path(self, mocker):
-        mocker.patch(
-            "kedro.server.http_server._resolve_project_path",
-            side_effect=ServerSettingsError("is not set"),
-        )
-
-        with pytest.raises(ServerSettingsError, match="is not set"):
-            create_http_server()

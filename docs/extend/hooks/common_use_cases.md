@@ -200,6 +200,38 @@ HOOKS = (AzureSecretsHook(),)
 !!! note
     `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorise access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
 
+## Use stateful Hooks to share context between Hook methods
+
+Hooks are instantiated once per Kedro session, so instance attributes persist across hook calls.
+This lets you capture data from `after_context_created` and reuse it in hooks that do not receive the context (such as `before_pipeline_run` or `before_node_run`).
+
+```python
+from typing import Any
+
+from kedro.framework.hooks import hook_impl
+
+
+class RuntimeConfigHook:
+    def __init__(self):
+        self._runtime_env = None
+
+    @hook_impl
+    def after_context_created(self, context) -> None:
+        # Persist values from context for later Hooks
+        self._runtime_env = context.env
+
+    @hook_impl
+    def before_pipeline_run(self, run_params: dict[str, Any], pipeline, catalog) -> None:
+        # Reuse values captured in `after_context_created`
+        if self._runtime_env is not None:
+            run_params["env"] = self._runtime_env
+```
+
+This pattern is useful when migrating older projects that passed `context` through custom integrations, or when coordinating configuration and runtime behaviour across multiple Hook points.
+
+!!! note
+    Keep stored data small and treat it as read-only to avoid surprising side effects across hooks.
+
 ## Use Hooks to read `metadata` from `DataCatalog`
 Use the `after_catalog_created` Hook to access `metadata` to extend Kedro.
 

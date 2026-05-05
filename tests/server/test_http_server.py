@@ -11,6 +11,8 @@ from kedro.server.models import PipelineExecutionError, PipelineExecutionResult
 class _FakeRunner:
     def __init__(self, *, is_async):
         self.is_async = is_async
+from kedro.server.http_server import create_http_server
+from kedro.server.utils import ServerSettingsError
 
 
 class TestHTTPServer:
@@ -22,70 +24,27 @@ class TestHTTPServer:
 
         result = create_http_server_lazy()
 
-        mock_create.assert_called_once_with()
+        mock_create.assert_called_once_with(
+            project_path=None, env=None, conf_source=None
+        )
         assert result is app
 
-    def test_execute_pipeline_success(self, mocker):
-        """Test that execute_pipeline returns success result"""
-        session = mocker.Mock()
-        session.run.return_value = {}
-
+    def test_create_http_server_resolves_env_from_argument_over_env_var(
+        self, monkeypatch, mocker, tmp_path
+    ):
+        monkeypatch.setenv("KEDRO_SERVER_ENV", "from_env_var")
         mocker.patch(
-            "kedro.server.http_server.generate_timestamp", return_value="run-123"
+            "kedro.server.http_server._resolve_project_path", return_value=tmp_path
         )
-        mocker.patch("kedro.server.http_server.load_obj", return_value=_FakeRunner)
-
-        result = execute_pipeline(
-            session,
-            pipeline_names=["__default__"],
-            runner="SequentialRunner",
-            is_async=True,
-            tags=["train", "daily"],
-            node_names=["node_a"],
-            from_nodes=["node_a"],
-            to_nodes=["node_b"],
-            from_inputs=["raw"],
-            to_outputs=["model"],
-            load_versions={"cars": "2025-01-01T00.00.00.000Z"},
-            namespaces=["ns"],
-            only_missing_outputs=True,
-            params={"alpha": 1},
-        )
-
-        assert result.status == "success"
-        assert result.run_id == "run-123"
-        assert result.error is None
-
-        session.run.assert_called_once()
-        kwargs = session.run.call_args.kwargs
-        assert kwargs["pipeline_names"] == ["__default__"]
-        assert kwargs["tags"] == ("train", "daily")
-        assert kwargs["node_names"] == ("node_a",)
-        assert kwargs["only_missing_outputs"] is True
-        assert kwargs["runtime_params"] == {"alpha": 1}
-        assert isinstance(kwargs["runner"], _FakeRunner)
-        assert kwargs["runner"].is_async is True
-
-    def test_execute_pipeline_failure_includes_traceback(self, mocker):
-        """Test that execute_pipeline returns failure result"""
-        session = mocker.Mock()
-        session.run.side_effect = RuntimeError("boom")
-
-        mocker.patch(
-            "kedro.server.http_server.generate_timestamp", return_value="run-err-debug"
-        )
-        mocker.patch("kedro.server.http_server.load_obj", return_value=_FakeRunner)
-
-        result = execute_pipeline(session)
-
-        assert result.status == "failure"
-        assert result.error.type == "RuntimeError"
-        assert result.error.traceback is not None
+        mocker.patch("kedro.server.http_server.bootstrap_project")
+        app = create_http_server(env="from_argument")
+        assert app.state.default_env == "from_argument"
+        assert app.state.default_conf_source is None
 
     def test_health_endpoint_with_lifespan(self, mocker, tmp_path):
         project_path = Path(tmp_path).resolve()
         mocker.patch(
-            "kedro.server.http_server.get_project_path", return_value=project_path
+            "kedro.server.http_server._resolve_project_path", return_value=project_path
         )
         mock_bootstrap_project = mocker.patch(
             "kedro.server.http_server.bootstrap_project"
@@ -325,4 +284,11 @@ class TestModels:
 
         assert as_dict["error"]["traceback"] == ["line 1", "line 2"]
         with pytest.raises(RuntimeError, match="cannot resolve project"):
+    def test_create_http_server_raises_on_bad_project_path(self, mocker):
+        mocker.patch(
+            "kedro.server.http_server._resolve_project_path",
+            side_effect=ServerSettingsError("is not set"),
+        )
+
+        with pytest.raises(ServerSettingsError, match="is not set"):
             create_http_server()

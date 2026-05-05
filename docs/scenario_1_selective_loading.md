@@ -2,8 +2,6 @@
 
 **Part of spike [#5406](https://github.com/kedro-org/kedro/issues/5406) · [← Overview](on_demand_dependency_loading.md) · [Scenario 2 →](scenario_2_dep_free_commands.md)**
 
-**Assumption:** All project dependencies are installed. The goal is to avoid importing unrelated pipeline modules when a specific pipeline is requested via `--pipeline`.
-
 ---
 
 ## Background

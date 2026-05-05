@@ -10,11 +10,9 @@
 
 This spike addresses two distinct scenarios with different root causes and solutions.
 
-### Scenario 1 — Selective Pipeline Loading (all dependencies installed)
+### Scenario 1 — Selective Pipeline Loading
 
 When a user runs `kedro run --pipeline data_science`, Kedro imports every pipeline module in the project — including unrelated pipelines. The selective loading capability already exists via `find_pipelines(pipelines_to_find=...)` from [PR #5401](https://github.com/kedro-org/kedro/pull/5401), but it is never wired to the CLI `--pipeline` flag automatically.
-
-**This scenario assumes all project dependencies are installed.** The goal is purely to avoid importing unrelated pipeline modules at startup.
 
 ### Scenario 2 — CLI Commands Without Project Dependencies
 
@@ -55,15 +53,13 @@ flowchart TD
     style E fill:#ffa500,color:#fff
 ```
 
-**Key problem:** `find_pipelines()` receives no filter, so it imports every pipeline directory and calls `inspect.signature()` on every node function — even though only `data_science` was requested. The unused pipelines (red) are fully loaded before the result is returned.
+**Key problem:** `find_pipelines()` receives no filter, so it imports every pipeline directory even though only `data_science` was requested. The unused pipelines (red) are fully loaded before the result is returned.
 
 ---
 
 ## 3. Root Cause Analysis
 
-There are **two distinct bottlenecks** at different layers of the stack:
-
-### Bottleneck 1: `_ProjectPipelines._load_data()` — Pipeline Level
+### `_ProjectPipelines._load_data()` — Pipeline Level
 
 ```python
 # kedro/framework/project/__init__.py
@@ -83,7 +79,7 @@ def _load_data(self) -> None:
 
 The selective loading capability **already exists** in `find_pipelines(pipelines_to_find=...)` from PR #5401, but `_load_data()` never passes a filter through.
 
-### Bottleneck 2: Missing project dependencies at module load time — Import Level
+### Missing project dependencies at module load time — Import Level
 
 Even when `_load_data()` correctly filters which pipelines to load, importing `pipeline_registry.py` triggers the full import chain for every pipeline referenced at the top level:
 
@@ -95,31 +91,6 @@ from my_project.pipelines.reporting import create_pipeline
 ```
 
 This happens before `register_pipelines()` is even called — before any filter can intervene.
-
-### The Gap Visualised
-
-```mermaid
-flowchart LR
-    subgraph "What Exists"
-        A["find_pipelines(pipelines_to_find=['data_science'])"]
-        B["KedroSession.run(pipeline_names=['data_science'])"]
-    end
-
-    subgraph "The Gap"
-        C["_load_data() calls register_pipelines()\nwith NO filter"]
-        D["pipeline_registry.py top-level imports\ntrigger full dep chain before any filter"]
-    end
-
-    subgraph "What We Need"
-        E["CLI calls pipelines.set_requested(names)\nfind_pipelines() reads _requested_pipelines\nwith CLI precedence over pipelines_to_find kwarg"]
-        F["safe_context() mocks missing deps\nin sys.modules before registry load"]
-    end
-
-    A -.->|"never wired to CLI"| C
-    B -.->|"never wired"| C
-    C -->|"Scenario 1 fix"| E
-    D -->|"Scenario 2 fix"| F
-```
 
 ---
 

@@ -284,6 +284,90 @@ class TestRunEndpoint:
             "traceback": ["Traceback line"],
         }
 
+    def test_run_endpoint_passes_parameters_to_execute_pipeline(
+        self, mocker, tmp_path
+    ):
+        """Test that RunRequest parameters are passed to _execute_pipeline."""
+        project_path = Path(tmp_path).resolve()
+        fake_session = mocker.Mock()
+        mocker.patch(
+            "kedro.server.http_server.KedroServiceSession.create",
+            return_value=fake_session,
+        )
+        mocker.patch(
+            "kedro.server.http_server._resolve_project_path", return_value=project_path
+        )
+        mocker.patch("kedro.server.http_server.bootstrap_project")
+        mock_execute = mocker.patch(
+            "kedro.server.http_server._execute_pipeline",
+            return_value=PipelineExecutionResult(
+                run_id="run-params",
+                status="success",
+                duration_ms=15.0,
+            ),
+        )
+
+        app = create_http_server()
+        with TestClient(app) as client:
+            response = client.post(
+                "/run",
+                json={
+                    "pipeline_names": ["my_pipeline"],
+                    "params": {"learning_rate": 0.01},
+                    "runner": "SequentialRunner",
+                    "tags": ["training"],
+                },
+            )
+
+        assert response.status_code == 200
+        mock_execute.assert_called_once()
+        call_kwargs = mock_execute.call_args[1]
+        assert call_kwargs["pipeline_names"] == ["my_pipeline"]
+        assert call_kwargs["params"] == {"learning_rate": 0.01}
+        assert call_kwargs["runner"] == "SequentialRunner"
+        assert call_kwargs["tags"] == ["training"]
+
+    def test_run_endpoint_passes_partial_parameters_to_execute_pipeline(
+        self, mocker, tmp_path
+    ):
+        """Test that partial RunRequest parameters are passed correctly."""
+        project_path = Path(tmp_path).resolve()
+        fake_session = mocker.Mock()
+        mocker.patch(
+            "kedro.server.http_server.KedroServiceSession.create",
+            return_value=fake_session,
+        )
+        mocker.patch(
+            "kedro.server.http_server._resolve_project_path", return_value=project_path
+        )
+        mocker.patch("kedro.server.http_server.bootstrap_project")
+        mock_execute = mocker.patch(
+            "kedro.server.http_server._execute_pipeline",
+            return_value=PipelineExecutionResult(
+                run_id="run-partial",
+                status="success",
+                duration_ms=8.5,
+            ),
+        )
+
+        app = create_http_server()
+        with TestClient(app) as client:
+            response = client.post(
+                "/run",
+                json={
+                    "node_names": ["node1", "node2"],
+                    "from_inputs": ["input_data"],
+                    "is_async": True,
+                },
+            )
+
+        assert response.status_code == 200
+        mock_execute.assert_called_once()
+        call_kwargs = mock_execute.call_args[1]
+        assert call_kwargs["node_names"] == ["node1", "node2"]
+        assert call_kwargs["from_inputs"] == ["input_data"]
+        assert call_kwargs["is_async"] is True
+
 
 class TestExecutePipeline:
     def test_execute_pipeline_success_with_defaults(self, mocker):

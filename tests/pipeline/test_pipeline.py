@@ -4,7 +4,6 @@ from itertools import chain
 import pytest
 
 import kedro
-from kedro import KedroDeprecationWarning
 from kedro.pipeline import GroupedNodes, node, pipeline
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
@@ -14,13 +13,6 @@ from kedro.pipeline.pipeline import (
 )
 from kedro.pipeline.transcoding import _strip_transcoding, _transcode_split
 from tests.test_utils import biconcat, constant_output, identity, triconcat
-
-
-def test_deprecation():
-    with pytest.warns(
-        KedroDeprecationWarning, match="'TRANSCODING_SEPARATOR' has been moved"
-    ):
-        from kedro.pipeline.pipeline import TRANSCODING_SEPARATOR  # noqa: F401
 
 
 class TestTranscodeHelpers:

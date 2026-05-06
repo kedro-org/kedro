@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Any
 
 from .exceptions import ParameterValidationError
 from .model_factory import instantiate_model
-from .type_extractor import TypeExtractor
-from .utils import resolve_nested_dict_path, set_nested_dict_value
+from .type_extractor import ParamRequirement, TypeExtractor
+from .utils import MISSING, resolve_nested_dict_path, set_nested_dict_value
 
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
@@ -46,15 +46,26 @@ class ParameterValidator:
         validation_errors = []
         instantiated_count = 0
 
-        for param_key, expected_type in requirements.items():
+        for param_key, requirement in requirements.items():
+            if isinstance(requirement, ParamRequirement):
+                expected_type = requirement.expected_type
+                allows_none = requirement.allows_none
+            else:
+                expected_type = requirement
+                allows_none = False
             try:
-                raw_value = resolve_nested_dict_path(raw_params, param_key)
+                raw_value = resolve_nested_dict_path(
+                    raw_params, param_key, default=MISSING
+                )
 
-                if raw_value is None:
+                if raw_value is MISSING:
                     logger.debug(
                         "Parameter '%s' not found in config, skipping validation",
                         param_key,
                     )
+                    continue
+
+                if raw_value is None and allows_none:
                     continue
 
                 validated_instance = instantiate_model(

@@ -2,6 +2,8 @@
 
 Detailed reference for the `kedro-babysit` skill. Read sections selectively — use the section headers to find what you need.
 
+For the **invocation tracks** (Local-only / Targeted CI fix / Full PR sweep / Watch CI) and which workflow steps each track requires, see [SKILL.md](SKILL.md) section "How to invoke this skill". This reference does not duplicate that routing — it just provides the underlying recipes each step calls into.
+
 ---
 
 ## Environment setup
@@ -93,7 +95,7 @@ Canonical mapping of CI check name -> local invocation. The skill always prefers
 
 | CI check                     | Workflow file                                                          | Local command                                              | Notes                                                                                                              |
 | ---------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `lint`                       | [lint.yml](../../../.github/workflows/lint.yml)                        | `make lint`                                                | Runs `pre-commit run -a --hook-stage manual` (ruff, ruff-format, file hygiene, `lint-imports`, `detect-secrets` on changed files) + `mypy kedro --strict --allow-any-generics --no-warn-unused-ignores`. Fires on both code and docs PRs. |
+| `lint`                       | [lint.yml](../../../.github/workflows/lint.yml)                        | `make lint` (full sweep) **or** targeted recipes — see "Fast lint iteration" below | Runs `pre-commit run -a --hook-stage manual` (ruff, ruff-format, file hygiene, `lint-imports`, `detect-secrets` on changed files) + `mypy kedro --strict --allow-any-generics --no-warn-unused-ignores`. **3–5 min per run.** For per-failure iteration use `pre-commit run <hook> --files <changed>` or direct tool invocations (sub-second to ~10s). Fires on both code and docs PRs. |
 | `unit-tests`                 | [unit-tests.yml](../../../.github/workflows/unit-tests.yml)            | `make test`                                                | `pytest --numprocesses 4 --dist loadfile`. Coverage `fail_under = 100` enforced via `pyproject.toml`.              |
 | `e2e-tests`                  | [e2e-tests.yml](../../../.github/workflows/e2e-tests.yml)              | `make e2e-tests`                                           | `behave --tags=-skip`. Slow (~10+ min on one config). Opt-in locally via `run_local_checks.sh --with-e2e`.         |
 | `detect-secrets`             | [detect-secrets.yml](../../../.github/workflows/detect-secrets.yml)    | `git ls-files -z \| xargs -0 detect-secrets-hook --baseline .secrets.baseline` | **No Make target.** Full-tree scan. Differs from the pre-commit hook in `make lint` (which only checks changed files) and can fail in CI even when `make lint` is green. |
@@ -151,19 +153,61 @@ This installs `.git/hooks/commit-msg` to append `Signed-off-by:` automatically (
 
 ---
 
+## Fast lint iteration
+
+`make lint` runs `pre-commit run -a --hook-stage manual` (every hook on every tracked file) **plus** `mypy kedro --strict ...` on the whole package. On a clean run that's typically 3–5 minutes. **For per-failure iteration, use the targeted commands below instead — most complete in seconds.** Reserve `make lint` for the final pre-push check (it's what `scripts/run_local_checks.sh` calls in step 5a of the workflow).
+
+### Targeting strategy
+
+1. **Identify which hook is failing** from the CI log or local output (the hook name appears in `make lint` output as `>>>>>>>> <hook name>`).
+2. **Run only that hook on only the changed files**: `pre-commit run <hook-id> --files <file1> <file2> ...`. If you don't know the changed file list, derive it relative to the PR's base branch:
+   ```bash
+   BASE="$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || echo main)"
+   git diff --name-only "origin/$BASE"...HEAD
+   ```
+   This mirrors the auto-detect logic in `scripts/run_local_checks.sh`. Don't hardcode `origin/main` — Kedro PRs may target `develop` or other branches.
+3. **For tools that can be invoked directly**, skip pre-commit altogether (faster, no hook overhead): see the per-tool recipes below.
+4. **Re-run `make lint`** only as a final belt-and-suspenders check before commit/push.
+
+### Per-hook recipes
+
+| Failing CI / local check | Targeted command (fast) | Notes |
+|---|---|---|
+| `ruff` (lint) | `ruff check --fix <file>` or `pre-commit run ruff --files <file>` | The hook is configured with `--fix --exit-non-zero-on-fix`, so it auto-fixes and reports. Direct `ruff check --fix` is fastest. |
+| `ruff-format` | `ruff format <file>` or `pre-commit run ruff-format --files <file>` | Reformats in place. |
+| `trailing-whitespace`, `end-of-file-fixer`, `check-yaml`, `check-json`, `debug-statements`, `requirements-txt-fixer`, `check-added-large-files`, `check-case-conflict`, `check-merge-conflict` | `pre-commit run <hook-id> --files <file>` | Auto-fixers (whitespace, EOF) modify in place; checkers report violations. |
+| `imports` (Import Linter) | `lint-imports --config pyproject.toml` | The hook has `pass_filenames: false`, so `--files` is ignored — it always scans the whole project. Direct invocation is the same speed but skips pre-commit's setup overhead. Contracts live in [pyproject.toml lines 166-226](../../../pyproject.toml). |
+| `detect-secrets` (pre-commit hook on changed files) | `pre-commit run detect-secrets --files <file>` | Different from the CI's full-tree scan. To reproduce CI's check, see the cookbook entry below. |
+| `mypy` | `mypy <file> --strict --allow-any-generics --no-warn-unused-ignores` or `mypy <subpackage>/ --strict --allow-any-generics --no-warn-unused-ignores` | Single file: ~5–10s (vs. 1–2 min for the whole `kedro/` package). Mypy config in [pyproject.toml lines 252-256](../../../pyproject.toml). |
+
+### Convenience: `make lint hook=<id>`
+
+The Makefile already supports `make lint hook=<hook-id>` ([Makefile line 11](../../../Makefile)) — runs only the named pre-commit hook (still on `-a` all files), then unconditionally runs mypy after. Useful when you don't have a changed-file list, but slower than the per-hook recipes above because it always re-runs mypy.
+
+### When to fall back to `make lint`
+
+Run the full sweep when:
+- Final verification before commit/push (or just call `bash scripts/run_local_checks.sh` which wraps it).
+- You've changed something cross-cutting (renamed a public API, edited many files) and want the whole-tree confidence.
+- The targeted recipes pass but you suspect side effects in untouched files.
+
+---
+
 ## Common CI failures and fixes
 
-Short cookbook keyed by CI check.
+Short cookbook keyed by CI check. Each entry leads with **Fast verify:** (the targeted command for fast iteration — same as in "Fast lint iteration" above for lint cases) followed by guidance on **what to fix**. Use Fast verify between iterations; reserve `make lint` / `make test` for the final pre-push check.
 
 ### `lint` — ruff lint failure
 
-`ruff check --fix` (or rerun `make lint` — the pre-commit hook auto-fixes when invoked via `--hook-stage manual`).
+Fast verify: `ruff check --fix <file>` or `pre-commit run ruff --files <file>`. The ruff hook auto-fixes; if fixes were applied, re-stage and re-run.
 
 ### `lint` — ruff format failure
 
-`ruff format` (or rerun `make lint`).
+Fast verify: `ruff format <file>` or `pre-commit run ruff-format --files <file>`. Reformats in place.
 
 ### `lint` — `lint-imports` (Import Linter) failure
+
+Fast verify: `lint-imports --config pyproject.toml` (the hook ignores `--files` because contracts apply project-wide).
 
 Read the violated contract from [pyproject.toml lines 166-226](../../../pyproject.toml). The contracts are:
 
@@ -175,11 +219,13 @@ Fix the import. Only if the architectural change is intentional (rare), propose 
 
 ### `lint` — mypy failure
 
-Add type annotations or stubs. `make lint` re-runs `mypy kedro --strict --allow-any-generics --no-warn-unused-ignores` after pre-commit. The repo's mypy config (in [pyproject.toml lines 252-256](../../../pyproject.toml)) has `ignore_missing_imports = true` and `disable_error_code = ["misc", "untyped-decorator"]`.
+Fast verify: `mypy <single-file> --strict --allow-any-generics --no-warn-unused-ignores` (5–10s vs. 1–2 min for the whole package). Add type annotations or stubs. The repo's mypy config (in [pyproject.toml lines 252-256](../../../pyproject.toml)) has `ignore_missing_imports = true` and `disable_error_code = ["misc", "untyped-decorator"]`.
 
 ### `unit-tests` failure
 
-Run `make test` locally. If the failure is real, fix it. If coverage drops below `fail_under = 100` (set in [pyproject.toml line 129](../../../pyproject.toml)), add unit tests for the new lines — coverage is enforced strictly.
+Fast verify: `pytest tests/path/to/test_thing.py::TestClass::test_method` (single test, sub-second to seconds), or `pytest tests/path/to/test_module.py` (single file). Use `make test` only for the full suite + coverage check before push — it runs `pytest --numprocesses 4 --dist loadfile` across the whole tree (minutes).
+
+If the failure is real, fix it. If coverage drops below `fail_under = 100` (set in [pyproject.toml line 129](../../../pyproject.toml)), add unit tests for the new lines — coverage is enforced strictly. Coverage is checked by `make test`, not by `pytest <specific-test>`, so re-run `make test` once the targeted test passes.
 
 ### `e2e-tests` failure
 
@@ -236,9 +282,15 @@ gh pr checks                                         # current CI status
 
 # Watch CI (used by watch_ci.sh)
 gh pr checks --watch --interval 30                   # poll until all complete
+gh pr checks --json name,bucket,workflow,link        # snapshot only (no wait); used by watch_ci.sh --no-wait
 gh run list --branch <branch> --limit 20 --json databaseId,name,conclusion
 gh run view <id> --log-failed                        # dump only failed steps
 
 # After a fix
 gh pr checks                                         # re-check status
 ```
+
+### `watch_ci.sh` modes
+
+- **Default (block)**: `bash scripts/watch_ci.sh` — calls `gh pr checks --watch` and blocks until every check completes (10–40 min). Use for Track C (full PR sweep) and Track D (watch CI).
+- **Snapshot (`--no-wait`)**: `bash scripts/watch_ci.sh --no-wait` — skips the blocking watch and returns immediately with the current state plus failed-step logs for any check already in `bucket=fail`. Use for Track B when you want to know what's failing *right now* without waiting for in-progress checks to finish.

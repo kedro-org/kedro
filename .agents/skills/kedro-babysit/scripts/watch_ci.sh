@@ -4,20 +4,25 @@
 # Workflow:
 #   1. Preflight: `gh` installed + authenticated (else exit 64).
 #   2. Resolve PR (from current branch or --pr arg).
-#   3. Watch via `gh pr checks --watch --interval <s>` until all checks complete.
+#   3. Watch via `gh pr checks --watch --interval <s>` until all checks complete
+#      (skipped if --no-wait is given — useful when CI is still running and you
+#      just want to see what's failed so far).
 #   4. Fetch the final structured state.
 #   5. For each failed check: extract the run ID from the GitHub Actions URL,
 #      annotate with the local Make target, dump the failed-step logs (deduped
 #      per run, tail -n <N>).
 #
 # Usage:
-#   bash watch_ci.sh                          # current branch's PR
+#   bash watch_ci.sh                          # current branch's PR; block until done
 #   bash watch_ci.sh --pr 1234                # explicit PR
 #   bash watch_ci.sh --pr https://github.com/kedro-org/kedro/pull/1234
 #   bash watch_ci.sh --interval 60 --tail 100 # slower poll, shorter log dump
+#   bash watch_ci.sh --no-wait                # snapshot mode: skip --watch,
+#                                             # fetch current state + dump logs
+#                                             # for any already-failed checks
 #
 # Exit codes:
-#   0     all checks passed
+#   0     all checks passed (or, with --no-wait, no failures so far)
 #   1-63  count of FAILED checks (capped)
 #   64    preflight failure (gh missing / not authenticated / no PR)
 
@@ -28,13 +33,15 @@ set -uo pipefail
 # --------------------------------------------------------------------------
 PR=""
 INTERVAL=30   # plan default; gh's own default is 10
-TAIL=200     # log lines per failed run
+TAIL=200      # log lines per failed run
+NO_WAIT=0     # --no-wait: snapshot mode (skip the blocking --watch call)
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --pr)        PR="$2"; shift 2 ;;
         --interval)  INTERVAL="$2"; shift 2 ;;
         --tail)      TAIL="$2"; shift 2 ;;
+        --no-wait)   NO_WAIT=1; shift ;;
         -h|--help)
             sed -n '2,/^set -uo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'
             exit 0
@@ -82,7 +89,11 @@ IFS=$'\t' read -r PR_NUMBER HEAD_REF BASE_REF PR_URL <<< "$PR_FIELDS"
 echo "PR     : #$PR_NUMBER"
 echo "Branch : $HEAD_REF (base: $BASE_REF)"
 echo "URL    : $PR_URL"
-echo "Watch  : interval=${INTERVAL}s, log tail=${TAIL} lines"
+if [[ $NO_WAIT -eq 1 ]]; then
+    echo "Mode   : snapshot (--no-wait); log tail=${TAIL} lines"
+else
+    echo "Watch  : interval=${INTERVAL}s, log tail=${TAIL} lines"
+fi
 echo
 
 # --------------------------------------------------------------------------
@@ -115,14 +126,19 @@ extract_run_id() {
 }
 
 # --------------------------------------------------------------------------
-# Watch CI
+# Watch CI (skipped in snapshot mode)
 # --------------------------------------------------------------------------
-echo "Watching CI (Ctrl-C to stop)..."
-echo
+if [[ $NO_WAIT -eq 1 ]]; then
+    echo "Snapshot mode: skipping --watch; reading current CI state."
+    echo
+else
+    echo "Watching CI (Ctrl-C to stop)..."
+    echo
 
-# `gh pr checks --watch` blocks until all checks complete. It exits non-zero
-# if any failed; we capture but don't propagate yet — we want to dump logs first.
-gh pr checks "$PR_NUMBER" --watch --interval "$INTERVAL" || true
+    # `gh pr checks --watch` blocks until all checks complete. It exits non-zero
+    # if any failed; we capture but don't propagate yet — we want to dump logs first.
+    gh pr checks "$PR_NUMBER" --watch --interval "$INTERVAL" || true
+fi
 
 # --------------------------------------------------------------------------
 # Final state
@@ -169,7 +185,11 @@ if [[ $FAIL_COUNT -eq 0 ]]; then
     echo
     echo "All non-pending checks passed."
     if [[ $PENDING_COUNT -gt 0 ]]; then
-        echo "Note: $PENDING_COUNT check(s) still pending (re-run watch_ci.sh to wait again)."
+        if [[ $NO_WAIT -eq 1 ]]; then
+            echo "Note: $PENDING_COUNT check(s) still pending; re-run without --no-wait to block until done."
+        else
+            echo "Note: $PENDING_COUNT check(s) still pending (re-run watch_ci.sh to wait again)."
+        fi
     fi
     exit 0
 fi

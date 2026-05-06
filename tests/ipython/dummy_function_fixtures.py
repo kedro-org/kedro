@@ -49,3 +49,19 @@ def same_module_helper(value):
 
 def dummy_function_using_same_module_helper(dummy_input):
     return same_module_helper(dummy_input)
+
+
+def invert_result(func):
+    def wrapper(value):
+        return not func(value)
+
+    return wrapper
+
+
+@invert_result
+def decorated_same_module_helper(value):
+    return value
+
+
+def dummy_function_using_decorated_helper(dummy_input):
+    return decorated_same_module_helper(dummy_input)

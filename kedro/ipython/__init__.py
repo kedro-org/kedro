@@ -591,8 +591,20 @@ def _build_dependency_source_block(
     ordered_nodes = sorted(nodes, key=lambda item: getattr(item, "lineno", 0))
     for node in ordered_nodes:
         try:
-            segment = ast.get_source_segment(module_source, node)
+            if (
+                isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef)
+                and node.decorator_list
+                and getattr(node, "end_lineno", None) is not None
+            ):
+                # AST source segments start at the def/class line; slice from the
+                # first decorator to preserve behavior from inspect.getsourcelines().
+                source_lines = module_source.splitlines(keepends=True)
+                start_line = min(decorator.lineno for decorator in node.decorator_list)
+                segment = "".join(source_lines[start_line - 1 : node.end_lineno])
+            else:
+                segment = ast.get_source_segment(module_source, node)
         except IndexError:
+            # Guard against stale/mismatched AST location metadata and source text.
             segment = None
         if segment:
             emitted_segments.append(segment.rstrip())

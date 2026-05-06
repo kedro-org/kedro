@@ -27,6 +27,7 @@ from kedro.pipeline import pipeline
 
 from .conftest import (
     dummy_function,
+    dummy_function_using_decorated_helper,
     dummy_function_with_loop,
     dummy_multiline_import_function,
     dummy_nested_function,
@@ -362,6 +363,15 @@ import logging.config  # noqa Dummy import"""
         namespace = {"catalog": Catalog()}
         exec(combined_cell, namespace)  # noqa: S102
 
+    def test_prepare_function_body_preserves_same_module_helper_decorators(self):
+        function_body = _prepare_function_body(dummy_function_using_decorated_helper)
+
+        assert "@invert_result" in function_body
+
+        namespace = {}
+        exec(function_body, namespace)  # noqa: S102
+        assert namespace["dummy_function_using_decorated_helper"](True) is False
+
     def test_find_node(self, dummy_pipelines, dummy_node):
         node_to_find = "dummy_node"
         result = _find_node(node_to_find, dummy_pipelines)
@@ -555,6 +565,19 @@ ERROR,
         node = ast.parse("x = 1").body[0]
 
         assert _build_dependency_source_block([node], "") is None
+
+    def test_prepare_function_body_fallback_when_dependency_source_segment_errors(
+        self, mocker, dummy_function_definition, caplog
+    ):
+        mocker.patch(
+            "kedro.ipython.ast.get_source_segment",
+            side_effect=IndexError("mismatched source metadata"),
+        )
+
+        result = _prepare_function_body(dummy_function)
+
+        assert result == dummy_function_definition
+        assert "could not render extracted AST nodes back to source." in caplog.text
 
     @pytest.mark.skip("lambda function is not supported yet.")
     def test_get_lambda_function_body(self, lambda_node):

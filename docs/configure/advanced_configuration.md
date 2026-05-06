@@ -44,7 +44,10 @@ from package_name.custom_configloader import CustomConfigLoader
 
 CONFIG_LOADER_CLASS = CustomConfigLoader
 ```
-
+Custom configuration loaders that do not subclass `OmegaConfigLoader`
+will not include OmegaConf-specific functionalities such as interpolation,
+globals, runtime parameters or custom resolvers. Access to these features
+requires subclassing `OmegaConfigLoader`.
 
 ### How to change which configuration files are loaded
 If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md).

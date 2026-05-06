@@ -69,12 +69,10 @@ def http_start(  # noqa: PLR0913
     The server exposes pipeline execution via HTTP endpoints, allowing
     external systems to trigger Kedro pipelines programmatically.
 
-    \b
     Endpoints:
       GET  /health  - Health check
       POST /run     - Execute a pipeline
 
-    \b
     Examples:
       kedro server start
       kedro server start --host 0.0.0.0 --port 8080

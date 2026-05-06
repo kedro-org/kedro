@@ -1,30 +1,10 @@
-"""Pydantic models and dataclasses for Kedro server request/response schemas."""
+"""Pydantic models for Kedro server request/response schemas."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
-
-
-@dataclass
-class PipelineExecutionError:
-    """Structured error information from a failed pipeline run."""
-
-    type: str
-    message: str
-    traceback: list[str] | None = None
-
-
-@dataclass
-class PipelineExecutionResult:
-    """Result of a pipeline execution attempt."""
-
-    run_id: str
-    status: Literal["success", "failure"]
-    duration_ms: float
-    error: PipelineExecutionError | None = None
 
 
 class RunRequest(BaseModel):
@@ -33,7 +13,6 @@ class RunRequest(BaseModel):
     Mirrors the parameters available in `kedro run` CLI command.
     """
 
-    # Pipeline selection
     from_inputs: list[str] | None = Field(
         default=None,
         description="A list of dataset names which should be used as a starting point.",

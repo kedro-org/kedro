@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from kedro.server.http_server import _execute_pipeline, create_http_server
-from kedro.server.models import PipelineExecutionError, PipelineExecutionResult
+from kedro.server.models import ErrorDetail, RunRequest, RunResponse
 
 
 class _FakeRunner:
@@ -124,7 +124,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mock_execute = mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=PipelineExecutionResult(
+            return_value=RunResponse(
                 run_id="run-1",
                 status="success",
                 duration_ms=10.0,
@@ -155,7 +155,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=PipelineExecutionResult(
+            return_value=RunResponse(
                 run_id="run-2",
                 status="success",
                 duration_ms=10.0,
@@ -187,7 +187,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=PipelineExecutionResult(
+            return_value=RunResponse(
                 run_id="run-3",
                 status="success",
                 duration_ms=10.0,
@@ -219,7 +219,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=PipelineExecutionResult(
+            return_value=RunResponse(
                 run_id="run-4",
                 status="success",
                 duration_ms=10.0,
@@ -257,11 +257,11 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=PipelineExecutionResult(
+            return_value=RunResponse(
                 run_id="run-fail",
                 status="failure",
                 duration_ms=12.34,
-                error=PipelineExecutionError(
+                error=ErrorDetail(
                     type="ValueError",
                     message="bad run",
                     traceback=["Traceback line"],
@@ -298,7 +298,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mock_execute = mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=PipelineExecutionResult(
+            return_value=RunResponse(
                 run_id="run-params",
                 status="success",
                 duration_ms=15.0,
@@ -320,10 +320,11 @@ class TestRunEndpoint:
         assert response.status_code == 200
         mock_execute.assert_called_once()
         call_kwargs = mock_execute.call_args[1]
-        assert call_kwargs["pipeline_names"] == ["my_pipeline"]
-        assert call_kwargs["params"] == {"learning_rate": 0.01}
-        assert call_kwargs["runner"] == "SequentialRunner"
-        assert call_kwargs["tags"] == ["training"]
+        request = call_kwargs["request"]
+        assert request.pipeline_names == ["my_pipeline"]
+        assert request.params == {"learning_rate": 0.01}
+        assert request.runner == "SequentialRunner"
+        assert request.tags == ["training"]
 
     def test_run_endpoint_passes_partial_parameters_to_execute_pipeline(
         self, mocker, tmp_path
@@ -341,7 +342,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mock_execute = mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=PipelineExecutionResult(
+            return_value=RunResponse(
                 run_id="run-partial",
                 status="success",
                 duration_ms=8.5,
@@ -362,9 +363,10 @@ class TestRunEndpoint:
         assert response.status_code == 200
         mock_execute.assert_called_once()
         call_kwargs = mock_execute.call_args[1]
-        assert call_kwargs["node_names"] == ["node1", "node2"]
-        assert call_kwargs["from_inputs"] == ["input_data"]
-        assert call_kwargs["is_async"] is True
+        request = call_kwargs["request"]
+        assert request.node_names == ["node1", "node2"]
+        assert request.from_inputs == ["input_data"]
+        assert request.is_async is True
 
 
 class TestExecutePipeline:
@@ -379,7 +381,7 @@ class TestExecutePipeline:
             return_value=mock_runner_factory,
         )
 
-        result = _execute_pipeline(session=mock_session)
+        result = _execute_pipeline(session=mock_session, request=RunRequest())
 
         assert result.status == "success"
         assert result.run_id is not None
@@ -402,8 +404,7 @@ class TestExecutePipeline:
 
         result = _execute_pipeline(
             session=mock_session,
-            runner="ParallelRunner",
-            is_async=True,
+            request=RunRequest(runner="ParallelRunner", is_async=True),
         )
 
         assert result.status == "success"
@@ -423,7 +424,7 @@ class TestExecutePipeline:
             return_value=lambda is_async: mock_runner,
         )
 
-        result = _execute_pipeline(session=mock_session)
+        result = _execute_pipeline(session=mock_session, request=RunRequest())
 
         assert result.status == "failure"
         assert result.run_id is not None
@@ -443,7 +444,7 @@ class TestExecutePipeline:
 
         result = _execute_pipeline(
             session=mock_session,
-            runner="UnknownRunner",
+            request=RunRequest(runner="UnknownRunner"),
         )
 
         assert result.status == "failure"
@@ -462,19 +463,21 @@ class TestExecutePipeline:
 
         result = _execute_pipeline(
             session=mock_session,
-            pipeline_names=["pipeline1", "pipeline2"],
-            params={"param1": "value1"},
-            runner="SequentialRunner",
-            is_async=False,
-            tags=["tag1", "tag2"],
-            node_names=["node1"],
-            from_nodes=["node2"],
-            to_nodes=["node3"],
-            from_inputs=["input1"],
-            to_outputs=["output1"],
-            load_versions={"dataset1": "2024-01-01"},
-            namespaces=["ns1"],
-            only_missing_outputs=True,
+            request=RunRequest(
+                pipeline_names=["pipeline1", "pipeline2"],
+                params={"param1": "value1"},
+                runner="SequentialRunner",
+                is_async=False,
+                tags=["tag1", "tag2"],
+                node_names=["node1"],
+                from_nodes=["node2"],
+                to_nodes=["node3"],
+                from_inputs=["input1"],
+                to_outputs=["output1"],
+                load_versions={"dataset1": "2024-01-01"},
+                namespaces=["ns1"],
+                only_missing_outputs=True,
+            ),
         )
 
         assert result.status == "success"
@@ -502,7 +505,9 @@ class TestExecutePipeline:
         )
         params = {"learning_rate": 0.01, "epochs": 100}
 
-        result = _execute_pipeline(session=mock_session, params=params)
+        result = _execute_pipeline(
+            session=mock_session, request=RunRequest(params=params)
+        )
 
         assert result.status == "success"
         call_kwargs = mock_session.run.call_args[1]
@@ -518,7 +523,9 @@ class TestExecutePipeline:
             return_value=lambda is_async: mock_runner,
         )
 
-        result = _execute_pipeline(session=mock_session, tags=["data", "training"])
+        result = _execute_pipeline(
+            session=mock_session, request=RunRequest(tags=["data", "training"])
+        )
 
         assert result.status == "success"
         call_kwargs = mock_session.run.call_args[1]
@@ -535,7 +542,9 @@ class TestExecutePipeline:
             return_value=lambda is_async: mock_runner,
         )
 
-        result = _execute_pipeline(session=mock_session, node_names=["node1", "node2"])
+        result = _execute_pipeline(
+            session=mock_session, request=RunRequest(node_names=["node1", "node2"])
+        )
 
         assert result.status == "success"
         call_kwargs = mock_session.run.call_args[1]
@@ -556,7 +565,7 @@ class TestExecutePipeline:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mock_execute = mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=PipelineExecutionResult(
+            return_value=RunResponse(
                 run_id="run-5",
                 status="success",
                 duration_ms=10.0,
@@ -586,16 +595,17 @@ class TestExecutePipeline:
         assert response.status_code == 200
         mock_execute.assert_called_once()
         call_kwargs = mock_execute.call_args[1]
-        assert call_kwargs["pipeline_names"] == ["pipeline1"]
-        assert call_kwargs["tags"] == ["tag1"]
-        assert call_kwargs["node_names"] == ["node1"]
-        assert call_kwargs["from_nodes"] == ["node2"]
-        assert call_kwargs["to_nodes"] == ["node3"]
-        assert call_kwargs["from_inputs"] == ["input1"]
-        assert call_kwargs["to_outputs"] == ["output1"]
-        assert call_kwargs["runner"] == "SequentialRunner"
-        assert call_kwargs["is_async"] is False
-        assert call_kwargs["load_versions"] == {"ds1": "2024-01-01"}
-        assert call_kwargs["namespaces"] == ["ns1"]
-        assert call_kwargs["params"] == {"param1": "value1"}
-        assert call_kwargs["only_missing_outputs"] is True
+        request = call_kwargs["request"]
+        assert request.pipeline_names == ["pipeline1"]
+        assert request.tags == ["tag1"]
+        assert request.node_names == ["node1"]
+        assert request.from_nodes == ["node2"]
+        assert request.to_nodes == ["node3"]
+        assert request.from_inputs == ["input1"]
+        assert request.to_outputs == ["output1"]
+        assert request.runner == "SequentialRunner"
+        assert request.is_async is False
+        assert request.load_versions == {"ds1": "2024-01-01"}
+        assert request.namespaces == ["ns1"]
+        assert request.params == {"param1": "value1"}
+        assert request.only_missing_outputs is True

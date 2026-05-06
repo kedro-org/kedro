@@ -49,14 +49,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     if settings.SESSION_CLASS is not KedroServiceSession:
         logger.warning(
-            "Kedro server is designed to work with KedroServiceSession. Using"
+            "The Kedro HTTP server is designed to work with KedroServiceSession. Not using the `SESSION_CLASS` specified in the settings.",
         )
 
     logger.info("Kedro server started successfully")
 
     yield
-    # Cleanup on shutdown (if needed in future)
     logger.info("Kedro server shutting down")
+    with app.state.session_lock:
+        if hasattr(app.state, "session"):
+            app.state.session.close()
 
 
 def create_http_server(

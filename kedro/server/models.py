@@ -10,7 +10,9 @@ from pydantic import BaseModel, Field
 class RunRequest(BaseModel):
     """Request model for pipeline execution.
 
-    Mirrors the parameters available in `kedro run` CLI command.
+    This model captures the parameters that can be sent in a request to the `/run` endpoint of the Kedro HTTP server.
+    Unlike the `kedro run` CLI command, `conf_source` and `env` are not included in this request model, as they are
+    expected to be set at the server level (e.g. via environment variables or server configuration) rather than per request.
     """
 
     from_inputs: list[str] | None = Field(
@@ -35,7 +37,7 @@ class RunRequest(BaseModel):
     )
     runner: str | None = Field(
         default=None,
-        description="Runner to use. Options: 'SequentialRunner', 'ParallelRunner', 'ThreadRunner'.",
+        description="Runner to use. Any importable subclass of `kedro.runner.AbstractRunner`.",
     )
     is_async: bool = Field(
         default=False,

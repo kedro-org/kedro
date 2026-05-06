@@ -10,6 +10,7 @@ import pytest
 from kedro.pipeline import node as kedro_node
 from kedro.validation.exceptions import ParameterValidationError
 from kedro.validation.parameter_validator import ParameterValidator
+from kedro.validation.type_extractor import ParamRequirement
 
 from .conftest import SampleDataclass, SamplePydanticModel
 
@@ -64,6 +65,27 @@ class TestApplyValidation:
 
         result = parameter_validator._apply_validation(raw, requirements)
         assert result == {"other_key": "value"}
+
+    def test_none_param_raises_when_not_optional(self, parameter_validator):
+        raw = {"model_options": None}
+        requirements = {"model_options": SamplePydanticModel}
+
+        with pytest.raises(
+            ParameterValidationError, match="Parameter validation failed"
+        ):
+            parameter_validator._apply_validation(raw, requirements)
+
+    def test_none_param_allowed_when_optional(self, parameter_validator):
+        raw = {"model_options": None}
+        requirements = {
+            "model_options": ParamRequirement(
+                expected_type=SamplePydanticModel,
+                allows_none=True,
+            )
+        }
+
+        result = parameter_validator._apply_validation(raw, requirements)
+        assert result["model_options"] is None
 
     def test_unsupported_type_returns_raw(self, parameter_validator):
         raw = {"threshold": 0.5}

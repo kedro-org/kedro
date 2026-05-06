@@ -8,7 +8,11 @@ from typing import Optional, Union
 from unittest.mock import MagicMock, patch
 
 from kedro.pipeline import node as kedro_node
-from kedro.validation.type_extractor import TypeExtractor, _type_name
+from kedro.validation.type_extractor import (
+    ParamRequirement,
+    TypeExtractor,
+    _type_name,
+)
 
 from .conftest import SampleDataclass, SamplePydanticModel
 
@@ -119,7 +123,7 @@ class TestExtractTypesFromPipelines:
         result = extractor.extract_types_from_pipelines()
 
         assert "eval_config" in result
-        assert result["eval_config"] == SampleDataclass
+        assert result["eval_config"].expected_type == SampleDataclass
 
     def test_conflicting_types_warns(self, caplog):
         """When two pipelines define different types for the same key, warn."""
@@ -170,7 +174,12 @@ class TestExtractTypesFromPipelines:
         )
 
         # Patch _extract_types_from_pipeline to return types without __name__
-        returns = iter([{"key": nameless_type}, {"key": _TypeA}])
+        returns = iter(
+            [
+                {"key": ParamRequirement(expected_type=nameless_type)},
+                {"key": ParamRequirement(expected_type=_TypeA)},
+            ]
+        )
         with patch.object(
             extractor,
             "_extract_types_from_pipeline",
@@ -234,11 +243,12 @@ class TestExtractTypesFromPipelines:
         result = extractor.extract_types_from_pipelines()
 
         assert "pydantic_cfg" in result
-        assert result["pydantic_cfg"] == SamplePydanticModel
+        assert result["pydantic_cfg"].expected_type == SamplePydanticModel
         assert "dc_cfg" in result
-        assert result["dc_cfg"] == SampleDataclass
+        assert result["dc_cfg"].expected_type == SampleDataclass
         assert "optional_cfg" in result
-        assert result["optional_cfg"] == SamplePydanticModel
+        assert result["optional_cfg"].expected_type == SamplePydanticModel
+        assert result["optional_cfg"].allows_none is True
         assert "threshold" not in result
         assert "union_cfg" not in result
 
@@ -277,7 +287,7 @@ class TestExtractTypesFromNode:
 
         result = type_extractor._extract_types_from_node(test_node)
         assert "model_options" in result
-        assert result["model_options"] == SamplePydanticModel
+        assert result["model_options"].expected_type == SamplePydanticModel
 
     def test_untyped_param_input(self, type_extractor):
         def my_func(data) -> None:
@@ -322,7 +332,7 @@ class TestExtractTypesFromNode:
 
         result = type_extractor._extract_types_from_node(node)
         assert "eval_config" in result
-        assert result["eval_config"] == SampleDataclass
+        assert result["eval_config"].expected_type == SampleDataclass
 
     def test_union_type_hint_skipped(self, type_extractor):
         def my_func(data: _UnionType) -> None:
@@ -353,7 +363,8 @@ class TestExtractTypesFromNode:
 
         result = type_extractor._extract_types_from_node(test_node)
         assert "config" in result
-        assert result["config"] == SamplePydanticModel
+        assert result["config"].expected_type == SamplePydanticModel
+        assert result["config"].allows_none is True
 
     def test_optional_dataclass_unwrapped(self, type_extractor):
         """Optional[Dataclass] should unwrap to Dataclass and be recorded."""
@@ -370,7 +381,8 @@ class TestExtractTypesFromNode:
 
         result = type_extractor._extract_types_from_node(test_node)
         assert "config" in result
-        assert result["config"] == SampleDataclass
+        assert result["config"].expected_type == SampleDataclass
+        assert result["config"].allows_none is True
 
     def test_builtin_type_hint_skipped(self, type_extractor):
         def my_func(data: int) -> None:

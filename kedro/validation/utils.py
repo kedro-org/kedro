@@ -43,13 +43,16 @@ def get_typed_fields(value: Any) -> dict[str, Any] | None:
     return None
 
 
-def resolve_nested_dict_path(data: dict, path: str) -> Any:
+MISSING = object()
+
+
+def resolve_nested_dict_path(data: dict, path: str, default: Any = None) -> Any:
     """Resolve a dot-separated path in a nested dictionary.
 
-    Returns None if any key in the path is missing.
+    Returns ``default`` if any key in the path is missing.
     """
     if "." not in path:
-        return data.get(path)
+        return data.get(path, default)
 
     keys = path.split(".")
     value = data
@@ -58,7 +61,7 @@ def resolve_nested_dict_path(data: dict, path: str) -> Any:
         if isinstance(value, dict) and key in value:
             value = value[key]
         else:
-            return None
+            return default
 
     return value
 

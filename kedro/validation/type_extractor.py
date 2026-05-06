@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _PARAMS_PREFIX = "params:"
+OPTIONAL_UNION_LEN = 2
 
 
 def _type_name(tp: type) -> str:
@@ -31,17 +32,26 @@ def _type_name(tp: type) -> str:
     return getattr(tp, "__name__", str(tp))
 
 
-def _unwrap_optional(tp: type) -> type:
+@dataclasses.dataclass(frozen=True)
+class ParamRequirement:
+    expected_type: type
+    allows_none: bool = False
+
+
+def _unwrap_optional(tp: type) -> tuple[type, bool]:
     """Unwrap ``Optional[X]`` / ``X | None`` to ``X``.
 
     If the type is a union of exactly one non-None type and ``NoneType``,
     return the non-None type. Otherwise return the original type unchanged.
     """
+    allows_none = False
     if get_origin(tp) is Union or isinstance(tp, types.UnionType):
-        args = [a for a in get_args(tp) if a is not type(None)]
-        if len(args) == 1:
-            return args[0]  # type: ignore[no-any-return]
-    return tp
+        args = get_args(tp)
+        non_none_args = [a for a in args if a is not type(None)]
+        if len(non_none_args) == 1 and len(args) == OPTIONAL_UNION_LEN:
+            allows_none = True
+            tp = non_none_args[0]
+    return tp, allows_none
 
 
 class TypeExtractor:
@@ -56,7 +66,7 @@ class TypeExtractor:
         self._pipelines = pipelines
         self._warned_union_types: set[type] = set()
 
-    def extract_types_from_pipelines(self) -> dict[str, type]:
+    def extract_types_from_pipelines(self) -> dict[str, ParamRequirement]:
         """Extract all type requirements from registered pipelines.
 
         Walks all pipelines (except ``__default__``) and inspects node
@@ -65,7 +75,7 @@ class TypeExtractor:
         Returns:
             Dictionary mapping parameter keys to their expected types.
         """
-        all_type_requirements: dict[str, type] = {}
+        all_type_requirements: dict[str, ParamRequirement] = {}
 
         for pipeline_name, pipeline in self._pipelines.items():
             if pipeline_name == "__default__":
@@ -76,16 +86,16 @@ class TypeExtractor:
             for key, new_type in pipeline_type_requirements.items():
                 if key in all_type_requirements:
                     existing_type = all_type_requirements[key]
-                    if existing_type != new_type:
+                    if existing_type.expected_type != new_type.expected_type:
                         logger.warning(
                             "Conflicting type requirements for parameter '%s': "
                             "%s (existing) vs %s (from pipeline '%s'). "
                             "Using %s.",
                             key,
-                            _type_name(existing_type),
-                            _type_name(new_type),
+                            _type_name(existing_type.expected_type),
+                            _type_name(new_type.expected_type),
                             pipeline_name,
-                            _type_name(new_type),
+                            _type_name(new_type.expected_type),
                         )
 
             all_type_requirements.update(pipeline_type_requirements)
@@ -96,9 +106,9 @@ class TypeExtractor:
         )
         return all_type_requirements
 
-    def _extract_types_from_pipeline(self, pipeline: Pipeline) -> dict[str, type]:
+    def _extract_types_from_pipeline(self, pipeline: Pipeline) -> dict[str, ParamRequirement]:
         """Extract type requirements from a single pipeline."""
-        type_requirements: dict[str, type] = {}
+        type_requirements: dict[str, ParamRequirement] = {}
 
         for node in getattr(pipeline, "nodes", []):
             node_type_requirements = self._extract_types_from_node(node)
@@ -106,7 +116,7 @@ class TypeExtractor:
 
         return type_requirements
 
-    def _extract_types_from_node(self, node: Node) -> dict[str, type]:
+    def _extract_types_from_node(self, node: Node) -> dict[str, ParamRequirement]:
         """Extract typed parameter requirements from a single node.
 
         Inspects the node's function signature and maps type-annotated
@@ -129,7 +139,7 @@ class TypeExtractor:
 
         dataset_to_arg = self._build_dataset_to_arg_mapping(node, sig)
 
-        all_requirements: dict[str, type] = {}
+        all_requirements: dict[str, ParamRequirement] = {}
 
         for ds_name, arg_name in dataset_to_arg.items():
             expected_type = type_hints.get(arg_name)
@@ -140,7 +150,7 @@ class TypeExtractor:
                 continue
 
             # Unwrap Optional[X] / X | None so we validate against the inner type
-            expected_type = _unwrap_optional(expected_type)
+            expected_type, allows_none = _unwrap_optional(expected_type)
 
             # Only record types we can actually validate (Pydantic models or dataclasses)
             if not (
@@ -164,7 +174,10 @@ class TypeExtractor:
                 continue
 
             param_key = ds_name.split(":", 1)[1]
-            all_requirements[param_key] = expected_type
+            all_requirements[param_key] = ParamRequirement(
+                expected_type=expected_type,
+                allows_none=allows_none,
+            )
             logger.debug(
                 "Found parameter requirement: %s -> %s",
                 param_key,

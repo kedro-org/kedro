@@ -7,6 +7,7 @@ NOTE: This session implementation is under active development and may occasional
 * Added inspection API to get project snapshot.
 
 ## Bug fixes and other changes
+* Fixed parameter validation for optional typed params so explicit `None` values are preserved and do not trigger validation errors.
 * Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
 * Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.

@@ -2,7 +2,7 @@
 
 Detailed reference for the `kedro-babysit` skill. Read sections selectively — use the section headers to find what you need.
 
-For the **invocation tracks** (Local-only / Targeted CI fix / Full PR sweep / Watch CI) and which workflow steps each track requires, see [SKILL.md](SKILL.md) section "How to invoke this skill". This reference does not duplicate that routing — it just provides the underlying recipes each step calls into.
+For the **invocation tracks** (L = Local dev / C = CI diagnosis & fix) and which workflow steps each track requires, see [SKILL.md](SKILL.md) section "How to invoke this skill". This reference does not duplicate that routing — it just provides the underlying recipes each step calls into.
 
 ---
 
@@ -67,7 +67,7 @@ If the PR touches `docs/` or `**.md`, also run:
 make install-docs-requirements   # uv pip install -e ".[docs]"
 ```
 
-The e2e CI job additionally runs `uv pip install pip` (see [.github/workflows/e2e-tests.yml line 37](../../../.github/workflows/e2e-tests.yml)). Add this if you plan to run `make e2e-tests` locally.
+**Note:** `e2e-tests` are not runnable through this skill (slow, require packaging the wheel, and out of scope for the babysit loop). If `e2e-tests` is the failing CI check, inspect the CI logs via `scripts/watch_ci.sh` and stop — local repro is not part of this skill.
 
 ### System tools
 
@@ -97,7 +97,7 @@ Canonical mapping of CI check name -> local invocation. The skill always prefers
 | ---------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `lint`                       | [lint.yml](../../../.github/workflows/lint.yml)                        | `make lint` (full sweep) **or** targeted recipes — see "Fast lint iteration" below | Runs `pre-commit run -a --hook-stage manual` (ruff, ruff-format, file hygiene, `lint-imports`, `detect-secrets` on changed files) + `mypy kedro --strict --allow-any-generics --no-warn-unused-ignores`. **3–5 min per run.** For per-failure iteration use `pre-commit run <hook> --files <changed>` or direct tool invocations (sub-second to ~10s). Fires on both code and docs PRs. |
 | `unit-tests`                 | [unit-tests.yml](../../../.github/workflows/unit-tests.yml)            | `make test`                                                | `pytest --numprocesses 4 --dist loadfile`. Coverage `fail_under = 100` enforced via `pyproject.toml`.              |
-| `e2e-tests`                  | [e2e-tests.yml](../../../.github/workflows/e2e-tests.yml)              | `make e2e-tests`                                           | `behave --tags=-skip`. Slow (~10+ min on one config). Opt-in locally via `run_local_checks.sh --with-e2e`.         |
+| `e2e-tests`                  | [e2e-tests.yml](../../../.github/workflows/e2e-tests.yml)              | **Out of scope locally** (would be `make e2e-tests`)       | `behave --tags=-skip`. Slow (~10+ min) and requires packaging the wheel. The skill does not run this — inspect CI logs via `watch_ci.sh` and ask the user how to proceed. |
 | `detect-secrets`             | [detect-secrets.yml](../../../.github/workflows/detect-secrets.yml)    | `git ls-files -z \| xargs -0 detect-secrets-hook --baseline .secrets.baseline` | **No Make target.** Full-tree scan. Differs from the pre-commit hook in `make lint` (which only checks changed files) and can fail in CI even when `make lint` is green. |
 | `docs-linkcheck`             | [docs-linkcheck.yml](../../../.github/workflows/docs-linkcheck.yml)    | `make linkcheck`                                           | `mkdocs build --strict` + `lychee --max-concurrency 32 --exclude "@.lycheeignore" site/`. Slow + needs network. Requires `lychee`. |
 | `docs-language-linter`       | [docs-language-linter.yml](../../../.github/workflows/docs-language-linter.yml) | `make language-lint dir=docs`                              | `vale docs`. **Non-blocking** — `merge-gatekeeper` ignores `runner / vale` (see [merge-gatekeeper.yml line 27](../../../.github/workflows/merge-gatekeeper.yml)). Requires `vale`. |
@@ -229,7 +229,7 @@ If the failure is real, fix it. If coverage drops below `fail_under = 100` (set 
 
 ### `e2e-tests` failure
 
-Run `make e2e-tests` locally. For faster iteration, `make e2e-tests-fast` runs with `BEHAVE_LOCAL_ENV=TRUE` and no output capture (see [Makefile lines 24-26](../../../Makefile)).
+**Out of scope for local repro.** The skill does not run e2e tests locally. Use `bash scripts/watch_ci.sh` to dump the failed-job logs from CI and share them with the user; ask whether they want to investigate locally (which is outside this skill's scope) or address the failure directly from the CI output.
 
 ### `detect-secrets` failure
 
@@ -280,9 +280,8 @@ gh pr view --json number,title,baseRefName,headRefName
 gh pr view --json mergeable,mergeStateStatus,headRefOid,files
 gh pr checks                                         # current CI status
 
-# Watch CI (used by watch_ci.sh)
-gh pr checks --watch --interval 30                   # poll until all complete
-gh pr checks --json name,bucket,workflow,link        # snapshot only (no wait); used by watch_ci.sh --no-wait
+# Snapshot CI (used by watch_ci.sh)
+gh pr checks --json name,bucket,workflow,link        # current state, non-blocking
 gh run list --branch <branch> --limit 20 --json databaseId,name,conclusion
 gh run view <id> --log-failed                        # dump only failed steps
 
@@ -290,7 +289,13 @@ gh run view <id> --log-failed                        # dump only failed steps
 gh pr checks                                         # re-check status
 ```
 
-### `watch_ci.sh` modes
+### `watch_ci.sh` behavior
 
-- **Default (block)**: `bash scripts/watch_ci.sh` — calls `gh pr checks --watch` and blocks until every check completes (10–40 min). Use for Track C (full PR sweep) and Track D (watch CI).
-- **Snapshot (`--no-wait`)**: `bash scripts/watch_ci.sh --no-wait` — skips the blocking watch and returns immediately with the current state plus failed-step logs for any check already in `bucket=fail`. Use for Track B when you want to know what's failing *right now* without waiting for in-progress checks to finish.
+`bash scripts/watch_ci.sh` is **snapshot-only** by design — it fetches the current CI state for the PR, dumps failed-step logs (last `--tail` lines, default 200) for any check already in `bucket=fail`, and exits. It does **not** block waiting for in-flight checks. To re-check later, just run it again.
+
+Flags:
+
+- `--pr <number-or-url>`: override PR detection from the current branch.
+- `--tail <N>`: lines of log to dump per failed run (default 200).
+
+This avoids long blocking sessions where the agent is idle waiting on CI. If the user wants to know when CI finishes, they re-invoke the skill.

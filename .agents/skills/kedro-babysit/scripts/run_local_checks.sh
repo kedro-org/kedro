@@ -5,13 +5,16 @@
 #   >>> <check name> (CI equivalent: <workflow>)
 # so failures cross-reference the GitHub Actions workflow that catches them.
 #
+# Scope is auto-detected from `git diff <base>...HEAD` unless overridden.
+# e2e-tests are intentionally NOT runnable through this script — they're slow,
+# require packaging the wheel, and are out of scope for the local babysit loop.
+# To debug an e2e failure, inspect the CI logs directly.
+#
 # Usage:
 #   bash run_local_checks.sh                 # auto-detect scope from `git diff`
 #   bash run_local_checks.sh --code          # lint + test + detect-secrets
 #   bash run_local_checks.sh --docs          # lint + linkcheck + language-lint
-#   bash run_local_checks.sh --all           # everything (code + docs + e2e)
-#   bash run_local_checks.sh --with-e2e      # add e2e-tests to the selected scope
-#   bash run_local_checks.sh --skip-slow     # drop test/e2e/linkcheck (fast loop)
+#   bash run_local_checks.sh --skip-slow     # drop test/linkcheck (fast loop)
 #   bash run_local_checks.sh --base <branch> # base branch for auto-detect
 #
 # Environment guard:
@@ -28,8 +31,7 @@ set -uo pipefail
 # --------------------------------------------------------------------------
 # Argument parsing
 # --------------------------------------------------------------------------
-SCOPE=""           # "code" | "docs" | "all" | "" (auto)
-WITH_E2E=0
+SCOPE=""           # "code" | "docs" | "code+docs" | "" (auto)
 SKIP_SLOW=0
 BASE_REF=""        # explicit --base; else auto-detect
 
@@ -37,8 +39,6 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --code)       SCOPE="code"; shift ;;
         --docs)       SCOPE="docs"; shift ;;
-        --all)        SCOPE="all"; shift ;;
-        --with-e2e)   WITH_E2E=1; shift ;;
         --skip-slow)  SKIP_SLOW=1; shift ;;
         --base)       BASE_REF="$2"; shift 2 ;;
         -h|--help)
@@ -124,8 +124,7 @@ auto_detect_scope() {
         esac
     done <<< "$files"
     if [[ $has_code -eq 1 && $has_docs -eq 1 ]]; then
-        # Mixed PR: CI runs both all-checks.yml AND docs-only-checks.yml,
-        # so locally we mirror that (e2e still opt-in).
+        # Mixed PR: CI runs both all-checks.yml AND docs-only-checks.yml; mirror that.
         echo "code+docs"
     elif [[ $has_docs -eq 1 ]]; then
         echo "docs"
@@ -136,7 +135,7 @@ auto_detect_scope() {
 
 if [[ -z "$SCOPE" ]]; then
     SCOPE="$(auto_detect_scope)"
-    echo "Auto-detected scope: $SCOPE  (override with --code / --docs / --all)"
+    echo "Auto-detected scope: $SCOPE  (override with --code / --docs)"
 fi
 
 # --------------------------------------------------------------------------
@@ -147,7 +146,6 @@ RUN_TEST=0
 RUN_DETECT_SECRETS=0
 RUN_LINKCHECK=0
 RUN_LANGUAGE_LINT=0
-RUN_E2E=0
 
 case "$SCOPE" in
     code)
@@ -160,18 +158,14 @@ case "$SCOPE" in
         RUN_LINT=1; RUN_TEST=1; RUN_DETECT_SECRETS=1
         RUN_LINKCHECK=1; RUN_LANGUAGE_LINT=1
         ;;
-    all)
-        RUN_LINT=1; RUN_TEST=1; RUN_DETECT_SECRETS=1
-        RUN_LINKCHECK=1; RUN_LANGUAGE_LINT=1
-        RUN_E2E=1
+    *)
+        echo "Error: invalid scope: $SCOPE" >&2
+        exit 64
         ;;
 esac
 
-[[ $WITH_E2E -eq 1 ]] && RUN_E2E=1
-
 if [[ $SKIP_SLOW -eq 1 ]]; then
     RUN_TEST=0
-    RUN_E2E=0
     RUN_LINKCHECK=0
 fi
 
@@ -224,7 +218,7 @@ detect_secrets_full_tree() {
 echo
 echo "Repo root : $REPO_ROOT"
 echo "Scope     : $SCOPE"
-echo "Modifiers : with-e2e=$WITH_E2E skip-slow=$SKIP_SLOW"
+echo "Modifiers : skip-slow=$SKIP_SLOW"
 echo "Active env: ${VIRTUAL_ENV:-${CONDA_PREFIX:-?}}"
 
 if [[ $RUN_LINT -eq 1 ]]; then
@@ -260,12 +254,6 @@ if [[ $RUN_LANGUAGE_LINT -eq 1 ]]; then
     fi
 fi
 
-if [[ $RUN_E2E -eq 1 ]]; then
-    run_check "make e2e-tests" "e2e-tests.yml" make e2e-tests
-elif [[ $WITH_E2E -eq 0 && "$SCOPE" != "docs" ]]; then
-    skip_check "make e2e-tests" "e2e-tests.yml" "opt-in only: pass --with-e2e or --all"
-fi
-
 # --------------------------------------------------------------------------
 # Summary
 # --------------------------------------------------------------------------
@@ -291,6 +279,9 @@ done
 
 echo
 echo "  Totals: $PASS_COUNT pass, $FAIL_COUNT fail, $SKIP_COUNT skip"
+echo
+echo "  Note: e2e-tests are not run locally by this script. To debug an e2e CI"
+echo "        failure, open the failing run via watch_ci.sh and inspect logs."
 
 # Cap exit code at 63 — env guard reserves 64.
 if [[ $FAIL_COUNT -gt 63 ]]; then

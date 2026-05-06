@@ -85,19 +85,31 @@ def _validate_datasets_exist(
     outputs = {_strip_transcoding(k) for k in outputs}
 
     existing = {_strip_transcoding(ds) for ds in pipe.datasets()}
-    non_existent = (inputs | outputs | parameters) - existing
-    if non_existent:
-        sorted_non_existent = sorted(non_existent)
-        possible_matches = get_close_matches(sorted_non_existent, existing)
+    missing_inputs = existing - (inputs | outputs | parameters)
+    extra_inputs = (inputs | outputs | parameters) - existing
+    if missing_inputs or extra_inputs:
+        sorted_missing = sorted(missing_inputs)
+        sorted_extra = sorted(extra_inputs)
+        possible_missing = get_close_matches(sorted_missing, existing)
+        possible_extra = get_close_matches(sorted_extra, existing)
 
-        error_msg = f"Failed to map datasets and/or parameters onto the nodes provided: {', '.join(sorted_non_existent)}"
-        suggestions = (
-            f" - did you mean one of these instead: {', '.join(possible_matches)}"
-            if possible_matches
-            else ""
-        )
-        raise PipelineError(error_msg + suggestions)
-
+        error_msg = ""
+    
+        if missing_inputs:
+            error_msg += (
+                f"Missing datasets/parameters: "
+                f"{', '.join(sorted_missing)}"
+            )
+    
+        if extra_inputs:
+            if error_msg:
+                error_msg += ". "
+    
+            error_msg += (
+                f"Extra datasets/parameters: "
+                f"{', '.join(sorted_extra)}"
+            )
+        raise PipelineError(error_msg)
 
 class OutputNotUniqueError(Exception):
     """Raised when two or more nodes that are part of the same pipeline

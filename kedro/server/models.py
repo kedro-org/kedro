@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RunRequest(BaseModel):
@@ -67,6 +67,9 @@ class RunRequest(BaseModel):
         default=False,
         description="Run only nodes with missing outputs. Skip nodes whose outputs already exist and are persisted.",
     )
+    model_config = ConfigDict(
+        extra="forbid"
+    )  # Forbid extra fields to prevent silent errors (conf_source and env should not be included in the request)
 
 
 class ErrorDetail(BaseModel):

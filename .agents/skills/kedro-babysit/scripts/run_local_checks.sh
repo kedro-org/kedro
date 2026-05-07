@@ -232,6 +232,15 @@ echo "Plan (the slow checks dominate total wall time):"
 [[ $RUN_DETECT_SECRETS -eq 1 ]] && echo "  - detect-secrets full tree  ~30s      (regex scan)"
 [[ $RUN_LINKCHECK      -eq 1 ]] && echo "  - make linkcheck            ~2-5 min  (mkdocs build + lychee, needs network)"
 [[ $RUN_LANGUAGE_LINT  -eq 1 ]] && echo "  - make language-lint        ~30s      (vale on docs/)"
+
+# Surface sandbox/permission requirements only for checks that actually need them,
+# so the calling agent can request elevation upfront and avoid a wasted retry.
+if [[ $RUN_TEST -eq 1 || $RUN_LINKCHECK -eq 1 ]]; then
+    echo
+    echo "Sandbox notes (request elevation upfront if running via a sandboxed shell):"
+    [[ $RUN_TEST      -eq 1 ]] && echo "  - make test       writes ~/.cookiecutter_replay/ outside the workspace (starters tests)."
+    [[ $RUN_LINKCHECK -eq 1 ]] && echo "  - make linkcheck  makes external HTTPS calls via lychee (needs network)."
+fi
 echo
 echo "Tip: each check streams its output as it runs — leave the terminal open"
 echo "     to watch progress (e.g. pytest dots, pre-commit hook headers, lychee URLs)."

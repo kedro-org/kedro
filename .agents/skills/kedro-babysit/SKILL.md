@@ -113,7 +113,7 @@ The Track C sub-bullets (Merge conflicts → CI failures → DCO sign-off) run i
    - For ruff/format: `ruff check --fix <file>` or `ruff format <file>` (sub-second).
    - For mypy: `mypy <file> --strict --allow-any-generics --no-warn-unused-ignores` (5–10s vs. 1–2 min).
    - For Import Linter: `lint-imports --config pyproject.toml` (it scans the whole project regardless — but skips pre-commit overhead).
-   - For unit tests: `pytest tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (~6 min for the full suite + 100% coverage check). **Never run `make test` during the fix loop** — pick the failing test path from the CI log and target it directly.
+   - For unit tests: `pytest tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (~6 min for the full suite + 100% coverage check). **Never run `make test` during the fix loop** — pick the failing test path from the CI log and target it directly. **Sandbox**: tests under `tests/framework/cli/starters/` write outside the workspace (cookiecutter replay files); request elevation upfront when running them. See [reference.md](reference.md) section "Sandbox & permissions".
 
    Full per-hook recipes in [reference.md](reference.md) section "Fast lint iteration". Track C does **not** run `scripts/run_local_checks.sh` here.
 6. Move to the next finding.
@@ -138,6 +138,8 @@ The script auto-detects scope from the changed files (`code`, `docs`, or `code+d
 - `code` only: **~10–12 min** (lint ~3-5 + test ~6 + detect-secrets ~30s)
 - `docs` only: **~5–10 min** (lint ~3-5 + linkcheck ~2-5 + language-lint ~30s)
 - `code+docs` (mixed PR): **~12–17 min** (everything above)
+
+**Request elevated shell permissions upfront** when invoking the script via a sandboxed shell tool. `make test` writes to `~/.cookiecutter_replay/` (cookiecutter starters tests) and `make linkcheck` makes external HTTPS calls — both will fail under the default sandbox and force a wasted retry. See [reference.md](reference.md) section "Sandbox & permissions" for the full table.
 
 The script prints the same plan + per-check duration estimates upfront before running, so the user can confirm they're happy to wait or background it. Tell the user to **leave the terminal open** — each check streams output as it runs (`make test` prints per-file dots; `make lint` prints `>>>>>>>> <hook name>` headers).
 

@@ -91,6 +91,26 @@ Docs checks that depend on missing system tools are reported as `[SKIP missing t
 
 ---
 
+## Sandbox & permissions
+
+Some commands the skill runs need to **write outside the workspace** or **make network calls**. If you're invoking them through a sandboxed shell tool (e.g. Cursor's `required_permissions`, Copilot's terminal approval), **request elevation upfront** to avoid a wasted first run that fails on a sandbox block and then has to be retried.
+
+| Command / script | Needs | Why |
+|---|---|---|
+| `make test` (full suite) | **`all`** (writes outside workspace) | `tests/framework/cli/starters/` calls real `cookiecutter()` which writes `~/.cookiecutter_replay/<template>.json`. There's no clean env-var override. |
+| `pytest tests/framework/cli/starters/...` | **`all`** | Same cookiecutter writes as above. |
+| Other targeted `pytest <path>` | default sandbox | Writes only to workspace + `.pytest_cache/`. |
+| `make lint` and per-hook recipes (`pre-commit run …`, `ruff …`, `mypy …`, `lint-imports`) | default sandbox | Writes only to workspace, `.mypy_cache/`, `.ruff_cache/`. |
+| `make linkcheck` (lychee) | **network** | Validates external HTTPS links. |
+| `make language-lint` (vale) | default sandbox | Local-only. |
+| `bash scripts/watch_ci.sh` | **network** | Calls GitHub API via `gh`. |
+| `bash scripts/bootstrap_env.sh` (install flow) | **network** (writes go to active venv inside workspace) | `make install-test-requirements` etc. fetch from PyPI. |
+| `bash scripts/run_local_checks.sh` | inherits the union of the above for whatever it plans to run | Specifically: `all` whenever `RUN_TEST=1`, network whenever `RUN_LINKCHECK=1`. |
+
+**Rule of thumb**: when the agent is about to invoke `make test`, full `pytest`, or `bash scripts/run_local_checks.sh` (with test in the plan), **always request `all` permissions upfront**. The cost of over-requesting is one approval click; the cost of under-requesting is a 6 min wasted test run.
+
+---
+
 ## CI-to-local mapping
 
 Canonical mapping of CI check name -> local invocation. The skill always prefers the Make target.

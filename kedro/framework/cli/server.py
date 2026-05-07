@@ -56,7 +56,7 @@ def server_cli() -> None:
     help="Path of a directory where project configuration is stored.",
 )
 @click.pass_obj
-def http_start(  # noqa: PLR0913
+def server_start(  # noqa: PLR0913
     metadata: ProjectMetadata,
     host: str,
     port: int,
@@ -79,18 +79,23 @@ def http_start(  # noqa: PLR0913
       kedro server start --reload
     """
     try:
+        import fastapi  # noqa: F401
         import uvicorn
     except ImportError as exc:
         raise KedroCliError(
-            "Kedro HTTP server requires 'uvicorn' and 'fastapi' packages. "
+            "Kedro HTTP server requires 'fastapi', 'pydantic', and 'uvicorn' packages. "
             "Install them with: pip install kedro[server]"
         ) from exc
 
     project_path = metadata.project_path
 
-    # Set environment variables for the server process
-    os.environ[KEDRO_PROJECT_PATH_ENV] = str(project_path)
+    # Unset env and conf-source to avoid re-using them from previous runs if not provided in the current command
+    if KEDRO_SERVER_ENV in os.environ:
+        del os.environ[KEDRO_SERVER_ENV]
+    if KEDRO_SERVER_CONF_SOURCE in os.environ:
+        del os.environ[KEDRO_SERVER_CONF_SOURCE]
 
+    os.environ[KEDRO_PROJECT_PATH_ENV] = str(project_path)
     if env:
         os.environ[KEDRO_SERVER_ENV] = env
 
@@ -98,11 +103,10 @@ def http_start(  # noqa: PLR0913
         os.environ[KEDRO_SERVER_CONF_SOURCE] = conf_source
 
     click.echo(f"Starting Kedro HTTP server for project at: {project_path}")
-    click.echo(f"Server running at: http://{host}:{port}")
+    click.echo(f"Starting server at: http://{host}:{port}")
     click.echo("Press CTRL+C to stop")
     click.echo()
 
-    # Start uvicorn programmatically
     uvicorn.run(
         "kedro.server.http_server:create_http_server",
         factory=True,
@@ -110,4 +114,5 @@ def http_start(  # noqa: PLR0913
         port=port,
         reload=reload,
         log_level="info",
+        **({"reload_dirs": [str(project_path)]} if reload else {}),
     )

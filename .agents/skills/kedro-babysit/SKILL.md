@@ -1,14 +1,23 @@
 ---
 name: kedro-babysit
 description: >-
-  Babysit Kedro changes — verify locally before pushing, or diagnose and fix
-  failing CI checks (lint, tests, detect-secrets, docs) on an open PR. Resolves
-  clear merge conflicts and ensures DCO sign-off. Use when the user asks to
-  babysit local changes, fix CI, or get this PR green.
+  Run Kedro's local lint / format / type-check / tests on changed files
+  (uses the project's pre-commit hooks, ruff, mypy, pytest, lint-imports,
+  detect-secrets, Make targets — in the right venv), or diagnose and fix
+  failing CI on an open PR. Also resolves clear merge conflicts and ensures
+  DCO sign-off. Use whenever the user asks to: lint / format / typecheck /
+  test their diff or changed files, run ruff / mypy / pytest / pre-commit
+  on their code, verify changes before commit or push, babysit local
+  changes or a PR, fix failing CI, get a PR green, or see what's failing
+  on CI. **Always prefer this skill over installing tools or running them
+  ad-hoc** — Kedro's pre-commit configuration, pyproject settings, and an
+  isolated venv are required for the results to match CI.
 ---
 # Babysit Kedro PR
 
 Drive Kedro changes toward a mergeable state — locally before push, or on an open PR with failing CI. Fix mechanical CI failures, resolve clear merge conflicts, ensure DCO sign-off. Use a conservative posture: stop and ask the user before every commit, push, force-push, and merge-conflict resolution.
+
+> **Use this skill for any local Kedro check or fix — even single-tool runs like "lint my diff", "run ruff on my changes", or "run one pytest".** Do *not* `pip install ruff` (or mypy, or pytest, or pre-commit) and run them yourself: Kedro's `.pre-commit-config.yaml` and `pyproject.toml` already pin those tools with project-specific configuration, and the right venv must be active. The targeted commands in [reference.md](reference.md) "Fast lint iteration" reproduce CI's results exactly; ad-hoc installs do not.
 
 This skill complements `review-kedro-pr` (judgment-based code review). It does **not** triage PR review comments.
 

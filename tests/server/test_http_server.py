@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from kedro.server import create_http_server as create_http_server_lazy
-from kedro.server.http_server import create_http_server
+from kedro.server.http_server import create_http_server, execute_pipeline
 from kedro.server.models import PipelineExecutionError, PipelineExecutionResult
 
 
@@ -238,3 +238,105 @@ class TestHTTPServer:
             "message": "bad run",
             "traceback": ["Traceback line"],
         }
+
+
+class TestExecutePipeline:
+    def test_execute_pipeline_success_returns_structured_result(self, mocker):
+        session = mocker.Mock()
+        mocker.patch(
+            "kedro.server.http_server.generate_timestamp", return_value="run-success"
+        )
+        mock_load_obj = mocker.patch(
+            "kedro.server.http_server.load_obj", return_value=_FakeRunner
+        )
+
+        result = execute_pipeline(
+            session=session,
+            pipeline_names=["__default__"],
+            params={"alpha": 1},
+            runner="ThreadRunner",
+            is_async=True,
+            tags=["t1"],
+            node_names=["n1"],
+            from_nodes=["fn"],
+            to_nodes=["tn"],
+            from_inputs=["fi"],
+            to_outputs=["to"],
+            load_versions={"ds": "2024-01-01"},
+            namespaces=["ns"],
+            only_missing_outputs=True,
+        )
+
+        assert isinstance(result, PipelineExecutionResult)
+        assert result.run_id == "run-success"
+        assert result.status == "success"
+        assert result.duration_ms >= 0
+        assert result.error is None
+
+        mock_load_obj.assert_called_once_with("ThreadRunner", "kedro.runner")
+        session.run.assert_called_once()
+        run_kwargs = session.run.call_args.kwargs
+        assert run_kwargs["run_id"] == "run-success"
+        assert run_kwargs["pipeline_names"] == ["__default__"]
+        assert run_kwargs["tags"] == ("t1",)
+        assert run_kwargs["node_names"] == ("n1",)
+        assert run_kwargs["from_nodes"] == ["fn"]
+        assert run_kwargs["to_nodes"] == ["tn"]
+        assert run_kwargs["from_inputs"] == ["fi"]
+        assert run_kwargs["to_outputs"] == ["to"]
+        assert run_kwargs["load_versions"] == {"ds": "2024-01-01"}
+        assert run_kwargs["namespaces"] == ["ns"]
+        assert run_kwargs["only_missing_outputs"] is True
+        assert run_kwargs["runtime_params"] == {"alpha": 1}
+        assert isinstance(run_kwargs["runner"], _FakeRunner)
+        assert run_kwargs["runner"].is_async is True
+
+    def test_execute_pipeline_defaults_to_sequential_runner(self, mocker):
+        session = mocker.Mock()
+        mocker.patch(
+            "kedro.server.http_server.generate_timestamp", return_value="run-default"
+        )
+        mock_load_obj = mocker.patch(
+            "kedro.server.http_server.load_obj", return_value=_FakeRunner
+        )
+
+        result = execute_pipeline(session=session)
+
+        assert result.status == "success"
+        mock_load_obj.assert_called_once_with("SequentialRunner", "kedro.runner")
+        run_kwargs = session.run.call_args.kwargs
+        assert run_kwargs["tags"] is None
+        assert run_kwargs["node_names"] is None
+        assert run_kwargs["runner"].is_async is False
+
+    def test_execute_pipeline_failure_returns_error_detail(self, mocker):
+        session = mocker.Mock()
+        session.run.side_effect = ValueError("boom")
+        mocker.patch(
+            "kedro.server.http_server.generate_timestamp", return_value="run-fail"
+        )
+        mocker.patch("kedro.server.http_server.load_obj", return_value=_FakeRunner)
+
+        result = execute_pipeline(session=session)
+
+        assert isinstance(result, PipelineExecutionResult)
+        assert result.run_id == "run-fail"
+        assert result.status == "failure"
+        assert result.duration_ms >= 0
+        assert isinstance(result.error, PipelineExecutionError)
+        assert result.error.type == "ValueError"
+        assert result.error.message == "boom"
+        assert isinstance(result.error.traceback, list)
+
+    def test_execute_pipeline_failure_falls_back_to_unknown_run_id(self, mocker):
+        session = mocker.Mock()
+        session.run.side_effect = RuntimeError("late failure")
+        mocker.patch("kedro.server.http_server.generate_timestamp", return_value=None)
+        mocker.patch("kedro.server.http_server.load_obj", return_value=_FakeRunner)
+
+        result = execute_pipeline(session=session)
+
+        assert result.run_id == "unknown"
+        assert result.status == "failure"
+        assert result.error is not None
+        assert result.error.type == "RuntimeError"

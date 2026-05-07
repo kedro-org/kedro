@@ -10,6 +10,7 @@ NOTE: This session implementation is under active development and may occasional
 * Added `catalog-config` AI agent skill and `AGENTS.md` to the project template so `kedro new` projects ship with catalog configuration guidance for Cursor, GitHub Copilot, Claude Code, and OpenAI Codex.
 * Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
+* Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
 
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.
@@ -18,6 +19,7 @@ NOTE: This session implementation is under active development and may occasional
 ## Community contributions
 
 * [jeevan6996](https://github.com/jeevan6996)
+* [Rahul Bansod](https://github.com/rahulbansod519)
 
 
 # Release 1.3.1

@@ -8,6 +8,7 @@ import re
 import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 import tomli_w
@@ -449,6 +450,44 @@ class TestKedroContext:
         assert "parameters" in result
         assert result["parameters"]["param1"] == 1
         patched.assert_called_once_with(pipeline_name=None)
+
+    def test_get_validated_params_scoped_to_existing_pipeline(
+        self, dummy_context, mocker
+    ):
+        """When ``pipeline_name`` matches a registered pipeline, only that
+        pipeline is forwarded to ``ParameterValidator``."""
+        from kedro.framework import project
+
+        fake_pipeline = MagicMock()
+        fake_pipeline.nodes = []
+        # Bypass the lazy registry load by populating ``_content`` directly;
+        # ``mocker.patch.dict`` would itself trigger ``_load_data``.
+        mocker.patch.object(
+            project.pipelines, "_content", {"data_science": fake_pipeline}
+        )
+        mocker.patch.object(project.pipelines, "_is_data_loaded", True)
+        validator_cls = mocker.patch(
+            "kedro.validation.parameter_validator.ParameterValidator"
+        )
+        validator_cls.return_value.validate_raw_params.return_value = {"foo": "bar"}
+
+        result = dummy_context._get_validated_params(pipeline_name="data_science")
+
+        assert result == {"foo": "bar"}
+        # Validator was constructed with only the target pipeline.
+        validator_cls.assert_called_once_with({"data_science": fake_pipeline})
+
+    def test_get_validated_params_unknown_pipeline_raises(self, dummy_context, mocker):
+        """An explicit pipeline name that isn't registered should raise."""
+        from kedro.framework import project
+
+        mocker.patch.object(
+            project.pipelines, "_content", {"data_science": MagicMock()}
+        )
+        mocker.patch.object(project.pipelines, "_is_data_loaded", True)
+
+        with pytest.raises(ValueError, match="Pipeline 'unknown' not found"):
+            dummy_context._get_validated_params(pipeline_name="unknown")
 
 
 @pytest.mark.parametrize(

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import threading
 import time
 import traceback
 from contextlib import asynccontextmanager
@@ -12,14 +13,13 @@ from typing import TYPE_CHECKING, Any
 from fastapi import FastAPI
 
 from kedro import __version__ as kedro_version
+from kedro.framework.project import settings
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
 from kedro.io.core import generate_timestamp
 from kedro.server.models import (
     ErrorDetail,
     HealthResponse,
-    PipelineExecutionError,
-    PipelineExecutionResult,
     RunRequest,
     RunResponse,
 )
@@ -34,8 +34,6 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from pathlib import Path
 
-    from .abstract_session import AbstractSession
-
 logger = logging.getLogger(__name__)
 
 
@@ -48,11 +46,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     project_path = app.state.project_path
     logger.info("Bootstrapping Kedro project at: %s", project_path)
     bootstrap_project(project_path)
+
+    if settings.SESSION_CLASS is not KedroServiceSession:
+        logger.warning(
+            "The Kedro HTTP server is designed to work with KedroServiceSession. Not using the `SESSION_CLASS` specified in the settings.",
+        )
+
     logger.info("Kedro server started successfully")
 
     yield
-    # Cleanup on shutdown (if needed in future)
     logger.info("Kedro server shutting down")
+    with app.state.session_lock:
+        if hasattr(app.state, "session"):
+            app.state.session.close()
 
 
 def create_http_server(
@@ -89,6 +95,7 @@ def create_http_server(
     app.state.default_env = resolved_env
     app.state.default_conf_source = resolved_conf_source
     app.state.project_path = _resolve_project_path(project_path)
+    app.state.session_lock = threading.Lock()
 
     @app.get("/health", response_model=HealthResponse, tags=["health"])
     async def health() -> HealthResponse:
@@ -104,34 +111,65 @@ def create_http_server(
         )
 
     @app.post("/run", response_model=RunResponse, tags=["pipeline"])
-    async def run_pipeline(request: RunRequest) -> RunResponse:
+    def run_pipeline(request: RunRequest) -> RunResponse:
         """Execute a Kedro pipeline.
 
-        This endpoint mirrors the behavior of `kedro run` CLI command.
-        First run request creates a new KedroServiceSession, and subsequent requests reuse it.
+        This endpoint accepts a `RunRequest` with parameters for pipeline execution,
+        runs the pipeline using the session, and returns a `RunResponse` with the result.
+        First run request creates a new `KedroServiceSession`, and subsequent requests reuse it.
+
         Args:
             request: Pipeline execution parameters.
 
         Returns:
-            RunResponse with run_id, status, duration, and optional error details.
+            `RunResponse` with run_id, status, duration, and optional error details.
         """
+        with app.state.session_lock:
+            if not hasattr(app.state, "session"):
+                app.state.session = KedroServiceSession.create(
+                    project_path=app.state.project_path,
+                    env=app.state.default_env,
+                    conf_source=app.state.default_conf_source,
+                )
 
-        # create a session and assign to app state if not already created
-        if not hasattr(app.state, "session"):
-            app.state.session = KedroServiceSession.create(
-                project_path=app.state.project_path,
-                env=app.state.default_env,
-                conf_source=app.state.default_conf_source,
-            )
+        return _execute_pipeline(session=app.state.session, request=request)
 
-        result = _execute_pipeline(
-            session=app.state.session,
+    return app
+
+
+def _execute_pipeline(
+    session: KedroServiceSession,
+    *,
+    request: RunRequest,
+) -> RunResponse:
+    """Execute a Kedro pipeline and return a structured result.
+
+    It receives a `KedroServiceSession` and a `RunRequest` as input, resolves
+    the runner, calls ``session.run()``, and returns a
+    `RunResponse`.
+
+    Args:
+        session: Kedro service session to use for pipeline execution.
+        request: Pipeline execution parameters.
+
+    Returns:
+        A `RunResponse` with run id, status, duration,
+        and optional error details.
+    """
+    run_id: str = generate_timestamp()
+    start_time = time.perf_counter()
+
+    try:
+        runner_name = request.runner or "SequentialRunner"
+        runner_class = load_obj(runner_name, "kedro.runner")
+        runner_obj = runner_class(is_async=request.is_async)
+
+        session.run(
+            run_id=run_id,
             pipeline_names=request.pipeline_names,
-            params=request.params,
-            runner=request.runner,
-            is_async=request.is_async,
-            tags=request.tags,
-            node_names=request.node_names,
+            tags=tuple(request.tags) if request.tags else None,
+            runner=runner_obj,
+            node_names=tuple(request.node_names) if request.node_names else None,
             from_nodes=request.from_nodes,
             to_nodes=request.to_nodes,
             from_inputs=request.from_inputs,
@@ -139,124 +177,35 @@ def create_http_server(
             load_versions=request.load_versions,
             namespaces=request.namespaces,
             only_missing_outputs=request.only_missing_outputs,
-        )
-        error_detail = None
-        if result.error:
-            error_detail = ErrorDetail(
-                type=result.error.type,
-                message=result.error.message,
-                traceback=result.error.traceback,
-            )
-
-        res = RunResponse(
-            run_id=result.run_id,
-            status=result.status,
-            duration_ms=result.duration_ms,
-            error=error_detail,
-        )
-        return res
-
-    return app
-
-
-def _execute_pipeline(  # noqa: PLR0913
-    session: AbstractSession,
-    *,
-    pipeline_names: list[str] | None = None,
-    params: dict[str, Any] | None = None,
-    runner: str | None = None,
-    is_async: bool = False,
-    tags: list[str] | None = None,
-    node_names: list[str] | None = None,
-    from_nodes: list[str] | None = None,
-    to_nodes: list[str] | None = None,
-    from_inputs: list[str] | None = None,
-    to_outputs: list[str] | None = None,
-    load_versions: dict[str, str] | None = None,
-    namespaces: list[str] | None = None,
-    only_missing_outputs: bool = False,
-) -> PipelineExecutionResult:
-    """Execute a Kedro pipeline and return a structured result.
-
-    This is the shared execution core used by both the HTTP and MCP
-    server interfaces.  It receives a `KedroServiceSession` as input , resolves
-    the runner, calls ``session.run()``, and returns a
-    `PipelineExecutionResult`.
-
-    Args:
-        session: Kedro service session to use for pipeline execution.
-        pipeline_names: List of pipeline names (mutually exclusive with
-            *pipeline*).  When *pipeline* is given it is normalised into
-            this list internally.
-        params: Runtime parameters for the pipeline context.
-        runner: Runner class name: ``'SequentialRunner'``,
-            ``'ParallelRunner'``, ``'ThreadRunner'``.
-        is_async: Load/save node inputs and outputs asynchronously.
-        tags: Run only nodes with these tags.
-        node_names: Run only these specific nodes.
-        from_nodes: Start execution from these nodes.
-        to_nodes: Stop execution at these nodes.
-        from_inputs: Start from nodes that produce these datasets.
-        to_outputs: Stop at nodes that produce these datasets.
-        load_versions: Pin specific dataset versions (name → timestamp).
-        namespaces: Run only nodes within these namespaces.
-        only_missing_outputs: Skip nodes whose outputs already exist.
-
-    Returns:
-        A `PipelineExecutionResult` with run id, status, duration,
-        and optional error details.
-    """
-    start_time = time.perf_counter()
-    run_id: str | None = generate_timestamp()
-
-    try:
-        runner_name = runner or "SequentialRunner"
-        runner_class = load_obj(runner_name, "kedro.runner")
-        runner_obj = runner_class(is_async=is_async)
-
-        session.run(
-            run_id=run_id,
-            pipeline_names=pipeline_names,
-            tags=tuple(tags) if tags else None,
-            runner=runner_obj,
-            node_names=tuple(node_names) if node_names else None,
-            from_nodes=from_nodes,
-            to_nodes=to_nodes,
-            from_inputs=from_inputs,
-            to_outputs=to_outputs,
-            load_versions=load_versions,
-            namespaces=namespaces,
-            only_missing_outputs=only_missing_outputs,
-            runtime_params=params,
+            runtime_params=request.params,
         )
 
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.info("Pipeline run %s completed in %.2fms", run_id, duration_ms)
-        response = PipelineExecutionResult(
-            run_id=run_id or "unknown",
+        return RunResponse(
+            run_id=run_id,
             status="success",
             duration_ms=round(duration_ms, 2),
         )
-        return response
 
     except Exception as exc:
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.error(
             "Pipeline run %s failed: %s",
-            run_id or "unknown",
+            run_id,
             str(exc),
             exc_info=True,
         )
 
-        error = PipelineExecutionError(
+        error_detail = ErrorDetail(
             type=type(exc).__qualname__,
             message=str(exc),
             traceback=traceback.format_tb(exc.__traceback__),
         )
 
-        return PipelineExecutionResult(
-            run_id=run_id or "unknown",
+        return RunResponse(
+            run_id=run_id,
             status="failure",
             duration_ms=round(duration_ms, 2),
-            error=error,
+            error=error_detail,
         )

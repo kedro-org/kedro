@@ -238,7 +238,7 @@ echo "Plan (the slow checks dominate total wall time):"
 if [[ $RUN_TEST -eq 1 || $RUN_LINKCHECK -eq 1 ]]; then
     echo
     echo "Sandbox notes (request elevation upfront if running via a sandboxed shell):"
-    [[ $RUN_TEST      -eq 1 ]] && echo "  - make test       writes ~/.cookiecutter_replay/ outside the workspace (starters tests)."
+    [[ $RUN_TEST      -eq 1 ]] && echo "  - make test       writes ~/.cookiecutter_replay/ outside the workspace (shared CLI test fixture)."
     [[ $RUN_LINKCHECK -eq 1 ]] && echo "  - make linkcheck  makes external HTTPS calls via lychee (needs network)."
 fi
 echo

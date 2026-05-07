@@ -69,8 +69,6 @@ If the PR touches `docs/` or `**.md`, also run:
 make install-docs-requirements   # uv pip install -e ".[docs]"
 ```
 
-**Note:** `e2e-tests` are not runnable through this skill (slow, require packaging the wheel, and out of scope for the babysit loop). If `e2e-tests` is the failing CI check, inspect the CI logs via `scripts/watch_ci.sh` and stop — local repro is not part of this skill.
-
 ### System tools
 
 Three external tools may be required depending on what checks run:
@@ -93,21 +91,16 @@ Docs checks that depend on missing system tools are reported as `[SKIP missing t
 
 ## Sandbox & permissions
 
-Some commands the skill runs need to **write outside the workspace** or **make network calls**. If you're invoking them through a sandboxed shell tool (e.g. Cursor's `required_permissions`, Copilot's terminal approval), **request elevation upfront** to avoid a wasted first run that fails on a sandbox block and then has to be retried.
+When invoking the commands below through a sandboxed shell tool (Cursor's `required_permissions`, Copilot's terminal approval, etc.), **request the listed permissions upfront** — guessing wrong wastes a run.
 
-| Command / script | Needs | Why |
-|---|---|---|
-| `make test` (full suite) | **`all`** (writes outside workspace) | `tests/framework/cli/starters/` calls real `cookiecutter()` which writes `~/.cookiecutter_replay/<template>.json`. There's no clean env-var override. |
-| `pytest tests/framework/cli/starters/...` | **`all`** | Same cookiecutter writes as above. |
-| Other targeted `pytest <path>` | default sandbox | Writes only to workspace + `.pytest_cache/`. |
-| `make lint` and per-hook recipes (`pre-commit run …`, `ruff …`, `mypy …`, `lint-imports`) | default sandbox | Writes only to workspace, `.mypy_cache/`, `.ruff_cache/`. |
-| `make linkcheck` (lychee) | **network** | Validates external HTTPS links. |
-| `make language-lint` (vale) | default sandbox | Local-only. |
-| `bash scripts/watch_ci.sh` | **network** | Calls GitHub API via `gh`. |
-| `bash scripts/bootstrap_env.sh` (install flow) | **network** (writes go to active venv inside workspace) | `make install-test-requirements` etc. fetch from PyPI. |
-| `bash scripts/run_local_checks.sh` | inherits the union of the above for whatever it plans to run | Specifically: `all` whenever `RUN_TEST=1`, network whenever `RUN_LINKCHECK=1`. |
+| Command | Permissions |
+|---|---|
+| `make test`, `pytest …` (any path) | **`all`** |
+| `make linkcheck`, `bash scripts/watch_ci.sh`, `bash scripts/bootstrap_env.sh` (install flow) | **`network`** |
+| `make lint`, per-hook recipes (`pre-commit run …`, `ruff …`, `mypy …`, `lint-imports`), `make language-lint` | default |
+| `bash scripts/run_local_checks.sh` | union of the above based on the plan it prints |
 
-**Rule of thumb**: when the agent is about to invoke `make test`, full `pytest`, or `bash scripts/run_local_checks.sh` (with test in the plan), **always request `all` permissions upfront**. The cost of over-requesting is one approval click; the cost of under-requesting is a 6 min wasted test run.
+**Rule for `pytest`**: always `all`, regardless of which path or test method you're targeting. Kedro's shared CLI test fixtures invoke `cookiecutter` during fixture setup, which writes `~/.cookiecutter_replay/<template>.json` outside the workspace. Some narrow paths (`tests/io/...`, `tests/runner/...`) don't strictly need it, but the cost of an unnecessary approval click is trivial vs. wasting a 6-min test run on a sandbox block.
 
 ---
 
@@ -117,9 +110,9 @@ Canonical mapping of CI check name -> local invocation. The skill always prefers
 
 | CI check                     | Workflow file                                                          | Local command                                              | Notes                                                                                                              |
 | ---------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `lint`                       | [lint.yml](../../../.github/workflows/lint.yml)                        | `make lint` (full sweep) **or** targeted recipes — see "Fast lint iteration" below | Runs `pre-commit run -a --hook-stage manual` (ruff, ruff-format, file hygiene, `lint-imports`, `detect-secrets` on changed files) + `mypy kedro --strict --allow-any-generics --no-warn-unused-ignores`. **3–5 min per run.** For per-failure iteration use `pre-commit run <hook> --files <changed>` or direct tool invocations (sub-second to ~10s). Fires on both code and docs PRs. |
-| `unit-tests`                 | [unit-tests.yml](../../../.github/workflows/unit-tests.yml)            | `make test`                                                | `pytest --numprocesses 4 --dist loadfile`. Coverage `fail_under = 100` enforced via `pyproject.toml`.              |
-| `e2e-tests`                  | [e2e-tests.yml](../../../.github/workflows/e2e-tests.yml)              | **Out of scope locally** (would be `make e2e-tests`)       | `behave --tags=-skip`. Slow (~10+ min) and requires packaging the wheel. The skill does not run this — inspect CI logs via `watch_ci.sh` and ask the user how to proceed. |
+| `lint`                       | [lint.yml](../../../.github/workflows/lint.yml)                        | `make lint` (full sweep, 3–5 min) **or** targeted recipes  | See "Fast lint iteration" below. Fires on both code and docs PRs.                                                  |
+| `unit-tests`                 | [unit-tests.yml](../../../.github/workflows/unit-tests.yml)            | `make test` (~6 min)                                       | See cookbook entry "`unit-tests` failure" below. Coverage `fail_under = 100` enforced via `pyproject.toml`.        |
+| `e2e-tests`                  | [e2e-tests.yml](../../../.github/workflows/e2e-tests.yml)              | **Out of scope locally** (would be `make e2e-tests`)       | See cookbook entry "`e2e-tests` failure" below.                                                                    |
 | `detect-secrets`             | [detect-secrets.yml](../../../.github/workflows/detect-secrets.yml)    | `git ls-files -z \| xargs -0 detect-secrets-hook --baseline .secrets.baseline` | **No Make target.** Full-tree scan. Differs from the pre-commit hook in `make lint` (which only checks changed files) and can fail in CI even when `make lint` is green. |
 | `docs-linkcheck`             | [docs-linkcheck.yml](../../../.github/workflows/docs-linkcheck.yml)    | `make linkcheck`                                           | `mkdocs build --strict` + `lychee --max-concurrency 32 --exclude "@.lycheeignore" site/`. Slow + needs network. Requires `lychee`. |
 | `docs-language-linter`       | [docs-language-linter.yml](../../../.github/workflows/docs-language-linter.yml) | `make language-lint dir=docs`                              | `vale docs`. **Non-blocking** — `merge-gatekeeper` ignores `runner / vale` (see [merge-gatekeeper.yml line 27](../../../.github/workflows/merge-gatekeeper.yml)). Requires `vale`. |
@@ -217,7 +210,7 @@ Run the full sweep when:
 
 ## Common CI failures and fixes
 
-Short cookbook keyed by CI check. **Fast verify commands for all `lint` sub-cases (ruff, ruff-format, lint-imports, mypy) live in the [Per-hook recipes](#per-hook-recipes) table above** — no separate cookbook entry is needed for plain ruff/ruff-format. The entries below cover non-lint failures plus the lint cases that need extra context (contracts, config, baselines). Reserve `make lint` / `make test` for the final pre-push check.
+Short cookbook keyed by CI check. Fast-verify commands for all `lint` sub-cases (ruff, ruff-format, lint-imports, mypy) live in the [Per-hook recipes](#per-hook-recipes) table above — the entries below cover non-lint failures plus the lint cases that need extra context (contracts, config, baselines).
 
 ### `lint` — `lint-imports` (Import Linter) failure
 
@@ -235,9 +228,9 @@ Fast verify is in the per-hook recipes table. Add type annotations or stubs. The
 
 ### `unit-tests` failure
 
-Fast verify: `pytest tests/path/to/test_thing.py::TestClass::test_method` (single test, sub-second to seconds), or `pytest tests/path/to/test_module.py` (single file). Use `make test` only for the full suite + coverage check before push — it runs `pytest --numprocesses 4 --dist loadfile` across the whole tree, **~6 min wall-clock**. Pre-warn the user before invoking it.
+Fast verify: `pytest tests/path/to/test_thing.py::TestClass::test_method` (single test, sub-second to seconds), or `pytest tests/path/to/test_module.py` (single file).
 
-If the failure is real, fix it. If coverage drops below `fail_under = 100` (set in [pyproject.toml line 129](../../../pyproject.toml)), add unit tests for the new lines — coverage is enforced strictly. Coverage is checked by `make test`, not by `pytest <specific-test>`, so the final `make test` run after targeted iteration is mandatory.
+If the failure is real, fix it. If coverage drops below `fail_under = 100` (set in [pyproject.toml line 129](../../../pyproject.toml)), add unit tests for the new lines — coverage is enforced strictly. Coverage is checked by `make test`, not by `pytest <specific-test>`, so the final `make test` run after targeted iteration is mandatory (~6 min wall-clock — pre-warn the user).
 
 ### `e2e-tests` failure
 

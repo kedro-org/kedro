@@ -32,10 +32,8 @@ This skill complements `review-kedro-pr` (judgment-based code review). It does *
 
 ### Picking the right track
 
-- **Track L** = user is iterating on uncommitted/unpushed changes and wants to know if they pass before pushing. No PR involvement.
-- **Track C** = a PR exists and CI is red (or the user wants to diagnose what CI thinks). Always starts by snapshotting CI state via `scripts/watch_ci.sh`.
 - **If "babysit this PR" is the only signal**, default to Track C (a PR is implied).
-- **If intent is unclear**, ask once: *"Verify your local changes before pushing (no PR), or diagnose and fix failing CI on an open PR?"* Pick a track **before** invoking any script.
+- **If intent is ambiguous**, ask once: *"Verify your local changes before pushing (no PR), or diagnose and fix failing CI on an open PR?"* Pick a track **before** invoking any script.
 - **For very narrow Track L asks** ("just lint my diff", "just run ruff on my changes"), skip Step 5a and run the targeted command from Step 4 directly — there's no need for a full-sweep discovery pass.
 
 Each step header below is annotated with the tracks that need it (e.g. `Tracks: L, C`). Skip a step if your track is not listed.
@@ -104,7 +102,7 @@ The Track C sub-bullets (Merge conflicts → CI failures → DCO sign-off) run i
 **Merge conflicts** (Track C). If `mergeStateStatus` is `DIRTY` or `BEHIND`, sync with the base branch. Resolve conflicts only when the intent is unambiguous; otherwise stop and ask the user.
 
 **CI failures** (Track C). For each failing check:
-1. Look up the local invocation in [reference.md](reference.md) section "CI-to-local mapping". **Note:** `e2e-tests` are intentionally not runnable locally through this skill — if e2e is failing, share the CI logs from `watch_ci.sh` and ask the user how to proceed.
+1. Look up the local invocation in [reference.md](reference.md) section "CI-to-local mapping" (and the cookbook entry below it for `e2e-tests`, which is intentionally out of scope locally).
 2. The failed-job logs were already dumped by `watch_ci.sh` in Step 3. If the snapshot is stale (e.g., new check runs completed since Step 3), re-run `bash scripts/watch_ci.sh` for a fresh snapshot.
 3. Propose the smallest scoped fix using [reference.md](reference.md) section "Common CI failures and fixes".
 4. Apply the fix to the working tree only (no `git add` / `git commit`).
@@ -113,14 +111,14 @@ The Track C sub-bullets (Merge conflicts → CI failures → DCO sign-off) run i
    - For ruff/format: `ruff check --fix <file>` or `ruff format <file>` (sub-second).
    - For mypy: `mypy <file> --strict --allow-any-generics --no-warn-unused-ignores` (5–10s vs. 1–2 min).
    - For Import Linter: `lint-imports --config pyproject.toml` (it scans the whole project regardless — but skips pre-commit overhead).
-   - For unit tests: `pytest tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (~6 min for the full suite + 100% coverage check). **Never run `make test` during the fix loop** — pick the failing test path from the CI log and target it directly. **Sandbox**: tests under `tests/framework/cli/starters/` write outside the workspace (cookiecutter replay files); request elevation upfront when running them. See [reference.md](reference.md) section "Sandbox & permissions".
+   - For unit tests: `pytest tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (~6 min for the full suite + 100% coverage check). **Never run `make test` during the fix loop** — pick the failing test path from the CI log and target it directly. **Sandbox: always request `all` permissions when running any `pytest` in this repo** (see [reference.md](reference.md) section "Sandbox & permissions").
 
    Full per-hook recipes in [reference.md](reference.md) section "Fast lint iteration". Track C does **not** run `scripts/run_local_checks.sh` here.
 6. Move to the next finding.
 
 **DCO sign-off** (Track C). List commits without `Signed-off-by:`. Apply one of the recipes from [reference.md](reference.md) section "DCO sign-off recipes" (typically `git rebase <base> --signoff` for older commits). Ask the user before amending; **explicitly warn that amend requires a force-push** (`git push --force-with-lease`).
 
-**Local-only failures** (Track L). Track L drives this loop from the output of Step 5a's full sweep. When `run_local_checks.sh` reports a FAIL, identify the failing hook from its output and verify the fix with the targeted command above — *not* by re-running the full `run_local_checks.sh` sweep after every iteration. Re-run the full sweep only as the final check before commit (Step 5a).
+**Local-only failures** (Track L). Track L drives this loop from the output of Step 5a's full sweep — apply the same targeted-command flow as above for each FAIL.
 
 ### 5. Verify locally → commit + push
 
@@ -139,13 +137,11 @@ The script auto-detects scope from the changed files (`code`, `docs`, or `code+d
 - `docs` only: **~5–10 min** (lint ~3-5 + linkcheck ~2-5 + language-lint ~30s)
 - `code+docs` (mixed PR): **~12–17 min** (everything above)
 
-**Request elevated shell permissions upfront** when invoking the script via a sandboxed shell tool. `make test` writes to `~/.cookiecutter_replay/` (cookiecutter starters tests) and `make linkcheck` makes external HTTPS calls — both will fail under the default sandbox and force a wasted retry. See [reference.md](reference.md) section "Sandbox & permissions" for the full table.
+**Request `all` permissions upfront** when invoking via a sandboxed shell tool — the script's plan typically includes `make test` and/or `make linkcheck`, which need `all` and `network` respectively (see [reference.md](reference.md) section "Sandbox & permissions").
 
 The script prints the same plan + per-check duration estimates upfront before running, so the user can confirm they're happy to wait or background it. Tell the user to **leave the terminal open** — each check streams output as it runs (`make test` prints per-file dots; `make lint` prints `>>>>>>>> <hook name>` headers).
 
-Show the user the per-check pass/fail/skip summary at the end. Any FAILs feed back into Step 4's local-fix loop.
-
-**Important — iterate with targeted commands, not the full sweep.** `run_local_checks.sh` calls `make lint` which runs every pre-commit hook on every file plus mypy on the entire `kedro/` package (3–5 min) **and** `make test` which runs the whole pytest suite + coverage check (~6 min). For each FAIL, identify the failing hook/test and use the targeted recipe from [reference.md](reference.md) section "Fast lint iteration" (seconds, not minutes). Re-run `run_local_checks.sh` only as the **final** belt-and-suspenders check once all targeted recipes pass.
+Show the user the per-check pass/fail/skip summary at the end. Any FAILs feed into Step 4's targeted fix loop — re-run `run_local_checks.sh` only as the final belt-and-suspenders check once all targeted recipes pass.
 
 **Track C skips 5a entirely** — per-check verification already happened in Step 4 for the specific failing checks; running the full sweep would be redundant and slow.
 

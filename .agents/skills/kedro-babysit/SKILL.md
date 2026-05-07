@@ -35,6 +35,7 @@ This skill complements `review-kedro-pr` (judgment-based code review). It does *
 - **If "babysit this PR" is the only signal**, default to Track C (a PR is implied).
 - **If intent is ambiguous**, ask once: *"Verify your local changes before pushing (no PR), or diagnose and fix failing CI on an open PR?"* Pick a track **before** invoking any script.
 - **For very narrow Track L asks** ("just lint my diff", "just run ruff on my changes"), skip Step 5a and run the targeted command from Step 4 directly — there's no need for a full-sweep discovery pass.
+- **Announce the chosen track in one line before invoking any step** (e.g. *"Picking Track L — no PR signal."*), so the user can redirect.
 
 Each step header below is annotated with the tracks that need it (e.g. `Tracks: L, C`). Skip a step if your track is not listed.
 

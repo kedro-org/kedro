@@ -68,11 +68,12 @@ def server_start(  # noqa: PLR0913
 
     The server exposes pipeline execution via HTTP endpoints, allowing
     external systems to trigger Kedro pipelines programmatically.
-
+    \b
     Endpoints:
       GET  /health  - Health check
       POST /run     - Execute a pipeline
 
+    \b
     Examples:
       kedro server start
       kedro server start --host 0.0.0.0 --port 8080
@@ -81,6 +82,7 @@ def server_start(  # noqa: PLR0913
     try:
         import fastapi  # noqa: F401
         import uvicorn
+
     except ImportError as exc:
         raise KedroCliError(
             "Kedro HTTP server requires 'fastapi', 'pydantic', and 'uvicorn' packages. "
@@ -113,6 +115,6 @@ def server_start(  # noqa: PLR0913
         host=host,
         port=port,
         reload=reload,
+        reload_dirs=[str(project_path)] if reload else None,
         log_level="info",
-        **({"reload_dirs": [str(project_path)]} if reload else {}),
     )

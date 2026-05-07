@@ -29,6 +29,7 @@ class TestServerCommand:
             host=DEFAULT_HOST,
             port=DEFAULT_HTTP_PORT,
             reload=False,
+            reload_dirs=None,
             log_level="info",
         )
 
@@ -71,8 +72,8 @@ class TestServerCommand:
             host="2.2.2.2",  # Random address to ensure options are passed through
             port=9000,
             reload=True,
+            reload_dirs=[str(fake_metadata.project_path)],
             log_level="info",
-            **{"reload_dirs": [str(fake_metadata.project_path)]},
         )
 
     def test_raises_helpful_error_when_uvicorn_is_missing(

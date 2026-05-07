@@ -104,7 +104,7 @@ The Track C sub-bullets (Merge conflicts → CI failures → DCO sign-off) run i
    - For ruff/format: `ruff check --fix <file>` or `ruff format <file>` (sub-second).
    - For mypy: `mypy <file> --strict --allow-any-generics --no-warn-unused-ignores` (5–10s vs. 1–2 min).
    - For Import Linter: `lint-imports --config pyproject.toml` (it scans the whole project regardless — but skips pre-commit overhead).
-   - For unit tests: `pytest tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (full suite, several min).
+   - For unit tests: `pytest tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (~6 min for the full suite + 100% coverage check). **Never run `make test` during the fix loop** — pick the failing test path from the CI log and target it directly.
 
    Full per-hook recipes in [reference.md](reference.md) section "Fast lint iteration". Track C does **not** run `scripts/run_local_checks.sh` here.
 6. Move to the next finding.
@@ -123,9 +123,18 @@ Two sub-steps. Run the ones your track requires.
 bash scripts/run_local_checks.sh
 ```
 
-The script auto-detects scope from the changed files (`code`, `docs`, or `code+docs`). It refuses to run if no isolated env is active. Show the user the per-check pass/fail/skip summary. Any FAILs feed back into Step 4's local-fix loop.
+The script auto-detects scope from the changed files (`code`, `docs`, or `code+docs`). It refuses to run if no isolated env is active.
 
-**Important — iterate with targeted commands, not the full sweep.** `run_local_checks.sh` calls `make lint` which runs every pre-commit hook on every file plus mypy on the entire `kedro/` package (3–5 min). For each FAIL, identify the failing hook and use the targeted recipe from [reference.md](reference.md) section "Fast lint iteration" (seconds, not minutes). Re-run `run_local_checks.sh` only as the **final** belt-and-suspenders check once all targeted recipes pass.
+**Before invoking the script, warn the user about the wait time.** Total wall time depends on scope:
+- `code` only: **~10–12 min** (lint ~3-5 + test ~6 + detect-secrets ~30s)
+- `docs` only: **~5–10 min** (lint ~3-5 + linkcheck ~2-5 + language-lint ~30s)
+- `code+docs` (mixed PR): **~12–17 min** (everything above)
+
+The script prints the same plan + per-check duration estimates upfront before running, so the user can confirm they're happy to wait or background it. Tell the user to **leave the terminal open** — each check streams output as it runs (`make test` prints per-file dots; `make lint` prints `>>>>>>>> <hook name>` headers).
+
+Show the user the per-check pass/fail/skip summary at the end. Any FAILs feed back into Step 4's local-fix loop.
+
+**Important — iterate with targeted commands, not the full sweep.** `run_local_checks.sh` calls `make lint` which runs every pre-commit hook on every file plus mypy on the entire `kedro/` package (3–5 min) **and** `make test` which runs the whole pytest suite + coverage check (~6 min). For each FAIL, identify the failing hook/test and use the targeted recipe from [reference.md](reference.md) section "Fast lint iteration" (seconds, not minutes). Re-run `run_local_checks.sh` only as the **final** belt-and-suspenders check once all targeted recipes pass.
 
 **Track C skips 5a entirely** — per-check verification already happened in Step 4 for the specific failing checks; running the full sweep would be redundant and slow.
 

@@ -215,9 +215,9 @@ Fast verify is in the per-hook recipes table. Add type annotations or stubs. The
 
 ### `unit-tests` failure
 
-Fast verify: `pytest tests/path/to/test_thing.py::TestClass::test_method` (single test, sub-second to seconds), or `pytest tests/path/to/test_module.py` (single file). Use `make test` only for the full suite + coverage check before push — it runs `pytest --numprocesses 4 --dist loadfile` across the whole tree (minutes).
+Fast verify: `pytest tests/path/to/test_thing.py::TestClass::test_method` (single test, sub-second to seconds), or `pytest tests/path/to/test_module.py` (single file). Use `make test` only for the full suite + coverage check before push — it runs `pytest --numprocesses 4 --dist loadfile` across the whole tree, **~6 min wall-clock**. Pre-warn the user before invoking it.
 
-If the failure is real, fix it. If coverage drops below `fail_under = 100` (set in [pyproject.toml line 129](../../../pyproject.toml)), add unit tests for the new lines — coverage is enforced strictly. Coverage is checked by `make test`, not by `pytest <specific-test>`, so re-run `make test` once the targeted test passes.
+If the failure is real, fix it. If coverage drops below `fail_under = 100` (set in [pyproject.toml line 129](../../../pyproject.toml)), add unit tests for the new lines — coverage is enforced strictly. Coverage is checked by `make test`, not by `pytest <specific-test>`, so the final `make test` run after targeted iteration is mandatory.
 
 ### `e2e-tests` failure
 

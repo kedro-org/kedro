@@ -217,13 +217,29 @@ detect_secrets_full_tree() {
 }
 
 # --------------------------------------------------------------------------
-# Run the selected checks
+# Plan + expected durations (printed before any check runs, so the user
+# knows whether to watch the terminal or background the run)
 # --------------------------------------------------------------------------
 echo
 echo "Repo root : $REPO_ROOT"
 echo "Scope     : $SCOPE"
 echo "Modifiers : skip-slow=$SKIP_SLOW"
 echo "Active env: ${VIRTUAL_ENV:-${CONDA_PREFIX:-?}}"
+echo
+echo "Plan (the slow checks dominate total wall time):"
+[[ $RUN_LINT           -eq 1 ]] && echo "  - make lint                 ~3-5 min  (pre-commit + mypy on the whole package)"
+[[ $RUN_TEST           -eq 1 ]] && echo "  - make test                 ~6 min    (full pytest suite + 100% coverage)"
+[[ $RUN_DETECT_SECRETS -eq 1 ]] && echo "  - detect-secrets full tree  ~30s      (regex scan)"
+[[ $RUN_LINKCHECK      -eq 1 ]] && echo "  - make linkcheck            ~2-5 min  (mkdocs build + lychee, needs network)"
+[[ $RUN_LANGUAGE_LINT  -eq 1 ]] && echo "  - make language-lint        ~30s      (vale on docs/)"
+echo
+echo "Tip: each check streams its output as it runs — leave the terminal open"
+echo "     to watch progress (e.g. pytest dots, pre-commit hook headers, lychee URLs)."
+echo
+
+# --------------------------------------------------------------------------
+# Run the selected checks
+# --------------------------------------------------------------------------
 
 if [[ $RUN_LINT -eq 1 ]]; then
     run_check "make lint" "lint.yml" make lint

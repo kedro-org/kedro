@@ -10,6 +10,8 @@ For the **invocation tracks** (L = Local dev / C = CI diagnosis & fix) and which
 
 The skill must run inside an isolated Python environment. It refuses to use system Python or the conda `base` env to avoid polluting the user's system packages.
 
+> Several recipes below reference [`uv`](https://github.com/astral-sh/uv) — Astral's fast Python installer / venv manager. Where present, the scripts and Make targets use it; if not installed, they fall back to `python -m venv` and stdlib `pip`.
+
 ### Detection rules
 
 An env is considered "active and isolated" when:
@@ -155,7 +157,7 @@ This installs `.git/hooks/commit-msg` to append `Signed-off-by:` automatically (
 
 ## Fast lint iteration
 
-`make lint` runs `pre-commit run -a --hook-stage manual` (every hook on every tracked file) **plus** `mypy kedro --strict ...` on the whole package. On a clean run that's typically 3–5 minutes. **For per-failure iteration, use the targeted commands below instead — most complete in seconds.** Reserve `make lint` for the final pre-push check (it's what `scripts/run_local_checks.sh` calls in step 5a of the workflow).
+`make lint` runs `pre-commit run -a --hook-stage manual` (every hook on every tracked file) **plus** `mypy kedro --strict ...` on the whole package. On a clean run that's typically 3–5 minutes. **For per-failure iteration, use the targeted commands below instead — most complete in seconds.** Reserve `make lint` for the final pre-push check (it's what `scripts/run_local_checks.sh` calls in Step 5a of the workflow).
 
 ### Targeting strategy
 
@@ -195,21 +197,11 @@ Run the full sweep when:
 
 ## Common CI failures and fixes
 
-Short cookbook keyed by CI check. Each entry leads with **Fast verify:** (the targeted command for fast iteration — same as in "Fast lint iteration" above for lint cases) followed by guidance on **what to fix**. Use Fast verify between iterations; reserve `make lint` / `make test` for the final pre-push check.
-
-### `lint` — ruff lint failure
-
-Fast verify: `ruff check --fix <file>` or `pre-commit run ruff --files <file>`. The ruff hook auto-fixes; if fixes were applied, re-stage and re-run.
-
-### `lint` — ruff format failure
-
-Fast verify: `ruff format <file>` or `pre-commit run ruff-format --files <file>`. Reformats in place.
+Short cookbook keyed by CI check. **Fast verify commands for all `lint` sub-cases (ruff, ruff-format, lint-imports, mypy) live in the [Per-hook recipes](#per-hook-recipes) table above** — no separate cookbook entry is needed for plain ruff/ruff-format. The entries below cover non-lint failures plus the lint cases that need extra context (contracts, config, baselines). Reserve `make lint` / `make test` for the final pre-push check.
 
 ### `lint` — `lint-imports` (Import Linter) failure
 
-Fast verify: `lint-imports --config pyproject.toml` (the hook ignores `--files` because contracts apply project-wide).
-
-Read the violated contract from [pyproject.toml lines 166-226](../../../pyproject.toml). The contracts are:
+Fast verify is in the per-hook recipes table. Read the violated contract from [pyproject.toml lines 166-226](../../../pyproject.toml):
 
 1. **Layered**: `framework.cli > framework.session > framework.context > framework.project > runner > io > pipeline > config`. Higher layers may import lower layers, never the reverse.
 2. **Independence**: `kedro.pipeline` and `kedro.io` cannot import each other.
@@ -219,7 +211,7 @@ Fix the import. Only if the architectural change is intentional (rare), propose 
 
 ### `lint` — mypy failure
 
-Fast verify: `mypy <single-file> --strict --allow-any-generics --no-warn-unused-ignores` (5–10s vs. 1–2 min for the whole package). Add type annotations or stubs. The repo's mypy config (in [pyproject.toml lines 252-256](../../../pyproject.toml)) has `ignore_missing_imports = true` and `disable_error_code = ["misc", "untyped-decorator"]`.
+Fast verify is in the per-hook recipes table. Add type annotations or stubs. The repo's mypy config ([pyproject.toml lines 252-256](../../../pyproject.toml)) sets `ignore_missing_imports = true` and `disable_error_code = ["misc", "untyped-decorator"]` — relevant when error messages reference these codes.
 
 ### `unit-tests` failure
 
@@ -282,6 +274,7 @@ gh pr checks                                         # current CI status
 
 # Snapshot CI (used by watch_ci.sh)
 gh pr checks --json name,bucket,workflow,link        # current state, non-blocking
+                                                     # bucket ∈ {pass, fail, pending, skipping, cancel}
 gh run list --branch <branch> --limit 20 --json databaseId,name,conclusion
 gh run view <id> --log-failed                        # dump only failed steps
 

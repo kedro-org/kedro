@@ -39,8 +39,12 @@ Detect the PR from the current branch, or accept a PR URL/number from the user:
 
 ```bash
 gh auth status
-gh pr view --json number,title,baseRefName,headRefName
+gh pr view --json number,title,baseRefName,headRefName        # current branch's PR
+# or, if the user supplied a PR:
+gh pr view <number-or-url> --json number,title,baseRefName,headRefName
 ```
+
+If the user provided an explicit PR, **thread it through every subsequent command** as `gh pr view <num> ...` and `bash scripts/watch_ci.sh --pr <num>`. The default (no `--pr`) only works for the current branch's PR.
 
 Preflight checks:
 - `gh` is installed and authenticated. If not, stop and ask the user to install/authenticate.
@@ -53,8 +57,12 @@ Run `scripts/bootstrap_env.sh`. The script:
 
 - Detects an active isolated env: `$VIRTUAL_ENV` set, OR (`$CONDA_PREFIX` set AND `$CONDA_DEFAULT_ENV != "base"`).
 - If no isolated env active: ask the user "venv or conda?" + name. Pass to `bootstrap_env.sh --type {venv|conda} --name <name>`. The script creates the env and prints the activation command. **The skill cannot activate the env from a child shell** — instruct the user to activate and re-invoke the skill.
-- If active but dependencies missing: the script runs `make install-test-requirements` + `make install-pre-commit` (and `make install-docs-requirements` if the PR touches `docs/` or `**.md`).
+- If active but dependencies missing: the script runs `make install-test-requirements` + `make install-pre-commit`. **It also runs `make install-docs-requirements` only when invoked with `--with-docs`** — the script does not auto-detect docs files. The agent must determine docs-ness first (see below) and pass `--with-docs` if needed.
 - Probes for system tools `vale`, `lychee`, `gh`. Prints platform-specific install hints if missing; does not install them.
+
+**Determining whether to pass `--with-docs`:**
+- Track L (no PR exists, so `origin/main` is the default base): `git diff --name-only "$(git merge-base HEAD origin/main)"...HEAD | grep -E '^docs/|\.md$'`. Pass `--with-docs` if there's a match.
+- Track C (PR's actual base may differ): `gh pr view --json files -q '.files[].path' | grep -E '^docs/|\.md$'`. Pass `--with-docs` if there's a match.
 
 Read [reference.md](reference.md) section "Environment setup" for manual recipes and cross-platform install hints.
 
@@ -63,10 +71,13 @@ Read [reference.md](reference.md) section "Environment setup" for manual recipes
 Single read-only pass:
 
 ```bash
+BASE="origin/$(gh pr view --json baseRefName -q .baseRefName)"   # resolves the PR's actual base
 gh pr view --json mergeable,mergeStateStatus,headRefOid,files
-bash scripts/watch_ci.sh                              # snapshot CI + dump failed-job logs
-git log <base>..HEAD --format='%H %(trailers:key=Signed-off-by)'
+bash scripts/watch_ci.sh                                          # snapshot CI + dump failed-job logs
+git log "$BASE"..HEAD --format='%H %(trailers:key=Signed-off-by)' # commits since base, with DCO trailer
 ```
+
+Don't hardcode `origin/main` — Kedro PRs may target `develop` or other branches.
 
 Show the user a one-screen summary:
 - Mergeable status (`CLEAN` / `BEHIND` / `DIRTY` / `BLOCKED`).
@@ -79,11 +90,13 @@ Show the user a one-screen summary:
 
 Each sub-step ends with **stop and ask before staging / committing / pushing / amending**.
 
+The Track C sub-bullets (Merge conflicts → CI failures → DCO sign-off) run in that order when multiple apply. Track L only triggers the Local-only failures sub-bullet at the end.
+
 **Merge conflicts** (Track C). If `mergeStateStatus` is `DIRTY` or `BEHIND`, sync with the base branch. Resolve conflicts only when the intent is unambiguous; otherwise stop and ask the user.
 
 **CI failures** (Track C). For each failing check:
 1. Look up the local invocation in [reference.md](reference.md) section "CI-to-local mapping". **Note:** `e2e-tests` are intentionally not runnable locally through this skill — if e2e is failing, share the CI logs from `watch_ci.sh` and ask the user how to proceed.
-2. The failed-job logs were already dumped by `watch_ci.sh` in Step 3. If the run finished after Step 3, re-run `bash scripts/watch_ci.sh` for an updated snapshot.
+2. The failed-job logs were already dumped by `watch_ci.sh` in Step 3. If the snapshot is stale (e.g., new check runs completed since Step 3), re-run `bash scripts/watch_ci.sh` for a fresh snapshot.
 3. Propose the smallest scoped fix using [reference.md](reference.md) section "Common CI failures and fixes".
 4. Apply the fix to the working tree only (no `git add` / `git commit`).
 5. **Verify with the most targeted command available** — almost never `make lint`, which runs *every* pre-commit hook on *every* file plus mypy on the whole `kedro/` package (typically 3–5 min per iteration). Instead:
@@ -96,9 +109,9 @@ Each sub-step ends with **stop and ask before staging / committing / pushing / a
    Full per-hook recipes in [reference.md](reference.md) section "Fast lint iteration". Track C does **not** run `scripts/run_local_checks.sh` here.
 6. Move to the next finding.
 
-**Local-only failures** (Track L). Track L drives this loop from the output of Step 5a's full sweep. When `run_local_checks.sh` reports a FAIL, identify the failing hook from its output and verify the fix with the targeted command above — *not* by re-running the full `run_local_checks.sh` sweep after every iteration. Re-run the full sweep only as the final check before commit (Step 5a).
-
 **DCO sign-off** (Track C). List commits without `Signed-off-by:`. Apply one of the recipes from [reference.md](reference.md) section "DCO sign-off recipes" (typically `git rebase <base> --signoff` for older commits). Ask the user before amending; **explicitly warn that amend requires a force-push** (`git push --force-with-lease`).
+
+**Local-only failures** (Track L). Track L drives this loop from the output of Step 5a's full sweep. When `run_local_checks.sh` reports a FAIL, identify the failing hook from its output and verify the fix with the targeted command above — *not* by re-running the full `run_local_checks.sh` sweep after every iteration. Re-run the full sweep only as the final check before commit (Step 5a).
 
 ### 5. Verify locally → commit + push
 

@@ -12,10 +12,14 @@
 #
 # Usage:
 #   bash run_local_checks.sh                 # auto-detect scope from `git diff`
+#                                            # (one of: code, docs, code+docs)
 #   bash run_local_checks.sh --code          # lint + test + detect-secrets
 #   bash run_local_checks.sh --docs          # lint + linkcheck + language-lint
 #   bash run_local_checks.sh --skip-slow     # drop test/linkcheck (fast loop)
 #   bash run_local_checks.sh --base <branch> # base branch for auto-detect
+#
+# Note: there is no flag for the mixed `code+docs` scope — it's only reachable
+# via auto-detect when the diff touches both code and docs files.
 #
 # Environment guard:
 #   Refuses to run unless an isolated venv or non-base conda env is active

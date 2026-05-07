@@ -19,6 +19,18 @@ logger = logging.getLogger(__name__)
 _PARAMS_PREFIX = "params:"
 
 
+def _type_name(tp: type) -> str:
+    """Return a human-readable name for a type, using str() for union types.
+
+    In Python 3.14, types.UnionType gained __name__ == "Union", so
+    getattr(tp, "__name__", str(tp)) would return "Union" instead of
+    the full representation like "list[str] | int".
+    """
+    if isinstance(tp, types.UnionType) or get_origin(tp) is Union:
+        return str(tp)
+    return getattr(tp, "__name__", str(tp))
+
+
 def _unwrap_optional(tp: type) -> type:
     """Unwrap ``Optional[X]`` / ``X | None`` to ``X``.
 
@@ -39,47 +51,24 @@ class TypeExtractor:
         """Initialise the type extractor.
 
         Args:
-            pipelines: Dictionary of registered pipelines to inspect.
+            pipelines: Dictionary of pipelines to inspect. Callers limit
+                the scope of validation by filtering this mapping.
         """
         self._pipelines = pipelines
         self._warned_union_types: set[type] = set()
 
-    def extract_types_from_pipelines(
-        self, pipeline_name: str | None = None
-    ) -> dict[str, type]:
-        """Extract type requirements from registered pipelines.
+    def extract_types_from_pipelines(self) -> dict[str, type]:
+        """Extract type requirements from the registered pipelines.
 
-        When *pipeline_name* is given, only that pipeline is inspected.
-        Otherwise all pipelines (except ``__default__``) are walked.
-
-        Args:
-            pipeline_name: Optional name of a specific pipeline to inspect.
-                When ``None``, all registered pipelines are inspected.
+        Walks each pipeline and inspects node function signatures for
+        type-annotated ``params:`` inputs.
 
         Returns:
             Dictionary mapping parameter keys to their expected types.
-
-        Raises:
-            KeyError: If *pipeline_name* is given but not found in the
-                registered pipelines.
         """
-        if pipeline_name is not None:
-            if pipeline_name not in self._pipelines:
-                raise KeyError(
-                    f"Pipeline '{pipeline_name}' not found. "
-                    f"Available pipelines: {sorted(self._pipelines.keys())}"
-                )
-            target = {pipeline_name: self._pipelines[pipeline_name]}
-        else:
-            target = {
-                name: pipe
-                for name, pipe in self._pipelines.items()
-                if name != "__default__"
-            }
-
         all_type_requirements: dict[str, type] = {}
 
-        for name, pipeline in target.items():
+        for pipeline_name, pipeline in self._pipelines.items():
             pipeline_type_requirements = self._extract_types_from_pipeline(pipeline)
 
             for key, new_type in pipeline_type_requirements.items():
@@ -91,18 +80,18 @@ class TypeExtractor:
                             "%s (existing) vs %s (from pipeline '%s'). "
                             "Using %s.",
                             key,
-                            getattr(existing_type, "__name__", str(existing_type)),
-                            getattr(new_type, "__name__", str(new_type)),
-                            name,
-                            getattr(new_type, "__name__", str(new_type)),
+                            _type_name(existing_type),
+                            _type_name(new_type),
+                            pipeline_name,
+                            _type_name(new_type),
                         )
 
             all_type_requirements.update(pipeline_type_requirements)
 
         logger.debug(
-            "Found %d type requirements across %s",
+            "Found %d type requirement(s) across %d pipeline(s)",
             len(all_type_requirements),
-            f"pipeline '{pipeline_name}'" if pipeline_name else "all pipelines",
+            len(self._pipelines),
         )
         return all_type_requirements
 
@@ -163,8 +152,7 @@ class TypeExtractor:
                 ) and expected_type not in self._warned_union_types:
                     self._warned_union_types.add(expected_type)
                     type_names = " | ".join(
-                        getattr(type_arg, "__name__", str(type_arg))
-                        for type_arg in get_args(expected_type)
+                        _type_name(type_arg) for type_arg in get_args(expected_type)
                     )
                     logger.warning(
                         "Union type hint (%s) is not supported for validation. "
@@ -179,7 +167,7 @@ class TypeExtractor:
             logger.debug(
                 "Found parameter requirement: %s -> %s",
                 param_key,
-                getattr(expected_type, "__name__", str(expected_type)),
+                _type_name(expected_type),
             )
 
         return all_requirements

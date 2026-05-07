@@ -340,11 +340,9 @@ class TestKedroContext:
         model_instance = ModelOptions(test_size=0.2, random_state=3)
 
         mocker.patch.object(
-            type(dummy_context),
-            "params",
-            new_callable=lambda: property(
-                lambda self: {"model_options": model_instance}
-            ),
+            dummy_context,
+            "_get_validated_params",
+            return_value={"model_options": model_instance},
         )
 
         result = dummy_context._get_parameters()
@@ -364,9 +362,9 @@ class TestKedroContext:
         dc_instance = EvalConfig(metric="rmse", threshold=0.5)
 
         mocker.patch.object(
-            type(dummy_context),
-            "params",
-            new_callable=lambda: property(lambda self: {"eval_config": dc_instance}),
+            dummy_context,
+            "_get_validated_params",
+            return_value={"eval_config": dc_instance},
         )
 
         result = dummy_context._get_parameters()
@@ -389,9 +387,9 @@ class TestKedroContext:
         outer = OuterModel(inner=InnerModel(value=42))
 
         mocker.patch.object(
-            type(dummy_context),
-            "params",
-            new_callable=lambda: property(lambda self: {"outer": outer}),
+            dummy_context,
+            "_get_validated_params",
+            return_value={"outer": outer},
         )
 
         result = dummy_context._get_parameters()
@@ -429,26 +427,28 @@ class TestKedroContext:
         spy.assert_called_once_with(pipeline_name="data_science")
 
     def test_get_parameters_with_pipeline_name(self, dummy_context, mocker):
-        """Verify _get_parameters calls _get_validated_params directly
-        when pipeline_name is provided, bypassing self.params."""
+        """Verify _get_parameters forwards the pipeline_name to
+        _get_validated_params so validation is scoped to that pipeline."""
         spy = mocker.spy(dummy_context, "_get_validated_params")
         dummy_context._get_parameters(pipeline_name="data_science")
         spy.assert_called_once_with(pipeline_name="data_science")
 
-    def test_get_parameters_without_pipeline_name_uses_params_property(
+    def test_get_parameters_without_pipeline_name_validates_all(
         self, dummy_context, mocker
     ):
-        """Verify _get_parameters() with no pipeline_name uses self.params."""
-        mocker.patch.object(
-            type(dummy_context),
-            "params",
-            new_callable=lambda: property(
-                lambda self: {"param1": 1, "param2": 2, "param3": {"param4": 3}}
-            ),
+        """``_get_parameters()`` with no pipeline_name should call
+        ``_get_validated_params(pipeline_name=None)`` (i.e. validate against
+        all registered pipelines)."""
+        patched = mocker.patch.object(
+            dummy_context,
+            "_get_validated_params",
+            return_value={"param1": 1, "param2": 2, "param3": {"param4": 3}},
         )
         result = dummy_context._get_parameters()
+
         assert "parameters" in result
         assert result["parameters"]["param1"] == 1
+        patched.assert_called_once_with(pipeline_name=None)
 
 
 @pytest.mark.parametrize(

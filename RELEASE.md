@@ -6,6 +6,8 @@ NOTE: This session implementation is under active development and may occasional
 * Added inspection API to get project snapshot.
 
 ## Bug fixes and other changes
+* Scoped parameter type-hint validation to the pipeline being run. When `kedro run --pipeline=<name>` runs a single named pipeline, only that pipeline's node signatures are inspected for type hints, avoiding unnecessary work and spurious "conflicting type" warnings from pipelines that aren't executing.
+
 ## Documentation changes
 ## Community contributions
 

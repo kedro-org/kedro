@@ -202,6 +202,7 @@ class KedroContext:
         Returns:
             Validated and transformed parameters with model instantiation.
         """
+        # ``None`` is the cache key for the unscoped result.
         if self._validated_params_cache is None:
             self._validated_params_cache = {}
 
@@ -218,11 +219,26 @@ class KedroContext:
             from kedro.framework.project import pipelines as project_pipelines
             from kedro.validation.parameter_validator import ParameterValidator
 
-            pipeline_dict = dict(project_pipelines)
-            validator = ParameterValidator(pipeline_dict)
-            validated_params = validator.validate_raw_params(
-                raw_params, pipeline_name=pipeline_name
-            )
+            if pipeline_name is None:
+                # ``__default__`` is the union of every registered pipeline,
+                # so its types are already covered when we walk the others.
+                pipelines_to_validate = {
+                    name: pipe
+                    for name, pipe in project_pipelines.items()
+                    if name != "__default__"
+                }
+            elif pipeline_name not in project_pipelines:
+                raise ValueError(
+                    f"Pipeline '{pipeline_name}' not found. "
+                    f"Available pipelines: {sorted(project_pipelines.keys())}"
+                )
+            else:
+                pipelines_to_validate = {
+                    pipeline_name: project_pipelines[pipeline_name]
+                }
+
+            validator = ParameterValidator(pipelines_to_validate)
+            validated_params = validator.validate_raw_params(raw_params)
         except ImportError:
             logging.getLogger(__name__).warning(
                 "Could not import pipelines, skipping parameter validation"
@@ -309,14 +325,9 @@ class KedroContext:
         Keys represent parameter names and the values are parameter values.
 
         Args:
-            pipeline_name: Optional pipeline name to scope parameter
-                validation to. When ``None``, uses the ``params`` property
-                (validates all pipelines).
+            pipeline_name: Optional pipeline name to scope parameter validation to.
         """
-        if pipeline_name is not None:
-            params = self._get_validated_params(pipeline_name=pipeline_name)
-        else:
-            params = self.params
+        params = self._get_validated_params(pipeline_name=pipeline_name)
         params_dict: dict[str, Any] = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:

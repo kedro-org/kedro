@@ -40,8 +40,11 @@ class TestParameterValidator:
 
         assert isinstance(result["model_options"], SamplePydanticModel)
 
-    def test_validate_raw_params_scoped_to_pipeline(self):
-        """Only validate params from the target pipeline."""
+    def test_validate_raw_params_scoped_to_constructed_pipelines(self):
+        """Validation is scoped to whichever pipelines the validator was
+        constructed with — callers limit the scope by passing a single
+        pipeline (rather than threading a pipeline name through every
+        method)."""
 
         def ds_func(opts: SampleDataclass) -> None:
             pass
@@ -67,16 +70,15 @@ class TestParameterValidator:
         pipeline_b = MagicMock()
         pipeline_b.nodes = [node_b]
 
-        validator = ParameterValidator(
-            pipelines={"pipeline_a": pipeline_a, "pipeline_b": pipeline_b}
-        )
+        # Caller constructs the validator with only the target pipeline.
+        validator = ParameterValidator(pipelines={"pipeline_a": pipeline_a})
 
         raw = {
             "config_a": {"name": "test", "value": 1.5},
             "config_b": {"test_size": 0.2, "random_state": 3},
         }
 
-        result = validator.validate_raw_params(raw, pipeline_name="pipeline_a")
+        result = validator.validate_raw_params(raw)
 
         # config_a should be validated (it's in pipeline_a)
         assert isinstance(result["config_a"], SampleDataclass)

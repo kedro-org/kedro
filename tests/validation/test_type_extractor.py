@@ -6,8 +6,6 @@ import dataclasses
 import inspect
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from kedro.pipeline import node as kedro_node
 from kedro.validation.type_extractor import TypeExtractor
 
@@ -36,43 +34,6 @@ class TestExtractTypesFromPipelines:
         extractor = TypeExtractor(pipelines={})
         result = extractor.extract_types_from_pipelines()
         assert result == {}
-
-    def test_skips_default_pipeline(self):
-        def my_func(options: SampleDataclass) -> None:
-            pass
-
-        def default_func(config: SamplePydanticModel) -> None:
-            pass
-
-        data_science_node = kedro_node(
-            func=my_func,
-            inputs="params:eval_config",
-            outputs="output",
-            name="ds_node",
-        )
-        default_node = kedro_node(
-            func=default_func,
-            inputs="params:default_only",
-            outputs="default_output",
-            name="default_node",
-        )
-
-        default_pipeline = MagicMock()
-        default_pipeline.nodes = [default_node]
-
-        data_science_pipeline = MagicMock()
-        data_science_pipeline.nodes = [data_science_node]
-
-        extractor = TypeExtractor(
-            pipelines={
-                "__default__": default_pipeline,
-                "data_science": data_science_pipeline,
-            }
-        )
-        result = extractor.extract_types_from_pipelines()
-
-        assert "eval_config" in result
-        assert "default_only" not in result
 
     def test_successful_extraction(self):
         def my_func(options: SampleDataclass) -> None:
@@ -215,8 +176,9 @@ class TestExtractTypesFromPipelines:
         assert "threshold" not in result
         assert "union_cfg" not in result
 
-    def test_scoped_to_single_pipeline(self):
-        """When pipeline_name is given, only that pipeline is inspected."""
+    def test_only_inspects_constructed_pipelines(self):
+        """Scoping is now done by the caller via the constructor: the extractor
+        only inspects the pipelines passed to ``__init__``."""
 
         def ds_func(opts: SampleDataclass) -> None:
             pass
@@ -242,25 +204,18 @@ class TestExtractTypesFromPipelines:
         pipeline_b = MagicMock()
         pipeline_b.nodes = [node_b]
 
-        extractor = TypeExtractor(
-            pipelines={"pipeline_a": pipeline_a, "pipeline_b": pipeline_b}
-        )
-
-        result = extractor.extract_types_from_pipelines(pipeline_name="pipeline_a")
+        # Caller constructed the extractor with only pipeline_a.
+        extractor = TypeExtractor(pipelines={"pipeline_a": pipeline_a})
+        result = extractor.extract_types_from_pipelines()
 
         assert "config_a" in result
         assert result["config_a"] == SampleDataclass
         assert "config_b" not in result
 
-    def test_scoped_pipeline_not_found_raises(self):
-        """KeyError is raised when the requested pipeline doesn't exist."""
-        extractor = TypeExtractor(pipelines={"data_science": MagicMock()})
-
-        with pytest.raises(KeyError, match="Pipeline 'nonexistent' not found"):
-            extractor.extract_types_from_pipelines(pipeline_name="nonexistent")
-
-    def test_scoped_to_default_pipeline_is_allowed(self):
-        """Explicitly requesting __default__ should work (skip logic is for unscoped)."""
+    def test_inspects_default_pipeline_when_given(self):
+        """``__default__`` is no longer skipped inside the extractor; the
+        caller decides whether to include it (typically the context layer
+        filters it out for the unscoped case)."""
 
         def my_func(opts: SampleDataclass) -> None:
             pass
@@ -274,42 +229,10 @@ class TestExtractTypesFromPipelines:
         default_pipeline = MagicMock()
         default_pipeline.nodes = [node]
 
-        extractor = TypeExtractor(
-            pipelines={"__default__": default_pipeline, "other": MagicMock()}
-        )
+        extractor = TypeExtractor(pipelines={"__default__": default_pipeline})
+        result = extractor.extract_types_from_pipelines()
 
-        result = extractor.extract_types_from_pipelines(pipeline_name="__default__")
         assert "config" in result
-
-    def test_none_pipeline_name_extracts_all(self):
-        """Passing None explicitly behaves the same as the default (all pipelines)."""
-
-        def func_a(opts: SampleDataclass) -> None:
-            pass
-
-        def func_b(cfg: SamplePydanticModel) -> None:
-            pass
-
-        node_a = kedro_node(
-            func=func_a, inputs="params:config_a", outputs="o1", name="n1"
-        )
-        node_b = kedro_node(
-            func=func_b, inputs="params:config_b", outputs="o2", name="n2"
-        )
-
-        pipeline_a = MagicMock()
-        pipeline_a.nodes = [node_a]
-        pipeline_b = MagicMock()
-        pipeline_b.nodes = [node_b]
-
-        extractor = TypeExtractor(
-            pipelines={"pipeline_a": pipeline_a, "pipeline_b": pipeline_b}
-        )
-
-        result = extractor.extract_types_from_pipelines(pipeline_name=None)
-
-        assert "config_a" in result
-        assert "config_b" in result
 
 
 class TestExtractTypesFromNode:

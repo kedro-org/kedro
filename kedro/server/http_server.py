@@ -113,6 +113,17 @@ def create_http_server(
     @app.post("/run", response_model=RunResponse, tags=["pipeline"])
     def run_pipeline(request: RunRequest) -> RunResponse:
         """Execute a Kedro pipeline.
+
+        This endpoint accepts a `RunRequest` with parameters for pipeline execution,
+        runs the pipeline using the session, and returns a `RunResponse` with the result.
+        First run request creates a new `KedroServiceSession`, and subsequent requests reuse it.
+
+        Args:
+            request: Pipeline execution parameters.
+
+        Returns:
+            `RunResponse` with run_id, status, duration, and optional error details.
+        """
         This endpoint accepts a `RunRequest` with parameters for pipeline execution,
         runs the pipeline using the session, and returns a `RunResponse` with the result.
         First run request creates a new KedroServiceSession, and subsequent requests reuse it.

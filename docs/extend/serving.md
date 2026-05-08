@@ -73,13 +73,13 @@ Key request fields:
 | `node_names` | `list[str]` | Run only specific nodes |
 | `from_nodes` / `to_nodes` | `list[str]` | Slice the pipeline by node name |
 | `from_inputs` / `to_outputs` | `list[str]` | Slice the pipeline by dataset name |
-| `namespaces` | `list[str]` | Run only nodes in these namespaces |
+| `namespaces` | `list[str]` | Run nodes in these namespaces |
 | `only_missing_outputs` | `bool` | Skip nodes whose outputs already exist |
 
 The response includes a `run_id`, `status` (`"success"` or `"failure"`), `duration_ms`, and an `error` object on failure.
 
 !!! note
-    `env` and `conf_source` are not accepted per-request. Set them once at server startup via the CLI flags or the `KEDRO_SERVER_ENV` and `KEDRO_SERVER_CONF_SOURCE` environment variables.
+    `env` and `conf_source` are not accepted per-request. Set them at server startup through the CLI flags or the `KEDRO_SERVER_ENV` and `KEDRO_SERVER_CONF_SOURCE` environment variables.
 
 ## Using `create_http_server` programmatically
 
@@ -98,7 +98,7 @@ import uvicorn
 uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
-The first `/run` request creates a `KedroServiceSession`; all subsequent requests reuse it, avoiding repeated project bootstrapping.
+The first `/run` request creates a `KedroServiceSession`; all later requests reuse it, avoiding repeated project bootstrapping.
 
 ## Extending the server
 

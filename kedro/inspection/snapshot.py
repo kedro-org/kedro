@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import threading
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -28,9 +29,19 @@ if TYPE_CHECKING:
 
 
 _ENV_RE = re.compile(r"^[A-Za-z0-9_-]+$")
-
-# avoid duplicate bootstrapping of the project when accessed via http endpoint
+_bootstrap_lock = threading.Lock()
 _bootstrapped: dict[Path, ProjectMetadata] = {}
+
+
+def _seed_bootstrap_cache(project_path: Path, metadata: ProjectMetadata) -> None:
+    """Seed the bootstrap cache with already-computed metadata.
+
+    Call this when ``bootstrap_project`` has already been run externally (e.g. in a
+    server lifespan) so that ``_build_project_snapshot`` skips a redundant bootstrap
+    on the first request.
+    """
+    with _bootstrap_lock:
+        _bootstrapped[project_path] = metadata
 
 
 def _build_project_metadata_snapshot(
@@ -137,9 +148,10 @@ def _build_project_snapshot(
             f"Invalid env value {env!r}: must contain only letters, digits, hyphens, and underscores."
         )
 
-    if project_path not in _bootstrapped:
-        _bootstrapped[project_path] = bootstrap_project(project_path)
-    metadata = _bootstrapped[project_path]
+    with _bootstrap_lock:
+        if project_path not in _bootstrapped:
+            _bootstrapped[project_path] = bootstrap_project(project_path)
+        metadata = _bootstrapped[project_path]
     config_loader = _make_config_loader(project_path, env=env)
 
     try:

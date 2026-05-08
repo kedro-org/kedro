@@ -13,7 +13,7 @@ from kedro.inspection.models import (
     ProjectMetadataSnapshot,
     ProjectSnapshot,
 )
-from kedro.inspection.snapshot import _build_project_snapshot
+from kedro.inspection.snapshot import _bootstrapped, _build_project_snapshot
 
 
 @pytest.fixture
@@ -111,6 +111,8 @@ class TestBuildProjectSnapshot:
         """Patch every sub-component so _build_project_snapshot runs in isolation."""
         self.project_path = tmp_path
 
+        mocker.patch.dict(_bootstrapped, {}, clear=True)
+
         self.mock_bootstrap = mocker.patch(
             "kedro.inspection.snapshot.bootstrap_project",
             return_value=project_metadata,
@@ -182,6 +184,11 @@ class TestBuildProjectSnapshot:
     def test_bootstrap_called_with_project_path(self):
         _build_project_snapshot(self.project_path)
         self.mock_bootstrap.assert_called_once_with(self.project_path)
+
+    def test_bootstrap_called_only_once_for_same_path(self):
+        _build_project_snapshot(self.project_path)
+        _build_project_snapshot(self.project_path)
+        self.mock_bootstrap.assert_called_once()
 
     def test_config_loader_created_with_explicit_env(self):
         _build_project_snapshot(self.project_path, env="staging")

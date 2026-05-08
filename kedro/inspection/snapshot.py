@@ -29,6 +29,9 @@ if TYPE_CHECKING:
 
 _ENV_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 
+# avoid duplicate bootstrapping of the project when accessed via http endpoint
+_bootstrapped: dict[Path, ProjectMetadata] = {}
+
 
 def _build_project_metadata_snapshot(
     metadata: ProjectMetadata,
@@ -134,7 +137,9 @@ def _build_project_snapshot(
             f"Invalid env value {env!r}: must contain only letters, digits, hyphens, and underscores."
         )
 
-    metadata = bootstrap_project(project_path)
+    if project_path not in _bootstrapped:
+        _bootstrapped[project_path] = bootstrap_project(project_path)
+    metadata = _bootstrapped[project_path]
     config_loader = _make_config_loader(project_path, env=env)
 
     try:

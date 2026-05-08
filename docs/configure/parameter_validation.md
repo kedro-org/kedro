@@ -10,7 +10,7 @@ This feature is **opt-in**: add a type hint to enable validation for that parame
 
 Parameter validation supports two kinds of typed objects:
 
-- **Pydantic models** (v2+): Full validation with field constraints, nested models, and custom validators. Requires `pip install pydantic`.
+- **Pydantic models** (v2+): Full validation with field constraints, nested models, and custom validators. Requires `pip install "kedro[pydantic]"`.
 - **Dataclasses**: Basic type checking using Python's built-in `dataclasses` module. No extra dependencies needed.
 
 !!! note
@@ -72,7 +72,7 @@ Kedro validates `params` against `TrainingParams` even though the hint is `Train
 
 There are two approaches to parameter validation:
 
-- **With Pydantic models**: Provides field constraints, nested model support, and custom validators. Requires installing Pydantic (`pip install pydantic`).
+- **With Pydantic models**: Provides field constraints, nested model support, and custom validators. Requires installing Pydantic (`pip install "kedro[pydantic]"`).
 - **With dataclasses**: Uses Python's built-in `dataclasses` module with no extra dependencies, but without constraint validation.
 
 The sections below cover Pydantic first, then [dataclasses](#use-dataclasses).

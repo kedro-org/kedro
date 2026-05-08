@@ -19,12 +19,8 @@ from kedro.framework.startup import bootstrap_project
 from kedro.inspection import get_project_snapshot
 from kedro.io.core import generate_timestamp
 from kedro.server.models import (
-    DatasetSnapshotResponse,
     ErrorDetail,
     HealthResponse,
-    NodeSnapshotResponse,
-    PipelineSnapshotResponse,
-    ProjectMetadataSnapshotResponse,
     RunRequest,
     RunResponse,
     SnapshotResponse,
@@ -39,8 +35,6 @@ from kedro.utils import load_obj
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from pathlib import Path
-
-    from kedro.inspection.models import ProjectSnapshot
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +129,13 @@ def create_http_server(
                 project_path=app.state.project_path,
                 env=app.state.default_env,
             )
-            return _build_snapshot_response(snapshot)
+            return SnapshotResponse(
+                status="success",
+                metadata=snapshot.metadata,
+                pipelines=snapshot.pipelines,
+                datasets=snapshot.datasets,
+                parameters=snapshot.parameters,
+            )
         except Exception as exc:
             logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
             return SnapshotResponse(
@@ -172,52 +172,6 @@ def create_http_server(
         return _execute_pipeline(session=app.state.session, request=request)
 
     return app
-
-
-def _build_snapshot_response(snapshot: ProjectSnapshot) -> SnapshotResponse:
-    """Convert a ``ProjectSnapshot`` dataclass to a ``SnapshotResponse`` Pydantic model.
-
-    Args:
-        snapshot: Populated project snapshot from the inspection API.
-
-    Returns:
-        A ``SnapshotResponse`` ready for serialisation.
-    """
-    return SnapshotResponse(
-        status="success",
-        metadata=ProjectMetadataSnapshotResponse(
-            project_name=snapshot.metadata.project_name,
-            package_name=snapshot.metadata.package_name,
-            kedro_version=snapshot.metadata.kedro_version,
-        ),
-        pipelines=[
-            PipelineSnapshotResponse(
-                name=pipe.name,
-                nodes=[
-                    NodeSnapshotResponse(
-                        name=n.name,
-                        namespace=n.namespace,
-                        tags=n.tags,
-                        inputs=n.inputs,
-                        outputs=n.outputs,
-                    )
-                    for n in pipe.nodes
-                ],
-                inputs=pipe.inputs,
-                outputs=pipe.outputs,
-            )
-            for pipe in snapshot.pipelines
-        ],
-        datasets={
-            name: DatasetSnapshotResponse(
-                name=ds.name,
-                type=ds.type,
-                filepath=ds.filepath,
-            )
-            for name, ds in snapshot.datasets.items()
-        },
-        parameters=snapshot.parameters,
-    )
 
 
 def _execute_pipeline(

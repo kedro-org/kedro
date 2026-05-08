@@ -9,7 +9,6 @@ from kedro.inspection.models import (
     ProjectMetadataSnapshot,
     ProjectSnapshot,
 )
-from kedro.server.http_server import _build_snapshot_response
 
 
 def _make_snapshot() -> ProjectSnapshot:
@@ -45,34 +44,6 @@ def _make_snapshot() -> ProjectSnapshot:
         },
         parameters=["learning_rate", "epochs"],
     )
-
-
-def test_build_snapshot_response_converts_project_snapshot():
-    response = _build_snapshot_response(_make_snapshot())
-
-    assert response.status == "success"
-    assert response.metadata.project_name == "test_project"
-    assert response.metadata.package_name == "test_pkg"
-    assert response.metadata.kedro_version == "1.0.0"
-
-    pipeline = response.pipelines[0]
-    assert pipeline.name == "__default__"
-    assert pipeline.inputs == ["raw_data"]
-    assert pipeline.outputs == ["processed"]
-
-    node = pipeline.nodes[0]
-    assert node.name == "my_node"
-    assert node.namespace == "ns"
-    assert node.tags == ["tag1"]
-    assert node.inputs == ["raw_data"]
-    assert node.outputs == ["processed"]
-
-    ds = response.datasets["raw_data"]
-    assert ds.name == "raw_data"
-    assert ds.type == "pandas.CSVDataset"
-    assert ds.filepath == "/data/raw.csv"
-
-    assert response.parameters == ["learning_rate", "epochs"]
 
 
 class TestSnapshotEndpoint:

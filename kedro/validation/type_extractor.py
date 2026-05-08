@@ -106,7 +106,9 @@ class TypeExtractor:
         )
         return all_type_requirements
 
-    def _extract_types_from_pipeline(self, pipeline: Pipeline) -> dict[str, ParamRequirement]:
+    def _extract_types_from_pipeline(
+        self, pipeline: Pipeline
+    ) -> dict[str, ParamRequirement]:
         """Extract type requirements from a single pipeline."""
         type_requirements: dict[str, ParamRequirement] = {}
 

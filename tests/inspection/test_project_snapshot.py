@@ -13,7 +13,11 @@ from kedro.inspection.models import (
     ProjectMetadataSnapshot,
     ProjectSnapshot,
 )
-from kedro.inspection.snapshot import _bootstrapped, _build_project_snapshot
+from kedro.inspection.snapshot import (
+    _bootstrapped,
+    _build_project_snapshot,
+    _seed_bootstrap_cache,
+)
 
 
 @pytest.fixture
@@ -279,3 +283,37 @@ class TestBuildProjectSnapshot:
     )
     def test_valid_env_does_not_raise(self, env):
         _build_project_snapshot(self.project_path, env=env)
+
+
+class TestSeedBootstrapCache:
+    """Tests for _seed_bootstrap_cache."""
+
+    def test_seed_populates_bootstrapped_cache(
+        self, mocker, tmp_path, project_metadata
+    ):
+        mocker.patch.dict(_bootstrapped, {}, clear=True)
+        _seed_bootstrap_cache(tmp_path, project_metadata)
+        assert _bootstrapped[tmp_path] is project_metadata
+
+    def test_seed_prevents_bootstrap_on_next_snapshot_call(
+        self, mocker, tmp_path, project_metadata
+    ):
+        mocker.patch.dict(_bootstrapped, {}, clear=True)
+        _seed_bootstrap_cache(tmp_path.resolve(), project_metadata)
+
+        mock_bootstrap = mocker.patch("kedro.inspection.snapshot.bootstrap_project")
+        mocker.patch("kedro.inspection.snapshot._make_config_loader")
+        mocker.patch("kedro.inspection.snapshot._build_project_metadata_snapshot")
+        mocker.patch(
+            "kedro.inspection.snapshot._build_pipeline_snapshots", return_value=[]
+        )
+        mocker.patch(
+            "kedro.inspection.snapshot._build_dataset_snapshots", return_value={}
+        )
+        mocker.patch(
+            "kedro.inspection.snapshot._resolve_factory_patterns", return_value={}
+        )
+        mocker.patch("kedro.inspection.snapshot._get_parameter_keys", return_value=[])
+
+        _build_project_snapshot(tmp_path)
+        mock_bootstrap.assert_not_called()

@@ -106,3 +106,69 @@ class HealthResponse(BaseModel):
         default=None,
         description="Path to the Kedro project being served.",
     )
+
+
+class NodeSnapshotResponse(BaseModel):
+    """Response model for a single pipeline node snapshot."""
+
+    name: str = Field(description="Fully-qualified node name.")
+    namespace: str | None = Field(default=None, description="Node namespace, if any.")
+    tags: list[str] = Field(
+        default_factory=list, description="Tags assigned to the node."
+    )
+    inputs: list[str] = Field(default_factory=list, description="Input dataset names.")
+    outputs: list[str] = Field(
+        default_factory=list, description="Output dataset names."
+    )
+
+
+class PipelineSnapshotResponse(BaseModel):
+    """Response model for a registered pipeline snapshot."""
+
+    name: str = Field(description="Pipeline registry key.")
+    nodes: list[NodeSnapshotResponse] = Field(
+        default_factory=list, description="Nodes in topological execution order."
+    )
+    inputs: list[str] = Field(default_factory=list, description="Free pipeline inputs.")
+    outputs: list[str] = Field(
+        default_factory=list, description="Final pipeline outputs."
+    )
+
+
+class DatasetSnapshotResponse(BaseModel):
+    """Response model for a catalog dataset snapshot."""
+
+    name: str = Field(description="Dataset name as it appears in the catalog.")
+    type: str = Field(description="Dataset type string.")
+    filepath: str | None = Field(
+        default=None, description="File path if present, with credentials redacted."
+    )
+
+
+class ProjectMetadataSnapshotResponse(BaseModel):
+    """Response model for project metadata snapshot."""
+
+    project_name: str = Field(description="Human-readable project name.")
+    package_name: str = Field(description="Python package name.")
+    kedro_version: str = Field(description="Kedro version from project metadata.")
+
+
+class SnapshotResponse(BaseModel):
+    """Response model for the project snapshot endpoint."""
+
+    status: Literal["success", "failure"] = Field(description="Snapshot status.")
+    metadata: ProjectMetadataSnapshotResponse | None = Field(
+        default=None, description="Project metadata snapshot."
+    )
+    pipelines: list[PipelineSnapshotResponse] | None = Field(
+        default=None, description="Registered pipeline snapshots."
+    )
+    datasets: dict[str, DatasetSnapshotResponse] | None = Field(
+        default=None, description="Catalog dataset snapshots keyed by dataset name."
+    )
+    parameters: list[str] | None = Field(
+        default=None, description="Sorted list of top-level parameter keys."
+    )
+    error: ErrorDetail | None = Field(
+        default=None, description="Error details if status is 'failure'."
+    )

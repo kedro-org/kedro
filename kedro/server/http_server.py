@@ -16,12 +16,18 @@ from kedro import __version__ as kedro_version
 from kedro.framework.project import settings
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
+from kedro.inspection import get_project_snapshot
 from kedro.io.core import generate_timestamp
 from kedro.server.models import (
+    DatasetSnapshotResponse,
     ErrorDetail,
     HealthResponse,
+    NodeSnapshotResponse,
+    PipelineSnapshotResponse,
+    ProjectMetadataSnapshotResponse,
     RunRequest,
     RunResponse,
+    SnapshotResponse,
 )
 from kedro.server.utils import (
     KEDRO_SERVER_CONF_SOURCE,
@@ -33,6 +39,8 @@ from kedro.utils import load_obj
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from pathlib import Path
+
+    from kedro.inspection.models import ProjectSnapshot
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +118,35 @@ def create_http_server(
             project_path=str(project_path),
         )
 
+    @app.get("/snapshot", response_model=SnapshotResponse, tags=["inspection"])
+    def get_snapshot() -> SnapshotResponse:
+        """Return a read-only snapshot of the Kedro project.
+
+        Uses the server-level environment configured at startup (equivalent to
+        the ``env`` passed to ``create_http_server`` or the ``KEDRO_SERVER_ENV``
+        environment variable).
+
+        Returns:
+            `SnapshotResponse` with project metadata, pipelines, datasets,
+            and parameter keys, or error details on failure.
+        """
+        try:
+            snapshot = get_project_snapshot(
+                project_path=app.state.project_path,
+                env=app.state.default_env,
+            )
+            return _build_snapshot_response(snapshot)
+        except Exception as exc:
+            logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
+            return SnapshotResponse(
+                status="failure",
+                error=ErrorDetail(
+                    type=type(exc).__qualname__,
+                    message=str(exc),
+                    traceback=traceback.format_tb(exc.__traceback__),
+                ),
+            )
+
     @app.post("/run", response_model=RunResponse, tags=["pipeline"])
     def run_pipeline(request: RunRequest) -> RunResponse:
         """Execute a Kedro pipeline.
@@ -135,6 +172,52 @@ def create_http_server(
         return _execute_pipeline(session=app.state.session, request=request)
 
     return app
+
+
+def _build_snapshot_response(snapshot: ProjectSnapshot) -> SnapshotResponse:
+    """Convert a ``ProjectSnapshot`` dataclass to a ``SnapshotResponse`` Pydantic model.
+
+    Args:
+        snapshot: Populated project snapshot from the inspection API.
+
+    Returns:
+        A ``SnapshotResponse`` ready for serialisation.
+    """
+    return SnapshotResponse(
+        status="success",
+        metadata=ProjectMetadataSnapshotResponse(
+            project_name=snapshot.metadata.project_name,
+            package_name=snapshot.metadata.package_name,
+            kedro_version=snapshot.metadata.kedro_version,
+        ),
+        pipelines=[
+            PipelineSnapshotResponse(
+                name=pipe.name,
+                nodes=[
+                    NodeSnapshotResponse(
+                        name=n.name,
+                        namespace=n.namespace,
+                        tags=n.tags,
+                        inputs=n.inputs,
+                        outputs=n.outputs,
+                    )
+                    for n in pipe.nodes
+                ],
+                inputs=pipe.inputs,
+                outputs=pipe.outputs,
+            )
+            for pipe in snapshot.pipelines
+        ],
+        datasets={
+            name: DatasetSnapshotResponse(
+                name=ds.name,
+                type=ds.type,
+                filepath=ds.filepath,
+            )
+            for name, ds in snapshot.datasets.items()
+        },
+        parameters=snapshot.parameters,
+    )
 
 
 def _execute_pipeline(

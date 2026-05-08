@@ -303,6 +303,7 @@ class TestSeedBootstrapCache:
 
         mock_bootstrap = mocker.patch("kedro.inspection.snapshot.bootstrap_project")
         mocker.patch("kedro.inspection.snapshot._make_config_loader")
+        mocker.patch("kedro.inspection.snapshot.pipelines", new={})
         mocker.patch("kedro.inspection.snapshot._build_project_metadata_snapshot")
         mocker.patch(
             "kedro.inspection.snapshot._build_pipeline_snapshots", return_value=[]

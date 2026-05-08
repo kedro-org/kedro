@@ -8,7 +8,7 @@ from kedro.server.http_server import create_http_server
 @pytest.fixture(autouse=True)
 def _patch_seed_bootstrap_cache(mocker):
     """Prevent _seed_bootstrap_cache from mutating the inspection module's cache during server tests."""
-    mocker.patch("kedro.server.http_server._seed_bootstrap_cache")
+    return mocker.patch("kedro.server.http_server._seed_bootstrap_cache")
 
 
 @pytest.fixture

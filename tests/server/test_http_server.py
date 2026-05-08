@@ -42,7 +42,9 @@ class TestHTTPServerFactory:
         with pytest.raises(RuntimeError, match="cannot resolve project"):
             create_http_server()
 
-    def test_lifespan_calls_bootstrap_on_startup(self, mocker, tmp_path):
+    def test_lifespan_calls_bootstrap_on_startup(
+        self, mocker, tmp_path, _patch_seed_bootstrap_cache
+    ):
         """Test that lifespan context manager calls bootstrap_project on startup."""
         project_path = Path(tmp_path).resolve()
         mocker.patch(
@@ -55,6 +57,9 @@ class TestHTTPServerFactory:
             client.get("/health")
 
         mock_bootstrap.assert_called_once_with(project_path)
+        _patch_seed_bootstrap_cache.assert_called_once_with(
+            project_path, mock_bootstrap.return_value
+        )
 
     def test_lifespan_closes_session_on_shutdown(self, mocker, tmp_path):
         """Test that the session is closed when the server shuts down."""

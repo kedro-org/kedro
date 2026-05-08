@@ -16,6 +16,7 @@ from kedro.inspection.models import (
 from kedro.inspection.snapshot import (
     _bootstrapped,
     _build_project_snapshot,
+    _clear_bootstrap_cache,
     _seed_bootstrap_cache,
 )
 
@@ -318,3 +319,99 @@ class TestSeedBootstrapCache:
 
         _build_project_snapshot(tmp_path)
         mock_bootstrap.assert_not_called()
+
+
+class TestBootstrapCacheLifecycle:
+    """Tests for cache lifecycle: multi-path isolation and eviction via _clear_bootstrap_cache."""
+
+    @pytest.fixture(autouse=True)
+    def _clean_cache(self, mocker):
+        mocker.patch.dict(_bootstrapped, {}, clear=True)
+
+    def test_different_project_paths_bootstrap_independently(
+        self, mocker, tmp_path, project_metadata
+    ):
+        path_a = (tmp_path / "project_a").resolve()
+        path_b = (tmp_path / "project_b").resolve()
+        mock_bootstrap = mocker.patch(
+            "kedro.inspection.snapshot.bootstrap_project",
+            return_value=project_metadata,
+        )
+        mocker.patch("kedro.inspection.snapshot._make_config_loader")
+        mocker.patch("kedro.inspection.snapshot.pipelines", new={})
+        mocker.patch("kedro.inspection.snapshot._build_project_metadata_snapshot")
+        mocker.patch(
+            "kedro.inspection.snapshot._build_pipeline_snapshots", return_value=[]
+        )
+        mocker.patch(
+            "kedro.inspection.snapshot._build_dataset_snapshots", return_value={}
+        )
+        mocker.patch(
+            "kedro.inspection.snapshot._resolve_factory_patterns", return_value={}
+        )
+        mocker.patch("kedro.inspection.snapshot._get_parameter_keys", return_value=[])
+
+        _build_project_snapshot(path_a)
+        _build_project_snapshot(path_b)
+
+        assert mock_bootstrap.call_count == 2
+        assert set(_bootstrapped.keys()) == {path_a, path_b}
+
+    def test_clear_cache_forces_re_bootstrap_on_next_call(
+        self, mocker, tmp_path, project_metadata
+    ):
+        mock_bootstrap = mocker.patch(
+            "kedro.inspection.snapshot.bootstrap_project",
+            return_value=project_metadata,
+        )
+        mocker.patch("kedro.inspection.snapshot._make_config_loader")
+        mocker.patch("kedro.inspection.snapshot.pipelines", new={})
+        mocker.patch("kedro.inspection.snapshot._build_project_metadata_snapshot")
+        mocker.patch(
+            "kedro.inspection.snapshot._build_pipeline_snapshots", return_value=[]
+        )
+        mocker.patch(
+            "kedro.inspection.snapshot._build_dataset_snapshots", return_value={}
+        )
+        mocker.patch(
+            "kedro.inspection.snapshot._resolve_factory_patterns", return_value={}
+        )
+        mocker.patch("kedro.inspection.snapshot._get_parameter_keys", return_value=[])
+
+        _build_project_snapshot(tmp_path)
+        assert mock_bootstrap.call_count == 1
+
+        _clear_bootstrap_cache()
+        assert _bootstrapped == {}
+
+        _build_project_snapshot(tmp_path)
+        assert mock_bootstrap.call_count == 2
+
+    def test_same_path_called_twice_after_clear_bootstraps_twice(
+        self, mocker, tmp_path, project_metadata
+    ):
+        mock_bootstrap = mocker.patch(
+            "kedro.inspection.snapshot.bootstrap_project",
+            return_value=project_metadata,
+        )
+        mocker.patch("kedro.inspection.snapshot._make_config_loader")
+        mocker.patch("kedro.inspection.snapshot.pipelines", new={})
+        mocker.patch("kedro.inspection.snapshot._build_project_metadata_snapshot")
+        mocker.patch(
+            "kedro.inspection.snapshot._build_pipeline_snapshots", return_value=[]
+        )
+        mocker.patch(
+            "kedro.inspection.snapshot._build_dataset_snapshots", return_value={}
+        )
+        mocker.patch(
+            "kedro.inspection.snapshot._resolve_factory_patterns", return_value={}
+        )
+        mocker.patch("kedro.inspection.snapshot._get_parameter_keys", return_value=[])
+
+        _build_project_snapshot(tmp_path)
+        _build_project_snapshot(tmp_path)  # cached — no second bootstrap
+        assert mock_bootstrap.call_count == 1
+
+        _clear_bootstrap_cache()
+        _build_project_snapshot(tmp_path)  # cache evicted — bootstraps again
+        assert mock_bootstrap.call_count == 2

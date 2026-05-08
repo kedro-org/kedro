@@ -30,6 +30,11 @@ if TYPE_CHECKING:
 
 _ENV_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 _bootstrap_lock = threading.Lock()
+# Process-global cache mapping resolved project path → ProjectMetadata.
+# Designed for single-project, long-running server processes where the project
+# configuration does not change at runtime. Multiple project paths are supported
+# (each bootstraps independently), but there is no automatic eviction.
+# Call clear_bootstrap_cache() to force re-bootstrap after a configuration change.
 _bootstrapped: dict[Path, ProjectMetadata] = {}
 
 
@@ -42,6 +47,17 @@ def _seed_bootstrap_cache(project_path: Path, metadata: ProjectMetadata) -> None
     """
     with _bootstrap_lock:
         _bootstrapped[project_path] = metadata
+
+
+def _clear_bootstrap_cache() -> None:
+    """Clear the process-global bootstrap cache.
+
+    Forces ``get_project_snapshot`` to re-run ``bootstrap_project`` on the next call
+    for any project path. Use this if the project configuration has changed at runtime
+    and you need the snapshot to reflect the updated state.
+    """
+    with _bootstrap_lock:
+        _bootstrapped.clear()
 
 
 def _build_project_metadata_snapshot(

@@ -1,10 +1,24 @@
 # Upcoming Release
+
 ## Major features and improvements
+* Add official support for Python 3.14.
 * Added the first iteration of the `KedroServiceSession`, a new session implementation that allows for multiple runs and data injection.
 NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
+* Added inspection API to get project snapshot.
+
 ## Bug fixes and other changes
+* Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
+* Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
+* Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
+
 ## Documentation changes
+* Added documentation for `KedroServiceSession`.
+* Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
+
 ## Community contributions
+
+* [jeevan6996](https://github.com/jeevan6996)
+* [Rahul Bansod](https://github.com/rahulbansod519)
 
 
 # Release 1.3.1

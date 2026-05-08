@@ -82,15 +82,15 @@ The following are examples of issues that should be treated as security vulnerab
 
 If YAML, JSON, parameters, dataset metadata, or other data inputs can cause arbitrary code execution beyond their documented purpose, that is a vulnerability.
 
-### Unsafe Deserialization
+### Unsafe Deserialisation
 
-If Kedro loads configuration or other user-controlled data using unsafe deserialization mechanisms that allow execution of arbitrary Python objects, that is a vulnerability.
+If Kedro loads configuration or other user-controlled data using unsafe deserialisation mechanisms that allow execution of arbitrary Python objects, that is a vulnerability.
 
 ### Validation Bypasses in Framework-Controlled Extension Points
 
 If Kedro is supposed to restrict a value to a safe set of classes, modules, paths, or behaviours and those restrictions can be bypassed, that is a vulnerability.
 
-### Credential Exposure Caused by Framework Behavior
+### Credential Exposure Caused by Framework Behaviour
 
 If Kedro logs, serializes, prints, or otherwise exposes secrets through framework behaviour without the Project Developer explicitly doing so, that is a vulnerability.
 

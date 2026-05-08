@@ -86,7 +86,7 @@ def server_start(  # noqa: PLR0913
     except ImportError as exc:
         raise KedroCliError(
             "Kedro HTTP server requires 'fastapi', 'pydantic', and 'uvicorn' packages. "
-            "Install them with: pip install kedro[server]"
+            "Install them with: uv pip install 'kedro[server]'"
         ) from exc
 
     project_path = metadata.project_path
@@ -103,11 +103,6 @@ def server_start(  # noqa: PLR0913
 
     if conf_source:
         os.environ[KEDRO_SERVER_CONF_SOURCE] = conf_source
-
-    click.echo(f"Starting Kedro HTTP server for project at: {project_path}")
-    click.echo(f"Starting server at: http://{host}:{port}")
-    click.echo("Press CTRL+C to stop")
-    click.echo()
 
     uvicorn.run(
         "kedro.server.http_server:create_http_server",

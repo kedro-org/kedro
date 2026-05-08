@@ -98,6 +98,8 @@ jupyter = [
 benchmark = [
     "asv"
 ]
+
+pydantic = ["pydantic>=2.0"]
 server = [
     "pydantic~=2.13",
     "fastapi>=0.100.0",

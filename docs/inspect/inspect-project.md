@@ -158,7 +158,7 @@ This follows the same environment resolution rules as `kedro run --env staging`.
 
 ## How to access the snapshot via the HTTP server
 
-When running the Kedro HTTP server, the same project snapshot is available over HTTP at `GET /snapshot`. The endpoint uses the environment configured at server startup and returns a JSON response matching the [`SnapshotResponse`][kedro.server.models.SnapshotResponse] schema.
+When running the Kedro HTTP server, the same project snapshot is available over HTTP at `GET /snapshot`. The endpoint uses the environment configured at server startup and returns a JSON response with a `status` field (`"success"` or `"failure"`), the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, and an `error` field on failure.
 
 Start the server:
 

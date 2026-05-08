@@ -156,7 +156,7 @@ snapshot = get_project_snapshot(project_path = "/path/to/my_project", env="stagi
 
 This follows the same environment resolution rules as `kedro run --env staging`. See [Configuration basics](../configure/configuration_basics.md) for details on how environments work.
 
-## How to access the snapshot via the HTTP server
+## How to access the snapshot through the HTTP server
 
 When running the Kedro HTTP server, the same project snapshot is available over HTTP at `GET /snapshot`. The endpoint uses the environment configured at server startup and returns a JSON response with a `status` field (`"success"` or `"failure"`), the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, and an `error` field on failure.
 
@@ -198,7 +198,7 @@ Example response:
 }
 ```
 
-If the snapshot cannot be built (for example, due to a misconfigured catalog), the response still returns HTTP 200 with `"status": "failure"` and an `error` field containing the exception type, message, and traceback.
+If the snapshot cannot be built (for example, due to a catalog error), the response still returns HTTP 200 with `"status": "failure"`. The `error` field contains the exception type, message, and stack trace.
 
 !!! note
-    The `/snapshot` endpoint uses the environment set at server startup (via `--env` or the `KEDRO_SERVER_ENV` environment variable). Unlike the programmatic API, it does not accept a per-request `env` parameter.
+    The `/snapshot` endpoint uses the environment set at server startup (with `--env` or the `KEDRO_SERVER_ENV` environment variable). Unlike the programmatic API, it does not accept a per-request `env` parameter.

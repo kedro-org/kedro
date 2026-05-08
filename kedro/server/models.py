@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-if TYPE_CHECKING:
-    from kedro.inspection.models import (
-        DatasetSnapshot,
-        PipelineSnapshot,
-        ProjectMetadataSnapshot,
-    )
+from kedro.inspection.models import (  # noqa: TCH001
+    DatasetSnapshot,
+    PipelineSnapshot,
+    ProjectMetadataSnapshot,
+)
 
 
 class RunRequest(BaseModel):

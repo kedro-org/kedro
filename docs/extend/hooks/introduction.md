@@ -30,10 +30,31 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 
 * `<noun>` refers to the relevant component in the Kedro execution timeline that throws the error.
 
-The full specifications for which you can inject additional behaviours by providing an implementation are listed in [kedro.framework.hooks][].
+The full specifications for which you can inject additional behaviours by providing an implementation are listed in [kedro.framework.hooks][]. The full per-argument signature of each hook is documented in the [`kedro.framework.hooks.specs` API reference](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs).
 
 This diagram illustrates the execution order of hooks during `kedro run`:
 ![Kedro run hook execution order](../../meta/images/kedro_run_lifecycle.png)
+
+### Available arguments per hook
+
+The table below summarises which arguments each Hook specification exposes. You can declare a subset of these in your implementation: thanks to [pluggy's opt-in argument behaviour](https://pluggy.readthedocs.io/en/stable/#opt-in-arguments), unused arguments may be omitted from the signature and Kedro will only pass what you declare. Refer to the [API reference for `kedro.framework.hooks.specs`](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) for the exact type of each argument and its full docstring.
+
+| Hook                     | Available arguments |
+|--------------------------|---------------------|
+| `after_context_created`  | `context` |
+| `after_catalog_created`  | `catalog`, `conf_catalog`, `conf_creds`, `parameters`, `save_version`, `load_versions` |
+| `before_pipeline_run`    | `run_params`, `pipeline`, `catalog` |
+| `after_pipeline_run`     | `run_params`, `run_result`, `pipeline`, `catalog` |
+| `on_pipeline_error`      | `error`, `run_params`, `pipeline`, `catalog` |
+| `before_node_run`        | `node`, `catalog`, `inputs`, `is_async`, `run_id` |
+| `after_node_run`         | `node`, `catalog`, `inputs`, `outputs`, `is_async`, `run_id` |
+| `on_node_error`          | `error`, `node`, `catalog`, `inputs`, `is_async`, `run_id` |
+| `before_dataset_loaded`  | `dataset_name`, `node` |
+| `after_dataset_loaded`   | `dataset_name`, `data`, `node` |
+| `before_dataset_saved`   | `dataset_name`, `data`, `node` |
+| `after_dataset_saved`    | `dataset_name`, `data`, `node` |
+
+The `run_params` argument carries the same dictionary in `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error`. Its schema is documented inline on each spec, e.g. [`before_pipeline_run`](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs.PipelineSpecs.before_pipeline_run).
 
 ### CLI Hooks
 

@@ -3,6 +3,7 @@ import re
 import subprocess
 import textwrap
 from collections.abc import Mapping
+from pathlib import Path
 
 import pytest
 from omegaconf import OmegaConf
@@ -21,6 +22,7 @@ from kedro.framework.project import (
 from kedro.framework.session import AbstractSession, KedroSession
 from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.store import BaseSessionStore
+from kedro.io import DatasetError, DatasetNotFoundError, MemoryDataset
 from kedro.utils import _has_rich_handler
 
 
@@ -262,6 +264,47 @@ class TestKedroSession:
 
         assert isinstance(result, KedroContext)
         assert result.__class__.__name__ == "MyContext"
+
+    @pytest.mark.usefixtures("mock_settings")
+    def test_memory_dataset_state_persists_with_same_catalog_instance(
+        self, fake_project
+    ):
+        """MemoryDataset state should persist when using the same catalog instance."""
+
+        # Create a minimal catalog.yml to allow catalog loading
+        (fake_project / "conf" / "base" / "catalog.yml").write_text("{}")
+
+        session = KedroSession.create(fake_project)
+        context = session.load_context()
+
+        catalog = context.catalog
+        catalog["test_memory_ds"] = MemoryDataset()
+
+        catalog.save("test_memory_ds", "test_data")
+
+        assert catalog.load("test_memory_ds") == "test_data"
+
+    @pytest.mark.usefixtures("mock_settings")
+    def test_memory_dataset_state_is_not_shared_across_catalog_property_access(
+        self, fake_project
+    ):
+        """Document current behavior where repeated context.catalog access
+        returns a fresh catalog instance.
+        """
+
+        # Create a minimal catalog.yml to allow catalog loading
+        (fake_project / "conf" / "base" / "catalog.yml").write_text("{}")
+
+        session = KedroSession.create(fake_project)
+        context = session.load_context()
+
+        catalog = context.catalog
+        catalog["test_memory_ds"] = MemoryDataset()
+        catalog.save("test_memory_ds", "test_data")
+
+        with pytest.raises(DatasetNotFoundError, match="Dataset 'test_memory_ds' not found in the catalog"):
+            context.catalog.load("test_memory_ds")
+    
 
     @pytest.mark.usefixtures("mock_settings_custom_config_loader_class")
     def test_load_config_loader_custom_config_loader_class(self, fake_project):

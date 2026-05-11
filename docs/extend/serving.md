@@ -1,6 +1,6 @@
 # Serving Kedro pipelines over HTTP
 
-Kedro includes a built-in HTTP server that lets external systems trigger pipeline runs via REST endpoints. It is backed by [`KedroServiceSession`](./session.md#create-a-kedroservicesession), which keeps the session alive across multiple requests.
+Kedro includes a built-in HTTP server that lets external systems trigger pipeline runs with REST endpoints. It is backed by [`KedroServiceSession`](./session.md#create-a-kedroservicesession), which keeps the session alive across multiple requests.
 
 !!! note
     The HTTP server requires optional dependencies. Install them with:
@@ -31,8 +31,8 @@ This starts the server at `http://127.0.0.1:8000` by default.
 Examples:
 
 ```bash
-# Bind to all interfaces on port 8080
-kedro server start --host 0.0.0.0 --port 8080
+# Bind to localhost on port 8080
+kedro server start --host 127.0.0.1 --port 8080
 
 # Use the staging environment with auto-reload
 kedro server start --env staging --reload
@@ -40,9 +40,15 @@ kedro server start --env staging --reload
 
 ## Endpoints
 
+The first `/run` request creates a `KedroServiceSession`; all later requests reuse it, avoiding repeated project bootstrapping.
+
 ### `GET /health`
 
 Returns server status and the Kedro version in use.
+
+```bash
+curl http://127.0.0.1:8000/health
+```
 
 ```json
 {
@@ -54,7 +60,7 @@ Returns server status and the Kedro version in use.
 
 ### `POST /run`
 
-Triggers a pipeline run. All fields are optional — an empty body runs the default pipeline with default settings.
+Triggers a pipeline run. All fields are optional and an empty body runs the default pipeline with default settings.
 
 ```bash
 curl -X POST http://127.0.0.1:8000/run \
@@ -68,9 +74,9 @@ Key request fields:
 |---|---|---|
 | `pipeline_names` | `list[str]` | Pipelines to run (default pipeline if omitted) |
 | `params` | `dict` | Runtime parameters passed to the context |
-| `runner` | `str` | Runner class, e.g. `"ParallelRunner"` (default: `"SequentialRunner"`) |
-| `tags` | `list[str]` | Run only nodes with these tags |
-| `node_names` | `list[str]` | Run only specific nodes |
+| `runner` | `str` | Runner class, for example, `"ParallelRunner"` (default: `"SequentialRunner"`) |
+| `tags` | `list[str]` | Run just the nodes with these tags |
+| `node_names` | `list[str]` | Run just the specific nodes |
 | `from_nodes` / `to_nodes` | `list[str]` | Slice the pipeline by node name |
 | `from_inputs` / `to_outputs` | `list[str]` | Slice the pipeline by dataset name |
 | `namespaces` | `list[str]` | Run nodes in these namespaces |
@@ -98,7 +104,6 @@ import uvicorn
 uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
-The first `/run` request creates a `KedroServiceSession`; all later requests reuse it, avoiding repeated project bootstrapping.
 
 ## Extending the server
 

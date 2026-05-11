@@ -8,7 +8,7 @@ pip install 'kedro[server]'
 ```
 
 !!! note
-    The HTTP server is intentionally minimal and meant to provide a simple interface that can be extended for custom use cases. It does not include authentication, authorisation, request queuing, async job execution, run history, or per-request session isolation. Do not expose it publicly without adding appropriate security controls.
+    The HTTP server is intentionally minimal and meant to provide an interface that can be extended for custom use cases. It does not include authentication, authorisation, request queuing, async job execution, run history, or per-request session isolation. Do not expose it publicly without adding appropriate security controls.
 
 ## Starting the server
 
@@ -26,7 +26,7 @@ This starts the server at `http://127.0.0.1:8000` by default.
 |---|---|---|---|
 | `--host` | `-H` | `127.0.0.1` | Host to bind the server to |
 | `--port` | `-p` | `8000` | Port to bind the server to |
-| `--reload` | | `False` | Enable auto-reload on code changes. For development only; do not use in production. |
+| `--reload` | | `False` | Enable auto-reload on code changes. Intended for development, do not use in production. |
 | `--env` | `-e` | | Kedro configuration environment |
 | `--conf-source` | | | Path to a custom configuration directory |
 
@@ -98,7 +98,7 @@ Key request fields:
 The response includes a `run_id`, `status` (`"success"` or `"failure"`), `duration_ms`, and an `error` object on failure.
 
 !!! note
-    `RunRequest` model uses strict validation, unknown fields return an error rather than being silently ignored.
+    `RunRequest` model uses strict validation, unknown fields return an error rather than being ignored.
 
 The first `/run` request creates a `KedroServiceSession` which the following requests reuse. The endpoint runs in a thread pool, so concurrent `/run` requests share the same session and pipeline runs are not isolated from each other.
 

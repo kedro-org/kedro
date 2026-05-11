@@ -2,6 +2,7 @@ agentic
 Aneira
 APIs
 Astro
+async
 autodiscovery
 breakpoint
 chonky

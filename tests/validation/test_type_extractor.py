@@ -238,7 +238,7 @@ class TestExtractTypesFromPipelines:
         assert "dc_cfg" in result
         assert result["dc_cfg"] == SampleDataclass
         assert "optional_cfg" in result
-        assert result["optional_cfg"] == SamplePydanticModel
+        assert result["optional_cfg"] == _OptionalPydantic
         assert "threshold" not in result
         assert "union_cfg" not in result
 
@@ -338,8 +338,8 @@ class TestExtractTypesFromNode:
         result = type_extractor._extract_types_from_node(test_node)
         assert result == {}
 
-    def test_optional_pydantic_unwrapped(self, type_extractor):
-        """Optional[PydanticModel] should unwrap to PydanticModel and be recorded."""
+    def test_optional_pydantic_recorded(self, type_extractor):
+        """Optional[PydanticModel] should be recorded as-is (not unwrapped)."""
 
         def my_func(config: _OptionalPydantic) -> None:
             pass
@@ -353,10 +353,10 @@ class TestExtractTypesFromNode:
 
         result = type_extractor._extract_types_from_node(test_node)
         assert "config" in result
-        assert result["config"] == SamplePydanticModel
+        assert result["config"] == _OptionalPydantic
 
-    def test_optional_dataclass_unwrapped(self, type_extractor):
-        """Optional[Dataclass] should unwrap to Dataclass and be recorded."""
+    def test_optional_dataclass_recorded(self, type_extractor):
+        """Optional[Dataclass] should be recorded as-is (not unwrapped)."""
 
         def my_func(config: _OptionalDataclass) -> None:
             pass
@@ -370,7 +370,7 @@ class TestExtractTypesFromNode:
 
         result = type_extractor._extract_types_from_node(test_node)
         assert "config" in result
-        assert result["config"] == SampleDataclass
+        assert result["config"] == _OptionalDataclass
 
     def test_builtin_type_hint_skipped(self, type_extractor):
         def my_func(data: int) -> None:

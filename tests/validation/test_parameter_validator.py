@@ -129,3 +129,17 @@ class TestApplyValidation:
 
         parameter_validator._apply_validation(raw, requirements)
         assert isinstance(raw["config"], dict)
+
+    def test_none_param_raises_when_not_optional(self, parameter_validator):
+        raw = {"model_options": None}
+        requirements = {"model_options": SamplePydanticModel}
+        with pytest.raises(
+            ParameterValidationError, match="Parameter validation failed"
+        ):
+            parameter_validator._apply_validation(raw, requirements)
+
+    def test_none_param_skips_when_optional(self, parameter_validator):
+        raw = {"model_options": None}
+        requirements = {"model_options": SamplePydanticModel | None}
+        result = parameter_validator._apply_validation(raw, requirements)
+        assert result["model_options"] is None

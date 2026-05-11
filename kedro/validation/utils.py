@@ -4,9 +4,32 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
-from typing import Any
+import types
+from typing import Any, Union, get_args, get_origin
 
 from .exceptions import ParameterValidationError
+
+_MISSING = object()
+
+
+def _unwrap_optional(tp: type) -> type:
+    """Unwrap ``Optional[X]`` / ``X | None`` to ``X``.
+
+    If the type is a union of exactly one non-None type and ``NoneType``,
+    return the non-None type. Otherwise return the original type unchanged.
+    """
+    if get_origin(tp) is Union or isinstance(tp, types.UnionType):
+        args = [a for a in get_args(tp) if a is not type(None)]
+        if len(args) == 1:
+            return args[0]  # type: ignore[no-any-return]
+    return tp
+
+
+def _is_optional(tp: type) -> bool:
+    """Return True if ``tp`` is ``Optional[X]`` (i.e. ``X | None``)."""
+    if get_origin(tp) is Union or isinstance(tp, types.UnionType):
+        return type(None) in get_args(tp)
+    return False
 
 
 def is_pydantic_model(value: Any) -> bool:
@@ -50,14 +73,15 @@ def resolve_nested_dict_path(data: dict, path: str) -> Any:
     ``"demo.config"`` that Kedro stores as literal flat keys in the params
     dict. Falls back to nested traversal for truly nested dicts.
 
-    Returns None if the key is not found under either strategy.
+    Returns ``_MISSING`` if the key is not found under either strategy,
+    so callers can distinguish "key absent" from "key present with None value".
     """
     # Flat key takes priority (handles namespace params, e.g. "demo.config")
     if path in data:
         return data[path]
 
     if "." not in path:
-        return data.get(path)
+        return _MISSING if path not in data else data[path]
 
     keys = path.split(".")
     value = data
@@ -66,7 +90,7 @@ def resolve_nested_dict_path(data: dict, path: str) -> Any:
         if isinstance(value, dict) and key in value:
             value = value[key]
         else:
-            return None
+            return _MISSING
 
     return value
 

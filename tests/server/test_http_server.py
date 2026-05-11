@@ -431,6 +431,44 @@ class TestRunEndpoint:
         assert request.is_async is True
 
 
+class TestRunRequest:
+    """Tests for RunRequest model validation."""
+
+    @pytest.mark.parametrize(
+        "runner",
+        [
+            "SequentialRunner",
+            "ParallelRunner",
+            "kedro.runner.SequentialRunner",
+            "mypackage.runners.MyRunner",
+            "my_package.sub_module.Runner",
+        ],
+    )
+    def test_valid_runner_formats(self, runner):
+        """Valid dotted-identifier runner strings must be accepted."""
+        req = RunRequest(runner=runner)
+        assert req.runner == runner
+
+    @pytest.mark.parametrize(
+        "runner",
+        [
+            "os; import sys",
+            "__import__('os')",
+            "os.system('rm -rf /')",
+            "../../etc/passwd",
+            "",
+            "has space",
+            "123invalid",
+        ],
+    )
+    def test_invalid_runner_formats_are_rejected(self, runner):
+        """Runner strings that are not valid dotted identifiers must be rejected."""
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError):
+            RunRequest(runner=runner)
+
+
 class TestExecutePipeline:
     def test_execute_pipeline_success_with_defaults(self, mocker):
         """Test successful pipeline execution loads SequentialRunner by default."""

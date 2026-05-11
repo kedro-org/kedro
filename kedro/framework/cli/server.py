@@ -42,7 +42,7 @@ def server_cli() -> None:
     "--reload",
     is_flag=True,
     default=False,
-    help="Enable auto-reload for development. Server restarts on code changes.",
+    help="Enable auto-reload for development. Server restarts on code changes. Should not be used in production.",
 )
 @click.option(
     "--env",

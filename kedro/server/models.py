@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+# Matches a valid Python dotted identifier, e.g. "SequentialRunner" or
+# "mypackage.runners.MyRunner".  Prevents passing arbitrary strings to
+# importlib.import_module before the AbstractRunner subclass check runs.
+_RUNNER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$")
 
 
 class RunRequest(BaseModel):
@@ -39,6 +45,18 @@ class RunRequest(BaseModel):
         default=None,
         description="Runner to use. Any importable subclass of `kedro.runner.AbstractRunner`.",
     )
+
+    @field_validator("runner")
+    @classmethod
+    def _validate_runner_format(cls, v: str | None) -> str | None:
+        if v is not None and not _RUNNER_PATTERN.match(v):
+            raise ValueError(
+                f"runner '{v}' is not a valid Python dotted identifier. "
+                "Expected a class name or dotted module path, e.g. 'SequentialRunner' "
+                "or 'mypackage.runners.MyRunner'."
+            )
+        return v
+
     is_async: bool = Field(
         default=False,
         description="Load and save node inputs and outputs asynchronously with threads.",

@@ -46,8 +46,16 @@ def get_typed_fields(value: Any) -> dict[str, Any] | None:
 def resolve_nested_dict_path(data: dict, path: str) -> Any:
     """Resolve a dot-separated path in a nested dictionary.
 
-    Returns None if any key in the path is missing.
+    Tries the flat key first to handle namespaced parameter keys like
+    ``"demo.config"`` that Kedro stores as literal flat keys in the params
+    dict. Falls back to nested traversal for truly nested dicts.
+
+    Returns None if the key is not found under either strategy.
     """
+    # Flat key takes priority (handles namespace params, e.g. "demo.config")
+    if path in data:
+        return data[path]
+
     if "." not in path:
         return data.get(path)
 
@@ -66,9 +74,18 @@ def resolve_nested_dict_path(data: dict, path: str) -> Any:
 def set_nested_dict_value(data: dict, path: str, value: Any) -> None:
     """Set a value at a dot-separated path, creating intermediate dicts as needed.
 
+    Uses the same flat-key-first strategy as `resolve_nested_dict_path`
+    so that namespaced parameter keys like ``"demo.config"`` are updated in
+    place rather than written into a nested structure.
+
     Raises:
         ParameterValidationError: If an intermediate key is not a dictionary.
     """
+    # If the flat key already exists, update it directly
+    if path in data:
+        data[path] = value
+        return
+
     if "." not in path:
         data[path] = value
         return

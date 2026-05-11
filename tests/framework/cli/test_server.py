@@ -1,5 +1,7 @@
 import types
+import warnings
 
+import pytest
 from click.testing import CliRunner
 
 from kedro.server.utils import DEFAULT_HOST, DEFAULT_HTTP_PORT, KEDRO_PROJECT_PATH_ENV
@@ -125,3 +127,38 @@ class TestServerCommand:
         assert result.exit_code == 0, result.output
         assert "KEDRO_SERVER_ENV" not in mock_environ
         assert "KEDRO_SERVER_CONF_SOURCE" not in mock_environ
+
+    def test_reload_emits_user_warning(self, fake_metadata, fake_project_cli, mocker):
+        """--reload must emit a UserWarning about development-only use."""
+
+        mocker.patch("os.environ", {})
+        mocker.patch.dict(
+            "sys.modules",
+            {
+                "uvicorn": types.SimpleNamespace(run=mocker.Mock()),
+                "fastapi": types.SimpleNamespace(),
+            },
+        )
+
+        with pytest.warns(UserWarning, match="--reload.*development only"):
+            CliRunner().invoke(
+                fake_project_cli, ["start", "--reload"], obj=fake_metadata
+            )
+
+    def test_no_warning_without_reload(self, fake_metadata, fake_project_cli, mocker):
+        """Starting without --reload must not emit the development-only warning."""
+
+        mocker.patch("os.environ", {})
+        mocker.patch.dict(
+            "sys.modules",
+            {
+                "uvicorn": types.SimpleNamespace(run=mocker.Mock()),
+                "fastapi": types.SimpleNamespace(),
+            },
+        )
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", UserWarning)
+            result = CliRunner().invoke(fake_project_cli, ["start"], obj=fake_metadata)
+
+        assert result.exit_code == 0, result.output

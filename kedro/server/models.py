@@ -77,10 +77,6 @@ class ErrorDetail(BaseModel):
 
     type: str = Field(description="Exception type name.")
     message: str = Field(description="Error message.")
-    traceback: list[str] | None = Field(
-        default=None,
-        description="Stack trace lines, if available. Only included for errors raised during pipeline execution.",
-    )
 
 
 class RunResponse(BaseModel):
@@ -102,7 +98,3 @@ class HealthResponse(BaseModel):
         default="healthy", description="Server health status."
     )
     kedro_version: str = Field(description="Kedro version.")
-    project_path: str | None = Field(
-        default=None,
-        description="Path to the Kedro project being served.",
-    )

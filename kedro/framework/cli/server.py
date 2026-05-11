@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import click
 
@@ -41,7 +42,7 @@ def server_cli() -> None:
     "--reload",
     is_flag=True,
     default=False,
-    help="Enable auto-reload for development. Server restarts on code changes.",
+    help="Enable auto-reload for development. Server restarts on code changes. Should not be used in production.",
 )
 @click.option(
     "--env",
@@ -90,6 +91,14 @@ def server_start(  # noqa: PLR0913
         ) from exc
 
     project_path = metadata.project_path
+
+    if reload:
+        warnings.warn(
+            "--reload enables Uvicorn's auto-reload mode which is intended for "
+            "development only. Do not use it in production.",
+            UserWarning,
+            stacklevel=1,
+        )
 
     # Unset env and conf-source to avoid re-using them from previous runs if not provided in the current command
     if KEDRO_SERVER_ENV in os.environ:

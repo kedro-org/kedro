@@ -3,13 +3,23 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from kedro.runner import AbstractRunner
 from kedro.server.http_server import _execute_pipeline, create_http_server
 from kedro.server.models import ErrorDetail, RunRequest, RunResponse
 
 
-class _FakeRunner:
-    def __init__(self, *, is_async):
-        self.is_async = is_async
+class _FakeRunner(AbstractRunner):
+    """Minimal AbstractRunner subclass for testing."""
+
+    @property
+    def is_async(self) -> bool:
+        return self._is_async
+
+    def _get_executor(self, max_workers):
+        return None
+
+    def _run(self, pipeline, catalog, hook_manager=None, run_id=None):
+        pass
 
 
 class TestHTTPServerFactory:
@@ -139,7 +149,6 @@ class TestHTTPServerFactory:
 
         assert response.status_code == 200
         assert response.json()["status"] == "healthy"
-        assert response.json()["project_path"] == str(project_path)
 
     def test_health_endpoint_response_model_validation(self, mocker, tmp_path):
         """Test that health endpoint response validates against HealthResponse model."""
@@ -154,11 +163,12 @@ class TestHTTPServerFactory:
             response = client.get("/health")
 
         payload = response.json()
-        assert set(payload.keys()) == {"status", "kedro_version", "project_path"}
+        assert set(payload.keys()) == {"status", "kedro_version"}
         assert payload["status"] in ["healthy", "unhealthy"]
         assert "kedro_version" in payload
         assert isinstance(payload["kedro_version"], str)
         assert len(payload["kedro_version"]) > 0
+        assert "project_path" not in payload
 
 
 class TestRunEndpoint:
@@ -317,7 +327,6 @@ class TestRunEndpoint:
                 error=ErrorDetail(
                     type="ValueError",
                     message="bad run",
-                    traceback=["Traceback line"],
                 ),
             ),
         )
@@ -334,8 +343,8 @@ class TestRunEndpoint:
         assert payload["error"] == {
             "type": "ValueError",
             "message": "bad run",
-            "traceback": ["Traceback line"],
         }
+        assert "traceback" not in payload["error"]
 
     def test_run_endpoint_passes_parameters_to_execute_pipeline(self, mocker, tmp_path):
         """Test that RunRequest parameters are passed to _execute_pipeline."""
@@ -422,16 +431,52 @@ class TestRunEndpoint:
         assert request.is_async is True
 
 
+class TestRunRequest:
+    """Tests for RunRequest model validation."""
+
+    @pytest.mark.parametrize(
+        "runner",
+        [
+            "SequentialRunner",
+            "ParallelRunner",
+            "kedro.runner.SequentialRunner",
+            "mypackage.runners.MyRunner",
+            "my_package.sub_module.Runner",
+        ],
+    )
+    def test_valid_runner_formats(self, runner):
+        """Valid dotted-identifier runner strings must be accepted."""
+        req = RunRequest(runner=runner)
+        assert req.runner == runner
+
+    @pytest.mark.parametrize(
+        "runner",
+        [
+            "os; import sys",
+            "__import__('os')",
+            "os.system('rm -rf /')",
+            "../../etc/passwd",
+            "",
+            "has space",
+            "123invalid",
+        ],
+    )
+    def test_invalid_runner_formats_are_rejected(self, runner):
+        """Runner strings that are not valid dotted identifiers must be rejected."""
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError):
+            RunRequest(runner=runner)
+
+
 class TestExecutePipeline:
     def test_execute_pipeline_success_with_defaults(self, mocker):
         """Test successful pipeline execution loads SequentialRunner by default."""
 
         mock_session = mocker.Mock()
-        mock_runner = _FakeRunner(is_async=False)
-        mock_runner_factory = mocker.Mock(return_value=mock_runner)
         mock_load_obj = mocker.patch(
             "kedro.server.http_server.load_obj",
-            return_value=mock_runner_factory,
+            return_value=_FakeRunner,
         )
 
         result = _execute_pipeline(session=mock_session, request=RunRequest())
@@ -441,18 +486,18 @@ class TestExecutePipeline:
         assert result.duration_ms > 0
         assert result.error is None
         mock_load_obj.assert_called_once_with("SequentialRunner", "kedro.runner")
-        mock_runner_factory.assert_called_once_with(is_async=False)
         mock_session.run.assert_called_once()
-        assert mock_session.run.call_args.kwargs["runner"] is mock_runner
+        runner_used = mock_session.run.call_args.kwargs["runner"]
+        assert isinstance(runner_used, _FakeRunner)
+        assert runner_used.is_async is False
 
     def test_execute_pipeline_success_with_custom_runner(self, mocker):
         """Test successful execution with custom runner class."""
 
         mock_session = mocker.Mock()
-        mock_runner = _FakeRunner(is_async=True)
         mock_load_obj = mocker.patch(
             "kedro.server.http_server.load_obj",
-            return_value=lambda is_async: mock_runner,
+            return_value=_FakeRunner,
         )
 
         result = _execute_pipeline(
@@ -463,18 +508,18 @@ class TestExecutePipeline:
         assert result.status == "success"
         mock_load_obj.assert_called_once_with("ParallelRunner", "kedro.runner")
         mock_session.run.assert_called_once()
-        call_kwargs = mock_session.run.call_args[1]
-        assert call_kwargs["runner"].is_async is True
+        runner_used = mock_session.run.call_args[1]["runner"]
+        assert isinstance(runner_used, _FakeRunner)
+        assert runner_used.is_async is True
 
     def test_execute_pipeline_failure_with_exception(self, mocker):
         """Test pipeline execution failure with exception."""
 
         mock_session = mocker.Mock()
         mock_session.run.side_effect = ValueError("Pipeline execution failed")
-        mock_runner = _FakeRunner(is_async=False)
         mocker.patch(
             "kedro.server.http_server.load_obj",
-            return_value=lambda is_async: mock_runner,
+            return_value=_FakeRunner,
         )
 
         result = _execute_pipeline(session=mock_session, request=RunRequest())
@@ -484,7 +529,7 @@ class TestExecutePipeline:
         assert result.error is not None
         assert result.error.type == "ValueError"
         assert result.error.message == "Pipeline execution failed"
-        assert isinstance(result.error.traceback, list)
+        assert not hasattr(result.error, "traceback")
 
     def test_execute_pipeline_runner_loading_failure(self, mocker):
         """Test failure when runner class cannot be loaded."""
@@ -504,14 +549,55 @@ class TestExecutePipeline:
         assert result.error.type == "AttributeError"
         assert "UnknownRunner" in result.error.message
 
+    def test_execute_pipeline_rejects_non_abstract_runner(self, mocker):
+        """Security: runner not subclassing AbstractRunner must be rejected."""
+
+        class _NotARunner:
+            def __init__(self, *, is_async=False):
+                pass
+
+        mock_session = mocker.Mock()
+        mocker.patch(
+            "kedro.server.http_server.load_obj",
+            return_value=_NotARunner,
+        )
+
+        result = _execute_pipeline(
+            session=mock_session,
+            request=RunRequest(runner="os.system"),
+        )
+
+        assert result.status == "failure"
+        assert result.error.type == "ValueError"
+        assert "AbstractRunner" in result.error.message
+        mock_session.run.assert_not_called()
+
+    def test_execute_pipeline_rejects_non_class_runner(self, mocker):
+        """Security: load_obj returning a non-class (e.g. a function) must be rejected."""
+
+        mock_session = mocker.Mock()
+        mocker.patch(
+            "kedro.server.http_server.load_obj",
+            return_value=lambda is_async: None,  # a callable, not a class
+        )
+
+        result = _execute_pipeline(
+            session=mock_session,
+            request=RunRequest(runner="some.function"),
+        )
+
+        assert result.status == "failure"
+        assert result.error.type == "ValueError"
+        assert "AbstractRunner" in result.error.message
+        mock_session.run.assert_not_called()
+
     def test_execute_pipeline_with_all_parameters(self, mocker):
         """Test pipeline execution with all parameters provided."""
 
         mock_session = mocker.Mock()
-        mock_runner = _FakeRunner(is_async=False)
         mocker.patch(
             "kedro.server.http_server.load_obj",
-            return_value=lambda is_async: mock_runner,
+            return_value=_FakeRunner,
         )
 
         result = _execute_pipeline(

@@ -58,12 +58,22 @@ curl http://127.0.0.1:8000/health
 
 ### `POST /run`
 
-Triggers a pipeline run. All fields are optional and an empty body runs the default pipeline with default settings.
+Triggers a pipeline run. All fields are optional; send an empty JSON object (`{}`) to run the default pipeline with default settings.
+
+Run the default pipeline:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/run \
   -H "Content-Type: application/json" \
-  -d '{"pipeline_names": ["__default__"], "params": {"n_splits": 5}}'
+  -d '{}'
+```
+
+Run a specific pipeline with runtime parameters:
+
+```bash
+curl -X POST http://127.0.0.1:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{"pipeline_names": ["training"], "params": {"n_splits": 5}}'
 ```
 
 Key request fields:
@@ -86,7 +96,7 @@ Key request fields:
 
 The response includes a `run_id`, `status` (`"success"` or `"failure"`), `duration_ms`, and an `error` object on failure.
 
-The first `/run` request creates a `KedroServiceSession`; all later requests reuse it, avoiding repeated project bootstrapping.
+The first `/run` request creates a `KedroServiceSession`; all later requests reuse it, avoiding repeated session creation.
 
 !!! note
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the CLI flags or the `KEDRO_SERVER_ENV` and `KEDRO_SERVER_CONF_SOURCE` environment variables.

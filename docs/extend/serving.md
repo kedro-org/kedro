@@ -26,7 +26,7 @@ This starts the server at `http://127.0.0.1:8000` by default.
 |---|---|---|---|
 | `--host` | `-H` | `127.0.0.1` | Host to bind the server to |
 | `--port` | `-p` | `8000` | Port to bind the server to |
-| `--reload` | | `False` | Enable auto-reload on code changes (development) |
+| `--reload` | | `False` | Enable auto-reload on code changes. For development only; do not use in production. |
 | `--env` | `-e` | | Kedro configuration environment |
 | `--conf-source` | | | Path to a custom configuration directory |
 
@@ -86,14 +86,14 @@ Key request fields:
 | `from_nodes` | `list[str]` | Start the pipeline from these node names |
 | `to_nodes` | `list[str]` | End the pipeline at these node names |
 | `node_names` | `list[str]` | Run specific nodes |
-| `runner` | `str` | Runner class name or full dotted path, should be a subclass of `kedro.runner.AbstractRunner` |
+| `runner` | `str` | Runner class name or full dotted path, should be a subclass of `kedro.runner.AbstractRunner` (default: `SequentialRunner`) |
 | `is_async` | `bool` | Load and save node inputs and outputs asynchronously with threads (default: `false`) |
 | `tags` | `list[str]` | Run nodes with these tags |
 | `load_versions` | `dict[str, str]` | Pin specific dataset versions for loading, as `{"dataset_name": "version"}` |
 | `pipeline_names` | `list[str]` | Pipelines to run (default pipeline if omitted) |
 | `namespaces` | `list[str]` | Run nodes in these namespaces |
 | `params` | `dict` | Runtime parameters passed to the context |
-| `only_missing_outputs` | `bool` | Skip nodes whose outputs already exist |
+| `only_missing_outputs` | `bool` | Skip nodes whose outputs already exist and are persisted |
 
 The response includes a `run_id`, `status` (`"success"` or `"failure"`), `duration_ms`, and an `error` object on failure.
 
@@ -107,7 +107,7 @@ The first `/run` request creates a `KedroServiceSession` which the following req
 
 ## Using `create_http_server` programmatically
 
-You can create the FastAPI application directly and serve it with any ASGI server. If `project_path` is not provided, it is resolved from the `KEDRO_PROJECT_PATH` environment variable. `env` and `conf_source` can be set in the `create_http_server` arguments or through the `KEDRO_ENV` and `KEDRO_CONF_SOURCE` environment variables.
+You can create the FastAPI application directly and serve it with any ASGI server. If `project_path` is not provided, it is resolved from the `KEDRO_PROJECT_PATH` environment variable. `env` and `conf_source` can be set in the `create_http_server` arguments or through the `KEDRO_SERVER_ENV` and `KEDRO_SERVER_CONF_SOURCE` environment variables.
 
 ```python
 from kedro.server import create_http_server

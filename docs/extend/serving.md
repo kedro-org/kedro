@@ -2,11 +2,13 @@
 
 Kedro includes a built-in HTTP server that lets external systems trigger pipeline runs with REST endpoints. It is backed by [`KedroServiceSession`](./session.md#create-a-kedroservicesession), which keeps the session alive across multiple requests.
 
+The HTTP server requires optional dependencies. Install them with:
+```bash
+pip install 'kedro[server]'
+```
+
 !!! note
-    The HTTP server requires optional dependencies. Install them with:
-    ```
-    pip install 'kedro[server]'
-    ```
+    The HTTP server is intentionally minimal and meant to provide a simple interface that can be extended for custom use cases. It does not include authentication, authorisation, request queuing, async job execution, run history, or per-request session isolation. Do not expose it publicly without adding appropriate security controls.
 
 ## Starting the server
 
@@ -51,8 +53,7 @@ curl http://127.0.0.1:8000/health
 ```json
 {
   "status": "healthy",
-  "kedro_version": "0.20.0",
-  "project_path": "/path/to/project"
+  "kedro_version": "<your-kedro-version>"
 }
 ```
 
@@ -85,7 +86,7 @@ Key request fields:
 | `from_nodes` | `list[str]` | Start the pipeline from these node names |
 | `to_nodes` | `list[str]` | End the pipeline at these node names |
 | `node_names` | `list[str]` | Run specific nodes |
-| `runner` | `str` | Runner class, for example, `"ParallelRunner"` (default: `"SequentialRunner"`) |
+| `runner` | `str` | Runner class name or full dotted path, should be a subclass of `kedro.runner.AbstractRunner` |
 | `is_async` | `bool` | Load and save node inputs and outputs asynchronously with threads (default: `false`) |
 | `tags` | `list[str]` | Run nodes with these tags |
 | `load_versions` | `dict[str, str]` | Pin specific dataset versions for loading, as `{"dataset_name": "version"}` |
@@ -96,14 +97,17 @@ Key request fields:
 
 The response includes a `run_id`, `status` (`"success"` or `"failure"`), `duration_ms`, and an `error` object on failure.
 
-The first `/run` request creates a `KedroServiceSession`; all later requests reuse it, avoiding repeated session creation.
+!!! note
+    `RunRequest` model uses strict validation, unknown fields return an error rather than being silently ignored.
+
+The first `/run` request creates a `KedroServiceSession` which the following requests reuse. The endpoint runs in a thread pool, so concurrent `/run` requests share the same session and pipeline runs are not isolated from each other.
 
 !!! note
-    `env` and `conf_source` are not accepted per-request. Set them at server startup through the CLI flags or the `KEDRO_SERVER_ENV` and `KEDRO_SERVER_CONF_SOURCE` environment variables.
+    `env` and `conf_source` are not accepted per-request. Set them at server startup through the `--env` and `--conf-source` options instead.
 
 ## Using `create_http_server` programmatically
 
-You can create the FastAPI application directly and serve it with any ASGI server. If `project_path` is not provided, it is resolved from the `KEDRO_PROJECT_PATH` environment variable.
+You can create the FastAPI application directly and serve it with any ASGI server. If `project_path` is not provided, it is resolved from the `KEDRO_PROJECT_PATH` environment variable. `env` and `conf_source` can be set in the `create_http_server` arguments or through the `KEDRO_ENV` and `KEDRO_CONF_SOURCE` environment variables.
 
 ```python
 from kedro.server import create_http_server

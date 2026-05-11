@@ -74,10 +74,10 @@ Key request fields:
 | `to_outputs` | `list[str]` | End the pipeline at these dataset names |
 | `from_nodes` | `list[str]` | Start the pipeline from these node names |
 | `to_nodes` | `list[str]` | End the pipeline at these node names |
-| `node_names` | `list[str]` | Run just the specific nodes |
+| `node_names` | `list[str]` | Run specific nodes |
 | `runner` | `str` | Runner class, for example, `"ParallelRunner"` (default: `"SequentialRunner"`) |
 | `is_async` | `bool` | Load and save node inputs and outputs asynchronously with threads (default: `false`) |
-| `tags` | `list[str]` | Run just the nodes with these tags |
+| `tags` | `list[str]` | Run nodes with these tags |
 | `load_versions` | `dict[str, str]` | Pin specific dataset versions for loading, as `{"dataset_name": "version"}` |
 | `pipeline_names` | `list[str]` | Pipelines to run (default pipeline if omitted) |
 | `namespaces` | `list[str]` | Run nodes in these namespaces |

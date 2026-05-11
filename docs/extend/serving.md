@@ -40,8 +40,6 @@ kedro server start --env staging --reload
 
 ## Endpoints
 
-The first `/run` request creates a `KedroServiceSession`; all later requests reuse it, avoiding repeated project bootstrapping.
-
 ### `GET /health`
 
 Returns server status and the Kedro version in use.
@@ -72,24 +70,30 @@ Key request fields:
 
 | Field | Type | Description |
 |---|---|---|
-| `pipeline_names` | `list[str]` | Pipelines to run (default pipeline if omitted) |
-| `params` | `dict` | Runtime parameters passed to the context |
-| `runner` | `str` | Runner class, for example, `"ParallelRunner"` (default: `"SequentialRunner"`) |
-| `tags` | `list[str]` | Run just the nodes with these tags |
+| `from_inputs` | `list[str]` | Start the pipeline from these dataset names |
+| `to_outputs` | `list[str]` | End the pipeline at these dataset names |
+| `from_nodes` | `list[str]` | Start the pipeline from these node names |
+| `to_nodes` | `list[str]` | End the pipeline at these node names |
 | `node_names` | `list[str]` | Run just the specific nodes |
-| `from_nodes` / `to_nodes` | `list[str]` | Slice the pipeline by node name |
-| `from_inputs` / `to_outputs` | `list[str]` | Slice the pipeline by dataset name |
+| `runner` | `str` | Runner class, for example, `"ParallelRunner"` (default: `"SequentialRunner"`) |
+| `is_async` | `bool` | Load and save node inputs and outputs asynchronously with threads (default: `false`) |
+| `tags` | `list[str]` | Run just the nodes with these tags |
+| `load_versions` | `dict[str, str]` | Pin specific dataset versions for loading, as `{"dataset_name": "version"}` |
+| `pipeline_names` | `list[str]` | Pipelines to run (default pipeline if omitted) |
 | `namespaces` | `list[str]` | Run nodes in these namespaces |
+| `params` | `dict` | Runtime parameters passed to the context |
 | `only_missing_outputs` | `bool` | Skip nodes whose outputs already exist |
 
 The response includes a `run_id`, `status` (`"success"` or `"failure"`), `duration_ms`, and an `error` object on failure.
+
+The first `/run` request creates a `KedroServiceSession`; all later requests reuse it, avoiding repeated project bootstrapping.
 
 !!! note
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the CLI flags or the `KEDRO_SERVER_ENV` and `KEDRO_SERVER_CONF_SOURCE` environment variables.
 
 ## Using `create_http_server` programmatically
 
-You can create the FastAPI application directly and serve it with any ASGI server:
+You can create the FastAPI application directly and serve it with any ASGI server. If `project_path` is not provided, it is resolved from the `KEDRO_PROJECT_PATH` environment variable.
 
 ```python
 from kedro.server import create_http_server
@@ -101,7 +105,7 @@ app = create_http_server(
 
 # Serve with uvicorn
 import uvicorn
-uvicorn.run(app, host="0.0.0.0", port=8000)
+uvicorn.run(app, host="127.0.0.1", port=8000)
 ```
 
 

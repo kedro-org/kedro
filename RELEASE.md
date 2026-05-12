@@ -8,13 +8,13 @@ NOTE: This session implementation is under active development and may occasional
 * Added a new CLI command `kedro server start` to run the server.
 * Added inspection API to get project snapshot.
 * Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
+* Added an HTTP endpoint `/snapshot` for accessing project snapshot.
 
 ## Bug fixes and other changes
 * Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
 * Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
 * Fixed parameter validation for namespaced pipelines.
-* Added an HTTP endpoint for accessing project snapshot.
 
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.

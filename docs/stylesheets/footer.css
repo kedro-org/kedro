@@ -36,6 +36,9 @@
   display: flex;
   gap: 16px;
   font-size: 14px;
+  margin-left: auto;
+  padding-right: 16px;
+  border-right: 1px solid var(--footer-text-color);
 }
 
 .legal-links a {
@@ -47,10 +50,23 @@
   text-decoration: underline;
 }
 
+.legal-links button.cookie-settings-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  color: var(--footer-text-color);
+}
+
+.legal-links button.cookie-settings-btn:hover {
+  text-decoration: underline;
+}
+
 .social-links {
   display: flex;
   gap: 1rem;
-  margin-left: auto;
+  margin-left: 16px;
 }
 
 .social-links a {
@@ -165,6 +181,9 @@
   .legal-links {
      flex-wrap: wrap;
     gap: 16px;
+    margin-left: 0;
+    padding-right: 0;
+    border-right: 0;
   }
 
   .social-links {

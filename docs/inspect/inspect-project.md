@@ -27,6 +27,7 @@ The following sections explain how to use the inspection API:
 - [How to inspect catalog datasets](#how-to-inspect-catalog-datasets)
 - [How to list parameter keys](#how-to-list-parameter-keys)
 - [How to inspect a specific environment](#how-to-inspect-a-specific-environment)
+- [How to access the snapshot through the HTTP server](#how-to-access-the-snapshot-through-the-http-server)
 
 ## How to get a project snapshot
 
@@ -151,54 +152,33 @@ if "example_learning_rate" in snapshot.parameters:
 By default, `get_project_snapshot` uses the project's default run environment (`local` overlaid on `base`). Pass the `env` argument to load configuration from a different environment:
 
 ```python
-snapshot = get_project_snapshot(project_path = "/path/to/my_project", env="staging")
+snapshot = get_project_snapshot("/path/to/my_project", env="staging")
 ```
 
 This follows the same environment resolution rules as `kedro run --env staging`. See [Configuration basics](../configure/configuration_basics.md) for details on how environments work.
 
-## How to access the snapshot through the HTTP server
+To load configuration from a non-default directory, pass `conf_source`:
 
-When running the Kedro HTTP server, the same project snapshot is available over HTTP at `GET /snapshot`. The endpoint uses the environment configured at server startup and returns a JSON response with a `status` field (`"success"` or `"failure"`), the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, and an `error` field on failure.
-
-Start the server:
-
-```bash
-kedro server start
+```python
+snapshot = get_project_snapshot("/path/to/my_project", conf_source="conf/custom")
 ```
-
-Fetch the snapshot:
-
-```bash
-curl http://127.0.0.1:8000/snapshot
-```
-
-Example response:
-
-```json
-{
-  "status": "success",
-  "metadata": {
-    "project_name": "My Project",
-    "package_name": "my_project",
-    "kedro_version": "1.0.0"
-  },
-  "pipelines": [
-    {
-      "name": "__default__",
-      "nodes": [{"name": "split_data_node", "inputs": ["example_iris_data"], "outputs": ["X_train", "X_test"], "tags": [], "namespace": null}],
-      "inputs": ["example_iris_data"],
-      "outputs": ["example_predictions"]
-    }
-  ],
-  "datasets": {
-    "example_iris_data": {"name": "example_iris_data", "type": "pandas.CSVDataset", "filepath": "data/01_raw/iris.csv"}
-  },
-  "parameters": ["example_learning_rate", "example_num_train_iter"],
-  "error": null
-}
-```
-
-If the snapshot cannot be built (for example, due to a catalog error), the response still returns HTTP 200 with `"status": "failure"`. The `error` field contains the exception type, message, and stack trace.
 
 !!! note
-    The `/snapshot` endpoint uses the environment set at server startup (with `--env` or the `KEDRO_SERVER_ENV` environment variable). Unlike the programmatic API, it does not accept a per-request `env` parameter.
+    To compare snapshots across environments in the same process, bootstrap the project once and pass the result to each call:
+
+    ```python
+    from kedro.framework.startup import bootstrap_project
+    from kedro.inspection import get_project_snapshot
+
+    metadata = bootstrap_project("/path/to/my_project")
+    snapshot_local   = get_project_snapshot("/path/to/my_project", metadata=metadata)
+    snapshot_staging = get_project_snapshot("/path/to/my_project", env="staging", metadata=metadata)
+    ```
+
+    This avoids redundant project initialisation. When using the HTTP server, `env` is fixed at startup and cannot be overridden per request — use the programmatic API when you need multi-environment access in the same process.
+
+## How to access the snapshot through the HTTP server
+
+The Kedro HTTP server exposes the same snapshot data at `GET /snapshot`. The response contains the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, serialised as JSON.
+
+See [Serving Kedro pipelines over HTTP](../extend/serving.md#get-snapshot) for the full endpoint reference, example response, and failure behaviour.

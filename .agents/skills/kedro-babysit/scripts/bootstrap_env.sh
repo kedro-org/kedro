@@ -7,10 +7,11 @@
 #      and prints the activation command. The script CANNOT activate the env
 #      from a child shell, so it exits 0 and asks the user to activate + re-run.
 #
-#   2. INSTALL FLOW (env is active): verifies dependencies (pytest, pre_commit,
-#      optionally mkdocs) and runs make install-test-requirements +
+#   2. INSTALL FLOW (env is active): verifies the [test]-extra dependencies the
+#      agent will invoke (pytest, pre_commit, mypy, importlinter, detect_secrets;
+#      and mkdocs if --with-docs), and runs make install-test-requirements +
 #      make install-pre-commit (and make install-docs-requirements if --with-docs)
-#      if missing. Probes for system tools (gh, vale, lychee) and prints
+#      if any are missing. Probes for system tools (gh, vale, lychee) and prints
 #      platform-specific install hints if any are missing.
 #
 # Usage:
@@ -32,6 +33,12 @@ set -euo pipefail
 SUPPORTED_PY_MIN=10        # i.e. 3.10
 SUPPORTED_PY_MAX=14        # i.e. 3.14
 DEFAULT_PY_VERSION="3.11"  # Fallback only; matches the lint job in all-checks.yml.
+
+# [test]-extra modules the skill's targeted-fix recipes invoke. Probed
+# individually so a partial install is reported clearly instead of failing later
+# with "command not found". (Ruff is excluded — pre-commit ships its own pinned
+# binary in its hook cache.) Keep in sync with the docstring above.
+REQUIRED_TEST_MODULES="pytest pre_commit mypy importlinter detect_secrets"
 
 TYPE=""
 NAME=""
@@ -311,15 +318,15 @@ fi
 
 section "Python dependencies"
 
-DEPS_OK=1
-if "$PYTHON_BIN" -c 'import pytest, pre_commit' >/dev/null 2>&1; then
-    ok "pytest + pre_commit installed"
-else
-    miss "pytest and/or pre_commit not installed"
-    DEPS_OK=0
-fi
+MISSING_MODULES=""
+for mod in $REQUIRED_TEST_MODULES; do
+    "$PYTHON_BIN" -c "import $mod" >/dev/null 2>&1 || MISSING_MODULES="$MISSING_MODULES $mod"
+done
 
-if [[ $DEPS_OK -eq 0 ]]; then
+if [[ -z "$MISSING_MODULES" ]]; then
+    ok "all required [test] modules installed: $REQUIRED_TEST_MODULES"
+else
+    miss "missing modules from [test]:$MISSING_MODULES"
     ok "Running: make install-test-requirements && make install-pre-commit"
     (cd "$REPO_ROOT" && make install-test-requirements && make install-pre-commit)
 fi
@@ -357,10 +364,14 @@ section "Summary"
 echo "  Env kind            : $ACTIVE_ENV_KIND"
 echo "  Env path            : $ACTIVE_ENV_PATH"
 echo "  Python version      : $PYTHON_RUNTIME_VERSION"
-if "$PYTHON_BIN" -c 'import pytest, pre_commit' >/dev/null 2>&1; then
+SUMMARY_MISSING=""
+for mod in $REQUIRED_TEST_MODULES; do
+    "$PYTHON_BIN" -c "import $mod" >/dev/null 2>&1 || SUMMARY_MISSING="$SUMMARY_MISSING $mod"
+done
+if [[ -z "$SUMMARY_MISSING" ]]; then
     echo "  Test deps           : ready"
 else
-    echo "  Test deps           : MISSING (install failed?)"
+    echo "  Test deps           : MISSING:$SUMMARY_MISSING (install failed?)"
 fi
 if [[ $WITH_DOCS -eq 1 ]]; then
     if "$PYTHON_BIN" -c 'import mkdocs' >/dev/null 2>&1; then

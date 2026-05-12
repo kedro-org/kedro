@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Optional
 from unittest.mock import MagicMock
 
 import pytest
@@ -151,3 +152,23 @@ class TestApplyValidation:
 
         parameter_validator._apply_validation(raw, requirements)
         assert isinstance(raw["config"], dict)
+
+    def test_validate_raw_params_optional_none(self):
+        def my_func(model_options: Optional[SamplePydanticModel]) -> None:
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:model_options",
+            outputs="output",
+            name="test_node",
+        )
+
+        pipeline = MagicMock()
+        pipeline.nodes = [test_node]
+
+        validator = ParameterValidator(pipelines={"data_science": pipeline})
+
+        result = validator.validate_raw_params({"model_options": None})
+
+        assert result["model_options"] is None

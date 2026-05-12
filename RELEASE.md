@@ -7,6 +7,7 @@ NOTE: This session implementation is under active development and may occasional
 * Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests.
 * Added a new CLI command `kedro server start` to run the server.
 * Added inspection API to get project snapshot.
+* Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
 
 ## Bug fixes and other changes
 * Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.

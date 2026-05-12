@@ -84,7 +84,7 @@ jobs:
             "Release ${{ needs.check-version.outputs.kedro_version }}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.check-version.outputs.kedro_version }}
           name: ${{ needs.check-version.outputs.kedro_version }}

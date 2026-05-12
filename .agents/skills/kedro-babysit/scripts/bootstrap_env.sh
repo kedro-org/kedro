@@ -7,12 +7,13 @@
 #      and prints the activation command. The script CANNOT activate the env
 #      from a child shell, so it exits 0 and asks the user to activate + re-run.
 #
-#   2. INSTALL FLOW (env is active): verifies the [test]-extra dependencies the
-#      agent will invoke (pytest, pre_commit, mypy, importlinter, detect_secrets;
-#      and mkdocs if --with-docs), and runs make install-test-requirements +
-#      make install-pre-commit (and make install-docs-requirements if --with-docs)
-#      if any are missing. Probes for system tools (gh, vale, lychee) and prints
-#      platform-specific install hints if any are missing.
+#   2. INSTALL FLOW (env is active): verifies that the binaries the skill's
+#      targeted-fix recipes invoke (pytest, pre-commit, mypy, lint-imports,
+#      detect-secrets-hook; and mkdocs if --with-docs) are on PATH, and runs
+#      make install-test-requirements + make install-pre-commit (and
+#      make install-docs-requirements if --with-docs) if any are missing.
+#      Probes for system tools (gh, vale, lychee) and prints platform-specific
+#      install hints if any are missing.
 #
 # Usage:
 #   bash bootstrap_env.sh                                           # auto-detect mode
@@ -34,11 +35,15 @@ SUPPORTED_PY_MIN=10        # i.e. 3.10
 SUPPORTED_PY_MAX=14        # i.e. 3.14
 DEFAULT_PY_VERSION="3.11"  # Fallback only; matches the lint job in all-checks.yml.
 
-# [test]-extra modules the skill's targeted-fix recipes invoke. Probed
-# individually so a partial install is reported clearly instead of failing later
-# with "command not found". (Ruff is excluded — pre-commit ships its own pinned
-# binary in its hook cache.) Keep in sync with the docstring above.
-REQUIRED_TEST_MODULES="pytest pre_commit mypy importlinter detect_secrets"
+# [test]-extra binaries the skill's targeted-fix recipes invoke. Probed via
+# `command -v` (not `python -c "import X"`) because the skill calls these as
+# CLI binaries — and an importable module can still be missing its entry-point
+# script (e.g. older import-linter versions registered `lint-imports` under a
+# different entry point, so `import importlinter` succeeded but the binary was
+# absent). Checking PATH matches what the recipes will actually do.
+# (Ruff is excluded — pre-commit ships its own pinned binary in its hook cache.)
+# Keep in sync with the docstring above.
+REQUIRED_TEST_BINARIES="pytest pre-commit mypy lint-imports detect-secrets-hook"
 
 TYPE=""
 NAME=""
@@ -319,15 +324,15 @@ fi
 
 section "Python dependencies"
 
-MISSING_MODULES=""
-for mod in $REQUIRED_TEST_MODULES; do
-    "$PYTHON_BIN" -c "import $mod" >/dev/null 2>&1 || MISSING_MODULES="$MISSING_MODULES $mod"
+MISSING_BINARIES=""
+for bin in $REQUIRED_TEST_BINARIES; do
+    command -v "$bin" >/dev/null 2>&1 || MISSING_BINARIES="$MISSING_BINARIES $bin"
 done
 
-if [[ -z "$MISSING_MODULES" ]]; then
-    ok "all required [test] modules installed: $REQUIRED_TEST_MODULES"
+if [[ -z "$MISSING_BINARIES" ]]; then
+    ok "all required [test] binaries on PATH: $REQUIRED_TEST_BINARIES"
 else
-    miss "missing modules from [test]:$MISSING_MODULES"
+    miss "missing binaries from [test]:$MISSING_BINARIES"
     info "Running: make install-test-requirements && make install-pre-commit"
     (cd "$REPO_ROOT" && make install-test-requirements && make install-pre-commit)
 fi
@@ -367,8 +372,8 @@ echo "  Env kind            : $ACTIVE_ENV_KIND"
 echo "  Env path            : $ACTIVE_ENV_PATH"
 echo "  Python version      : $PYTHON_RUNTIME_VERSION"
 SUMMARY_MISSING=""
-for mod in $REQUIRED_TEST_MODULES; do
-    "$PYTHON_BIN" -c "import $mod" >/dev/null 2>&1 || SUMMARY_MISSING="$SUMMARY_MISSING $mod"
+for bin in $REQUIRED_TEST_BINARIES; do
+    command -v "$bin" >/dev/null 2>&1 || SUMMARY_MISSING="$SUMMARY_MISSING $bin"
 done
 if [[ -z "$SUMMARY_MISSING" ]]; then
     echo "  Test deps           : ready"

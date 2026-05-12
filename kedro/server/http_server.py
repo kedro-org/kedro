@@ -19,6 +19,7 @@ from kedro.framework.startup import bootstrap_project
 from kedro.inspection import get_project_snapshot
 from kedro.inspection.snapshot import _seed_bootstrap_cache
 from kedro.io.core import generate_timestamp
+from kedro.runner import AbstractRunner
 from kedro.server.models import (
     ErrorDetail,
     HealthResponse,
@@ -107,11 +108,9 @@ def create_http_server(
 
         Returns server status and Kedro version information.
         """
-        project_path = app.state.project_path
         return HealthResponse(
             status="healthy",
             kedro_version=kedro_version,
-            project_path=str(project_path),
         )
 
     @app.get("/snapshot", response_model=SnapshotResponse, tags=["inspection"])
@@ -201,6 +200,13 @@ def _execute_pipeline(
     try:
         runner_name = request.runner or "SequentialRunner"
         runner_class = load_obj(runner_name, "kedro.runner")
+        if not (
+            isinstance(runner_class, type) and issubclass(runner_class, AbstractRunner)
+        ):
+            raise ValueError(
+                f"Runner '{runner_name}' is not a subclass of AbstractRunner. "
+                "Only AbstractRunner subclasses are permitted."
+            )
         runner_obj = runner_class(is_async=request.is_async)
 
         session.run(
@@ -239,7 +245,6 @@ def _execute_pipeline(
         error_detail = ErrorDetail(
             type=type(exc).__qualname__,
             message=str(exc),
-            traceback=traceback.format_tb(exc.__traceback__),
         )
 
         return RunResponse(

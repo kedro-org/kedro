@@ -42,9 +42,7 @@ class TestHTTPServerFactory:
         with pytest.raises(RuntimeError, match="cannot resolve project"):
             create_http_server()
 
-    def test_lifespan_calls_bootstrap_on_startup(
-        self, mocker, tmp_path, _patch_seed_bootstrap_cache
-    ):
+    def test_lifespan_calls_bootstrap_on_startup(self, mocker, tmp_path):
         """Test that lifespan context manager calls bootstrap_project on startup."""
         project_path = Path(tmp_path).resolve()
         mocker.patch(
@@ -57,9 +55,6 @@ class TestHTTPServerFactory:
             client.get("/health")
 
         mock_bootstrap.assert_called_once_with(project_path)
-        _patch_seed_bootstrap_cache.assert_called_once_with(
-            project_path, mock_bootstrap.return_value
-        )
 
     def test_lifespan_closes_session_on_shutdown(self, mocker, tmp_path):
         """Test that the session is closed when the server shuts down."""
@@ -125,26 +120,37 @@ class TestHTTPServerFactory:
             for record in caplog.records
         )
 
-    def test_health_endpoint_returns_healthy_status(self, tmp_path, make_http_server):
+    def test_health_endpoint_returns_healthy_status(self, mocker, tmp_path):
         """Test that health endpoint returns 200 with healthy status."""
         project_path = Path(tmp_path).resolve()
-        app = make_http_server()
+        mocker.patch(
+            "kedro.server.http_server._resolve_project_path", return_value=project_path
+        )
+        mocker.patch("kedro.server.http_server.bootstrap_project")
+
+        app = create_http_server()
         with TestClient(app) as client:
             response = client.get("/health")
 
         assert response.status_code == 200
         assert response.json()["status"] == "healthy"
-        assert response.json()["project_path"] == str(project_path)
 
-    def test_health_endpoint_response_model_validation(self, make_http_server):
+    def test_health_endpoint_response_model_validation(self, mocker, tmp_path):
         """Test that health endpoint response validates against HealthResponse model."""
-        app = make_http_server()
+        project_path = Path(tmp_path).resolve()
+        mocker.patch(
+            "kedro.server.http_server._resolve_project_path", return_value=project_path
+        )
+        mocker.patch("kedro.server.http_server.bootstrap_project")
+
+        app = create_http_server()
         with TestClient(app) as client:
             response = client.get("/health")
 
         payload = response.json()
-        assert set(payload.keys()) == {"status", "kedro_version", "project_path"}
+        assert set(payload.keys()) == {"status", "kedro_version"}
         assert payload["status"] in ["healthy", "unhealthy"]
         assert "kedro_version" in payload
         assert isinstance(payload["kedro_version"], str)
         assert len(payload["kedro_version"]) > 0
+        assert "project_path" not in payload

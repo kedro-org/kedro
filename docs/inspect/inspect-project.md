@@ -163,13 +163,13 @@ When running the Kedro HTTP server, the same project snapshot is available over 
 Start the server:
 
 ```bash
-kedro serve
+kedro server start
 ```
 
 Fetch the snapshot:
 
 ```bash
-curl http://localhost:4141/snapshot
+curl http://127.0.0.1:8000/snapshot
 ```
 
 Example response:

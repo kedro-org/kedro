@@ -1,6 +1,6 @@
 # Serving Kedro pipelines over HTTP
 
-Kedro includes a built-in HTTP server that lets external systems trigger pipeline runs with REST endpoints. It is backed by [`KedroServiceSession`](./session.md#create-a-kedroservicesession), which keeps the session alive across multiple requests.
+Kedro includes a built-in HTTP server that lets external systems interact with a Kedro project over REST — triggering pipeline runs, inspecting project metadata, and more. It is backed by [`KedroServiceSession`](./session.md#create-a-kedroservicesession), which keeps the session alive across multiple requests.
 
 The HTTP server requires optional dependencies. Install them with:
 ```bash
@@ -53,9 +53,11 @@ curl http://127.0.0.1:8000/health
 ```json
 {
   "status": "healthy",
-  "kedro_version": "<your-kedro-version>"
+  "kedro_version": "<installed-kedro-version>"
 }
 ```
+
+`kedro_version` is the version of the Kedro package running the server, not the version declared in the project's `pyproject.toml`.
 
 ### `POST /run`
 
@@ -105,9 +107,13 @@ The first `/run` request creates a `KedroServiceSession` which the following req
 !!! note
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the `--env` and `--conf-source` options instead.
 
+### Interactive API reference
+
+When the server is running, [FastAPI](https://fastapi.tiangolo.com/) automatically generates interactive API documentation at `http://127.0.0.1:8000/docs`. This page lists all available endpoints, their request and response schemas, and lets you try them out directly in the browser.
+
 ## Using `create_http_server` programmatically
 
-You can create the FastAPI application directly and serve it with any ASGI server. If `project_path` is not provided, it is resolved from the `KEDRO_PROJECT_PATH` environment variable. `env` and `conf_source` can be set in the `create_http_server` arguments or through the `KEDRO_SERVER_ENV` and `KEDRO_SERVER_CONF_SOURCE` environment variables.
+You can create the FastAPI application directly and serve it. If `project_path` is not provided, it is resolved from the `KEDRO_PROJECT_PATH` environment variable. `env` and `conf_source` can be set in the `create_http_server` arguments or through the `KEDRO_SERVER_ENV` and `KEDRO_SERVER_CONF_SOURCE` environment variables.
 
 ```python
 from kedro.server import create_http_server

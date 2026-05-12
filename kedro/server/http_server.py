@@ -24,6 +24,7 @@ from kedro.server.models import (
     HealthResponse,
     RunRequest,
     RunResponse,
+    SnapshotErrorDetail,
     SnapshotResponse,
 )
 from kedro.server.utils import (
@@ -141,7 +142,7 @@ def create_http_server(
             logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
             return SnapshotResponse(
                 status="failure",
-                error=ErrorDetail(
+                error=SnapshotErrorDetail(
                     type=type(exc).__qualname__,
                     message=str(exc),
                     traceback=traceback.format_tb(exc.__traceback__),

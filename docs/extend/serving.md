@@ -59,6 +59,74 @@ curl http://127.0.0.1:8000/health
 
 `kedro_version` is the version of the Kedro package running the server, not the version declared in the project's `pyproject.toml`.
 
+### `GET /snapshot`
+
+Returns a read-only snapshot of the project structure: metadata, registered pipelines, catalog datasets, and parameter keys.
+
+```bash
+curl http://127.0.0.1:8000/snapshot
+```
+
+```json
+{
+  "status": "success",
+  "metadata": {
+    "project_name": "My Project",
+    "package_name": "my_project",
+    "kedro_version": "1.0.0"
+  },
+  "pipelines": [
+    {
+      "name": "__default__",
+      "nodes": [
+        {
+          "name": "split_data_node",
+          "inputs": ["example_iris_data"],
+          "outputs": ["X_train", "X_test"],
+          "tags": [],
+          "namespace": null
+        }
+      ],
+      "inputs": ["example_iris_data"],
+      "outputs": ["example_predictions"]
+    }
+  ],
+  "datasets": {
+    "example_iris_data": {
+      "name": "example_iris_data",
+      "type": "pandas.CSVDataset",
+      "filepath": "data/01_raw/iris.csv"
+    }
+  },
+  "parameters": ["example_learning_rate", "example_num_train_iter"],
+  "error": null
+}
+```
+
+If the snapshot cannot be built (for example, due to a catalog error), the response still returns HTTP 200 with `"status": "failure"`. The `error` field contains the exception type, message, and stack trace:
+
+```json
+{
+  "status": "failure",
+  "metadata": null,
+  "pipelines": null,
+  "datasets": null,
+  "parameters": null,
+  "error": {
+    "type": "MissingConfigException",
+    "message": "No config files found matching the pattern(s) 'catalog*'",
+    "traceback": [
+      "  File \".../kedro/inspection/snapshot.py\", line 150, in _build_project_snapshot\n    conf_catalog = config_loader[\"catalog\"]\n"
+    ]
+  }
+}
+```
+
+!!! note
+    The `/snapshot` endpoint uses the environment configured at server startup (`--env` or `KEDRO_SERVER_ENV`). It does not accept a per-request `env` parameter.
+
+See [Inspect a Kedro project](../inspect/inspect-project.md) for the equivalent programmatic API and details on the snapshot structure.
+
 ### `POST /run`
 
 Triggers a pipeline run. All fields are optional; send an empty JSON object (`{}`) to run the default pipeline with default settings.
@@ -149,4 +217,4 @@ def list_pipelines() -> dict:
     return {"pipelines": list(pipelines.keys())}
 ```
 
-The new `/pipelines` endpoint sits alongside the built-in `/health` and `/run` routes and benefits from the same session lifecycle.
+The new `/pipelines` endpoint sits alongside the built-in `/health`, `/snapshot`, and `/run` routes and benefits from the same session lifecycle.

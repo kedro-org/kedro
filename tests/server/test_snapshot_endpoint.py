@@ -158,8 +158,10 @@ class TestSnapshotEndpoint:
             "kedro.server.http_server.get_project_snapshot",
             return_value=_make_snapshot(),
         )
-        mock_bootstrap = mocker.patch("kedro.server.http_server.bootstrap_project")
         app = make_http_server()
         with TestClient(app) as client:
             client.get("/snapshot")
-        assert mock_get.call_args[1]["metadata"] is mock_bootstrap.return_value
+        assert (
+            mock_get.call_args[1]["metadata"]
+            is make_http_server.mock_bootstrap.return_value
+        )

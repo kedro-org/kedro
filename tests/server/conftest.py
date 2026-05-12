@@ -21,14 +21,16 @@ def make_http_server(mocker, tmp_path):
             app = make_http_server(env="staging")
     """
 
+    mock_bootstrap = mocker.patch("kedro.server.http_server.bootstrap_project")
+
     def _factory(*, env=None, conf_source=None):
         project_path = Path(tmp_path).resolve()
         mocker.patch(
             "kedro.server.http_server._resolve_project_path", return_value=project_path
         )
-        mocker.patch("kedro.server.http_server.bootstrap_project")
         return create_http_server(
             project_path=str(project_path), env=env, conf_source=conf_source
         )
 
+    _factory.mock_bootstrap = mock_bootstrap
     return _factory

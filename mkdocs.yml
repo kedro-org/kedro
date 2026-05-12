@@ -95,15 +95,12 @@ plugins:
       full_output: llms-full.txt
 
       sections:
-        Getting Started:
+        Get Started:
           - index.md: Welcome to Kedro documentation
-          - getting-started/course.md: Introduction to Kedro - learn the basics
-          - getting-started/kedro_concepts.md: Core concepts - nodes, pipelines, catalog, and more
           - getting-started/install.md: Installation guide for pip, conda, and development setup
-          - getting-started/architecture_overview.md: Understanding Kedro's architecture
-          - getting-started/commands_reference.md: Complete CLI command reference
-          - getting-started/glossary.md: Kedro terminology glossary
+          - getting-started/kedro_concepts.md: Core concepts - nodes, pipelines, catalog, and more
           - getting-started/faq.md: Frequently asked questions
+          - getting-started/course.md: Learn about Kedro from our video course
 
         Essential Tutorials:
           - tutorials/spaceflights_tutorial.md: Complete tutorial building a spaceflight price prediction project
@@ -247,6 +244,8 @@ plugins:
           - ide/set_up_pycharm.md: PyCharm setup for Kedro
 
         About Kedro:
+          - getting-started/architecture_overview.md: Understanding Kedro's architecture
+          - getting-started/glossary.md: Kedro terminology glossary
           - about/technical_steering_committee.md: Kedro's Technical Steering Committee
           - about/migration.md: Migration guide between Kedro versions
           - about/telemetry.md: Understanding Kedro telemetry
@@ -300,14 +299,10 @@ nav:
   - Welcome: index.md
   - Kedro:
       - Get Started:
-          - Introduction to Kedro: getting-started/course.md
-          - Concepts: getting-started/kedro_concepts.md
           - Installation: getting-started/install.md
-          - Kedro architecture: getting-started/architecture_overview.md
-          # - Kedro's CLI: getting-started/commands_reference.md
-            #   - Quickstart: getting-started/quickstart.md
-          - Glossary: getting-started/glossary.md
+          - Concepts: getting-started/kedro_concepts.md
           - FAQs: getting-started/faq.md
+          - Kedro's video course: getting-started/course.md
       - Tutorials:
           - Kedro Spaceflights tutorial:
             - Spaceflight tutorial: tutorials/spaceflights_tutorial.md
@@ -462,6 +457,8 @@ nav:
           - Visual Studio Code: ide/set_up_vscode.md
           - PyCharm: ide/set_up_pycharm.md
       - About:
+          - Kedro architecture: getting-started/architecture_overview.md
+          - Glossary: getting-started/glossary.md
         #   - Community:
             #   - Kedro Slack: about/community/slack.md
             #   - Kedro Wizard: about/community/wizard.md

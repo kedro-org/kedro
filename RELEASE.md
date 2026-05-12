@@ -14,13 +14,14 @@ NOTE: This session implementation is under active development and may occasional
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
 * Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
 * Fixed parameter validation for namespaced pipelines.
+* Fixed non-async runners (`SequentialRunner`, `ThreadRunner`, and `ParallelRunner`) iterating over iterable-but-non-generator node outputs (e.g. `mne.Epochs`) before saving them. Streaming behaviour is now restricted to generator-function nodes, so custom business objects are passed to `catalog.save` unchanged.
 
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.
 * Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
 
 ## Community contributions
-
+* [BhavayChopra](https://github.com/BhavayChopra)
 * [jeevan6996](https://github.com/jeevan6996)
 * [Rahul Bansod](https://github.com/rahulbansod519)
 

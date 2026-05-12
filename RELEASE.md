@@ -1,23 +1,73 @@
 # Upcoming Release
+
 ## Major features and improvements
+* Add official support for Python 3.14.
+* Added the first iteration of the `KedroServiceSession`, a new session implementation that allows for multiple runs and data injection.
+NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
+* Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests.
+* Added a new CLI command `kedro server start` to run the server.
+* Added inspection API to get project snapshot.
 * Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
+
 ## Bug fixes and other changes
+* Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
+* Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
+* Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
+* Fixed parameter validation for namespaced pipelines.
 
 ## Documentation changes
+* Added documentation for `KedroServiceSession`.
+* Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
+
 ## Community contributions
 
+* [jeevan6996](https://github.com/jeevan6996)
+* [Rahul Bansod](https://github.com/rahulbansod519)
+
+
+# Release 1.3.1
+
+## Bug fixes and other changes
+* Fixed `AttributeError` when node functions have non-Pydantic/dataclass type hints on `params:` inputs. The parameter validation framework now correctly skips types it cannot validate.
+
+## Documentation changes
+* Added documentation for `Optional[Model]` support and multi-type union limitations in parameter validation.
+* Improved Mermaid diagram visibility in dark mode.
+
+## Community contributions
+* [SayantanDutt](https://github.com/SayantanDutt)
 
 # Release 1.3.0
 
 ## Major features and improvements
+* Added optional parameter validation that uses type hints of parameter inputs to auto-validate and instantiate Pydantic models/dataclasses with no impact on untyped parameters.
 * Added `list_versions()` method for versioned datasets to list available dataset versions.
+* Added `pipelines_to_find` parameter to `find_pipelines()`, allowing users to selectively run a subset of existing pipelines by modifying the pipeline registry.
+* The CLI `--checkout` flag can now be used on a new Kedro project from the default template, without a starter.
+* Added `SESSION_CLASS` as a configurable project setting, allowing users to define a custom KedroSession subclass
 
 ## Bug fixes and other changes
+* `DataCatalog.load()` and `DataCatalog.save()` now raise a `DatasetError` that includes the dataset name for easier debugging.
+* Aligned the run data passed to `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error` and the schema specified in the hooks specs.
+* Fixed a path traversal vulnerability in versioned dataset loading that could allow unauthorized file access via unsanitized version strings.
+* Fixed remote code execution vulnerability in the logging configuration.
 * Removed the `cachetools` dependency and replaced it with a lightweight internal caching implementation.
 * Added a warning when a node returns a value but is defined with `outputs=None`, clarifying that the return value is ignored.
+* Added `preserve_logging` flag to `configure_project()` to prevent runtime-added logging handlers from being overwritten when `configure_project()` is called after custom handlers have been attached (e.g. in a long-running server process such as FastAPI).
+* Added util method `find_config_file()` to handle different config file extensions (.yml, .yaml)
+* Added reusable suggestion functionality for mistyped pipeline names using `kedro run`
+* Added a fix for `CatalogConfigResolver` splitting sqlalchemy URL during pattern resolution.
 
 ## Documentation changes
+* Added parameter validation documentation covering Pydantic model and dataclass support for typed parameters.
+
 ## Community contributions
+* [aziq](https://github.com/aziq)
+* [zhubaobao2024](https://github.com/zhubaobao2024)
+* [Camille Coeurjoly](https://github.com/Camille1992)
+* [sinanpl](https://github.com/sinanpl)
+* [Mr-Neutr0n](https://github.com/Mr-Neutr0n)
+* [mvhensbergen](https://github.com/mvhensbergen)
 
 # Release 1.2.0
 ## Major features and improvements
@@ -67,6 +117,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Aseem Sangalay](https://github.com/aseemsangalay)
 * [Chris Schopp](https://github.com/chrisschopp)
 * [Yaroslav Halchenko](https://github.com/yarikoptic)
+
 
 # Release 1.0.0
 ## Major features and improvements

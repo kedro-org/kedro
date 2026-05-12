@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 import sys
 import warnings
 
-__version__ = "1.2.0"
+__version__ = "1.3.1"
 
 
 class KedroDeprecationWarning(DeprecationWarning):
@@ -28,7 +28,7 @@ if not sys.warnoptions:
     warnings.simplefilter("default", KedroDeprecationWarning)
     warnings.simplefilter("error", KedroPythonVersionWarning)
 
-if sys.version_info >= (3, 14):
+if sys.version_info >= (3, 15):
     warnings.warn(
         """Kedro is not yet fully compatible with this Python version.
 To proceed at your own risk and ignore this warning,

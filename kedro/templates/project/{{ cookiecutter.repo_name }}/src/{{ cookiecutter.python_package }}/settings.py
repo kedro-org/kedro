@@ -11,6 +11,10 @@ https://docs.kedro.org/en/stable/configure/configuration_basics/#configuration""
 # Installed plugins for which to disable hook auto-registration.
 # DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)
 
+# Class that manages the KedroSession.
+# from kedro.framework.session import KedroSession
+# SESSION_CLASS = KedroSession
+
 # Class that manages storing KedroSession data.
 # from kedro.framework.session.store import BaseSessionStore
 # SESSION_STORE_CLASS = BaseSessionStore

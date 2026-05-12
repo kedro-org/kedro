@@ -40,8 +40,12 @@ def test_project_logging_in_default_logging_config(default_logging_config_with_p
     assert logging.getLogger("test_project").level == logging.INFO
 
 
-def test_environment_variable_logging_config(monkeypatch, tmp_path):
-    config_path = Path(tmp_path) / "logging.yml"
+@pytest.mark.parametrize(
+    "logging_filename",
+    ["logging.yml", "logging.yaml"],
+)
+def test_environment_variable_logging_config(monkeypatch, tmp_path, logging_filename):
+    config_path = Path(tmp_path) / logging_filename
     monkeypatch.setenv("KEDRO_LOGGING_CONFIG", config_path.absolute())
     logging_config = {"version": 1, "loggers": {"kedro": {"level": "WARNING"}}}
     with config_path.open("w", encoding="utf-8") as f:
@@ -172,8 +176,12 @@ def test_has_rich_handler():
         assert not _has_rich_handler(test_logger)
 
 
-def test_default_logging_info_emission(monkeypatch, tmp_path, caplog):
-    config_path = (Path(tmp_path) / "conf" / "logging.yml").absolute()
+@pytest.mark.parametrize(
+    "logging_filename",
+    ["logging.yml", "logging.yaml"],
+)
+def test_default_logging_info_emission(monkeypatch, tmp_path, caplog, logging_filename):
+    config_path = (Path(tmp_path) / "conf" / logging_filename).absolute()
     config_path.parent.mkdir(parents=True)
     logging_config = {"version": 1, "loggers": {"kedro": {"level": "DEBUG"}}}
     with config_path.open("w", encoding="utf-8") as f:
@@ -216,6 +224,49 @@ def test_logger_without_rich_markup():
 
     for record in custom_handler.records:
         assert "[dark_orange]" not in record.message
+
+
+def test_configure_project_preserve_logging_keeps_runtime_handlers():
+    """Runtime-added handlers should survive configure_project() when preserve_logging=True.
+
+    Regression test for https://github.com/kedro-org/kedro/issues/4606:
+    calling configure_project() triggers dictConfig(), which resets the logging
+    state and silently discards any handlers added after the initial LOGGING setup.
+    """
+    custom_handler = logging.StreamHandler()
+    custom_handler.name = "custom_runtime_handler"
+    root_logger = logging.getLogger()
+    root_logger.addHandler(custom_handler)
+
+    try:
+        configure_project("test_project_preserve", preserve_logging=True)
+
+        handler_names = {h.name for h in root_logger.handlers}
+        assert "custom_runtime_handler" in handler_names
+        # The package logger should still be registered in LOGGING.data
+        assert "test_project_preserve" in LOGGING.data.get("loggers", {})
+    finally:
+        root_logger.removeHandler(custom_handler)
+
+
+def test_configure_project_overwrites_runtime_handlers_by_default():
+    """Without preserve_logging=True, configure_project() wipes runtime-added handlers.
+
+    This documents the existing (pre-fix) default behaviour and ensures we haven't
+    accidentally changed it.
+    """
+    custom_handler = logging.StreamHandler()
+    custom_handler.name = "custom_runtime_handler_default"
+    root_logger = logging.getLogger()
+    root_logger.addHandler(custom_handler)
+
+    try:
+        configure_project("test_project_no_preserve")
+
+        handler_names = {h.name for h in root_logger.handlers}
+        assert "custom_runtime_handler_default" not in handler_names
+    finally:
+        root_logger.removeHandler(custom_handler)
 
 
 def test_logger_with_invalid_markup_args():
@@ -264,3 +315,138 @@ def test_rich_format_with_invalid_type():
         TypeError, match="rich_format only accept non-empty list as an argument"
     ):
         root_logger.warning("value: %s", "val", extra={"rich_format": "red"})
+
+
+def test_validate_safe_config():
+    """Test that _validate_logging_config passes safe configs unchanged."""
+    from kedro.framework.project import _ProjectLogging
+
+    input_config = {
+        "version": 1,
+        "handlers": {"console": {"class": "logging.StreamHandler"}},
+        "loggers": {"kedro": {"level": "INFO"}},
+    }
+
+    logging_instance = _ProjectLogging()
+    result = logging_instance._validate_logging_config(input_config)
+    assert result == input_config
+
+
+@pytest.mark.parametrize(
+    "class_path",
+    [
+        "logging.StreamHandler",
+        "logging.FileHandler",
+        "logging.handlers.RotatingFileHandler",
+        "logging.Formatter",
+        "logging.Filter",
+        "kedro.logging.RichHandler",
+    ],
+)
+def test_validate_logging_class_allows_legitimate_classes(class_path):
+    """Legitimate logging classes must pass validation without error."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    # Should not raise
+    logging_instance._validate_logging_class(class_path)
+
+
+@pytest.mark.parametrize(
+    "class_path",
+    [
+        "subprocess.Popen",
+        "os.system",
+        "builtins.eval",
+        "builtins.exec",
+    ],
+)
+def test_validate_logging_class_blocks_non_logging_classes(class_path):
+    """Non-logging classes (e.g. subprocess.Popen) must be rejected."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="Invalid logging class"):
+        logging_instance._validate_logging_class(class_path)
+
+
+def test_validate_logging_class_blocks_nonexistent_class():
+    """A class that doesn't exist in its module must be rejected."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="not found in module"):
+        logging_instance._validate_logging_class("logging.NonExistentHandler")
+
+
+def test_validate_logging_class_blocks_nonexistent_module():
+    """A class from a non-importable module must be rejected."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="Cannot import module"):
+        logging_instance._validate_logging_class("totally.fake.module.Handler")
+
+
+def test_validate_logging_class_bare_name_passes():
+    """A bare class name with no module prefix must pass (logging resolves it)."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    logging_instance._validate_logging_class("StreamHandler")  # should not raise
+
+
+def test_validate_config_blocks_rce_via_class():
+    """The subprocess.Popen RCE vector via the 'class' key must be blocked."""
+    from kedro.framework.project import _ProjectLogging
+
+    malicious_config = {
+        "version": 1,
+        "handlers": {
+            "rce": {
+                "class": "subprocess.Popen",
+                "args": "id",
+                "shell": True,
+            }
+        },
+        "root": {"handlers": ["rce"]},
+    }
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="Invalid logging class"):
+        logging_instance.configure(malicious_config)
+
+
+@pytest.mark.parametrize(
+    "input_config",
+    [
+        # Simple dict with '()' key
+        {
+            "version": 1,
+            "handlers": {
+                "console": {
+                    "class": "logging.StreamHandler",
+                    "()": "os.system",  # Dangerous factory
+                    "args": ["echo pwned"],
+                }
+            },
+            "loggers": {"kedro": {"level": "INFO"}},
+        },
+        # Nested dict with '()' in list
+        {
+            "handlers": [
+                {"class": "logging.StreamHandler", "()": "subprocess.call"},
+                {"class": "logging.FileHandler", "filename": "log.txt"},
+            ]
+        },
+    ],
+)
+def test_validate_raises_error_on_factory_keys(input_config):
+    """Test that _validate_logging_config raises ValueError on '()' factory keys."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(
+        ValueError, match="The '\\(\\)\\' key is not allowed in logging configuration"
+    ):
+        logging_instance.configure(input_config)

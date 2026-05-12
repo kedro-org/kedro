@@ -22,6 +22,7 @@ else:
 import kedro
 from features.steps import util
 from features.steps.sh_run import ChildTerminatingPopen, check_run, run
+from kedro.inspection import get_project_snapshot
 
 OK_EXIT_CODE = 0
 
@@ -775,3 +776,32 @@ def delete_project_file(context, filepath):
         file_to_delete.unlink()
     elif file_to_delete.is_dir():
         shutil.rmtree(file_to_delete)
+
+
+@when("I call get_project_snapshot on the project")
+def call_get_project_snapshot(context):
+    """Call get_project_snapshot on the test project and store the result in context."""
+    context.snapshot = get_project_snapshot(context.root_project_dir)
+
+
+@then("the snapshot pipelines include {names:CSV}")
+def check_snapshot_pipelines(context, names):
+    pipeline_names = [p.name for p in context.snapshot.pipelines]
+    for name in names:
+        assert name in pipeline_names, f"Expected pipeline '{name}' in {pipeline_names}"
+
+
+@then("the snapshot datasets include {names:CSV}")
+def check_snapshot_datasets(context, names):
+    for name in names:
+        assert (
+            name in context.snapshot.datasets
+        ), f"Expected dataset '{name}' in {list(context.snapshot.datasets)}"
+
+
+@then("the snapshot parameters include {names:CSV}")
+def check_snapshot_parameters(context, names):
+    for name in names:
+        assert (
+            name in context.snapshot.parameters
+        ), f"Expected parameter '{name}' in {context.snapshot.parameters}"

@@ -2,12 +2,13 @@
 of kedro package.
 """
 
+import difflib
 import importlib
 import logging
 import os
 import re
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from functools import wraps
 from pathlib import Path
 from typing import Any
@@ -31,6 +32,9 @@ CLOUD_PROTOCOLS = (
     "s3n",
 )
 PROTOCOL_DELIMITER = "://"
+
+# Config extensions
+_CONFIG_EXTENSIONS = (".yml", ".yaml")
 
 
 def _parse_filepath(filepath: str) -> dict[str, str]:
@@ -257,3 +261,62 @@ def experimental(obj: Callable | type) -> Callable | type:
         return obj
 
     return obj
+
+
+def get_close_matches(
+    input: str | list[str],
+    targets: Iterable[str],
+    max_suggestions: int = 3,
+    cutoff: float = 0.6,
+) -> list[str]:
+    """Get close matches from targets for inputs.
+
+    Args:
+        input: Inputs to get close matches for as a single string or list of strings.
+        targets: Targets to get close matches from as a list of strings.
+        max_suggestions: Maximum number of suggestions to return, defaults to 3.
+        cutoff: Cutoff value for the similarity ratio, defaults to 0.6.
+    Returns:
+        List of close matches or empty list if no matches are found.
+    """
+    _init_matches = []
+    if isinstance(input, str):
+        matches = difflib.get_close_matches(
+            input, list(targets), n=max_suggestions, cutoff=cutoff
+        )
+        _init_matches.extend(matches)
+    else:
+        for source_str in input:
+            _matches = difflib.get_close_matches(
+                source_str, list(targets), n=max_suggestions, cutoff=cutoff
+            )
+            _init_matches.extend(_matches)
+    return _init_matches[:max_suggestions]
+
+
+def find_config_file(
+    filename: str, extensions: tuple[str, ...] = _CONFIG_EXTENSIONS
+) -> Path | None:
+    """Find a config file in the current working directory.
+
+    Args:
+        filename: The name of the config file to find.
+        extensions: The extensions of the config file to find.
+
+    Returns:
+        The path to the config file if found, otherwise None.
+    """
+    path = Path(filename)
+    return next(
+        (path.with_suffix(ext) for ext in extensions if path.with_suffix(ext).exists()),
+        None,
+    )
+
+
+def _is_unsafe_version(version: str) -> bool:
+    """Return True if the version string is not a safe single path component.
+
+    A valid version must be a non-empty string with no path separators (``/`` or ``\\``)
+    and must not be a dot-only component (``.`` or ``..``).
+    """
+    return not version or "/" in version or "\\" in version or version in (".", "..")

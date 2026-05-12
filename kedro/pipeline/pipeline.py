@@ -7,7 +7,6 @@ produced outputs and execution order.
 from __future__ import annotations
 
 import copy
-import difflib
 import json
 from collections import Counter, defaultdict, deque
 from functools import cached_property
@@ -18,27 +17,12 @@ from warnings import warn
 
 import kedro
 from kedro.pipeline.node import GroupedNodes, Node, _to_list
+from kedro.utils import get_close_matches
 
 from .transcoding import _strip_transcoding, _transcode_split
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Set
-
-
-def __getattr__(name: str) -> Any:
-    if name == "TRANSCODING_SEPARATOR":
-        import warnings
-
-        from kedro.pipeline.transcoding import TRANSCODING_SEPARATOR
-
-        warnings.warn(
-            f"{name!r} has been moved to 'kedro.pipeline.transcoding', "
-            f"and the alias will be removed in Kedro 1.0.0.",
-            kedro.KedroDeprecationWarning,
-            stacklevel=2,
-        )
-        return TRANSCODING_SEPARATOR
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class PipelineError(Exception):
@@ -104,9 +88,7 @@ def _validate_datasets_exist(
     non_existent = (inputs | outputs | parameters) - existing
     if non_existent:
         sorted_non_existent = sorted(non_existent)
-        possible_matches = []
-        for non_existent_input in sorted_non_existent:
-            possible_matches += difflib.get_close_matches(non_existent_input, existing)
+        possible_matches = get_close_matches(sorted_non_existent, existing)
 
         error_msg = f"Failed to map datasets and/or parameters onto the nodes provided: {', '.join(sorted_non_existent)}"
         suggestions = (

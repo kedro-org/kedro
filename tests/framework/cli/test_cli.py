@@ -10,6 +10,7 @@ from click.testing import CliRunner
 from omegaconf import OmegaConf
 from pytest import fixture, mark, raises
 
+from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.cli import (
@@ -28,6 +29,7 @@ from kedro.framework.cli.utils import (
     validate_conf_source,
 )
 from kedro.framework.session import KedroSession
+from kedro.framework.session.service_session import KedroServiceSession
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
@@ -162,7 +164,7 @@ class TestCommandCollection:
     def test_not_found_closest_match(self, mocker):
         """Check that calling a nonexistent command with a close match returns the close match"""
         patched_difflib = mocker.patch(
-            "kedro.framework.cli.utils.difflib.get_close_matches",
+            "kedro.framework.cli.utils.get_close_matches",
             return_value=["suggestion_1", "suggestion_2"],
         )
 
@@ -182,7 +184,7 @@ class TestCommandCollection:
     def test_not_found_closet_match_singular(self, mocker):
         """Check that calling a nonexistent command with a close match has the proper wording"""
         patched_difflib = mocker.patch(
-            "kedro.framework.cli.utils.difflib.get_close_matches",
+            "kedro.framework.cli.utils.get_close_matches",
             return_value=["suggestion_1"],
         )
 
@@ -410,6 +412,7 @@ class TestKedroCLI:
             "pipeline",
             "registry",
             "run",
+            "server",
         ]
 
     def test_project_commands_no_project(self, mocker, tmp_path):
@@ -576,8 +579,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -618,8 +620,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -660,8 +661,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -693,8 +693,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=["fake_namespace"],
             only_missing_outputs=False,
         )
@@ -719,8 +718,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -761,8 +759,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name="pipeline1",
-            pipeline_names=None,
+            pipeline_names=["pipeline1"],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -778,7 +775,6 @@ class TestRunCommand:
 
         assert not result.exit_code
         assert fake_session.run.call_count == 1
-        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
 
         pipelines = fake_session.run.call_args.kwargs["pipeline_names"]
         assert "pipe1" in pipelines
@@ -795,7 +791,6 @@ class TestRunCommand:
 
         assert not result.exit_code
         assert fake_session.run.call_count == 1
-        assert fake_session.run.call_args.kwargs["pipeline_name"] is None
         assert fake_session.run.call_args.kwargs["pipeline_names"] == ["pipe1"]
 
     def test_pipeline_and_pipelines_mutually_exclusive(
@@ -813,13 +808,12 @@ class TestRunCommand:
     def test_pipeline_name_deprecation_warning(
         self, fake_project_cli, fake_metadata, caplog
     ):
-        CliRunner().invoke(
-            fake_project_cli,
-            ["run", "--pipeline", "pipe1"],
-            obj=fake_metadata,
-        )
-
-        assert "deprecated" in caplog.text.lower()
+        with pytest.warns(KedroDeprecationWarning):
+            CliRunner().invoke(
+                fake_project_cli,
+                ["run", "--pipeline", "pipe1"],
+                obj=fake_metadata,
+            )
 
     @mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_invalid_config(
@@ -882,8 +876,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name="pipeline1",
-            pipeline_names=None,
+            pipeline_names=["pipeline1"],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -979,6 +972,17 @@ class TestRunCommand:
                 "dataset1:time1, dataset2:time2",
                 {"dataset1": "time1", "dataset2": "time2"},
             ],
+            [
+                "dataset1:2024-01-15T10.00.00.000Z",
+                {"dataset1": "2024-01-15T10.00.00.000Z"},
+            ],
+            [
+                "dataset1:2024-01-15T10.00.00.000Z,dataset2:2024-01-16T10.00.00.000Z",
+                {
+                    "dataset1": "2024-01-15T10.00.00.000Z",
+                    "dataset2": "2024-01-16T10.00.00.000Z",
+                },
+            ],
         ],
     )
     def test_split_load_versions(
@@ -998,8 +1002,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions=lv_dict,
-            pipeline_name=None,
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -1019,6 +1022,30 @@ class TestRunCommand:
             f"found {load_version} instead\n"
         )
         assert expected_output in result.output
+
+    @mark.parametrize(
+        "unsafe_version",
+        [
+            "dataset1:../../../secrets",  # POSIX traversal
+            "dataset1:..\\..\\..\\secrets",  # Windows traversal
+            "dataset1:/absolute/path",  # POSIX absolute
+            "dataset1:C:\\Users\\secrets",  # Windows absolute
+            "dataset1:.",  # single dot
+            "dataset1:..",  # double dot
+            "dataset1:foo/bar",  # subdirectory via POSIX separator
+            "dataset1:foo\\bar",  # subdirectory via Windows separator
+        ],
+    )
+    def test_fail_split_load_versions_path_traversal(
+        self, fake_project_cli, fake_metadata, unsafe_version
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--load-versions", unsafe_version],
+            obj=fake_metadata,
+        )
+        assert result.exit_code
+        assert "not allowed" in result.output
 
     @mark.parametrize(
         "from_nodes, expected",
@@ -1062,8 +1089,7 @@ class TestRunCommand:
             from_inputs=[],
             to_outputs=[],
             load_versions={},
-            pipeline_name=None,
-            pipeline_names=None,
+            pipeline_names=[],
             namespaces=[],
             only_missing_outputs=False,
         )
@@ -1091,6 +1117,26 @@ class TestRunCommand:
             " does not exist."
         )
         assert expected_output in result.output
+
+    def test_run_with_service_session(self, fake_project_cli, fake_metadata, mocker):
+        mocker.patch(
+            "kedro.framework.cli.project.settings.SESSION_CLASS",
+            new=KedroServiceSession,
+        )
+        mock_create = mocker.patch(
+            "kedro.framework.cli.project.settings.SESSION_CLASS.create",
+            return_value=MagicMock(),
+        )
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--params", "foo=bar"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0
+        mock_create.assert_called_once()
+        call_kwargs = mock_create.call_args[1]
+        print(call_kwargs)
+        assert "runtime_params" not in call_kwargs
 
 
 class TestValidateConfSource:

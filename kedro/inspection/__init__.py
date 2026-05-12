@@ -38,8 +38,29 @@ def get_project_snapshot(
             ``None``, defaults to ``<project_path>/<settings.CONF_SOURCE>``.
         metadata: Optional pre-computed ``ProjectMetadata`` returned by a prior
             ``bootstrap_project`` call. When provided, ``bootstrap_project`` is
-            skipped, avoiding redundant initialisation in long-running processes
-            such as the Kedro HTTP server.
+            skipped. Pass this when calling ``get_project_snapshot`` repeatedly
+            in the same process to avoid redundant initialisation.
+
+            For example, in a long-running server the project is bootstrapped
+            once at startup and the result is forwarded to every snapshot call::
+
+                # --- server startup ---
+                metadata = bootstrap_project(project_path)
+
+                # --- per-request snapshot (bootstrap_project not called again) ---
+                snapshot = get_project_snapshot(project_path, metadata=metadata)
+
+            The same pattern applies to programmatic callers that need multiple
+            snapshots across different environments::
+
+                from kedro.framework.startup import bootstrap_project
+                from kedro.inspection import get_project_snapshot
+
+                metadata = bootstrap_project(project_path)
+                snapshot_default = get_project_snapshot(project_path, metadata=metadata)
+                snapshot_staging = get_project_snapshot(
+                    project_path, env="staging", metadata=metadata
+                )
 
     Returns:
         A fully populated ``ProjectSnapshot``.

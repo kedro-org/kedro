@@ -43,7 +43,7 @@ class TestHTTPServerFactory:
             create_http_server()
 
     def test_lifespan_calls_bootstrap_on_startup(self, mocker, tmp_path):
-        """Test that lifespan context manager calls bootstrap_project on startup."""
+        """Test that lifespan bootstraps the project and stores metadata on app.state."""
         project_path = Path(tmp_path).resolve()
         mocker.patch(
             "kedro.server.http_server._resolve_project_path", return_value=project_path
@@ -55,6 +55,7 @@ class TestHTTPServerFactory:
             client.get("/health")
 
         mock_bootstrap.assert_called_once_with(project_path)
+        assert app.state.metadata is mock_bootstrap.return_value
 
     def test_lifespan_closes_session_on_shutdown(self, mocker, tmp_path):
         """Test that the session is closed when the server shuts down."""

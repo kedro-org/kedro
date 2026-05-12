@@ -17,7 +17,6 @@ from kedro.framework.project import settings
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
 from kedro.inspection import get_project_snapshot
-from kedro.inspection.snapshot import _seed_bootstrap_cache
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner
 from kedro.server.models import (
@@ -49,8 +48,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     project_path = app.state.project_path
     logger.info("Bootstrapping Kedro project at: %s", project_path)
-    metadata = bootstrap_project(project_path)
-    _seed_bootstrap_cache(project_path, metadata)
+    app.state.metadata = bootstrap_project(project_path)
 
     if settings.SESSION_CLASS is not KedroServiceSession:
         logger.warning(
@@ -129,6 +127,8 @@ def create_http_server(
             snapshot = get_project_snapshot(
                 project_path=app.state.project_path,
                 env=app.state.default_env,
+                conf_source=app.state.default_conf_source,
+                metadata=app.state.metadata,
             )
             return SnapshotResponse(
                 status="success",

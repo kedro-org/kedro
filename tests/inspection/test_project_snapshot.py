@@ -17,7 +17,6 @@ from kedro.inspection.snapshot import (
     _bootstrapped,
     _build_project_snapshot,
     _clear_bootstrap_cache,
-    _seed_bootstrap_cache,
 )
 
 
@@ -198,14 +197,29 @@ class TestBuildProjectSnapshot:
     def test_config_loader_created_with_explicit_env(self):
         _build_project_snapshot(self.project_path, env="staging")
         self.mock_make_config_loader.assert_called_once_with(
-            self.project_path, env="staging"
+            self.project_path, env="staging", conf_source=None
         )
 
     def test_config_loader_created_with_default_env(self):
         _build_project_snapshot(self.project_path)
         self.mock_make_config_loader.assert_called_once_with(
-            self.project_path, env=None
+            self.project_path, env=None, conf_source=None
         )
+
+    def test_config_loader_created_with_explicit_conf_source(self):
+        _build_project_snapshot(self.project_path, conf_source="conf/custom")
+        self.mock_make_config_loader.assert_called_once_with(
+            self.project_path, env=None, conf_source="conf/custom"
+        )
+
+    def test_metadata_parameter_skips_bootstrap(self, project_metadata):
+        _build_project_snapshot(self.project_path, metadata=project_metadata)
+        self.mock_bootstrap.assert_not_called()
+
+    def test_metadata_parameter_seeds_cache(self, project_metadata):
+        resolved = self.project_path.resolve()
+        _build_project_snapshot(self.project_path, metadata=project_metadata)
+        assert _bootstrapped[resolved] is project_metadata
 
     def test_catalog_loaded_from_config_loader_and_passed_downstream(self, mocker):
         """Catalog config is loaded from the config loader and passed to both
@@ -284,41 +298,6 @@ class TestBuildProjectSnapshot:
     )
     def test_valid_env_does_not_raise(self, env):
         _build_project_snapshot(self.project_path, env=env)
-
-
-class TestSeedBootstrapCache:
-    """Tests for _seed_bootstrap_cache."""
-
-    def test_seed_populates_bootstrapped_cache(
-        self, mocker, tmp_path, project_metadata
-    ):
-        mocker.patch.dict(_bootstrapped, {}, clear=True)
-        _seed_bootstrap_cache(tmp_path, project_metadata)
-        assert _bootstrapped[tmp_path] is project_metadata
-
-    def test_seed_prevents_bootstrap_on_next_snapshot_call(
-        self, mocker, tmp_path, project_metadata
-    ):
-        mocker.patch.dict(_bootstrapped, {}, clear=True)
-        _seed_bootstrap_cache(tmp_path.resolve(), project_metadata)
-
-        mock_bootstrap = mocker.patch("kedro.inspection.snapshot.bootstrap_project")
-        mocker.patch("kedro.inspection.snapshot._make_config_loader")
-        mocker.patch("kedro.inspection.snapshot.pipelines", new={})
-        mocker.patch("kedro.inspection.snapshot._build_project_metadata_snapshot")
-        mocker.patch(
-            "kedro.inspection.snapshot._build_pipeline_snapshots", return_value=[]
-        )
-        mocker.patch(
-            "kedro.inspection.snapshot._build_dataset_snapshots", return_value={}
-        )
-        mocker.patch(
-            "kedro.inspection.snapshot._resolve_factory_patterns", return_value={}
-        )
-        mocker.patch("kedro.inspection.snapshot._get_parameter_keys", return_value=[])
-
-        _build_project_snapshot(tmp_path)
-        mock_bootstrap.assert_not_called()
 
 
 class TestBootstrapCacheLifecycle:

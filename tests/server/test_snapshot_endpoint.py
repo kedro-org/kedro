@@ -138,3 +138,28 @@ class TestSnapshotEndpoint:
         with TestClient(app) as client:
             client.get("/snapshot")
         assert mock_get.call_args[1]["project_path"] == project_path
+
+    def test_snapshot_passes_conf_source_to_get_project_snapshot(
+        self, mocker, make_http_server
+    ):
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        app = make_http_server(conf_source="conf/custom")
+        with TestClient(app) as client:
+            client.get("/snapshot")
+        assert mock_get.call_args[1]["conf_source"] == "conf/custom"
+
+    def test_snapshot_passes_metadata_from_app_state_to_get_project_snapshot(
+        self, mocker, make_http_server
+    ):
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        mock_bootstrap = mocker.patch("kedro.server.http_server.bootstrap_project")
+        app = make_http_server()
+        with TestClient(app) as client:
+            client.get("/snapshot")
+        assert mock_get.call_args[1]["metadata"] is mock_bootstrap.return_value

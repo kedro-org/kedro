@@ -38,17 +38,6 @@ _bootstrap_lock = threading.Lock()
 _bootstrapped: dict[Path, ProjectMetadata] = {}
 
 
-def _seed_bootstrap_cache(project_path: Path, metadata: ProjectMetadata) -> None:
-    """Seed the bootstrap cache with already-computed metadata.
-
-    Call this when ``bootstrap_project`` has already been run externally (e.g. in a
-    server lifespan) so that ``_build_project_snapshot`` skips a redundant bootstrap
-    on the first request.
-    """
-    with _bootstrap_lock:
-        _bootstrapped[project_path] = metadata
-
-
 def _clear_bootstrap_cache() -> None:
     """Clear the process-global bootstrap cache.
 
@@ -143,7 +132,10 @@ def _build_pipeline_snapshots(
 
 
 def _build_project_snapshot(
-    project_path: str | Path, env: str | None = None
+    project_path: str | Path,
+    env: str | None = None,
+    conf_source: str | None = None,
+    metadata: ProjectMetadata | None = None,
 ) -> ProjectSnapshot:
     """Build a ``ProjectSnapshot`` for the Kedro project at project_path.
 
@@ -153,6 +145,11 @@ def _build_project_snapshot(
         env: Optional run environment override (e.g. ``"staging"``).
             When ``None`` the default run environment from the project
             settings is used.
+        conf_source: Optional path to the configuration directory.
+            When ``None``, defaults to ``<project_path>/<settings.CONF_SOURCE>``.
+        metadata: Optional pre-computed ``ProjectMetadata`` (e.g. from a server
+            lifespan that already called ``bootstrap_project``). When provided,
+            ``bootstrap_project`` is skipped on the first call for this path.
 
     Returns:
         A fully populated ``ProjectSnapshot``.
@@ -166,16 +163,18 @@ def _build_project_snapshot(
 
     with _bootstrap_lock:
         if project_path not in _bootstrapped:
-            _bootstrapped[project_path] = bootstrap_project(project_path)
-        metadata = _bootstrapped[project_path]
-    config_loader = _make_config_loader(project_path, env=env)
+            _bootstrapped[project_path] = (
+                metadata if metadata is not None else bootstrap_project(project_path)
+            )
+        resolved_metadata = _bootstrapped[project_path]
+    config_loader = _make_config_loader(project_path, env=env, conf_source=conf_source)
 
     try:
         conf_catalog: dict[str, Any] = config_loader["catalog"]
     except (KeyError, MissingConfigException):
         conf_catalog = {}
 
-    metadata_snapshot = _build_project_metadata_snapshot(metadata)
+    metadata_snapshot = _build_project_metadata_snapshot(resolved_metadata)
     pipeline_snapshots = _build_pipeline_snapshots(dict(pipelines))
     dataset_snapshots = _build_dataset_snapshots(conf_catalog)
 

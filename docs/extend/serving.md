@@ -61,7 +61,7 @@ curl http://127.0.0.1:8000/health
 
 ### `GET /snapshot`
 
-Returns a read-only snapshot of the project structure: metadata, registered pipelines, catalog datasets, and parameter keys.
+Returns a snapshot of the project structure: metadata, registered pipelines, catalog datasets, and parameter keys.
 
 ```bash
 curl http://127.0.0.1:8000/snapshot
@@ -125,7 +125,7 @@ If the snapshot cannot be built (for example, due to a catalog error), the respo
 !!! note
     The `/snapshot` endpoint uses the environment configured at server startup (`--env` or `KEDRO_SERVER_ENV`). It does not accept a per-request `env` parameter.
 
-See [Inspect a Kedro project](../inspect/inspect-project.md) for the equivalent programmatic API and details on the snapshot structure.
+See [Inspect a Kedro project](../inspect/inspect-project.md) for the programmatic API and details on the snapshot structure.
 
 ### `POST /run`
 

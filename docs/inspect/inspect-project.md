@@ -164,7 +164,7 @@ snapshot = get_project_snapshot("/path/to/my_project", conf_source="conf/custom"
 ```
 
 !!! note
-    To compare snapshots across environments in the same process, bootstrap the project once and pass the result to each call:
+    To compare snapshots across environments in the same process, bootstrap the project and pass the result to each call:
 
     ```python
     from kedro.framework.startup import bootstrap_project

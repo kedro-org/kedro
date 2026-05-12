@@ -91,7 +91,7 @@ Docs checks that depend on missing system tools are reported as `[SKIP missing t
 
 ## Sandbox & permissions
 
-When invoking the commands below through a sandboxed shell tool (Cursor's `required_permissions`, Copilot's terminal approval, etc.), **request the listed permissions upfront** — guessing wrong wastes a run.
+When invoking the commands below through a sandboxed shell tool, **request the listed permissions upfront** — guessing wrong wastes a run.
 
 | Command | Permissions |
 |---|---|

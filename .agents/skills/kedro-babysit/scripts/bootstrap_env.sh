@@ -91,6 +91,7 @@ section() {
 ok()    { echo "  [OK]    $*"; }
 warn()  { echo "  [WARN]  $*"; }
 miss()  { echo "  [MISS]  $*"; }
+info()  { echo "  [..]    $*"; }   # announcing an in-progress action; success is reported by ok() afterwards
 
 # Extract major.minor (e.g. "3.12") from `python --version` output, or empty.
 detect_python_minor() {
@@ -260,7 +261,7 @@ if [[ -z "$ACTIVE_ENV_KIND" ]]; then
             if [[ -d "$NAME" ]]; then
                 warn "$NAME already exists; reusing."
             elif command -v uv >/dev/null 2>&1; then
-                ok "Creating venv at $NAME with uv (python $PYTHON_VERSION)"
+                info "Creating venv at $NAME with uv (python $PYTHON_VERSION)"
                 uv venv "$NAME" --python "$PYTHON_VERSION"
             else
                 warn "uv not found; falling back to 'python -m venv'"
@@ -269,7 +270,7 @@ if [[ -z "$ACTIVE_ENV_KIND" ]]; then
                     echo "Error: no python interpreter found to create venv" >&2
                     exit 1
                 fi
-                ok "Creating venv at $NAME with $PY_FOR_VENV"
+                info "Creating venv at $NAME with $PY_FOR_VENV"
                 "$PY_FOR_VENV" -m venv "$NAME"
             fi
             echo
@@ -285,7 +286,7 @@ if [[ -z "$ACTIVE_ENV_KIND" ]]; then
             if conda env list | awk '{print $1}' | grep -qx "$NAME"; then
                 warn "conda env '$NAME' already exists; reusing."
             else
-                ok "Creating conda env '$NAME' (python $PYTHON_VERSION)"
+                info "Creating conda env '$NAME' (python $PYTHON_VERSION)"
                 conda create -y -n "$NAME" "python=$PYTHON_VERSION"
             fi
             echo
@@ -327,7 +328,7 @@ if [[ -z "$MISSING_MODULES" ]]; then
     ok "all required [test] modules installed: $REQUIRED_TEST_MODULES"
 else
     miss "missing modules from [test]:$MISSING_MODULES"
-    ok "Running: make install-test-requirements && make install-pre-commit"
+    info "Running: make install-test-requirements && make install-pre-commit"
     (cd "$REPO_ROOT" && make install-test-requirements && make install-pre-commit)
 fi
 
@@ -335,7 +336,8 @@ if [[ $WITH_DOCS -eq 1 ]]; then
     if "$PYTHON_BIN" -c 'import mkdocs' >/dev/null 2>&1; then
         ok "mkdocs installed"
     else
-        miss "mkdocs not installed; running: make install-docs-requirements"
+        miss "mkdocs not installed"
+        info "Running: make install-docs-requirements"
         (cd "$REPO_ROOT" && make install-docs-requirements)
     fi
 fi

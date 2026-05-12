@@ -79,11 +79,13 @@ Read [reference.md](reference.md) section "Environment setup" for manual recipes
 Single read-only pass:
 
 ```bash
-BASE="origin/$(gh pr view --json baseRefName -q .baseRefName)"   # resolves the PR's actual base
-gh pr view --json mergeable,mergeStateStatus,headRefOid,files
-bash scripts/watch_ci.sh                                          # snapshot CI + dump failed-job logs
-git log "$BASE"..HEAD --format='%H %(trailers:key=Signed-off-by)' # commits since base, with DCO trailer
+BASE="origin/$(gh pr view [<num>] --json baseRefName -q .baseRefName)"   # resolves the PR's actual base
+gh pr view [<num>] --json mergeable,mergeStateStatus,headRefOid,files
+bash scripts/watch_ci.sh [--pr <num>]                                    # snapshot CI + dump failed-job logs
+git log "$BASE"..HEAD --format='%H %(trailers:key=Signed-off-by)'        # commits since base, with DCO trailer
 ```
+
+Drop the `[<num>]` / `[--pr <num>]` brackets when operating on the current branch's PR. When the user supplied an explicit PR in Step 1, keep them — omitting the number will silently resolve the *current branch's* PR instead.
 
 Don't hardcode `origin/main` — Kedro PRs may target `develop` or other branches.
 

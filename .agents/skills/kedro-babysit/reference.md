@@ -228,9 +228,11 @@ Fast verify is in the per-hook recipes table. Add type annotations or stubs. The
 
 ### `unit-tests` failure
 
-Fast verify: `pytest tests/path/to/test_thing.py::TestClass::test_method` (single test, sub-second to seconds), or `pytest tests/path/to/test_module.py` (single file).
+Fast verify: `pytest --no-cov tests/path/to/test_thing.py::TestClass::test_method` (single test, sub-second to seconds), or `pytest --no-cov tests/path/to/test_module.py` (single file).
 
-If the failure is real, fix it. If coverage drops below `fail_under = 100` (set in the `[tool.coverage.report]` section of [pyproject.toml](../../../pyproject.toml)), add unit tests for the new lines — coverage is enforced strictly. Coverage is checked by `make test`, not by `pytest <specific-test>`, so the final `make test` run after targeted iteration is mandatory (~6 min wall-clock — pre-warn the user).
+Pass `--no-cov` for targeted iteration — pytest's `addopts` in [pyproject.toml](../../../pyproject.toml) always applies `--cov ...` with `fail_under = 100`, so even a passing single-test run will exit non-zero on the coverage gate without it. (`--no-cov-on-fail` only suppresses the report when tests *fail*, not when they pass with sub-100% coverage.)
+
+If the failure is real, fix it. If coverage drops below `fail_under = 100` (set in the `[tool.coverage.report]` section of [pyproject.toml](../../../pyproject.toml)), add unit tests for the new lines — coverage is enforced strictly. The full coverage check is only meaningful via the final `make test` run after targeted iteration (~6 min wall-clock — pre-warn the user).
 
 ### `e2e-tests` failure
 

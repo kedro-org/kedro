@@ -112,7 +112,7 @@ The Track C sub-bullets (Merge conflicts → CI failures → DCO sign-off) run i
    - For ruff/format: `ruff check --fix <file>` or `ruff format <file>` (sub-second).
    - For mypy: `mypy <file> --strict --allow-any-generics --no-warn-unused-ignores` (5–10s vs. 1–2 min).
    - For Import Linter: `lint-imports --config pyproject.toml` (it scans the whole project regardless — but skips pre-commit overhead).
-   - For unit tests: `pytest tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (~6 min for the full suite + 100% coverage check). **Never run `make test` during the fix loop** — pick the failing test path from the CI log and target it directly. **Sandbox: always request `all` permissions when running any `pytest` in this repo** (see [reference.md](reference.md) section "Sandbox & permissions").
+   - For unit tests: `pytest --no-cov tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (~6 min for the full suite + 100% coverage check). **`--no-cov` is required** because `pyproject.toml` always applies `--cov` with `fail_under = 100`, which would otherwise exit non-zero even on a passing single-test run. **Never run `make test` during the fix loop** — pick the failing test path from the CI log and target it directly. **Sandbox: always request `all` permissions when running any `pytest` in this repo** (see [reference.md](reference.md) section "Sandbox & permissions").
 
    Full per-hook recipes in [reference.md](reference.md) section "Fast lint iteration". Track C does **not** run `scripts/run_local_checks.sh` here.
 6. Move to the next finding.

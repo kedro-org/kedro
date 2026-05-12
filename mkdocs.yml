@@ -182,6 +182,7 @@ plugins:
           - extend/hooks/common_use_cases.md: Common hook use cases
           - extend/hooks/examples.md: Hook implementation examples
           - extend/session.md: Programmatic usage with KedroSession
+          - extend/serving.md: Serving pipelines over HTTP
           - extend/plugins.md: Creating Kedro plugins
           - extend/create_a_starter.md: Creating custom project starters
 
@@ -226,6 +227,8 @@ plugins:
           - api/runner/kedro.runner.SequentialRunner.md: SequentialRunner reference
           - api/runner/kedro.runner.ParallelRunner.md: ParallelRunner reference
           - api/runner/kedro.runner.ThreadRunner.md: ThreadRunner reference
+          - api/server/kedro.server.md: Server API overview
+          - api/server/kedro.server.models.md: Server request and response models
           - api/kedro.utils.md: Utility functions and helpers
           - api/kedro.load_ipython_extension.md: IPython extension loader
           - api/kedro.KedroDeprecationWarning.md: Deprecation warning class
@@ -382,6 +385,7 @@ nav:
               - Common use cases: extend/hooks/common_use_cases.md
               - Hooks examples: extend/hooks/examples.md
           - Programmatic usage: extend/session.md
+          - Serving over HTTP: extend/serving.md
           - Custom plugins: extend/plugins.md
           - Custom starters: extend/create_a_starter.md
       - Reference:
@@ -436,6 +440,9 @@ nav:
               - kedro.inspection:
                   - Overview: api/inspection/kedro.inspection.md
                   - Models: api/inspection/kedro.inspection.models.md
+              - kedro.server:
+                  - Overview: api/server/kedro.server.md
+                  - Models: api/server/kedro.server.models.md
               - kedro.utils: api/kedro.utils.md
               - kedro.load_ipython_extension: api/kedro.load_ipython_extension.md
               - kedro.KedroDeprecationWarning: api/kedro.KedroDeprecationWarning.md

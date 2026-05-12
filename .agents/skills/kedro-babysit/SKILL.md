@@ -106,7 +106,7 @@ The Track C sub-bullets (Merge conflicts → CI failures → DCO sign-off) run i
 
 **CI failures** (Track C). For each failing check:
 1. Look up the local invocation in [reference.md](reference.md) section "CI-to-local mapping" (and the cookbook entry below it for `e2e-tests`, which is intentionally out of scope locally).
-2. The failed-job logs were already dumped by `watch_ci.sh` in Step 3. If the snapshot is stale (e.g., new check runs completed since Step 3), re-run `bash scripts/watch_ci.sh` for a fresh snapshot.
+2. The failed-job logs were already dumped by `watch_ci.sh` in Step 3. If the snapshot is stale (e.g., new check runs completed since Step 3), re-run `bash scripts/watch_ci.sh [--pr <num>]` for a fresh snapshot — keep the `--pr` flag if the user supplied a PR in Step 1.
 3. Propose the smallest scoped fix using [reference.md](reference.md) section "Common CI failures and fixes".
 4. Apply the fix to the working tree only (no `git add` / `git commit`).
 5. **Verify with the most targeted command available** — almost never `make lint`, which runs *every* pre-commit hook on *every* file plus mypy on the whole `kedro/` package (typically 3–5 min per iteration). Instead:
@@ -157,7 +157,7 @@ On user confirmation:
 
 On Track L, commit + push is **optional**: the user may just want a clean local working tree before continuing to iterate. Always confirm intent.
 
-After push on Track C, **do not block waiting for CI**. If the user wants to see the new CI state, they can re-run `bash scripts/watch_ci.sh` later for a fresh snapshot.
+After push on Track C, **do not block waiting for CI**. If the user wants to see the new CI state, they can re-run `bash scripts/watch_ci.sh [--pr <num>]` later for a fresh snapshot — keep the `--pr` flag if a PR was supplied in Step 1.
 
 ## Out of scope
 

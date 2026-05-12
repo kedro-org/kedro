@@ -599,6 +599,7 @@ def _build_dependency_source_block(
 ) -> str | None:
     """Render AST nodes back to source ordered by their original position."""
     emitted_segments: list[str] = []
+    segment: str | None = None
     ordered_nodes = sorted(nodes, key=lambda item: getattr(item, "lineno", 0))
     for node in ordered_nodes:
         try:

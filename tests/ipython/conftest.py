@@ -12,6 +12,7 @@ from kedro.pipeline import node, pipeline
 from . import dummy_function_fixtures
 from .dummy_function_fixtures import (
     dummy_function,
+    dummy_function_using_decorated_helper,  # noqa: F401
     dummy_function_using_same_module_helper,
     dummy_function_with_loop,
     dummy_function_with_variable_length,

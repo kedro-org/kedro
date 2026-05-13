@@ -53,7 +53,7 @@ To withdraw consent, you have several options:
 
 3 - **Change or Create the `.telemetry` file manually**:
    If the `.telemetry` file exists in the root folder of your Kedro project, set the `consent` variable to `false`. If the file does not exist, create it with the following content:
-   
+
    ```yaml
    consent: false
    ```

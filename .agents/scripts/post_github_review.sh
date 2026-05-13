@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Posts a full PR review or security scan review (summary + inline comments) to GitHub.
+# Shared helper for posting a structured review (summary + inline comments) to GitHub.
+# Currently used by: review-kedro-pr skill
+# Planned consumers: security-scan skill
+#
 # Input: a JSON file matching the GitHub "Create a review" API format.
 #
 # Expected JSON structure:
 # {
 #   "event": "COMMENT",
-#   "body": "## Kedro PR Review\n...",
+#   "body": "## Review summary\n...",
 #   "comments": [
 #     { "path": "file.py", "line": 42, "side": "RIGHT", "body": "Comment text" }
 #   ]

@@ -168,7 +168,7 @@ For full API signatures and the complete list of base classes, read [reference.m
 Do NOT flag:
 
 - **Pre-existing issues** — only review changes in the diff.
-- **Security issues** — handled by the separate `security-scan` skill.
+- **Security issues** — handled by the separate `kedro-security-review` skill.
 - **Anything CI already checks mechanically** — the following are handled by the `kedro-babysit` skill, which runs and fixes them automatically:
   - Linting and formatting (ruff)
   - Running unit tests (pytest)

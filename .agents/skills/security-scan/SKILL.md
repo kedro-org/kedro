@@ -40,8 +40,9 @@ Read these before triaging findings:
   - `p/security-audit`
   - `p/secrets`
   - `p/python`
-  - `p/owasp-top-ten`
   - `.agents/skills/security-scan/rules/kedro-security-patterns.yml`
+- Optional rulesets (run only when explicitly requested):
+  - `p/owasp-top-ten` — designed for web applications; expect high noise against framework code
 - Temporary working directory:
   - create with `mktemp -d`
   - delete at the end unless the user explicitly asks to keep artifacts
@@ -207,13 +208,6 @@ Run these in parallel:
   "${SEMGREP_CMD[@]}" scan --metrics=off \
     --include="*.py" --config p/python \
     --json --output "$OUTPUT_DIR/raw/python.json" \
-    "${SCAN_TARGETS[@]}"
-) &
-
-(
-  "${SEMGREP_CMD[@]}" scan --metrics=off \
-    --include="*.py" --config p/owasp-top-ten \
-    --json --output "$OUTPUT_DIR/raw/owasp-top-ten.json" \
     "${SCAN_TARGETS[@]}"
 ) &
 

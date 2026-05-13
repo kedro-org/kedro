@@ -138,21 +138,24 @@ def _build_project_snapshot(
     Returns:
         A fully populated ``ProjectSnapshot``.
     """
+    resolved_project_path = (
+        Path(project_path).expanduser().resolve() if project_path is not None else None
+    )
     if metadata is not None:
         if (
-            project_path is not None
-            and Path(project_path).resolve() != metadata.project_path
+            resolved_project_path is not None
+            and resolved_project_path != metadata.project_path
         ):
             warnings.warn(
                 f"Both project_path and metadata were provided but point to different "
-                f"directories ({Path(project_path).resolve()!r} vs "
+                f"directories ({resolved_project_path!r} vs "
                 f"{metadata.project_path!r}). project_path will be ignored.",
                 UserWarning,
                 stacklevel=3,
             )
         effective_project_path = metadata.project_path
-    elif project_path is not None:
-        effective_project_path = Path(project_path).resolve()
+    elif resolved_project_path is not None:
+        effective_project_path = resolved_project_path
     else:
         raise ValueError("Either project_path or metadata must be provided.")
 

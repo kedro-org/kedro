@@ -161,6 +161,47 @@ class TestKedroServiceSession:
         mock_logging.assert_not_called()
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.parametrize(
+        "pipeline_names, expected_scope",
+        [
+            (None, None),
+            (["__default__"], None),
+            ([_FAKE_PIPELINE_NAME], [_FAKE_PIPELINE_NAME]),
+            ([_FAKE_PIPELINE_NAME, "__default__"], None),
+        ],
+    )
+    def test_run_sets_pipelines_to_validate(
+        self,
+        fake_project,
+        mock_context_class,
+        mock_runner,
+        mocker,
+        pipeline_names,
+        expected_scope,
+    ):
+        """``KedroServiceSession.run`` should set ``_pipelines_to_validate``
+        on the context only when a single non-``__default__`` pipeline is
+        run, mirroring ``KedroSession.run``."""
+        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        mocker.patch(
+            "kedro.framework.session.service_session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_context = mock_context_class.return_value
+        mock_context._pipelines_to_validate = None
+        mock_runner.__name__ = "SequentialRunner"
+
+        with KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id"
+        ) as session:
+            session.run(runner=mock_runner, pipeline_names=pipeline_names)
+
+        assert mock_context._pipelines_to_validate == expected_scope
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, [_FAKE_PIPELINE_NAME]])
     def test_run(
         self,

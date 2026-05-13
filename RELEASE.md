@@ -8,9 +8,9 @@ NOTE: This session implementation is under active development and may occasional
 * Added a new CLI command `kedro server start` to run the server.
 * Added inspection API to get project snapshot.
 * Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
+* Scoped parameter type-hint validation to the pipeline being run. When `kedro run --pipeline=<name>` runs a single named pipeline, only that pipeline's node signatures are inspected for type hints, avoiding unnecessary work and spurious "conflicting type" warnings from pipelines that aren't executing.
 
 ## Bug fixes and other changes
-* Scoped parameter type-hint validation to the pipeline being run. When `kedro run --pipeline=<name>` runs a single named pipeline, only that pipeline's node signatures are inspected for type hints, avoiding unnecessary work and spurious "conflicting type" warnings from pipelines that aren't executing.
 * Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
 * Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.

@@ -178,7 +178,12 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
-    _validated_params_cache: dict[str | None, dict[str, Any]] | None = None
+    # Optional list of pipeline names to scope parameter validation to.
+    # Set by the session before building the catalog so a single-pipeline run
+    # only triggers validation for that pipeline's typed ``params:`` inputs.
+    # ``None`` means "all registered pipelines (except ``__default__``)".
+    _pipelines_to_validate: list[str] | None = None
+    _validated_params_cache: dict[str, Any] | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -192,22 +197,20 @@ class KedroContext:
         """
         return self._get_catalog()
 
-    def _get_validated_params(self, pipeline_name: str | None = None) -> dict[str, Any]:
+    def _get_validated_params(self) -> dict[str, Any]:
         """Get validated parameters with caching support.
 
-        Args:
-            pipeline_name: Optional pipeline name to scope validation to.
-                When ``None``, all registered pipelines are inspected.
+        The set of pipelines inspected is taken from
+        ``self._pipelines_to_validate``. The session sets this before
+        building the catalog so a single-pipeline run only validates
+        parameters for that pipeline; otherwise all registered pipelines
+        (except ``__default__``) are inspected.
 
         Returns:
             Validated and transformed parameters with model instantiation.
         """
-        # ``None`` is the cache key for the unscoped result.
-        if self._validated_params_cache is None:
-            self._validated_params_cache = {}
-
-        if pipeline_name in self._validated_params_cache:
-            return self._validated_params_cache[pipeline_name]
+        if self._validated_params_cache is not None:
+            return self._validated_params_cache
 
         try:
             raw_params = self.config_loader["parameters"]
@@ -219,7 +222,7 @@ class KedroContext:
             from kedro.framework.project import pipelines as project_pipelines
             from kedro.validation.parameter_validator import ParameterValidator
 
-            if pipeline_name is None:
+            if self._pipelines_to_validate is None:
                 # ``__default__`` is the union of every registered pipeline,
                 # so its types are already covered when we walk the others.
                 pipelines_to_validate = {
@@ -227,14 +230,20 @@ class KedroContext:
                     for name, pipe in project_pipelines.items()
                     if name != "__default__"
                 }
-            elif pipeline_name not in project_pipelines:
-                raise ValueError(
-                    f"Pipeline '{pipeline_name}' not found. "
-                    f"Available pipelines: {sorted(project_pipelines.keys())}"
-                )
             else:
+                unknown = [
+                    name
+                    for name in self._pipelines_to_validate
+                    if name not in project_pipelines
+                ]
+                if unknown:
+                    raise ValueError(
+                        f"Pipeline(s) not found: {sorted(unknown)}. "
+                        f"Available pipelines: {sorted(project_pipelines.keys())}"
+                    )
                 pipelines_to_validate = {
-                    pipeline_name: project_pipelines[pipeline_name]
+                    name: project_pipelines[name]
+                    for name in self._pipelines_to_validate
                 }
 
             validator = ParameterValidator(pipelines_to_validate)
@@ -245,7 +254,7 @@ class KedroContext:
             )
             validated_params = raw_params
 
-        self._validated_params_cache[pipeline_name] = validated_params
+        self._validated_params_cache = validated_params
 
         return validated_params
 
@@ -265,17 +274,8 @@ class KedroContext:
         catalog_class: type = DataCatalog,
         save_version: str | None = None,
         load_versions: dict[str, str] | None = None,
-        pipeline_name: str | None = None,
     ) -> CatalogProtocol:
         """A hook for changing the creation of a catalog instance.
-
-        Args:
-            catalog_class: The catalog class to use.
-            save_version: Version string to use for ``save`` operations.
-            load_versions: Mapping of dataset names to version strings
-                for ``load`` operations.
-            pipeline_name: Optional pipeline name to scope parameter
-                validation to.
 
         Returns:
             catalog defined in `catalog.yml`.
@@ -302,7 +302,7 @@ class KedroContext:
             save_version=save_version,
         )
 
-        parameters = self._get_parameters(pipeline_name=pipeline_name)
+        parameters = self._get_parameters()
 
         # Add parameters data to catalog.
         for param_name, param_value in parameters.items():
@@ -320,14 +320,10 @@ class KedroContext:
         )
         return catalog
 
-    def _get_parameters(self, pipeline_name: str | None = None) -> dict[str, Any]:
+    def _get_parameters(self) -> dict[str, Any]:
         """Returns a dictionary with data to be added in memory as ``MemoryDataset`` instances.
-        Keys represent parameter names and the values are parameter values.
-
-        Args:
-            pipeline_name: Optional pipeline name to scope parameter validation to.
-        """
-        params = self._get_validated_params(pipeline_name=pipeline_name)
+        Keys represent parameter names and the values are parameter values."""
+        params = self.params
         params_dict: dict[str, Any] = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:

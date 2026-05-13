@@ -408,54 +408,14 @@ class TestKedroContext:
         second = dummy_context.params
         assert first is second
 
-    def test_validated_params_cache_keyed_by_pipeline(self, dummy_context):
-        """Different pipeline names should cache independently."""
-        # Access with no pipeline (default)
-        dummy_context._get_validated_params()
-        assert None in dummy_context._validated_params_cache
+    def test_pipelines_to_validate_defaults_to_none(self, dummy_context):
+        """``_pipelines_to_validate`` defaults to ``None`` (validate every
+        registered pipeline)."""
+        assert dummy_context._pipelines_to_validate is None
 
-        # Access with a specific pipeline name
-        dummy_context._get_validated_params(pipeline_name="data_science")
-        assert "data_science" in dummy_context._validated_params_cache
-
-        # Both should be cached independently
-        assert len(dummy_context._validated_params_cache) == 2
-
-    def test_get_catalog_with_pipeline_name(self, dummy_context, mocker):
-        """Verify _get_catalog passes pipeline_name to _get_parameters."""
-        spy = mocker.spy(dummy_context, "_get_parameters")
-        dummy_context._get_catalog(pipeline_name="data_science")
-        spy.assert_called_once_with(pipeline_name="data_science")
-
-    def test_get_parameters_with_pipeline_name(self, dummy_context, mocker):
-        """Verify _get_parameters forwards the pipeline_name to
-        _get_validated_params so validation is scoped to that pipeline."""
-        spy = mocker.spy(dummy_context, "_get_validated_params")
-        dummy_context._get_parameters(pipeline_name="data_science")
-        spy.assert_called_once_with(pipeline_name="data_science")
-
-    def test_get_parameters_without_pipeline_name_validates_all(
-        self, dummy_context, mocker
-    ):
-        """``_get_parameters()`` with no pipeline_name should call
-        ``_get_validated_params(pipeline_name=None)`` (i.e. validate against
-        all registered pipelines)."""
-        patched = mocker.patch.object(
-            dummy_context,
-            "_get_validated_params",
-            return_value={"param1": 1, "param2": 2, "param3": {"param4": 3}},
-        )
-        result = dummy_context._get_parameters()
-
-        assert "parameters" in result
-        assert result["parameters"]["param1"] == 1
-        patched.assert_called_once_with(pipeline_name=None)
-
-    def test_get_validated_params_scoped_to_existing_pipeline(
-        self, dummy_context, mocker
-    ):
-        """When ``pipeline_name`` matches a registered pipeline, only that
-        pipeline is forwarded to ``ParameterValidator``."""
+    def test_get_validated_params_scoped_to_set_pipelines(self, dummy_context, mocker):
+        """When ``_pipelines_to_validate`` is set, only those pipelines are
+        forwarded to ``ParameterValidator``."""
         from kedro.framework import project
 
         fake_pipeline = MagicMock()
@@ -471,14 +431,16 @@ class TestKedroContext:
         )
         validator_cls.return_value.validate_raw_params.return_value = {"foo": "bar"}
 
-        result = dummy_context._get_validated_params(pipeline_name="data_science")
+        dummy_context._pipelines_to_validate = ["data_science"]
+        result = dummy_context._get_validated_params()
 
         assert result == {"foo": "bar"}
         # Validator was constructed with only the target pipeline.
         validator_cls.assert_called_once_with({"data_science": fake_pipeline})
 
     def test_get_validated_params_unknown_pipeline_raises(self, dummy_context, mocker):
-        """An explicit pipeline name that isn't registered should raise."""
+        """If ``_pipelines_to_validate`` references a name that isn't
+        registered, ``_get_validated_params`` raises ``ValueError``."""
         from kedro.framework import project
 
         mocker.patch.object(
@@ -486,8 +448,9 @@ class TestKedroContext:
         )
         mocker.patch.object(project.pipelines, "_is_data_loaded", True)
 
-        with pytest.raises(ValueError, match="Pipeline 'unknown' not found"):
-            dummy_context._get_validated_params(pipeline_name="unknown")
+        dummy_context._pipelines_to_validate = ["unknown"]
+        with pytest.raises(ValueError, match=r"Pipeline\(s\) not found:.*unknown"):
+            dummy_context._get_validated_params()
 
 
 @pytest.mark.parametrize(

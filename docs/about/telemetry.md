@@ -2,11 +2,9 @@
 
 To help the [Kedro Project maintainers](../about/technical_steering_committee.md) improve the software,
 Kedro can capture anonymised telemetry.
-
 This data is collected with the sole purpose of improving Kedro by understanding feature usage.
 Importantly, we do not store personal information about you or sensitive data from your project,
 and this process is never utilised for marketing or promotional purposes.
-
 Participation in this program is optional, and it is enabled by default. Kedro will continue working as normal if you opt-out.
 
 The Kedro Project's telemetry has been reviewed and approved under the
@@ -50,8 +48,8 @@ To withdraw consent, you have several options:
    ```
    This will create a new project with a `.telemetry` file in its root folder, containing `consent: false`. This file will be used when executing Kedro commands within that project folder. **Note**: telemetry data about the execution of the `kedro new` command will still be sent if telemetry has not been disabled using environment variables.
 
-   !!! note
-       The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
+!!! note
+    The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
 
 3. **Change or Create the `.telemetry` file manually**:
    If the `.telemetry` file exists in the root folder of your Kedro project, set the `consent` variable to `false`. If the file does not exist, create it with the following content:
@@ -66,8 +64,8 @@ To withdraw consent, you have several options:
    pip uninstall kedro-telemetry
    ```
 
-   !!! note
-       This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).
+!!! note
+    This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).
 
 ## How to hide the message that Kedro is collecting telemetry data
 

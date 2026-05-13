@@ -6,7 +6,6 @@ description: >-
   Kedro security model. Use when the user says things like "run security scan
   on the full codebase" or "run security scan on this PR". Produce one final
   report only, in chat by default or posted to GitHub when explicitly asked.
-allowed-tools: Bash Read Glob AskUserQuestion
 ---
 
 # Security Scan
@@ -18,13 +17,14 @@ Two modes:
 - PR-only
 
 In both modes:
-1. resolve runtime and working directory
-2. resolve scan target
-3. run Semgrep in parallel across all rulesets
-4. read and deduplicate findings
-5. triage and classify findings against the Kedro security model
-6. run manual review checks from `references/kedro-findings-triage.md`
-7. emit one final report
+1. resolve runtime
+2. resolve temporary working directory
+3. resolve scan target
+4. run Semgrep in parallel across all rulesets
+5. read and deduplicate findings
+6. triage and classify findings against the Kedro security model
+7. run manual review checks from `references/kedro-findings-triage.md`
+8. emit one final report
 
 ## References
 

@@ -1,0 +1,34 @@
+rules:
+  - id: kedro-dynamic-import
+    message: >-
+      importlib.import_module() is called with a dynamic argument. In Kedro,
+      module paths often originate from catalog.yml or other config, which is
+      the code-vs-data boundary. Verify the argument cannot be influenced by
+      untrusted external input.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      impact: HIGH
+    patterns:
+      - pattern: importlib.import_module($X)
+      - pattern-not: importlib.import_module("...")
+
+  - id: kedro-yaml-unsafe-load
+    message: >-
+      yaml.load() without a safe Loader can deserialise arbitrary Python
+      objects. Kedro config files are user-controlled data; prefer
+      yaml.safe_load() or pass Loader=yaml.SafeLoader explicitly.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: HIGH
+    patterns:
+      - pattern: yaml.load(...)
+      - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
+      - pattern-not: yaml.load(..., Loader=yaml.FullLoader, ...)
+      - pattern-not: yaml.load(..., Loader=yaml.CLoader, ...)
+      - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader, ...)

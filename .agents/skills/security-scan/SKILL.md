@@ -19,7 +19,7 @@ Two modes:
 
 In both modes:
 1. run Semgrep
-2. merge the JSON output
+2. read and deduplicate findings
 3. inspect the flagged code
 4. classify findings against the Kedro security model
 5. emit one final report
@@ -40,7 +40,8 @@ Read these before triaging findings:
   - `p/security-audit`
   - `p/secrets`
   - `p/python`
-  - `.agents/skills/security-scan/rules/python-package-security-patterns.yml`
+  - `p/owasp-top-ten`
+  - `.agents/skills/security-scan/rules/kedro-security-patterns.yml`
 - Temporary working directory:
   - create with `mktemp -d`
   - delete at the end unless the user explicitly asks to keep artifacts
@@ -50,8 +51,8 @@ Always use `--metrics=off`.
 ## Runtime note
 
 If a `uvx` or `uv tool run` Semgrep command fails with a permissions error on a
-`~/.cache/uv` path, rerun the same command with escalation instead of treating
-it as a real scan failure.
+`~/.cache/uv` path, rerun the same command with elevated filesystem permissions
+instead of treating it as a real scan failure.
 
 ## Delivery modes
 
@@ -125,7 +126,7 @@ fi
 
 If the selected runtime is `uvx` or `uv tool run` and the version check fails
 with a permissions error involving `~/.cache/uv`, rerun that same command with
-escalation.
+elevated filesystem permissions.
 
 ### 2. Resolve temporary working directory
 
@@ -182,7 +183,7 @@ If `SCAN_TARGETS` is empty, stop and report that there are no scannable files.
 Set:
 
 ```bash
-LOCAL_RULESET="/absolute/path/to/repo/.agents/skills/security-scan/rules/python-package-security-patterns.yml"
+LOCAL_RULESET="$(pwd)/.agents/skills/security-scan/rules/kedro-security-patterns.yml"
 ```
 
 Run these in parallel:
@@ -211,9 +212,16 @@ Run these in parallel:
 
 (
   "${SEMGREP_CMD[@]}" scan --metrics=off \
+    --include="*.py" --config p/owasp-top-ten \
+    --json --output "$OUTPUT_DIR/raw/owasp-top-ten.json" \
+    "${SCAN_TARGETS[@]}"
+) &
+
+(
+  "${SEMGREP_CMD[@]}" scan --metrics=off \
     --include="*.py" \
     --config "$LOCAL_RULESET" \
-    --json --output "$OUTPUT_DIR/raw/local-python-rules.json" \
+    --json --output "$OUTPUT_DIR/raw/kedro-security-patterns.json" \
     "${SCAN_TARGETS[@]}"
 ) &
 
@@ -223,8 +231,8 @@ wait
 If one scan fails, report it instead of pretending the full scan succeeded.
 
 If a scan command using `uvx` or `uv tool run` fails because of a permissions
-error on `~/.cache/uv`, rerun that same scan command with escalation before
-marking the scan as failed.
+error on `~/.cache/uv`, rerun that same scan command with elevated filesystem
+permissions before marking the scan as failed.
 
 ### 5. Read findings
 

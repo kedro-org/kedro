@@ -41,3 +41,38 @@ Use when deeper context is required before you can classify confidently.
 - Would fixing this belong to Kedro maintainers, project developers, or
   deployment managers?
 - Is this a real security boundary violation or only a risky coding pattern?
+
+## Kedro-specific rule guidance
+
+### `kedro-dynamic-import`
+
+Fires on `importlib.import_module($X)` where the argument is not a string
+literal. Kedro uses dynamic imports extensively and legitimately — dataset
+class paths, pipeline modules, and settings are all loaded this way from
+project config.
+
+- If the module path originates from `catalog.yml`, `settings.py`, or other
+  **project developer-authored config**, classify as
+  `project_developer_responsibility`.
+- If the module path could be influenced by **external runtime input** with no
+  validation (e.g. user-supplied parameters flowing into an import call),
+  classify as `candidate_kedro_vulnerability`.
+- If the call is inside Kedro framework code and the input path is not
+  validated or allowlisted before importing, classify as
+  `candidate_kedro_vulnerability`.
+- In most cases this will be `false_positive_or_informational` — confirm by
+  tracing where the argument originates.
+
+### `kedro-yaml-unsafe-load`
+
+Fires on `yaml.load()` without a safe Loader. Kedro should always use
+`yaml.safe_load()` or an explicit safe Loader in framework code, because YAML
+config files are user-controlled data.
+
+- If found in **Kedro framework code** (`kedro/` package): classify as
+  `candidate_kedro_vulnerability` — unsafe YAML deserialization on
+  user-controlled config can execute arbitrary Python objects.
+- If found in **project developer code**: classify as
+  `project_developer_responsibility`.
+- `yaml.safe_load`, `yaml.SafeLoader`, `yaml.FullLoader`, `yaml.CLoader`, and
+  `yaml.CSafeLoader` are all safe and excluded by the rule automatically.

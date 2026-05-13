@@ -171,8 +171,8 @@ snapshot = get_project_snapshot("/path/to/my_project", conf_source="conf/custom"
     from kedro.inspection import get_project_snapshot
 
     metadata = bootstrap_project("/path/to/my_project")
-    snapshot_local   = get_project_snapshot("/path/to/my_project", metadata=metadata)
-    snapshot_staging = get_project_snapshot("/path/to/my_project", env="staging", metadata=metadata)
+    snapshot_local   = get_project_snapshot(metadata=metadata)
+    snapshot_staging = get_project_snapshot(env="staging", metadata=metadata)
     ```
 
     This avoids redundant project initialisation. When using the HTTP server, `env` is fixed at startup and cannot be overridden per request — use the programmatic API when you need multi-environment access in the same process.

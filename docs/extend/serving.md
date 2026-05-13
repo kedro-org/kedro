@@ -114,10 +114,7 @@ If the snapshot cannot be built (for example, due to a catalog error), the respo
   "parameters": null,
   "error": {
     "type": "MissingConfigException",
-    "message": "No config files found matching the pattern(s) 'catalog*'",
-    "traceback": [
-      "  File \".../kedro/inspection/snapshot.py\", line 150, in _build_project_snapshot\n    conf_catalog = config_loader[\"catalog\"]\n"
-    ]
+    "message": "No config files found matching the pattern(s) 'catalog*'"
   }
 }
 ```

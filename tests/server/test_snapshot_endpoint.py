@@ -109,7 +109,6 @@ class TestSnapshotEndpoint:
         assert payload["status"] == "failure"
         assert payload["error"]["type"] == "RuntimeError"
         assert payload["error"]["message"] == "project not found"
-        assert isinstance(payload["error"]["traceback"], list)
 
     def test_snapshot_failure_response_has_no_data_fields(
         self, mocker, make_http_server

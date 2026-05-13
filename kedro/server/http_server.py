@@ -6,7 +6,6 @@ import logging
 import os
 import threading
 import time
-import traceback
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
@@ -24,7 +23,6 @@ from kedro.server.models import (
     HealthResponse,
     RunRequest,
     RunResponse,
-    SnapshotErrorDetail,
     SnapshotResponse,
 )
 from kedro.server.utils import (
@@ -142,11 +140,7 @@ def create_http_server(
             logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
             return SnapshotResponse(
                 status="failure",
-                error=SnapshotErrorDetail(
-                    type=type(exc).__qualname__,
-                    message=str(exc),
-                    traceback=traceback.format_tb(exc.__traceback__),
-                ),
+                error=ErrorDetail(type=type(exc).__qualname__, message=str(exc)),
             )
 
     @app.post("/run", response_model=RunResponse, tags=["pipeline"])

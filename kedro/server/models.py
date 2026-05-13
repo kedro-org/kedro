@@ -103,15 +103,6 @@ class ErrorDetail(BaseModel):
     message: str = Field(description="Error message.")
 
 
-class SnapshotErrorDetail(ErrorDetail):
-    """Error detail for the snapshot endpoint, including a stack trace."""
-
-    traceback: list[str] | None = Field(
-        default=None,
-        description="Stack trace lines from the failure.",
-    )
-
-
 class RunResponse(BaseModel):
     """Response model for pipeline execution."""
 
@@ -149,6 +140,6 @@ class SnapshotResponse(BaseModel):
     parameters: list[str] | None = Field(
         default=None, description="Sorted list of top-level parameter keys."
     )
-    error: SnapshotErrorDetail | None = Field(
+    error: ErrorDetail | None = Field(
         default=None, description="Error details if status is 'failure'."
     )

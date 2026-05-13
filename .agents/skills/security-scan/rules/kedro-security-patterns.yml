@@ -102,4 +102,3 @@ rules:
       - pattern: |
           if "()" in str($SINK):
               ...
-

@@ -18,12 +18,13 @@ Two modes:
 - PR-only
 
 In both modes:
-1. run Semgrep
-2. read and deduplicate findings
-3. inspect the flagged code
-4. classify findings against the Kedro security model
-5. run manual review checks from `references/kedro-findings-triage.md`
-6. emit one final report
+1. resolve runtime and working directory
+2. resolve scan target
+3. run Semgrep in parallel across all rulesets
+4. read and deduplicate findings
+5. triage and classify findings against the Kedro security model
+6. run manual review checks from `references/kedro-findings-triage.md`
+7. emit one final report
 
 ## References
 
@@ -256,7 +257,7 @@ Use these buckets:
 - `false_positive_or_informational`
 - `needs_manual_review`
 
-### 6a. Manual review checks (always run, even with zero Semgrep findings)
+### 7. Manual review checks (always run, even with zero Semgrep findings)
 
 After triaging Semgrep output, run the **Manual review checks** from
 `references/kedro-findings-triage.md` against the scan target.
@@ -270,7 +271,7 @@ For each check:
 This step exists because Semgrep only catches known patterns. These checks
 catch the class of issues that static analysis misses.
 
-### 7. Build the final report
+### 8. Build the final report
 
 Do not stream intermediate findings to the user.
 

@@ -138,9 +138,11 @@ Sinks covered: `logging.config.dictConfig`, `logging.config.fileConfig`,
 
 ### `kedro-taint-string-param-to-path`
 
-Fires broadly — any `str` parameter flowing into a pathlib `/` operator. Expect
-high volume; most hits are legitimate path operations in CLI scaffolding and
-config resolution code.
+Fires on any explicitly `str`-annotated parameter flowing into a pathlib `/`
+operator. Expect moderate-to-high volume; most hits are legitimate path
+operations in CLI scaffolding and config resolution code. Untyped parameters
+are intentionally out of scope to limit noise — flag any untyped string
+parameters reaching path sinks as `needs_manual_review` instead.
 
 Triage steps:
 1. Trace where the `str` parameter originates. If it comes from developer-authored
@@ -166,8 +168,12 @@ config files are user-controlled data.
   user-controlled config can execute arbitrary Python objects.
 - If found in **project developer code**: classify as
   `project_developer_responsibility`.
-- `yaml.safe_load`, `yaml.SafeLoader`, `yaml.CLoader`, and `yaml.CSafeLoader`
+- `yaml.safe_load`, `yaml.SafeLoader`, and `yaml.CSafeLoader`
   are safe and excluded by the rule automatically (keyword and positional forms).
+- `yaml.CLoader` is **not** safe — it is the C extension of `FullLoader`, not
+  `SafeLoader`. Do not treat `yaml.load(..., Loader=yaml.CLoader)` as safe; the
+  rule will fire on it and it should be classified as
+  `candidate_kedro_vulnerability` in Kedro framework code.
 - `yaml.FullLoader` is **not** excluded — it is not safe for user-controlled
   data (can deserialise Python objects via `!!python/object/apply`). Treat any
   `yaml.load(..., Loader=yaml.FullLoader)` in Kedro framework code as

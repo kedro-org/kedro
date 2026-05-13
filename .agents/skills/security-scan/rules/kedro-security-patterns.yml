@@ -29,18 +29,19 @@ rules:
     patterns:
       - pattern: yaml.load(...)
       - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
-      - pattern-not: yaml.load(..., Loader=yaml.CLoader, ...)
       - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader, ...)
       - pattern-not: yaml.load(..., yaml.SafeLoader, ...)
       - pattern-not: yaml.load(..., yaml.CSafeLoader, ...)
 
   - id: kedro-taint-string-param-to-path
     message: >-
-      A string parameter flows into a pathlib path construction without traversal
-      sanitization. If this parameter originates from user-supplied input (CLI
-      flags, catalog config, API params), '../' sequences can escape the intended
-      directory. Validate that the value contains no '..' or absolute path
-      segments before using it as a path component.
+      A str-annotated parameter flows into a pathlib path construction without
+      traversal sanitization. If this parameter originates from user-supplied
+      input (CLI flags, catalog config, API params), '../' sequences can escape
+      the intended directory. Validate that the value contains no '..' or
+      absolute path segments before using it as a path component. Note: only
+      explicitly str-annotated parameters are tracked to limit noise; untyped
+      parameters require manual review.
     mode: taint
     languages: [python]
     severity: WARNING
@@ -62,7 +63,9 @@ rules:
       - pattern: |
           if ".." in $SINK:
               ...
-      - pattern: $SINK.lstrip("/")
+      - pattern: |
+          if ".." in str($SINK):
+              ...
       - pattern: re.match(..., $SINK)
 
   - id: kedro-taint-config-to-callable-sink

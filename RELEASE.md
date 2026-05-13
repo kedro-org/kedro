@@ -1,9 +1,41 @@
 # Upcoming Release
+
 ## Major features and improvements
+* Add official support for Python 3.14.
+* Added the first iteration of the `KedroServiceSession`, a new session implementation that allows for multiple runs and data injection.
+NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
+* Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests.
+* Added a new CLI command `kedro server start` to run the server.
+* Added inspection API to get project snapshot.
+* Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
+
 ## Bug fixes and other changes
+* Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
+* Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
+* Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
+* Fixed parameter validation for namespaced pipelines.
+
 ## Documentation changes
+* Added documentation for `KedroServiceSession`.
+* Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
+
 ## Community contributions
 
+* [jeevan6996](https://github.com/jeevan6996)
+* [Rahul Bansod](https://github.com/rahulbansod519)
+
+
+# Release 1.3.1
+
+## Bug fixes and other changes
+* Fixed `AttributeError` when node functions have non-Pydantic/dataclass type hints on `params:` inputs. The parameter validation framework now correctly skips types it cannot validate.
+
+## Documentation changes
+* Added documentation for `Optional[Model]` support and multi-type union limitations in parameter validation.
+* Improved Mermaid diagram visibility in dark mode.
+
+## Community contributions
+* [SayantanDutt](https://github.com/SayantanDutt)
 
 # Release 1.3.0
 

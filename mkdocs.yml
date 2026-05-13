@@ -8,13 +8,13 @@ theme:
   custom_dir: docs/overrides/
   palette:
     # Palette toggle for light mode
-    - scheme: default
+    - scheme: light
       toggle:
         icon: material/white-balance-sunny
         name: Switch to dark mode
 
     # Palette toggle for dark mode
-    - scheme: slate
+    - scheme: dark
       toggle:
         icon: material/white-balance-sunny
         name: Switch to light mode
@@ -95,15 +95,12 @@ plugins:
       full_output: llms-full.txt
 
       sections:
-        Getting Started:
+        Get Started:
           - index.md: Welcome to Kedro documentation
-          - getting-started/course.md: Introduction to Kedro - learn the basics
-          - getting-started/kedro_concepts.md: Core concepts - nodes, pipelines, catalog, and more
           - getting-started/install.md: Installation guide for pip, conda, and development setup
-          - getting-started/architecture_overview.md: Understanding Kedro's architecture
-          - getting-started/commands_reference.md: Complete CLI command reference
-          - getting-started/glossary.md: Kedro terminology glossary
+          - getting-started/kedro_concepts.md: Core concepts - nodes, pipelines, catalog, and more
           - getting-started/faq.md: Frequently asked questions
+          - getting-started/course.md: Learn about Kedro from our video course
 
         Essential Tutorials:
           - tutorials/spaceflights_tutorial.md: Complete tutorial building a spaceflight price prediction project
@@ -185,6 +182,7 @@ plugins:
           - extend/hooks/common_use_cases.md: Common hook use cases
           - extend/hooks/examples.md: Hook implementation examples
           - extend/session.md: Programmatic usage with KedroSession
+          - extend/serving.md: Serving pipelines over HTTP
           - extend/plugins.md: Creating Kedro plugins
           - extend/create_a_starter.md: Creating custom project starters
 
@@ -229,6 +227,8 @@ plugins:
           - api/runner/kedro.runner.SequentialRunner.md: SequentialRunner reference
           - api/runner/kedro.runner.ParallelRunner.md: ParallelRunner reference
           - api/runner/kedro.runner.ThreadRunner.md: ThreadRunner reference
+          - api/server/kedro.server.md: Server API overview
+          - api/server/kedro.server.models.md: Server request and response models
           - api/kedro.utils.md: Utility functions and helpers
           - api/kedro.load_ipython_extension.md: IPython extension loader
           - api/kedro.KedroDeprecationWarning.md: Deprecation warning class
@@ -247,6 +247,8 @@ plugins:
           - ide/set_up_pycharm.md: PyCharm setup for Kedro
 
         About Kedro:
+          - getting-started/architecture_overview.md: Understanding Kedro's architecture
+          - getting-started/glossary.md: Kedro terminology glossary
           - about/technical_steering_committee.md: Kedro's Technical Steering Committee
           - about/migration.md: Migration guide between Kedro versions
           - about/telemetry.md: Understanding Kedro telemetry
@@ -287,9 +289,10 @@ extra_css:
   - stylesheets/themes.css
   - stylesheets/footer.css
   - stylesheets/welcome.css
-   - stylesheets/mermaid.css
+  - stylesheets/mermaid.css
 
 extra_javascript:
+  - https://kedro.org/consent/kedro-consent.js
   - javascript/readthedocs.js
   - javascript/deindex-old-docs.js
 
@@ -299,14 +302,10 @@ nav:
   - Welcome: index.md
   - Kedro:
       - Get Started:
-          - Introduction to Kedro: getting-started/course.md
-          - Concepts: getting-started/kedro_concepts.md
           - Installation: getting-started/install.md
-          - Kedro architecture: getting-started/architecture_overview.md
-          # - Kedro's CLI: getting-started/commands_reference.md
-            #   - Quickstart: getting-started/quickstart.md
-          - Glossary: getting-started/glossary.md
+          - Concepts: getting-started/kedro_concepts.md
           - FAQs: getting-started/faq.md
+          - Kedro's video course: getting-started/course.md
       - Tutorials:
           - Kedro Spaceflights tutorial:
             - Spaceflight tutorial: tutorials/spaceflights_tutorial.md
@@ -356,6 +355,8 @@ nav:
           - Code formatting and linting: develop/linting.md
           - Debugging: develop/debugging.md
           - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
+      - Inspect:
+          - Inspect a project: inspect/inspect-project.md
       - Deploy:
           - Overview: deploy/index.md
           - How to package your project: deploy/package_a_project.md
@@ -384,6 +385,7 @@ nav:
               - Common use cases: extend/hooks/common_use_cases.md
               - Hooks examples: extend/hooks/examples.md
           - Programmatic usage: extend/session.md
+          - Serving over HTTP: extend/serving.md
           - Custom plugins: extend/plugins.md
           - Custom starters: extend/create_a_starter.md
       - Reference:
@@ -435,6 +437,12 @@ nav:
                   - SequentialRunner: api/runner/kedro.runner.SequentialRunner.md
                   - ParallelRunner: api/runner/kedro.runner.ParallelRunner.md
                   - ThreadRunner: api/runner/kedro.runner.ThreadRunner.md
+              - kedro.inspection:
+                  - Overview: api/inspection/kedro.inspection.md
+                  - Models: api/inspection/kedro.inspection.models.md
+              - kedro.server:
+                  - Overview: api/server/kedro.server.md
+                  - Models: api/server/kedro.server.models.md
               - kedro.utils: api/kedro.utils.md
               - kedro.load_ipython_extension: api/kedro.load_ipython_extension.md
               - kedro.KedroDeprecationWarning: api/kedro.KedroDeprecationWarning.md
@@ -456,6 +464,8 @@ nav:
           - Visual Studio Code: ide/set_up_vscode.md
           - PyCharm: ide/set_up_pycharm.md
       - About:
+          - Kedro architecture: getting-started/architecture_overview.md
+          - Glossary: getting-started/glossary.md
         #   - Community:
             #   - Kedro Slack: about/community/slack.md
             #   - Kedro Wizard: about/community/wizard.md

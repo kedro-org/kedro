@@ -826,7 +826,7 @@ def _make_cookiecutter_args_and_fetch_template(
     else:
         # Use the default template path for non PySpark or example options:
         starter_path = template_path
-        if checkout:
+        if checkout and template_path == str(TEMPLATE_PATH):
             warnings.warn(
                 "The --checkout flag has no effect when using the default template "
                 "without one of the following flags:"

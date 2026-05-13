@@ -113,6 +113,16 @@ class TestResolveNestedDictPath:
         data = {"model": "not_a_dict"}
         assert resolve_nested_dict_path(data, "model.options") is None
 
+    def test_namespace_flat_key(self):
+        """Namespaced params are stored as flat dotted keys."""
+        data = {"demo.config": {"my_name": "dummy"}}
+        assert resolve_nested_dict_path(data, "demo.config") == {"my_name": "dummy"}
+
+    def test_flat_key_takes_priority_over_nested(self):
+        """When both flat and nested paths exist, flat key wins."""
+        data = {"demo.config": "flat", "demo": {"config": "nested"}}
+        assert resolve_nested_dict_path(data, "demo.config") == "flat"
+
 
 class TestSetNestedDictValue:
     def test_flat_key(self):
@@ -134,3 +144,10 @@ class TestSetNestedDictValue:
         data = {"model": "not_a_dict"}
         with pytest.raises(ParameterValidationError, match="not a dictionary"):
             set_nested_dict_value(data, "model.options.test_size", 0.3)
+
+    def test_namespace_flat_key_updated_in_place(self):
+        """Namespaced params stored as flat dotted keys are updated directly."""
+        data = {"demo.config": {"my_name": "old"}}
+        set_nested_dict_value(data, "demo.config", {"my_name": "new"})
+        assert data["demo.config"] == {"my_name": "new"}
+        assert "demo" not in data

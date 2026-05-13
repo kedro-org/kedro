@@ -140,14 +140,14 @@ cleanup() {
   rm -rf "$OUTPUT_DIR"
 }
 trap cleanup EXIT
-mkdir -p "$OUTPUT_DIR/raw" "$OUTPUT_DIR/results"
+mkdir -p "$OUTPUT_DIR/raw"
 ```
 
 If keeping artifacts (omit the trap entirely):
 
 ```bash
 OUTPUT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/kedro-security-scan.XXXXXX")"
-mkdir -p "$OUTPUT_DIR/raw" "$OUTPUT_DIR/results"
+mkdir -p "$OUTPUT_DIR/raw"
 ```
 
 In that case, report `$OUTPUT_DIR` at the end of the scan so the user can
@@ -226,17 +226,15 @@ If a scan command using `uvx` or `uv tool run` fails because of a permissions
 error on `~/.cache/uv`, rerun that same scan command with escalation before
 marking the scan as failed.
 
-### 5. Merge results
+### 5. Read findings
 
-```bash
-uv run .agents/skills/security-scan/scripts/merge_semgrep_json.py \
-  "$OUTPUT_DIR/raw" \
-  "$OUTPUT_DIR/results/results.json"
-```
+Read all JSON files in `$OUTPUT_DIR/raw/` directly. Deduplicate by
+`(check_id, path, start.line)` — if the same finding appears in more than one
+ruleset output, count it once.
 
 ### 6. Triage against the Kedro security model
 
-For every finding in the merged JSON:
+For every unique finding:
 - open the flagged file and inspect the surrounding code
 - classify it using [references/kedro-findings-triage.md](references/kedro-findings-triage.md)
 - tie the reasoning back to the code-vs-data boundary in

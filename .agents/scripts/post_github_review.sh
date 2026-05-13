@@ -1,25 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Posts a full PR review (summary + inline comments) to GitHub.
-# Input: a JSON file matching the GitHub "Create a review" API format.
-#
-# Expected JSON structure:
-# {
-#   "event": "COMMENT",
-#   "body": "## Kedro PR Review\n...",
-#   "comments": [
-#     { "path": "file.py", "line": 42, "side": "RIGHT", "body": "Comment text" }
-#   ]
-# }
-#
-# Usage: bash post_review.sh <review_json_file>
+# Post a GitHub PR review from a JSON payload matching the "create review" API.
+# Usage: bash .agents/scripts/post_github_review.sh <review_json_file>
 
 review_file="${1:-}"
 
 if [[ -z "$review_file" ]]; then
     echo "Error: No review JSON file provided."
-    echo "Usage: bash post_review.sh <review_json_file>"
+    echo "Usage: bash .agents/scripts/post_github_review.sh <review_json_file>"
     exit 1
 fi
 

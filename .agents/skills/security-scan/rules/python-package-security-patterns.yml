@@ -1,0 +1,40 @@
+rules:
+  - id: python-eval-exec
+    message: Avoid using eval() or exec() on dynamic input.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: HIGH
+    patterns:
+      - pattern-either:
+          - pattern: eval($X)
+          - pattern: exec($X)
+
+  - id: python-unsafe-subprocess-shell
+    message: Avoid shell execution with untrusted or dynamic input.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: HIGH
+    patterns:
+      - pattern-either:
+          - pattern: subprocess.run(..., shell=True, ...)
+          - pattern: subprocess.Popen(..., shell=True, ...)
+          - pattern: os.system(...)
+          - pattern: os.popen(...)
+
+  - id: python-yaml-unsafe-load
+    message: Use safe YAML loading for untrusted input.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: MEDIUM
+    patterns:
+      - pattern: yaml.load(...)
+      - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)

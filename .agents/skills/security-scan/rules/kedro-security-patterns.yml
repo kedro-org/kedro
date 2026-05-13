@@ -67,6 +67,21 @@ rules:
           if ".." in str($SINK):
               ...
       - pattern: re.match(..., $SINK)
+      - pattern: |
+          if os.path.isabs($SINK):
+              ...
+      - pattern: |
+          if not os.path.isabs($SINK):
+              ...
+      - pattern: |
+          if pathlib.Path($SINK).is_absolute():
+              ...
+      - pattern: |
+          if not pathlib.Path($SINK).is_absolute():
+              ...
+      - pattern: |
+          if $SINK.startswith(...):
+              ...
 
   - id: kedro-taint-config-to-callable-sink
     message: >-

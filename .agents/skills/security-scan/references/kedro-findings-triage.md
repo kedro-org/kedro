@@ -126,6 +126,14 @@ data→executable vulnerabilities: `dictConfig` `()` keys, `pickle` `__reduce__`
 Sinks covered: `logging.config.dictConfig`, `logging.config.fileConfig`,
 `pickle.loads`, `marshal.loads`, `eval`, `exec`.
 
+Note: `yaml.safe_load` is intentionally included as a taint source alongside
+`yaml.load` and `os.environ`. Safe YAML parsing prevents arbitrary object
+deserialisation at parse time, but it does not prevent the *parsed dict* from
+containing keys (such as `()`) that a downstream sink like `dictConfig` will
+interpret as callable factories. The risk is in the sink, not the loader — so
+any config data reaching a callable sink is tracked regardless of how it was
+parsed.
+
 - If the tainted value flows into any sink with no sanitization and the source
   is user-controllable at runtime (env var, API, external file): classify as
   `candidate_kedro_vulnerability`.

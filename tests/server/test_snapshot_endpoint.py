@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from fastapi.testclient import TestClient
 
 from kedro.inspection.models import (
@@ -124,19 +122,6 @@ class TestSnapshotEndpoint:
         assert payload["pipelines"] is None
         assert payload["datasets"] is None
         assert payload["parameters"] is None
-
-    def test_snapshot_passes_project_path_to_get_project_snapshot(
-        self, mocker, tmp_path, make_http_server
-    ):
-        project_path = Path(tmp_path).resolve()
-        mock_get = mocker.patch(
-            "kedro.server.http_server.get_project_snapshot",
-            return_value=_make_snapshot(),
-        )
-        app = make_http_server()
-        with TestClient(app) as client:
-            client.get("/snapshot")
-        assert mock_get.call_args[1]["project_path"] == project_path
 
     def test_snapshot_passes_conf_source_to_get_project_snapshot(
         self, mocker, make_http_server

@@ -282,3 +282,34 @@ class TestBuildProjectSnapshot:
     )
     def test_valid_env_does_not_raise(self, env):
         _build_project_snapshot(self.project_path, env=env)
+
+    def test_raises_when_neither_project_path_nor_metadata_provided(self):
+        with pytest.raises(
+            ValueError, match="Either project_path or metadata must be provided"
+        ):
+            _build_project_snapshot()
+
+    def test_warns_when_project_path_and_metadata_project_path_differ(
+        self, project_metadata, tmp_path
+    ):
+        different_path = tmp_path / "other_project"
+        with pytest.warns(UserWarning, match="project_path will be ignored"):
+            _build_project_snapshot(different_path, metadata=project_metadata)
+
+    def test_no_warning_when_project_path_matches_metadata(self, project_metadata):
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            _build_project_snapshot(
+                project_metadata.project_path, metadata=project_metadata
+            )
+
+    def test_metadata_project_path_used_for_config_loader_when_only_metadata_provided(
+        self, project_metadata
+    ):
+        _build_project_snapshot(metadata=project_metadata)
+        self.mock_bootstrap.assert_not_called()
+        self.mock_make_config_loader.assert_called_once_with(
+            project_metadata.project_path, env=None, conf_source=None
+        )

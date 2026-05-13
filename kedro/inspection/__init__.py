@@ -18,20 +18,24 @@ __all__ = [
 
 
 def get_project_snapshot(
-    project_path: str | Path,
+    project_path: str | Path | None = None,
     env: str | None = None,
     conf_source: str | None = None,
     metadata: ProjectMetadata | None = None,
 ) -> ProjectSnapshot:
-    """Return a read-only snapshot of the Kedro project at *project_path*.
+    """Return a read-only snapshot of the Kedro project.
 
     This is the primary entry point for the inspection API. It initialises
     the project, loads configuration and pipelines, and assembles a
     ``ProjectSnapshot`` without executing any pipeline nodes or writing data.
 
+    At least one of *project_path* or *metadata* must be supplied.  When both
+    are given and point to different directories, *metadata.project_path* takes
+    precedence and a ``UserWarning`` is emitted.
+
     Args:
         project_path: Path to the project root directory (the directory that
-            contains ``pyproject.toml``).
+            contains ``pyproject.toml``). Optional when *metadata* is provided.
         env: Optional run environment override (e.g. ``"staging"``). When
             ``None``, the project's default run environment is used.
         conf_source: Optional path to the configuration directory. When
@@ -48,7 +52,7 @@ def get_project_snapshot(
                 metadata = bootstrap_project(project_path)
 
                 # --- per-request snapshot (bootstrap_project not called again) ---
-                snapshot = get_project_snapshot(project_path, metadata=metadata)
+                snapshot = get_project_snapshot(metadata=metadata)
 
             The same pattern applies to programmatic callers that need multiple
             snapshots across different environments::
@@ -57,10 +61,8 @@ def get_project_snapshot(
                 from kedro.inspection import get_project_snapshot
 
                 metadata = bootstrap_project(project_path)
-                snapshot_default = get_project_snapshot(project_path, metadata=metadata)
-                snapshot_staging = get_project_snapshot(
-                    project_path, env="staging", metadata=metadata
-                )
+                snapshot_default = get_project_snapshot(metadata=metadata)
+                snapshot_staging = get_project_snapshot(env="staging", metadata=metadata)
 
     Returns:
         A fully populated ``ProjectSnapshot``.

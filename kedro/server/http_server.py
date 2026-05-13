@@ -124,7 +124,6 @@ def create_http_server(
         """
         try:
             snapshot = get_project_snapshot(
-                project_path=app.state.project_path,
                 env=app.state.default_env,
                 conf_source=app.state.default_conf_source,
                 metadata=app.state.metadata,

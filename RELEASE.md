@@ -8,6 +8,7 @@ NOTE: This session implementation is under active development and may occasional
 * Added a new CLI command `kedro server start` to run the server.
 * Added inspection API to get project snapshot.
 * Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
+* Added an HTTP endpoint `/snapshot` for accessing project snapshot.
 
 ## Bug fixes and other changes
 * Fixed parameter validation for optional typed params so explicit `None` values are preserved and do not trigger validation errors.

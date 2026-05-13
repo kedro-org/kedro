@@ -90,7 +90,7 @@ def create_http_server(
 
     app = FastAPI(
         title="Kedro Server",
-        description="HTTP API for running Kedro pipelines",
+        description="HTTP API for triggering pipeline runs, inspecting project metadata, and more",
         version=kedro_version,
         lifespan=lifespan,
     )

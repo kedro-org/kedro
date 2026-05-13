@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from kedro.validation.exceptions import ParameterValidationError
 from kedro.validation.utils import (
+    _MISSING,
     get_typed_fields,
     is_pydantic_class,
     is_pydantic_model,
@@ -103,15 +104,19 @@ class TestResolveNestedDictPath:
 
     def test_missing_flat_key(self):
         data = {"test_size": 0.2}
-        assert resolve_nested_dict_path(data, "missing") is None
+        assert resolve_nested_dict_path(data, "missing") is _MISSING
 
     def test_missing_nested_key(self):
         data = {"model": {"options": {}}}
-        assert resolve_nested_dict_path(data, "model.options.missing") is None
+        assert resolve_nested_dict_path(data, "model.options.missing") is _MISSING
 
     def test_intermediate_not_dict(self):
         data = {"model": "not_a_dict"}
-        assert resolve_nested_dict_path(data, "model.options") is None
+        assert resolve_nested_dict_path(data, "model.options") is _MISSING
+
+    def test_key_with_none_value_returns_none(self):
+        data = {"model_options": None}
+        assert resolve_nested_dict_path(data, "model_options") is None
 
     def test_namespace_flat_key(self):
         """Namespaced params are stored as flat dotted keys."""

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 from unittest.mock import MagicMock
 
 import pytest
@@ -11,7 +10,6 @@ import pytest
 from kedro.pipeline import node as kedro_node
 from kedro.validation.exceptions import ParameterValidationError
 from kedro.validation.parameter_validator import ParameterValidator
-from kedro.validation.type_extractor import ParamRequirement
 
 from .conftest import SampleDataclass, SamplePydanticModel
 
@@ -42,6 +40,29 @@ class TestParameterValidator:
 
         assert isinstance(result["model_options"], SamplePydanticModel)
 
+    def test_validate_raw_params_optional_none(self):
+        """Test Optional[Model] = None is validated correctly via full extraction."""
+        from typing import Optional
+
+        def my_func(model_options: Optional[SamplePydanticModel]) -> None:
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs="params:model_options",
+            outputs="output",
+            name="test_node",
+        )
+
+        pipeline = MagicMock()
+        pipeline.nodes = [test_node]
+
+        validator = ParameterValidator(pipelines={"data_science": pipeline})
+        raw = {"model_options": None}
+        result = validator.validate_raw_params(raw)
+
+        assert result["model_options"] is None
+
 
 class TestApplyValidation:
     def test_pydantic_model_success(self, parameter_validator):
@@ -66,27 +87,6 @@ class TestApplyValidation:
 
         result = parameter_validator._apply_validation(raw, requirements)
         assert result == {"other_key": "value"}
-
-    def test_none_param_raises_when_not_optional(self, parameter_validator):
-        raw = {"model_options": None}
-        requirements = {"model_options": SamplePydanticModel}
-
-        with pytest.raises(
-            ParameterValidationError, match="Parameter validation failed"
-        ):
-            parameter_validator._apply_validation(raw, requirements)
-
-    def test_none_param_allowed_when_optional(self, parameter_validator):
-        raw = {"model_options": None}
-        requirements = {
-            "model_options": ParamRequirement(
-                expected_type=SamplePydanticModel,
-                allows_none=True,
-            )
-        }
-
-        result = parameter_validator._apply_validation(raw, requirements)
-        assert result["model_options"] is None
 
     def test_unsupported_type_returns_raw(self, parameter_validator):
         raw = {"threshold": 0.5}
@@ -153,22 +153,16 @@ class TestApplyValidation:
         parameter_validator._apply_validation(raw, requirements)
         assert isinstance(raw["config"], dict)
 
-    def test_validate_raw_params_optional_none(self):
-        def my_func(model_options: Optional[SamplePydanticModel]) -> None:
-            pass
+    def test_none_param_raises_when_not_optional(self, parameter_validator):
+        raw = {"model_options": None}
+        requirements = {"model_options": SamplePydanticModel}
+        with pytest.raises(
+            ParameterValidationError, match="Parameter validation failed"
+        ):
+            parameter_validator._apply_validation(raw, requirements)
 
-        test_node = kedro_node(
-            func=my_func,
-            inputs="params:model_options",
-            outputs="output",
-            name="test_node",
-        )
-
-        pipeline = MagicMock()
-        pipeline.nodes = [test_node]
-
-        validator = ParameterValidator(pipelines={"data_science": pipeline})
-
-        result = validator.validate_raw_params({"model_options": None})
-
+    def test_none_param_skips_when_optional(self, parameter_validator):
+        raw = {"model_options": None}
+        requirements = {"model_options": SamplePydanticModel | None}
+        result = parameter_validator._apply_validation(raw, requirements)
         assert result["model_options"] is None

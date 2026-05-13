@@ -8,8 +8,14 @@ from typing import TYPE_CHECKING, Any
 
 from .exceptions import ParameterValidationError
 from .model_factory import instantiate_model
-from .type_extractor import ParamRequirement, TypeExtractor
-from .utils import MISSING, resolve_nested_dict_path, set_nested_dict_value
+from .type_extractor import TypeExtractor
+from .utils import (
+    _MISSING,
+    _is_optional,
+    _unwrap_optional,
+    resolve_nested_dict_path,
+    set_nested_dict_value,
+)
 
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
@@ -46,31 +52,30 @@ class ParameterValidator:
         validation_errors = []
         instantiated_count = 0
 
-        for param_key, requirement in requirements.items():
-            if isinstance(requirement, ParamRequirement):
-                expected_type = requirement.expected_type
-                allows_none = requirement.allows_none
-            else:
-                expected_type = requirement
-                allows_none = False
+        for param_key, expected_type in requirements.items():
             try:
-                raw_value = resolve_nested_dict_path(
-                    raw_params, param_key, default=MISSING
-                )
+                raw_value = resolve_nested_dict_path(raw_params, param_key)
 
-                if raw_value is MISSING:
+                if raw_value is _MISSING:
                     logger.debug(
                         "Parameter '%s' not found in config, skipping validation",
                         param_key,
                     )
                     continue
 
-                if raw_value is None and allows_none:
+                if raw_value is None:
+                    if _is_optional(expected_type):
+                        continue
+                    error_msg = (
+                        f"Parameter '{param_key}': value is None but type "
+                        "is not Optional"
+                    )
+                    validation_errors.append(error_msg)
+                    logger.error(error_msg)
                     continue
 
-                validated_instance = instantiate_model(
-                    param_key, raw_value, expected_type
-                )
+                inner_type = _unwrap_optional(expected_type)
+                validated_instance = instantiate_model(param_key, raw_value, inner_type)
 
                 if validated_instance is not raw_value:
                     set_nested_dict_value(
@@ -79,7 +84,7 @@ class ParameterValidator:
                     instantiated_count += 1
                     logger.debug(
                         "Successfully instantiated %s for parameter '%s'",
-                        expected_type.__name__,
+                        getattr(inner_type, "__name__", str(inner_type)),
                         param_key,
                     )
 

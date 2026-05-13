@@ -8,7 +8,7 @@ import logging
 import types
 from typing import TYPE_CHECKING, Union, get_args, get_origin, get_type_hints
 
-from .utils import is_pydantic_class
+from .utils import _unwrap_optional, is_pydantic_class
 
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _PARAMS_PREFIX = "params:"
-OPTIONAL_UNION_LEN = 2
 
 
 def _type_name(tp: type) -> str:
@@ -32,28 +31,6 @@ def _type_name(tp: type) -> str:
     return getattr(tp, "__name__", str(tp))
 
 
-@dataclasses.dataclass(frozen=True)
-class ParamRequirement:
-    expected_type: type
-    allows_none: bool = False
-
-
-def _unwrap_optional(tp: type) -> tuple[type, bool]:
-    """Unwrap ``Optional[X]`` / ``X | None`` to ``X``.
-
-    If the type is a union of exactly one non-None type and ``NoneType``,
-    return the non-None type. Otherwise return the original type unchanged.
-    """
-    allows_none = False
-    if get_origin(tp) is Union or isinstance(tp, types.UnionType):
-        args = get_args(tp)
-        non_none_args = [a for a in args if a is not type(None)]
-        if len(non_none_args) == 1 and len(args) == OPTIONAL_UNION_LEN:
-            allows_none = True
-            tp = non_none_args[0]
-    return tp, allows_none
-
-
 class TypeExtractor:
     """Extracts parameter type requirements from pipeline node signatures."""
 
@@ -66,7 +43,7 @@ class TypeExtractor:
         self._pipelines = pipelines
         self._warned_union_types: set[type] = set()
 
-    def extract_types_from_pipelines(self) -> dict[str, ParamRequirement]:
+    def extract_types_from_pipelines(self) -> dict[str, type]:
         """Extract all type requirements from registered pipelines.
 
         Walks all pipelines (except ``__default__``) and inspects node
@@ -75,7 +52,7 @@ class TypeExtractor:
         Returns:
             Dictionary mapping parameter keys to their expected types.
         """
-        all_type_requirements: dict[str, ParamRequirement] = {}
+        all_type_requirements: dict[str, type] = {}
 
         for pipeline_name, pipeline in self._pipelines.items():
             if pipeline_name == "__default__":
@@ -86,16 +63,16 @@ class TypeExtractor:
             for key, new_type in pipeline_type_requirements.items():
                 if key in all_type_requirements:
                     existing_type = all_type_requirements[key]
-                    if existing_type.expected_type != new_type.expected_type:
+                    if existing_type != new_type:
                         logger.warning(
                             "Conflicting type requirements for parameter '%s': "
                             "%s (existing) vs %s (from pipeline '%s'). "
                             "Using %s.",
                             key,
-                            _type_name(existing_type.expected_type),
-                            _type_name(new_type.expected_type),
+                            _type_name(existing_type),
+                            _type_name(new_type),
                             pipeline_name,
-                            _type_name(new_type.expected_type),
+                            _type_name(new_type),
                         )
 
             all_type_requirements.update(pipeline_type_requirements)
@@ -106,11 +83,9 @@ class TypeExtractor:
         )
         return all_type_requirements
 
-    def _extract_types_from_pipeline(
-        self, pipeline: Pipeline
-    ) -> dict[str, ParamRequirement]:
+    def _extract_types_from_pipeline(self, pipeline: Pipeline) -> dict[str, type]:
         """Extract type requirements from a single pipeline."""
-        type_requirements: dict[str, ParamRequirement] = {}
+        type_requirements: dict[str, type] = {}
 
         for node in getattr(pipeline, "nodes", []):
             node_type_requirements = self._extract_types_from_node(node)
@@ -118,7 +93,7 @@ class TypeExtractor:
 
         return type_requirements
 
-    def _extract_types_from_node(self, node: Node) -> dict[str, ParamRequirement]:
+    def _extract_types_from_node(self, node: Node) -> dict[str, type]:
         """Extract typed parameter requirements from a single node.
 
         Inspects the node's function signature and maps type-annotated
@@ -141,7 +116,7 @@ class TypeExtractor:
 
         dataset_to_arg = self._build_dataset_to_arg_mapping(node, sig)
 
-        all_requirements: dict[str, ParamRequirement] = {}
+        all_requirements: dict[str, type] = {}
 
         for ds_name, arg_name in dataset_to_arg.items():
             expected_type = type_hints.get(arg_name)
@@ -151,21 +126,21 @@ class TypeExtractor:
             if not ds_name.startswith(_PARAMS_PREFIX):
                 continue
 
-            # Unwrap Optional[X] / X | None so we validate against the inner type
-            expected_type, allows_none = _unwrap_optional(expected_type)
-
-            # Only record types we can actually validate (Pydantic models or dataclasses)
+            # Unwrap Optional[X] / X | None to check if the inner type is validatable,
+            # but store the original type so _apply_validation knows if None is allowed.
+            inner_type = _unwrap_optional(expected_type)
+            # Only record types we can actually validate (Pydantic models or
+            # dataclasses)
             if not (
-                is_pydantic_class(expected_type)
-                or dataclasses.is_dataclass(expected_type)
+                is_pydantic_class(inner_type) or dataclasses.is_dataclass(inner_type)
             ):
                 if (
-                    get_origin(expected_type) is Union
-                    or isinstance(expected_type, types.UnionType)
-                ) and expected_type not in self._warned_union_types:
-                    self._warned_union_types.add(expected_type)
+                    get_origin(inner_type) is Union
+                    or isinstance(inner_type, types.UnionType)
+                ) and inner_type not in self._warned_union_types:
+                    self._warned_union_types.add(inner_type)
                     type_names = " | ".join(
-                        _type_name(type_arg) for type_arg in get_args(expected_type)
+                        _type_name(type_arg) for type_arg in get_args(inner_type)
                     )
                     logger.warning(
                         "Union type hint (%s) is not supported for validation. "
@@ -176,10 +151,7 @@ class TypeExtractor:
                 continue
 
             param_key = ds_name.split(":", 1)[1]
-            all_requirements[param_key] = ParamRequirement(
-                expected_type=expected_type,
-                allows_none=allows_none,
-            )
+            all_requirements[param_key] = expected_type  # preserve Optional if present
             logger.debug(
                 "Found parameter requirement: %s -> %s",
                 param_key,

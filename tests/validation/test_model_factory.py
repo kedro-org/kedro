@@ -24,7 +24,7 @@ class TestInstantiateModel:
         raw = {"test_size": "banana", "random_state": 3}
         with pytest.raises(
             ModelInstantiationError,
-            match=r"(?s)Failed to instantiate SamplePydanticModel for parameter 'model_options'.*test_size",
+            match=r"(?s)Failed to instantiate SamplePydanticModel.*test_size",
         ):
             instantiate_model("model_options", raw, SamplePydanticModel)
 

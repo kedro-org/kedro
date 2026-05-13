@@ -22,7 +22,8 @@ In both modes:
 2. read and deduplicate findings
 3. inspect the flagged code
 4. classify findings against the Kedro security model
-5. emit one final report
+5. run manual review checks from `references/kedro-findings-triage.md`
+6. emit one final report
 
 ## References
 
@@ -52,8 +53,9 @@ Always use `--metrics=off`.
 ## Runtime note
 
 If a `uvx` or `uv tool run` Semgrep command fails with a permissions error on a
-`~/.cache/uv` path, rerun the same command with elevated filesystem permissions
-instead of treating it as a real scan failure.
+`~/.cache/uv` path, ask the user for permission to run outside the sandbox
+(i.e. with full filesystem access) and then rerun the same command. Do not
+treat a cache permission failure as a real scan failure.
 
 ## Delivery modes
 
@@ -126,8 +128,9 @@ fi
 ```
 
 If the selected runtime is `uvx` or `uv tool run` and the version check fails
-with a permissions error involving `~/.cache/uv`, rerun that same command with
-elevated filesystem permissions.
+with a permissions error involving `~/.cache/uv`, ask the user for permission
+to run outside the sandbox (full filesystem access) and then rerun the same
+command.
 
 ### 2. Resolve temporary working directory
 
@@ -222,11 +225,15 @@ Run these in parallel:
 wait
 ```
 
-If one scan fails, report it instead of pretending the full scan succeeded.
+If one or more rulesets fail, continue with the findings from the rulesets that
+did succeed. Do not abort the full scan. In the final report, include a
+"Scan errors" section that lists each failed ruleset and its error message so
+the user knows the scan was partial.
 
 If a scan command using `uvx` or `uv tool run` fails because of a permissions
-error on `~/.cache/uv`, rerun that same scan command with elevated filesystem
-permissions before marking the scan as failed.
+error on `~/.cache/uv`, ask the user for permission to run outside the sandbox
+(full filesystem access) and rerun that same scan command before marking it as
+failed.
 
 ### 5. Read findings
 
@@ -248,6 +255,20 @@ Use these buckets:
 - `deployment_or_environment_issue`
 - `false_positive_or_informational`
 - `needs_manual_review`
+
+### 6a. Manual review checks (always run, even with zero Semgrep findings)
+
+After triaging Semgrep output, run the **Manual review checks** from
+`references/kedro-findings-triage.md` against the scan target.
+
+For each check:
+- Search the scanned files for the pattern described
+- If found and unmitigated, add it to the findings list with classification
+  `candidate_kedro_vulnerability` or `needs_manual_review`
+- If not found, note the check was performed and was clean
+
+This step exists because Semgrep only catches known patterns. These checks
+catch the class of issues that static analysis misses.
 
 ### 7. Build the final report
 

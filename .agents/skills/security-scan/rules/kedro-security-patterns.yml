@@ -29,6 +29,77 @@ rules:
     patterns:
       - pattern: yaml.load(...)
       - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
-      - pattern-not: yaml.load(..., Loader=yaml.FullLoader, ...)
       - pattern-not: yaml.load(..., Loader=yaml.CLoader, ...)
       - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader, ...)
+      - pattern-not: yaml.load(..., yaml.SafeLoader, ...)
+      - pattern-not: yaml.load(..., yaml.CSafeLoader, ...)
+
+  - id: kedro-taint-string-param-to-path
+    message: >-
+      A string parameter flows into a pathlib path construction without traversal
+      sanitization. If this parameter originates from user-supplied input (CLI
+      flags, catalog config, API params), '../' sequences can escape the intended
+      directory. Validate that the value contains no '..' or absolute path
+      segments before using it as a path component.
+    mode: taint
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+      impact: HIGH
+    pattern-sources:
+      - patterns:
+          - pattern-inside: |
+              def $FUNC(..., $ARG: str, ...):
+                  ...
+          - focus-metavariable: $ARG
+    pattern-sinks:
+      - pattern: $BASE / $SINK
+      - pattern: pathlib.Path(..., $SINK, ...)
+      - pattern: pathlib.PurePosixPath(..., $SINK, ...)
+    pattern-sanitizers:
+      - pattern: |
+          if ".." in $SINK:
+              ...
+      - pattern: $SINK.lstrip("/")
+      - pattern: re.match(..., $SINK)
+
+  - id: kedro-taint-config-to-callable-sink
+    message: >-
+      A value loaded from an environment variable or config file flows into a
+      function that can interpret data as executable callables. In Python, several
+      functions treat special keys (e.g. '()' in logging.config.dictConfig, Python
+      object tags in yaml.load, __reduce__ in pickle) as callable factories,
+      enabling RCE if the input is user-controlled. Validate or sanitize the
+      config dict before passing it to any such sink.
+    mode: taint
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: CRITICAL
+    pattern-sources:
+      - pattern: os.environ.get(...)
+      - pattern: os.environ[...]
+      - pattern: os.getenv(...)
+      - pattern: yaml.safe_load(...)
+      - pattern: yaml.load(...)
+      - pattern: json.load(...)
+      - pattern: json.loads(...)
+    pattern-sinks:
+      - pattern: logging.config.dictConfig($SINK)
+      - pattern: logging.config.fileConfig($SINK)
+      - pattern: pickle.loads($SINK)
+      - pattern: marshal.loads($SINK)
+      - pattern: eval($SINK)
+      - pattern: exec($SINK)
+    pattern-sanitizers:
+      - pattern: |
+          if "()" in $SINK:
+              ...
+      - pattern: |
+          if "()" in str($SINK):
+              ...
+

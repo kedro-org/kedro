@@ -10,6 +10,8 @@ import json
 import sys
 from pathlib import Path
 
+_EXPECTED_ARGS = 3
+
 
 def _dedup_key(result: dict) -> tuple:
     start = result.get("start") or {}
@@ -40,7 +42,7 @@ def merge_semgrep_json(files: list[Path]) -> dict:
         try:
             data = json.loads(path.read_text())
         except json.JSONDecodeError as exc:
-            print(f"Warning: Failed to parse {path}: {exc}", file=sys.stderr)
+            sys.stderr.write(f"Warning: Failed to parse {path}: {exc}\n")
             continue
 
         if merged["version"] is None:
@@ -63,8 +65,8 @@ def merge_semgrep_json(files: list[Path]) -> dict:
 
 
 def main() -> int:
-    if len(sys.argv) != 3:
-        print(f"Usage: {sys.argv[0]} RAW_DIR OUTPUT_FILE", file=sys.stderr)
+    if len(sys.argv) != _EXPECTED_ARGS:
+        sys.stderr.write(f"Usage: {sys.argv[0]} RAW_DIR OUTPUT_FILE\n")
         return 1
 
     raw_dir = Path(sys.argv[1])
@@ -72,8 +74,8 @@ def main() -> int:
     files = sorted(raw_dir.glob("*.json"))
 
     if not files:
-      print("No JSON files found", file=sys.stderr)
-      return 1
+        sys.stderr.write("No JSON files found\n")
+        return 1
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(json.dumps(merge_semgrep_json(files), indent=2))

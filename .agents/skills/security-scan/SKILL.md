@@ -129,18 +129,29 @@ escalation.
 
 ### 2. Resolve temporary working directory
 
+Check whether the user explicitly asked to keep artifacts **before** emitting
+the script below.
+
+If NOT keeping artifacts:
+
 ```bash
 OUTPUT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/kedro-security-scan.XXXXXX")"
 cleanup() {
   rm -rf "$OUTPUT_DIR"
 }
 trap cleanup EXIT
-
 mkdir -p "$OUTPUT_DIR/raw" "$OUTPUT_DIR/results"
 ```
 
-If the user explicitly asks to keep the artifacts, do not register the cleanup
-trap and report the directory path at the end.
+If keeping artifacts (omit the trap entirely):
+
+```bash
+OUTPUT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/kedro-security-scan.XXXXXX")"
+mkdir -p "$OUTPUT_DIR/raw" "$OUTPUT_DIR/results"
+```
+
+In that case, report `$OUTPUT_DIR` at the end of the scan so the user can
+inspect it.
 
 ### 3. Resolve scan target
 
@@ -155,9 +166,12 @@ For PR mode:
 
 ```bash
 PR_NUMBER="<resolved-pr-number>"
-SCAN_TARGETS=("${(@f)$(gh pr diff "$PR_NUMBER" --name-only | while read -r path; do
+SCAN_TARGETS=()
+while IFS= read -r f; do
+  SCAN_TARGETS+=("$f")
+done < <(gh pr diff "$PR_NUMBER" --name-only | while read -r path; do
   [ -f "$path" ] && printf '%s\n' "$path"
-done)}")
+done)
 TARGET_LABEL="PR #$PR_NUMBER"
 ```
 
@@ -215,7 +229,7 @@ marking the scan as failed.
 ### 5. Merge results
 
 ```bash
-uv run {baseDir}/scripts/merge_semgrep_json.py \
+uv run .agents/skills/security-scan/scripts/merge_semgrep_json.py \
   "$OUTPUT_DIR/raw" \
   "$OUTPUT_DIR/results/results.json"
 ```

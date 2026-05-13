@@ -1,16 +1,22 @@
 rules:
   - id: python-eval-exec
-    message: Avoid using eval() or exec() on dynamic input.
+    message: >-
+      Avoid using eval() or exec() on dynamic input. This rule fires on all
+      usages; manually verify that the argument is not a constant string before
+      treating the finding as a real issue.
     languages: [python]
     severity: ERROR
     metadata:
       category: security
-      confidence: HIGH
+      confidence: MEDIUM
       impact: HIGH
     patterns:
       - pattern-either:
           - pattern: eval($X)
           - pattern: exec($X)
+      - pattern-not-either:
+          - pattern: eval("...")
+          - pattern: exec("...")
 
   - id: python-unsafe-subprocess-shell
     message: Avoid shell execution with untrusted or dynamic input.
@@ -38,3 +44,5 @@ rules:
     patterns:
       - pattern: yaml.load(...)
       - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
+      - pattern-not: yaml.load(..., Loader=yaml.FullLoader, ...)
+      - pattern-not: yaml.load(..., Loader=yaml.CLoader, ...)

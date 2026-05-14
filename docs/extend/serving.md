@@ -103,7 +103,7 @@ curl http://127.0.0.1:8000/snapshot
 }
 ```
 
-If the snapshot cannot be built (for example, due to a catalog error), the response still returns HTTP 200 with `"status": "failure"`. The `error` field contains the exception type, message, and stack trace:
+If the snapshot cannot be built (for example, due to a catalog error), the response still returns HTTP 200 with `"status": "failure"`. The `error` field contains the exception type and message:
 
 ```json
 {
@@ -120,7 +120,7 @@ If the snapshot cannot be built (for example, due to a catalog error), the respo
 ```
 
 !!! note
-    The `/snapshot` endpoint uses the environment configured at server startup (`--env` or `KEDRO_SERVER_ENV`). It does not accept a per-request `env` parameter.
+    The `/snapshot` endpoint uses the environment and configuration source configured at server startup (`--env` / `KEDRO_SERVER_ENV` and `--conf-source` / `KEDRO_SERVER_CONF_SOURCE`). It does not accept per-request `env` or `conf_source` parameters.
 
 See [Inspect a Kedro project](../inspect/inspect-project.md) for the programmatic API and details on the snapshot structure.
 

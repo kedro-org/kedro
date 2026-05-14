@@ -11,6 +11,7 @@ Kedro is a framework that makes it easy to build robust and scalable data pipeli
 | [`kedro.logging`](kedro.logging.md)               |                                                                                                         |
 | [`kedro.pipeline`](pipeline/kedro.pipeline.md)    | Provides functionality to define and execute data-driven pipelines.                                     |
 | [`kedro.runner`](runner/kedro.runner.md)          | Provides runners that are able to execute Pipeline instances.                                           |
+| [`kedro.server`](server/kedro.server.md)          | Provides an optional HTTP server for triggering Kedro pipelines over REST.                              |
 | [`kedro.utils`](kedro.utils.md)                   | This module provides a set of helper functions being used across different components of Kedro package. |
 
 ## Functions

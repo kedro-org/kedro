@@ -49,8 +49,10 @@ jobs:
 
     - name: Pull specific branch from Kedro and install it
       if: github.event.action == 'labeled' && contains(github.event.label.name, 'performance')
+      env:
+        BRANCH_REF: ${{ github.event.pull_request.head.ref }}
       run: |
-        git clone --branch ${{ github.event.pull_request.head.ref }} https://github.com/kedro-org/kedro.git
+        git clone --branch "$BRANCH_REF" https://github.com/kedro-org/kedro.git
         cd kedro
         make install
 

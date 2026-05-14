@@ -43,8 +43,6 @@ Read these before triaging findings:
   - `p/secrets`
   - `p/python`
   - `.agents/skills/security-scan/rules/kedro-security-patterns.yml`
-- Optional rulesets (run only when explicitly requested):
-  - `p/owasp-top-ten` — designed for web applications; expect high noise against framework code
 - Temporary working directory:
   - create with `mktemp -d`
   - delete at the end unless the user explicitly asks to keep artifacts

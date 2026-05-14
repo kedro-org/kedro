@@ -77,10 +77,14 @@ outside Kedro's own defaults (CLI arg, env var, catalog config, API param):
 
 ### `p/security-audit`
 
+_Broad OWASP-style checks — injection, unsafe calls, dangerous APIs._
+
 Expect high volume; most findings on a framework codebase are
 `false_positive_or_informational`. Apply standard classification buckets.
 
 ### `p/secrets`
+
+_Detects hardcoded credentials, tokens, and API keys in source files._
 
 Triage in order: (1) check the file path — `tests/`, `docs/`, `features/`,
 `.agents/` paths are almost always `false_positive_or_informational`;
@@ -89,6 +93,8 @@ Triage in order: (1) check the file path — `tests/`, `docs/`, `features/`,
 `needs_manual_review`.
 
 ### `p/python`
+
+_General Python anti-patterns — unsafe deserialization, shell injection, insecure stdlib use._
 
 Rarely indicates Kedro vulnerabilities. One exception worth checking: `pickle`
 usage — if Kedro framework code is deserialising untrusted data, classify as

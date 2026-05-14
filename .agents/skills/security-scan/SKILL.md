@@ -17,9 +17,9 @@ Two modes:
 - PR-only
 
 In both modes:
-1. resolve runtime
-2. resolve temporary working directory
-3. resolve scan target
+1. detect which Semgrep binary is available (see Defaults)
+2. create a temporary working directory with `mktemp -d`
+3. determine what to scan — full repo or changed files from the PR
 4. run Semgrep in parallel across all rulesets
 5. read and deduplicate findings
 6. triage and classify findings against the Kedro security model

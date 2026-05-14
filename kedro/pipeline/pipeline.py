@@ -90,8 +90,12 @@ def _validate_datasets_exist(
     if missing_inputs or extra_inputs:
         sorted_missing = sorted(missing_inputs)
         sorted_extra = sorted(extra_inputs)
-        possible_missing = get_close_matches(sorted_missing, existing)
-        possible_extra = get_close_matches(sorted_extra, existing)
+        possible_missing = {
+            m[0] for extra in sorted_extra
+            if (m := get_close_matches(extra, sorted_missing, n=1))
+        }
+        missing_inputs -= possible_missing
+        
 
         error_msg = ""
     

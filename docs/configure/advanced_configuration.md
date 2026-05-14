@@ -46,7 +46,7 @@ CONFIG_LOADER_CLASS = CustomConfigLoader
 ```
 Custom configuration loaders that do not subclass `OmegaConfigLoader`
 will not include OmegaConf-specific functionalities such as interpolation,
-globals, runtime parameters or custom resolvers. Access to these features
+globals, runtime parameters or custom resolvers.
 requires subclassing `OmegaConfigLoader`.
 
 ### How to change which configuration files are loaded

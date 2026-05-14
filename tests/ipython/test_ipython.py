@@ -1,3 +1,4 @@
+import ast
 from pathlib import Path
 
 import pytest
@@ -6,6 +7,8 @@ from IPython.core.error import UsageError
 import kedro.ipython
 from kedro.framework.project import pipelines
 from kedro.ipython import (
+    _build_dependency_source_block,
+    _build_module_symbol_table,
     _find_node,
     _format_node_inputs_text,
     _get_node_bound_arguments,
@@ -13,7 +16,9 @@ from kedro.ipython import (
     _prepare_function_body,
     _prepare_imports,
     _prepare_node_inputs,
+    _resolve_function_node,
     _resolve_project_path,
+    _resolve_symbol_dependencies,
     load_ipython_extension,
     magic_load_node,
     reload_kedro,
@@ -22,6 +27,7 @@ from kedro.pipeline import pipeline
 
 from .conftest import (
     dummy_function,
+    dummy_function_using_decorated_helper,
     dummy_function_with_loop,
     dummy_multiline_import_function,
     dummy_nested_function,
@@ -342,6 +348,34 @@ import logging.config  # noqa Dummy import"""
         for cell, expected_cell in zip(cells_list, expected_cells):
             assert cell == expected_cell
 
+    def test_load_node_executes_with_same_module_helper_dependency(
+        self,
+        mocker,
+        dummy_pipelines_with_same_module_helper,
+    ):
+        mock_pipeline_values = dummy_pipelines_with_same_module_helper.values()
+        mocker.patch.object(pipelines, "values", return_value=mock_pipeline_values)
+
+        cells = _load_node("dummy_node_using_same_module_helper", pipelines)
+        combined_cell = "\n\n".join(cells)
+
+        class Catalog:
+            @staticmethod
+            def load(_name):
+                return True
+
+        namespace = {"catalog": Catalog()}
+        exec(combined_cell, namespace)  # noqa: S102
+
+    def test_prepare_function_body_preserves_same_module_helper_decorators(self):
+        function_body = _prepare_function_body(dummy_function_using_decorated_helper)
+
+        assert "@invert_result" in function_body
+
+        namespace = {}
+        exec(function_body, namespace)  # noqa: S102
+        assert namespace["dummy_function_using_decorated_helper"](True) is False
+
     def test_find_node(self, dummy_pipelines, dummy_node):
         node_to_find = "dummy_node"
         result = _find_node(node_to_find, dummy_pipelines)
@@ -436,6 +470,118 @@ ERROR,
     def test_prepare_function_body(self, dummy_function_definition):
         result = _prepare_function_body(dummy_function)
         assert result == dummy_function_definition
+
+    # NOTE: The tests below cover unlikely but realistic fallback/resilience
+    # branches for AST extraction. They are intentionally explicit to guard
+    # behavior under degraded environments and keep strict coverage stable.
+    def test_prepare_function_body_fallback_when_source_file_missing(
+        self, mocker, dummy_function_definition, caplog
+    ):
+        mocker.patch(
+            "kedro.ipython.inspect.getsourcelines",
+            return_value=(dummy_function_definition.splitlines(keepends=True), 1),
+        )
+        mocker.patch("kedro.ipython.inspect.getsourcefile", return_value=None)
+
+        result = _prepare_function_body(dummy_function)
+
+        assert result == dummy_function_definition
+        assert (
+            "Falling back to basic source extraction for 'dummy_function'"
+            in caplog.text
+        )
+
+    def test_prepare_function_body_fallback_when_ast_parse_fails(
+        self, mocker, dummy_function_definition, caplog
+    ):
+        mocker.patch("kedro.ipython.Path.read_text", side_effect=OSError("boom"))
+
+        result = _prepare_function_body(dummy_function)
+
+        assert result == dummy_function_definition
+        assert (
+            "AST dependency extraction failed (boom). "
+            "Same-module dependencies may be missing." in caplog.text
+        )
+
+    def test_prepare_function_body_fallback_when_no_dependency_nodes(
+        self, mocker, dummy_function_definition, caplog
+    ):
+        mocker.patch("kedro.ipython._resolve_symbol_dependencies", return_value=[])
+
+        result = _prepare_function_body(dummy_function)
+
+        assert result == dummy_function_definition
+        assert "no dependency nodes were resolved from AST extraction." in caplog.text
+
+    def test_prepare_function_body_fallback_when_render_fails(
+        self, mocker, dummy_function_definition, caplog
+    ):
+        mocker.patch(
+            "kedro.ipython._resolve_symbol_dependencies",
+            return_value=[mocker.Mock(lineno=1)],
+        )
+        mocker.patch("kedro.ipython._build_dependency_source_block", return_value=None)
+
+        result = _prepare_function_body(dummy_function)
+
+        assert result == dummy_function_definition
+        assert "could not render extracted AST nodes back to source." in caplog.text
+
+    # NOTE: Helper-level edge cases below are primarily for defensive behavior
+    # and branch coverage of the dependency graph utilities.
+    def test_build_module_symbol_table_supports_assign_and_annassign(self):
+        module_tree = ast.parse(
+            "a = b = 10\n"
+            "annotated: int = 3\n"
+            "def helper():\n"
+            "    return a + b + annotated\n"
+        )
+
+        symbol_table = _build_module_symbol_table(module_tree)
+
+        assert {"a", "b", "annotated", "helper"} <= set(symbol_table)
+
+    def test_resolve_function_node_raises_when_function_not_found(self):
+        module_tree = ast.parse("def other():\n    return 1\n")
+
+        with pytest.raises(ValueError, match="Unable to locate node function"):
+            _resolve_function_node(module_tree, dummy_function)
+
+    def test_resolve_symbol_dependencies_handles_cycles(self):
+        module_tree = ast.parse(
+            "def a():\n" "    return b()\n" "def b():\n" "    return a()\n"
+        )
+        symbols = _build_module_symbol_table(module_tree)
+
+        resolved_nodes = _resolve_symbol_dependencies(symbols, "a")
+        resolved_names = {node.name for node in resolved_nodes if hasattr(node, "name")}
+
+        assert resolved_names == {"a", "b"}
+
+    def test_resolve_symbol_dependencies_handles_missing_root_symbol(self):
+        module_tree = ast.parse("def a():\n    return 1\n")
+        symbols = _build_module_symbol_table(module_tree)
+
+        assert _resolve_symbol_dependencies(symbols, "missing") == []
+
+    def test_build_dependency_source_block_returns_none_when_no_segments(self):
+        node = ast.parse("x = 1").body[0]
+
+        assert _build_dependency_source_block([node], "") is None
+
+    def test_prepare_function_body_fallback_when_dependency_source_segment_errors(
+        self, mocker, dummy_function_definition, caplog
+    ):
+        mocker.patch(
+            "kedro.ipython.ast.get_source_segment",
+            side_effect=IndexError("mismatched source metadata"),
+        )
+
+        result = _prepare_function_body(dummy_function)
+
+        assert result == dummy_function_definition
+        assert "could not render extracted AST nodes back to source." in caplog.text
 
     @pytest.mark.skip("lambda function is not supported yet.")
     def test_get_lambda_function_body(self, lambda_node):

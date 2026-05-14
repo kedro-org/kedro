@@ -135,6 +135,8 @@ bash scripts/run_local_checks.sh
 
 The script auto-detects scope from the changed files (`code`, `docs`, or `code+docs`). It refuses to run if no isolated env is active.
 
+**Local scope is narrower than CI's path filter.** Only `docs/**` changes trigger local docs checks. Generic `*.md` files outside `docs/` (e.g., `RELEASE.md`, root `README.md`) are skipped locally because they don't affect the docs build — but CI's `docs-only-checks` workflow *will* still fire on them. The script prints a one-line note when this divergence applies, with the recommended local pre-check command (`make linkcheck` / `make language-lint dir=docs`). If those checks fail on CI later, Track C is the safety net.
+
 **Before invoking the script, warn the user about the wait time.** Total wall time depends on scope:
 - `code` only: **~10–12 min** (lint ~3-5 + test ~6 + detect-secrets ~30s)
 - `docs` only: **~5–10 min** (lint ~3-5 + linkcheck ~2-5 + language-lint ~30s)

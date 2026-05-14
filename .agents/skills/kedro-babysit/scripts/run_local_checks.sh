@@ -108,7 +108,20 @@ resolve_base_ref() {
 
 # --------------------------------------------------------------------------
 # Scope auto-detection
+#
+# Only `docs/**` triggers docs-scope locally. Generic `*.md` files outside
+# docs/ (RELEASE.md, READMEs, etc.) are tracked separately and surfaced as a
+# plan note instead — they don't affect the docs build, but they DO trigger
+# CI's docs-only-checks workflow. Track C handles any CI surprise that the
+# local sweep skipped.
+#
+# Returns scope via globals (not stdout) so the *.md-outside-docs counters
+# survive command substitution; bash subshells would otherwise drop them.
 # --------------------------------------------------------------------------
+SCOPE_DETECTED=""
+MD_OUTSIDE_DOCS_COUNT=0
+MD_OUTSIDE_DOCS_FIRST=""
+
 auto_detect_scope() {
     local base
     base="$(resolve_base_ref)"
@@ -116,7 +129,7 @@ auto_detect_scope() {
     files="$(git diff --name-only "$base"...HEAD 2>/dev/null || true)"
     if [[ -z "$files" ]]; then
         # No diff resolvable (detached HEAD, no upstream, etc.) — default to code.
-        echo "code"
+        SCOPE_DETECTED="code"
         return
     fi
     local has_code=0 has_docs=0
@@ -124,21 +137,25 @@ auto_detect_scope() {
         [[ -z "$f" ]] && continue
         case "$f" in
             kedro/*|tests/*|features/*) has_code=1 ;;
-            docs/*|*.md)                has_docs=1 ;;
+            docs/*)                     has_docs=1 ;;
+            *.md)
+                MD_OUTSIDE_DOCS_COUNT=$((MD_OUTSIDE_DOCS_COUNT + 1))
+                [[ -z "$MD_OUTSIDE_DOCS_FIRST" ]] && MD_OUTSIDE_DOCS_FIRST="$f"
+                ;;
         esac
     done <<< "$files"
     if [[ $has_code -eq 1 && $has_docs -eq 1 ]]; then
-        # Mixed PR: CI runs both all-checks.yml AND docs-only-checks.yml; mirror that.
-        echo "code+docs"
+        SCOPE_DETECTED="code+docs"
     elif [[ $has_docs -eq 1 ]]; then
-        echo "docs"
+        SCOPE_DETECTED="docs"
     else
-        echo "code"
+        SCOPE_DETECTED="code"
     fi
 }
 
 if [[ -z "$SCOPE" ]]; then
-    SCOPE="$(auto_detect_scope)"
+    auto_detect_scope
+    SCOPE="$SCOPE_DETECTED"
     echo "Auto-detected scope: $SCOPE  (override with --code / --docs)"
 fi
 
@@ -240,6 +257,15 @@ if [[ $RUN_TEST -eq 1 || $RUN_LINKCHECK -eq 1 ]]; then
     echo "Sandbox notes (request elevation upfront if running via a sandboxed shell):"
     [[ $RUN_TEST      -eq 1 ]] && echo "  - make test       writes ~/.cookiecutter_replay/ outside the workspace (shared CLI test fixture)."
     [[ $RUN_LINKCHECK -eq 1 ]] && echo "  - make linkcheck  makes external HTTPS calls via lychee (needs network)."
+fi
+
+# Surface *.md files outside docs/ that CI will run docs workflows on, but
+# this local sweep skipped (because they don't affect the docs build).
+if [[ $MD_OUTSIDE_DOCS_COUNT -gt 0 && $RUN_LINKCHECK -eq 0 ]]; then
+    echo
+    echo "Note: diff has $MD_OUTSIDE_DOCS_COUNT *.md file(s) outside docs/ (e.g., $MD_OUTSIDE_DOCS_FIRST)."
+    echo "  Local sweep skips linkcheck/language-lint here (CI will run docs workflows on these)."
+    echo "  Pre-check locally if you want: \`make linkcheck\` (~2-5 min) or \`make language-lint dir=docs\` (~30s)."
 fi
 echo
 echo "Tip: each check streams its output as it runs — leave the terminal open"

@@ -290,6 +290,8 @@ class KedroContext:
         for param_name, param_value in parameters.items():
             catalog[param_name] = param_value
 
+        self._apply_dataset_validation(catalog)
+
         _validate_transcoded_datasets(catalog)
 
         self._hook_manager.hook.after_catalog_created(
@@ -337,6 +339,50 @@ class KedroContext:
             )
             conf_creds = {}
         return conf_creds
+
+    def _apply_dataset_validation(self, catalog: CatalogProtocol) -> None:
+        """Discover Pandera dataset schemas from pipeline node signatures
+        and wrap matching catalog datasets with validation on ``load()``.
+
+        Args:
+            catalog: The catalog to apply dataset validation to.
+        """
+        try:
+            from kedro.framework.project import pipelines as project_pipelines
+            from kedro.validation.dataset_validator import _ValidatingDataset
+            from kedro.validation.type_extractor import TypeExtractor
+
+            pipeline_dict = dict(project_pipelines)
+        except ImportError:
+            logging.getLogger(__name__).debug(
+                "Could not import pipelines or validation modules, "
+                "skipping dataset validation"
+            )
+            return
+
+        extractor = TypeExtractor(pipeline_dict)
+        dataset_schemas = extractor.extract_dataset_schemas()
+
+        if not dataset_schemas:
+            return
+
+        for dataset_name, schema_class in dataset_schemas.items():
+            if dataset_name in catalog._datasets:
+                original = catalog._datasets[dataset_name]
+                catalog._datasets[dataset_name] = _ValidatingDataset(
+                    wrapped_dataset=original,
+                    schema_class=schema_class,
+                    dataset_name=dataset_name,
+                )
+                logging.getLogger(__name__).debug(
+                    "Wrapped dataset '%s' with validation against %s",
+                    dataset_name,
+                    schema_class.__name__,
+                )
+
+        logging.getLogger(__name__).info(
+            "Applied dataset validation to %d dataset(s)", len(dataset_schemas)
+        )
 
 
 class KedroContextError(Exception):

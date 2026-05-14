@@ -6,6 +6,8 @@ import inspect
 import logging
 from typing import TYPE_CHECKING, get_type_hints
 
+from .dataset_validator import _is_pandera_model
+
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
@@ -118,6 +120,75 @@ class TypeExtractor:
             )
 
         return all_requirements
+
+    def extract_dataset_schemas(self) -> dict[str, type]:
+        """Extract Pandera DataFrameModel schemas from pipeline node signatures.
+
+        Walks all pipelines (except ``__default__``) and inspects node
+        function signatures for non-``params:`` inputs annotated with
+        Pandera DataFrameModel subclasses.
+
+        Returns:
+            Dictionary mapping dataset names to their Pandera schema classes.
+        """
+        all_schemas: dict[str, type] = {}
+
+        for pipeline_name, pipeline in self._pipelines.items():
+            if pipeline_name == "__default__":
+                continue
+
+            for node in getattr(pipeline, "nodes", []):
+                node_schemas = self._extract_dataset_schemas_from_node(node)
+                all_schemas.update(node_schemas)
+
+        logger.debug(
+            "Found %d dataset schemas across all pipelines",
+            len(all_schemas),
+        )
+        return all_schemas
+
+    def _extract_dataset_schemas_from_node(self, node: Node) -> dict[str, type]:
+        """Extract Pandera DataFrameModel annotations from a single node.
+
+        Only considers non-``params:`` inputs where the type annotation is
+        a Pandera DataFrameModel subclass.
+        """
+        func = getattr(node, "func", None)
+        if func is None:
+            return {}
+
+        try:
+            sig = inspect.signature(func)
+            type_hints = get_type_hints(func, include_extras=False)
+        except Exception as exc:
+            logger.warning(
+                "Could not extract type hints from function %s: %s",
+                getattr(func, "__name__", repr(func)),
+                exc,
+            )
+            return {}
+
+        dataset_to_arg = self._build_dataset_to_arg_mapping(node, sig)
+
+        schemas: dict[str, type] = {}
+
+        for ds_name, arg_name in dataset_to_arg.items():
+            if ds_name.startswith(_PARAMS_PREFIX):
+                continue
+
+            expected_type = type_hints.get(arg_name)
+            if not expected_type:
+                continue
+
+            if _is_pandera_model(expected_type):
+                schemas[ds_name] = expected_type
+                logger.debug(
+                    "Found dataset schema: %s -> %s",
+                    ds_name,
+                    expected_type.__name__,
+                )
+
+        return schemas
 
     @staticmethod
     def _build_dataset_to_arg_mapping(

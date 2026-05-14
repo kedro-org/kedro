@@ -34,7 +34,8 @@ class TestIsPydanticModel:
         assert is_pydantic_model(value) is expected
 
     def test_returns_false_when_pydantic_not_installed(self):
-        with patch.dict("sys.modules", {"pydantic": None}):
+        # Patch the pydantic variable in the utils module to None
+        with patch("kedro.validation.utils.pydantic", None):
             assert is_pydantic_model({"x": 1}) is False
 
 
@@ -52,7 +53,8 @@ class TestIsPydanticClass:
         assert is_pydantic_class(cls) is expected
 
     def test_returns_false_when_pydantic_not_installed(self):
-        with patch.dict("sys.modules", {"pydantic": None}):
+        # Patch the pydantic variable in the utils module to None
+        with patch("kedro.validation.utils.pydantic", None):
             assert is_pydantic_class(SampleDataclass) is False
 
 

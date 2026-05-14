@@ -12,6 +12,7 @@ NOTE: This session implementation is under active development and may occasional
 
 ## Bug fixes and other changes
 * Fixed parameter validation for optional typed params so explicit `None` values are preserved and do not trigger validation errors.
+* Updated `resolve_nested_dict_path()` in `kedro.validation.utils` to return `_MISSING` sentinel instead of `None` for missing keys, distinguishing "key absent" from "key present with None value". This is a behavior change for direct callers of the function.
 * Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
 * Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
@@ -25,6 +26,7 @@ NOTE: This session implementation is under active development and may occasional
 
 * [jeevan6996](https://github.com/jeevan6996)
 * [Rahul Bansod](https://github.com/rahulbansod519)
+* [PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
 
 
 # Release 1.3.1

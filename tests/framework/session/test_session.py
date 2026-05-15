@@ -312,7 +312,6 @@ class TestKedroSession:
             match="Dataset 'test_memory_ds' not found in the catalog",
         ):
             context.catalog.load("test_memory_ds")
-    
 
     @pytest.mark.usefixtures("mock_settings_custom_config_loader_class")
     def test_load_config_loader_custom_config_loader_class(self, fake_project):

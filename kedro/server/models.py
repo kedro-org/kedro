@@ -7,6 +7,12 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from kedro.inspection.models import (  # noqa: TCH001
+    DatasetSnapshot,
+    PipelineSnapshot,
+    ProjectMetadataSnapshot,
+)
+
 # Matches a valid Python dotted identifier, e.g. "SequentialRunner" or
 # "mypackage.runners.MyRunner".  Prevents passing arbitrary strings to
 # importlib.import_module before the AbstractRunner subclass check runs.
@@ -116,3 +122,24 @@ class HealthResponse(BaseModel):
         default="healthy", description="Server health status."
     )
     kedro_version: str = Field(description="Kedro version.")
+
+
+class SnapshotResponse(BaseModel):
+    """Response model for the project snapshot endpoint."""
+
+    status: Literal["success", "failure"] = Field(description="Snapshot status.")
+    metadata: ProjectMetadataSnapshot | None = Field(
+        default=None, description="Project metadata snapshot."
+    )
+    pipelines: list[PipelineSnapshot] | None = Field(
+        default=None, description="Registered pipeline snapshots."
+    )
+    datasets: dict[str, DatasetSnapshot] | None = Field(
+        default=None, description="Catalog dataset snapshots keyed by dataset name."
+    )
+    parameters: list[str] | None = Field(
+        default=None, description="Sorted list of top-level parameter keys."
+    )
+    error: ErrorDetail | None = Field(
+        default=None, description="Error details if status is 'failure'."
+    )

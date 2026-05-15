@@ -15,6 +15,7 @@ from kedro import __version__ as kedro_version
 from kedro.framework.project import settings
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
+from kedro.inspection import get_project_snapshot
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner
 from kedro.server.models import (
@@ -22,6 +23,7 @@ from kedro.server.models import (
     HealthResponse,
     RunRequest,
     RunResponse,
+    SnapshotResponse,
 )
 from kedro.server.utils import (
     KEDRO_SERVER_CONF_SOURCE,
@@ -45,7 +47,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     project_path = app.state.project_path
     logger.info("Bootstrapping Kedro project at: %s", project_path)
-    bootstrap_project(project_path)
+    app.state.metadata = bootstrap_project(project_path)
 
     if settings.SESSION_CLASS is not KedroServiceSession:
         logger.warning(
@@ -88,7 +90,7 @@ def create_http_server(
 
     app = FastAPI(
         title="Kedro Server",
-        description="HTTP API for running Kedro pipelines",
+        description="HTTP API for triggering pipeline runs, inspecting project metadata, and more",
         version=kedro_version,
         lifespan=lifespan,
     )
@@ -107,6 +109,38 @@ def create_http_server(
             status="healthy",
             kedro_version=kedro_version,
         )
+
+    @app.get("/snapshot", response_model=SnapshotResponse, tags=["inspection"])
+    def get_snapshot() -> SnapshotResponse:
+        """Return a read-only snapshot of the Kedro project.
+
+        Uses the server-level environment configured at startup (equivalent to
+        the ``env`` passed to ``create_http_server`` or the ``KEDRO_SERVER_ENV``
+        environment variable).
+
+        Returns:
+            `SnapshotResponse` with project metadata, pipelines, datasets,
+            and parameter keys, or error details on failure.
+        """
+        try:
+            snapshot = get_project_snapshot(
+                env=app.state.default_env,
+                conf_source=app.state.default_conf_source,
+                metadata=app.state.metadata,
+            )
+            return SnapshotResponse(
+                status="success",
+                metadata=snapshot.metadata,
+                pipelines=snapshot.pipelines,
+                datasets=snapshot.datasets,
+                parameters=snapshot.parameters,
+            )
+        except Exception as exc:
+            logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
+            return SnapshotResponse(
+                status="failure",
+                error=ErrorDetail(type=type(exc).__qualname__, message=str(exc)),
+            )
 
     @app.post("/run", response_model=RunResponse, tags=["pipeline"])
     def run_pipeline(request: RunRequest) -> RunResponse:

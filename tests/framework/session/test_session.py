@@ -3,7 +3,6 @@ import re
 import subprocess
 import textwrap
 from collections.abc import Mapping
-from pathlib import Path
 
 import pytest
 from omegaconf import OmegaConf
@@ -22,7 +21,7 @@ from kedro.framework.project import (
 from kedro.framework.session import AbstractSession, KedroSession
 from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.store import BaseSessionStore
-from kedro.io import DatasetError, DatasetNotFoundError, MemoryDataset
+from kedro.io import DatasetNotFoundError, MemoryDataset
 from kedro.utils import _has_rich_handler
 
 
@@ -271,25 +270,31 @@ class TestKedroSession:
     ):
         """MemoryDataset state should persist when using the same catalog instance."""
 
-        # Create a minimal catalog.yml to allow catalog loading
-        (fake_project / "conf" / "base" / "catalog.yml").write_text("{}")
+        # Create a catalog.yml with a MemoryDataset
+        (fake_project / "conf" / "base" / "catalog.yml").write_text(
+            "test_memory_ds:\n  type: MemoryDataset\n"
+        )
 
         session = KedroSession.create(fake_project)
         context = session.load_context()
 
         catalog = context.catalog
-        catalog["test_memory_ds"] = MemoryDataset()
 
         catalog.save("test_memory_ds", "test_data")
 
         assert catalog.load("test_memory_ds") == "test_data"
 
     @pytest.mark.usefixtures("mock_settings")
-    def test_memory_dataset_state_is_not_shared_across_catalog_property_access(
+    def test_runtime_registered_dataset_does_not_persist_across_catalog_property_access(
         self, fake_project
     ):
-        """Document current behavior where repeated context.catalog access
-        returns a fresh catalog instance.
+        """Pins current behavior: KedroContext.catalog is recomputed on every
+        property access, so runtime-registered datasets are not visible on
+        subsequent accesses.
+
+        NOTE: This test documents intentional current behavior. If catalog
+        memoization is introduced in the future, this test should be
+        knowingly updated or removed.
         """
 
         # Create a minimal catalog.yml to allow catalog loading
@@ -302,7 +307,10 @@ class TestKedroSession:
         catalog["test_memory_ds"] = MemoryDataset()
         catalog.save("test_memory_ds", "test_data")
 
-        with pytest.raises(DatasetNotFoundError, match="Dataset 'test_memory_ds' not found in the catalog"):
+        with pytest.raises(
+            DatasetNotFoundError,
+            match="Dataset 'test_memory_ds' not found in the catalog",
+        ):
             context.catalog.load("test_memory_ds")
     
 

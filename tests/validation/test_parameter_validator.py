@@ -42,9 +42,8 @@ class TestParameterValidator:
 
     def test_validate_raw_params_optional_none(self):
         """Test Optional[Model] = None is validated correctly via full extraction."""
-        from typing import Optional
 
-        def my_func(model_options: Optional[SamplePydanticModel]) -> None:
+        def my_func(model_options: SamplePydanticModel | None) -> None:
             pass
 
         test_node = kedro_node(

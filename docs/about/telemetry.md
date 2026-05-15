@@ -1,4 +1,5 @@
 # Anonymous telemetry
+
 To help the [Kedro Project maintainers](../about/technical_steering_committee.md) improve the software,
 Kedro can capture anonymised telemetry.
 This data is collected with the sole purpose of improving Kedro by understanding feature usage.
@@ -17,7 +18,7 @@ which is installed as one of Kedro’s dependencies.
 
 ## Collected data fields
 
-- **Unique user identifier(UUID):** The UUID is a randomly generated anonymous identifier, stored within an OS-specific configuration folder for Kedro, named `telemetry.toml`. If a UUID does not already exist, the telemetry plugin generates a new one, stores it, and then uses this UUID in following telemetry events.
+- **Unique User Identifier (UUID):** The UUID is a randomly generated anonymous identifier, stored within an OS-specific configuration folder for Kedro, named `telemetry.toml`. If a UUID does not already exist, the telemetry plugin generates a new one, stores it, and then uses this UUID in following telemetry events.
 - **CLI Command (Masked Arguments):** The command used, with sensitive arguments masked for privacy. Example Input: `kedro run --pipeline=ds --env=test` What we receive: `kedro run --pipeline ***** --env *****`
 - **Project UUID:** The hash of project UUID (randomly generated anonymous project identifier) and the package name. If project UUID does not already exist, the telemetry plugin generates a new one, stores it in `pyproject.toml`, and then joins this project UUID with the package name, hashes the joined result and uses it in following telemetry events.
 - **Kedro Project Version:** The version of Kedro being used.
@@ -36,10 +37,10 @@ For technical information on how the telemetry collection works, you can browse
 
 To withdraw consent, you have several options:
 
-1. **Set Environment Variables**:
+1 - **Set Environment Variables**:
    Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of any of these environment variables will disable telemetry for all Kedro projects in that environment and will override any consent specified in the `.telemetry` file of the specific project.
 
-2. **CLI Option When Creating a New Project**:
+2 - **CLI Option When Creating a New Project**:
    When creating a new project, you can use the command:
 
    ```console
@@ -50,18 +51,20 @@ To withdraw consent, you have several options:
 !!! note
     The `.telemetry` file should not be committed to `git` or packaged in deployment. In `kedro>=0.17.4` the file is git-ignored.
 
-3. **Change or Create the `.telemetry` file manually**:
+3 - **Change or Create the `.telemetry` file manually**:
    If the `.telemetry` file exists in the root folder of your Kedro project, set the `consent` variable to `false`. If the file does not exist, create it with the following content:
-     ```yaml
-     consent: false
-     ```
 
-4. **Uninstall the plugin**:
+   ```yaml
+   consent: false
+   ```
+
+4 - **Uninstall the plugin**:
    Remove the `kedro-telemetry` plugin:
 
    ```console
    pip uninstall kedro-telemetry
    ```
+
 !!! note
     This is a last resort option, as it will break the dependencies of Kedro (for example, `pip check` will report issues).
 

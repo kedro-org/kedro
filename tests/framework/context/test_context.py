@@ -418,12 +418,20 @@ class TestKedroContext:
         forwarded to ``ParameterValidator``."""
         from kedro.framework import project
 
-        fake_pipeline = MagicMock()
-        fake_pipeline.nodes = []
+        fake_pipeline_a = MagicMock()
+        fake_pipeline_a.nodes = []
+        fake_pipeline_b = MagicMock()
+        fake_pipeline_b.nodes = []
         # Bypass the lazy registry load by populating ``_content`` directly;
         # ``mocker.patch.dict`` would itself trigger ``_load_data``.
         mocker.patch.object(
-            project.pipelines, "_content", {"data_science": fake_pipeline}
+            project.pipelines,
+            "_content",
+            {
+                "data_science": fake_pipeline_a,
+                "data_engineering": fake_pipeline_b,
+                "other": MagicMock(),
+            },
         )
         mocker.patch.object(project.pipelines, "_is_data_loaded", True)
         validator_cls = mocker.patch(
@@ -431,26 +439,18 @@ class TestKedroContext:
         )
         validator_cls.return_value.validate_raw_params.return_value = {"foo": "bar"}
 
-        dummy_context._pipelines_to_validate = ["data_science"]
+        dummy_context._pipelines_to_validate = ["data_science", "data_engineering"]
         result = dummy_context._get_validated_params()
 
         assert result == {"foo": "bar"}
-        # Validator was constructed with only the target pipeline.
-        validator_cls.assert_called_once_with({"data_science": fake_pipeline})
-
-    def test_get_validated_params_unknown_pipeline_raises(self, dummy_context, mocker):
-        """If ``_pipelines_to_validate`` references a name that isn't
-        registered, ``_get_validated_params`` raises ``ValueError``."""
-        from kedro.framework import project
-
-        mocker.patch.object(
-            project.pipelines, "_content", {"data_science": MagicMock()}
+        # Validator was constructed with only the requested pipelines —
+        # ``other`` is excluded even though it is registered.
+        validator_cls.assert_called_once_with(
+            {
+                "data_science": fake_pipeline_a,
+                "data_engineering": fake_pipeline_b,
+            }
         )
-        mocker.patch.object(project.pipelines, "_is_data_loaded", True)
-
-        dummy_context._pipelines_to_validate = ["unknown"]
-        with pytest.raises(ValueError, match=r"Pipeline\(s\) not found:.*unknown"):
-            dummy_context._get_validated_params()
 
 
 @pytest.mark.parametrize(

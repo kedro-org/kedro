@@ -407,11 +407,11 @@ class KedroSession(AbstractSession):
             else settings.DATA_CATALOG_CLASS
         )
 
-        # Scope parameter validation to the target pipeline when a single
-        # named pipeline is being run.  For the default pipeline or multiple
-        # pipelines, leave the scope unset so all pipelines are validated.
-        if len(names) == 1 and names[0] != "__default__":
-            context._pipelines_to_validate = [names[0]]
+        # Scope parameter validation to the requested pipelines.  When
+        # ``__default__`` is among them, fall back to validating every
+        # registered pipeline because ``__default__`` is the union of all.
+        if "__default__" not in names:
+            context._pipelines_to_validate = list(names)
 
         catalog = context._get_catalog(
             catalog_class=catalog_class,

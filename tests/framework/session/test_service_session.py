@@ -167,6 +167,10 @@ class TestKedroServiceSession:
             (None, None),
             (["__default__"], None),
             ([_FAKE_PIPELINE_NAME], [_FAKE_PIPELINE_NAME]),
+            (
+                [_FAKE_PIPELINE_NAME, "other_pipeline"],
+                [_FAKE_PIPELINE_NAME, "other_pipeline"],
+            ),
             ([_FAKE_PIPELINE_NAME, "__default__"], None),
         ],
     )
@@ -179,9 +183,9 @@ class TestKedroServiceSession:
         pipeline_names,
         expected_scope,
     ):
-        """``KedroServiceSession.run`` should set ``_pipelines_to_validate``
-        on the context only when a single non-``__default__`` pipeline is
-        run, mirroring ``KedroSession.run``."""
+        """``KedroServiceSession.run`` scopes validation to the requested
+        pipelines, mirroring ``KedroSession.run``. When ``__default__`` is
+        among them, every registered pipeline is validated."""
         mocker.patch("kedro.framework.session.service_session._create_hook_manager")
         mocker.patch(
             "kedro.framework.session.service_session.pipelines",

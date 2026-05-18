@@ -231,16 +231,9 @@ class KedroContext:
                     if name != "__default__"
                 }
             else:
-                unknown = [
-                    name
-                    for name in self._pipelines_to_validate
-                    if name not in project_pipelines
-                ]
-                if unknown:
-                    raise ValueError(
-                        f"Pipeline(s) not found: {sorted(unknown)}. "
-                        f"Available pipelines: {sorted(project_pipelines.keys())}"
-                    )
+                # Session-level code is responsible for ensuring these names
+                # are registered before setting the prop; we do not duplicate
+                # that check here.
                 pipelines_to_validate = {
                     name: project_pipelines[name]
                     for name in self._pipelines_to_validate

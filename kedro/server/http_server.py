@@ -169,7 +169,7 @@ def create_http_server(
     return app
 
 
-def _validate_runner_module(runner_name: str, package_name: str) -> bool:
+def _validate_runner_module(runner_name: str | None, package_name: str) -> bool:
     """Return True when the runner's module prefix is in the allowlist.
 
     A runner name without a module prefix (e.g. ``SequentialRunner``) always
@@ -177,7 +177,7 @@ def _validate_runner_module(runner_name: str, package_name: str) -> bool:
     Allowed prefixes are ``kedro.runner``, the project <package_name>, and any
     additional entries in ``settings.RUNNER_MODULES_WHITELIST``.
     """
-    if "." not in runner_name:
+    if runner_name is None or "." not in runner_name:
         return True
     module = runner_name.rsplit(".", 1)[0]
     allowed_prefixes = [

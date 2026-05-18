@@ -502,6 +502,24 @@ class TestExecutePipeline:
         assert result.status == "success"
         mock_session.run.assert_called_once()
 
+    def test_execute_pipeline_allows_project_subpackage_module(self, mocker):
+        """Runner from a subpackage of the project package is permitted without whitelisting."""
+        mock_session = mocker.Mock()
+        mock_session._package_name = "mypackage"
+        mocker.patch(
+            "kedro.server.http_server.load_obj",
+            return_value=_FakeRunner,
+        )
+        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
+
+        result = _execute_pipeline(
+            session=mock_session,
+            request=RunRequest(runner="mypackage.sub.runners.CustomRunner"),
+        )
+
+        assert result.status == "success"
+        mock_session.run.assert_called_once()
+
     def test_execute_pipeline_with_all_parameters(self, mocker):
         """Test pipeline execution with all parameters provided."""
 

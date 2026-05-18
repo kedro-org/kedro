@@ -138,7 +138,7 @@ class _ProjectSettings(LazySettings):
     )
     _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={})
     _DISABLE_HOOKS_FOR_PLUGINS = Validator("DISABLE_HOOKS_FOR_PLUGINS", default=tuple())
-    _RUNNER_MODULES_WHITELIST = Validator("RUNNER_MODULES_WHITELIST", default=[])
+    _RUNNER_MODULES_WHITELIST = Validator("RUNNER_MODULES_WHITELIST", default=tuple())
     _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
         "CONFIG_LOADER_CLASS",
         default=_get_default_class("kedro.config.OmegaConfigLoader"),

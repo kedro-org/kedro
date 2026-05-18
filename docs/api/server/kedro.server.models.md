@@ -12,6 +12,7 @@
 | [`RunResponse`](#kedro.server.models.RunResponse) | Class | Response model returned by `POST /run`. |
 | [`ErrorDetail`](#kedro.server.models.ErrorDetail) | Class | Structured error information included in a failed `RunResponse`. |
 | [`HealthResponse`](#kedro.server.models.HealthResponse) | Class | Response model returned by `GET /health`. |
+| [`SnapshotResponse`](#kedro.server.models.SnapshotResponse) | Class | Response model returned by `GET /snapshot`. |
 
 ::: kedro.server.models.RunRequest
     options:
@@ -26,5 +27,9 @@
       show_source: true
 
 ::: kedro.server.models.HealthResponse
+    options:
+      show_source: true
+
+::: kedro.server.models.SnapshotResponse
     options:
       show_source: true

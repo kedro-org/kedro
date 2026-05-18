@@ -252,6 +252,7 @@ plugins:
           - about/technical_steering_committee.md: Kedro's Technical Steering Committee
           - about/migration.md: Migration guide between Kedro versions
           - about/telemetry.md: Understanding Kedro telemetry
+          - about/security_model.md: Kedro security model
           - about/experimental.md: Experimental APIs in Kedro
 
 markdown_extensions:
@@ -465,6 +466,7 @@ nav:
           - PyCharm: ide/set_up_pycharm.md
       - About:
           - Kedro architecture: getting-started/architecture_overview.md
+          - Kedro security model: about/security_model.md
           - Glossary: getting-started/glossary.md
         #   - Community:
             #   - Kedro Slack: about/community/slack.md

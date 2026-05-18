@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -113,29 +114,61 @@ def _build_pipeline_snapshots(
 
 
 def _build_project_snapshot(
-    project_path: str | Path, env: str | None = None
+    project_path: str | Path | None = None,
+    env: str | None = None,
+    conf_source: str | None = None,
+    metadata: ProjectMetadata | None = None,
 ) -> ProjectSnapshot:
     """Build a ``ProjectSnapshot`` for the Kedro project at project_path.
 
     Args:
         project_path: Path to the project root directory (the directory that
-            contains ``pyproject.toml``).
+            contains ``pyproject.toml``). Optional when *metadata* is provided;
+            if both are given and point to different directories a warning is
+            emitted and *metadata.project_path* takes precedence.
         env: Optional run environment override (e.g. ``"staging"``).
             When ``None`` the default run environment from the project
             settings is used.
+        conf_source: Optional path to the configuration directory.
+            When ``None``, defaults to ``<project_path>/<settings.CONF_SOURCE>``.
+        metadata: Optional pre-computed ``ProjectMetadata`` returned by a prior
+            ``bootstrap_project`` call. When provided, ``bootstrap_project`` is
+            skipped entirely.
 
     Returns:
         A fully populated ``ProjectSnapshot``.
     """
-    project_path = Path(project_path).resolve()
+    resolved_project_path = (
+        Path(project_path).expanduser().resolve() if project_path is not None else None
+    )
+    if metadata is not None:
+        if (
+            resolved_project_path is not None
+            and resolved_project_path != metadata.project_path
+        ):
+            warnings.warn(
+                f"Both project_path and metadata were provided but point to different "
+                f"directories ({resolved_project_path!r} vs "
+                f"{metadata.project_path!r}). project_path will be ignored.",
+                UserWarning,
+                stacklevel=3,
+            )
+        effective_project_path = metadata.project_path
+    elif resolved_project_path is not None:
+        effective_project_path = resolved_project_path
+    else:
+        raise ValueError("Either project_path or metadata must be provided.")
 
     if env is not None and not _ENV_RE.match(env):
         raise ValueError(
             f"Invalid env value {env!r}: must contain only letters, digits, hyphens, and underscores."
         )
 
-    metadata = bootstrap_project(project_path)
-    config_loader = _make_config_loader(project_path, env=env)
+    if metadata is None:
+        metadata = bootstrap_project(effective_project_path)
+    config_loader = _make_config_loader(
+        effective_project_path, env=env, conf_source=conf_source
+    )
 
     try:
         conf_catalog: dict[str, Any] = config_loader["catalog"]

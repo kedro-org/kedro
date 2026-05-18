@@ -14,6 +14,7 @@
 | [`kedro.framework.cli.project`](#kedro.framework.cli.project) | A collection of CLI commands for working with Kedro projects.              |
 | [`kedro.framework.cli.registry`](#kedro.framework.cli.registry) | A collection of CLI commands for working with registered Kedro pipelines.  |
 | [`kedro.framework.cli.starters`](#kedro.framework.cli.starters) | `kedro` is a CLI for managing Kedro projects.                               |
+| [`kedro.framework.cli.server`](#kedro.framework.cli.server) | CLI commands for running Kedro as an HTTP server.                          |
 | [`kedro.framework.cli.utils`](#kedro.framework.cli.utils)     | Utilities for use with click.                                              |
 
 
@@ -53,6 +54,11 @@
       show_source: true
 
 ::: kedro.framework.cli.starters
+    options:
+      members: true
+      show_source: true
+
+::: kedro.framework.cli.server
     options:
       members: true
       show_source: true

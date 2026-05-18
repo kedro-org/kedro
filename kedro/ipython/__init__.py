@@ -5,6 +5,7 @@ local scope.
 
 from __future__ import annotations
 
+import ast
 import importlib
 import inspect
 import logging
@@ -434,9 +435,196 @@ def _format_node_inputs_text(input_params_dict: dict[str, str] | None) -> str | 
 
 
 def _prepare_function_body(func: Callable) -> str:
+    """Build a standalone function cell for ``%load_node``.
+
+    Resolution order:
+    1) Try AST-based extraction first and include the target function plus
+       referenced same-module top-level symbols (for example helper functions,
+       classes, and constants).
+    2) If AST extraction cannot be performed safely, fall back to the original
+       ``inspect.getsourcelines()`` output for the target function only.
+    """
     source_lines, _ = inspect.getsourcelines(func)
-    body = "".join(source_lines)
-    return body
+    fallback_body = "".join(source_lines)
+    python_file = inspect.getsourcefile(func)
+    if not python_file:
+        logger.warning(
+            "Falling back to basic source extraction for '%s': "
+            "could not resolve source file. Same-module dependencies may be missing.",
+            func.__name__,
+        )
+        return fallback_body
+
+    try:
+        module_source = Path(python_file).read_text()
+        module_tree = ast.parse(module_source)
+        symbols = _build_module_symbol_table(module_tree)
+        # Root AST node for the selected Kedro node function.
+        function_node = _resolve_function_node(module_tree, func)
+    except (OSError, SyntaxError, ValueError) as exc:
+        logger.warning(
+            "Falling back to basic source extraction for '%s': "
+            "AST dependency extraction failed (%s). "
+            "Same-module dependencies may be missing.",
+            func.__name__,
+            exc,
+        )
+        return fallback_body
+
+    # Resolve transitive same-module dependencies starting from function_node,
+    # e.g. node_fn -> helper_a -> helper_b.
+    nodes_to_emit = _resolve_symbol_dependencies(symbols, function_node.name)
+    if not nodes_to_emit:
+        logger.warning(
+            "Falling back to basic source extraction for '%s': "
+            "no dependency nodes were resolved from AST extraction.",
+            func.__name__,
+        )
+        return fallback_body
+
+    # Convert resolved AST nodes back to source text in file order so generated
+    # code can run standalone in the notebook cell.
+    rendered_source = _build_dependency_source_block(nodes_to_emit, module_source)
+    if not rendered_source:
+        logger.warning(
+            "Falling back to basic source extraction for '%s': "
+            "could not render extracted AST nodes back to source.",
+            func.__name__,
+        )
+        return fallback_body
+
+    return rendered_source
+
+
+def _build_module_symbol_table(module_tree: ast.Module) -> dict[str, ast.AST]:
+    """Map top-level symbol names to their defining AST node.
+
+    Example:
+        Source:
+            x = 1
+            a = b = 10
+            def helper(): ...
+
+        ``module_tree.body`` contains top-level ``node`` entries:
+            - node: Assign(targets=[Name(id="x")], ...)
+              -> target.id == "x"
+            - node: Assign(targets=[Name(id="a"), Name(id="b")], ...)
+              -> target.id == "a", then "b"
+            - node: FunctionDef(name="helper", ...)
+    """
+    symbol_table: dict[str, ast.AST] = {}
+    for node in module_tree.body:
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            symbol_table[node.name] = node
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    symbol_table[target.id] = node
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            symbol_table[node.target.id] = node
+    return symbol_table
+
+
+def _resolve_function_node(
+    module_tree: ast.Module, func: Callable
+) -> ast.FunctionDef | ast.AsyncFunctionDef:
+    """Resolve the top-level AST node that corresponds to ``func``."""
+    _, source_line = inspect.getsourcelines(func)
+    candidates = [
+        node
+        for node in module_tree.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        and node.name == func.__name__
+    ]
+    if not candidates:
+        raise ValueError(f"Unable to locate node function '{func.__name__}'")
+
+    exact_match = next(
+        (node for node in candidates if node.lineno == source_line), None
+    )
+    return exact_match or candidates[0]
+
+
+def _collect_required_symbols(node: ast.AST, known_symbols: set[str]) -> set[str]:
+    """Collect loaded symbol names that are available in ``known_symbols``."""
+    return {
+        candidate.id
+        for candidate in ast.walk(node)
+        if isinstance(candidate, ast.Name)
+        and isinstance(candidate.ctx, ast.Load)
+        and candidate.id in known_symbols
+    }
+
+
+def _resolve_symbol_dependencies(
+    symbols: dict[str, ast.AST], root_symbol: str
+) -> list[ast.AST]:
+    """Return the transitive closure of same-module symbol dependencies.
+
+    This models top-level module symbols as a dependency graph:
+    - Graph nodes: top-level symbols in ``symbols`` (functions, classes, constants).
+    - Graph edges: ``A -> B`` when symbol ``A`` references ``B`` via
+      ``Name(..., Load())`` in its AST subtree.
+
+    The walk starts from ``root_symbol`` and traverses reachable edges until no
+    unseen symbols remain. The traversal is recursive in effect (it resolves
+    dependencies of dependencies), implemented iteratively with a worklist:
+    when a newly discovered symbol is visited, its referenced symbols are added
+    to the worklist and explored in subsequent iterations.
+    """
+    visited_symbols: set[str] = set()
+    symbols_to_visit = [root_symbol]
+    nodes_to_emit: list[ast.AST] = []
+    candidate_symbols = set(symbols)
+
+    while symbols_to_visit:
+        symbol_name = symbols_to_visit.pop()
+        if symbol_name in visited_symbols:
+            continue
+
+        symbol_node = symbols.get(symbol_name)
+        if symbol_node is None:
+            continue
+
+        visited_symbols.add(symbol_name)
+        nodes_to_emit.append(symbol_node)
+        required = _collect_required_symbols(symbol_node, candidate_symbols)
+        symbols_to_visit.extend(required)
+
+    return nodes_to_emit
+
+
+def _build_dependency_source_block(
+    nodes: list[ast.AST], module_source: str
+) -> str | None:
+    """Render AST nodes back to source ordered by their original position."""
+    emitted_segments: list[str] = []
+    segment: str | None = None
+    ordered_nodes = sorted(nodes, key=lambda item: getattr(item, "lineno", 0))
+    for node in ordered_nodes:
+        try:
+            if (
+                isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef)
+                and node.decorator_list
+                and getattr(node, "end_lineno", None) is not None
+            ):
+                # AST source segments start at the def/class line; slice from the
+                # first decorator to preserve behavior from inspect.getsourcelines().
+                source_lines = module_source.splitlines(keepends=True)
+                start_line = min(decorator.lineno for decorator in node.decorator_list)
+                segment = "".join(source_lines[start_line - 1 : node.end_lineno])
+            else:
+                segment = ast.get_source_segment(module_source, node)
+        except IndexError:
+            # Guard against stale/mismatched AST location metadata and source text.
+            segment = None
+        if segment:
+            emitted_segments.append(segment.rstrip())
+
+    if not emitted_segments:
+        return None
+
+    return "\n\n".join(emitted_segments) + "\n"
 
 
 def _prepare_function_call(

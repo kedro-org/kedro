@@ -169,7 +169,7 @@ def create_http_server(
     return app
 
 
-def _validate_runner_module(runner_name: str | None, package_name: str) -> bool:
+def _validate_runner_module(runner_name: str | None, package_name: str | None) -> bool:
     """Return True when the runner's module prefix is in the allowlist.
 
     A runner name without a module prefix (e.g. ``SequentialRunner``) always

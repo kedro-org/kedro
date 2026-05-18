@@ -1,0 +1,5 @@
+---
+description: Kedro catalog configuration guidance
+globs: conf/**/*.yml
+---
+When editing catalog or configuration YAML files, read `.agents/skills/catalog-config/SKILL.md` and follow its guidelines for dataset types, arguments, factories, credentials, and interpolation.

@@ -24,7 +24,7 @@ from kedro.framework.cli.starters import (
 # Number of files in the base template when no tools are selected.
 # Includes: .gitignore, README.md, requirements.txt, pyproject.toml, and
 # the default src/ package structure.
-FILES_IN_TEMPLATE_WITH_NO_TOOLS = 15
+FILES_IN_TEMPLATE_WITH_NO_TOOLS = 18
 
 # Valid tools parameter values for parametrized tests (CLI flags and config file).
 VALID_TOOLS_PARAMETERS = [

@@ -174,7 +174,7 @@ The first `/run` request creates a `KedroServiceSession` which the following req
 
 #### Runner security
 
-Short names (e.g. `SequentialRunner`) always resolve against `kedro.runner`. Fully-qualified names (e.g. `mypackage.runners.MyRunner`) must belong to `kedro.runner`, the project's own package, or a module listed in `RUNNER_MODULES_WHITELIST` in `settings.py` — the module is never imported otherwise.
+Short names (for example, `SequentialRunner`) always resolve against `kedro.runner`. Fully-qualified names (for example, `mypackage.runners.MyRunner`) must belong to `kedro.runner`, the project's own package, or a module listed in `RUNNER_MODULES_WHITELIST` in `settings.py`. The module is never imported otherwise.
 
 ```python
 # settings.py

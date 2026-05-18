@@ -29,7 +29,7 @@ In both modes:
 ## References
 
 Read these before triaging findings:
-- [references/kedro-security-model.md](references/kedro-security-model.md)
+- [../../docs/about/security_model.md](../../docs/about/security_model.md)
 - [references/kedro-findings-triage.md](references/kedro-findings-triage.md)
 
 ## Defaults
@@ -246,7 +246,7 @@ For every unique finding:
 - open the flagged file and inspect the surrounding code
 - classify it using [references/kedro-findings-triage.md](references/kedro-findings-triage.md)
 - tie the reasoning back to the code-vs-data boundary in
-  [references/kedro-security-model.md](references/kedro-security-model.md)
+  [../../docs/about/security_model.md](../../docs/about/security_model.md)
 
 Use these buckets:
 - `candidate_kedro_vulnerability`

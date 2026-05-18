@@ -14,16 +14,17 @@ Two modes:
 - full codebase
 - PR-only
 
-In both modes:
-1. confirm scan scope (see Scan scope)
-2. detect which Semgrep binary is available (see Defaults)
-3. create a temporary working directory with `mktemp -d`
-4. determine what to scan — full repo or changed files from the PR
-5. run Semgrep in parallel across all rulesets
-6. read and deduplicate findings
-7. triage and classify findings against the Kedro security model
-8. run manual review checks from `reference.md`
-9. emit one final report
+Confirm scan scope first (see `## Scan scope`), then run the numbered Workflow
+below:
+
+1. detect which Semgrep binary is available (see Defaults)
+2. create a temporary working directory with `mktemp -d`
+3. determine what to scan — full repo or changed files from the PR
+4. run Semgrep in parallel across all rulesets
+5. read and deduplicate findings
+6. triage and classify findings against the Kedro security model
+7. run manual review checks from `reference.md`
+8. emit one final report
 
 ## References
 
@@ -87,6 +88,10 @@ output.
 
 Only use when the user explicitly asks to post, submit, or publish the scan
 result to GitHub.
+
+Post mode is only valid in PR mode — it produces a GitHub PR review payload
+and there is no PR to attach it to in full-codebase mode. If a user asks to
+post a full-codebase scan, fall back to chat mode and tell the user why.
 
 In post mode:
 - still do all scanning and triage locally first

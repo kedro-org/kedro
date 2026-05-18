@@ -10,27 +10,39 @@ description: >-
 
 # Security Scan
 
-Use this as the user-facing Kedro security skill.
-
 Two modes:
 - full codebase
 - PR-only
 
 In both modes:
-1. detect which Semgrep binary is available (see Defaults)
-2. create a temporary working directory with `mktemp -d`
-3. determine what to scan — full repo or changed files from the PR
-4. run Semgrep in parallel across all rulesets
-5. read and deduplicate findings
-6. triage and classify findings against the Kedro security model
-7. run manual review checks from `references/kedro-findings-triage.md`
-8. emit one final report
+1. confirm scan scope (see Scan scope)
+2. detect which Semgrep binary is available (see Defaults)
+3. create a temporary working directory with `mktemp -d`
+4. determine what to scan — full repo or changed files from the PR
+5. run Semgrep in parallel across all rulesets
+6. read and deduplicate findings
+7. triage and classify findings against the Kedro security model
+8. run manual review checks from `reference.md`
+9. emit one final report
 
 ## References
 
 Read these before triaging findings:
-- [../../docs/about/security_model.md](../../docs/about/security_model.md)
-- [references/kedro-findings-triage.md](references/kedro-findings-triage.md)
+- [../../../docs/about/security_model.md](../../../docs/about/security_model.md)
+- [reference.md](reference.md)
+
+## Scan scope
+
+Before scanning, ask once:
+
+> Are we scanning **Kedro framework code** (this repository's `kedro/` package)
+> or a **Kedro project** (user pipelines, catalog, and project config)?
+
+Use the answer to pre-classify findings (see `reference.md`). For example,
+`kedro-yaml-unsafe-load` in `kedro/` is `candidate_kedro_vulnerability`; the
+same rule in project code is `project_developer_responsibility`.
+
+If the user already stated the scope, do not ask again.
 
 ## Defaults
 
@@ -43,6 +55,11 @@ Read these before triaging findings:
   - `p/secrets`
   - `p/python`
   - `.agents/skills/security-scan/rules/kedro-security-patterns.yml`
+- Path exclusions (every Semgrep invocation):
+  - `--exclude tests/`
+  - `--exclude docs/`
+  - `--exclude features/`
+  - `--exclude .agents/`
 - Temporary working directory:
   - create with `mktemp -d`
   - delete at the end unless the user explicitly asks to keep artifacts
@@ -55,6 +72,9 @@ If a `uvx` or `uv tool run` Semgrep command fails with a permissions error on a
 `~/.cache/uv` path, ask the user for permission to run outside the sandbox
 (i.e. with full filesystem access) and then rerun the same command. Do not
 treat a cache permission failure as a real scan failure.
+
+Later workflow steps that invoke Semgrep should refer back to this note instead
+of repeating it.
 
 ## Delivery modes
 
@@ -123,13 +143,18 @@ else
   exit 1
 fi
 
+SEMGREP_EXCLUDE=(
+  --exclude tests/
+  --exclude docs/
+  --exclude features/
+  --exclude .agents/
+)
+
 "${SEMGREP_CMD[@]}" --version
 ```
 
-If the selected runtime is `uvx` or `uv tool run` and the version check fails
-with a permissions error involving `~/.cache/uv`, ask the user for permission
-to run outside the sandbox (full filesystem access) and then rerun the same
-command.
+If the version check fails, apply the **Runtime note** above before treating
+the scan as failed.
 
 ### 2. Resolve temporary working directory
 
@@ -189,11 +214,12 @@ Set:
 LOCAL_RULESET="$(pwd)/.agents/skills/security-scan/rules/kedro-security-patterns.yml"
 ```
 
-Run these in parallel:
+Run these in parallel (each command includes `"${SEMGREP_EXCLUDE[@]}"`):
 
 ```bash
 (
   "${SEMGREP_CMD[@]}" scan --metrics=off \
+    "${SEMGREP_EXCLUDE[@]}" \
     --config p/security-audit \
     --json --output "$OUTPUT_DIR/raw/security-audit.json" \
     "${SCAN_TARGETS[@]}"
@@ -201,6 +227,7 @@ Run these in parallel:
 
 (
   "${SEMGREP_CMD[@]}" scan --metrics=off \
+    "${SEMGREP_EXCLUDE[@]}" \
     --config p/secrets \
     --json --output "$OUTPUT_DIR/raw/secrets.json" \
     "${SCAN_TARGETS[@]}"
@@ -208,6 +235,7 @@ Run these in parallel:
 
 (
   "${SEMGREP_CMD[@]}" scan --metrics=off \
+    "${SEMGREP_EXCLUDE[@]}" \
     --include="*.py" --config p/python \
     --json --output "$OUTPUT_DIR/raw/python.json" \
     "${SCAN_TARGETS[@]}"
@@ -215,6 +243,7 @@ Run these in parallel:
 
 (
   "${SEMGREP_CMD[@]}" scan --metrics=off \
+    "${SEMGREP_EXCLUDE[@]}" \
     --include="*.py" \
     --config "$LOCAL_RULESET" \
     --json --output "$OUTPUT_DIR/raw/kedro-security-patterns.json" \
@@ -229,10 +258,8 @@ did succeed. Do not abort the full scan. In the final report, include a
 "Scan errors" section that lists each failed ruleset and its error message so
 the user knows the scan was partial.
 
-If a scan command using `uvx` or `uv tool run` fails because of a permissions
-error on `~/.cache/uv`, ask the user for permission to run outside the sandbox
-(full filesystem access) and rerun that same scan command before marking it as
-failed.
+If a scan command fails, apply the **Runtime note** before marking that
+ruleset as failed.
 
 ### 5. Read findings
 
@@ -244,9 +271,10 @@ ruleset output, count it once.
 
 For every unique finding:
 - open the flagged file and inspect the surrounding code
-- classify it using [references/kedro-findings-triage.md](references/kedro-findings-triage.md)
+- classify it using [reference.md](reference.md)
 - tie the reasoning back to the code-vs-data boundary in
-  [../../docs/about/security_model.md](../../docs/about/security_model.md)
+  [../../../docs/about/security_model.md](../../../docs/about/security_model.md)
+- include the **Suggested next step** from the matching bucket in `reference.md`
 
 Use these buckets:
 - `candidate_kedro_vulnerability`
@@ -258,7 +286,7 @@ Use these buckets:
 ### 7. Manual review checks (always run, even with zero Semgrep findings)
 
 After triaging Semgrep output, run the **Manual review checks** from
-`references/kedro-findings-triage.md` against the scan target.
+`reference.md` against the scan target.
 
 For each check:
 - Search the scanned files for the pattern described
@@ -290,6 +318,7 @@ Keep the report short and decisive.
 
 Always include:
 - mode used: full codebase or PR
+- scan scope: framework code or Kedro project
 - target scanned
 - total Semgrep findings reviewed
 - counts by classification bucket
@@ -302,7 +331,7 @@ For each finding, include:
 - Semgrep severity
 - Kedro classification
 - one-sentence reasoning
-- suggested next step
+- suggested next step (from `reference.md` for that bucket)
 
 If no findings are plausible Kedro vulnerabilities, say so explicitly.
 
@@ -318,6 +347,7 @@ Return one final report in this shape:
 
 ### Overview
 - **Mode:** <full codebase | PR>
+- **Scope:** <Kedro framework | Kedro project>
 - **Target:** <repo root | PR #123>
 - **Findings reviewed:** <count>
 - **Highest Semgrep severities:** <list or "none">

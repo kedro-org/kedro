@@ -15,24 +15,41 @@ Use when the finding points to behavior in Kedro framework code where:
 - Kedro appears to bypass or fail a documented safety restriction
 - Kedro framework behavior may expose credentials or secrets unintentionally
 
+**Suggested next step:** treat as a framework security issue — open a maintainer
+follow-up, draft a Security Advisory or `SECURITY.md` entry, and do not ship until
+reviewed.
+
 ### `project_developer_responsibility`
 
 Use when the risky behavior is explicitly authored code rather than Kedro
 framework behavior.
+
+**Suggested next step:** note in the report only; the project owner must fix or
+accept the risk in their own codebase.
 
 ### `deployment_or_environment_issue`
 
 Use when the real control point is infrastructure, secrets management, network
 policy, or other deployment-owned controls.
 
+**Suggested next step:** flag for ops / deployment documentation (secrets store,
+network policy, IAM, etc.) — not actionable in Kedro framework code.
+
 ### `false_positive_or_informational`
 
 Use when the rule fired but the surrounding code does not imply a meaningful
 issue in context.
 
+**Suggested next step:** suppress in future scans (`.semgrepignore` or
+rule-specific nosemgrep) if the same hit recurs; otherwise omit from the
+actionable findings list.
+
 ### `needs_manual_review`
 
 Use when deeper context is required before you can classify confidently.
+
+**Suggested next step:** open a follow-up issue or assign a human reviewer;
+do not auto-dismiss.
 
 ## Manual review checks
 
@@ -182,8 +199,10 @@ config files are user-controlled data.
   user-controlled config can execute arbitrary Python objects.
 - If found in **project developer code**: classify as
   `project_developer_responsibility`.
-- `yaml.safe_load`, `yaml.SafeLoader`, and `yaml.CSafeLoader`
-  are safe and excluded by the rule automatically (keyword and positional forms).
+- `yaml.safe_load()` is a separate function and is never matched by this rule
+  (the pattern is `yaml.load(...)` only). For `yaml.load(...)`, safe loaders
+  are excluded via `pattern-not` for `Loader=yaml.SafeLoader` /
+  `Loader=yaml.CSafeLoader` and positional `yaml.SafeLoader` / `yaml.CSafeLoader`.
 - `yaml.CLoader` is **not** safe — it is the C extension of `FullLoader`, not
   `SafeLoader`. Do not treat `yaml.load(..., Loader=yaml.CLoader)` as safe; the
   rule will fire on it and it should be classified as

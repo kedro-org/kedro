@@ -51,8 +51,7 @@ class TypeExtractor:
         """Initialise the type extractor.
 
         Args:
-            pipelines: Dictionary of pipelines to inspect. Callers limit
-                the scope of validation by filtering this mapping.
+            pipelines: Pipelines to inspect; callers filter to control scope.
         """
         self._pipelines = pipelines
         self._warned_union_types: set[type] = set()
@@ -60,8 +59,7 @@ class TypeExtractor:
     def extract_types_from_pipelines(self) -> dict[str, type]:
         """Extract type requirements from the registered pipelines.
 
-        Walks each pipeline and inspects node function signatures for
-        type-annotated ``params:`` inputs.
+        Walks each pipeline's nodes for type-annotated `params:` inputs.
 
         Returns:
             Dictionary mapping parameter keys to their expected types.

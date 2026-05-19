@@ -178,10 +178,8 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
-    # Optional list of pipeline names to scope parameter validation to.
-    # Set by the session before building the catalog so a single-pipeline run
-    # only triggers validation for that pipeline's typed ``params:`` inputs.
-    # ``None`` means "all registered pipelines (except ``__default__``)".
+    # Pipelines to scope parameter validation to. Set by the session before
+    # building the catalog; `None` means "all registered (except `__default__`)".
     _pipelines_to_validate: list[str] | None = None
     _validated_params_cache: dict[str, Any] | None = None
 
@@ -200,11 +198,8 @@ class KedroContext:
     def _get_validated_params(self) -> dict[str, Any]:
         """Get validated parameters with caching support.
 
-        The set of pipelines inspected is taken from
-        ``self._pipelines_to_validate``. The session sets this before
-        building the catalog so a single-pipeline run only validates
-        parameters for that pipeline; otherwise all registered pipelines
-        (except ``__default__``) are inspected.
+        Scope is taken from `self._pipelines_to_validate`; when unset,
+        all registered pipelines (except `__default__`) are inspected.
 
         Returns:
             Validated and transformed parameters with model instantiation.
@@ -223,17 +218,13 @@ class KedroContext:
             from kedro.validation.parameter_validator import ParameterValidator
 
             if self._pipelines_to_validate is None:
-                # ``__default__`` is the union of every registered pipeline,
-                # so its types are already covered when we walk the others.
+                # Skip `__default__` as its nodes are already covered by the others.
                 pipelines_to_validate = {
                     name: pipe
                     for name, pipe in project_pipelines.items()
                     if name != "__default__"
                 }
             else:
-                # Session-level code is responsible for ensuring these names
-                # are registered before setting the prop; we do not duplicate
-                # that check here.
                 pipelines_to_validate = {
                     name: project_pipelines[name]
                     for name in self._pipelines_to_validate
@@ -254,6 +245,10 @@ class KedroContext:
     @property
     def params(self) -> dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
+
+        Validation is scoped only when the session sets
+        `_pipelines_to_validate` before building the catalog; reading
+        `params` in isolation (hooks, notebooks) validates every pipeline.
 
         Returns:
             Parameters defined in `parameters.yml` with the addition of any

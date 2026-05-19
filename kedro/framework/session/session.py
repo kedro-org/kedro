@@ -407,9 +407,8 @@ class KedroSession(AbstractSession):
             else settings.DATA_CATALOG_CLASS
         )
 
-        # Scope parameter validation to the requested pipelines.  When
-        # ``__default__`` is among them, fall back to validating every
-        # registered pipeline because ``__default__`` is the union of all.
+        # Scope validation to the requested pipelines; `__default__` falls
+        # back to validating every registered pipeline.
         if "__default__" not in names:
             context._pipelines_to_validate = list(names)
 

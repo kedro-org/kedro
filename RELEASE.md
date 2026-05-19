@@ -21,7 +21,7 @@ NOTE: This session implementation is under active development and may occasional
 * Added documentation for `KedroServiceSession`.
 * Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
 * Added security model documentation covering trust boundaries, user responsibilities, and framework vulnerabilities.
-*  Updated advanced_configuration.md with custom loader info.
+* Updated `advanced_configuration.md` with custom loader info.
 
 ## Community contributions
 

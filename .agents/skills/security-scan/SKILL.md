@@ -309,7 +309,11 @@ For each check:
 - Search the scanned files for the pattern described
 - If found and unmitigated, add it to the findings list with classification
   `candidate_kedro_vulnerability` or `needs_manual_review`
-- If not found, note the check was performed and was clean
+- If not found, the check was clean — do not itemise it
+
+When all checks are clean, report them as a single line in the final report
+rather than enumerating each one. Only expand a check when it actually
+flagged something.
 
 This step exists because Semgrep only catches known patterns. These checks
 catch the class of issues that static analysis misses.
@@ -331,7 +335,8 @@ Delete the temporary review JSON file after posting.
 
 ## Reporting
 
-Keep the report short and decisive.
+Keep the report short and decisive. The classification summary already carries
+the counts — do not repeat non-actionable findings as prose.
 
 Always include:
 - mode used: full codebase or PR
@@ -341,7 +346,21 @@ Always include:
 - counts by classification bucket
 - highest Semgrep severities present
 
-For each finding, include:
+**Only itemise actionable findings** in the Findings section:
+- `candidate_kedro_vulnerability`
+- `needs_manual_review`
+
+**Do not itemise** findings in these buckets — they are reflected in the
+classification summary counts and that is sufficient:
+- `false_positive_or_informational`
+- `project_developer_responsibility`
+- `deployment_or_environment_issue`
+
+If the Findings section has nothing actionable, replace it with a single line
+that names the non-actionable counts (e.g. "None actionable. 2 false positives
+on pre-existing lines.").
+
+For each actionable finding, include:
 - file
 - line
 - rule id
@@ -371,13 +390,23 @@ Return one final report in this shape:
 
 ### Classification summary
 - **candidate_kedro_vulnerability:** <count>
+- **needs_manual_review:** <count>
 - **project_developer_responsibility:** <count>
 - **deployment_or_environment_issue:** <count>
 - **false_positive_or_informational:** <count>
-- **needs_manual_review:** <count>
 
 ### Findings
+<For each actionable finding (candidate_kedro_vulnerability, needs_manual_review):>
 - `path/to/file.py:L42` — `<classification>` — <rule id> — <reason> — <next step>
+
+<If nothing actionable, replace the list with a single line, e.g.:>
+None actionable. <count> false positives on pre-existing lines.
+
+### Manual review checks
+<If all clean, one line:>
+All clean (config-dict consumers, env-var paths, path construction, subprocess/eval/exec/pickle/yaml/dynamic import).
+
+<Otherwise, only list the checks that flagged something, with reasoning.>
 
 ### Conclusion
 - <short conclusion, or "No plausible Kedro vulnerabilities found.">
@@ -402,5 +431,8 @@ Write one GitHub review payload:
 }
 ```
 
-Use inline comments only for concrete findings tied to changed PR lines. Put the
-full summary in `body`.
+Use inline comments only for actionable findings (`candidate_kedro_vulnerability`
+or `needs_manual_review`) tied to changed PR lines. Do not post inline comments
+for false positives or other non-actionable buckets. Put the full summary in
+`body`, following the same conciseness rules as chat mode (counts only for
+non-actionable buckets; collapse clean manual review checks to one line).

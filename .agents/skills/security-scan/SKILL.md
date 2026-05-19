@@ -10,12 +10,13 @@ description: >-
 
 # Security Scan
 
-Two modes:
-- full codebase
-- PR-only
+Before scanning, decide three things:
 
-Confirm scan scope first (see `## Scan scope`), then run the numbered Workflow
-below:
+1. **Target source** — full codebase or PR (see `## Mode selection`)
+2. **Scan scope** — Kedro framework code or a Kedro project (see `## Scan scope`)
+3. **Delivery** — chat (default) or post to GitHub (see `## Delivery modes`)
+
+Then run the numbered Workflow below:
 
 1. detect which Semgrep binary is available (see Defaults)
 2. create a temporary working directory with `mktemp -d`
@@ -336,7 +337,7 @@ For each finding, include:
 - Semgrep severity
 - Kedro classification
 - one-sentence reasoning
-- suggested next step (from `reference.md` for that bucket)
+- suggested next step (from `reference.md` for that bucket; for `candidate_kedro_vulnerability`, pick the ERROR or WARNING recommendation based on Semgrep severity)
 
 If no findings are plausible Kedro vulnerabilities, say so explicitly.
 

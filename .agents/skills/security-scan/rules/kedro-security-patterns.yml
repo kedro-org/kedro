@@ -121,3 +121,22 @@ rules:
       - pattern: |
           if "()" in str($SINK):
               ...
+
+  - id: kedro-subprocess-shell-injection
+    message: >-
+      subprocess is called with shell=True and a non-literal command. If the
+      command string originates from config, environment variables, or CLI
+      arguments, an attacker who controls that value can execute arbitrary shell
+      commands. Kedro framework code should avoid shell=True with non-literal
+      commands; prefer shell=False with an explicit argument list, or validate
+      and allowlist the command before use.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH
+      impact: CRITICAL
+    patterns:
+      - pattern: subprocess.$FUNC($CMD, ..., shell=True, ...)
+      - pattern-not: subprocess.$FUNC("...", ..., shell=True, ...)
+      - pattern-not: subprocess.$FUNC([...], ..., shell=True, ...)

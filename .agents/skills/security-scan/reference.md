@@ -15,9 +15,19 @@ Use when the finding points to behavior in Kedro framework code where:
 - Kedro appears to bypass or fail a documented safety restriction
 - Kedro framework behavior may expose credentials or secrets unintentionally
 
-**Suggested next step:** treat as a framework security issue — open a maintainer
-follow-up, draft a Security Advisory or `SECURITY.md` entry, and do not ship until
-reviewed.
+Severity determines how the finding is surfaced to the user (the skill itself
+does not enforce anything — it only reports):
+
+- **ERROR severity** — the rule has high confidence and critical impact (e.g.
+  RCE, arbitrary code execution, credential exposure). **Flag prominently and
+  recommend fixing before the code is merged or released.** Suggest discussing
+  with maintainers as part of the PR review. If the same pattern is later
+  confirmed to exist in an already-released version, that is when a Security
+  Advisory becomes relevant — not at PR time.
+- **WARNING severity** — plausible risk but lower confidence or limited impact.
+  **Recommend investigating and fixing, but it does not need to block the
+  merge.** Suggest opening a maintainer follow-up issue if it can't be resolved
+  in the current PR.
 
 ### `project_developer_responsibility`
 
@@ -55,6 +65,10 @@ do not auto-dismiss.
 
 Run these after Semgrep, regardless of whether any rule fired.
 Semgrep only covers known patterns. These checks catch the unknown ones.
+
+Apply the same path exclusions as the Semgrep scan when grepping or searching:
+skip `tests/`, `docs/`, `features/`, and `.agents/`. Otherwise these checks
+will re-flag hits in paths the Semgrep phase already filtered out.
 
 ### 1. New third-party functions that accept config dicts
 
@@ -103,11 +117,13 @@ Expect high volume; most findings on a framework codebase are
 
 _Detects hardcoded credentials, tokens, and API keys in source files._
 
-Triage in order: (1) check the file path — `tests/`, `docs/`, `features/`,
-`.agents/` paths are almost always `false_positive_or_informational`;
-(2) check for a placeholder value (`"YOUR_API_KEY"`, `"xxx"`, `"<token>"`);
-(3) if the string looks like a real secret in production code, classify as
-`needs_manual_review`.
+The Semgrep scan already excludes `tests/`, `docs/`, `features/`, and
+`.agents/` via `--exclude`, so any finding from `p/secrets` is in production
+code. Triage in order: (1) check for a placeholder value
+(`"YOUR_API_KEY"`, `"xxx"`, `"<token>"`) — classify as
+`false_positive_or_informational`; (2) if the string looks like a real secret,
+classify as `needs_manual_review`. (If a finding does appear under an excluded
+path, treat it as a scan misconfiguration rather than a real signal.)
 
 ### `p/python`
 
@@ -187,6 +203,31 @@ Triage steps:
    `.is_dir()`), classify as `false_positive_or_informational`.
 4. If the flagged function is itself a sanitizer (checking for `..` or absolute
    paths), classify as `false_positive_or_informational`.
+
+### `kedro-subprocess-shell-injection`
+
+Fires on `subprocess.$FUNC($CMD, ..., shell=True)` where the command is not a
+string or list literal — i.e. the command comes from a variable that could
+originate from config, an environment variable, or a CLI argument.
+
+Triage steps:
+
+1. Trace where `$CMD` originates. If it is a hardcoded string assembled only
+   from framework-internal defaults (no external input), classify as
+   `false_positive_or_informational`.
+2. If `$CMD` is constructed from a developer-authored project value
+   (e.g. a Kedro node name, pipeline name, or catalog key provided in
+   `catalog.yml`), classify as `project_developer_responsibility`.
+3. If `$CMD` can be influenced by an untrusted external caller (env var, API
+   input, CI trigger, user-supplied CLI flag) with no allowlist or escaping,
+   classify as `candidate_kedro_vulnerability` at ERROR severity.
+4. If the origin is unclear without deeper runtime context, classify as
+   `needs_manual_review`.
+
+Note: `shell=False` with an explicit list argument (`[cmd, arg1, arg2]`) is
+always safe regardless of where the arguments come from, because the shell
+never interprets them. The rule only fires when `shell=True` is present with a
+non-literal command.
 
 ### `kedro-yaml-unsafe-load`
 

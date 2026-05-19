@@ -9,6 +9,8 @@ NOTE: This session implementation is under active development and may occasional
 * Added inspection API to get project snapshot.
 * Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
 * Scoped parameter type-hint validation to the pipeline being run. When `kedro run --pipeline=<name>` runs a single named pipeline, only that pipeline's node signatures are inspected for type hints, avoiding unnecessary work and spurious "conflicting type" warnings from pipelines that aren't executing.
+* Added an HTTP endpoint `/snapshot` for accessing project snapshot.
+
 
 ## Bug fixes and other changes
 * Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
@@ -19,6 +21,7 @@ NOTE: This session implementation is under active development and may occasional
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.
 * Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
+* Added security model documentation covering trust boundaries, user responsibilities, and framework vulnerabilities.
 
 ## Community contributions
 

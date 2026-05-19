@@ -1,10 +1,12 @@
 # Agentic Reflection and Continuous Learning MVP
 
+---
+
 # 1. Problem Statement
 
 ## 1.1 Business Context
 
-A telco B2B client has multiple commercial use cases such as:
+A telco B2B client runs multiple commercial use cases powered by LLM agents:
 
 - Cross-sell recommendations
 - Pricing and discount guidance
@@ -13,11 +15,11 @@ A telco B2B client has multiple commercial use cases such as:
 - Account planning
 - Renewal and churn prevention
 
-These workflows increasingly involve LLM-powered agents that reason over customer data, product catalogs, business rules, prompts, tools, and prior context. However, most agentic systems have a major weakness:
+These agents reason over customer data, product catalogs, business rules, prompts, tools, and prior context. But most agentic systems share one major weakness:
 
 > They execute, but they do not systematically learn from their own traces.
 
-A typical agent may generate a recommendation, call tools, produce an explanation, and return an answer. But after the run, the organization often lacks a structured way to answer:
+An agent may generate a recommendation, call tools, produce an explanation, and return an answer. But after the run, the organization has no structured way to answer:
 
 - What exactly did the agent see?
 - Which prompt version was used?
@@ -31,8 +33,6 @@ A typical agent may generate a recommendation, call tools, produce an explanatio
 The problem is not just recommendation quality. The deeper problem is the absence of a governed continuous learning loop for agentic systems.
 
 ## 1.2 Target Problem
-
-The MVP should solve the following problem:
 
 > Build a Kedro-native reflection and continuous learning layer that ingests agent traces, evaluates agent behavior, derives improvement signals, stores structured reflections, and feeds approved improvements back into future agent runs.
 
@@ -50,7 +50,7 @@ For an enterprise telco client, agentic systems need more than clever prompts. T
 - Human approval for sensitive changes
 - Reusable learning across use cases
 
-This is where Kedro is valuable. Kedro can provide the pipeline backbone, Data Catalog, modular project structure, reusable datasets, hooks, and visualization. The new GenAI-oriented features such as `LLMContextNode` and Langfuse datasets can help bring prompts, traces, and evaluations into the Kedro-native development pattern.
+This is where Kedro is valuable. Kedro can provide the pipeline backbone, Data Catalog, modular project structure, reusable datasets, hooks, and visualization. New GenAI-oriented features such as `LLMContextNode` and Langfuse datasets help bring prompts, traces, and evaluations into the Kedro-native development pattern.
 
 ---
 
@@ -60,7 +60,7 @@ This is where Kedro is valuable. Kedro can provide the pipeline backbone, Data C
 
 The MVP is an **Agentic Reflection Control Tower** for a B2B telco cross-sell agent.
 
-The cross-sell agent will:
+**The cross-sell agent will:**
 
 1. Read customer and product context.
 2. Generate cross-sell recommendations.
@@ -69,7 +69,7 @@ The cross-sell agent will:
 5. Pass its trace and outputs into a reflection pipeline.
 6. Receive improvement signals for the next run.
 
-The reflection system will:
+**The reflection system will:**
 
 1. Ingest agent traces.
 2. Evaluate the agent's behavior and outputs.
@@ -87,15 +87,7 @@ Example agent task:
 
 > Given a B2B customer profile, product catalog, business rules, and prior learning memory, recommend the next best telco product to cross-sell and explain the recommendation.
 
-Example products:
-
-- SD-WAN
-- Managed Firewall
-- IoT Connectivity
-- Business Mobile
-- Cloud Connectivity
-- Private 5G
-- Unified Communications
+Example products: SD-WAN, Managed Firewall, IoT Connectivity, Business Mobile, Cloud Connectivity, Private 5G, Unified Communications.
 
 The MVP does not need to optimize real commercial decisions. It needs to prove the reusable reflection pattern.
 
@@ -103,7 +95,7 @@ The MVP does not need to optimize real commercial decisions. It needs to prove t
 
 A non-agentic version would simply run a deterministic recommendation pipeline.
 
-The agentic version includes:
+The agentic version adds:
 
 - LLM-based reasoning
 - Prompt-managed behavior
@@ -117,20 +109,15 @@ The agentic version includes:
 
 ## 2.4 MVP Learning Loop
 
-The continuous learning loop is:
+The system runs a closed loop: the agent produces traces, those traces are evaluated and reflected upon, improvement signals are generated, a human approves changes, and approved changes feed back into the next run.
 
-```mermaid
-flowchart LR
-    A[Agent Run] --> B[Trace Capture]
-    B --> C[Evaluation]
-    C --> D[Reflection]
-    D --> E[Improvement Signal]
-    E --> F[Human Approval]
-    F --> G[Updated Agent Inputs]
-    G --> A
+```
+  [Agent Run] ──→ [Trace Capture] ──→ [Evaluation] ──→ [Reflection]
+       ↑                                                      ↓
+[Updated Inputs] ←── [Human Approval] ←── [Improvement Signal]
 ```
 
-The key design choice:
+Key design choice:
 
 > The MVP should automate diagnosis and reflection, but keep material behavior changes human-approved by default.
 
@@ -140,195 +127,132 @@ The key design choice:
 
 ## 3.1 High-Level Architecture
 
-```mermaid
-flowchart TB
-    subgraph BusinessScenario[Demo Business Scenario]
-        CS[Cross-Sell Agent]
-        CUST[Customer Context]
-        PROD[Product Catalog]
-        RULES[Business Rules]
-        MEM[Prior Reflection Memory]
-    end
+The system is organized into six layers. Data flows top-to-bottom from inputs through the agent, into traces, evaluation, reflection, and improvement proposals. Approved changes loop back into the top.
 
-    subgraph AgentRuntime[Agent Runtime Layer]
-        PROMPTS[Prompt Inputs]
-        TOOLS[Tool Inputs]
-        LLMCTX[LLMContextNode]
-        AGENT[Agent Execution Node]
-    end
+```
+INPUTS
+──────────────────────────────────────────────────────────
+  Customer Context  ──┐
+  Product Catalog   ──┤──→ [ Cross-Sell Agent ]
+  Business Rules    ──┤
+  Prior Memory      ──┘
 
-    subgraph TraceLayer[Trace and Observability Layer]
-        TRACE[Agent Traces]
-        TOOLTRACE[Tool Call Logs]
-        PROMPTTRACE[Prompt Version Metadata]
-        OUTPUTS[Agent Outputs]
-    end
+        ↓ agent outputs flow into:
 
-    subgraph EvaluationLayer[Evaluation Layer]
-        RULEEVAL[Business Rule Evaluation]
-        OUTEVAL[Output Quality Evaluation]
-        EXPEVAL[Explanation Evaluation]
-        TRAJEEVAL[Trajectory Evaluation]
-        GOLDEN[Golden Eval Set]
-    end
+TRACE CAPTURE
+──────────────────────────────────────────────────────────
+  Agent Trace | Tool Call Logs | Prompt Metadata | Outputs
 
-    subgraph ReflectionLayer[Reflection Layer]
-        DIAG[Failure Diagnostics]
-        PATTERNS[Pattern Mining]
-        REFL[Structured Reflection Generator]
-        SIGNALS[Improvement Signal Generator]
-    end
+        ↓ traces feed into:
 
-    subgraph ImprovementLayer[Improvement Target Layer]
-        PROMPTUP[Prompt Update Proposal]
-        EVALUP[Eval Set Update Proposal]
-        MEMUP[Memory Update]
-        SKILLUP[Skill Update Proposal]
-        ONTOUP[Ontology Update Proposal]
-    end
+EVALUATION
+──────────────────────────────────────────────────────────
+  Business Rule Check | Output Quality | Explanation | Trajectory
+                          (vs. Golden Eval Set)
 
-    subgraph GovernanceLayer[Governance Layer]
-        REVIEW[Human Review]
-        APPROVED[Approved Learning Registry]
-        REJECTED[Rejected / Deferred Changes]
-    end
+        ↓ evaluation results feed into:
 
-    CUST --> CS
-    PROD --> CS
-    RULES --> CS
-    MEM --> CS
+REFLECTION
+──────────────────────────────────────────────────────────
+  Diagnose Failures → Mine Patterns → Reflection Record → Improvement Signal
 
-    PROMPTS --> LLMCTX
-    TOOLS --> LLMCTX
-    LLMCTX --> AGENT
-    CS --> AGENT
+        ↓ signals split into proposals:
 
-    AGENT --> TRACE
-    AGENT --> OUTPUTS
-    AGENT --> TOOLTRACE
-    AGENT --> PROMPTTRACE
+IMPROVEMENT PROPOSALS
+──────────────────────────────────────────────────────────
+  Prompt Update | Eval Set Addition | Memory Update | Tool Change | Skill Proposal
 
-    TRACE --> TRAJEEVAL
-    OUTPUTS --> OUTEVAL
-    OUTPUTS --> RULEEVAL
-    OUTPUTS --> EXPEVAL
-    GOLDEN --> OUTEVAL
-    RULES --> RULEEVAL
+        ↓ all proposals go to:
 
-    RULEEVAL --> DIAG
-    OUTEVAL --> DIAG
-    EXPEVAL --> DIAG
-    TRAJEEVAL --> DIAG
-    DIAG --> PATTERNS
-    PATTERNS --> REFL
-    REFL --> SIGNALS
+GOVERNANCE
+──────────────────────────────────────────────────────────
+  Human Review → Approved Registry  (or)  Rejected / Deferred
 
-    SIGNALS --> PROMPTUP
-    SIGNALS --> EVALUP
-    SIGNALS --> MEMUP
-    SIGNALS --> SKILLUP
-    SIGNALS --> ONTOUP
-
-    PROMPTUP --> REVIEW
-    EVALUP --> REVIEW
-    MEMUP --> REVIEW
-    SKILLUP --> REVIEW
-    ONTOUP --> REVIEW
-
-    REVIEW --> APPROVED
-    REVIEW --> REJECTED
-    APPROVED --> MEM
-    APPROVED --> PROMPTS
-    APPROVED --> GOLDEN
-    APPROVED --> TOOLS
+        ↓ approved changes feed back into INPUTS for next run
+  Prompts | Memory | Eval Sets | Tools
 ```
 
 ## 3.2 Kedro-Native Architecture
 
-```mermaid
-flowchart TB
-    subgraph KedroProject[Kedro Project]
-        subgraph Catalog[Data Catalog]
-            D1[customer_context]
-            D2[product_catalog]
-            D3[business_rules]
-            D4[prompt_dataset]
-            D5[trace_dataset]
-            D6[evaluation_dataset]
-            D7[reflection_memory]
-            D8[approved_learning_registry]
-        end
+Everything lives inside a single Kedro project. The Data Catalog stores all versioned artifacts. Modular pipelines handle each stage. Hooks provide observability at key lifecycle events.
 
-        subgraph Pipelines[Modular Pipelines]
-            P1[agent_input_pipeline]
-            P2[agent_execution_pipeline]
-            P3[trace_ingestion_pipeline]
-            P4[evaluation_pipeline]
-            P5[reflection_pipeline]
-            P6[improvement_signal_pipeline]
-            P7[approval_and_feedback_pipeline]
-            P8[reporting_pipeline]
-        end
+```
+KEDRO PROJECT
+│
+├── DATA CATALOG (versioned, reusable datasets)
+│   ├── customer_context
+│   ├── product_catalog
+│   ├── business_rules
+│   ├── prompt_dataset
+│   ├── trace_dataset
+│   ├── evaluation_dataset
+│   ├── reflection_memory
+│   └── approved_learning_registry
+│
+├── MODULAR PIPELINES (one per stage)
+│   ├── agent_input_pipeline
+│   ├── agent_execution_pipeline
+│   ├── trace_ingestion_pipeline
+│   ├── evaluation_pipeline
+│   ├── reflection_pipeline
+│   ├── improvement_signal_pipeline
+│   ├── approval_and_feedback_pipeline
+│   └── reporting_pipeline
+│
+└── KEDRO HOOKS (lifecycle observations)
+    ├── before_pipeline_run  — load approved memory
+    ├── after_node_run       — emit trace events
+    ├── on_node_error        — capture failures
+    └── after_pipeline_run   — finalize run metadata
 
-        subgraph Hooks[Kedro Hooks]
-            H1[before_pipeline_run]
-            H2[after_node_run]
-            H3[on_node_error]
-            H4[after_pipeline_run]
-        end
-    end
-
-    Catalog --> Pipelines
-    Pipelines --> Catalog
-    Hooks --> Pipelines
-    Pipelines --> Hooks
+Catalog ↔ Pipelines  (pipelines read inputs and write outputs via catalog)
+Hooks   → Pipelines  (hooks observe pipeline events and inject signals)
 ```
 
 ## 3.3 Pipeline-Level Design
 
-```mermaid
-flowchart LR
-    A1[Load Customer Context] --> A2[Load Product Catalog]
-    A2 --> A3[Load Business Rules]
-    A3 --> A4[Load Approved Memory]
-    A4 --> A5[Build Agent Input]
+This shows the step-by-step flow across all eight pipelines from input loading through to the feedback loop.
 
-    A5 --> B1[LLMContextNode]
-    B1 --> B2[Run Cross-Sell Agent]
-    B2 --> B3[Generate Recommendation]
-    B3 --> B4[Generate Explanation]
+```
+STAGE 1 — PREPARE INPUTS
+  Load Customer Context → Load Product Catalog → Load Business Rules
+  → Load Approved Memory → Build Agent Input
 
-    B2 --> C1[Persist Agent Trace]
-    B3 --> C2[Persist Agent Output]
-    B4 --> C3[Persist Explanation]
+        ↓
 
-    C1 --> D1[Evaluate Trajectory]
-    C2 --> D2[Evaluate Recommendation]
-    C3 --> D3[Evaluate Explanation]
-    D2 --> D4[Compare Against Golden Eval Set]
-    D1 --> E1[Diagnose Failures]
-    D2 --> E1
-    D3 --> E1
-    D4 --> E1
+STAGE 2 — RUN AGENT
+  LLMContextNode → Run Cross-Sell Agent
+  → Generate Recommendation → Generate Explanation
 
-    E1 --> E2[Mine Recurring Patterns]
-    E2 --> E3[Generate Structured Reflection]
-    E3 --> E4[Generate Improvement Signals]
+        ↓
 
-    E4 --> F1[Prompt Change Proposal]
-    E4 --> F2[Eval Set Proposal]
-    E4 --> F3[Memory Update]
-    E4 --> F4[Skill Proposal]
-    E4 --> F5[Ontology Proposal]
+STAGE 3 — CAPTURE TRACES
+  Persist Agent Trace | Persist Agent Output | Persist Explanation
 
-    F1 --> G1[Human Approval Queue]
-    F2 --> G1
-    F3 --> G1
-    F4 --> G1
-    F5 --> G1
+        ↓
 
-    G1 --> H1[Approved Registry]
-    H1 --> A4
+STAGE 4 — EVALUATE
+  Evaluate Trajectory | Evaluate Recommendation | Evaluate Explanation
+  → Compare Against Golden Eval Set
+  → Diagnose Failures
+
+        ↓
+
+STAGE 5 — REFLECT
+  Mine Recurring Patterns → Generate Structured Reflection
+  → Generate Improvement Signals
+
+        ↓
+
+STAGE 6 — PROPOSE IMPROVEMENTS
+  Prompt Change | Eval Set Addition | Memory Update
+  | Skill Proposal | Ontology Update
+
+        ↓
+
+STAGE 7 — APPROVE AND FEED BACK
+  Human Approval Queue → Approved Registry
+  → (feeds back into Stage 1 for next run)
 ```
 
 ## 3.4 Agent Trace Schema
@@ -397,7 +321,7 @@ labels:
 
 ## 3.6 Reflection Schema
 
-Reflection should be structured, not just prose.
+Reflection should be structured, not just prose. Each reflection links its evidence, root cause, and proposed change so the improvement is fully traceable.
 
 ```yaml
 reflection_id: refl_001
@@ -428,7 +352,7 @@ created_at: 2026-05-18T12:00:00Z
 
 ## 3.7 Improvement Signal Types
 
-The reflection system should produce multiple kinds of improvement signals.
+The reflection system produces multiple kinds of improvement signals targeting different parts of the agent system.
 
 | Improvement target | What it means | MVP support |
 |---|---|---|
@@ -441,24 +365,17 @@ The reflection system should produce multiple kinds of improvement signals.
 
 ## 3.8 Feedback Targets
 
-```mermaid
-flowchart TB
-    SIGNAL[Improvement Signal]
+An improvement signal fans out into specific targets. Each approved target feeds directly into the next agent run or evaluation run.
 
-    SIGNAL --> P[Prompt Registry]
-    SIGNAL --> E[Evaluation Set]
-    SIGNAL --> M[Reflection Memory]
-    SIGNAL --> T[Tool Registry]
-    SIGNAL --> S[Skill Registry]
-    SIGNAL --> O[Domain Ontology]
-
-    P --> AGENT[Next Agent Run]
-    E --> EVAL[Next Evaluation Run]
-    M --> AGENT
-    T --> AGENT
-    S --> AGENT
-    O --> AGENT
-    O --> EVAL
+```
+              [Improvement Signal]
+                       │
+   ┌──────┬────────┬───┴────┬────────┬──────────┐
+   ↓      ↓        ↓        ↓        ↓          ↓
+[Prompt] [Eval] [Memory] [Tools] [Skills] [Ontology]
+   │      │        │        │        │          │
+   └──────┴────→ [Next Agent Run] ←─┴──────────┘
+          └────→ [Next Eval Run]  ←─ [Eval] + [Ontology]
 ```
 
 ---
@@ -467,9 +384,9 @@ flowchart TB
 
 ## 4.1 Development Philosophy
 
-The POC should be developed from specs, not generated ad hoc from prompts.
+The POC is developed from specs, not generated ad hoc from prompts. This ensures each component has a clear contract before code is written.
 
-The working pattern should be:
+Working pattern:
 
 1. Define the behavior spec.
 2. Define data contracts.
@@ -516,12 +433,12 @@ The system must present traces, evaluations, reflections, and improvement signal
 
 ## 4.3 MVP Non-Functional Requirements
 
-- Traceability: every reflection must link back to evidence.
-- Reproducibility: every run should be reproducible from cataloged inputs.
-- Modularity: agent execution, evaluation, reflection, and feedback should be separate Kedro pipelines.
-- Governance: high-impact changes require approval.
-- Extensibility: the same pattern should support pricing and digital marketing later.
-- Observability: prompt versions, traces, evaluations, and outputs should be inspectable.
+- **Traceability:** every reflection must link back to evidence.
+- **Reproducibility:** every run should be reproducible from cataloged inputs.
+- **Modularity:** agent execution, evaluation, reflection, and feedback should be separate Kedro pipelines.
+- **Governance:** high-impact changes require approval.
+- **Extensibility:** the same pattern should support pricing and digital marketing later.
+- **Observability:** prompt versions, traces, evaluations, and outputs should be inspectable.
 
 ## 4.4 Data Contracts
 
@@ -678,113 +595,57 @@ Load approved changes into the next agent run and show improved behavior.
 
 ## 5.1 Demo Narrative
 
-The demo should tell this story:
-
 > We are not just building an agent. We are building a learning system around agents. The agent performs cross-sell recommendations, but the platform observes the agent, evaluates its behavior, generates improvement signals, and feeds approved learning back into future runs.
 
 ## 5.2 Control Tower UI
 
-A simple Streamlit app can act as the client-facing control tower.
-
-Recommended sections:
+A simple Streamlit app acts as the client-facing control tower.
 
 ### 1. Run Overview
 
-Show:
-
-- Run ID
-- Agent version
-- Prompt version
-- Dataset version
-- Number of customers processed
-- Number of recommendations generated
-- Number of traces captured
-- Evaluation summary
-- Reflection summary
+Show: Run ID, Agent version, Prompt version, Dataset version, Number of customers processed, Number of recommendations, Traces captured, Evaluation summary, Reflection summary.
 
 ### 2. Agent Trace Explorer
 
-Show:
-
-- Customer context
-- Prompt version
-- Tool calls
-- Agent output
-- Explanation
-- Latency and token usage
+Show: Customer context, Prompt version, Tool calls, Agent output, Explanation, Latency and token usage.
 
 ### 3. Evaluation Dashboard
 
-Show:
-
-- Recommendation quality score
-- Explanation quality score
-- Business-rule pass rate
-- Groundedness score
-- Tool-use quality score
-- Failure categories
+Show: Recommendation quality score, Explanation quality score, Business-rule pass rate, Groundedness score, Tool-use quality score, Failure categories.
 
 ### 4. Reflection Board
 
-Show:
-
-- Key findings
-- Root-cause hypotheses
-- Evidence links
-- Confidence
-- Affected segment/product
+Show: Key findings, Root-cause hypotheses, Evidence links, Confidence, Affected segment/product.
 
 ### 5. Improvement Signal Queue
 
-Show proposed changes grouped by target:
+Proposed changes grouped by target: Prompt updates | Eval set additions | Memory updates | Tool improvements | Skill proposals | Ontology proposals.
 
-- Prompt updates
-- Eval set additions
-- Memory updates
-- Tool improvements
-- Skill proposals
-- Ontology proposals
-
-Each proposal should have:
-
-- Evidence
-- Expected benefit
-- Risk
-- Approval status
+Each proposal includes: Evidence, Expected benefit, Risk, Approval status.
 
 ### 6. Before vs After
 
-Show Run 1 vs Run 2:
-
-- Improved explanation score
-- Reduced business-rule violations
-- Better groundedness
-- Better prompt adherence
-- More relevant recommendations
+Run 1 vs Run 2: Improved explanation score, Reduced business-rule violations, Better groundedness, Better prompt adherence, More relevant recommendations.
 
 ## 5.3 Streamlit Layout
 
-```mermaid
-flowchart TB
-    UI[Streamlit Control Tower]
-    UI --> O[Run Overview]
-    UI --> T[Trace Explorer]
-    UI --> E[Evaluation Dashboard]
-    UI --> R[Reflection Board]
-    UI --> I[Improvement Queue]
-    UI --> B[Before vs After Comparison]
+```
+[Streamlit Control Tower]
+        │
+        ├── Run Overview
+        ├── Trace Explorer
+        ├── Evaluation Dashboard
+        ├── Reflection Board
+        ├── Improvement Queue
+        └── Before vs After Comparison
 ```
 
 ## 5.4 What to Emphasize to Client
 
-Emphasize these points:
-
-- The cross-sell use case is only the first example.
-- The reusable capability is agentic learning.
-- The system does not blindly self-modify.
-- It creates evidence-backed improvement proposals.
-- Human approval is included for governance.
-- The same architecture can support pricing, marketing, sales, and service agents.
+- The cross-sell use case is only the first example — the reusable capability is agentic learning.
+- The system does not blindly self-modify. It creates evidence-backed improvement proposals.
+- Human approval is built in for governance.
+- The same architecture supports pricing, marketing, sales, and service agents.
 
 ---
 
@@ -807,40 +668,21 @@ Emphasize these points:
 
 ### Local POC
 
-- Kedro project
-- Local file-based catalog
-- Synthetic data
-- Local Streamlit app
-- Optional Langfuse local or cloud integration
+- Kedro project, local file-based catalog, synthetic data, local Streamlit app, optional Langfuse integration.
 
 ### Internal Demo
 
-- Kedro-Viz for pipeline explainability
-- Streamlit for business-friendly control tower
-- Versioned prompts and eval sets
-- Run artifacts stored in local or object storage
+- Kedro-Viz for pipeline explainability, Streamlit for business-friendly control tower, versioned prompts and eval sets, run artifacts stored locally or in object storage.
 
 ### Enterprise Deployment Path
 
-- Containerize Kedro project
-- Schedule pipeline runs with an orchestrator
-- Store traces and evaluations in managed observability tooling
-- Store approved learning registry in a governed data store
-- Add identity, access control, and audit trails
-- Integrate with real telco CRM, product, billing, and campaign data
+- Containerize Kedro project, schedule pipeline runs with an orchestrator, store traces and evaluations in managed observability tooling, store approved learning registry in a governed data store, add identity/access control and audit trails, integrate with real telco CRM, product, billing, and campaign data.
 
 ## 6.3 Future Improvements
 
 ### More Automation
 
-Future versions can add:
-
-- Automatic prompt variant generation
-- Automatic eval case generation from failures
-- Agent-selected diagnostic pipelines
-- Automated rollback of bad prompt updates
-- A/B testing of prompt versions
-- Continuous monitoring of agent drift
+Future versions can add: automatic prompt variant generation, automatic eval case generation from failures, agent-selected diagnostic pipelines, automated rollback of bad prompt updates, A/B testing of prompt versions, continuous monitoring of agent drift.
 
 ### Skills
 
@@ -861,83 +703,39 @@ Example:
 
 ### Ontology
 
-An ontology captures domain concepts and relationships.
+An ontology captures domain concepts and relationships. Example telco concepts: Customer, Segment, Product, Product family, Eligibility rule, Buying signal, Pain point, Offer, Bundle, Contract, Channel.
 
-Example telco concepts:
-
-- Customer
-- Segment
-- Product
-- Product family
-- Eligibility rule
-- Buying signal
-- Pain point
-- Offer
-- Bundle
-- Contract
-- Channel
-
-Future reflection can propose ontology improvements.
-
-Example:
+Future reflection can propose ontology improvements:
 
 > Add `network_reliability_pain_point` as a concept linked to SD-WAN, high support-ticket volume, and multi-site customers.
 
 ### Other Use Cases
 
-The same learning architecture can support:
+**Pricing Agent:** Ingest pricing-agent traces → evaluate margin and policy compliance → reflect on discounting errors → feed back into pricing prompts, eval cases, and approval rules.
 
-#### Pricing Agent
+**Digital Marketing Agent:** Ingest campaign-agent traces → evaluate message relevance and targeting quality → reflect on weak personalization → feed back into campaign prompts, audience rules, and eval sets.
 
-- Ingest pricing-agent traces
-- Evaluate margin and policy compliance
-- Reflect on discounting errors
-- Feed back into pricing prompts, eval cases, and approval rules
-
-#### Digital Marketing Agent
-
-- Ingest campaign-agent traces
-- Evaluate message relevance and targeting quality
-- Reflect on weak personalization
-- Feed back into campaign prompts, audience rules, and eval sets
-
-#### Sales Assistant Agent
-
-- Ingest account-planning traces
-- Evaluate recommendation usefulness
-- Reflect on missed buying signals
-- Feed back into sales playbooks and account research skills
+**Sales Assistant Agent:** Ingest account-planning traces → evaluate recommendation usefulness → reflect on missed buying signals → feed back into sales playbooks and account research skills.
 
 ## 6.4 Target End-State
 
-The long-term vision is a reusable learning layer for enterprise agents:
+The long-term vision is a reusable learning layer for enterprise agents. The MVP proves the first version of this loop with cross-sell; the roadmap expands the same pattern to pricing, digital marketing, and other B2B telco workflows.
 
-```mermaid
-flowchart LR
-    A[Agents] --> B[Traces]
-    B --> C[Evaluations]
-    C --> D[Reflections]
-    D --> E[Improvement Signals]
-    E --> F[Approved Learning Registry]
-    F --> G[Prompts]
-    F --> H[Eval Sets]
-    F --> I[Memory]
-    F --> J[Skills]
-    F --> K[Ontology]
-    G --> A
-    H --> C
-    I --> A
-    J --> A
-    K --> A
-    K --> C
 ```
-
-The MVP should prove the first version of this loop with cross-sell. The roadmap should then expand the same pattern to pricing, digital marketing, and other B2B telco agent workflows.
+[Agents] → [Traces] → [Evaluations] → [Reflections] → [Improvement Signals]
+                                                                ↓
+                                           [Approved Learning Registry]
+                                                    │
+                        ┌──────────┬───────────────┼───────────┬──────────┐
+                        ↓          ↓               ↓           ↓          ↓
+                    [Prompts] [Eval Sets]       [Memory]   [Skills]  [Ontology]
+                        │          │               │           │          │
+                        └──────────┴──→ [Agents] ←┘           │          │
+                                        [Evals]  ←─────────────┴──────────┘
+```
 
 ---
 
 # 7. Key Design Principle
-
-The most important principle is:
 
 > Do not build an autonomous agent that silently changes itself. Build a governed reflection system that turns traces into evidence-backed improvement signals and feeds approved learning into future agent runs.

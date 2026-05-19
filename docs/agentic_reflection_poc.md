@@ -128,40 +128,58 @@ GOVERNANCE
 
 ## 3.2 Kedro-Native Architecture
 
-Everything lives inside a single Kedro project. The Data Catalog stores all versioned artifacts. Modular pipelines handle each stage. Hooks provide observability at key lifecycle events.
+Everything lives inside a single Kedro project. Traces, evaluations, and prompts flow into Langfuse through native Kedro-Langfuse dataset types — nodes simply write to catalog outputs and Langfuse receives them automatically. Hooks are scoped only to what datasets cannot handle: failure capture and run-level metadata. The Kedro HTTP service exposes the project to the Streamlit control tower over REST, decoupling the UI from the Kedro filesystem entirely.
 
 ```
 KEDRO PROJECT
 │
-├── DATA CATALOG (versioned, reusable datasets)
-│   ├── customer_context
-│   ├── product_catalog
-│   ├── business_rules
-│   ├── prompt_dataset
-│   ├── trace_dataset
-│   ├── evaluation_dataset
-│   ├── reflection_memory
-│   └── approved_learning_registry
-│
-├── MODULAR PIPELINES (one per stage)
-│   ├── agent_input_pipeline
-│   ├── agent_execution_pipeline
-│   ├── trace_ingestion_pipeline
-│   ├── evaluation_pipeline
-│   ├── reflection_pipeline
-│   ├── improvement_signal_pipeline
-│   ├── approval_and_feedback_pipeline
-│   └── reporting_pipeline
-│
-└── KEDRO HOOKS (lifecycle observations)
-    ├── before_pipeline_run  — load approved memory
-    ├── after_node_run       — emit trace events
-    ├── on_node_error        — capture failures
-    └── after_pipeline_run   — finalize run metadata
+├── DATA CATALOG         — versioned datasets; Langfuse datasets handle observability natively
+├── MODULAR PIPELINES    — one pipeline per stage, independently runnable
+├── KEDRO HOOKS          — scoped to failure capture and run-level metadata only
+└── HTTP SERVICE         — REST interface for external systems (Streamlit control tower)
+                           GET  /snapshot  → discover pipelines, datasets, parameters
+                           POST /run       → trigger a named pipeline with runtime params
 
-Catalog ↔ Pipelines  (pipelines read inputs and write outputs via catalog)
-Hooks   → Pipelines  (hooks observe pipeline events and inject signals)
+Catalog ↔ Pipelines  (nodes read inputs and write outputs via catalog; Langfuse datasets
+                      push to Langfuse as a side effect of the normal catalog write)
+Streamlit → HTTP Service  (control tower triggers and inspects Kedro over REST, no
+                           direct filesystem access needed)
 ```
+
+### Data Catalog
+
+Langfuse-backed datasets (`LangfusePromptDataset`, `LangfuseTraceDataset`, `LangfuseEvaluationDataset`) replace the need for hooks to manually emit observability events. Reading a prompt pulls the latest approved version from Langfuse. Writing a trace or evaluation score pushes it to Langfuse automatically.
+
+| Dataset | Kedro Type | Data Layer | Contents |
+|---|---|---|---|
+| `customer_context` | `JSONDataset` | `01_raw` | B2B customer profiles: firmographics, product holdings, usage metrics, support-ticket history |
+| `product_catalog` | `YAMLDataset` | `01_raw` | Telco product definitions, eligibility rules, bundle compatibility matrix |
+| `business_rules` | `YAMLDataset` | `01_raw` | Pricing policy, compliance constraints, cross-sell eligibility logic |
+| `prompt_dataset` | `LangfusePromptDataset` | `conf/base` | Versioned prompt templates fetched directly from Langfuse; loading always retrieves the current approved version |
+| `agent_inputs` | `JSONDataset` | `02_intermediate` | Assembled per-customer input package for each run (context + approved memory) |
+| `agent_outputs` | `JSONDataset` | `07_model_output` | Raw agent outputs: recommended products and explanations |
+| `trace_dataset` | `LangfuseTraceDataset` | `02_intermediate` | Agent trace records written to Langfuse; captures inputs, tool calls, outputs, token usage, latency per run |
+| `golden_eval_set` | `JSONDataset` | `03_primary` | Curated reference examples used as ground truth for evaluation |
+| `evaluation_dataset` | `LangfuseEvaluationDataset` | `07_model_output` | Evaluation scores pushed to Langfuse; quality scores, issues, and labels per trace |
+| `reflection_memory` | `JSONDataset` | `09_reflection_memory` | Approved structured reflections from prior runs, injected into future agent inputs |
+| `improvement_signals` | `JSONDataset` | `07_model_output` | Proposed changes pending human approval |
+| `approved_learning_registry` | `JSONDataset` | `10_learning_registry` | Approved prompt updates, memory entries, eval additions, and tool changes |
+
+### Kedro Hooks
+
+Hooks are minimal — only two remain relevant once Langfuse datasets handle observability.
+
+**`before_pipeline_run`** — Inject approved learning into the run
+
+Reads `approved_learning_registry` and injects approved memory entries and tool configs into pipeline parameters before execution starts. Also sets the shared `run_id` used to group all traces for this run in Langfuse.
+
+**`on_node_error`** — Capture failures as traceable records
+
+On node failure, writes a structured error record to `trace_dataset` marked `status: failed`. This ensures failed runs still reach Langfuse and remain available to the reflection pipeline rather than being silently dropped.
+
+**`after_pipeline_run`** — Write run summary to catalog
+
+Writes the run summary (customer count, recommendation count, evaluation summary, reflection count) to the local catalog for the Streamlit control tower. This is Kedro-internal metadata not covered by Langfuse datasets.
 
 ## 3.3 Pipeline-Level Design
 
@@ -551,20 +569,22 @@ Load approved changes into the next agent run and show improved behavior.
 
 > We are not just building an agent. We are building a learning system around agents. The agent performs cross-sell recommendations, but the platform observes the agent, evaluates its behavior, generates improvement signals, and feeds approved learning back into future runs.
 
-## 5.2 Control Tower UI: Streamlit + Langfuse
+## 5.2 Control Tower UI: Streamlit + Langfuse + Kedro HTTP Service
 
-The control tower is a **Streamlit app** for business-facing views, combined with **Langfuse** for trace and evaluation observability. Rather than rebuilding what Langfuse already does well, the Streamlit app links to or embeds Langfuse views for anything trace- or eval-related.
+The control tower is a **Streamlit app** that talks to two backends: **Langfuse** for trace and evaluation observability, and the **Kedro HTTP service** for triggering pipelines and inspecting project state. Streamlit has no direct filesystem access to the Kedro project — everything goes through these two APIs.
 
 **Responsibility split:**
 
-| What to show | Where |
+| What to show / do | How |
 |---|---|
-| Run overview and run metadata | Streamlit |
-| Trace details, prompt versions, tool calls, token usage, latency | Langfuse UI / Langfuse widgets |
+| Run overview and run metadata | Streamlit reads from `approved_learning_registry` snapshot |
+| Trace details, prompt versions, tool calls, token usage, latency | Langfuse UI (deep link or embed) |
 | LLM-as-judge evaluation scores and score breakdowns | Langfuse UI |
 | Reflection board (findings, root causes, evidence) | Streamlit |
-| Improvement signal queue and approval workflow | Streamlit |
-| Before vs After comparison | Streamlit |
+| Improvement signal queue and approve/reject action | Streamlit → `POST /run` (approval_pipeline + signal IDs as params) |
+| Trigger agent run or reflection run on demand | Streamlit → `POST /run` (named pipeline) |
+| Discover available pipelines and datasets | Streamlit → `GET /snapshot` |
+| Before vs After comparison | Streamlit → `POST /run` (run 2 with updated params) |
 
 ## 5.3 Streamlit Layout
 
@@ -572,36 +592,36 @@ The control tower is a **Streamlit app** for business-facing views, combined wit
 [Streamlit Control Tower]
         │
         ├── Run Overview          (run metadata, summary counts)
-        ├── Trace Explorer        (link/embed → Langfuse)
+        ├── Trace Explorer        (deep link → Langfuse)
         ├── Evaluation Dashboard  (score summary in Streamlit; detail → Langfuse)
         ├── Reflection Board      (findings, root causes, evidence links)
-        ├── Improvement Queue     (proposals + approve/reject workflow)
-        └── Before vs After       (Run 1 vs Run 2 score comparison)
+        ├── Improvement Queue     (proposals + approve/reject → POST /run approval_pipeline)
+        └── Before vs After       (trigger Run 2 → POST /run agent_pipeline, compare scores)
 ```
 
 ### Run Overview
 
-Show: Run ID, Agent version, Prompt version, Dataset version, customers processed, recommendations generated, traces captured, top-level evaluation summary, reflection summary.
+Show: Run ID, Agent version, Prompt version, customers processed, recommendations generated, traces captured, evaluation summary, reflection summary. Populated from the Kedro HTTP `GET /snapshot` and the run summary written by the `after_pipeline_run` hook.
 
 ### Trace Explorer
 
-Link directly to the Langfuse trace view for the run. Langfuse natively shows: prompt inputs, model outputs, tool calls, token counts, latency, and prompt version metadata. No need to rebuild this in Streamlit.
+Deep link into Langfuse for the run. Langfuse natively shows prompt inputs, model outputs, tool calls, token counts, and latency. No rebuild needed in Streamlit.
 
 ### Evaluation Dashboard
 
-Show a summary scorecard in Streamlit (recommendation quality, explanation quality, business-rule pass rate, groundedness). Link to Langfuse for per-trace score breakdowns and LLM-as-judge details.
+Show a summary scorecard in Streamlit (recommendation quality, explanation quality, business-rule pass rate, groundedness). Deep link to Langfuse for per-trace score breakdowns.
 
 ### Reflection Board
 
-Show: key findings, root-cause hypotheses, evidence trace links (deep-linked into Langfuse), confidence, affected segment and product.
+Show: key findings, root-cause hypotheses, confidence, affected segment and product, evidence trace links (deep-linked into Langfuse).
 
 ### Improvement Signal Queue
 
-Show proposed changes grouped by target — Prompt | Eval Set | Memory | Tool | Skill | Ontology — with evidence, expected benefit, risk, and an approve/reject action per proposal.
+Show proposed changes grouped by target — Prompt | Eval Set | Memory | Tool | Skill | Ontology — with evidence, expected benefit, risk, and an approve/reject action. Approvals are submitted via `POST /run` to `approval_pipeline` with the selected signal IDs passed as runtime parameters.
 
 ### Before vs After
 
-Run 1 vs Run 2: improved explanation score, reduced business-rule violations, better groundedness, better prompt adherence, more relevant recommendations.
+Trigger Run 2 via `POST /run` with updated parameters (approved prompt version, updated memory). Compare Run 1 vs Run 2 scores: explanation quality, business-rule pass rate, groundedness, recommendation relevance.
 
 ---
 

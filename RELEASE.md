@@ -9,6 +9,7 @@ NOTE: This session implementation is under active development and may occasional
 ## Bug fixes and other changes
 * Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
+* Updated advanced_configuration.md with custom loader info
 
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.
@@ -17,7 +18,7 @@ NOTE: This session implementation is under active development and may occasional
 ## Community contributions
 
 * [jeevan6996](https://github.com/jeevan6996)
-
+* [datascienceio](https://github.com/datascienceio)
 
 # Release 1.3.1
 

@@ -152,18 +152,18 @@ Langfuse-backed datasets (`LangfusePromptDataset`, `LangfuseTraceDataset`, `Lang
 
 | Dataset | Kedro Type | Data Layer | Contents |
 |---|---|---|---|
-| `customer_context` | `JSONDataset` | `01_raw` | B2B customer profiles: firmographics, product holdings, usage metrics, support-ticket history |
-| `product_catalog` | `YAMLDataset` | `01_raw` | Telco product definitions, eligibility rules, bundle compatibility matrix |
-| `business_rules` | `YAMLDataset` | `01_raw` | Pricing policy, compliance constraints, cross-sell eligibility logic |
-| `prompt_dataset` | `LangfusePromptDataset` | `conf/base` | Versioned prompt templates fetched directly from Langfuse; loading always retrieves the current approved version |
-| `agent_inputs` | `JSONDataset` | `02_intermediate` | Assembled per-customer input package for each run (context + approved memory) |
-| `agent_outputs` | `JSONDataset` | `07_model_output` | Raw agent outputs: recommended products and explanations |
-| `trace_dataset` | `LangfuseTraceDataset` | `02_intermediate` | Agent trace records written to Langfuse; captures inputs, tool calls, outputs, token usage, latency per run |
-| `golden_eval_set` | `JSONDataset` | `03_primary` | Curated reference examples used as ground truth for evaluation |
-| `evaluation_dataset` | `LangfuseEvaluationDataset` | `07_model_output` | Evaluation scores pushed to Langfuse; quality scores, issues, and labels per trace |
-| `reflection_memory` | `JSONDataset` | `09_reflection_memory` | Approved structured reflections from prior runs, injected into future agent inputs |
-| `improvement_signals` | `JSONDataset` | `07_model_output` | Proposed changes pending human approval |
-| `approved_learning_registry` | `JSONDataset` | `10_learning_registry` | Approved prompt updates, memory entries, eval additions, and tool changes |
+| `customer_context` | `JSONDataset` | `inputs` | B2B customer profiles: firmographics, product holdings, usage metrics, support-ticket history |
+| `product_catalog` | `YAMLDataset` | `inputs` | Telco product definitions, eligibility rules, bundle compatibility matrix |
+| `business_rules` | `YAMLDataset` | `inputs` | Pricing policy, compliance constraints, cross-sell eligibility logic |
+| `prompt_dataset` | `LangfusePromptDataset` | `prompts` | Versioned prompt templates fetched directly from Langfuse; loading always retrieves the current approved version |
+| `agent_inputs` | `JSONDataset` | `prepared` | Assembled per-customer input package for each run (context + approved memory) |
+| `agent_outputs` | `JSONDataset` | `outputs` | Raw agent outputs: recommended products and explanations |
+| `trace_dataset` | `LangfuseTraceDataset` | `traces` | Agent trace records written to Langfuse; captures inputs, tool calls, outputs, token usage, latency per run |
+| `golden_eval_set` | `JSONDataset` | `curated` | Human-curated reference examples used as ground truth for evaluation |
+| `evaluation_dataset` | `LangfuseEvaluationDataset` | `evaluated` | Evaluation scores pushed to Langfuse; quality scores, issues, and labels per trace |
+| `reflection_memory` | `JSONDataset` | `memory` | Approved structured reflections from prior runs, injected into future agent inputs |
+| `improvement_signals` | `JSONDataset` | `signals` | Proposed changes pending human approval |
+| `approved_learning_registry` | `JSONDataset` | `registry` | Approved prompt updates, memory entries, eval additions, and tool changes |
 
 ### Kedro Hooks
 
@@ -503,13 +503,16 @@ telco_agentic_reflection/
       evaluation_rubrics.yml
       reflection.yml
   data/
-    01_raw/
-    02_intermediate/
-    03_primary/
-    07_model_output/
-    08_reporting/
-    09_reflection_memory/
-    10_learning_registry/
+    inputs/          # customer context, product catalog, business rules
+    prompts/         # versioned prompt templates (synced from Langfuse)
+    prepared/        # assembled agent inputs per run
+    outputs/         # raw agent outputs (recommendations, explanations)
+    traces/          # agent trace records (synced to Langfuse)
+    curated/         # golden eval set (human-curated reference examples)
+    evaluated/       # evaluation scores per trace (synced to Langfuse)
+    signals/         # improvement proposals pending approval
+    memory/          # approved reflections from prior runs
+    registry/        # approved learning changes (prompts, memory, tools)
   src/
     telco_agentic_reflection/
       pipelines/

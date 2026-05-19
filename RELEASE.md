@@ -20,6 +20,7 @@ NOTE: This session implementation is under active development and may occasional
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.
 * Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
+* Added security model documentation covering trust boundaries, user responsibilities, and framework vulnerabilities.
 
 ## Community contributions
 

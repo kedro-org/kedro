@@ -80,7 +80,7 @@ def resolve_nested_dict_path(data: dict, path: str) -> Any:
         return data[path]
 
     if "." not in path:
-        return _MISSING if path not in data else data[path]
+        return _MISSING
 
     keys = path.split(".")
     value = data

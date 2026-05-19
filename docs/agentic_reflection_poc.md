@@ -597,54 +597,64 @@ Load approved changes into the next agent run and show improved behavior.
 
 > We are not just building an agent. We are building a learning system around agents. The agent performs cross-sell recommendations, but the platform observes the agent, evaluates its behavior, generates improvement signals, and feeds approved learning back into future runs.
 
-## 5.2 Control Tower UI
+## 5.2 Control Tower UI: Streamlit + Langfuse
 
-A simple Streamlit app acts as the client-facing control tower.
+The control tower is a **Streamlit app** for business-facing views, combined with **Langfuse** for trace and evaluation observability. Rather than rebuilding what Langfuse already does well, the Streamlit app links to or embeds Langfuse views for anything trace- or eval-related.
 
-### 1. Run Overview
+**Responsibility split:**
 
-Show: Run ID, Agent version, Prompt version, Dataset version, Number of customers processed, Number of recommendations, Traces captured, Evaluation summary, Reflection summary.
-
-### 2. Agent Trace Explorer
-
-Show: Customer context, Prompt version, Tool calls, Agent output, Explanation, Latency and token usage.
-
-### 3. Evaluation Dashboard
-
-Show: Recommendation quality score, Explanation quality score, Business-rule pass rate, Groundedness score, Tool-use quality score, Failure categories.
-
-### 4. Reflection Board
-
-Show: Key findings, Root-cause hypotheses, Evidence links, Confidence, Affected segment/product.
-
-### 5. Improvement Signal Queue
-
-Proposed changes grouped by target: Prompt updates | Eval set additions | Memory updates | Tool improvements | Skill proposals | Ontology proposals.
-
-Each proposal includes: Evidence, Expected benefit, Risk, Approval status.
-
-### 6. Before vs After
-
-Run 1 vs Run 2: Improved explanation score, Reduced business-rule violations, Better groundedness, Better prompt adherence, More relevant recommendations.
+| What to show | Where |
+|---|---|
+| Run overview and run metadata | Streamlit |
+| Trace details, prompt versions, tool calls, token usage, latency | Langfuse UI / Langfuse widgets |
+| LLM-as-judge evaluation scores and score breakdowns | Langfuse UI |
+| Reflection board (findings, root causes, evidence) | Streamlit |
+| Improvement signal queue and approval workflow | Streamlit |
+| Before vs After comparison | Streamlit |
 
 ## 5.3 Streamlit Layout
 
 ```
 [Streamlit Control Tower]
         │
-        ├── Run Overview
-        ├── Trace Explorer
-        ├── Evaluation Dashboard
-        ├── Reflection Board
-        ├── Improvement Queue
-        └── Before vs After Comparison
+        ├── Run Overview          (run metadata, summary counts)
+        ├── Trace Explorer        (link/embed → Langfuse)
+        ├── Evaluation Dashboard  (score summary in Streamlit; detail → Langfuse)
+        ├── Reflection Board      (findings, root causes, evidence links)
+        ├── Improvement Queue     (proposals + approve/reject workflow)
+        └── Before vs After       (Run 1 vs Run 2 score comparison)
 ```
+
+### Run Overview
+
+Show: Run ID, Agent version, Prompt version, Dataset version, customers processed, recommendations generated, traces captured, top-level evaluation summary, reflection summary.
+
+### Trace Explorer
+
+Link directly to the Langfuse trace view for the run. Langfuse natively shows: prompt inputs, model outputs, tool calls, token counts, latency, and prompt version metadata. No need to rebuild this in Streamlit.
+
+### Evaluation Dashboard
+
+Show a summary scorecard in Streamlit (recommendation quality, explanation quality, business-rule pass rate, groundedness). Link to Langfuse for per-trace score breakdowns and LLM-as-judge details.
+
+### Reflection Board
+
+Show: key findings, root-cause hypotheses, evidence trace links (deep-linked into Langfuse), confidence, affected segment and product.
+
+### Improvement Signal Queue
+
+Show proposed changes grouped by target — Prompt | Eval Set | Memory | Tool | Skill | Ontology — with evidence, expected benefit, risk, and an approve/reject action per proposal.
+
+### Before vs After
+
+Run 1 vs Run 2: improved explanation score, reduced business-rule violations, better groundedness, better prompt adherence, more relevant recommendations.
 
 ## 5.4 What to Emphasize to Client
 
 - The cross-sell use case is only the first example — the reusable capability is agentic learning.
 - The system does not blindly self-modify. It creates evidence-backed improvement proposals.
 - Human approval is built in for governance.
+- Langfuse provides deep trace and evaluation observability out of the box; Streamlit adds the business-facing reflection and approval layer on top.
 - The same architecture supports pricing, marketing, sales, and service agents.
 
 ---
@@ -661,14 +671,14 @@ Run 1 vs Run 2: Improved explanation score, Reduced business-rule violations, Be
 6. Build a deterministic cross-sell baseline.
 7. Add LLMContextNode for agent execution and reflection generation.
 8. Add prompt, trace, and evaluation datasets.
-9. Build a Streamlit control tower.
+9. Build a Streamlit control tower with Langfuse for trace and evaluation views.
 10. Run a two-pass demo showing learning from Run 1 to Run 2.
 
 ## 6.2 Deployment Plan
 
 ### Local POC
 
-- Kedro project, local file-based catalog, synthetic data, local Streamlit app, optional Langfuse integration.
+- Kedro project, local file-based catalog, synthetic data, Langfuse (local or cloud) for trace and evaluation observability, Streamlit app for reflection and approval views.
 
 ### Internal Demo
 

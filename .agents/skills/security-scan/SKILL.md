@@ -201,16 +201,27 @@ For PR mode:
 
 ```bash
 PR_NUMBER="<resolved-pr-number>"
+
+# Apply the same path exclusions as full-codebase mode.
+# Semgrep's --exclude only filters during directory walk, so explicit file
+# arguments would otherwise bypass the exclusion list (e.g. tests/foo.py).
+EXCLUDE_PREFIXES=(tests/ docs/ features/ .agents/)
+
 SCAN_TARGETS=()
-while IFS= read -r f; do
-  SCAN_TARGETS+=("$f")
-done < <(gh pr diff "$PR_NUMBER" --name-only | while read -r path; do
-  [ -f "$path" ] && printf '%s\n' "$path"
-done)
+while IFS= read -r path; do
+  [ -f "$path" ] || continue
+  skip=0
+  for prefix in "${EXCLUDE_PREFIXES[@]}"; do
+    [[ "$path" == "$prefix"* ]] && skip=1 && break
+  done
+  (( skip == 0 )) && SCAN_TARGETS+=("$path")
+done < <(gh pr diff "$PR_NUMBER" --name-only)
 TARGET_LABEL="PR #$PR_NUMBER"
 ```
 
-If `SCAN_TARGETS` is empty, stop and report that there are no scannable files.
+If `SCAN_TARGETS` is empty, stop and report that there are no scannable files
+(this also happens when a PR only touches excluded paths like `tests/` or
+`docs/`).
 
 ### 4. Run Semgrep
 
@@ -385,7 +396,7 @@ Write one GitHub review payload:
       "path": "file.py",
       "line": 42,
       "side": "RIGHT",
-      "body": "**candidate_kedro_vulnerability:** <reason>\\n\\nRule: `<rule id>`\\nSeverity: `<severity>`\\nNext step: <next step>"
+      "body": "**candidate_kedro_vulnerability:** <reason>\n\nRule: `<rule id>`\nSeverity: `<severity>`\nNext step: <next step>"
     }
   ]
 }

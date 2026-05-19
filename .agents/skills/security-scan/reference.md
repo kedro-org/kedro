@@ -207,27 +207,34 @@ Triage steps:
 ### `kedro-subprocess-shell-injection`
 
 Fires on `subprocess.$FUNC($CMD, ..., shell=True)` where the command is not a
-string or list literal — i.e. the command comes from a variable that could
-originate from config, an environment variable, or a CLI argument.
+plain string literal. This includes:
+
+- Variable-derived strings (most common case — possible RCE)
+- List-form calls (`subprocess.run([cmd], shell=True)`) — flagged because
+  Python only passes the first list element to the shell, which is rarely
+  intentional and easy to misuse, even when the list contents are literals
 
 Triage steps:
 
-1. Trace where `$CMD` originates. If it is a hardcoded string assembled only
+1. **List with only literal elements** (e.g. `subprocess.run(["ls", "-l"],
+   shell=True)`): code smell but not exploitable in isolation. Classify as
+   `false_positive_or_informational`; recommend converting to `shell=False`
+   with the same list.
+2. Trace where `$CMD` originates. If it is a hardcoded string assembled only
    from framework-internal defaults (no external input), classify as
    `false_positive_or_informational`.
-2. If `$CMD` is constructed from a developer-authored project value
+3. If `$CMD` is constructed from a developer-authored project value
    (e.g. a Kedro node name, pipeline name, or catalog key provided in
    `catalog.yml`), classify as `project_developer_responsibility`.
-3. If `$CMD` can be influenced by an untrusted external caller (env var, API
+4. If `$CMD` can be influenced by an untrusted external caller (env var, API
    input, CI trigger, user-supplied CLI flag) with no allowlist or escaping,
    classify as `candidate_kedro_vulnerability` at ERROR severity.
-4. If the origin is unclear without deeper runtime context, classify as
+5. If the origin is unclear without deeper runtime context, classify as
    `needs_manual_review`.
 
 Note: `shell=False` with an explicit list argument (`[cmd, arg1, arg2]`) is
 always safe regardless of where the arguments come from, because the shell
-never interprets them. The rule only fires when `shell=True` is present with a
-non-literal command.
+never interprets them. The rule only fires when `shell=True` is present.
 
 ### `kedro-yaml-unsafe-load`
 
@@ -242,8 +249,11 @@ config files are user-controlled data.
   `project_developer_responsibility`.
 - `yaml.safe_load()` is a separate function and is never matched by this rule
   (the pattern is `yaml.load(...)` only). For `yaml.load(...)`, safe loaders
-  are excluded via `pattern-not` for `Loader=yaml.SafeLoader` /
-  `Loader=yaml.CSafeLoader` and positional `yaml.SafeLoader` / `yaml.CSafeLoader`.
+  are excluded via `pattern-not` for both the fully-qualified forms
+  (`Loader=yaml.SafeLoader`, `Loader=yaml.CSafeLoader`, and positional
+  `yaml.SafeLoader` / `yaml.CSafeLoader`) and the unqualified forms used after
+  `from yaml import SafeLoader` (`Loader=SafeLoader`, `Loader=CSafeLoader`,
+  and positional `SafeLoader` / `CSafeLoader`).
 - `yaml.CLoader` is **not** safe — it is the C extension of `FullLoader`, not
   `SafeLoader`. Do not treat `yaml.load(..., Loader=yaml.CLoader)` as safe; the
   rule will fire on it and it should be classified as

@@ -29,10 +29,17 @@ rules:
       impact: HIGH
     patterns:
       - pattern: yaml.load(...)
+      # Fully-qualified safe loader forms (`import yaml`).
       - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
       - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader, ...)
       - pattern-not: yaml.load(..., yaml.SafeLoader, ...)
       - pattern-not: yaml.load(..., yaml.CSafeLoader, ...)
+      # Unqualified safe loader forms (`from yaml import SafeLoader` or
+      # `from yaml.loader import SafeLoader`).
+      - pattern-not: yaml.load(..., Loader=SafeLoader, ...)
+      - pattern-not: yaml.load(..., Loader=CSafeLoader, ...)
+      - pattern-not: yaml.load(..., SafeLoader, ...)
+      - pattern-not: yaml.load(..., CSafeLoader, ...)
 
   - id: kedro-taint-string-param-to-path
     message: >-
@@ -124,12 +131,14 @@ rules:
 
   - id: kedro-subprocess-shell-injection
     message: >-
-      subprocess is called with shell=True and a non-literal command. If the
-      command string originates from config, environment variables, or CLI
-      arguments, an attacker who controls that value can execute arbitrary shell
-      commands. Kedro framework code should avoid shell=True with non-literal
-      commands; prefer shell=False with an explicit argument list, or validate
-      and allowlist the command before use.
+      subprocess is called with shell=True. If the command originates from
+      config, environment variables, or CLI arguments, an attacker who controls
+      that value can execute arbitrary shell commands. Kedro framework code
+      should avoid shell=True; prefer shell=False with an explicit argument
+      list, or validate and allowlist the command before use. List-form calls
+      with shell=True (e.g. subprocess.run([cmd], shell=True)) are also flagged
+      because Python only passes the first element to the shell, which is rarely
+      intentional and easy to misuse.
     languages: [python]
     severity: ERROR
     metadata:
@@ -139,4 +148,3 @@ rules:
     patterns:
       - pattern: subprocess.$FUNC($CMD, ..., shell=True, ...)
       - pattern-not: subprocess.$FUNC("...", ..., shell=True, ...)
-      - pattern-not: subprocess.$FUNC([...], ..., shell=True, ...)

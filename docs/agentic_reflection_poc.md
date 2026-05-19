@@ -1,56 +1,24 @@
 # Agentic Reflection and Continuous Learning MVP
 
+> Do not build an autonomous agent that silently changes itself. Build a governed reflection system that turns traces into evidence-backed improvement signals and feeds approved learning into future agent runs.
+
 ---
 
 # 1. Problem Statement
 
-## 1.1 Business Context
+## 1.1 The Gap
 
-A telco B2B client runs multiple commercial use cases powered by LLM agents:
-
-- Cross-sell recommendations
-- Pricing and discount guidance
-- Digital marketing campaign targeting
-- Sales next-best-action recommendations
-- Account planning
-- Renewal and churn prevention
-
-These agents reason over customer data, product catalogs, business rules, prompts, tools, and prior context. But most agentic systems share one major weakness:
+A telco B2B client runs LLM-powered agents across commercial workflows — cross-sell, pricing, digital marketing, sales, account planning, and renewal. These agents reason over customer data, product catalogs, business rules, and prior context. But most agentic systems share one major weakness:
 
 > They execute, but they do not systematically learn from their own traces.
 
-An agent may generate a recommendation, call tools, produce an explanation, and return an answer. But after the run, the organization has no structured way to answer:
-
-- What exactly did the agent see?
-- Which prompt version was used?
-- Which tools were called?
-- Which reasoning steps led to the output?
-- Which recommendations were wrong, weak, unsafe, or commercially poor?
-- Which failures repeat across segments, products, or tasks?
-- What should change in the next run?
-- Should we update prompts, eval cases, memory, tools, skills, or the domain ontology?
-
-The problem is not just recommendation quality. The deeper problem is the absence of a governed continuous learning loop for agentic systems.
+After each run, the organization has no structured way to answer: which recommendations were wrong or commercially poor, which failures repeat across segments, what should change in the next prompt, and whether to update memory, tools, or eval cases. The deeper problem is the absence of a governed continuous learning loop.
 
 ## 1.2 Target Problem
 
 > Build a Kedro-native reflection and continuous learning layer that ingests agent traces, evaluates agent behavior, derives improvement signals, stores structured reflections, and feeds approved improvements back into future agent runs.
 
-## 1.3 Why This Matters
-
-For an enterprise telco client, agentic systems need more than clever prompts. They need:
-
-- Traceability
-- Evaluation
-- Governance
-- Prompt versioning
-- Repeatable experimentation
-- Business-rule compliance
-- Continuous improvement
-- Human approval for sensitive changes
-- Reusable learning across use cases
-
-This is where Kedro is valuable. Kedro can provide the pipeline backbone, Data Catalog, modular project structure, reusable datasets, hooks, and visualization. New GenAI-oriented features such as `LLMContextNode` and Langfuse datasets help bring prompts, traces, and evaluations into the Kedro-native development pattern.
+Kedro provides the pipeline backbone, Data Catalog, and modular project structure for this. New GenAI-oriented features — `LLMContextNode` and Langfuse datasets — bring prompts, traces, and evaluations into the Kedro-native development pattern.
 
 ---
 
@@ -106,20 +74,6 @@ The agentic version adds:
 - Memory from previous runs
 - Improvement proposals
 - Feedback into future inputs
-
-## 2.4 MVP Learning Loop
-
-The system runs a closed loop: the agent produces traces, those traces are evaluated and reflected upon, improvement signals are generated, a human approves changes, and approved changes feed back into the next run.
-
-```
-  [Agent Run] ──→ [Trace Capture] ──→ [Evaluation] ──→ [Reflection]
-       ↑                                                      ↓
-[Updated Inputs] ←── [Human Approval] ←── [Improvement Signal]
-```
-
-Key design choice:
-
-> The MVP should automate diagnosis and reflection, but keep material behavior changes human-approved by default.
 
 ---
 
@@ -649,83 +603,34 @@ Show proposed changes grouped by target — Prompt | Eval Set | Memory | Tool | 
 
 Run 1 vs Run 2: improved explanation score, reduced business-rule violations, better groundedness, better prompt adherence, more relevant recommendations.
 
-## 5.4 What to Emphasize to Client
-
-- The cross-sell use case is only the first example — the reusable capability is agentic learning.
-- The system does not blindly self-modify. It creates evidence-backed improvement proposals.
-- Human approval is built in for governance.
-- Langfuse provides deep trace and evaluation observability out of the box; Streamlit adds the business-facing reflection and approval layer on top.
-- The same architecture supports pricing, marketing, sales, and service agents.
-
 ---
 
 # 6. Next Steps
 
-## 6.1 Immediate Next Steps
+## 6.1 MVP Build Order
 
-1. Finalize the agentic reflection MVP spec.
-2. Define the synthetic cross-sell data model.
-3. Define the agent trace schema.
-4. Define evaluation rubrics.
-5. Define reflection and improvement signal schemas.
-6. Build a deterministic cross-sell baseline.
-7. Add LLMContextNode for agent execution and reflection generation.
-8. Add prompt, trace, and evaluation datasets.
-9. Build a Streamlit control tower with Langfuse for trace and evaluation views.
-10. Run a two-pass demo showing learning from Run 1 to Run 2.
+1. Define synthetic cross-sell data, trace schema, and evaluation rubrics.
+2. Build a deterministic cross-sell baseline with LLMContextNode.
+3. Wire up Langfuse for trace and evaluation capture.
+4. Build the reflection and improvement signal pipelines.
+5. Add a lightweight approval step.
+6. Build the Streamlit control tower.
+7. Run a two-pass demo: Run 1 → reflect → approve → Run 2 shows improvement.
 
-## 6.2 Deployment Plan
+## 6.2 Deployment Path
 
-### Local POC
+**Local POC:** Kedro project with file-based catalog, Langfuse local/cloud, Streamlit app.
 
-- Kedro project, local file-based catalog, synthetic data, Langfuse (local or cloud) for trace and evaluation observability, Streamlit app for reflection and approval views.
+**Internal Demo:** Add Kedro-Viz for pipeline explainability; store run artifacts in object storage.
 
-### Internal Demo
+**Enterprise:** Containerize, add an orchestrator, govern the learning registry, integrate with real telco CRM and product data.
 
-- Kedro-Viz for pipeline explainability, Streamlit for business-friendly control tower, versioned prompts and eval sets, run artifacts stored locally or in object storage.
+## 6.3 Future Directions
 
-### Enterprise Deployment Path
-
-- Containerize Kedro project, schedule pipeline runs with an orchestrator, store traces and evaluations in managed observability tooling, store approved learning registry in a governed data store, add identity/access control and audit trails, integrate with real telco CRM, product, billing, and campaign data.
-
-## 6.3 Future Improvements
-
-### More Automation
-
-Future versions can add: automatic prompt variant generation, automatic eval case generation from failures, agent-selected diagnostic pipelines, automated rollback of bad prompt updates, A/B testing of prompt versions, continuous monitoring of agent drift.
-
-### Skills
-
-A skill is a reusable agent capability. Future skill examples:
-
-- Check product eligibility
-- Summarize account profile
-- Generate sales objection handling
-- Compare product bundles
-- Detect pricing-policy risk
-- Generate campaign personalization
-
-The reflection system can detect repeated gaps and propose new skills.
-
-Example:
-
-> The agent repeatedly fails to compare SD-WAN and Managed Firewall bundles. Create a `bundle_comparison_skill`.
-
-### Ontology
-
-An ontology captures domain concepts and relationships. Example telco concepts: Customer, Segment, Product, Product family, Eligibility rule, Buying signal, Pain point, Offer, Bundle, Contract, Channel.
-
-Future reflection can propose ontology improvements:
-
-> Add `network_reliability_pain_point` as a concept linked to SD-WAN, high support-ticket volume, and multi-site customers.
-
-### Other Use Cases
-
-**Pricing Agent:** Ingest pricing-agent traces → evaluate margin and policy compliance → reflect on discounting errors → feed back into pricing prompts, eval cases, and approval rules.
-
-**Digital Marketing Agent:** Ingest campaign-agent traces → evaluate message relevance and targeting quality → reflect on weak personalization → feed back into campaign prompts, audience rules, and eval sets.
-
-**Sales Assistant Agent:** Ingest account-planning traces → evaluate recommendation usefulness → reflect on missed buying signals → feed back into sales playbooks and account research skills.
+- **More automation:** prompt variant generation, eval case generation from failures, A/B testing of prompt versions, automated rollback.
+- **Skills:** reusable agent capabilities proposed by reflection (e.g. bundle comparison, objection handling).
+- **Ontology:** reflection-proposed domain concept additions (e.g. linking `network_reliability_pain_point` to SD-WAN and multi-site customers).
+- **Other use cases:** same architecture applies to Pricing, Digital Marketing, and Sales Assistant agents.
 
 ## 6.4 Target End-State
 
@@ -743,9 +648,3 @@ The long-term vision is a reusable learning layer for enterprise agents. The MVP
                         └──────────┴──→ [Agents] ←┘           │          │
                                         [Evals]  ←─────────────┴──────────┘
 ```
-
----
-
-# 7. Key Design Principle
-
-> Do not build an autonomous agent that silently changes itself. Build a governed reflection system that turns traces into evidence-backed improvement signals and feeds approved learning into future agent runs.

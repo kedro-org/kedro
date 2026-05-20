@@ -126,14 +126,14 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 
 <!-- DO NOT EDIT THIS AND MERGE A PR WITHOUT A VOTE TO SIGN OFF ANY CHANGES -->
 
-| Name                                                     | Organisation                                                                            |
-|----------------------------------------------------------|---------------------------------------------------------------------------------------- |
+| Name                                                     | Organisation                                                                            | Role |
+|----------------------------------------------------------|---------------------------------------------------------------------------------------- |--------------------------------|
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Deepyaman Datta](https://github.com/deepyaman)          | [Dagster Labs](https://dagster.io)                                                      |
+| [Deepyaman Datta](https://github.com/deepyaman)          | [Goldman Sachs](https://www.goldmansachs.com/)                                          | Maintainer |
 | [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ivan Danov](https://github.com/idanov)                  | [Palantir](https://www.palantir.com/)                                                   |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Joel Schwarzmann](https://github.com/datajoely)         | [Aneira Health](https://www.aneira.health)                                              |
+| [Joel Schwarzmann](https://github.com/datajoely)         | [PhysicsX](https://www.physicsx.ai/)                                              | Advisor |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [Printify, Inc.](https://printify.com/)                                                 |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |

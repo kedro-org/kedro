@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from kedro.framework.project import settings
 from kedro.runner import AbstractRunner
 from kedro.server.http_server import _execute_pipeline, create_http_server
 from kedro.server.models import ErrorDetail, RunRequest, RunResponse
@@ -414,11 +413,9 @@ class TestExecutePipeline:
             return_value=_NotARunner,
         )
 
-        # Use a kedro.runner-namespaced path so the module check passes;
-        # the AbstractRunner subclass check must still catch it.
         result = _execute_pipeline(
             session=mock_session,
-            request=RunRequest(runner="kedro.runner.FakeNonRunner"),
+            request=RunRequest(runner="os.system"),
         )
 
         assert result.status == "failure"
@@ -435,90 +432,15 @@ class TestExecutePipeline:
             return_value=lambda is_async: None,  # a callable, not a class
         )
 
-        # Use a kedro.runner-namespaced path so the module check passes;
-        # the isinstance check must still catch it.
         result = _execute_pipeline(
             session=mock_session,
-            request=RunRequest(runner="kedro.runner.some_function"),
+            request=RunRequest(runner="some.function"),
         )
 
         assert result.status == "failure"
         assert result.error.type == "ValueError"
         assert "AbstractRunner" in result.error.message
         mock_session.run.assert_not_called()
-
-    def test_execute_pipeline_rejects_disallowed_module(self, mocker):
-        """Security: runner whose module is not in the allowlist must be rejected before load_obj."""
-        mock_session = mocker.Mock()
-        mock_session._package_name = "mypackage"
-        mock_load_obj = mocker.patch("kedro.server.http_server.load_obj")
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
-
-        result = _execute_pipeline(
-            session=mock_session,
-            request=RunRequest(runner="os.system"),
-        )
-
-        assert result.status == "failure"
-        assert result.error.type == "ValueError"
-        assert "os" in result.error.message
-        assert "not allowed" in result.error.message
-        mock_load_obj.assert_not_called()
-        mock_session.run.assert_not_called()
-
-    def test_execute_pipeline_allows_whitelisted_module(self, mocker):
-        """Runner from a module listed in RUNNER_MODULES_WHITELIST is permitted."""
-        mock_session = mocker.Mock()
-        mock_session._package_name = "mypackage"
-        mocker.patch(
-            "kedro.server.http_server.load_obj",
-            return_value=_FakeRunner,
-        )
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", ["external.runners"])
-
-        result = _execute_pipeline(
-            session=mock_session,
-            request=RunRequest(runner="external.runners.MyRunner"),
-        )
-
-        assert result.status == "success"
-        mock_session.run.assert_called_once()
-
-    def test_execute_pipeline_allows_project_package_module(self, mocker):
-        """Runner from the project's own package namespace is permitted without whitelisting."""
-        mock_session = mocker.Mock()
-        mock_session._package_name = "mypackage"
-        mocker.patch(
-            "kedro.server.http_server.load_obj",
-            return_value=_FakeRunner,
-        )
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
-
-        result = _execute_pipeline(
-            session=mock_session,
-            request=RunRequest(runner="mypackage.runners.CustomRunner"),
-        )
-
-        assert result.status == "success"
-        mock_session.run.assert_called_once()
-
-    def test_execute_pipeline_allows_project_subpackage_module(self, mocker):
-        """Runner from a subpackage of the project package is permitted without whitelisting."""
-        mock_session = mocker.Mock()
-        mock_session._package_name = "mypackage"
-        mocker.patch(
-            "kedro.server.http_server.load_obj",
-            return_value=_FakeRunner,
-        )
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
-
-        result = _execute_pipeline(
-            session=mock_session,
-            request=RunRequest(runner="mypackage.sub.runners.CustomRunner"),
-        )
-
-        assert result.status == "success"
-        mock_session.run.assert_called_once()
 
     def test_execute_pipeline_with_all_parameters(self, mocker):
         """Test pipeline execution with all parameters provided."""

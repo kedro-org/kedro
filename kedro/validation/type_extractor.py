@@ -38,16 +38,15 @@ class TypeExtractor:
         """Initialise the type extractor.
 
         Args:
-            pipelines: Dictionary of registered pipelines to inspect.
+            pipelines: Pipelines to inspect; callers filter to control scope.
         """
         self._pipelines = pipelines
         self._warned_union_types: set[type] = set()
 
     def extract_types_from_pipelines(self) -> dict[str, type]:
-        """Extract all type requirements from registered pipelines.
+        """Extract type requirements from the registered pipelines.
 
-        Walks all pipelines (except ``__default__``) and inspects node
-        function signatures for type-annotated ``params:`` inputs.
+        Walks each pipeline's nodes for type-annotated `params:` inputs.
 
         Returns:
             Dictionary mapping parameter keys to their expected types.
@@ -55,9 +54,6 @@ class TypeExtractor:
         all_type_requirements: dict[str, type] = {}
 
         for pipeline_name, pipeline in self._pipelines.items():
-            if pipeline_name == "__default__":
-                continue
-
             pipeline_type_requirements = self._extract_types_from_pipeline(pipeline)
 
             for key, new_type in pipeline_type_requirements.items():
@@ -78,8 +74,9 @@ class TypeExtractor:
             all_type_requirements.update(pipeline_type_requirements)
 
         logger.debug(
-            "Found %d type requirements across all pipelines",
+            "Found %d type requirement(s) across %d pipeline(s)",
             len(all_type_requirements),
+            len(self._pipelines),
         )
         return all_type_requirements
 

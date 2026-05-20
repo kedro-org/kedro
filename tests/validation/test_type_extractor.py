@@ -65,43 +65,6 @@ class TestExtractTypesFromPipelines:
         result = extractor.extract_types_from_pipelines()
         assert result == {}
 
-    def test_skips_default_pipeline(self):
-        def my_func(options: SampleDataclass) -> None:
-            pass
-
-        def default_func(config: SamplePydanticModel) -> None:
-            pass
-
-        data_science_node = kedro_node(
-            func=my_func,
-            inputs="params:eval_config",
-            outputs="output",
-            name="ds_node",
-        )
-        default_node = kedro_node(
-            func=default_func,
-            inputs="params:default_only",
-            outputs="default_output",
-            name="default_node",
-        )
-
-        default_pipeline = MagicMock()
-        default_pipeline.nodes = [default_node]
-
-        data_science_pipeline = MagicMock()
-        data_science_pipeline.nodes = [data_science_node]
-
-        extractor = TypeExtractor(
-            pipelines={
-                "__default__": default_pipeline,
-                "data_science": data_science_pipeline,
-            }
-        )
-        result = extractor.extract_types_from_pipelines()
-
-        assert "eval_config" in result
-        assert "default_only" not in result
-
     def test_successful_extraction(self):
         def my_func(options: SampleDataclass) -> None:
             pass
@@ -242,6 +205,64 @@ class TestExtractTypesFromPipelines:
         assert result["optional_cfg"] == _OptionalPydantic
         assert "threshold" not in result
         assert "union_cfg" not in result
+
+    def test_only_inspects_constructed_pipelines(self):
+        """Scoping is now done by the caller via the constructor: the extractor
+        only inspects the pipelines passed to ``__init__``."""
+
+        def ds_func(opts: SampleDataclass) -> None:
+            pass
+
+        def pydantic_func(cfg: SamplePydanticModel) -> None:
+            pass
+
+        node_a = kedro_node(
+            func=ds_func,
+            inputs="params:config_a",
+            outputs="o1",
+            name="node_a",
+        )
+        node_b = kedro_node(
+            func=pydantic_func,
+            inputs="params:config_b",
+            outputs="o2",
+            name="node_b",
+        )
+
+        pipeline_a = MagicMock()
+        pipeline_a.nodes = [node_a]
+        pipeline_b = MagicMock()
+        pipeline_b.nodes = [node_b]
+
+        # Caller constructed the extractor with only pipeline_a.
+        extractor = TypeExtractor(pipelines={"pipeline_a": pipeline_a})
+        result = extractor.extract_types_from_pipelines()
+
+        assert "config_a" in result
+        assert result["config_a"] == SampleDataclass
+        assert "config_b" not in result
+
+    def test_inspects_default_pipeline_when_given(self):
+        """``__default__`` is no longer skipped inside the extractor; the
+        caller decides whether to include it (typically the context layer
+        filters it out for the unscoped case)."""
+
+        def my_func(opts: SampleDataclass) -> None:
+            pass
+
+        node = kedro_node(
+            func=my_func,
+            inputs="params:config",
+            outputs="output",
+            name="node",
+        )
+        default_pipeline = MagicMock()
+        default_pipeline.nodes = [node]
+
+        extractor = TypeExtractor(pipelines={"__default__": default_pipeline})
+        result = extractor.extract_types_from_pipelines()
+
+        assert "config" in result
 
 
 class TestExtractTypesFromNode:

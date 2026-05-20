@@ -3,7 +3,6 @@ from __future__ import annotations
 import inspect
 import itertools as it
 import multiprocessing
-from collections.abc import Iterable, Iterator
 from concurrent.futures import (
     ALL_COMPLETED,
     Future,
@@ -23,6 +22,8 @@ from kedro.framework.hooks.manager import (
 from kedro.framework.project import settings
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from pluggy import PluginManager
 
     from kedro.io import CatalogProtocol
@@ -169,8 +170,10 @@ class Task:
         )
 
         items: Iterable = outputs.items()
-        # if all outputs are iterators, then the node is a generator node
-        if all(isinstance(d, Iterator) for d in outputs.values()):
+        # Stream chunks only for generator-function nodes, so iterable
+        # business objects (e.g. ``mne.Epochs``) are passed to
+        # ``catalog.save`` unchanged. See kedro-org/kedro#5412.
+        if outputs and inspect.isgeneratorfunction(node.func):
             # Python dictionaries are ordered, so we are sure
             # the keys and the chunk streams are in the same order
             # [a, b, c]

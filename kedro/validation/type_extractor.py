@@ -8,7 +8,7 @@ import logging
 import types
 from typing import TYPE_CHECKING, Union, get_args, get_origin, get_type_hints
 
-from .utils import is_pydantic_class
+from .utils import _unwrap_optional, is_pydantic_class
 
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
@@ -29,19 +29,6 @@ def _type_name(tp: type) -> str:
     if isinstance(tp, types.UnionType) or get_origin(tp) is Union:
         return str(tp)
     return getattr(tp, "__name__", str(tp))
-
-
-def _unwrap_optional(tp: type) -> type:
-    """Unwrap ``Optional[X]`` / ``X | None`` to ``X``.
-
-    If the type is a union of exactly one non-None type and ``NoneType``,
-    return the non-None type. Otherwise return the original type unchanged.
-    """
-    if get_origin(tp) is Union or isinstance(tp, types.UnionType):
-        args = [a for a in get_args(tp) if a is not type(None)]
-        if len(args) == 1:
-            return args[0]  # type: ignore[no-any-return]
-    return tp
 
 
 class TypeExtractor:
@@ -136,21 +123,21 @@ class TypeExtractor:
             if not ds_name.startswith(_PARAMS_PREFIX):
                 continue
 
-            # Unwrap Optional[X] / X | None so we validate against the inner type
-            expected_type = _unwrap_optional(expected_type)
-
-            # Only record types we can actually validate (Pydantic models or dataclasses)
+            # Unwrap Optional[X] / X | None to check if the inner type is validatable,
+            # but store the original type so _apply_validation knows if None is allowed.
+            inner_type = _unwrap_optional(expected_type)
+            # Only record types we can actually validate (Pydantic models or
+            # dataclasses)
             if not (
-                is_pydantic_class(expected_type)
-                or dataclasses.is_dataclass(expected_type)
+                is_pydantic_class(inner_type) or dataclasses.is_dataclass(inner_type)
             ):
                 if (
-                    get_origin(expected_type) is Union
-                    or isinstance(expected_type, types.UnionType)
-                ) and expected_type not in self._warned_union_types:
-                    self._warned_union_types.add(expected_type)
+                    get_origin(inner_type) is Union
+                    or isinstance(inner_type, types.UnionType)
+                ) and inner_type not in self._warned_union_types:
+                    self._warned_union_types.add(inner_type)
                     type_names = " | ".join(
-                        _type_name(type_arg) for type_arg in get_args(expected_type)
+                        _type_name(type_arg) for type_arg in get_args(inner_type)
                     )
                     logger.warning(
                         "Union type hint (%s) is not supported for validation. "
@@ -161,7 +148,7 @@ class TypeExtractor:
                 continue
 
             param_key = ds_name.split(":", 1)[1]
-            all_requirements[param_key] = expected_type
+            all_requirements[param_key] = expected_type  # preserve Optional if present
             logger.debug(
                 "Found parameter requirement: %s -> %s",
                 param_key,

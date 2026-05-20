@@ -172,6 +172,15 @@ The first `/run` request creates a `KedroServiceSession` which the following req
 !!! note
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the `--env` and `--conf-source` options instead.
 
+#### Runner security
+
+Short names (for example, `SequentialRunner`) always resolve against `kedro.runner`. Fully-qualified names (for example, `mypackage.runners.MyRunner`) must belong to `kedro.runner`, the project's own package, or a module listed in `RUNNER_MODULES_WHITELIST` in `settings.py`. The module is never imported otherwise.
+
+```python
+# settings.py
+RUNNER_MODULES_WHITELIST = ["external_lib.runners"]
+```
+
 ### Interactive API reference
 
 When the server is running, [FastAPI](https://fastapi.tiangolo.com/) automatically generates interactive API documentation at `http://127.0.0.1:8000/docs`. This page lists all available endpoints, their request and response schemas, and lets you try them out directly in the browser.

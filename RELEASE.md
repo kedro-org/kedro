@@ -13,20 +13,25 @@ NOTE: This session implementation is under active development and may occasional
 
 
 ## Bug fixes and other changes
+* Fixed parameter validation for optional typed params so explicit `None` values are preserved and do not trigger validation errors.
 * Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
 * Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
 * Fixed parameter validation for namespaced pipelines.
+* Fixed runners iterating over iterable-but-non-generator node outputs (e.g. `mne.Epochs`) before saving them. Streaming behaviour is now restricted to generator-function nodes, so custom business objects are passed to `catalog.save` unchanged.
 
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.
 * Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
 * Added security model documentation covering trust boundaries, user responsibilities, and framework vulnerabilities.
+* Updated `advanced_configuration.md` with custom loader info.
 
 ## Community contributions
-
+* [BhavayChopra](https://github.com/BhavayChopra)
 * [jeevan6996](https://github.com/jeevan6996)
 * [Rahul Bansod](https://github.com/rahulbansod519)
+* [PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
+* [datascienceio](https://github.com/datascienceio)
 
 
 # Release 1.3.1

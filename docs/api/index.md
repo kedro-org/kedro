@@ -2,18 +2,17 @@ Kedro is a framework that makes it easy to build robust and scalable data pipeli
 
 ## Modules
 
-| Name                                                 | Description                                                                                               |
-|------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| [`kedro.config`](config/kedro.config.md)             | Provides functionality for loading Kedro configuration from different file formats.                       |
-| [`kedro.framework`](framework/kedro.framework.md)    | Provides Kedro's framework components.                                                                    |
-| [`kedro.inspection`](inspection/kedro.inspection.md) | Provides a read-only inspection API for querying Kedro project structure without running pipelines.       |
-| [`kedro.io`](io/kedro.io.md)                         | Provides functionality to read and write to a number of datasets.                                         |
-| [`kedro.ipython`](ipython/kedro.ipython.md)          | This script creates an IPython extension to load Kedro-related variables in local scope.                  |
-| [`kedro.logging`](kedro.logging.md)                  | Provides a Rich-based logging handler with enhanced formatting, traceback rendering, and warning capture. |
-| [`kedro.pipeline`](pipeline/kedro.pipeline.md)       | Provides functionality to define and execute data-driven pipelines.                                       |
-| [`kedro.runner`](runner/kedro.runner.md)             | Provides runners that are able to execute Pipeline instances.                                             |
-| [`kedro.server`](server/kedro.server.md)             | Provides an optional HTTP server for triggering Kedro pipelines over REST.                                |
-| [`kedro.utils`](kedro.utils.md)                      | This module provides a set of helper functions being used across different components of Kedro package.   |
+| Name                                              | Description                                                                                             |
+|---------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| [`kedro.config`](config/kedro.config.md)          | Provides functionality for loading Kedro configuration from different file formats.                     |
+| [`kedro.framework`](framework/kedro.framework.md) | Provides Kedro's framework components.                                                                  |
+| [`kedro.io`](io/kedro.io.md)                      | Provides functionality to read and write to a number of datasets.                                       |
+| [`kedro.ipython`](ipython/kedro.ipython.md)       | This script creates an IPython extension to load Kedro-related variables in local scope.                |
+| [`kedro.logging`](kedro.logging.md)               |                                                                                                         |
+| [`kedro.pipeline`](pipeline/kedro.pipeline.md)    | Provides functionality to define and execute data-driven pipelines.                                     |
+| [`kedro.runner`](runner/kedro.runner.md)          | Provides runners that are able to execute Pipeline instances.                                           |
+| [`kedro.server`](server/kedro.server.md)          | Provides an optional HTTP server for triggering Kedro pipelines over REST.                              |
+| [`kedro.utils`](kedro.utils.md)                   | This module provides a set of helper functions being used across different components of Kedro package. |
 
 ## Functions
 | Name                                   | Description                                      |

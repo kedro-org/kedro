@@ -179,9 +179,14 @@ class KedroContext:
         init=True, default=None, converter=deepcopy
     )
     # Pipelines to scope parameter validation to. Set by the session before
-    # building the catalog; `None` means "all registered (except `__default__`)".
+    # building the catalog; `None` means "all registered pipelines".
     _pipelines_to_validate: list[str] | None = None
     _validated_params_cache: dict[str, Any] | None = None
+    # Scope under which `_validated_params_cache` was filled. Lets the cache
+    # be transparently invalidated if `_pipelines_to_validate` changes between
+    # an unscoped read (e.g. an `after_context_created` hook reading `params`)
+    # and a scoped read from the session.
+    _cached_validation_scope: list[str] | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -199,12 +204,15 @@ class KedroContext:
         """Get validated parameters with caching support.
 
         Scope is taken from `self._pipelines_to_validate`; when unset,
-        all registered pipelines (except `__default__`) are inspected.
+        all registered pipelines are inspected.
 
         Returns:
             Validated and transformed parameters with model instantiation.
         """
-        if self._validated_params_cache is not None:
+        if (
+            self._validated_params_cache is not None
+            and self._cached_validation_scope == self._pipelines_to_validate
+        ):
             return self._validated_params_cache
 
         try:
@@ -218,12 +226,7 @@ class KedroContext:
             from kedro.validation.parameter_validator import ParameterValidator
 
             if self._pipelines_to_validate is None:
-                # Skip `__default__` as its nodes are already covered by the others.
-                pipelines_to_validate = {
-                    name: pipe
-                    for name, pipe in project_pipelines.items()
-                    if name != "__default__"
-                }
+                pipelines_to_validate = dict(project_pipelines)
             else:
                 pipelines_to_validate = {
                     name: project_pipelines[name]
@@ -239,6 +242,7 @@ class KedroContext:
             validated_params = raw_params
 
         self._validated_params_cache = validated_params
+        self._cached_validation_scope = self._pipelines_to_validate
 
         return validated_params
 

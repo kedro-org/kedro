@@ -452,6 +452,37 @@ class TestKedroContext:
             }
         )
 
+    def test_cache_invalidates_when_scope_changes(self, dummy_context, mocker):
+        """A cached unscoped read (e.g. from an ``after_context_created``
+        hook reading ``context.params``) must not be reused once the session
+        sets ``_pipelines_to_validate``."""
+        from kedro.framework import project
+
+        scoped_pipeline = MagicMock()
+        scoped_pipeline.nodes = []
+        mocker.patch.object(
+            project.pipelines, "_content", {"data_science": scoped_pipeline}
+        )
+        mocker.patch.object(project.pipelines, "_is_data_loaded", True)
+        validator_cls = mocker.patch(
+            "kedro.validation.parameter_validator.ParameterValidator"
+        )
+        validator_cls.return_value.validate_raw_params.side_effect = [
+            {"unscoped": True},
+            {"scoped": True},
+        ]
+
+        # 1) Unscoped read (simulating a hook touching ``context.params``).
+        first = dummy_context._get_validated_params()
+        assert first == {"unscoped": True}
+
+        # 2) Session sets the scope and re-reads — the cache from (1) must
+        # not be returned.
+        dummy_context._pipelines_to_validate = ["data_science"]
+        second = dummy_context._get_validated_params()
+        assert second == {"scoped": True}
+        assert validator_cls.return_value.validate_raw_params.call_count == 2
+
 
 @pytest.mark.parametrize(
     "path_string,expected",

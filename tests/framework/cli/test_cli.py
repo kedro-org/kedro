@@ -412,7 +412,6 @@ class TestKedroCLI:
             "pipeline",
             "registry",
             "run",
-            "server",
         ]
 
     def test_project_commands_no_project(self, mocker, tmp_path):

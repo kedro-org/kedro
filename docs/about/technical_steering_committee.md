@@ -143,8 +143,8 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 | [Sajid Alam](https://github.com/SajidAlamQB)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Simon Brugman](https://github.com/sbrugman)             | [ING](https://www.ing.com/)                                                             |
 | [Tynan DeBold](https://github.com/tynandebold)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Yetunde Dada](https://github.com/yetudada)              | [Astronomer](https://www.astronomer.io/)                                                |
-| [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei) | [Société Générale Assurances](https://www.assurances.societegenerale.com/en/individual) |
+| [Yetunde Dada](https://github.com/yetudada)              | [Astronomer](https://www.astronomer.io/)                                                | Advisor |
+| [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei) | [Société Générale Assurances](https://www.assurances.societegenerale.com/en/individual) | Advisor |
 
 
 ## Past TSC members

@@ -586,6 +586,49 @@ class TestKedroSession:
             catalog=mock_catalog,
         )
 
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.parametrize(
+        "pipeline_names, expected_scope",
+        [
+            (None, None),
+            (["__default__"], None),
+            ([_FAKE_PIPELINE_NAME], [_FAKE_PIPELINE_NAME]),
+            (
+                [_FAKE_PIPELINE_NAME, "other_pipeline"],
+                [_FAKE_PIPELINE_NAME, "other_pipeline"],
+            ),
+            ([_FAKE_PIPELINE_NAME, "__default__"], None),
+        ],
+    )
+    def test_run_sets_pipelines_to_validate(
+        self,
+        fake_project,
+        mock_context_class,
+        mock_runner,
+        mocker,
+        pipeline_names,
+        expected_scope,
+    ):
+        """``KedroSession.run`` scopes validation to the requested pipelines.
+        When ``__default__`` is among them, the scope is left unset so every
+        registered pipeline is validated."""
+        mocker.patch("kedro.framework.session.session._create_hook_manager")
+        mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_context = mock_context_class.return_value
+        mock_context._pipelines_to_validate = None
+        mock_runner.__name__ = "SequentialRunner"
+
+        with KedroSession.create(fake_project) as session:
+            session.run(runner=mock_runner, pipeline_names=pipeline_names)
+
+        assert mock_context._pipelines_to_validate == expected_scope
+
     def test_run_logs_package_name_when_outside_project(
         self, tmp_path, mock_package_name, caplog, monkeypatch
     ):

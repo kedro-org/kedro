@@ -6,6 +6,8 @@
 NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
 * Added inspection API to get project snapshot.
 * Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
+* Scoped parameter type-hint validation to the pipelines being run. When `kedro run --pipelines=<name>` runs one or more named pipelines, only those pipelines' node signatures are inspected for type hints, avoiding unnecessary work and spurious "conflicting type" warnings from pipelines that aren't executing.
+
 
 ## Bug fixes and other changes
 * Fixed parameter validation for optional typed params so explicit `None` values are preserved and do not trigger validation errors.

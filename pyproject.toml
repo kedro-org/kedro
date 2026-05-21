@@ -97,7 +97,10 @@ jupyter = [
 benchmark = [
     "asv"
 ]
-all = [ "kedro[test,docs,jupyter,benchmark]" ]
+pydantic = [
+    "pydantic>=2.0"
+]
+all = [ "kedro[test,docs,jupyter,benchmark,pydantic]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"

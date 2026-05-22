@@ -131,11 +131,11 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Goldman Sachs](https://www.goldmansachs.com/)                                          | Maintainer |
 | [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Ivan Danov](https://github.com/idanov)                  | [Palantir](https://www.palantir.com/)                                                   |
+| [Ivan Danov](https://github.com/idanov)                  | [PhysicsX](https://www.physicsx.ai/)                                                    |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Joel Schwarzmann](https://github.com/datajoely)         | [PhysicsX](https://www.physicsx.ai/)                                              | Advisor |
+| [Joel Schwarzmann](https://github.com/datajoely)         | [PhysicsX](https://www.physicsx.ai/)                                                    | Advisor |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
-| [Marcin Zabłocki](https://github.com/marrrcin)           | [Printify, Inc.](https://printify.com/)                                                 |
+| [Marcin Zabłocki](https://github.com/marrrcin)           | [FYUL](https://www.fyul.com/)                                                           | Advisor |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Rashida Kanchwala](https://github.com/rashidakanchwala) | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |

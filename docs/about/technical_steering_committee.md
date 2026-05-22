@@ -137,7 +137,7 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [Printify, Inc.](https://printify.com/)                                                 |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
-| [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Rashida Kanchwala](https://github.com/rashidakanchwala) | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla)  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Sajid Alam](https://github.com/SajidAlamQB)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |

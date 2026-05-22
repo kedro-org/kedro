@@ -1,6 +1,13 @@
 # Upcoming Release
 
 ## Major features and improvements
+## Bug fixes and other changes
+## Documentation changes
+## Community contributions
+
+# Release 1.4.0
+
+## Major features and improvements
 * Add official support for Python 3.14.
 * Added the first iteration of the `KedroServiceSession`, a new session implementation that allows for multiple runs and data injection.
 NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
@@ -29,6 +36,8 @@ NOTE: This session implementation is under active development and may occasional
 * [Rahul Bansod](https://github.com/rahulbansod519)
 * [PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
 * [datascienceio](https://github.com/datascienceio)
+* [Guillaume Tauzin](https://github.com/gtauzin)
+* [Prince Kumar](https://github.com/prince8273)
 
 
 # Release 1.3.1

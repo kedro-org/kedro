@@ -130,6 +130,8 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 |----------------------------------------------------------|---------------------------------------------------------------------------------------- |--------------------------------|
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Goldman Sachs](https://www.goldmansachs.com/)                                          | Maintainer |
+| [Elena Khaustova](https://github.com/ElenaKhaustova)     | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Elijah Koh](https://github.com/iamelijahko)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ivan Danov](https://github.com/idanov)                  | [PhysicsX](https://www.physicsx.ai/)                                                    |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |

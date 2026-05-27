@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from kedro.server.http_server import create_http_server
-from kedro.server.models import RunResponse
+from kedro.server.models import RunSuccess
 
 
 class TestHTTPServerFactory:
@@ -71,9 +71,7 @@ class TestHTTPServerFactory:
         )
         mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=RunResponse(
-                run_id="run-1", status="success", duration_ms=10.0
-            ),
+            return_value=RunSuccess(run_id="run-1", status="success", duration_ms=10.0),
         )
 
         app = create_http_server()

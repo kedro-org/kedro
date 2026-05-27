@@ -118,10 +118,10 @@ class TestSnapshotEndpoint:
         )
         with TestClient(app) as client:
             payload = client.get("/snapshot").json()
-        assert payload["metadata"] is None
-        assert payload["pipelines"] is None
-        assert payload["datasets"] is None
-        assert payload["parameters"] is None
+        assert "metadata" not in payload
+        assert "pipelines" not in payload
+        assert "datasets" not in payload
+        assert "parameters" not in payload
 
     def test_snapshot_passes_conf_source_to_get_project_snapshot(
         self, mocker, make_http_server

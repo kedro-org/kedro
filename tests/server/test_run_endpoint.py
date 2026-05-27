@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from kedro.framework.project import settings
 from kedro.runner import AbstractRunner
 from kedro.server.http_server import _execute_pipeline, create_http_server
-from kedro.server.models import ErrorDetail, RunRequest, RunResponse
+from kedro.server.models import ErrorDetail, RunFailure, RunRequest, RunSuccess
 
 
 class _FakeRunner(AbstractRunner):
@@ -39,7 +39,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mock_execute = mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=RunResponse(
+            return_value=RunSuccess(
                 run_id="run-1",
                 status="success",
                 duration_ms=10.0,
@@ -70,7 +70,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=RunResponse(
+            return_value=RunSuccess(
                 run_id="run-2",
                 status="success",
                 duration_ms=10.0,
@@ -102,7 +102,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=RunResponse(
+            return_value=RunSuccess(
                 run_id="run-3",
                 status="success",
                 duration_ms=10.0,
@@ -134,7 +134,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=RunResponse(
+            return_value=RunSuccess(
                 run_id="run-4",
                 status="success",
                 duration_ms=10.0,
@@ -172,7 +172,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=RunResponse(
+            return_value=RunFailure(
                 run_id="run-fail",
                 status="failure",
                 duration_ms=12.34,
@@ -212,7 +212,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mock_execute = mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=RunResponse(
+            return_value=RunSuccess(
                 run_id="run-params",
                 status="success",
                 duration_ms=15.0,
@@ -256,7 +256,7 @@ class TestRunEndpoint:
         mocker.patch("kedro.server.http_server.bootstrap_project")
         mock_execute = mocker.patch(
             "kedro.server.http_server._execute_pipeline",
-            return_value=RunResponse(
+            return_value=RunSuccess(
                 run_id="run-partial",
                 status="success",
                 duration_ms=8.5,
@@ -336,7 +336,7 @@ class TestExecutePipeline:
         assert result.status == "success"
         assert result.run_id is not None
         assert result.duration_ms > 0
-        assert result.error is None
+        assert not hasattr(result, "error")
         mock_load_obj.assert_called_once_with("SequentialRunner", "kedro.runner")
         mock_session.run.assert_called_once()
         runner_used = mock_session.run.call_args.kwargs["runner"]

@@ -21,9 +21,13 @@ from kedro.runner import AbstractRunner
 from kedro.server.models import (
     ErrorDetail,
     HealthResponse,
+    RunFailure,
     RunRequest,
     RunResponse,
+    RunSuccess,
+    SnapshotFailure,
     SnapshotResponse,
+    SnapshotSuccess,
 )
 from kedro.server.utils import (
     KEDRO_SERVER_CONF_SOURCE,
@@ -128,7 +132,7 @@ def create_http_server(
                 conf_source=app.state.default_conf_source,
                 metadata=app.state.metadata,
             )
-            return SnapshotResponse(
+            return SnapshotSuccess(
                 status="success",
                 metadata=snapshot.metadata,
                 pipelines=snapshot.pipelines,
@@ -137,9 +141,12 @@ def create_http_server(
             )
         except Exception as exc:
             logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
-            return SnapshotResponse(
+            return SnapshotFailure(
                 status="failure",
-                error=ErrorDetail(type=type(exc).__qualname__, message=str(exc)),
+                error=ErrorDetail(
+                    type=type(exc).__qualname__,
+                    message=str(exc),
+                ),
             )
 
     @app.post("/run", response_model=RunResponse, tags=["pipeline"])
@@ -250,7 +257,7 @@ def _execute_pipeline(
 
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.info("Pipeline run %s completed in %.2fms", run_id, duration_ms)
-        return RunResponse(
+        return RunSuccess(
             run_id=run_id,
             status="success",
             duration_ms=round(duration_ms, 2),
@@ -265,14 +272,12 @@ def _execute_pipeline(
             exc_info=True,
         )
 
-        error_detail = ErrorDetail(
-            type=type(exc).__qualname__,
-            message=str(exc),
-        )
-
-        return RunResponse(
+        return RunFailure(
             run_id=run_id,
             status="failure",
             duration_ms=round(duration_ms, 2),
-            error=error_detail,
+            error=ErrorDetail(
+                type=type(exc).__qualname__,
+                message=str(exc),
+            ),
         )

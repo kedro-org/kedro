@@ -2,6 +2,7 @@ agentic
 Aneira
 APIs
 Astro
+async
 autodiscovery
 breakpoint
 chonky
@@ -48,6 +49,7 @@ Langfuse
 matplotlib
 Matplotlib
 Marimo
+middleware
 mixin
 MLflow
 Modin

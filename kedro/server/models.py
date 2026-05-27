@@ -106,7 +106,7 @@ class ErrorDetail(BaseModel):
 class RunSuccess(BaseModel):
     """Response model for a successful pipeline run."""
 
-    status: Literal["success"]
+    status: Literal["success"] = Field(description="Run status.")
     run_id: str = Field(description="Unique identifier for this pipeline run.")
     duration_ms: float = Field(description="Total execution time in milliseconds.")
 
@@ -114,7 +114,7 @@ class RunSuccess(BaseModel):
 class RunFailure(BaseModel):
     """Response model for a failed pipeline run."""
 
-    status: Literal["failure"]
+    status: Literal["failure"] = Field(description="Run status.")
     run_id: str = Field(description="Unique identifier for this pipeline run.")
     duration_ms: float = Field(description="Total execution time in milliseconds.")
     error: ErrorDetail = Field(description="Error details.")
@@ -135,7 +135,7 @@ class HealthResponse(BaseModel):
 class SnapshotSuccess(BaseModel):
     """Response model for a successful project snapshot."""
 
-    status: Literal["success"]
+    status: Literal["success"] = Field(description="Snapshot status.")
     metadata: ProjectMetadataSnapshot = Field(description="Project metadata snapshot.")
     pipelines: list[PipelineSnapshot] = Field(
         description="Registered pipeline snapshots."
@@ -151,7 +151,7 @@ class SnapshotSuccess(BaseModel):
 class SnapshotFailure(BaseModel):
     """Response model for a failed project snapshot."""
 
-    status: Literal["failure"]
+    status: Literal["failure"] = Field(description="Snapshot status.")
     error: ErrorDetail = Field(description="Error details.")
 
 

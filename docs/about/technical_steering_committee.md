@@ -126,8 +126,9 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 
 <!-- DO NOT EDIT THIS AND MERGE A PR WITHOUT A VOTE TO SIGN OFF ANY CHANGES -->
 
-| Name                                                     | Organisation                                                                            | Role |
-|----------------------------------------------------------|---------------------------------------------------------------------------------------- |--------------------------------|
+| Name                                                     | Organisation                                                                            |
+|----------------------------------------------------------|---------------------------------------------------------------------------------------- |
+| [Alice Cima](https://github.com/AliceCima10)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Goldman Sachs](https://www.goldmansachs.com/)                                          | Maintainer |
 | [Elena Khaustova](https://github.com/ElenaKhaustova)     | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
@@ -136,6 +137,7 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 | [Ivan Danov](https://github.com/idanov)                  | [PhysicsX](https://www.physicsx.ai/)                                                    |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Joel Schwarzmann](https://github.com/datajoely)         | [PhysicsX](https://www.physicsx.ai/)                                                    | Advisor |
+| [Joseph Perkins](https://github.com/Joseph-Perkins)      | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [FYUL](https://www.fyul.com/)                                                           | Advisor |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |

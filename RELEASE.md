@@ -1,6 +1,11 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests.
+* Added a new CLI command `kedro server start` to run the server.
+* Added an HTTP endpoint `/snapshot` for accessing project snapshot.
+
+
 ## Bug fixes and other changes
 ## Documentation changes
 ## Community contributions

@@ -98,20 +98,15 @@ curl http://127.0.0.1:8000/snapshot
       "filepath": "data/01_raw/iris.csv"
     }
   },
-  "parameters": ["example_learning_rate", "example_num_train_iter"],
-  "error": null
+  "parameters": ["example_learning_rate", "example_num_train_iter"]
 }
 ```
 
-If the snapshot cannot be built (for example, due to a catalog error), the response still returns HTTP 200 with `"status": "failure"`. The `error` field contains the exception type and message:
+If the snapshot cannot be built (for example, due to a catalog error), the response still returns HTTP 200 with `"status": "failure"`. The `error` field contains the exception type and message, and the data fields (`metadata`, `pipelines`, `datasets`, `parameters`) are absent:
 
 ```json
 {
   "status": "failure",
-  "metadata": null,
-  "pipelines": null,
-  "datasets": null,
-  "parameters": null,
   "error": {
     "type": "MissingConfigException",
     "message": "No config files found matching the pattern(s) 'catalog*'"
@@ -162,7 +157,29 @@ Key request fields:
 | `params` | `dict` | Runtime parameters passed to the context |
 | `only_missing_outputs` | `bool` | Skip nodes whose outputs already exist and are persisted |
 
-The response includes a `run_id`, `status` (`"success"` or `"failure"`), `duration_ms`, and an `error` object on failure.
+On success the response contains `run_id`, `status`, and `duration_ms`:
+
+```json
+{
+  "status": "success",
+  "run_id": "2024-01-01T00.00.00.000Z",
+  "duration_ms": 142.3
+}
+```
+
+On failure the response additionally contains an `error` object with the exception type and message:
+
+```json
+{
+  "status": "failure",
+  "run_id": "2024-01-01T00.00.00.000Z",
+  "duration_ms": 12.1,
+  "error": {
+    "type": "DatasetError",
+    "message": "Failed to load dataset 'raw_data'"
+  }
+}
+```
 
 !!! note
     `RunRequest` model uses strict validation, unknown fields return an error rather than being ignored.

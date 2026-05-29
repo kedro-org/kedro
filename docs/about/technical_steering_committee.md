@@ -128,7 +128,7 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 
 | Name                                                     | Organisation                                                                            | Role |
 |----------------------------------------------------------|---------------------------------------------------------------------------------------- |--------------------------------|
-| [Alice Cima](https://github.com/AliceCima10)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | 
+| [Alice Cima](https://github.com/AliceCima10)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer |
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer |
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Dagster Labs](https://dagster.io)                                                      |
 | [Elena Khaustova](https://github.com/ElenaKhaustova)     | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |

@@ -342,6 +342,7 @@ class KedroSession(AbstractSession):
         session_id = self.store["session_id"]
         save_version = session_id
         runtime_params = self.store.get("runtime_params") or {}
+        pipelines.set_requested(pipeline_names or None)
         context = self.load_context()
 
         names = pipeline_names or ["__default__"]

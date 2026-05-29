@@ -6,7 +6,14 @@ from pathlib import Path
 
 import pytest
 
-from kedro.framework.project import configure_project, find_pipelines
+from kedro.framework.project import (
+    _ProjectPipelines,
+    configure_project,
+    find_pipelines,
+)
+from kedro.framework.project import (
+    pipelines as _pipelines_global,
+)
 
 
 @pytest.fixture
@@ -435,3 +442,96 @@ def test_find_pipelines_package_name_none_selective_raises(monkeypatch):
     monkeypatch.setattr(project_module, "PACKAGE_NAME", None)
     with pytest.raises(RuntimeError, match="find_pipelines.*cannot be called before"):
         find_pipelines(pipelines_to_find=["some_pipeline"])
+
+
+def test_set_requested_invalidates_cache_on_filter_change():
+    p = _ProjectPipelines()
+    p._is_data_loaded = True
+    p._content = {"__default__": object()}
+
+    p.set_requested(["pipe_a"])
+
+    assert not p._is_data_loaded
+    assert p._content == {}
+    assert p._requested_pipelines == ["pipe_a"]
+
+
+def test_set_requested_same_filter_preserves_cache():
+    p = _ProjectPipelines()
+    p._requested_pipelines = ["pipe_a"]
+    p._is_data_loaded = True
+    sentinel = object()
+    p._content = {"pipe_a": sentinel}
+
+    p.set_requested(["pipe_a"])
+
+    assert p._is_data_loaded
+    assert p._content == {"pipe_a": sentinel}
+
+
+def test_configure_resets_requested_pipelines():
+    p = _ProjectPipelines()
+    p.set_requested(["pipe_a"])
+    assert p._requested_pipelines == ["pipe_a"]
+
+    p.configure()
+
+    assert p._requested_pipelines is None
+
+
+@pytest.fixture()
+def _reset_global_pipelines_request():
+    """Reset _requested_pipelines on the global singleton after each test."""
+    yield
+    _pipelines_global.set_requested(None)
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipe_x", "pipe_y", "pipe_z"}],
+    indirect=True,
+)
+def test_find_pipelines_uses_global_requested_pipelines(
+    mock_package_name_with_pipelines, _reset_global_pipelines_request
+):
+    configure_project(mock_package_name_with_pipelines)
+    _pipelines_global.set_requested(["pipe_x"])
+
+    result = find_pipelines()
+
+    assert set(result) == {"pipe_x"}
+    assert "__default__" not in result
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipe_x", "pipe_y"}],
+    indirect=True,
+)
+def test_find_pipelines_global_requested_overrides_kwarg(
+    mock_package_name_with_pipelines, _reset_global_pipelines_request
+):
+    configure_project(mock_package_name_with_pipelines)
+    _pipelines_global.set_requested(["pipe_x"])
+
+    result = find_pipelines(pipelines_to_find=["pipe_y"])
+
+    assert set(result) == {"pipe_x"}
+    assert "pipe_y" not in result
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipe_x", "pipe_y"}],
+    indirect=True,
+)
+def test_find_pipelines_none_global_requested_falls_back_to_kwarg(
+    mock_package_name_with_pipelines,
+):
+    configure_project(mock_package_name_with_pipelines)
+    assert _pipelines_global._requested_pipelines is None  # sanity check
+
+    result = find_pipelines(pipelines_to_find=["pipe_x"])
+
+    assert set(result) == {"pipe_x"}
+    assert "pipe_y" not in result

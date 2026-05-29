@@ -203,6 +203,7 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module: str | None = None
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
+        self._requested_pipelines: list[str] | None = None
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
@@ -226,6 +227,17 @@ class _ProjectPipelines(MutableMapping):
         self._content = project_pipelines
         self._is_data_loaded = True
 
+    def set_requested(self, pipeline_names: list[str] | None) -> None:
+        """Store which pipelines should be loaded on the next dict access.
+
+        Invalidates the cache when the filter changes so that a subsequent
+        access with a different (or absent) filter re-runs ``_load_data``.
+        """
+        if self._requested_pipelines != pipeline_names:
+            self._is_data_loaded = False
+            self._content = {}
+        self._requested_pipelines = pipeline_names
+
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every ``configure`` call,
@@ -234,6 +246,7 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module = pipelines_module
         self._is_data_loaded = False
         self._content = {}
+        self._requested_pipelines = None
 
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)
@@ -501,9 +514,14 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
             "Call 'configure_project' first."
         )
 
-    # Determine if specific pipelines were requested
-    load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
-    requested_pipelines: set[str] | None = None if load_all else set(pipelines_to_find)  # type: ignore[arg-type]
+    # CLI-set filter takes precedence; falls back to the explicit kwarg.
+    effective = (
+        pipelines._requested_pipelines
+        if pipelines._requested_pipelines is not None
+        else pipelines_to_find
+    )
+    load_all = effective is None or "__default__" in effective
+    requested_pipelines: set[str] | None = None if load_all else set(effective)  # type: ignore[arg-type]
 
     pipelines_dict: dict[str, Pipeline] = {}
 

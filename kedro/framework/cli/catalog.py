@@ -9,7 +9,7 @@ import yaml
 from click import secho
 
 from kedro.framework.cli.utils import env_option, split_string
-from kedro.framework.project import settings
+from kedro.framework.project import pipelines, settings
 
 if TYPE_CHECKING:
     from kedro.framework.startup import ProjectMetadata
@@ -42,7 +42,7 @@ def catalog() -> None:
     callback=split_string,
 )
 @click.pass_obj
-def describe_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
+def describe_datasets(metadata: ProjectMetadata, pipeline: list[str], env: str) -> None:
     """
     Describe datasets used in the specified pipelines, grouped by type.\n
 
@@ -52,10 +52,11 @@ def describe_datasets(metadata: ProjectMetadata, pipeline: str, env: str) -> Non
     - `factories`: Datasets resolved from dataset factory patterns.\n
     - `defaults`: Datasets that do not match any pattern or explicit definition.\n
     """
+    p = pipeline or None
+    pipelines.set_requested(p)
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    p = pipeline or None
     datasets_dict = context.catalog.describe_datasets(p)  # type: ignore
 
     secho(yaml.dump(datasets_dict))
@@ -89,7 +90,7 @@ def list_patterns(metadata: ProjectMetadata, env: str) -> None:
     callback=split_string,
 )
 @click.pass_obj
-def resolve_patterns(metadata: ProjectMetadata, pipeline: str, env: str) -> None:
+def resolve_patterns(metadata: ProjectMetadata, pipeline: list[str], env: str) -> None:
     """
     Resolve dataset factory patterns against pipeline datasets.
 
@@ -97,10 +98,11 @@ def resolve_patterns(metadata: ProjectMetadata, pipeline: str, env: str) -> None
     It includes datasets explicitly defined in the catalog as well as those resolved
     from dataset factory patterns.
     """
+    p = pipeline or None
+    pipelines.set_requested(p)
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    p = pipeline or None
     datasets_dict = context.catalog.resolve_patterns(p)  # type: ignore
 
     secho(yaml.dump(datasets_dict))

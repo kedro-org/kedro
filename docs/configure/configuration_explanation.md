@@ -88,7 +88,7 @@ Configuration files will be matched according to file name and type rules. Suppo
 ### Configuration patterns
 Under the hood, the Kedro configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by `config_patterns` in the configuration loader classes.
 
-By default, those patterns are set as follows for the configuration of catalog, parameters, logging, credentials:
+By default, those patterns are set as follows for the configuration of catalog, parameters, credentials, logging, and globals:
 
 ```python
 config_patterns = {
@@ -96,6 +96,7 @@ config_patterns = {
     "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
     "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
     "logging": ["logging*", "logging*/**", "**/logging*"],
+    "globals": ["globals.yml"],
 }
 ```
 

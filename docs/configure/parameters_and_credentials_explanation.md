@@ -1,4 +1,4 @@
-# Parameters and Credentials
+# Parameters and credentials
 
 This page explains what parameters and credentials are in Kedro, and how they work conceptually.
 
@@ -14,7 +14,7 @@ These parameters can serve as input to nodes and are used when running the pipel
 
 If you have a group of parameters that determine the hyperparameters of your model, define them in a single location such as `conf/base/parameters.yml`. Keeping everything together reduces the chances of missing an update elsewhere in the codebase.
 
-Parameters are added to the Data Catalog by Kedro as `MemoryDataset`s, which makes them accessible to your pipeline nodes just like any other dataset.
+Parameters are added to the Data Catalog by Kedro as `MemoryDataset`s, which makes them accessible to your pipeline nodes like any other dataset.
 
 To learn how to use parameters in practice, see the [how-to guide on working with parameters and credentials](how_to_use_parameters_and_credentials.md).
 

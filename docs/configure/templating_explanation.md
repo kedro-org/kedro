@@ -1,10 +1,12 @@
+<!-- vale Kedro.headings = NO -->
 # Templating with OmegaConfigLoader
+<!-- vale Kedro.headings = YES -->
 
 ## Introduction to templating
 
 Templating, or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation) as it's called in `OmegaConf`, allows you to reference values from one part of your configuration in another. This helps you avoid duplication and makes your configuration easier to maintain.
 
-When you use templating, you can define a value once and reference it multiple times across your configuration files. If you need to change that value, you only need to update it in one place.
+When you use templating, you can define a value in one place and reference it multiple times across your configuration files. If you need to change that value, you update it in a single location.
 
 ## How templating works with the OmegaConfigLoader
 

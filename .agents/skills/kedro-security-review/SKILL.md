@@ -1,5 +1,5 @@
 ---
-name: security-scan
+name: kedro-security-review
 description: >-
   Run a Kedro security scan on the full codebase or just a pull request. This
   skill always runs Semgrep first and then evaluates the findings against the
@@ -56,7 +56,7 @@ If the user already stated the scope, do not ask again.
   - `p/security-audit`
   - `p/secrets`
   - `p/python`
-  - `.agents/skills/security-scan/rules/kedro-security-patterns.yml`
+  - `.agents/skills/kedro-security-review/rules/kedro-security-patterns.yml`
 - Path exclusions (every Semgrep invocation):
   - `--exclude tests/`
   - `--exclude docs/`
@@ -170,7 +170,7 @@ the script below.
 If NOT keeping artifacts:
 
 ```bash
-OUTPUT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/kedro-security-scan.XXXXXX")"
+OUTPUT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/kedro-security-review.XXXXXX")"
 cleanup() {
   rm -rf "$OUTPUT_DIR"
 }
@@ -181,7 +181,7 @@ mkdir -p "$OUTPUT_DIR/raw"
 If keeping artifacts (omit the trap entirely):
 
 ```bash
-OUTPUT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/kedro-security-scan.XXXXXX")"
+OUTPUT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/kedro-security-review.XXXXXX")"
 mkdir -p "$OUTPUT_DIR/raw"
 ```
 
@@ -228,7 +228,7 @@ If `SCAN_TARGETS` is empty, stop and report that there are no scannable files
 Set:
 
 ```bash
-LOCAL_RULESET="$(pwd)/.agents/skills/security-scan/rules/kedro-security-patterns.yml"
+LOCAL_RULESET="$(pwd)/.agents/skills/kedro-security-review/rules/kedro-security-patterns.yml"
 ```
 
 Run these in parallel (each command includes `"${SEMGREP_EXCLUDE[@]}"`):
@@ -347,14 +347,16 @@ Always include:
 - highest Semgrep severities present
 
 **Only itemise actionable findings** in the Findings section:
-- `candidate_kedro_vulnerability`
-- `needs_manual_review`
+- Always: `candidate_kedro_vulnerability`, `needs_manual_review`
+- When scope is **Kedro project**: also `project_developer_responsibility`
+  (this is the primary actionable bucket for the project owner — include file,
+  line, rule id, and suggested fix for each finding)
 
 **Do not itemise** findings in these buckets — they are reflected in the
 classification summary counts and that is sufficient:
 - `false_positive_or_informational`
-- `project_developer_responsibility`
 - `deployment_or_environment_issue`
+- `project_developer_responsibility` when scope is **Kedro framework**
 
 If the Findings section has nothing actionable, replace it with a single line
 that names the non-actionable counts (e.g. "None actionable. 2 false positives
@@ -379,7 +381,7 @@ Return one final report in this shape:
 
 ```markdown
 ## Kedro Security Scan
-> Generated with `security-scan`.
+> Generated with `kedro-security-review`.
 
 ### Overview
 - **Mode:** <full codebase | PR>
@@ -431,8 +433,12 @@ Write one GitHub review payload:
 }
 ```
 
-Use inline comments only for actionable findings (`candidate_kedro_vulnerability`
-or `needs_manual_review`) tied to changed PR lines. Do not post inline comments
-for false positives or other non-actionable buckets. Put the full summary in
-`body`, following the same conciseness rules as chat mode (counts only for
-non-actionable buckets; collapse clean manual review checks to one line).
+Use inline comments only for actionable findings tied to changed PR lines:
+- Always: `candidate_kedro_vulnerability`, `needs_manual_review`
+- When scope is **Kedro project**: also `project_developer_responsibility`
+
+Do not post inline comments for `false_positive_or_informational`,
+`deployment_or_environment_issue`, or `project_developer_responsibility` when
+scope is **Kedro framework**. Put the full summary in `body`, following the
+same conciseness rules as chat mode (counts only for non-actionable buckets;
+collapse clean manual review checks to one line).

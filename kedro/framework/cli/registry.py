@@ -38,6 +38,7 @@ def describe_registered_pipeline(
     pipelines.set_requested([name])
     pipeline_obj = pipelines.get(name)
     if not pipeline_obj:
+        pipelines.set_requested(None)
         all_pipeline_names = pipelines.keys()
         existing_pipelines = ", ".join(sorted(all_pipeline_names))
         raise KedroCliError(

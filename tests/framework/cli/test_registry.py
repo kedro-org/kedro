@@ -92,7 +92,10 @@ class TestRegistryDescribeCommand:
         )
 
         assert result.exit_code
-        mock_pipes.set_requested.assert_called_once_with(["missing"])
+        assert mock_pipes.set_requested.call_args_list == [
+            mocker.call(["missing"]),
+            mocker.call(None),
+        ]
         expected_output = (
             "Error: 'missing' pipeline not found. Existing pipelines: "
             "[__default__, data_engineering, data_processing, data_science]\n"

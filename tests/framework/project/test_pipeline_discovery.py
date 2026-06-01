@@ -469,6 +469,19 @@ def test_set_requested_same_filter_preserves_cache():
     assert p._content == {"pipe_a": sentinel}
 
 
+def test_set_requested_order_independent():
+    p = _ProjectPipelines()
+    p._requested_pipelines = ["pipe_a", "pipe_b"]
+    p._is_data_loaded = True
+    sentinel = object()
+    p._content = {"pipe_a": sentinel}
+
+    p.set_requested(["pipe_b", "pipe_a"])
+
+    assert p._is_data_loaded
+    assert p._content == {"pipe_a": sentinel}
+
+
 def test_configure_resets_requested_pipelines():
     p = _ProjectPipelines()
     p.set_requested(["pipe_a"])

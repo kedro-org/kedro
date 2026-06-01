@@ -55,6 +55,11 @@ plugins:
   - redirects:
       redirect_maps:
         'configuration/telemetry.md': 'about/telemetry.md'
+        'configure/configuration_basics.md': 'configure/configuration_explanation.md'
+        'configure/advanced_configuration.md': 'configure/how_to_configure_project.md'
+        'configure/parameters.md': 'configure/how_to_use_parameters_and_credentials.md'
+        'configure/credentials.md': 'configure/how_to_use_parameters_and_credentials.md'
+        'configure/parameter_validation.md': 'configure/how_to_use_parameters_and_credentials.md'
   - mkdocstrings:
       handlers:
         python:

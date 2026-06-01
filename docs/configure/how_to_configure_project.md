@@ -49,7 +49,7 @@ How to reference a `zip` file:
 kedro run --conf-source=<path-to-compressed-file>.zip
 ```
 
-To compress your configuration you can use Kedro's `kedro package` command which builds the package into the `dist/` folder of your project, and creates a `.whl` file, as well as a `tar.gz` file containing the project configuration. The compressed version of the config files excludes any files inside your `local` folder.
+To compress your configuration you can use Kedro's `kedro package` command. This builds the package into the `dist/` folder of your project, creating a `.whl` file and a `tar.gz` file containing the project configuration. The compressed version of the config files excludes any files inside your `local` folder.
 
 You can also run the command below to create a `tar.gz` file:
 
@@ -133,7 +133,7 @@ s3://my-bucket/configs/
 ```
 
 !!! note
-    While Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately, it does not support reading compressed files directly from cloud storage (for example, s3://my-bucket/configs.tar.gz).
+    Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately. It does not support reading compressed files directly from cloud storage (for example, s3://my-bucket/configs.tar.gz).
 
 ## How to access configuration in code
 To directly access configuration in code, for example to debug, you can do so as follows:
@@ -154,7 +154,7 @@ conf_catalog = conf_loader["catalog"]
 !!! note
     We do not recommend that you load and manipulate a data catalog directly in a Kedro node. Nodes are designed to be pure functions and thus should remain agnostic of I/O.
 
-Assuming your project contains a catalog and credentials file, each located in `base` and `local` environments respectively, you can use the `OmegaConfigLoader` to load these configurations, and pass them to a `DataCatalog` object to access the catalog entries with resolved credentials.
+Assuming your project contains a catalog and credentials file in `base` and `local` environments respectively, you can use the `OmegaConfigLoader` to load these configurations. Pass them to a `DataCatalog` object to access the catalog entries with resolved credentials.
 ```python
 from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings

@@ -35,9 +35,9 @@ from omegaconf import OmegaConf
 parameters = OmegaConf.load("/path/to/parameters.yml")
 ```
 
-When your configuration files are complex and contain credentials or templating, Kedro's `OmegaConfigLoader` is more suitable, as described in more detail in [How to load a data catalog with credentials in code?](how_to_configure_project.md#how-to-load-a-data-catalog-with-credentials-in-code) and [How to load a data catalog with templating in code?](how_to_use_templating.md#how-to-load-a-data-catalog-with-templating-in-code).
+When your configuration files are complex and contain credentials or templating, Kedro's `OmegaConfigLoader` is more suitable. See [How to load a data catalog with credentials in code](how_to_configure_project.md#how-to-load-a-data-catalog-with-credentials-in-code) and [How to load a data catalog with templating in code](how_to_use_templating.md#how-to-load-a-data-catalog-with-templating-in-code) for details.
 
-In summary, while both `OmegaConf` and Kedro's `OmegaConfigLoader` provide ways to manage configurations, your choice depends on the complexity of your configuration and whether you are working within the context of the Kedro framework.
+In summary, both `OmegaConf` and Kedro's `OmegaConfigLoader` provide ways to manage configurations. Your choice depends on the complexity of your configuration and whether you are working within the Kedro framework.
 
 ## Configuration source
 The configuration source folder is [`conf`](../getting-started/kedro_concepts.md#conf) by default. We recommend that you keep all configuration files in the default `conf` folder of a Kedro project.

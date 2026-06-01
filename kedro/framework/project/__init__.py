@@ -232,6 +232,10 @@ class _ProjectPipelines(MutableMapping):
 
         Invalidates the cache when the filter changes so that a subsequent
         access with a different (or absent) filter re-runs ``_load_data``.
+
+        Args:
+            pipeline_names: Names of the pipelines to load selectively, or
+                ``None`` to load all registered pipelines.
         """
         if set(self._requested_pipelines or []) != set(pipeline_names or []):
             self._is_data_loaded = False

@@ -206,6 +206,44 @@ class TestKedroServiceSession:
         assert mock_context._pipelines_to_validate == expected_scope
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.parametrize(
+        "pipeline_names, expected_requested",
+        [
+            (None, None),
+            ([], None),
+            ([_FAKE_PIPELINE_NAME], [_FAKE_PIPELINE_NAME]),
+            (
+                [_FAKE_PIPELINE_NAME, "other_pipeline"],
+                [_FAKE_PIPELINE_NAME, "other_pipeline"],
+            ),
+        ],
+    )
+    def test_run_calls_set_requested(
+        self,
+        fake_project,
+        mock_context_class,
+        mock_runner,
+        mocker,
+        pipeline_names,
+        expected_requested,
+    ):
+        """``KedroServiceSession.run`` calls ``pipelines.set_requested`` with the
+        pipeline filter before the first dict access, so ``find_pipelines`` only
+        imports the requested modules."""
+        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.service_session.pipelines"
+        )
+        mock_runner.__name__ = "SequentialRunner"
+
+        with KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id"
+        ) as session:
+            session.run(runner=mock_runner, pipeline_names=pipeline_names)
+
+        mock_pipelines.set_requested.assert_called_once_with(expected_requested)
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, [_FAKE_PIPELINE_NAME]])
     def test_run(
         self,
@@ -356,12 +394,15 @@ class TestKedroServiceSession:
 
         filter_mock.filter.return_value = ds_mock
 
+        class _PipelinesDict(dict):
+            def set_requested(self, _):
+                pass
+
         mocker.patch(
             "kedro.framework.session.service_session.pipelines",
-            {
-                _FAKE_PIPELINE_NAME: filter_mock,
-                "__default__": filter_mock,
-            },
+            _PipelinesDict(
+                {_FAKE_PIPELINE_NAME: filter_mock, "__default__": filter_mock}
+            ),
         )
         mocker.patch(
             "kedro.io.data_catalog.CatalogConfigResolver.match_dataset_pattern",

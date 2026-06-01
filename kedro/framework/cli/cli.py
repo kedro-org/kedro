@@ -98,6 +98,7 @@ def info() -> None:
         "package": "kedro.framework.cli.project.package",
         "jupyter": "kedro.framework.cli.jupyter.jupyter",
         "pipeline": "kedro.framework.cli.pipeline.pipeline",
+        "server": "kedro.framework.cli.server.server_cli",
     },
 )
 def project_commands() -> None:
@@ -174,10 +175,18 @@ class KedroCLI(CommandCollection):
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
 
-            # When CLI is run outside of a project, project_groups are not registered
-            catch_exception = "click.exceptions.UsageError: No such command"
-            # click convert exception handles to error message
-            if catch_exception in traceback.format_exc() and not self.project_groups:
+            # When CLI is run outside of a project, project_groups are not registered.
+            # Click <8.4 raises ``UsageError``; Click >=8.4 raises the ``NoSuchCommand``
+            # subclass (pallets/click#3228).
+            catch_exceptions = (
+                "click.exceptions.UsageError: No such command",
+                "click.exceptions.NoSuchCommand: No such command",
+            )
+            formatted_tb = traceback.format_exc()
+            if (
+                any(exc_str in formatted_tb for exc_str in catch_exceptions)
+                and not self.project_groups
+            ):
                 warn = click.style(
                     "\nKedro project not found in this directory. ",
                     fg=ORANGE,

@@ -18,7 +18,9 @@ if TYPE_CHECKING:
 
 
 def _make_config_loader(
-    project_path: Path, env: str | None = None
+    project_path: Path,
+    env: str | None = None,
+    conf_source: str | None = None,
 ) -> AbstractConfigLoader:
     """Instantiate the project's configured config loader.
 
@@ -27,14 +29,20 @@ def _make_config_loader(
         env: Optional run environment override (e.g. ``"staging"``).
             When ``None`` the default run environment from
             ``CONFIG_LOADER_ARGS`` is used.
+        conf_source: Optional path to the configuration directory.
+            When ``None``, defaults to ``<project_path>/<settings.CONF_SOURCE>``.
 
     Returns:
         An initialised config loader instance.
     """
-    conf_source = str(project_path / settings.CONF_SOURCE)
+    resolved_conf_source = (
+        conf_source
+        if conf_source is not None
+        else str(project_path / settings.CONF_SOURCE)
+    )
     config_loader_class = settings.CONFIG_LOADER_CLASS
     return config_loader_class(  # type: ignore[no-any-return]
-        conf_source=conf_source,
+        conf_source=resolved_conf_source,
         env=env,
         **settings.CONFIG_LOADER_ARGS,
     )

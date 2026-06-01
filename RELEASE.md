@@ -1,13 +1,48 @@
 # Upcoming Release
 
 ## Major features and improvements
-* Added the first iteration of the `KedroServiceSession`, a new session implementation that allows for multiple runs and data injection.
-NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
-* Added inspection API to get project snapshot.
+* Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests.
+* Added a new CLI command `kedro server start` to run the server.
+* Added an HTTP endpoint `/snapshot` for accessing project snapshot.
+
 
 ## Bug fixes and other changes
 ## Documentation changes
 ## Community contributions
+
+# Release 1.4.0
+
+## Major features and improvements
+* Add official support for Python 3.14.
+* Added the first iteration of the `KedroServiceSession`, a new session implementation that allows for multiple runs and data injection.
+NOTE: This session implementation is under active development and may occasionally contain bugs or breaking changes. We encourage users to try it out and share their feedback with us.
+* Added inspection API to get project snapshot.
+* Improved `%load_node` to include same-module helper dependencies via AST extraction, with explicit fallback warnings when extraction degrades to function-only source loading.
+* Scoped parameter type-hint validation to the pipelines being run. When `kedro run --pipelines=<name>` runs one or more named pipelines, only those pipelines' node signatures are inspected for type hints, avoiding unnecessary work and spurious "conflicting type" warnings from pipelines that aren't executing.
+
+
+## Bug fixes and other changes
+* Fixed parameter validation for optional typed params so explicit `None` values are preserved and do not trigger validation errors.
+* Added `review-kedro-pr` agent skill (Cursor, GitHub Copilot) for Kedro-aware PR review with optional GitHub comment posting.
+* Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
+* Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
+* Fixed parameter validation for namespaced pipelines.
+* Fixed runners iterating over iterable-but-non-generator node outputs (e.g. `mne.Epochs`) before saving them. Streaming behaviour is now restricted to generator-function nodes, so custom business objects are passed to `catalog.save` unchanged.
+
+## Documentation changes
+* Added documentation for `KedroServiceSession`.
+* Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
+* Added security model documentation covering trust boundaries, user responsibilities, and framework vulnerabilities.
+* Updated `advanced_configuration.md` with custom loader info.
+
+## Community contributions
+* [BhavayChopra](https://github.com/BhavayChopra)
+* [jeevan6996](https://github.com/jeevan6996)
+* [Rahul Bansod](https://github.com/rahulbansod519)
+* [PragnyaKhandelwal](https://github.com/PragnyaKhandelwal)
+* [datascienceio](https://github.com/datascienceio)
+* [Guillaume Tauzin](https://github.com/gtauzin)
+* [Prince Kumar](https://github.com/prince8273)
 
 
 # Release 1.3.1

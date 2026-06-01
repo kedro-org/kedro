@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from kedro.validation.exceptions import ParameterValidationError
 from kedro.validation.utils import (
+    _MISSING,
     get_typed_fields,
     is_pydantic_class,
     is_pydantic_model,
@@ -33,7 +34,8 @@ class TestIsPydanticModel:
         assert is_pydantic_model(value) is expected
 
     def test_returns_false_when_pydantic_not_installed(self):
-        with patch.dict("sys.modules", {"pydantic": None}):
+        # Patch the pydantic variable in the utils module to None
+        with patch("kedro.validation.utils.pydantic", None):
             assert is_pydantic_model({"x": 1}) is False
 
 
@@ -51,7 +53,8 @@ class TestIsPydanticClass:
         assert is_pydantic_class(cls) is expected
 
     def test_returns_false_when_pydantic_not_installed(self):
-        with patch.dict("sys.modules", {"pydantic": None}):
+        # Patch the pydantic variable in the utils module to None
+        with patch("kedro.validation.utils.pydantic", None):
             assert is_pydantic_class(SampleDataclass) is False
 
 
@@ -103,15 +106,29 @@ class TestResolveNestedDictPath:
 
     def test_missing_flat_key(self):
         data = {"test_size": 0.2}
-        assert resolve_nested_dict_path(data, "missing") is None
+        assert resolve_nested_dict_path(data, "missing") is _MISSING
 
     def test_missing_nested_key(self):
         data = {"model": {"options": {}}}
-        assert resolve_nested_dict_path(data, "model.options.missing") is None
+        assert resolve_nested_dict_path(data, "model.options.missing") is _MISSING
 
     def test_intermediate_not_dict(self):
         data = {"model": "not_a_dict"}
-        assert resolve_nested_dict_path(data, "model.options") is None
+        assert resolve_nested_dict_path(data, "model.options") is _MISSING
+
+    def test_key_with_none_value_returns_none(self):
+        data = {"model_options": None}
+        assert resolve_nested_dict_path(data, "model_options") is None
+
+    def test_namespace_flat_key(self):
+        """Namespaced params are stored as flat dotted keys."""
+        data = {"demo.config": {"my_name": "dummy"}}
+        assert resolve_nested_dict_path(data, "demo.config") == {"my_name": "dummy"}
+
+    def test_flat_key_takes_priority_over_nested(self):
+        """When both flat and nested paths exist, flat key wins."""
+        data = {"demo.config": "flat", "demo": {"config": "nested"}}
+        assert resolve_nested_dict_path(data, "demo.config") == "flat"
 
 
 class TestSetNestedDictValue:
@@ -134,3 +151,10 @@ class TestSetNestedDictValue:
         data = {"model": "not_a_dict"}
         with pytest.raises(ParameterValidationError, match="not a dictionary"):
             set_nested_dict_value(data, "model.options.test_size", 0.3)
+
+    def test_namespace_flat_key_updated_in_place(self):
+        """Namespaced params stored as flat dotted keys are updated directly."""
+        data = {"demo.config": {"my_name": "old"}}
+        set_nested_dict_value(data, "demo.config", {"my_name": "new"})
+        assert data["demo.config"] == {"my_name": "new"}
+        assert "demo" not in data

@@ -12,6 +12,8 @@ from kedro.pipeline import node, pipeline
 from . import dummy_function_fixtures
 from .dummy_function_fixtures import (
     dummy_function,
+    dummy_function_using_decorated_helper,  # noqa: F401
+    dummy_function_using_same_module_helper,
     dummy_function_with_loop,
     dummy_function_with_variable_length,
     dummy_nested_function,
@@ -146,3 +148,18 @@ def lambda_node():
         outputs=["lambda_output"],
         name="lambda_node",
     )
+
+
+@pytest.fixture
+def dummy_node_using_same_module_helper():
+    return node(
+        func=dummy_function_using_same_module_helper,
+        inputs=["dummy_input"],
+        outputs=["dummy_output"],
+        name="dummy_node_using_same_module_helper",
+    )
+
+
+@pytest.fixture
+def dummy_pipelines_with_same_module_helper(dummy_node_using_same_module_helper):
+    return {"dummy_pipeline": pipeline([dummy_node_using_same_module_helper])}

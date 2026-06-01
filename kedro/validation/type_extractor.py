@@ -8,7 +8,7 @@ import logging
 import types
 from typing import TYPE_CHECKING, Union, get_args, get_origin, get_type_hints
 
-from .utils import is_pydantic_class
+from .utils import _unwrap_optional, is_pydantic_class
 
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
@@ -19,17 +19,16 @@ logger = logging.getLogger(__name__)
 _PARAMS_PREFIX = "params:"
 
 
-def _unwrap_optional(tp: type) -> type:
-    """Unwrap ``Optional[X]`` / ``X | None`` to ``X``.
+def _type_name(tp: type) -> str:
+    """Return a human-readable name for a type, using str() for union types.
 
-    If the type is a union of exactly one non-None type and ``NoneType``,
-    return the non-None type. Otherwise return the original type unchanged.
+    In Python 3.14, types.UnionType gained __name__ == "Union", so
+    getattr(tp, "__name__", str(tp)) would return "Union" instead of
+    the full representation like "list[str] | int".
     """
-    if get_origin(tp) is Union or isinstance(tp, types.UnionType):
-        args = [a for a in get_args(tp) if a is not type(None)]
-        if len(args) == 1:
-            return args[0]  # type: ignore[no-any-return]
-    return tp
+    if isinstance(tp, types.UnionType) or get_origin(tp) is Union:
+        return str(tp)
+    return getattr(tp, "__name__", str(tp))
 
 
 class TypeExtractor:
@@ -39,16 +38,15 @@ class TypeExtractor:
         """Initialise the type extractor.
 
         Args:
-            pipelines: Dictionary of registered pipelines to inspect.
+            pipelines: Pipelines to inspect; callers filter to control scope.
         """
         self._pipelines = pipelines
         self._warned_union_types: set[type] = set()
 
     def extract_types_from_pipelines(self) -> dict[str, type]:
-        """Extract all type requirements from registered pipelines.
+        """Extract type requirements from the registered pipelines.
 
-        Walks all pipelines (except ``__default__``) and inspects node
-        function signatures for type-annotated ``params:`` inputs.
+        Walks each pipeline's nodes for type-annotated `params:` inputs.
 
         Returns:
             Dictionary mapping parameter keys to their expected types.
@@ -56,9 +54,6 @@ class TypeExtractor:
         all_type_requirements: dict[str, type] = {}
 
         for pipeline_name, pipeline in self._pipelines.items():
-            if pipeline_name == "__default__":
-                continue
-
             pipeline_type_requirements = self._extract_types_from_pipeline(pipeline)
 
             for key, new_type in pipeline_type_requirements.items():
@@ -70,17 +65,18 @@ class TypeExtractor:
                             "%s (existing) vs %s (from pipeline '%s'). "
                             "Using %s.",
                             key,
-                            getattr(existing_type, "__name__", str(existing_type)),
-                            getattr(new_type, "__name__", str(new_type)),
+                            _type_name(existing_type),
+                            _type_name(new_type),
                             pipeline_name,
-                            getattr(new_type, "__name__", str(new_type)),
+                            _type_name(new_type),
                         )
 
             all_type_requirements.update(pipeline_type_requirements)
 
         logger.debug(
-            "Found %d type requirements across all pipelines",
+            "Found %d type requirement(s) across %d pipeline(s)",
             len(all_type_requirements),
+            len(self._pipelines),
         )
         return all_type_requirements
 
@@ -127,22 +123,21 @@ class TypeExtractor:
             if not ds_name.startswith(_PARAMS_PREFIX):
                 continue
 
-            # Unwrap Optional[X] / X | None so we validate against the inner type
-            expected_type = _unwrap_optional(expected_type)
-
-            # Only record types we can actually validate (Pydantic models or dataclasses)
+            # Unwrap Optional[X] / X | None to check if the inner type is validatable,
+            # but store the original type so _apply_validation knows if None is allowed.
+            inner_type = _unwrap_optional(expected_type)
+            # Only record types we can actually validate (Pydantic models or
+            # dataclasses)
             if not (
-                is_pydantic_class(expected_type)
-                or dataclasses.is_dataclass(expected_type)
+                is_pydantic_class(inner_type) or dataclasses.is_dataclass(inner_type)
             ):
                 if (
-                    get_origin(expected_type) is Union
-                    or isinstance(expected_type, types.UnionType)
-                ) and expected_type not in self._warned_union_types:
-                    self._warned_union_types.add(expected_type)
+                    get_origin(inner_type) is Union
+                    or isinstance(inner_type, types.UnionType)
+                ) and inner_type not in self._warned_union_types:
+                    self._warned_union_types.add(inner_type)
                     type_names = " | ".join(
-                        getattr(type_arg, "__name__", str(type_arg))
-                        for type_arg in get_args(expected_type)
+                        _type_name(type_arg) for type_arg in get_args(inner_type)
                     )
                     logger.warning(
                         "Union type hint (%s) is not supported for validation. "
@@ -153,11 +148,11 @@ class TypeExtractor:
                 continue
 
             param_key = ds_name.split(":", 1)[1]
-            all_requirements[param_key] = expected_type
+            all_requirements[param_key] = expected_type  # preserve Optional if present
             logger.debug(
                 "Found parameter requirement: %s -> %s",
                 param_key,
-                getattr(expected_type, "__name__", str(expected_type)),
+                _type_name(expected_type),
             )
 
         return all_requirements

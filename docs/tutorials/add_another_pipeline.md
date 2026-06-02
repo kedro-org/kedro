@@ -108,7 +108,7 @@ Parameters that are used by the `DataCatalog` when the pipeline executes are sto
 
 Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
 
-More information about [parameters is available in the configuration documentation](../configure/parameters.md).
+More information about [parameters is available in the configuration documentation](../configure/parameters_and_credentials_explanation.md#parameters).
 
 ## Model registration
 

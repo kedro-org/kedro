@@ -155,5 +155,6 @@ class ParallelRunner(AbstractRunner):
         super()._run(
             pipeline=pipeline,
             catalog=catalog,
+            hook_manager=hook_manager,
             run_id=run_id,
         )

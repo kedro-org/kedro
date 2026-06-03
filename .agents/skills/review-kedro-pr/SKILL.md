@@ -211,7 +211,7 @@ Write a JSON file with the full review payload and post it via the script:
 Then post:
 
 ```bash
-bash .agents/skills/review-kedro-pr/scripts/post_review.sh <review_json_file>
+bash .agents/scripts/post_github_review.sh <review_json_file>
 ```
 
 This creates one review with the summary as the main message and inline comments on specific lines. Delete the JSON file after posting.

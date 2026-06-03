@@ -196,7 +196,7 @@ Further information about `kedro run` can be found in the [Kedro CLI documentati
 
 ## Selective pipeline loading
 
-When you run `kedro run --pipeline <name>`, Kedro only imports the pipeline modules that are required for that run, skipping unrelated modules. This speeds up startup time for large projects with many pipelines.
+When you run `kedro run --pipeline <name>`, Kedro imports the pipeline modules required for that run and skips unrelated modules. This speeds up startup time for large projects with many pipelines.
 
 ```bash
 kedro run --pipeline data_science
@@ -211,7 +211,7 @@ kedro run --pipeline data_engineering --pipeline data_science
 Passing `__default__` (or omitting `--pipeline` entirely) loads all registered pipelines as normal.
 
 !!! note "Limitation"
-    Selective loading only works when `register_pipelines()` uses [`find_pipelines()`](../api/framework/kedro.framework.project.md) for discovery. If your `pipeline_registry.py` imports pipeline modules at the top level (outside `register_pipelines()`), or accesses the `pipelines` dictionary directly before a run is started (for example, during bootstrapping), those imports will still occur regardless of which pipeline was requested.
+    Selective loading requires that `register_pipelines()` uses [`find_pipelines()`](../api/framework/kedro.framework.project.md) for discovery. If your `pipeline_registry.py` imports pipeline modules at the top level (outside `register_pipelines()`), or accesses the `pipelines` dictionary directly before a run is started (for example, during bootstrapping), those imports will still occur regardless of which pipeline was requested.
 
 ## Run pipelines with IO
 

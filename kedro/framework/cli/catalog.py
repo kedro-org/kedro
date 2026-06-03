@@ -53,6 +53,7 @@ def describe_datasets(metadata: ProjectMetadata, pipeline: list[str], env: str) 
     - `defaults`: Datasets that do not match any pattern or explicit definition.\n
     """
     p = pipeline or None
+    # Must be called before load_context(), which triggers the first pipelines dict access.
     pipelines.set_requested(p)
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
@@ -99,6 +100,7 @@ def resolve_patterns(metadata: ProjectMetadata, pipeline: list[str], env: str) -
     from dataset factory patterns.
     """
     p = pipeline or None
+    # Must be called before load_context(), which triggers the first pipelines dict access.
     pipelines.set_requested(p)
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()

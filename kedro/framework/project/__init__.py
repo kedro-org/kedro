@@ -240,7 +240,9 @@ class _ProjectPipelines(MutableMapping):
         if set(self._requested_pipelines or []) != set(pipeline_names or []):
             self._is_data_loaded = False
             self._content = {}
-        self._requested_pipelines = pipeline_names
+        self._requested_pipelines = (
+            list(pipeline_names) if pipeline_names is not None else None
+        )
 
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.

@@ -548,3 +548,20 @@ def test_find_pipelines_none_global_requested_falls_back_to_kwarg(
 
     assert set(result) == {"pipe_x"}
     assert "pipe_y" not in result
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [{"pipe_x", "pipe_y", "pipe_z"}],
+    indirect=True,
+)
+def test_find_pipelines_global_requested_default_loads_all(
+    mock_package_name_with_pipelines, _reset_global_pipelines_request
+):
+    """``"__default__"`` in the filter is special: it means load everything."""
+    configure_project(mock_package_name_with_pipelines)
+    _pipelines_global.set_requested(["__default__"])
+
+    result = find_pipelines()
+
+    assert set(result) == {"pipe_x", "pipe_y", "pipe_z", "__default__"}

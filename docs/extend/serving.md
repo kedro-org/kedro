@@ -59,6 +59,66 @@ curl http://127.0.0.1:8000/health
 
 `kedro_version` is the version of the Kedro package running the server, not the version declared in the project's `pyproject.toml`.
 
+### `GET /snapshot`
+
+Returns a snapshot of the project structure: metadata, registered pipelines, catalog datasets, and parameter keys.
+
+```bash
+curl http://127.0.0.1:8000/snapshot
+```
+
+```json
+{
+  "status": "success",
+  "metadata": {
+    "project_name": "My Project",
+    "package_name": "my_project",
+    "kedro_version": "1.0.0"
+  },
+  "pipelines": [
+    {
+      "name": "__default__",
+      "nodes": [
+        {
+          "name": "split_data_node",
+          "inputs": ["example_iris_data"],
+          "outputs": ["X_train", "X_test"],
+          "tags": [],
+          "namespace": null
+        }
+      ],
+      "inputs": ["example_iris_data"],
+      "outputs": ["example_predictions"]
+    }
+  ],
+  "datasets": {
+    "example_iris_data": {
+      "name": "example_iris_data",
+      "type": "pandas.CSVDataset",
+      "filepath": "data/01_raw/iris.csv"
+    }
+  },
+  "parameters": ["example_learning_rate", "example_num_train_iter"]
+}
+```
+
+If the snapshot cannot be built (for example, due to a catalog error), the response still returns HTTP 200 with `"status": "failure"`. The `error` field contains the exception type and message, and the data fields (`metadata`, `pipelines`, `datasets`, `parameters`) are absent:
+
+```json
+{
+  "status": "failure",
+  "error": {
+    "type": "MissingConfigException",
+    "message": "No config files found matching the pattern(s) 'catalog*'"
+  }
+}
+```
+
+!!! note
+    The `/snapshot` endpoint uses the environment and configuration source configured at server startup (`--env` / `KEDRO_SERVER_ENV` and `--conf-source` / `KEDRO_SERVER_CONF_SOURCE`). It does not accept per-request `env` or `conf_source` parameters.
+
+See [Inspect a Kedro project](../inspect/inspect-project.md) for the programmatic API and details on the snapshot structure.
+
 ### `POST /run`
 
 Triggers a pipeline run. All fields are optional; send an empty JSON object (`{}`) to run the default pipeline with default settings.
@@ -97,7 +157,29 @@ Key request fields:
 | `params` | `dict` | Runtime parameters passed to the context |
 | `only_missing_outputs` | `bool` | Skip nodes whose outputs already exist and are persisted |
 
-The response includes a `run_id`, `status` (`"success"` or `"failure"`), `duration_ms`, and an `error` object on failure.
+On success the response contains `run_id`, `status`, and `duration_ms`:
+
+```json
+{
+  "status": "success",
+  "run_id": "2024-01-01T00.00.00.000Z",
+  "duration_ms": 142.3
+}
+```
+
+On failure the response additionally contains an `error` object with the exception type and message:
+
+```json
+{
+  "status": "failure",
+  "run_id": "2024-01-01T00.00.00.000Z",
+  "duration_ms": 12.1,
+  "error": {
+    "type": "DatasetError",
+    "message": "Failed to load dataset 'raw_data'"
+  }
+}
+```
 
 !!! note
     `RunRequest` model uses strict validation, unknown fields return an error rather than being ignored.
@@ -106,6 +188,15 @@ The first `/run` request creates a `KedroServiceSession` which the following req
 
 !!! note
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the `--env` and `--conf-source` options instead.
+
+#### Runner security
+
+Short names (for example, `SequentialRunner`) always resolve against `kedro.runner`. Fully-qualified names (for example, `mypackage.runners.MyRunner`) must belong to `kedro.runner`, the project's own package, or a module listed in `RUNNER_MODULES_WHITELIST` in `settings.py`. The module is never imported otherwise.
+
+```python
+# settings.py
+RUNNER_MODULES_WHITELIST = ["external_lib.runners"]
+```
 
 ### Interactive API reference
 
@@ -149,4 +240,4 @@ def list_pipelines() -> dict:
     return {"pipelines": list(pipelines.keys())}
 ```
 
-The new `/pipelines` endpoint sits alongside the built-in `/health` and `/run` routes and benefits from the same session lifecycle.
+The new `/pipelines` endpoint sits alongside the built-in `/health`, `/snapshot`, and `/run` routes and benefits from the same session lifecycle.

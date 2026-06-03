@@ -128,13 +128,16 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 
 | Name                                                     | Organisation                                                                            |
 |----------------------------------------------------------|---------------------------------------------------------------------------------------- |
+| [Alice Cima](https://github.com/AliceCima10)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Dagster Labs](https://dagster.io)                                                      |
-| [Dmitry Sorokin](https://github.com/DimedS)              | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Elena Khaustova](https://github.com/ElenaKhaustova)     | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Elijah Koh](https://github.com/iamelijahko)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Ivan Danov](https://github.com/idanov)                  | [Palantir](https://www.palantir.com/)                                                   |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Joel Schwarzmann](https://github.com/datajoely)         | [Aneira Health](https://www.aneira.health)                                              |
+| [Joseph Perkins](https://github.com/Joseph-Perkins)      | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [Printify, Inc.](https://printify.com/)                                                 |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
@@ -143,7 +146,6 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 | [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla)  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Sajid Alam](https://github.com/SajidAlamQB)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Simon Brugman](https://github.com/sbrugman)             | [ING](https://www.ing.com/)                                                             |
-| [Stephanie Kaiser](https://github.com/stephkaiser)       | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Tynan DeBold](https://github.com/tynandebold)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
 | [Yetunde Dada](https://github.com/yetudada)              | [Astronomer](https://www.astronomer.io/)                                                |
 | [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei) | [Société Générale Assurances](https://www.assurances.societegenerale.com/en/individual) |
@@ -162,6 +164,7 @@ Former core team members with significant contributions include
 [Antony Milne](https://github.com/antonymilne),
 [Cvetanka Nechevska](https://github.com/cvetankanechevska),
 [Dmitrii Deriabin](https://github.com/dmder),
+[Dmitry Sorokin](https://github.com/DimedS),
 [Gabriel Comym](https://github.com/comym),
 [Gordon Wrigley](https://github.com/tolomea),
 [Hamza Oza](https://github.com/hamzaoza),
@@ -179,6 +182,7 @@ Former core team members with significant contributions include
 [Nasef Khan](https://github.com/nakhan98),
 [Nero Okwa](https://github.com/NeroOkwa),
 [Richard Westenra](https://github.com/richardwestenra),
+[Stephanie Kaiser](https://github.com/stephkaiser),
 [Susanna Wong](https://github.com/studioswong),
 [Vladimir Nikolic](https://github.com/vladimir-mck) and
 [Zain Patel](https://github.com/mzjp2).

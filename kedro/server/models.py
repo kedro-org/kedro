@@ -3,9 +3,15 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from kedro.inspection.models import (  # noqa: TCH001
+    DatasetSnapshot,
+    PipelineSnapshot,
+    ProjectMetadataSnapshot,
+)
 
 # Matches a valid Python dotted identifier, e.g. "SequentialRunner" or
 # "mypackage.runners.MyRunner".  Prevents passing arbitrary strings to
@@ -97,16 +103,24 @@ class ErrorDetail(BaseModel):
     message: str = Field(description="Error message.")
 
 
-class RunResponse(BaseModel):
-    """Response model for pipeline execution."""
+class RunSuccess(BaseModel):
+    """Response model for a successful pipeline run."""
 
+    status: Literal["success"] = Field(description="Run status.")
     run_id: str = Field(description="Unique identifier for this pipeline run.")
-    status: Literal["success", "failure"] = Field(description="Run status.")
     duration_ms: float = Field(description="Total execution time in milliseconds.")
-    error: ErrorDetail | None = Field(
-        default=None,
-        description="Error details if status is 'failure'.",
-    )
+
+
+class RunFailure(BaseModel):
+    """Response model for a failed pipeline run."""
+
+    status: Literal["failure"] = Field(description="Run status.")
+    run_id: str = Field(description="Unique identifier for this pipeline run.")
+    duration_ms: float = Field(description="Total execution time in milliseconds.")
+    error: ErrorDetail = Field(description="Error details.")
+
+
+RunResponse = Annotated[RunSuccess | RunFailure, Field(discriminator="status")]
 
 
 class HealthResponse(BaseModel):
@@ -116,3 +130,31 @@ class HealthResponse(BaseModel):
         default="healthy", description="Server health status."
     )
     kedro_version: str = Field(description="Kedro version.")
+
+
+class SnapshotSuccess(BaseModel):
+    """Response model for a successful project snapshot."""
+
+    status: Literal["success"] = Field(description="Snapshot status.")
+    metadata: ProjectMetadataSnapshot = Field(description="Project metadata snapshot.")
+    pipelines: list[PipelineSnapshot] = Field(
+        description="Registered pipeline snapshots."
+    )
+    datasets: dict[str, DatasetSnapshot] = Field(
+        description="Catalog dataset snapshots keyed by dataset name."
+    )
+    parameters: list[str] = Field(
+        description="Sorted list of top-level parameter keys."
+    )
+
+
+class SnapshotFailure(BaseModel):
+    """Response model for a failed project snapshot."""
+
+    status: Literal["failure"] = Field(description="Snapshot status.")
+    error: ErrorDetail = Field(description="Error details.")
+
+
+SnapshotResponse = Annotated[
+    SnapshotSuccess | SnapshotFailure, Field(discriminator="status")
+]

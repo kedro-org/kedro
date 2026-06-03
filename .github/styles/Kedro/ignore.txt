@@ -22,6 +22,7 @@ dataframe
 dataframes
 dbt
 dbx
+deserialisation
 Dockerfile
 docstring
 docstrings
@@ -100,6 +101,7 @@ transcode
 transcoded
 transcoding
 untyped
+untrusted
 validators
 Unsplash
 uv

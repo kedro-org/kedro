@@ -99,9 +99,9 @@ benchmark = [
     "asv"
 ]
 
-pydantic = ["pydantic>=2.0"]
+pydantic = ["pydantic>=2.13"]
 server = [
-    "pydantic~=2.13",
+    "kedro[pydantic]",
     "fastapi>=0.100.0",
     "uvicorn>=0.20.0",
 ]

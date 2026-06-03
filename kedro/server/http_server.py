@@ -21,9 +21,13 @@ from kedro.runner import AbstractRunner
 from kedro.server.models import (
     ErrorDetail,
     HealthResponse,
+    RunFailure,
     RunRequest,
     RunResponse,
+    RunSuccess,
+    SnapshotFailure,
     SnapshotResponse,
+    SnapshotSuccess,
 )
 from kedro.server.utils import (
     KEDRO_SERVER_CONF_SOURCE,
@@ -128,7 +132,7 @@ def create_http_server(
                 conf_source=app.state.default_conf_source,
                 metadata=app.state.metadata,
             )
-            return SnapshotResponse(
+            return SnapshotSuccess(
                 status="success",
                 metadata=snapshot.metadata,
                 pipelines=snapshot.pipelines,
@@ -137,9 +141,12 @@ def create_http_server(
             )
         except Exception as exc:
             logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
-            return SnapshotResponse(
+            return SnapshotFailure(
                 status="failure",
-                error=ErrorDetail(type=type(exc).__qualname__, message=str(exc)),
+                error=ErrorDetail(
+                    type=type(exc).__qualname__,
+                    message=str(exc),
+                ),
             )
 
     @app.post("/run", response_model=RunResponse, tags=["pipeline"])
@@ -169,6 +176,28 @@ def create_http_server(
     return app
 
 
+def _validate_runner_module(runner_name: str | None, package_name: str | None) -> bool:
+    """Return True when the runner's module prefix is in the allowlist.
+
+    A runner name without a module prefix (e.g. ``SequentialRunner``) always
+    passes because ``load_obj`` will resolve it against ``kedro.runner``.
+    Allowed prefixes are ``kedro.runner``, the project <package_name>, and any
+    additional entries in ``settings.RUNNER_MODULES_WHITELIST``.
+    """
+    if runner_name is None or "." not in runner_name:
+        return True
+    module = runner_name.rsplit(".", 1)[0]
+    allowed_prefixes = [
+        "kedro.runner",
+        package_name,
+        *settings.RUNNER_MODULES_WHITELIST,
+    ]
+    return any(
+        module == prefix or module.startswith(prefix + ".")
+        for prefix in allowed_prefixes
+    )
+
+
 def _execute_pipeline(
     session: KedroServiceSession,
     *,
@@ -193,6 +222,13 @@ def _execute_pipeline(
 
     try:
         runner_name = request.runner or "SequentialRunner"
+        if not _validate_runner_module(runner_name, session._package_name):
+            module = runner_name.rsplit(".", 1)[0]
+            raise ValueError(
+                f"Runner module '{module}' is not allowed. "
+                "Only 'kedro.runner', the project package, or modules listed in "
+                "'RUNNER_MODULES_WHITELIST' via settings.py are permitted."
+            )
         runner_class = load_obj(runner_name, "kedro.runner")
         if not (
             isinstance(runner_class, type) and issubclass(runner_class, AbstractRunner)
@@ -221,7 +257,7 @@ def _execute_pipeline(
 
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.info("Pipeline run %s completed in %.2fms", run_id, duration_ms)
-        return RunResponse(
+        return RunSuccess(
             run_id=run_id,
             status="success",
             duration_ms=round(duration_ms, 2),
@@ -236,14 +272,12 @@ def _execute_pipeline(
             exc_info=True,
         )
 
-        error_detail = ErrorDetail(
-            type=type(exc).__qualname__,
-            message=str(exc),
-        )
-
-        return RunResponse(
+        return RunFailure(
             run_id=run_id,
             status="failure",
             duration_ms=round(duration_ms, 2),
-            error=error_detail,
+            error=ErrorDetail(
+                type=type(exc).__qualname__,
+                message=str(exc),
+            ),
         )

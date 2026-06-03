@@ -37,7 +37,7 @@ Read these before triaging findings:
 
 Before scanning, ask once:
 
-> Are we scanning **Kedro framework code** (this repository's `kedro/` package)
+> Are we scanning **Kedro framework code** (this repository's `kedro/`)
 > or a **Kedro project** (user pipelines, catalog, and project config)?
 
 Use the answer to pre-classify findings (see `reference.md`). For example,

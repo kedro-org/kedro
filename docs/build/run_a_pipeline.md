@@ -57,6 +57,9 @@ kedro run --runner=ThreadRunner
 
 For more information on how to maximise concurrency when using Kedro with PySpark, read our guide on [how to build a Kedro pipeline with PySpark](../integrations-and-plugins/pyspark_integration.md).
 
+!!! note
+    Hooks may not work as expected with `ParallelRunner` because worker processes may not execute `node` and `dataset` hooks. All hooks execute with `ThreadRunner`.
+
 ## Custom runners
 
 If the built-in Kedro runners do not meet your requirements, you can also define your own runner within your project. For example, you may want to add a dry runner, which lists which nodes would run without executing them:

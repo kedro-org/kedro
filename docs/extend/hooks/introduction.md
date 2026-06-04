@@ -37,7 +37,7 @@ This diagram illustrates the execution order of hooks during `kedro run`:
 
 
 !!! warning
-    Some hooks may not execute when using `ParallelRunner`. Specifically, `catalog`, `context`, and `pipeline` hooks that run in the main process will execute, but `dataset` and `node` hooks may not run in the worker processes that run nodes in parallel.
+    Some hooks will not execute when using `ParallelRunner`. Specifically, `catalog`, `context`, and `pipeline` hooks that run in the main process will execute, but `dataset` and `node` hooks do not run in the worker processes that run nodes in parallel. Use `SequentialRunner` or `ThreadRunner` if your project relies on these hooks.
 
 
 ### CLI Hooks

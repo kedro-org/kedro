@@ -46,6 +46,11 @@ To control which multiprocessing start method is used by `ParallelRunner`, set `
 !!! warning
     `ParallelRunner` does not execute `node` and `dataset` hooks. If your project relies on these hooks, use `SequentialRunner` or `ThreadRunner` instead.
 
+!!! note
+    `SparkDataset` doesn't work as expected with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataset`, you must use `ThreadRunner`.
+
+For more information on how to maximise concurrency when using Kedro with PySpark, read our guide on [how to build a Kedro pipeline with PySpark](../integrations-and-plugins/pyspark_integration.md).
+
 ### ThreadRunner
 
 While `ParallelRunner` uses multiprocessing, you can also run the pipeline with multithreading for concurrent execution by specifying `ThreadRunner` as follows:
@@ -53,11 +58,6 @@ While `ParallelRunner` uses multiprocessing, you can also run the pipeline with 
 ```bash
 kedro run --runner=ThreadRunner
 ```
-
-!!! note
-    `SparkDataset` doesn't work as expected with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataset`, you must use `ThreadRunner`.
-
-For more information on how to maximise concurrency when using Kedro with PySpark, read our guide on [how to build a Kedro pipeline with PySpark](../integrations-and-plugins/pyspark_integration.md).
 
 ## Custom runners
 

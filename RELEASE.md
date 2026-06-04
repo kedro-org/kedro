@@ -8,6 +8,8 @@
 
 ## Bug fixes and other changes
 ## Documentation changes
+* Documented hooks limitation when using `ParallelRunner`.
+
 ## Community contributions
 
 # Release 1.4.0

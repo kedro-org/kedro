@@ -51,7 +51,7 @@ To control which multiprocessing start method is used by `ParallelRunner`, set `
 
 For more information on how to maximise concurrency when using Kedro with PySpark, read our guide on [how to build a Kedro pipeline with PySpark](../integrations-and-plugins/pyspark_integration.md).
 
-### ThreadRunner
+### `ThreadRunner`
 
 While `ParallelRunner` uses multiprocessing, you can also run the pipeline with multithreading for concurrent execution by specifying `ThreadRunner` as follows:
 

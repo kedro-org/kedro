@@ -16,7 +16,7 @@ across cluster instances.
 
 Some applications may need a different approach, such as:
 
-- **Custom Python version:** By default, the latest EMR releases (6.10.0, 6.11.0) run Python 3.7, but an application may require Python 3.9 or later.
+- **Custom Python version:** EMR Serverless base images may ship with a Python version older than your project needs. Kedro 1.x requires Python >=3.10, so a custom image is often required.
 - **Python dependencies:** Some applications use a range of third-party dependencies that need to be installed on both the driver and worker nodes.
 
 Even though the official AWS documentation provides methods for configuring a [custom Python version](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python.html)
@@ -36,47 +36,94 @@ With this context established, the rest of this page describes how to deploy a K
 This approach creates a custom Docker image for EMR Serverless to package dependencies and manage the runtime environment, and follows these steps:
 
 - Packaging the Kedro project to install it on all EMR Serverless worker nodes. `kedro package` can be used for this: the resultant `.whl` file is used for installation, while `conf.tar.gz` contains the project configuration files.
-- Using a custom Python version instead of the default Python installed on EMR Serverless. In the example, [pyenv](https://github.com/pyenv/pyenv) is used for installing the custom Python version.
+- Using a custom Python version instead of the default Python installed on EMR Serverless. In the example, [pyenv](https://github.com/pyenv/pyenv) is used for installing the custom Python version. Choose any Python version **>=3.10** that matches your Kedro project's `requires-python` setting in `pyproject.toml`.
 - Running a job on EMR Serverless specifying Spark properties. This is needed to use the custom Python and provide an entrypoint script that accepts command line arguments for running Kedro.
 
-Here is an example Dockerfile that can be used:
+### Choose your Python version
+
+Kedro 1.x supports **Python >=3.10**. When building the custom EMR image, set `PYTHON_VERSION` to the same patch release you use locally and declare in your project (for example `3.12.8`, `3.11.11`, or `3.10.16`). pyenv must support the exact patch release you choose.
+
+Use the same value everywhere:
+
+| Location | Example for Python 3.12.8 |
+|----------|----------------------------|
+| `pyproject.toml` | `requires-python = ">=3.10"` |
+| Dockerfile `PYTHON_VERSION` | `3.12.8` |
+| `sparkSubmitParameters` Python path | `/usr/.pyenv/versions/3.12.8/bin/python` |
+
+#### Worked example: Python 3.12
+
+If your Kedro project runs locally on **Python 3.12**, use `3.12.8` (or another 3.12 patch release supported by [pyenv](https://github.com/pyenv/pyenv)) consistently in the Dockerfile and job submission command.
+
+In the Dockerfile:
+
+```dockerfile
+ENV PYTHON_VERSION=3.12.8
+```
+
+When submitting the job with the AWS CLI, set `sparkSubmitParameters` to:
 
 ```shell
+--conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/usr/.pyenv/versions/3.12.8/bin/python \
+--conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/3.12.8/bin/python \
+--conf spark.executorEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/3.12.8/bin/python
+```
+
+??? example "Full AWS CLI example for Python 3.12.8"
+    ```shell
+    aws emr-serverless start-job-run \
+        --application-id <application-id> \
+        --execution-role-arn <execution-role-arn> \
+        --job-driver '{
+            "sparkSubmit": {
+                "entryPoint": "<s3-path-to-entrypoint-script>",
+                "entryPointArguments": ["--env", "<emr-conf>", "--runner", "ThreadRunner", "--pipelines", "<kedro-pipeline-name>"],
+                "sparkSubmitParameters": "--conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/usr/.pyenv/versions/3.12.8/bin/python --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/3.12.8/bin/python --conf spark.executorEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/3.12.8/bin/python"
+            }
+        }'
+    ```
+
+Here is an example Dockerfile that can be used. Replace `<python-version>` with your chosen version (for example `3.12.8`). The EMR release in the `FROM` line must match the release label of your EMR Serverless application (see [AWS custom image guidance](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)):
+
+```dockerfile
 FROM public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest AS base
 
 USER root
 
 # Install Python build dependencies for pyenv
-RUN yum install -y gcc make patch zlib-devel bzip2 bzip2-devel readline-devel  \
-        sqlite sqlite-devel openssl11-devel tk-devel libffi-devel xz-devel tar
+RUN yum install -y gcc make patch zlib-devel bzip2 bzip2-devel readline-devel \
+        sqlite sqlite-devel openssl11-devel tk-devel libffi-devel xz-devel tar git
 
-# Install git for pyenv installation
-RUN yum install -y git
+ENV PYENV_ROOT=/usr/.pyenv
+ENV PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+ENV PYTHON_VERSION=<python-version>
 
-# Add pyenv to PATH and set up environment variables
-ENV PYENV_ROOT /usr/.pyenv
-ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
-ENV PYTHON_VERSION=3.9.16
-
-# Install pyenv, initialise it, install desired Python version and set as global
-RUN curl https://pyenv.run | bash
-RUN eval "$(pyenv init -)"
-RUN pyenv install ${PYTHON_VERSION} && pyenv global ${PYTHON_VERSION}
+# Install pyenv, then install and select the desired Python version (>=3.10)
+RUN curl https://pyenv.run | bash && \
+    export PYENV_ROOT="/usr/.pyenv" && \
+    export PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH" && \
+    pyenv install ${PYTHON_VERSION} && \
+    pyenv global ${PYTHON_VERSION}
 
 # Copy and install packaged Kedro project
-ENV KEDRO_PACKAGE <PACKAGE_WHEEL_NAME>
+ENV KEDRO_PACKAGE=<PACKAGE_WHEEL_NAME>
 COPY dist/$KEDRO_PACKAGE /tmp/dist/$KEDRO_PACKAGE
-RUN pip install --upgrade pip && pip install /tmp/dist/$KEDRO_PACKAGE  \
+RUN pip install --upgrade pip && pip install /tmp/dist/$KEDRO_PACKAGE \
     && rm -f /tmp/dist/$KEDRO_PACKAGE
 
 # Copy and extract conf folder
 ADD dist/conf.tar.gz /home/hadoop/
 
-# EMRS will run the image as hadoop
+# EMR Serverless runs the image as hadoop
 USER hadoop:hadoop
 ```
 
-Make sure to replace `<PACKAGE_WHEEL_NAME>` with your own `.whl` file name.
+Make sure to replace:
+
+- `<python-version>` with a Python **>=3.10** release supported by pyenv (for example `3.12.8`, `3.11.11`, or `3.10.16`)
+- `<PACKAGE_WHEEL_NAME>` with your own `.whl` file name
+
+Run `kedro package` in your project root before building the image.
 Here is the `entrypoint.py` entrypoint script:
 
 ```python
@@ -92,15 +139,20 @@ Replace `<PACKAGE_NAME>` with your package name.
 ### Resources
 For more details, see the following resources:
 
-- [Package a Kedro project](https://docs.kedro.org/en/stable/deploy/package_a_project/#package-a-kedro-project)
-- [Run a packaged project](https://docs.kedro.org/en/stable/deploy/package_a_project/#run-a-packaged-project)
+- [Package a Kedro project](../package_a_project.md#package-a-kedro-project)
+- [Run a packaged project](../package_a_project.md#run-a-packaged-project)
 - [Customising an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
 - [Using custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-custom-images.html)
 
 ## Setup
 
 ### Prerequisites
-You must create an S3 bucket to store data for EMR Serverless.
+
+- A Kedro 1.x project with `requires-python = ">=3.10"` in `pyproject.toml`
+- A local Python environment **>=3.10** matching the version you install in the custom image
+- [Docker](https://www.docker.com/) installed locally to build the custom image
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region
+- An S3 bucket to store data and job entrypoint scripts for EMR Serverless
 
 ### Infrastructure
 
@@ -115,7 +167,7 @@ You must create an S3 bucket to store data for EMR Serverless.
 3. **Create an application**.
 
 - Type: Spark
-- Release version: `emr-6.10.0`
+- Release version: `emr-6.10.0` (must match the base image used in your Dockerfile)
 - Architecture: `x86_64`
 - Application setup options > "Choose custom settings"
 - Custom image settings > "Use the custom image with this application"
@@ -179,13 +231,13 @@ aws emr-serverless start-job-run \
     --job-driver '{
         "sparkSubmit": {
             "entryPoint": "<s3-path-to-entrypoint-script>",
-            "entryPointArguments": ["--env", "<emr-conf>", "--runner", "ThreadRunner", "--pipeline", "<kedro-pipeline-name>"],
-            "sparkSubmitParameters": "--conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/usr/.pyenv/versions/3.9.16/bin/python --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/3.9.16/bin/python --conf spark.executorEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/3.9.16/bin/python"
+            "entryPointArguments": ["--env", "<emr-conf>", "--runner", "ThreadRunner", "--pipelines", "<kedro-pipeline-name>"],
+            "sparkSubmitParameters": "--conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/usr/.pyenv/versions/<python-version>/bin/python --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/<python-version>/bin/python --conf spark.executorEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/<python-version>/bin/python"
         }
     }'
 ```
 
-Enter the respective values in the placeholders above. For example, use the ARN from the job runtime role created earlier for `<execution-role-arn>`.
+Enter the respective values in the placeholders above. For example, use the ARN from the job runtime role created earlier for `<execution-role-arn>`. Use the same `<python-version>` value in `sparkSubmitParameters` as in the Dockerfile `PYTHON_VERSION`. See the [Python 3.12 worked example](#worked-example-python-312) above for a copy-paste ready command.
 
 ## Frequently asked questions
 
@@ -198,7 +250,7 @@ The approach of providing a custom image applies to EMR *Serverless*. On EMR it 
 
 ### Why install a custom Python version on EMR Serverless?
 
-Some applications may need a different Python version than the default installation. For example, your code base may rely on Python 3.9, while the latest EMR releases (6.10.0, 6.11.0) ship with Python 3.7.
+Some applications may need a different Python version than the default installation. Kedro 1.x requires Python >=3.10, while many EMR Serverless base images ship with an older Python version. Install whichever supported Python version (3.10, 3.11, 3.12, or newer) matches your Kedro project.
 
 ### Why do we need to create a custom image to provide the custom Python version?
 
@@ -217,13 +269,45 @@ As mentioned in the [AWS documentation](https://docs.aws.amazon.com/emr/latest/E
 We recommend using the `entrypoint.py` entrypoint script approach to run Kedro
 programmatically, instead of using [subprocess](https://docs.python.org/3/library/subprocess.html) to invoke `kedro run`.
 
-### How about using the method described in [Lifecycle management with KedroSession](https://docs.kedro.org/en/0.18.11/kedro_project_setup/session.html) to run Kedro programmatically?
+### How about using the method described in [Lifecycle management with KedroSession](../../extend/session.md) to run Kedro programmatically?
 
-This is a valid alternative to run Kedro programmatically, without needing to package the Kedro project, but the arguments are not a direct mapping to Kedro command line arguments:
-- Different names are used. For example, `pipeline_name` and `node_names` are used instead of `pipeline` and `nodes`.
-- Different types are used. For example, to specify the runner you need to pass an `AbstractRunner` object, instead of a string value like `ThreadRunner`.
+You can run Kedro with `KedroSession` inside your Spark `entrypoint.py` script instead of calling your packaged project's `__main__` module. You still package the project and install the wheel in the custom image as described above; the session API is an alternative way to *invoke* the pipeline from the entrypoint script.
 
-Arguments need to be passed separately: `env` is passed directly to `KedroSession.create()` while
-other arguments such as `pipeline_name` and `node_names` need to be passed to `session.run()`.
+The session API does not mirror the CLI one-to-one. The table below shows the main differences:
 
-It is most suited to scenarios such as invoking `kedro run`, or where you do not provide several command line arguments to Kedro.
+| CLI flag | `KedroSession` API | Method |
+|----------|-------------------|--------|
+| `--env` | `env` | `KedroSession.create()` |
+| `--params` | `runtime_params` | `KedroSession.create()` |
+| `--conf-source` | `conf_source` | `KedroSession.create()` |
+| `--pipelines` | `pipeline_names` (a list of strings) | `session.run()` |
+| `--nodes` | `node_names` | `session.run()` |
+| `--runner` | `runner` (an `AbstractRunner` instance, for example `ThreadRunner()`) | `session.run()` |
+| `--tags` | `tags` | `session.run()` |
+| `--from-nodes` / `--to-nodes` | `from_nodes` / `to_nodes` | `session.run()` |
+| `--load-versions` | `load_versions` | `session.run()` |
+
+In a packaged EMR deployment, call `configure_project()` (not `bootstrap_project()`) before creating the session. Here is an example entrypoint script:
+
+```python
+from kedro.framework.project import configure_project
+from kedro.framework.session import KedroSession
+from kedro.runner import ThreadRunner
+
+configure_project("<PACKAGE_NAME>")
+
+with KedroSession.create(env="<emr-conf>") as session:
+    session.run(
+        pipeline_names=["<kedro-pipeline-name>"],
+        runner=ThreadRunner(),
+    )
+```
+
+Upload this script to S3 and reference it as the Spark `entryPoint`, the same way as the `__main__`-based entrypoint described earlier.
+
+**When to use which approach:**
+
+- Use the **`__main__` entrypoint** (passing `entryPointArguments` such as `--env`, `--pipelines`, and `--runner`) when you want the same interface as `python -m <package_name>` or `kedro run` at the command line.
+- Use **`KedroSession`** when you prefer explicit Python control over run options, or when you do not want to translate CLI arguments into `entryPointArguments`.
+
+We still recommend avoiding [subprocess](https://docs.python.org/3/library/subprocess.html) to shell out to `kedro run` from the entrypoint script.

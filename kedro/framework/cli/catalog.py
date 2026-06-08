@@ -52,13 +52,12 @@ def describe_datasets(metadata: ProjectMetadata, pipeline: list[str], env: str) 
     - `factories`: Datasets resolved from dataset factory patterns.\n
     - `defaults`: Datasets that do not match any pattern or explicit definition.\n
     """
-    p = pipeline or None
-    # Must be called before load_context(), which triggers the first pipelines dict access.
-    pipelines.set_requested(p)
+    if pipeline:
+        pipelines.set_requested(pipeline)
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    datasets_dict = context.catalog.describe_datasets(p)  # type: ignore
+    datasets_dict = context.catalog.describe_datasets(pipeline)  # type: ignore
 
     secho(yaml.dump(datasets_dict))
 

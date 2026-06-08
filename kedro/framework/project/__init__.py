@@ -521,13 +521,13 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
         )
 
     # CLI-set filter takes precedence; falls back to the explicit kwarg.
-    effective = (
+    pipeline_filter = (
         pipelines._requested_pipelines
         if pipelines._requested_pipelines is not None
         else pipelines_to_find
     )
-    load_all = effective is None or "__default__" in effective
-    requested_pipelines: set[str] | None = None if load_all else set(effective)  # type: ignore[arg-type]
+    load_all = pipeline_filter is None or "__default__" in pipeline_filter
+    requested_pipelines: set[str] | None = None if load_all else set(pipeline_filter)  # type: ignore[arg-type]
 
     pipelines_dict: dict[str, Pipeline] = {}
 

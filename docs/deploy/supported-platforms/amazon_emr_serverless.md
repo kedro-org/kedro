@@ -366,13 +366,13 @@ aws emr-serverless start-job-run \
 | `entryPointArguments` | Kedro CLI flags (`--env`, `--conf-source`, `--pipelines`, `--runner`) |
 | `sparkSubmitParameters` | Tells Spark which Python interpreter to use on driver and executors |
 
-See [Monitor EMR Serverless job runs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-monitor.html) for logging and status checks.
+See [View EMR Serverless job runs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-monitor.html) for logging and status checks.
 
 ---
 
 ## Step 10: Verify the job succeeded
 
-1. **Check job state** — confirm the job reached **SUCCESS**. See [Monitor EMR Serverless job runs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-monitor.html):
+1. **Check job state** — confirm the job reached **SUCCESS**. See [View EMR Serverless job runs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-monitor.html):
 
 ```bash
 aws emr-serverless get-job-run \
@@ -627,7 +627,9 @@ For pyenv, set `sparkSubmitParameters` to `/usr/.pyenv/versions/3.10.16/bin/pyth
 
 ## Troubleshooting
 
-| Symptom | Likely cause | Fix |
+<!--vale off-->
+
+| Symptom | Cause | Fix |
 |---------|--------------|-----|
 | `Custom image architecture doesn't match application architecture` | Image built for ARM on Apple Silicon | Rebuild with `--platform linux/amd64` |
 | `Permission denied` on `/home/hadoop/conf/...` | Config copied as root without read permissions for `hadoop` | Use `ADD --chown=hadoop:hadoop` and `chmod -R a+rX /home/hadoop/conf` in the Dockerfile |
@@ -644,6 +646,8 @@ For pyenv, set `sparkSubmitParameters` to `/usr/.pyenv/versions/3.10.16/bin/pyth
 | `DatasetError: ... Failed while saving data` for `spark.SparkDatasetV2` on EMR 6.x with custom Python | Standalone Python cannot import EMR's bundled PySpark, or Python/pandas versions are incompatible with Spark 3.3 | Set `SPARK_HOME` and `PYTHONPATH` in the Dockerfile; use **Python 3.10** and **`pandas>=1.5,<2.0`** on EMR 6.x |
 | Spark save fails with schema inference errors after `createDataFrame(pandas_df)` | Null/NaN values in string columns can break Spark schema inference on EMR 6.x | Fill or cast nulls in object columns before converting to Spark (for example `df.fillna({"col": ""})` for string fields) |
 
+<!--vale on-->
+
 To confirm which config is inside the image EMR will run:
 
 ```bash
@@ -655,7 +659,7 @@ docker run --rm --user hadoop --entrypoint head <ecr-image-uri> \
 
 ## Frequently asked questions
 
-### Should I use EMR 6.x or 7.x with Kedro 1.x?
+### Should we use EMR 6.x or 7.x with Kedro 1.x?
 
 Use **EMR 7.x** for all new Kedro 1.x deployments. See [Choose EMR 7.x or 6.x](#choose-emr-7x-or-6x) and [Legacy: EMR 6.x](#legacy-emr-6x).
 

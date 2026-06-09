@@ -6,7 +6,6 @@ import logging
 import os
 import threading
 import time
-import traceback
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
@@ -16,12 +15,19 @@ from kedro import __version__ as kedro_version
 from kedro.framework.project import settings
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
+from kedro.inspection import get_project_snapshot
 from kedro.io.core import generate_timestamp
+from kedro.runner import AbstractRunner
 from kedro.server.models import (
     ErrorDetail,
     HealthResponse,
+    RunFailure,
     RunRequest,
     RunResponse,
+    RunSuccess,
+    SnapshotFailure,
+    SnapshotResponse,
+    SnapshotSuccess,
 )
 from kedro.server.utils import (
     KEDRO_SERVER_CONF_SOURCE,
@@ -45,7 +51,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     project_path = app.state.project_path
     logger.info("Bootstrapping Kedro project at: %s", project_path)
-    bootstrap_project(project_path)
+    app.state.metadata = bootstrap_project(project_path)
 
     if settings.SESSION_CLASS is not KedroServiceSession:
         logger.warning(
@@ -88,7 +94,7 @@ def create_http_server(
 
     app = FastAPI(
         title="Kedro Server",
-        description="HTTP API for running Kedro pipelines",
+        description="HTTP API for triggering pipeline runs, inspecting project metadata, and more",
         version=kedro_version,
         lifespan=lifespan,
     )
@@ -103,12 +109,45 @@ def create_http_server(
 
         Returns server status and Kedro version information.
         """
-        project_path = app.state.project_path
         return HealthResponse(
             status="healthy",
             kedro_version=kedro_version,
-            project_path=str(project_path),
         )
+
+    @app.get("/snapshot", response_model=SnapshotResponse, tags=["inspection"])
+    def get_snapshot() -> SnapshotResponse:
+        """Return a read-only snapshot of the Kedro project.
+
+        Uses the server-level environment configured at startup (equivalent to
+        the ``env`` passed to ``create_http_server`` or the ``KEDRO_SERVER_ENV``
+        environment variable).
+
+        Returns:
+            `SnapshotResponse` with project metadata, pipelines, datasets,
+            and parameter keys, or error details on failure.
+        """
+        try:
+            snapshot = get_project_snapshot(
+                env=app.state.default_env,
+                conf_source=app.state.default_conf_source,
+                metadata=app.state.metadata,
+            )
+            return SnapshotSuccess(
+                status="success",
+                metadata=snapshot.metadata,
+                pipelines=snapshot.pipelines,
+                datasets=snapshot.datasets,
+                parameters=snapshot.parameters,
+            )
+        except Exception as exc:
+            logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
+            return SnapshotFailure(
+                status="failure",
+                error=ErrorDetail(
+                    type=type(exc).__qualname__,
+                    message=str(exc),
+                ),
+            )
 
     @app.post("/run", response_model=RunResponse, tags=["pipeline"])
     def run_pipeline(request: RunRequest) -> RunResponse:
@@ -137,6 +176,28 @@ def create_http_server(
     return app
 
 
+def _validate_runner_module(runner_name: str | None, package_name: str | None) -> bool:
+    """Return True when the runner's module prefix is in the allowlist.
+
+    A runner name without a module prefix (e.g. ``SequentialRunner``) always
+    passes because ``load_obj`` will resolve it against ``kedro.runner``.
+    Allowed prefixes are ``kedro.runner``, the project <package_name>, and any
+    additional entries in ``settings.RUNNER_MODULES_WHITELIST``.
+    """
+    if runner_name is None or "." not in runner_name:
+        return True
+    module = runner_name.rsplit(".", 1)[0]
+    allowed_prefixes = [
+        "kedro.runner",
+        package_name,
+        *settings.RUNNER_MODULES_WHITELIST,
+    ]
+    return any(
+        module == prefix or module.startswith(prefix + ".")
+        for prefix in allowed_prefixes
+    )
+
+
 def _execute_pipeline(
     session: KedroServiceSession,
     *,
@@ -161,7 +222,21 @@ def _execute_pipeline(
 
     try:
         runner_name = request.runner or "SequentialRunner"
+        if not _validate_runner_module(runner_name, session._package_name):
+            module = runner_name.rsplit(".", 1)[0]
+            raise ValueError(
+                f"Runner module '{module}' is not allowed. "
+                "Only 'kedro.runner', the project package, or modules listed in "
+                "'RUNNER_MODULES_WHITELIST' via settings.py are permitted."
+            )
         runner_class = load_obj(runner_name, "kedro.runner")
+        if not (
+            isinstance(runner_class, type) and issubclass(runner_class, AbstractRunner)
+        ):
+            raise ValueError(
+                f"Runner '{runner_name}' is not a subclass of AbstractRunner. "
+                "Only AbstractRunner subclasses are permitted."
+            )
         runner_obj = runner_class(is_async=request.is_async)
 
         session.run(
@@ -182,7 +257,7 @@ def _execute_pipeline(
 
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.info("Pipeline run %s completed in %.2fms", run_id, duration_ms)
-        return RunResponse(
+        return RunSuccess(
             run_id=run_id,
             status="success",
             duration_ms=round(duration_ms, 2),
@@ -197,15 +272,12 @@ def _execute_pipeline(
             exc_info=True,
         )
 
-        error_detail = ErrorDetail(
-            type=type(exc).__qualname__,
-            message=str(exc),
-            traceback=traceback.format_tb(exc.__traceback__),
-        )
-
-        return RunResponse(
+        return RunFailure(
             run_id=run_id,
             status="failure",
             duration_ms=round(duration_ms, 2),
-            error=error_detail,
+            error=ErrorDetail(
+                type=type(exc).__qualname__,
+                message=str(exc),
+            ),
         )

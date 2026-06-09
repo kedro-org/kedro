@@ -35,6 +35,10 @@ The full specifications for which you can inject additional behaviours by provid
 This diagram illustrates the execution order of hooks during `kedro run`:
 ![Kedro run hook execution order](../../meta/images/kedro_run_lifecycle.png)
 
+!!! warning
+    Some hooks will not execute when using `ParallelRunner`. Specifically, `catalog`, `context`, and `pipeline` hooks that run in the main process will execute, but `dataset` and `node` hooks do not run in the worker processes that run nodes in parallel. Use `SequentialRunner` or `ThreadRunner` if your project relies on these hooks.
+
+
 ### Available arguments per hook
 
 The table below summarises which arguments each Hook specification exposes. You can declare a subset of these in your implementation: thanks to [pluggy's opt-in argument behaviour](https://pluggy.readthedocs.io/en/stable/#opt-in-arguments), unused arguments may be omitted from the signature and Kedro will only pass what you declare. Refer to the [API reference for `kedro.framework.hooks.specs`](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) for the exact type of each argument and its full docstring.

@@ -124,7 +124,7 @@ dependencies = [
 
 ### Upload raw data to S3
 
-Upload input data before submitting the job:
+Upload input data before submitting the job — see [Uploading objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html):
 
 ```bash
 aws s3 sync data/01_raw/ s3://<your-bucket>/data/01_raw/
@@ -150,37 +150,24 @@ This creates a `.whl` file and `conf-<package_name>.tar.gz` in `dist/` (for exam
 
 ## Step 4: Set up AWS
 
-Complete these once per AWS account/region (or per EMR release line if you run both 7.x and 6.x).
+Complete these once per AWS account/region (or per EMR release line if you run both 7.x and 6.x). Follow the linked AWS guides for console and CLI steps — this section only lists what you need and Kedro-specific settings.
 
-### Create an S3 bucket
+| Resource | AWS documentation | What you need for Kedro |
+|----------|-------------------|-------------------------|
+| **S3 bucket** | [Creating a bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) | Store raw/output data (`s3://<your-bucket>/data/...`) and the entrypoint script (`s3://<your-bucket>/scripts/entrypoint.py`) |
+| **ECR repository** | [Create a private repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html) | One **private** repo per EMR release line (for example `kedro-emr-7` and `kedro-emr-6`) |
+| **Job runtime role** | [Getting started with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/getting-started.html) | IAM role with access to your S3 bucket; note the ARN as `<execution-role-arn>` |
+| **ECR repository policy** | [Custom images for EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html) | Lets EMR Serverless pull your custom image |
 
-Create a bucket in your target region. Use it for:
+!!! note "ECR policy gotchas"
+    When applying the repository policy with `aws ecr set-repository-policy`, use the AWS template but:
 
-- Raw and output data (`s3://<your-bucket>/data/...`)
-- The entrypoint script (`s3://<your-bucket>/scripts/entrypoint.py`)
+    - Use `"ArnLike"` (not `"StringLike"`) in the condition.
+    - Include `ecr:DescribeImages` alongside the other actions.
+    - Set `aws:SourceArn` to `arn:aws:emr-serverless:<region>:<account-id>:/applications/*`.
+    - **Omit the `"Resource"` field** — the policy is already scoped to the repository.
 
-### Create an ECR repository
-
-Create a **private** ECR repository to store your custom image. See [Create an Amazon ECR private repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html).
-
-Use a separate repository per EMR release line (for example `kedro-emr-7` and `kedro-emr-6`).
-
-### Create a job runtime role
-
-Follow [Create a job runtime role](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/getting-started.html). This IAM role is used when submitting jobs. Grant it access to your S3 bucket.
-
-Note the role ARN — you need it as `<execution-role-arn>` when submitting jobs.
-
-### Grant EMR Serverless access to ECR
-
-EMR Serverless must pull your custom image from ECR. Apply a repository policy like [this AWS example](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html):
-
-- Use `"ArnLike"` (not `"StringLike"`) in the condition.
-- Include `ecr:DescribeImages` alongside the other actions.
-- Set `aws:SourceArn` to `arn:aws:emr-serverless:<region>:<account-id>:/applications/*`.
-- **Omit the `"Resource"` field** when applying with `aws ecr set-repository-policy` (the policy is already scoped to the repository).
-
-Apply the ECR repository policy **before** starting jobs, or image pull will fail.
+    Apply the ECR repository policy **before** starting jobs, or image pull will fail.
 
 ---
 
@@ -239,6 +226,8 @@ docker run --rm --user hadoop --entrypoint python3.12 ${ECR_IMAGE} \
 
 ### Push to ECR
 
+See [Pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html). Authenticate and push `${ECR_IMAGE}` — the URI you used at build time:
+
 ```bash
 aws ecr get-login-password --region <aws-region> | \
   docker login --username AWS --password-stdin <ecr-registry>
@@ -264,22 +253,24 @@ amazon-emr-serverless-image validate-image -i ${ECR_IMAGE} -r emr-7.13.0 -t spar
 
 Create **one application per EMR release line** (for example a separate app for `emr-7.13.0` and `emr-6.10.0`). The release label and custom image URI must match your Dockerfile `FROM` line.
 
-### Option A — AWS Console
+Follow the AWS guides to create and start the application:
 
-1. Open **Amazon EMR** in the AWS Console (same region as your ECR repo and S3 bucket).
-2. In the left menu, choose **EMR Serverless** (not “Clusters”).
-3. Choose **Create application**.
-4. Set:
-   - **Name:** for example `kedro-emr-7-test`
-   - **Type:** Spark
-   - **Release:** `emr-7.13.0` (must match your Dockerfile)
-   - **Architecture:** `x86_64`
-5. Under **Application setup options**, choose **Custom settings**.
-6. Under **Custom image settings**, enable **Use the custom image with this application**.
-7. Paste your **`<ecr-image-uri>`** (same URI for driver and executors).
-8. Choose **Create application**.
+- [Create an EMR Serverless application](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/applications-create.html)
+- [Using custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-custom-images.html)
+- [Start an application](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/applications-start.html)
 
-### Option B — AWS CLI
+When creating the application, set these **Kedro-specific values**:
+
+| Setting | Value |
+|---------|-------|
+| **Type** | Spark |
+| **Release** | `emr-7.13.0` (must match your Dockerfile) |
+| **Architecture** | `x86_64` |
+| **Custom image** | Enable custom image; use your `<ecr-image-uri>` for driver and executors |
+
+Note the **Application ID** as `<application-id>`. The application must be in **`STARTED`** state before you submit jobs.
+
+Example CLI workflow — see [Create an EMR Serverless application](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/applications-create.html) and [Start an application](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/applications-start.html) for full options:
 
 ```bash
 export AWS_REGION=us-east-1
@@ -295,16 +286,10 @@ APP_ID=$(aws emr-serverless create-application \
   --query 'applicationId' --output text)
 
 echo "Application ID: ${APP_ID}"
-```
 
-### Start the application
-
-EMR Serverless applications must be **started** before you can submit jobs:
-
-```bash
 aws emr-serverless start-application \
-  --application-id <application-id> \
-  --region us-east-1
+  --application-id "${APP_ID}" \
+  --region "${AWS_REGION}"
 ```
 
 Wait until state is **`STARTED`**:
@@ -317,7 +302,17 @@ aws emr-serverless get-application \
 ```
 
 !!! note "Restart after image updates"
-    When you rebuild and push a new image to ECR, **stop and start** the application before submitting another job. A running application may keep warm workers referencing the previous image digest. See [pre-initialised capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/pre-init-capacity.html).
+    When you rebuild and push a new image to ECR, **stop and start** the application before submitting another job. A running application may keep warm workers referencing the previous image digest. See [pre-initialised capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/pre-init-capacity.html), [Stop an application](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/applications-stop.html), and [Start an application](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/applications-start.html):
+
+    ```bash
+    aws emr-serverless stop-application \
+      --application-id <application-id> \
+      --region us-east-1
+
+    aws emr-serverless start-application \
+      --application-id <application-id> \
+      --region us-east-1
+    ```
 
 ---
 
@@ -334,7 +329,7 @@ from <PACKAGE_NAME>.__main__ import main
 main(sys.argv[1:])
 ```
 
-Upload it to S3:
+Upload it to S3 — see [Uploading objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html):
 
 ```bash
 aws s3 cp entrypoint.py s3://<your-bucket>/scripts/entrypoint.py
@@ -348,7 +343,9 @@ See [How about using KedroSession?](#how-about-using-kedrosession) if you prefer
 
 ## Step 9: Submit your first job
 
-Submit a Spark job that points at your S3 entrypoint script and passes Kedro CLI arguments:
+Follow [Submitting Spark jobs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark-submit.html) to submit a job run. Use your `<application-id>`, `<execution-role-arn>`, and an S3 `entryPoint` pointing at `entrypoint.py`.
+
+The **Kedro-specific** job driver settings below pass CLI arguments to your packaged project and set the custom Python interpreter for Spark:
 
 ```shell
 aws emr-serverless start-job-run \
@@ -369,14 +366,23 @@ aws emr-serverless start-job-run \
 | `entryPointArguments` | Kedro CLI flags (`--env`, `--conf-source`, `--pipelines`, `--runner`) |
 | `sparkSubmitParameters` | Tells Spark which Python interpreter to use on driver and executors |
 
-See [how to run a Spark job on EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html) for monitoring and logging.
+See [Monitor EMR Serverless job runs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-monitor.html) for logging and status checks.
 
 ---
 
 ## Step 10: Verify the job succeeded
 
-1. **Check job state** — in the EMR Serverless console or via CLI, confirm the job reached **SUCCESS**.
-2. **Check S3 outputs** — list the output paths from your `conf/emr/catalog.yml`:
+1. **Check job state** — confirm the job reached **SUCCESS**. See [Monitor EMR Serverless job runs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-monitor.html):
+
+```bash
+aws emr-serverless get-job-run \
+  --application-id <application-id> \
+  --job-run-id <job-run-id> \
+  --region us-east-1 \
+  --query 'jobRun.state' --output text
+```
+
+2. **Check S3 outputs** — list the output paths from your `conf/emr/catalog.yml`. See [Listing objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ListingObjects.html):
 
 ```bash
 aws s3 ls s3://<your-bucket>/data/02_intermediate/
@@ -508,6 +514,8 @@ docker run --rm --user hadoop --entrypoint /opt/python/bin/python ${ECR_IMAGE} \
 
 Expect Python **3.10.x**, pandas **1.5.x**, pyspark **3.3.x**.
 
+Push to ECR — see [Pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
+
 ```bash
 aws ecr get-login-password --region <aws-region> | \
   docker login --username AWS --password-stdin <ecr-registry>
@@ -522,9 +530,11 @@ amazon-emr-serverless-image validate-image -i ${ECR_IMAGE} -r emr-6.10.0 -t spar
 
 ### Step 7 (EMR 6.x): Create the application
 
-Same as Step 7, but use release **`emr-6.10.0`** and your `kedro-emr-6` image URI:
+Same as [Step 7](#step-7-create-the-emr-serverless-application), but set **Release** to `emr-6.10.0` and use your `kedro-emr-6` image URI. See [Create an EMR Serverless application](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/applications-create.html) and [Start an application](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/applications-start.html).
 
 ```bash
+export ECR_IMAGE=<ecr-image-uri>
+
 APP_ID=$(aws emr-serverless create-application \
   --name kedro-emr-6-test \
   --release-label emr-6.10.0 \
@@ -541,7 +551,7 @@ Step 8 is unchanged (same entrypoint script).
 
 ### Step 9 (EMR 6.x): Submit a job
 
-Use `/opt/python/bin/python` and pass extra environment variables for pipeline filtering and PySpark imports:
+Follow [Submitting Spark jobs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark-submit.html). Use `/opt/python/bin/python` and pass extra environment variables for pipeline filtering and PySpark imports:
 
 ```shell
 aws emr-serverless start-job-run \
@@ -704,10 +714,18 @@ Upload this script to S3 and reference it as the Spark `entryPoint`.
 
 ## Further reading
 
+### Kedro
+
 - [Package a Kedro project](../package_a_project.md#package-a-kedro-project)
 - [Run a packaged project](../package_a_project.md#run-a-packaged-project)
 - [Lifecycle management with KedroSession](../../extend/session.md)
-- [EMR Serverless 7.13.0 release notes](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/release-version-7130.html)
-- [Customising an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
+
+### AWS
+
+- [EMR Serverless User Guide](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html)
+- [Getting started with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/getting-started.html)
+- [Custom images for EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
 - [Using custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-custom-images.html)
+- [Submitting Spark jobs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark-submit.html)
+- [EMR Serverless 7.13.0 release notes](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/release-version-7130.html)
 - [AWS custom Python version samples (EMR 6.x)](https://github.com/aws-samples/emr-serverless-samples/tree/main/examples/pyspark/custom_python_version)

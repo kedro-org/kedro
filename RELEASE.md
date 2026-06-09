@@ -8,7 +8,13 @@
 
 ## Bug fixes and other changes
 ## Documentation changes
+* Documented hooks limitation when using `ParallelRunner`.
+
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [Simon Bull](https://github.com/simon-b)
 
 # Release 1.4.0
 

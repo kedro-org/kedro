@@ -42,7 +42,7 @@ Use **EMR 7.x** for all new Kedro 1.x deployments. EMR base images ship with Pyt
 | Wheel install | full dependencies OK | `--no-deps` + slim runtime |
 
 !!! warning "Legacy: EMR 6.x"
-    EMR 6.x defaults to Python ~3.7. Reaching Python 3.10+ requires extra work in the image. We do **not** recommend EMR 6.x for new deployments. See [Legacy: EMR 6.x](#legacy-emr-6x) only if you cannot use EMR 7.x.
+    EMR 6.x defaults to Python ~3.7. Reaching Python 3.10+ requires extra work in the image. We do **not** recommend EMR 6.x for new deployments. See [Legacy: EMR 6.x](#legacy-emr-6x) if you cannot use EMR 7.x.
 
 Keep the EMR release label aligned everywhere: Dockerfile `FROM` line, EMR Serverless application release, `validate-image -r` flag, and job submission must all match (for example `emr-7.13.0`).
 
@@ -90,7 +90,7 @@ Keep `conf/base/catalog.yml` on **local file paths** for local development. You 
 Add `conf/emr/` (or another environment name) with S3 paths for datasets your pipeline reads and writes. Pass `--env emr` when you submit the job.
 
 !!! warning "Catalog environment merge is destructive"
-    By default, Kedro merges configuration environments at the **top level**. If `conf/emr/catalog.yml` overrides a dataset with only `filepath`, it **replaces** the entire dataset entry from `conf/base/` and drops keys such as `type`. Either include the full dataset definition (including `type`) in `conf/emr/catalog.yml`, or set `merge_strategy: {catalog: soft}` in `settings.py` so environment files can override individual fields.
+    By default, Kedro merges configuration environments at the **top level**. If `conf/emr/catalog.yml` overrides a dataset using `filepath` alone, it **replaces** the entire dataset entry from `conf/base/` and drops keys such as `type`. Either include the full dataset definition (including `type`) in `conf/emr/catalog.yml`, or set `merge_strategy: {catalog: soft}` in `settings.py` so environment files can override individual fields.
 
 Example `conf/emr/catalog.yml` (full entries):
 
@@ -108,7 +108,7 @@ preprocessed_companies:
     mode: overwrite
 ```
 
-- Use **`s3://`** for pandas datasets (via `s3fs`).
+- Use **`s3://`** for pandas datasets (with `s3fs`).
 - Use **`s3a://`** for `spark.SparkDatasetV2` paths so Spark uses the Hadoop S3 filesystem bundled with EMR.
 
 ### Add `s3fs` to project dependencies
@@ -150,7 +150,7 @@ This creates a `.whl` file and `conf-<package_name>.tar.gz` in `dist/` (for exam
 
 ## Step 4: Set up AWS
 
-Complete these once per AWS account/region (or per EMR release line if you run both 7.x and 6.x). Follow the linked AWS guides for console and CLI steps — this section only lists what you need and Kedro-specific settings.
+Complete this setup for each AWS account/region (or per EMR release line if you run both 7.x and 6.x). Follow the linked AWS guides for console and CLI steps — this section lists what you need and Kedro-specific settings.
 
 | Resource | AWS documentation | What you need for Kedro |
 |----------|-------------------|-------------------------|
@@ -198,7 +198,7 @@ USER hadoop:hadoop
 !!! tip "Apple Silicon (ARM) builders"
     EMR Serverless applications use **`x86_64`**. Build with `--platform linux/amd64` (Docker or Podman) or the job may fail with `Custom image architecture doesn't match application architecture`.
 
-Build the image. Tag it with your ECR URI at build time so the image you push is the one you just built:
+Build the image. Tag it with your ECR URI at build time so the image you push is the one you built:
 
 ```bash
 export ECR_IMAGE=<ecr-image-uri>
@@ -207,7 +207,7 @@ kedro package
 docker build --platform linux/amd64 -t ${ECR_IMAGE} .
 ```
 
-If you build with a local tag (for example `kedro-emr-7`), run `docker tag kedro-emr-7:latest <ecr-image-uri>` immediately before pushing. Pushing an older ECR-tagged image by mistake is a common source of stale-configuration failures.
+If you build with a local tag (for example `kedro-emr-7`), run `docker tag kedro-emr-7:latest <ecr-image-uri>` right before pushing. Pushing an older ECR-tagged image by mistake is a common source of stale-configuration failures.
 
 ---
 
@@ -215,7 +215,7 @@ If you build with a local tag (for example `kedro-emr-7`), run `docker tag kedro
 
 ### Verify locally before pushing
 
-Inspect the ECR-tagged image (not a `localhost/...` tag only):
+Inspect the ECR-tagged image (avoid relying on a `localhost/...` tag alone):
 
 ```bash
 docker run --rm --user hadoop --entrypoint head ${ECR_IMAGE} \
@@ -402,7 +402,7 @@ Follow [Steps 1–4](#step-1-prepare-your-kedro-project) as for EMR 7.x, then ap
 
 ### Additional Kedro configuration for slim images
 
-EMR 6.x images typically install the wheel with **`--no-deps`** and only the runtime packages the job needs. That means optional starter dependencies (for example `matplotlib`, `scikit-learn`) are not in the image.
+EMR 6.x images typically install the wheel with **`--no-deps`** and the runtime packages the job needs. That means optional starter dependencies (for example `matplotlib`, `scikit-learn`) are not in the image.
 
 Kedro's default [`find_pipelines()`](../../build/pipeline_registry.md) imports **every** pipeline package at startup — even when you pass `--pipelines data_processing`. To avoid import errors:
 
@@ -432,14 +432,14 @@ When `KEDRO_PIPELINES_TO_FIND` is unset (local development), all pipelines are r
 
 3. Set `KEDRO_PIPELINES_TO_FIND` in `sparkSubmitParameters` at job submission (see below).
 
-### Step 5 (EMR 6.x): Build the custom Docker image
+### Step 5 (EMR 6.x): build the custom Docker image
 
 Save as `Dockerfile.emr6` and pass `-f Dockerfile.emr6` at build time.
 
 Uses **`emr-6.10.0`**, **Python 3.10.16**, and Amazon Linux 2.
 
 !!! tip "Prefer pre-built Python on EMR 6.x"
-    Compiling Python with pyenv inside a `linux/amd64` image on Apple Silicon can take **1–2+ hours**. The Dockerfile below uses a [python-build-standalone](https://github.com/astral-sh/python-build-standalone) release instead. See [Alternative: pyenv on EMR 6.x](#alternative-pyenv-on-emr-6x) if you must match the AWS pyenv samples exactly.
+    Compiling Python with pyenv inside a `linux/amd64` image on Apple Silicon can take **1–2+ hours**. The Dockerfile below uses a [python-build-standalone](https://github.com/astral-sh/python-build-standalone) release instead. See [Alternative: pyenv on EMR 6.x](#alternative-pyenv-on-emr-6x) if you must follow the AWS pyenv samples.
 
 !!! warning "Match Python to EMR 6.x Spark"
     EMR 6.10 ships **Spark 3.3**, which is not compatible with **Python 3.12** or **pandas 2.x+** for `createDataFrame(pandas_df)`. Use **Python 3.10** and pin **`pandas>=1.5,<2.0`** in the EMR 6.x image. Prefer **EMR 7.x** if you need Python 3.12 and modern pandas.
@@ -483,7 +483,7 @@ USER hadoop:hadoop
 ```
 
 !!! note "Why not install the full project dependency set on EMR 6.x?"
-    The EMR 7.x Dockerfile can install the packaged wheel with all dependencies from `pyproject.toml`. On **EMR 6.x**, install the wheel with **`--no-deps`** and add only the runtime packages the job needs with **`--prefer-binary`**, because:
+    The EMR 7.x Dockerfile can install the packaged wheel with all dependencies from `pyproject.toml`. On **EMR 6.x**, install the wheel with **`--no-deps`** and add the runtime packages the job needs with **`--prefer-binary`**, because:
 
     - **PySpark** is provided by EMR — do not `pip install pyspark` in the image.
     - **Amazon Linux 2 (GCC 7.3)** cannot compile some packages (for example scikit-learn 1.8+) from source when wheels are unavailable.
@@ -568,20 +568,20 @@ aws emr-serverless start-job-run \
 
 If you change `PYTHON_VERSION` in the Dockerfile, keep the Spark Python paths in `sparkSubmitParameters` aligned with the interpreter inside the image.
 
-### EMR 7.x vs 6.x at a glance
+### EMR 7.x vs 6.x comparison
 
 | | EMR 7.x | EMR 6.x |
 |--|---------|---------|
 | Release | `emr-7.13.0` | `emr-6.10.0` |
-| Python | 3.12 via `dnf` | 3.10.16 standalone |
+| Python | 3.12 with `dnf` | 3.10.16 standalone |
 | Dockerfile | `Dockerfile` | `Dockerfile.emr6` |
 | Wheel install | full dependencies OK | `--no-deps` + slim runtime |
 | Spark Python | `/usr/bin/python3.12` | `/opt/python/bin/python` |
-| Extra job env | — | `KEDRO_PIPELINES_TO_FIND`, `PYTHONPATH` |
+| Extra environment variables | — | `KEDRO_PIPELINES_TO_FIND`, `PYTHONPATH` |
 
 ### Alternative: pyenv on EMR 6.x
 
-Use this only if you need to follow the [AWS custom Python version samples](https://github.com/aws-samples/emr-serverless-samples/tree/main/examples/pyspark/custom_python_version) literally. On Apple Silicon, build on an `x86_64` host or in CI if possible.
+Use this path if you need to follow the [AWS custom Python version samples](https://github.com/aws-samples/emr-serverless-samples/tree/main/examples/pyspark/custom_python_version). On Apple Silicon, build on an `x86_64` host or in CI if possible.
 
 ```dockerfile
 FROM public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest AS base
@@ -631,13 +631,13 @@ For pyenv, set `sparkSubmitParameters` to `/usr/.pyenv/versions/3.10.16/bin/pyth
 |---------|--------------|-----|
 | `Custom image architecture doesn't match application architecture` | Image built for ARM on Apple Silicon | Rebuild with `--platform linux/amd64` |
 | `Permission denied` on `/home/hadoop/conf/...` | Config copied as root without read permissions for `hadoop` | Use `ADD --chown=hadoop:hadoop` and `chmod -R a+rX /home/hadoop/conf` in the Dockerfile |
-| `'type' is missing from dataset catalog configuration` | `conf/<emr-conf>/catalog.yml` overrides a dataset with only `filepath`, or an old ECR image is still running | Add full dataset entries (including `type`) or enable soft catalog merge; retag and push the new image, then restart the application |
+| `'type' is missing from dataset catalog configuration` | `conf/<emr-conf>/catalog.yml` overrides a dataset using `filepath` alone, or an old ECR image is still running | Add full dataset entries (including `type`) or enable soft catalog merge; tag and push the new image, then restart the application |
 | `s3fs not installed` | Pandas datasets use `s3://` paths | Add `s3fs` to `pyproject.toml`, repackage, rebuild, and push |
 | `BatchGetImage` / ECR access denied | ECR repository policy missing or incorrect | Apply the [AWS policy template](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html) with `ArnLike` and `ecr:DescribeImages`; **omit `"Resource"`** when applying with `aws ecr set-repository-policy` |
 | Job uses stale configuration after a rebuild | EMR application still holds warm workers on the old image digest | Stop and start the application after each ECR push |
 | `Installing Python-3.12.8...` hangs during EMR 6.x image build | pyenv is compiling Python from source under `linux/amd64` emulation (common on Apple Silicon) | Use the [pre-built Python Dockerfile](#step-5-emr-6x-build-the-custom-docker-image), build on an `x86_64` host/CI, or run `pyenv install -v` and expect a long wait |
 | NumPy/scikit-learn build fails with `Unknown compiler(s): ... g++` on EMR 6.x | C++ compiler missing from the image | Add `gcc-c++` to the `yum install` line; install the wheel with `--no-deps` and use `--prefer-binary` for runtime packages |
-| `scikit-learn requires GCC >= 8.0` during EMR 6.x image build | pip is compiling scikit-learn from source on Amazon Linux 2 (GCC 7.3) | Install the wheel with `--no-deps` and add only the runtime packages you need with `--prefer-binary`; omit pyspark (provided by EMR) |
+| `scikit-learn requires GCC >= 8.0` during EMR 6.x image build | pip is compiling scikit-learn from source on Amazon Linux 2 (GCC 7.3) | Install the wheel with `--no-deps` and add the runtime packages you need with `--prefer-binary`; omit pyspark (provided by EMR) |
 | `No matching distribution found for pyspark` with `--only-binary :all:` | PySpark is not available under a wheels-only install constraint | Do not add `pyspark` to the Dockerfile; use the Spark/pyspark bundled in the EMR image |
 | `ModuleNotFoundError: No module named 'matplotlib'` (or `plotly`, `sklearn`) when running a subset of pipelines | Kedro imports all pipeline modules at startup; slim EMR images omit optional starter dependencies | Use the [`pipeline_registry.py` pattern](#additional-kedro-configuration-for-slim-images) and set `KEDRO_PIPELINES_TO_FIND` in `sparkSubmitParameters`, or add the missing packages to the Dockerfile runtime install |
 | `DatasetError: No module named 'plotly'` (or other dataset backend) with a slim image | `conf/base/catalog.yml` still lists datasets merged into `--env emr` | Move non-EMR datasets to `conf/local/` (or another environment), or install the matching `kedro-datasets` extras in the image |

@@ -1,5 +1,7 @@
 agentic
 Aneira
+AMI
+AMIs
 APIs
 Astro
 async
@@ -71,8 +73,10 @@ Pikachu
 pickleable
 Plotly
 pluggy
+Podman
 Polars
 polars
+pyspark
 Pydantic
 Pydantic's
 Printify
@@ -83,6 +87,7 @@ regressors
 Repo
 Repos
 repo
+retag
 reusability
 SQLAlchemy
 serialisable

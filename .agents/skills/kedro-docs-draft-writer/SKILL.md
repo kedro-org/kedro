@@ -1,15 +1,16 @@
 ---
 name: kedro-docs-draft-writer
 description: >-
-  Draft Kedro documentation for a topic, feature, or PR change. Follows the
-  Kedro style guide, places the draft in the correct docs/ path, and runs Vale
-  before delivery. Use when the user says "draft docs for X", "write a how-to
-  for X", "document this feature", or wants to beat blank-page paralysis on any
-  Kedro docs page.
+  Draft or polish Kedro documentation. Writes a first draft from source code or
+  a branch, or polishes an existing draft the user provides. Follows the Kedro
+  style guide, places new files in the correct docs/ path, and runs Vale before
+  handing back. Use when the user says "draft docs for X", "write a how-to for
+  X", "document this feature", "polish my draft", or wants to beat blank-page
+  paralysis on any Kedro docs page.
 ---
 # Kedro docs draft writer
 
-Generate a Vale-clean first draft of a Kedro documentation page and write it to the correct `docs/` path. The goal is to give the user something concrete to edit — not a polished final doc.
+Write a first draft of a Kedro documentation page, or polish a draft the user already has. The output is always a starting point for human review — not a finished document.
 
 ## How to invoke this skill
 
@@ -21,8 +22,11 @@ The user can supply any combination of:
 | Topic + doc type | "write a how-to for streaming nodes" |
 | PR / branch context | "draft docs for the changes on this branch" |
 | Nothing (infer from branch) | "draft docs" |
+| **Existing draft to polish** | "polish this draft", "clean up my docs", "check my draft against the style guide" |
 
-Work out what's missing from context. Before generating anything, confirm with the user: **topic**, **doc type**, and **proposed target file path** in a single message. Don't ask three separate questions, and don't ask again in Step 3.
+**If the user provides an existing draft to polish**, skip straight to [Polish mode](#polish-mode) below.
+
+Otherwise, work out what's missing from context. Before generating anything, confirm with the user: **topic**, **doc type**, and **proposed target file path** in a single message. Don't ask three separate questions, and don't ask again in Step 3.
 
 ---
 
@@ -79,7 +83,7 @@ Read the following before drafting. This is the most important step — the draf
 
 **Always:**
 - Any existing doc in the same `docs/` subdirectory that covers a similar topic. Use it as a structural model for heading hierarchy and section order. To find candidates: `ls docs/<subdir>/`.
-- The relevant source files under `kedro/` for accurate class names, method signatures, parameter names, and default values. Do not invent API details.
+- The relevant source files under `kedro/` for accurate class names, method signatures, parameter names, and default values. Read docstrings first — they are the primary source of truth for how a feature behaves.
 
 **For how-tos and tutorials:**
 - One existing how-to or tutorial of similar scope. Mirror its step structure and tone.
@@ -89,6 +93,8 @@ Read the following before drafting. This is the most important step — the draf
 
 Read multiple files in parallel where possible. Take notes on: key classes/functions, important parameters, any caveats or version constraints, and related docs pages to cross-link.
 
+**Gap rule:** If source material is missing, ambiguous, or contradictory, do not fill the gap with plausible-sounding content. Insert a `<!-- TODO: verify — <what's unclear> -->` comment in the draft and list the gap in Step 8. Gaps are expected in a first draft; invented facts are not.
+
 ---
 
 ### 5. Draft the page
@@ -97,18 +103,24 @@ Write the draft directly. Follow the structural template from the page you found
 
 Apply all style rules from [reference.md](reference.md) section "Style rules" as you write — do not draft first and fix later.
 
+**Scope discipline:** Stay specific to the feature being documented. Don't add background context the reader didn't ask for — if broader context is needed, link to an existing explanation page instead of writing it inline. A draft that says too much about the wrong thing is harder to fix than a tight draft with gaps.
+
+**Tone guard:** Write for a practitioner. Don't over-explain, don't state things obvious from the code, and don't soften instructions with hedges like "you might want to" or "it's worth noting that". Assume the reader is competent. Condescension and sycophancy in docs erode trust.
+
 Required elements by doc type:
 
 **How-to:**
 - Opening sentence: one sentence stating what the reader will achieve and what prerequisite knowledge is assumed.
 - Numbered steps. Each step starts with an imperative verb.
 - Code blocks with language lexers (`python`, `bash`, `yaml`).
+- Where the feature involves configuration, include a concrete boilerplate snippet (YAML, TOML, JSON, or HCL as appropriate) that the reader can copy and edit. Mark placeholder values clearly, e.g. `# replace with your value`.
 - No explanatory tangents — link to explanation pages instead.
 
 **Tutorial:**
 - Opening "by the end of this tutorial" sentence.
 - Numbered sections. Each section builds on the last.
 - Complete, runnable code examples.
+- Include boilerplate config files where relevant — readers should be able to copy the file and edit it, not construct it from scratch.
 - Expected output shown where relevant.
 
 **Explanation:**
@@ -154,10 +166,49 @@ Apply the fix rules from [reference.md](reference.md) section "Common Vale fixes
 
 Tell the user:
 - The path of the written file.
-- What the draft covers and what it deliberately leaves blank (so the user knows what to fill in).
-- Any gaps you hit — missing API details, unclear behaviour, or things to verify against the code.
+- What the draft covers and what it deliberately leaves out (so the user knows the scope).
+- Every `<!-- TODO: verify -->` gap — list them explicitly so the user can resolve them before opening a PR.
 - Any Vale findings that were judgment calls rather than mechanical fixes.
 - A reminder to add the new file to the MkDocs nav in `mkdocs.yml` before the docs build will include it.
+
+Be direct about what the draft is: a starting point. The user should read it, fill the gaps, and do a final review before it goes anywhere. Don't present it as ready to ship.
+
+---
+
+---
+
+## Polish mode
+
+Use this when the user provides an existing draft and wants it improved, not rewritten. The goal is to make their text cleaner and more consistent — not to replace their decisions about what the doc should say.
+
+### P1. Read the draft
+
+Read the file or text the user provides. Do not rewrite it yet.
+
+### P2. Run Vale (or manual checklist)
+
+Follow the same Vale / manual checklist process as Step 7 in the main workflow. Collect all findings before making changes.
+
+### P3. Apply mechanical fixes only
+
+Fix anything that is clearly wrong and has no judgment involved: Vale rule violations, spelling, sentence length, passive voice, banned terms (see [reference.md](reference.md) "Common Vale fixes").
+
+**Do not:**
+- Restructure sections without being asked.
+- Add content that isn't already there, implied by the source code, or requested.
+- Remove content because you think it's unnecessary — flag it instead.
+- Make opinionated style choices beyond what the style guide requires.
+
+### P4. Flag, don't decide
+
+For anything that would require a decision — restructuring, missing information, ambiguous scope — add an inline comment (`<!-- SUGGESTION: … -->`) and list it in your report. Let the user decide.
+
+### P5. Report changes
+
+Tell the user:
+- A short list of mechanical fixes applied.
+- Every `<!-- SUGGESTION: … -->` item, with a one-line explanation of why you flagged it.
+- Any gaps you noticed (things that seem underspecified or unverifiable against the source code).
 
 ---
 

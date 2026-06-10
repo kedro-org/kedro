@@ -98,3 +98,7 @@ Use this when Vale is not installed. Work through every item before declaring th
 - [ ] `Hooks` capitalised when referring to the Kedro Hooks system
 - [ ] `pipeline`, `node`, `dataset`, `catalog` in lowercase (as concepts)
 - [ ] No non-inclusive terms: "whitelist/blacklist", "master/slave", "sanity check", "dummy" (see [style-guide.md](style-guide.md) inclusive language section)
+- [ ] No condescending hedges: "you might want to", "it's worth noting that", "as you may know", "obviously", "of course"
+- [ ] Scope is tight — no background context that isn't directly needed; broader context is linked, not inlined
+- [ ] All gaps are marked with `<!-- TODO: verify — <what's unclear> -->` rather than filled with plausible content
+- [ ] Config/manifest examples use clear placeholder markers (`# replace with your value`) for values the reader must supply

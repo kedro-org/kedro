@@ -311,7 +311,7 @@ nav:
           - Kedro's video course: getting-started/course.md
       - Tutorials:
           - Kedro Spaceflights tutorial:
-            - Spaceflight tutorial: tutorials/spaceflights_tutorial.md
+            - Spaceflights tutorial: tutorials/spaceflights_tutorial.md
             - Spaceflight tutorial template: tutorials/tutorial_template.md
             - Set up data: tutorials/set_up_data.md
             - Create a pipeline: tutorials/create_a_pipeline.md

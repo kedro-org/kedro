@@ -22,7 +22,7 @@ The user can supply any combination of:
 | PR / branch context | "draft docs for the changes on this branch" |
 | Nothing (infer from branch) | "draft docs" |
 
-Work out what's missing from context. Before generating anything, confirm with the user: **topic**, **doc type**, and **target file path**. One short message is enough — don't ask three separate questions.
+Work out what's missing from context. Before generating anything, confirm with the user: **topic**, **doc type**, and **proposed target file path** in a single message. Don't ask three separate questions, and don't ask again in Step 3.
 
 ---
 
@@ -35,7 +35,9 @@ Work out what's missing from context. Before generating anything, confirm with t
 **If no topic was supplied**, infer from the current branch:
 
 ```bash
-git diff origin/main...HEAD --name-only
+DEFAULT=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
+DEFAULT=${DEFAULT:-main}
+git diff origin/${DEFAULT}...HEAD --name-only
 gh pr view --json title,body 2>/dev/null
 ```
 
@@ -67,7 +69,7 @@ Use the directory map in [reference.md](reference.md) section "Directory map" to
 - Explanation files: noun phrase (e.g. `pipeline_introduction.md`)
 - Reference files: noun phrase (e.g. `configuration_basics.md`)
 
-Confirm the full path with the user before writing anything.
+Include the proposed path in the single confirmation message from Step 1. Do not ask a second time here.
 
 ---
 
@@ -76,7 +78,7 @@ Confirm the full path with the user before writing anything.
 Read the following before drafting. This is the most important step — the draft quality depends on accurate source material.
 
 **Always:**
-- Any existing doc in the same `docs/` subdirectory that covers a similar topic. Use it as a structural model for heading hierarchy and section order.
+- Any existing doc in the same `docs/` subdirectory that covers a similar topic. Use it as a structural model for heading hierarchy and section order. To find candidates: `ls docs/<subdir>/`.
 - The relevant source files under `kedro/` for accurate class names, method signatures, parameter names, and default values. Do not invent API details.
 
 **For how-tos and tutorials:**
@@ -136,7 +138,7 @@ Check whether Vale is installed:
 vale --version 2>/dev/null || echo "NOT_INSTALLED"
 ```
 
-**If Vale is installed**, run it and fix every finding:
+**If Vale is installed**, run it from the repo root (where `.vale.ini` lives) and fix every finding:
 
 ```bash
 vale <path/to/draft.md>
@@ -155,6 +157,7 @@ Tell the user:
 - What the draft covers and what it deliberately leaves blank (so the user knows what to fill in).
 - Any gaps you hit — missing API details, unclear behaviour, or things to verify against the code.
 - Any Vale findings that were judgment calls rather than mechanical fixes.
+- A reminder to add the new file to the MkDocs nav in `mkdocs.yml` before the docs build will include it.
 
 ---
 

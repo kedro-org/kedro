@@ -312,7 +312,7 @@ nav:
       - Tutorials:
           - Kedro Spaceflights tutorial:
             - Spaceflights tutorial: tutorials/spaceflights_tutorial.md
-            - Spaceflight tutorial template: tutorials/tutorial_template.md
+            - Tutorial template: tutorials/tutorial_template.md
             - Set up data: tutorials/set_up_data.md
             - Create a pipeline: tutorials/create_a_pipeline.md
             - Add another pipeline: tutorials/add_another_pipeline.md

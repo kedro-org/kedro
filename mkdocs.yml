@@ -97,6 +97,7 @@ plugins:
       sections:
         Get Started:
           - index.md: Welcome to Kedro documentation
+          - getting-started/quick_start.md: Quick start guide to using Kedro
           - getting-started/install.md: Installation guide for pip, conda, and development setup
           - getting-started/kedro_concepts.md: Core concepts - nodes, pipelines, catalog, and more
           - getting-started/faq.md: Frequently asked questions
@@ -303,6 +304,7 @@ nav:
   - Welcome: index.md
   - Kedro:
       - Get Started:
+          - Quick start: getting-started/quick_start.md
           - Installation: getting-started/install.md
           - Concepts: getting-started/kedro_concepts.md
           - FAQs: getting-started/faq.md

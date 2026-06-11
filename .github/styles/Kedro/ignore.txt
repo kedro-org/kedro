@@ -71,6 +71,7 @@ Pikachu
 pickleable
 Plotly
 pluggy
+Podman
 Polars
 polars
 Pydantic
@@ -103,6 +104,7 @@ transcoding
 untyped
 untrusted
 validators
+vCPUs
 Unsplash
 uv
 VSCode

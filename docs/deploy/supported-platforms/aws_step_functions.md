@@ -202,7 +202,7 @@ Replace `spaceflights_step_functions` with your package name if you used a diffe
 
 ## Step 6. Build the Lambda container image
 
-Create a `Dockerfile` to define the custom Docker image or an available base image to act as the base for our Lambda functions, here we used [AWS Lambda Python 3.12 base image](https://gallery.ecr.aws/lambda/python):
+Create a `Dockerfile` that uses the [AWS Lambda Python 3.12 base image](https://gallery.ecr.aws/lambda/python):
 
 ```Dockerfile
 FROM public.ecr.aws/lambda/python:3.12

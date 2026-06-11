@@ -15,6 +15,7 @@ exceptions:
   - AWS Batch
   - AWS Step Functions
   - AWS Systems Manager
+  - AWS
   - Azure
   - Azure App Service
   - Azure App Service Plan

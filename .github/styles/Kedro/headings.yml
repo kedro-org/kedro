@@ -22,6 +22,7 @@ exceptions:
   - Azure Event Hub
   - Azure ML
   - CI/CD
+  - CDK
   - CLI
   - DataCatalog
   - Data Catalog
@@ -79,6 +80,7 @@ exceptions:
   - Red Hat
   - Redis
   - SageMaker
+  - S3
   - Slack
   - SSH
   - Spark

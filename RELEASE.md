@@ -12,6 +12,7 @@
 * Documented hooks limitation when using `ParallelRunner`.
 
 ## Community contributions
+* [Feng Jikui](https://github.com/fengjikui)
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 

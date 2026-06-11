@@ -35,8 +35,11 @@ def describe_registered_pipeline(
     """Describe a registered pipeline by providing a pipeline name.
     Defaults to the `__default__` pipeline.
     """
+    # Must be called before pipelines.get(), which triggers the first pipelines dict access.
+    pipelines.set_requested([name])
     pipeline_obj = pipelines.get(name)
     if not pipeline_obj:
+        pipelines.set_requested(None)
         all_pipeline_names = pipelines.keys()
         existing_pipelines = ", ".join(sorted(all_pipeline_names))
         raise KedroCliError(

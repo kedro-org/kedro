@@ -4,7 +4,7 @@
 * Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests.
 * Added a new CLI command `kedro server start` to run the server.
 * Added an HTTP endpoint `/snapshot` for accessing project snapshot.
-
+* Added selective pipeline loading: when `--pipelines` is specified, only the requested pipeline modules are imported.
 
 ## Bug fixes and other changes
 * Fixed Rich logging integration so node input/output brackets render correctly in console logs and dataset colour markup does not leak into plain log handlers.

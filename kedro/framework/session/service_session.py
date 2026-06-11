@@ -159,6 +159,8 @@ class KedroServiceSession(AbstractSession):
         self._logger.info("Run ID: %s", run_id)
         save_version = run_id
 
+        # Must be called before load_context(), which triggers the first pipelines dict access.
+        pipelines.set_requested(pipeline_names or None)
         context = self.load_context(runtime_params)
         pipeline_names = pipeline_names or ["__default__"]
         combined_pipeline = Pipeline([])

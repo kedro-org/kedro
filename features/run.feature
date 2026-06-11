@@ -77,6 +77,23 @@ Feature: Run Project
     Then I should get a successful exit code
     And the logs should show that 4 nodes were run
 
+  Scenario: Run kedro run with selective pipeline loading
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter "default"
+    When I execute the kedro command "run --pipeline data_engineering"
+    Then I should get a successful exit code
+    And the logs should show that 1 nodes were run
+    And the logs should show that "split_data_node" was run
+
+  Scenario: Run kedro run with selective pipeline loading skips unrelated pipeline modules
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter "default"
+    And I have broken the "data_science" pipeline with an unimportable dependency
+    When I execute the kedro command "run --pipeline data_engineering"
+    Then I should get a successful exit code
+    And the logs should show that 1 nodes were run
+    And the logs should show that "split_data_node" was run
+
   Scenario: Run with --only-missing-outputs flag after deleting an intermediate output
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"

@@ -1,384 +1,573 @@
 # AWS Step Functions
 
-This tutorial explains how to deploy a Kedro project with [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) to run a Kedro pipeline in production on the AWS [Serverless Computing](https://aws.amazon.com/serverless/) platform.
+[AWS Step Functions](https://aws.amazon.com/step-functions/) orchestrates [AWS Lambda](https://aws.amazon.com/lambda/) functions into a state machine. This guide walks you through deploying a **Kedro 1.x** project so each pipeline node runs as a Lambda function, with datasets stored on Amazon S3.
 
-## Why would you run a Kedro pipeline with AWS Step Functions?
+## What you will do
 
-A major problem when data pipelines move to production is to build and maintain the underlying compute infrastructure, or [servers](https://en.wikipedia.org/wiki/Server_(computing)). [Serverless computing](https://en.wikipedia.org/wiki/Serverless_computing) hands the provisioning and management of distributed computing resources to cloud providers, enabling data engineers and data scientists to focus on their business problems.
+1. [Prepare your Kedro project](#step-1-prepare-your-kedro-project)
+2. [Configure Kedro for AWS](#step-2-configure-kedro-for-aws)
+3. [Package the Kedro project](#step-3-package-the-kedro-project)
+4. [Set up AWS](#step-4-set-up-aws)
+5. [Create the Lambda handler](#step-5-create-the-lambda-handler)
+6. [Build the Lambda container image](#step-6-build-the-lambda-container-image)
+7. [Write the CDK deployment script](#step-7-write-the-cdk-deployment-script)
+8. [Deploy with CDK](#step-8-deploy-with-cdk)
+9. [Run the state machine](#step-9-run-the-state-machine)
+10. [Verify outputs on S3](#step-10-verify-outputs-on-s3)
 
-[Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/) and [AWS Lambda](https://aws.amazon.com/lambda/) are good examples of this solution, but others are available. Services like [AWS Step Functions](https://aws.amazon.com/step-functions/) offer a managed orchestration capability that helps you sequence serverless functions and multiple cloud-native services into business-critical applications.
-
-From a Kedro perspective, this means the ability to run each node and keep the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure. Another benefit of running a Kedro pipeline in a serverless computing platform is the ability to use other services from the same provider, such as the [feature store for Amazon SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.
-
-The following discusses how to run the Kedro pipeline from the [spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) on [AWS Step Functions](https://aws.amazon.com/step-functions/).
-
-
-## Strategy
-
-The general strategy to deploy a Kedro pipeline on AWS Step Functions is to run every Kedro node as an [AWS Lambda](https://aws.amazon.com/lambda/) function. The whole pipeline is converted into an [AWS Step Functions State Machine](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html) for orchestration. This approach mirrors the principles of [running Kedro in a distributed environment](../distributed.md).
-
-## Prerequisites
-
-To use AWS Step Functions, ensure you have the following:
-
-- An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
-- [Configured AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) on your local machine
-- Generated Kedro project called **Spaceflights Step Functions** using [Kedro Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/).
-  - The final project directory's name should be `spaceflights-step-functions`.
-  - You should complete the [spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) to understand the project's structure.
-
-* In this tutorial, we also use the [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) to write our deployment script. To install the `cdk` command, see the [AWS guide](https://docs.aws.amazon.com/cdk/v2/guide/cli.html). The official installation method uses [`npm`](https://www.npmjs.com/):
-
-```console
-$ npm install -g aws-cdk
-# to verify that the cdk command has been installed
-$ cdk -h
-```
-
-## Deployment process
-
-The deployment process for a Kedro pipeline on AWS Step Functions consists of the following steps:
-
-* Develop the Kedro pipeline locally as normal
-* Create a new configuration environment in which we ensure all nodes' inputs and outputs have a persistent location on S3, since `MemoryDataset` can't be shared between AWS Lambda functions
-* Package the Kedro pipeline as an [AWS Lambda-compliant Docker image](https://docs.aws.amazon.com/lambda/latest/dg/lambda-images.html)
-* Write a script to convert and deploy each Kedro node as an AWS Lambda function. Each function will use the same pipeline Docker image created in the previous step and run a single Kedro node associated with it. This follows the principles laid out in our [distributed deployment guide](../distributed.md).
-* The script above will also convert and deploy the entire Kedro pipeline as an AWS Step Functions State Machine.
-
-The final deployed AWS Step Functions State Machine will have the following visualisation in AWS Management Console:
+The deployed state machine looks like this in the AWS Management Console:
 
 ![](../../meta/images/aws_step_functions_state_machine.png)
 
-The rest of the tutorial will explain each step in the deployment process above in details.
+## Before you start
 
-### Step 1. Create new configuration environment to prepare a compatible `DataCatalog`
+### Prerequisites
 
-* Create a `conf/aws` directory in your Kedro project
-* Put a `catalog.yml` file in this directory with the following content
-* Ensure that you have `s3fs>=0.3.0,<0.5` defined in your `requirements.txt` so the data can be read from S3.
+- A Kedro 1.x project from the [Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/) (`requires-python = ">=3.10"` in `pyproject.toml`)
+- Python **>=3.10** locally
+- [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI)
+- [Node.js](https://nodejs.org/) and the [CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/cli.html) (`npm install -g aws-cdk`)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region
+- An AWS account with permissions for S3, ECR, Lambda, Step Functions, IAM, and CloudFormation
 
-??? example "View code"
+Create the project with:
+
+```bash
+kedro new -s spaceflights-pandas -n spaceflights_step_functions
+```
+
+Name the project directory `spaceflights-step-functions`. Complete the [Spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) if you are new to the project layout.
+
+### Strategy
+
+Each Kedro node becomes a Lambda function that shares the same container image. Step Functions runs nodes in parallel within each dependency group and sequentially across groups, following the same principles as [running Kedro in a distributed environment](../distributed.md).
+
+Because Lambda functions are isolated, every dataset that crosses node boundaries must use persistent storage (for example S3). `MemoryDataset` entries cannot be shared between functions.
+
+### Why a container image?
+
+Lambda [container images](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html) let you package Kedro, project dependencies, and configuration into one artefact you can build and test locally before pushing to [Amazon ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html). The [AWS Lambda Python 3.12 base image](https://gallery.ecr.aws/lambda/python) provides the runtime interface; your `Dockerfile` installs the packaged Kedro wheel and copies `conf/`.
+
+### Placeholders used in this guide
+
+Replace these before building and deploying:
+
+| Placeholder | Example |
+| --- | --- |
+| `<your-bucket>` | `kedro-sfn-test-123456789012` |
+| `<your-aws-account-id>` | `123456789012` |
+| `<your-aws-region>` | `us-east-1` |
+| `<PACKAGE_NAME>` | `spaceflights_step_functions` |
+| `<ecr-image-uri>` | `123456789012.dkr.ecr.us-east-1.amazonaws.com/spaceflights-step-functions:latest` |
+
+---
+
+## Step 1: Prepare your Kedro project
+
+From the project root, install dependencies and run the pipeline locally:
+
+```bash
+pip install -e .
+kedro run
+```
+
+Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in a separate environment in the next step.
+
+---
+
+## Step 2: Configure Kedro for AWS
+
+### Create an `aws` config environment
+
+Add `conf/aws/` with a `globals.yml` file and a `catalog.yml` that points every dataset to S3. Use [catalog globals](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params) so the bucket name is defined in one place.
+
+`conf/aws/globals.yml`:
+
+```yaml
+s3_bucket: <your-bucket>
+```
+
+!!! warning "Catalog environment merge is destructive"
+    By default, Kedro merges configuration environments at the **top level**. If `conf/aws/catalog.yml` overrides a dataset using `filepath` alone, it **replaces** the entire dataset entry from `conf/base/` and drops keys such as `type`. Either include the full dataset definition (including `type`) in `conf/aws/catalog.yml`, or set `merge_strategy: {catalog: soft}` in `settings.py` so environment files can override individual fields.
+
+!!! warning "Every shared dataset needs S3 storage"
+    The `aws` catalog must list **every** dataset used by the deployed pipeline, including intermediate outputs such as `X_train`, `X_test`, `y_train`, and `y_test`, and reporting artefacts. Omitting a dataset causes `MemoryDataset` errors when Step Functions moves between Lambda invocations.
+
+### Add `s3fs` to project dependencies
+
+When datasets read from `s3://` paths, add `s3fs` to `pyproject.toml`:
+
+```toml
+"s3fs>=2024.6.0"
+```
+
+The Spaceflights starter uses Parquet for intermediate tables and includes a reporting pipeline.
+
+??? example "View `conf/aws/catalog.yml`"
     ```yaml
     companies:
       type: pandas.CSVDataset
-      filepath: s3://<your-bucket>/companies.csv
+      filepath: s3://${globals:s3_bucket}/01_raw/companies.csv
 
     reviews:
       type: pandas.CSVDataset
-      filepath: s3://<your-bucket>/reviews.csv
+      filepath: s3://${globals:s3_bucket}/01_raw/reviews.csv
 
     shuttles:
       type: pandas.ExcelDataset
-      filepath: s3://<your-bucket>/shuttles.xlsx
+      filepath: s3://${globals:s3_bucket}/01_raw/shuttles.xlsx
+      load_args:
+        engine: openpyxl
 
     preprocessed_companies:
-      type: pandas.CSVDataset
-      filepath: s3://<your-bucket>/preprocessed_companies.csv
+      type: pandas.ParquetDataset
+      filepath: s3://${globals:s3_bucket}/02_intermediate/preprocessed_companies.parquet
 
     preprocessed_shuttles:
-      type: pandas.CSVDataset
-      filepath: s3://<your-bucket>/preprocessed_shuttles.csv
+      type: pandas.ParquetDataset
+      filepath: s3://${globals:s3_bucket}/02_intermediate/preprocessed_shuttles.parquet
 
     model_input_table:
-      type: pandas.CSVDataset
-      filepath: s3://<your-bucket>/model_input_table.csv
-
-    regressor:
-      type: pickle.PickleDataset
-      filepath: s3://<your-bucket>/regressor.pickle
-      versioned: true
+      type: pandas.ParquetDataset
+      filepath: s3://${globals:s3_bucket}/03_primary/model_input_table.parquet
 
     X_train:
       type: pickle.PickleDataset
-      filepath: s3://<your-bucket>/X_train.pickle
+      filepath: s3://${globals:s3_bucket}/04_feature/X_train.pickle
 
     X_test:
       type: pickle.PickleDataset
-      filepath: s3://<your-bucket>/X_test.pickle
+      filepath: s3://${globals:s3_bucket}/04_feature/X_test.pickle
 
     y_train:
       type: pickle.PickleDataset
-      filepath: s3://<your-bucket>/y_train.pickle
+      filepath: s3://${globals:s3_bucket}/04_feature/y_train.pickle
 
     y_test:
       type: pickle.PickleDataset
-      filepath: s3://<your-bucket>/y_test.pickle
+      filepath: s3://${globals:s3_bucket}/04_feature/y_test.pickle
+
+    regressor:
+      type: pickle.PickleDataset
+      filepath: s3://${globals:s3_bucket}/06_models/regressor.pickle
+      versioned: true
+
+    shuttle_passenger_capacity_plot_exp:
+      type: plotly.PlotlyDataset
+      filepath: s3://${globals:s3_bucket}/08_reporting/shuttle_passenger_capacity_plot_exp.json
+      versioned: true
+      plotly_args:
+        type: bar
+        fig:
+          x: shuttle_type
+          y: passenger_capacity
+          orientation: h
+        layout:
+          xaxis_title: Shuttles
+          yaxis_title: Average passenger capacity
+          title: Shuttle Passenger capacity
+
+    shuttle_passenger_capacity_plot_go:
+      type: plotly.JSONDataset
+      filepath: s3://${globals:s3_bucket}/08_reporting/shuttle_passenger_capacity_plot_go.json
+      versioned: true
+
+    dummy_confusion_matrix:
+      type: matplotlib.MatplotlibDataset
+      filepath: s3://${globals:s3_bucket}/08_reporting/dummy_confusion_matrix.png
+      versioned: true
     ```
 
-### Step 2. Package the Kedro pipeline as an AWS Lambda-compliant Docker image
+### Create an S3 bucket and upload raw data
 
-In December 2020, [AWS announced that an AWS Lambda function can now use a container image up to **10 GB in size**](https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/) as its deployment package. The image works alongside the original zip method. Because Lambda imposes specific [requirements for the container image to work properly](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-reqs), you must build a custom Docker container image that includes the Kedro pipeline and meets those requirements.
+Create a globally unique bucket and upload the raw datasets — see [Creating a bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) and [Uploading objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html):
 
-!!! note
-    All the following steps should be done in the Kedro project's root directory.
+```bash
+export AWS_REGION=<your-aws-region>
+export S3_BUCKET=<your-bucket>
 
-* **Step 2.1**: Package the Kedro pipeline as a Python package so you can install it into the container later on:
-
-```console
-$ kedro package
+aws s3 mb "s3://${S3_BUCKET}" --region "${AWS_REGION}"
+aws s3 sync data/01_raw/ "s3://${S3_BUCKET}/01_raw/"
 ```
 
-For more information, see the guide on [packaging Kedro as a Python package](../../deploy/package_a_project.md).
+!!! note "`shuttles.xlsx` may be missing locally"
+    The starter gitignores `data/01_raw/shuttles.xlsx`. Copy it from the [starter repository](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) if `kedro new` did not place it in your project.
 
-* **Step 2.2**: Create a `lambda_handler.py` file:
+### Verify the AWS environment locally
+
+```bash
+kedro run --env aws
+```
+
+Confirm outputs appear under your S3 bucket paths.
+
+### How config reaches Lambda
+
+`kedro package` produces a `.whl` file; the wheel does **not** include `conf/`. The `Dockerfile` copies the `conf/` directory into `${LAMBDA_TASK_ROOT}/conf`. The handler passes `conf_source` to `KedroSession.create()` so Kedro loads the `aws` environment from that path.
+
+---
+
+## Step 3: Package the Kedro project
+
+Run this in your project root. Repeat whenever you change pipeline code or dependencies:
+
+```bash
+kedro package
+```
+
+This creates `dist/spaceflights_step_functions-0.1-py3-none-any.whl` (the exact filename depends on your package version). See [Package a Kedro project](../package_a_project.md#package-a-kedro-project) for details.
+
+---
+
+## Step 4: Set up AWS
+
+Complete this setup for each AWS account/region. Follow the linked AWS guides for console and CLI steps — this section lists what you need and Kedro-specific settings.
+
+| Resource | AWS documentation | What you need for Kedro |
+| --- | --- | --- |
+| **S3 bucket** | [Creating a bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) | Store raw data and pipeline outputs (`s3://<your-bucket>/01_raw/`, `02_intermediate/`, and so on) |
+| **ECR repository** | [Create a private repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html) | One **private** repo for the Lambda image (for example `spaceflights-step-functions`) |
+| **CDK bootstrap** | [Bootstrapping](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) | One-time per account/region before `cdk deploy` |
+| **IAM** | Created by CDK | Lambda execution roles and Step Functions permissions are provisioned by the CDK stack |
+
+```bash
+export AWS_ACCOUNT_ID=<your-aws-account-id>
+export AWS_REGION=<your-aws-region>
+export ECR_REPO=spaceflights-step-functions
+
+aws ecr create-repository --repository-name "${ECR_REPO}" --region "${AWS_REGION}"
+```
+
+---
+
+## Step 5: Create the Lambda handler
+
+Create `lambda_handler.py` in the project root. Each Lambda invocation runs a single node named in the event payload.
+
+!!! note "Use `configure_project` inside Lambda"
+    Call `configure_project("<PACKAGE_NAME>")` in the handler, not `bootstrap_project()`. The packaged wheel is installed into the container; `bootstrap_project()` expects `pyproject.toml` and a `src/` tree that are not copied into the image.
 
 ```python
+from pathlib import Path
 from unittest.mock import patch
 
 
 def handler(event, context):
+    """AWS Lambda entrypoint that runs a single Kedro node."""
     from kedro.framework.project import configure_project
+    from kedro.framework.session import KedroSession
 
-    configure_project("spaceflights_step_functions")
     node_to_run = event["node_name"]
+    project_path = Path(__file__).resolve().parent
 
-    # Since _multiprocessing.SemLock is not implemented on lambda yet,
-    # we mock it out so we could import the session. This has no impact on the correctness
-    # of the pipeline, as each Lambda function runs a single Kedro node, hence no need for Lock
-    # during import. For more information, please see this StackOverflow discussion:
-    # https://stackoverflow.com/questions/34005930/multiprocessing-semlock-is-not-implemented-when-running-on-aws-lambda
+    # SemLock is not available on Lambda; mock it so Kedro can import safely.
     with patch("multiprocessing.Lock"):
-        from kedro.framework.session import KedroSession
-
-        with KedroSession.create(env="aws") as session:
+        configure_project("spaceflights_step_functions")
+        with KedroSession.create(
+            project_path=project_path,
+            env="aws",
+            conf_source=str(project_path / "conf"),
+        ) as session:
             session.run(node_names=[node_to_run])
 ```
 
-This file acts as the handler for each Lambda function in our pipeline, receives the name of a Kedro node from a triggering event and executes it accordingly.
+Replace `spaceflights_step_functions` with your package name if you used a different starter.
 
-* **Step 2.3**: Create a `Dockerfile` to define the custom Docker image to act as the base for our Lambda functions:
+---
 
-```Dockerfile
-# Define global args
-ARG FUNCTION_DIR="/home/app/"
-ARG RUNTIME_VERSION="3.9"
+## Step 6: Build the Lambda container image
 
-# Stage 1 - bundle base image + runtime
-# Grab a fresh copy of the image and install GCC
-FROM python:${RUNTIME_VERSION}-buster as build-image
+Create a `Dockerfile` in your project root:
 
-# Install aws-lambda-cpp build dependencies
-RUN apt-get update && \
-  apt-get install -y \
-  g++ \
-  make \
-  cmake \
-  unzip \
-  libcurl4-openssl-dev
+```dockerfile
+FROM public.ecr.aws/lambda/python:3.12
 
-# Include global args in this stage of the build
-ARG FUNCTION_DIR
-ARG RUNTIME_VERSION
-# Create the function directory
-RUN mkdir -p ${FUNCTION_DIR}
-RUN mkdir -p ${FUNCTION_DIR}/{conf}
-# Add handler function
-COPY lambda_handler.py ${FUNCTION_DIR}
-# Add conf/ directory
-COPY conf ${FUNCTION_DIR}/conf
-# Install Kedro pipeline
-COPY dist/spaceflights_step_functions-0.1-py3-none-any.whl .
-RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir spaceflights_step_functions-0.1-py3-none-any.whl --target ${FUNCTION_DIR}
-# Install Lambda Runtime Interface Client for Python
-RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir awslambdaric --target ${FUNCTION_DIR}
+COPY lambda_handler.py ${LAMBDA_TASK_ROOT}/
+COPY conf/ ${LAMBDA_TASK_ROOT}/conf/
 
-# Stage 3 - final runtime image
-# Grab a fresh copy of the Python image
-FROM python:${RUNTIME_VERSION}-buster
-# Include global arg in this stage of the build
-ARG FUNCTION_DIR
-# Set working directory to function root directory
-WORKDIR ${FUNCTION_DIR}
-# Copy in the built dependencies
-COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
-ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
-CMD [ "lambda_handler.handler" ]
+COPY dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl --target "${LAMBDA_TASK_ROOT}" \
+    && rm -f /tmp/*.whl
+
+CMD ["lambda_handler.handler"]
 ```
 
-This `Dockerfile` is adapted from the official guide on [how to create a custom image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-types) for Lambda to include Kedro-specific steps.
+!!! tip "Apple Silicon (ARM) builders"
+    Lambda functions use **`x86_64`** by default. Build with `--platform linux/amd64` (Docker or Podman) or invocations may fail with `Runtime.InvalidEntrypoint` / `ProcessSpawnFailed`.
 
-* **Step 2.4**: Build the Docker image and push it to AWS Elastic Container Registry (ECR):
+Build the image. Tag it with your ECR URI at build time so the image you push is the one you built:
 
-```console
-# build and tag the image
-$ docker build -t spaceflights-step-functions .
-$ docker tag spaceflights-step-functions:latest <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com/spaceflights-step-functions:latest
-# login to ECR
-$ aws ecr get-login-password | docker login --username AWS --password-stdin <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com
-# push the image to ECR
-$ docker push <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com/spaceflights-step-functions:latest
+```bash
+export ECR_IMAGE=<ecr-image-uri>
+
+kedro package
+docker build --platform linux/amd64 -t ${ECR_IMAGE} .
 ```
 
-### Step 3. Write the deployment script
+If you build with a local tag (for example `spaceflights-step-functions`), run `docker tag spaceflights-step-functions:latest <ecr-image-uri>` right before pushing.
 
-As you will write our deployment script using [AWS CDK in Python](https://docs.aws.amazon.com/cdk/v2/guide/work-with-cdk-python.html), you will have to install some required dependencies from CDK.
+### Push to ECR
 
-* **Step 3.1**: Create a `deploy_requirements.txt` with the following content:
+See [Pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
 
-```
-aws_cdk.aws_s3
-aws_cdk.core
-aws-cdk.aws_ecr
-aws-cdk.aws_lambda
-aws-cdk.aws-stepfunctions
-aws-cdk.aws-stepfunctions-tasks
+```bash
+aws ecr get-login-password --region <your-aws-region> | \
+  docker login --username AWS --password-stdin <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com
+docker push ${ECR_IMAGE}
 ```
 
-Then install these dependencies with `pip`:
+!!! note "Re-push after handler or catalog changes"
+    When you change `lambda_handler.py`, `conf/aws/`, or rebuild the wheel, push a new image tag and update each Lambda function. If you reuse an existing CDK stack, run `aws lambda update-function-code --image-uri <ecr-image-uri>` on each image-based function, or redeploy with `cdk deploy`.
 
-```console
-$ pip install -r deploy_requirements.txt
+---
+
+## Step 7: Write the CDK deployment script
+
+Install CDK Python dependencies into the **same environment** as your Kedro project:
+
+`deploy_requirements.txt`:
+
+```
+aws-cdk-lib>=2.170.0
+constructs>=10.0.0
 ```
 
-* **Step 3.2**: Create a `deploy.py` file:
+```bash
+pip install -r deploy_requirements.txt
+```
 
-```python
-import re
-from pathlib import Path
+Create `deploy.py`. This script reads the Kedro pipeline, creates one Lambda function per node, and wires them into a Step Functions state machine. Update `s3_data_bucket_name` to match your bucket.
 
-from aws_cdk import aws_stepfunctions as sfn
-from aws_cdk import aws_s3 as s3
-from aws_cdk import core, aws_lambda, aws_ecr
-from aws_cdk.aws_lambda import IFunction
-from aws_cdk.aws_stepfunctions_tasks import LambdaInvoke
-from kedro.framework.project import pipelines
-from kedro.framework.session import KedroSession
-from kedro.framework.startup import bootstrap_project
-from kedro.pipeline.node import Node
+??? example "View `deploy.py`"
+    ```python
+    import re
+    from pathlib import Path
 
-
-def _clean_name(name: str) -> str:
-    """Reformat a name to be compliant with AWS requirements for their resources.
-
-    Returns:
-        name: formatted name.
-    """
-    return re.sub(r"[\W_]+", "-", name).strip("-")[:63]
-
-
-class KedroStepFunctionsStack(core.Stack):
-    """A CDK Stack to deploy a Kedro pipeline to AWS Step Functions."""
-
-    env = "aws"
-    project_path = Path.cwd()
-    erc_repository_name = project_path.name
-    s3_data_bucket_name = (
-        "spaceflights-step-functions"  # this is where the raw data is located
+    import aws_cdk as cdk
+    from aws_cdk import (
+        Duration,
+        Stack,
+        aws_ecr as ecr,
+        aws_lambda as lambda_,
+        aws_s3 as s3,
+        aws_stepfunctions as sfn,
+        aws_stepfunctions_tasks as tasks,
     )
-
-    def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
-        super().__init__(scope, id, **kwargs)
-
-        self._parse_kedro_pipeline()
-        self._set_ecr_repository()
-        self._set_ecr_image()
-        self._set_s3_data_bucket()
-        self._convert_kedro_pipeline_to_step_functions_state_machine()
-
-    def _parse_kedro_pipeline(self) -> None:
-        """Extract the Kedro pipeline from the project"""
-        metadata = bootstrap_project(self.project_path)
-
-        self.project_name = metadata.project_name
-        self.pipeline = pipelines.get("__default__")
-
-    def _set_ecr_repository(self) -> None:
-        """Set the ECR repository for the Lambda base image"""
-        self.ecr_repository = aws_ecr.Repository.from_repository_name(
-            self, id="ECR", repository_name=self.erc_repository_name
-        )
-
-    def _set_ecr_image(self) -> None:
-        """Set the Lambda base image"""
-        self.ecr_image = aws_lambda.EcrImageCode(repository=self.ecr_repository)
-
-    def _set_s3_data_bucket(self) -> None:
-        """Set the S3 bucket containing the raw data"""
-        self.s3_bucket = s3.Bucket(
-            self, "RawDataBucket", bucket_name=self.s3_data_bucket_name
-        )
-
-    def _convert_kedro_node_to_lambda_function(self, node: Node) -> IFunction:
-        """Convert a Kedro node into an AWS Lambda function"""
-        func = aws_lambda.Function(
-            self,
-            id=_clean_name(f"{node.name}_fn"),
-            description=str(node),
-            code=self.ecr_image,
-            handler=aws_lambda.Handler.FROM_IMAGE,
-            runtime=aws_lambda.Runtime.FROM_IMAGE,
-            environment={},
-            function_name=_clean_name(node.name),
-            memory_size=256,
-            reserved_concurrent_executions=10,
-            timeout=core.Duration.seconds(15 * 60),
-        )
-        self.s3_bucket.grant_read_write(func)
-        return func
-
-    def _convert_kedro_node_to_sfn_task(self, node: Node) -> LambdaInvoke:
-        """Convert a Kedro node into an AWS Step Functions Task"""
-        return LambdaInvoke(
-            self,
-            _clean_name(node.name),
-            lambda_function=self._convert_kedro_node_to_lambda_function(node),
-            payload=sfn.TaskInput.from_object({"node_name": node.name}),
-        )
-
-    def _convert_kedro_pipeline_to_step_functions_state_machine(self) -> None:
-        """Convert Kedro pipeline into an AWS Step Functions State Machine"""
-        definition = sfn.Pass(self, "Start")
-
-        for i, group in enumerate(self.pipeline.grouped_nodes, 1):
-            group_name = f"Group {i}"
-            sfn_state = sfn.Parallel(self, group_name)
-            for node in group:
-                sfn_task = self._convert_kedro_node_to_sfn_task(node)
-                sfn_state.branch(sfn_task)
-
-            definition = definition.next(sfn_state)
-
-        sfn.StateMachine(
-            self,
-            self.project_name,
-            definition=definition,
-            timeout=core.Duration.seconds(5 * 60),
-        )
+    from constructs import Construct
+    from kedro.framework.project import pipelines
+    from kedro.framework.startup import bootstrap_project
+    from kedro.pipeline.node import Node
 
 
-app = core.App()
-KedroStepFunctionsStack(app, "KedroStepFunctionsStack")
-app.synth()
-```
+    def _clean_name(name: str) -> str:
+        """Reformat a name to be compliant with AWS naming rules."""
+        return re.sub(r"[\W_]+", "-", name).strip("-")[:63]
 
-This script converts a Kedro pipeline into an AWS Step Functions State Machine, defining each Kedro node as a Lambda function that uses the Docker image in Step 2. Register it with CDK by creating a `cdk.json` with the following content:
+
+    class KedroStepFunctionsStack(Stack):
+        """A CDK stack that deploys a Kedro pipeline to AWS Step Functions."""
+
+        env_name = "aws"
+        project_path = Path.cwd()
+        ecr_repository_name = project_path.name
+        s3_data_bucket_name = "<your-bucket>"
+
+        def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+            super().__init__(scope, construct_id, **kwargs)
+
+            self._parse_kedro_pipeline()
+            self._set_ecr_repository()
+            self._set_ecr_image()
+            self._set_s3_data_bucket()
+            self._convert_kedro_pipeline_to_step_functions_state_machine()
+
+        def _parse_kedro_pipeline(self) -> None:
+            """Extract the Kedro pipeline from the project"""
+            metadata = bootstrap_project(self.project_path)
+
+            self.project_name = metadata.project_name
+            self.pipeline = pipelines["__default__"]
+
+        def _set_ecr_repository(self) -> None:
+            """Set the ECR repository for the Lambda base image"""
+            self.ecr_repository = ecr.Repository.from_repository_name(
+                self, id="ECR", repository_name=self.ecr_repository_name
+            )
+
+        def _set_ecr_image(self) -> None:
+            """Set the Lambda base image"""
+            self.ecr_image = lambda_.EcrImageCode.from_ecr_image(
+                repository=self.ecr_repository, tag_or_digest="latest"
+            )
+
+        def _set_s3_data_bucket(self) -> None:
+            """Set the S3 bucket containing the raw data"""
+            self.s3_bucket = s3.Bucket.from_bucket_name(
+                self, "RawDataBucket", self.s3_data_bucket_name
+            )
+
+        def _convert_kedro_node_to_lambda_function(self, node: Node) -> lambda_.Function:
+            """Convert a Kedro node into an AWS Lambda function"""
+            func = lambda_.Function(
+                self,
+                id=_clean_name(f"{node.name}_fn"),
+                description=str(node),
+                code=self.ecr_image,
+                handler=lambda_.Handler.FROM_IMAGE,
+                runtime=lambda_.Runtime.FROM_IMAGE,
+                environment={
+                    "S3_BUCKET": self.s3_data_bucket_name,
+                    "MPLCONFIGDIR": "/tmp/matplotlib",
+                },
+                function_name=_clean_name(node.name),
+                memory_size=1024,
+                timeout=Duration.minutes(15),
+            )
+            self.s3_bucket.grant_read_write(func)
+            return func
+
+        def _convert_kedro_node_to_sfn_task(self, node: Node) -> tasks.LambdaInvoke:
+            """Convert a Kedro node into an AWS Step Functions Task"""
+            return tasks.LambdaInvoke(
+                self,
+                _clean_name(node.name),
+                lambda_function=self._convert_kedro_node_to_lambda_function(node),
+                payload=sfn.TaskInput.from_object({"node_name": node.name}),
+            )
+
+        def _convert_kedro_pipeline_to_step_functions_state_machine(self) -> None:
+            """Convert Kedro pipeline into an AWS Step Functions State Machine"""
+            definition = sfn.Pass(self, "Start")
+
+            for index, group in enumerate(self.pipeline.grouped_nodes, start=1):
+                group_name = f"Group {index}"
+                parallel_state = sfn.Parallel(self, group_name)
+                for node in group:
+                    parallel_state.branch(self._convert_kedro_node_to_sfn_task(node))
+                definition = definition.next(parallel_state)
+
+            sfn.StateMachine(
+                self,
+                self.project_name,
+                definition=definition,
+                timeout=Duration.minutes(60),
+            )
+
+
+    app = cdk.App()
+    KedroStepFunctionsStack(app, "KedroStepFunctionsStack")
+    app.synth()
+    ```
+
+Register the app with CDK by creating `cdk.json`:
 
 ```json
 {
-  "app": "python3 deploy.py"
+  "app": "python deploy.py"
 }
 ```
 
-And that's it! You are now ready to deploy and run the Kedro pipeline on AWS Step Functions.
+!!! note "Match the Python interpreter in `cdk.json`"
+    `deploy.py` calls `bootstrap_project()` and needs both Kedro and `aws-cdk-lib` installed. If your system `python3` differs from the environment where you installed dependencies, point `app` at that interpreter (for example `.venv/bin/python deploy.py`).
 
-### Step 4. Deploy the pipeline
+---
 
-Deploy with CDK by running:
+## Step 8: Deploy with CDK
 
-```console
-$ cdk deploy
+Bootstrap CDK in your account (first time per account/region) and deploy the stack — see [AWS CDK bootstrapping](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html):
+
+```bash
+cdk bootstrap "aws://<your-aws-account-id>/<your-aws-region>"
+cdk deploy
 ```
 
-After the deployment finishes, log into AWS Management Console to see the AWS Step Functions State Machine created for your pipeline:
+After deployment, open the [Step Functions console](https://console.aws.amazon.com/states/) to see the state machine:
 
 ![](../../meta/images/aws_step_functions_state_machine_listing.png)
 
-As well as the corresponding Lambda functions for each Kedro node:
+You will also see one Lambda function per Kedro node:
 
 ![](../../meta/images/aws_lambda_functions.png)
 
-If you open the state machine and click `Start Execution`, you can see a full end-to-end (E2E) run of the Kedro pipeline on AWS Step Functions.
+The CloudFormation stack `KedroStepFunctionsStack` should reach **`CREATE_COMPLETE`**.
+
+---
+
+## Step 9: Run the state machine
+
+Start an execution from the [Step Functions console](https://console.aws.amazon.com/states/) or with the AWS CLI — see [Starting a state machine execution](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html):
+
+```bash
+STATE_MACHINE_ARN=$(aws stepfunctions list-state-machines \
+  --query "stateMachines[?contains(name, 'spaceflights')].stateMachineArn | [0]" \
+  --output text)
+
+aws stepfunctions start-execution \
+  --state-machine-arn "${STATE_MACHINE_ARN}" \
+  --name "kedro-run-$(date +%s)"
+```
+
+Poll until the execution status is **`SUCCEEDED`**.
+
+---
+
+## Step 10: Verify outputs on S3
+
+1. **Check execution status** — confirm the Step Functions run reached **SUCCEEDED**.
+
+2. **Check S3 outputs** — list the output paths from your `conf/aws/catalog.yml`. See [Listing objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ListingObjects.html):
+
+```bash
+aws s3 ls "s3://<your-bucket>/" --recursive
+```
+
+You should see objects under `02_intermediate/`, `03_primary/`, `04_feature/`, `06_models/`, and `08_reporting/`.
+
+If the execution failed, see [Troubleshooting](#troubleshooting).
+
+---
+
+## Troubleshooting
+
+<!-- vale off -->
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `Runtime.InvalidEntrypoint` / `ProcessSpawnFailed` | Container image built for ARM (Apple Silicon) but Lambda runs x86_64 | Rebuild with `docker build --platform linux/amd64` and push again |
+| `Could not find pyproject.toml` in `/var/task` | `bootstrap_project` called inside Lambda | Use `configure_project("<package_name>")` in `lambda_handler.py` as shown in Step 5 |
+| `Dataset 'MatplotlibWriter' not found` | Outdated dataset type name in catalog | Use `matplotlib.MatplotlibDataset` (Kedro Datasets 3.x+) |
+| `MemoryDataset` errors between nodes | Dataset not listed in `conf/aws/catalog.yml` | Add an S3-backed entry for every dataset shared across Lambda invocations |
+| Step Functions times out | State machine timeout too short for your pipeline | Increase `timeout=Duration.minutes(...)` in `deploy.py` |
+| Lambda out of memory | Default memory too low for modelling nodes | Increase `memory_size` in `deploy.py` (for example `1024` or higher) |
+| `ModuleNotFoundError: No module named 'aws_cdk'` | CDK dependencies not installed in the Python env used by `cdk.json` | Install `deploy_requirements.txt` in that environment, or update `cdk.json` to point at the correct interpreter |
+
+<!-- vale on -->
+
+---
 
 ## Limitations
 
-The [limitations on AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) have improved in recent years. Each Lambda function still has a 15-minute timeout, a 10 GB memory limit, and a 10 GB container image size limit. If a node takes longer than 15 minutes to run, switch to another AWS service, such as [AWS Batch](aws_batch.md) or [AWS ECS](https://aws.amazon.com/ecs/), to execute that node.
+Each Lambda function has a [15-minute timeout](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html), a 10 GB memory limit, and a 10 GB container image size limit. If a node exceeds these limits, run it on another AWS service such as [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md).
+
+!!! warning "Image size with the full Spaceflights starter"
+    The Spaceflights starter includes Jupyter, Viz, and reporting dependencies that increase image size. For production deployments, consider trimming `pyproject.toml` dependencies to what your pipeline requires.
+
+---
+
+## Further reading
+
+### Kedro
+
+- [Running Kedro in a distributed environment](../distributed.md)
+- [Package a Kedro project](../package_a_project.md)
+- [Run a packaged project](../package_a_project.md#run-a-packaged-project)
+- [Catalog globals](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params)
+- [Lifecycle management with KedroSession](../../extend/session.md)
+
+### AWS
+
+- [AWS Lambda container images](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html)
+- [AWS CDK Python workshop](https://docs.aws.amazon.com/cdk/v2/guide/work-with-cdk-python.html)
+- [Creating an Amazon S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html)
+- [Creating an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html)
+- [AWS Step Functions developer guide](https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html)

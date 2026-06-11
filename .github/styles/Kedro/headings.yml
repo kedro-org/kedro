@@ -37,6 +37,7 @@ exceptions:
   - Docker Swarm
   - Dockerfile
   - EMR Serverless
+  - ECR
   - Excel
   - GitHub
   - GitHub Actions

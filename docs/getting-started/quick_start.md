@@ -18,6 +18,7 @@ In **Terminal**, enter the following command. This creates a fully functioning K
 ```bash
 uvx kedro new --starter spaceflights-pandas --name spaceflights
 ```
+![Download the Kedro starter project](01-download-the-kedro-starter-project.gif)
 
 
 ## 2. Navigate to the project folder
@@ -25,6 +26,7 @@ uvx kedro new --starter spaceflights-pandas --name spaceflights
 ```bash
 cd spaceflights
 ```
+![Navigate to the project folder](02-navigate-to-the-project-folder.gif)
 
 
 ## 3. Verification
@@ -32,6 +34,7 @@ To **check Kedro is installed** in your project, enter the following command in 
 ```bash
 uv run kedro info
 ```
+![Verification](03-verification.gif)
 
 
 ## 4. Run the default pipeline
@@ -39,6 +42,7 @@ To **run the default pipeline** of this starter project, enter the following com
 ```bash
 uv run kedro run --pipeline __default__
 ```
+![Run the default pipeline](04-run-the-default-pipeline.gif)
 
 
 ## 5. Visualise the default pipeline
@@ -46,3 +50,4 @@ To **visualise the default pipeline** with **Kedro-Viz**, our interactive develo
 ```bash
 uv run kedro viz run
 ```
+![Visualise the default pipeline](05-visualise-the-default-pipeline.gif)

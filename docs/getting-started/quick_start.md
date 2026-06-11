@@ -1,5 +1,7 @@
 # Quick start with Kedro
-This quick-start guide uses the CLI. If you prefer a GUI-based approach, [try our interactive Kedro Builder](https://demo.kedro.org/kedro-builder/)!
+This quick-start guide uses the **CLI**.
+<br>
+If you prefer a **GUI-based approach**, [try our interactive Kedro Builder](https://demo.kedro.org/kedro-builder/)!
 
 ## 0. Prerequisites
 Before you begin, make sure the following are installed:
@@ -13,7 +15,7 @@ Before you begin, make sure the following are installed:
 
 ## 1. Download the Kedro starter project
 **Navigate to a folder** where you want to download the Kedro project.
-
+<br>
 In **Terminal**, enter the following command. This creates a fully functioning Kedro project from a template without installing Kedro globally.
 ```bash
 uvx kedro new --starter spaceflights-pandas --name spaceflights

@@ -107,7 +107,7 @@ plugins:
           - tutorials/spaceflights_tutorial.md: Complete tutorial building a spaceflight price prediction project
           - tutorials/tutorial_template.md: Tutorial project template guide
           - tutorials/set_up_data.md: Setting up data for the tutorial
-          - tutorials/create_a_pipeline.md: Step-by-step guide to creating pipelines
+          - tutorials/create_a_data_processing_pipeline.md: Step-by-step guide to creating a data processing pipelines
           - tutorials/add_another_pipeline.md: Adding multiple pipelines to a project
           - tutorials/settings.md: Configuring project settings
           - tutorials/test_a_project.md: Testing your Kedro project
@@ -314,7 +314,7 @@ nav:
             - Spaceflights tutorial: tutorials/spaceflights_tutorial.md
             - Tutorial template: tutorials/tutorial_template.md
             - Set up data: tutorials/set_up_data.md
-            - Create a pipeline: tutorials/create_a_pipeline.md
+            - Create a data processing pipeline: tutorials/create_a_data_processing_pipeline.md
             - Add another pipeline: tutorials/add_another_pipeline.md
             - Settings: tutorials/settings.md
             - Test a project: tutorials/test_a_project.md

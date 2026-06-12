@@ -53,3 +53,58 @@ To **visualise the default pipeline** with **Kedro-Viz**, our interactive develo
 uv run kedro viz run
 ```
 ![Visualise the default pipeline](05-visualise-the-default-pipeline.gif)
+
+## 4 key concepts
+### 01 Project template
+An opinionated, standardized layout. Every Kedro project looks the same — new team members are on the same page from day one.
+### 02 Data catalog
+Data catalog is the central registry of all data sources used in a Kedro project. Instead of hardcoding file paths, data formats, and credentials directly into the Python code, datasets are defined in a single YAML file `catalog.yml`, which specifies how your project should load and save data.
+### 03 Node
+Just a pure Python function, with same input and same output. Building blocks of pipelines. Functions you can unit test in isolation.
+### 04 Pipeline
+Compose nodes into DAG. It resolves dependencies automatically from dataset names.
+
+## Project template
+### One layout. Every project.
+`kedro new` bootstraps your Kedro project with the same layout. Walk into any Kedro repos and know where things live.
+
+
+```bash
+project-dir
+├── conf
+│       ├── base/
+│       ├── local/
+├── data
+│       ├── 01_raw
+│       ├── 02_intermediate
+│       ├── 03_primary
+│       ├── 04_feature
+│       ├── 05_model_input
+│       ├── 06_models
+│       ├── 07_model_output
+│       ├── 08_reporting
+├── docs
+├── notebooks
+├── src
+│       ├── pipeline/
+│              ├── nodes.py
+│              ├── pipeline.py
+├── tests
+├── .gitignore
+├── pyproject.toml
+├── READ.md
+├── requirements.txt
+```
+
+**conf/**
+
+* **base**: Settings to be shared across different installations (e.g. `catalog.yml`, `parameters.yml`)
+* **local**: Settings specific to each user (e.g. `credentials.yml`)
+
+**data/**
+
+* Data in layered progression from **raw → output**
+
+**src/**
+
+* Contains different pipeline source codes (e.g. nodes.py, pipeline.py)

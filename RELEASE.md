@@ -7,10 +7,12 @@
 
 
 ## Bug fixes and other changes
+* Fixed Rich logging integration so node input/output brackets render correctly in console logs and dataset colour markup does not leak into plain log handlers.
 ## Documentation changes
 * Documented hooks limitation when using `ParallelRunner`.
 
 ## Community contributions
+* [Feng Jikui](https://github.com/fengjikui)
 
 Many thanks to the following Kedroids for contributing PRs to this release:
 

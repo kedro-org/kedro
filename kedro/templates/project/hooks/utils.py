@@ -13,7 +13,11 @@ current_dir = Path.cwd()
 
 # Requirements for linting tools
 lint_requirements = "ruff~=0.1.8\n"  # For requirements.txt
-lint_pyproject_requirements = ["tool.ruff", "tool.ruff.format", "tool.ruff.lint"]  # For pyproject.toml
+lint_pyproject_requirements = [
+    "tool.ruff",
+    "tool.ruff.format",
+    "tool.ruff.lint",
+]  # For pyproject.toml
 
 # Requirements and configurations for testing tools and coverage reporting
 test_requirements = (  # For requirements.txt
@@ -25,7 +29,9 @@ test_pyproject_requirements = [  # For pyproject.toml
 ]
 
 # Configuration key for documentation dependencies
-docs_pyproject_requirements = ["project.optional-dependencies.docs"]  # For pyproject.toml
+docs_pyproject_requirements = [
+    "project.optional-dependencies.docs"
+]  # For pyproject.toml
 # Configuration key for linting and testing dependencies
 dev_pyproject_requirements = ["project.optional-dependencies.dev"]  # For pyproject.toml
 

@@ -97,6 +97,33 @@ class TestToolsAndExampleFromCLI:
             not in result.output
         )
 
+    def test_docs_tool_index_rst_no_stale_modules(self, fake_kedro_cli):
+        """Test that generated index.rst with docs tool does not contain stale modules reference."""
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            [
+                "new",
+                "--name",
+                "New Kedro Project",
+                "--tools",
+                "docs",
+                "--example",
+                "no",
+            ],
+        )
+
+        assert result.exit_code == 0, result.output
+
+        index_rst = Path("new-kedro-project/docs/source/index.rst").read_text(
+            encoding="utf-8"
+        )
+        assert (
+            "modules" not in index_rst
+        ), "index.rst should not contain a stale 'modules' toctree entry"
+        assert (
+            "sphinx-apidoc" in index_rst
+        ), "index.rst should explain the manual sphinx-apidoc workflow"
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNameFromCLI:

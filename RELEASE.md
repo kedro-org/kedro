@@ -8,6 +8,8 @@
 
 ## Bug fixes and other changes
 * Fixed Rich logging integration so node input/output brackets render correctly in console logs and dataset colour markup does not leak into plain log handlers.
+* Removed stale `modules` reference from generated Sphinx docs template and clarified the `sphinx-apidoc` workflow (#5592)
+
 ## Documentation changes
 * Documented hooks limitation when using `ParallelRunner`.
 
@@ -36,6 +38,7 @@ NOTE: This session implementation is under active development and may occasional
 * Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
 * Fixed parameter validation for namespaced pipelines.
 * Fixed runners iterating over iterable-but-non-generator node outputs (e.g. `mne.Epochs`) before saving them. Streaming behaviour is now restricted to generator-function nodes, so custom business objects are passed to `catalog.save` unchanged.
+* Removed stale `modules` reference from generated Sphinx docs template and clarified the `sphinx-apidoc` workflow (#5592)
 
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.

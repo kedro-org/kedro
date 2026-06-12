@@ -549,9 +549,7 @@ ERROR,
             _resolve_function_node(module_tree, dummy_function)
 
     def test_resolve_symbol_dependencies_handles_cycles(self):
-        module_tree = ast.parse(
-            "def a():\n" "    return b()\n" "def b():\n" "    return a()\n"
-        )
+        module_tree = ast.parse("def a():\n    return b()\ndef b():\n    return a()\n")
         symbols = _build_module_symbol_table(module_tree)
 
         resolved_nodes = _resolve_symbol_dependencies(symbols, "a")

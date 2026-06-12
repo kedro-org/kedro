@@ -8,8 +8,16 @@ Welcome to project {{ cookiecutter.python_package }}'s API docs!
 .. toctree::
    :maxdepth: 4
 
-   modules
+Getting Started
+---------------
 
+To generate API documentation from your project's docstrings, run:
+
+.. code-block:: bash
+
+   pip install -e ".[docs]"
+   sphinx-apidoc -o docs/source src/{{ cookiecutter.python_package }}
+   sphinx-build -b html docs/source docs/build/html
 
 Indices and tables
 ==================

@@ -117,12 +117,12 @@ class TestToolsAndExampleFromCLI:
         index_rst = Path("new-kedro-project/docs/source/index.rst").read_text(
             encoding="utf-8"
         )
-        assert "modules" not in index_rst, (
-            "index.rst should not contain a stale 'modules' toctree entry"
-        )
-        assert "sphinx-apidoc" in index_rst, (
-            "index.rst should explain the manual sphinx-apidoc workflow"
-        )
+        assert (
+            "modules" not in index_rst
+        ), "index.rst should not contain a stale 'modules' toctree entry"
+        assert (
+            "sphinx-apidoc" in index_rst
+        ), "index.rst should explain the manual sphinx-apidoc workflow"
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

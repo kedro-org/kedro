@@ -37,15 +37,8 @@ NOTE: This session implementation is under active development and may occasional
 * Removed outdated `TRANSCODING_SEPARATOR` alias from `kedro.pipeline.pipeline`.
 * Added an optional `pydantic` dependency extra, allowing users to enable Pydantic support with `pip install "kedro[pydantic]"`.
 * Fixed parameter validation for namespaced pipelines.
-<<<<<<< HEAD
-<<<<<<< HEAD
 * Fixed runners iterating over iterable-but-non-generator node outputs (e.g. `mne.Epochs`) before saving them. Streaming behaviour is now restricted to generator-function nodes, so custom business objects are passed to `catalog.save` unchanged.
-=======
-* Remove stale `modules` reference from generated Sphinx docs template and clarify `sphinx-apidoc` workflow (#5592)
->>>>>>> 4b1617f5 (docs: add release note for stale modules fix)
-=======
 * Removed stale `modules` reference from generated Sphinx docs template and clarified the `sphinx-apidoc` workflow (#5592)
->>>>>>> cb25efbe (docs: resolve release note conflict)
 
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.

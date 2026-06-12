@@ -3,6 +3,7 @@ just for illustrating basic Kedro features.
 
 PLEASE DELETE THIS FILE ONCE YOU START WORKING ON YOUR OWN PROJECT!
 """
+
 from __future__ import annotations
 
 from typing import Any

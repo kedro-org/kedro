@@ -256,3 +256,79 @@ cars:
 ```
 
 In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml` and rely on Kedro to detect which definition of `cars` dataset to use in your pipeline.
+
+## Unit-testing nodes with a programmatic catalog
+
+When writing unit tests for Kedro nodes you don't want to read from or write to
+real files on disk. Use `MemoryDataset` together with a programmatic `DataCatalog`
+to supply controlled input data and capture outputs entirely in memory.
+
+### Example: testing a text-preprocessing node
+
+Suppose your pipeline contains a node that cleans raw financial news text:
+
+```python
+# src/<your_project>/nodes/preprocessing.py
+import pandas as pd
+
+
+def preprocess_news(raw: pd.DataFrame) -> pd.DataFrame:
+    """Lower-case text and strip leading/trailing whitespace."""
+    df = raw.copy()
+    df["headline"] = df["headline"].str.lower().str.strip()
+    return df
+```
+
+A unit test for this node looks like this:
+
+```python
+# tests/test_preprocessing.py
+import pandas as pd
+import pytest
+from kedro.io import DataCatalog, MemoryDataset
+from kedro.pipeline import node
+
+from <your_project>.nodes.preprocessing import preprocess_news
+
+
+@pytest.fixture()
+def raw_news_catalog():
+    raw_data = pd.DataFrame(
+        {
+            "headline": [
+                "  APPLE REPORTS RECORD EARNINGS  ",
+                "Markets React To Fed Decision",
+            ],
+            "label": ["positive", "neutral"],
+        }
+    )
+    return DataCatalog(
+        {
+            "financial_news_raw": MemoryDataset(data=raw_data),
+            "financial_news_processed": MemoryDataset(),
+        }
+    )
+
+
+def test_preprocess_news(raw_news_catalog):
+    preprocessing_node = node(
+        func=preprocess_news,
+        inputs="financial_news_raw",
+        outputs="financial_news_processed",
+        name="preprocess_news_node",
+    )
+    preprocessing_node.run(raw_news_catalog)
+
+    result = raw_news_catalog.load("financial_news_processed")
+    assert result["headline"].tolist() == [
+        "apple reports record earnings",
+        "markets react to fed decision",
+    ]
+```
+
+Key points:
+
+- `MemoryDataset(data=...)` pre-loads the dataset so `catalog.load()` returns it immediately.
+- `MemoryDataset()` with no arguments acts as an empty sink — the node saves its output there and you retrieve it with `catalog.load()` to assert on the result.
+- `node.run(catalog)` executes the node function, loading inputs from and saving outputs to the supplied catalog — the same mechanism Kedro's runner uses in production.
+- No files are created on disk, making the test fast and fully isolated.

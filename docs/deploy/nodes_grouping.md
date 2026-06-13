@@ -8,19 +8,22 @@ If your project contains different pipelines, you can use them as predefined nod
 <br>
 ![Switching between different pipelines in Kedro Viz](../meta/images/kedro_viz_switching_pipeline.gif)
 
-If you want to group nodes differently from the existing pipeline structure, you can use tags or namespaces instead of creating a new pipeline. The `kedro run --pipeline` command allows running one pipeline at a time, so multiple pipelines cannot be executed in a single step. While you can switch between pipelines in Kedro Viz, the flowchart view does not support collapsing or expanding them.
+If you want to group nodes differently from the existing pipeline structure, you can use tags or namespaces instead of creating a new pipeline. The `--pipelines` flag supports running one or more pipelines in a single command. While you can switch between pipelines in Kedro Viz, the flowchart view does not support collapsing or expanding them.
 
 **Best used when**
-- You have already separated your logic into different pipelines, and your project is structured to execute them independently in the deployment environment.
+- You have already separated your logic into different pipelines, and your project is structured to execute them independently or together in sequence in the deployment environment.
 
 **Not to use when**
-- You need to run more than one pipeline at a time.
 - You want to use the expand and collapse functionality in Kedro Viz.
 
 **How to use**
 
 ```bash
-  kedro run --pipeline=<your_pipeline_name>
+  # Run a single pipeline
+kedro run --pipelines=<pipeline_name>
+
+# Run multiple pipelines in one command
+kedro run --pipelines=<pipeline_name1>,<pipeline_name2>
 ```
 
 More information: [Run a pipeline by name](https://docs.kedro.org/en/stable/build/run_a_pipeline/#run-a-pipeline-by-name)
@@ -110,5 +113,6 @@ This reduces the number of Airflow tasks and keeps logically related nodes toget
 |--------|-----------|------|-----------|
 | **What Works** | If you're happy with how the nodes are structured in your existing pipeline, or your pipeline is low complexity and a new grouping view is not required then you don't have to use any alternatives | Tagging individual nodes or the entire pipeline allows flexible execution of specific sections without altering the pipeline structure, and Kedro-Viz offers clear visualisation of these tagged nodes for better understanding. | Namespaces group nodes to ensure clear dependencies and separation within a pipeline, allow selective execution, and can be visualised using Kedro-Viz. |
 | **What Doesn't Work** | If you want to group nodes differently from the current pipeline structure, instead of creating a new pipeline, you can use alternative grouping methods such as tags or namespaces. | Lack of hierarchical structure, using tags makes debugging and maintaining the codebase more challenging | Defining namespaces at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps create a modular structure by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline. |
-| **Syntax** | `kedro run --pipeline=<your_pipeline_name>` | `kedro run --tags=<your_tag_name>` | `kedro run --namespaces=< namespace1,namespace2 >` |
+| **Syntax** | `kedro run --pipelines=<your_pipeline_names>` | `kedro run --tags=<your_tag_name>` | `kedro run --namespaces=< namespace1,namespace2 >` |
 | **Deployment Plugin Support** | N/A | N/A | `kedro airflow create --group-by namespace`; [AWS Step Functions](./supported-platforms/aws_step_functions.md) |
+

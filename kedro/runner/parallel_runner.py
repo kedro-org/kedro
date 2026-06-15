@@ -42,11 +42,6 @@ class ParallelRunner(AbstractRunner):
     Please note that this `runner` implementation validates dataset using the
     ``_validate_catalog`` method, which checks if any of the datasets are
     single process only using the `_SINGLE_PROCESS` dataset attribute.
-
-    !!! warning
-        This runner will not execute `node` and `dataset` hooks. Use
-        `SequentialRunner` or `ThreadRunner` if your project relies on these
-        hooks.
     """
 
     def __init__(

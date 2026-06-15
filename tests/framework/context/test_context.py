@@ -8,7 +8,6 @@ import re
 import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
 import tomli_w
@@ -341,9 +340,11 @@ class TestKedroContext:
         model_instance = ModelOptions(test_size=0.2, random_state=3)
 
         mocker.patch.object(
-            dummy_context,
-            "_get_validated_params",
-            return_value={"model_options": model_instance},
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(
+                lambda self: {"model_options": model_instance}
+            ),
         )
 
         result = dummy_context._get_parameters()
@@ -363,9 +364,9 @@ class TestKedroContext:
         dc_instance = EvalConfig(metric="rmse", threshold=0.5)
 
         mocker.patch.object(
-            dummy_context,
-            "_get_validated_params",
-            return_value={"eval_config": dc_instance},
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(lambda self: {"eval_config": dc_instance}),
         )
 
         result = dummy_context._get_parameters()
@@ -388,9 +389,9 @@ class TestKedroContext:
         outer = OuterModel(inner=InnerModel(value=42))
 
         mocker.patch.object(
-            dummy_context,
-            "_get_validated_params",
-            return_value={"outer": outer},
+            type(dummy_context),
+            "params",
+            new_callable=lambda: property(lambda self: {"outer": outer}),
         )
 
         result = dummy_context._get_parameters()
@@ -407,81 +408,6 @@ class TestKedroContext:
         assert dummy_context._validated_params_cache is not None
         second = dummy_context.params
         assert first is second
-
-    def test_pipelines_to_validate_defaults_to_none(self, dummy_context):
-        """``_pipelines_to_validate`` defaults to ``None`` (validate every
-        registered pipeline)."""
-        assert dummy_context._pipelines_to_validate is None
-
-    def test_get_validated_params_scoped_to_set_pipelines(self, dummy_context, mocker):
-        """When ``_pipelines_to_validate`` is set, only those pipelines are
-        forwarded to ``ParameterValidator``."""
-        from kedro.framework import project
-
-        fake_pipeline_a = MagicMock()
-        fake_pipeline_a.nodes = []
-        fake_pipeline_b = MagicMock()
-        fake_pipeline_b.nodes = []
-        # Bypass the lazy registry load by populating ``_content`` directly;
-        # ``mocker.patch.dict`` would itself trigger ``_load_data``.
-        mocker.patch.object(
-            project.pipelines,
-            "_content",
-            {
-                "data_science": fake_pipeline_a,
-                "data_engineering": fake_pipeline_b,
-                "other": MagicMock(),
-            },
-        )
-        mocker.patch.object(project.pipelines, "_is_data_loaded", True)
-        validator_cls = mocker.patch(
-            "kedro.validation.parameter_validator.ParameterValidator"
-        )
-        validator_cls.return_value.validate_raw_params.return_value = {"foo": "bar"}
-
-        dummy_context._pipelines_to_validate = ["data_science", "data_engineering"]
-        result = dummy_context._get_validated_params()
-
-        assert result == {"foo": "bar"}
-        # Validator was constructed with only the requested pipelines —
-        # ``other`` is excluded even though it is registered.
-        validator_cls.assert_called_once_with(
-            {
-                "data_science": fake_pipeline_a,
-                "data_engineering": fake_pipeline_b,
-            }
-        )
-
-    def test_cache_invalidates_when_scope_changes(self, dummy_context, mocker):
-        """A cached unscoped read (e.g. from an ``after_context_created``
-        hook reading ``context.params``) must not be reused once the session
-        sets ``_pipelines_to_validate``."""
-        from kedro.framework import project
-
-        scoped_pipeline = MagicMock()
-        scoped_pipeline.nodes = []
-        mocker.patch.object(
-            project.pipelines, "_content", {"data_science": scoped_pipeline}
-        )
-        mocker.patch.object(project.pipelines, "_is_data_loaded", True)
-        validator_cls = mocker.patch(
-            "kedro.validation.parameter_validator.ParameterValidator"
-        )
-        validator_cls.return_value.validate_raw_params.side_effect = [
-            {"unscoped": True},
-            {"scoped": True},
-        ]
-
-        # 1) Unscoped read (simulating a hook touching ``context.params``).
-        first = dummy_context._get_validated_params()
-        assert first == {"unscoped": True}
-
-        # 2) Session sets the scope and re-reads — the cache from (1) must
-        # not be returned.
-        dummy_context._pipelines_to_validate = ["data_science"]
-        second = dummy_context._get_validated_params()
-        assert second == {"scoped": True}
-        assert validator_cls.return_value.validate_raw_params.call_count == 2
 
 
 @pytest.mark.parametrize(

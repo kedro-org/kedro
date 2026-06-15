@@ -178,15 +178,7 @@ class KedroContext:
     _runtime_params: dict[str, Any] | None = field(
         init=True, default=None, converter=deepcopy
     )
-    # Pipelines to scope parameter validation to. Set by the session before
-    # building the catalog; `None` means "all registered pipelines".
-    _pipelines_to_validate: list[str] | None = None
     _validated_params_cache: dict[str, Any] | None = None
-    # Scope under which `_validated_params_cache` was filled. Lets the cache
-    # be transparently invalidated if `_pipelines_to_validate` changes between
-    # an unscoped read (e.g. an `after_context_created` hook reading `params`)
-    # and a scoped read from the session.
-    _cached_validation_scope: list[str] | None = None
 
     @property
     def catalog(self) -> CatalogProtocol:
@@ -203,16 +195,10 @@ class KedroContext:
     def _get_validated_params(self) -> dict[str, Any]:
         """Get validated parameters with caching support.
 
-        Scope is taken from `self._pipelines_to_validate`; when unset,
-        all registered pipelines are inspected.
-
         Returns:
             Validated and transformed parameters with model instantiation.
         """
-        if (
-            self._validated_params_cache is not None
-            and self._cached_validation_scope == self._pipelines_to_validate
-        ):
+        if self._validated_params_cache is not None:
             return self._validated_params_cache
 
         try:
@@ -225,15 +211,8 @@ class KedroContext:
             from kedro.framework.project import pipelines as project_pipelines
             from kedro.validation.parameter_validator import ParameterValidator
 
-            if self._pipelines_to_validate is None:
-                pipelines_to_validate = dict(project_pipelines)
-            else:
-                pipelines_to_validate = {
-                    name: project_pipelines[name]
-                    for name in self._pipelines_to_validate
-                }
-
-            validator = ParameterValidator(pipelines_to_validate)
+            pipeline_dict = dict(project_pipelines)
+            validator = ParameterValidator(pipeline_dict)
             validated_params = validator.validate_raw_params(raw_params)
         except ImportError:
             logging.getLogger(__name__).warning(
@@ -242,17 +221,12 @@ class KedroContext:
             validated_params = raw_params
 
         self._validated_params_cache = validated_params
-        self._cached_validation_scope = self._pipelines_to_validate
 
         return validated_params
 
     @property
     def params(self) -> dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
-
-        Validation is scoped only when the session sets
-        `_pipelines_to_validate` before building the catalog; reading
-        `params` in isolation (hooks, notebooks) validates every pipeline.
 
         Returns:
             Parameters defined in `parameters.yml` with the addition of any

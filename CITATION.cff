@@ -3,12 +3,8 @@ message: If you use this software, please cite it as below.
 authors:
 - family-names: Alam
   given-names: Sajid
-- family-names: Brugman
-  given-names: Simon
 - family-names: Chan
   given-names: Nok Lam
-- family-names: Cima
-  given-names: Alice
 - family-names: Couto
   given-names: Laura
 - family-names: Dada
@@ -25,27 +21,31 @@ authors:
   given-names: Jitendra
 - family-names: Honoré-Rougé
   given-names: Yolan
+- family-names: Kaiser
+  given-names: Stephanie
 - family-names: Kanchwala
   given-names: Rashida
 - family-names: Katiyar
   given-names: Ankita
-- family-names: Khaustova
-  given-names: Elena
-- family-names: Ko
-  given-names: Elijah
-- family-names: Nguyen
-  given-names: Huong
-- family-names: Perkins
-  given-names: Joseph
 - family-names: Pilla
   given-names: Ravi Kumar
+- family-names: Nguyen
+  given-names: Huong
 - family-names: Schwarzmann
   given-names: Joel
+- family-names: Sorokin
+  given-names: Dmitry
 - family-names: Theisen
   given-names: Merel
 - family-names: Zabłocki
   given-names: Marcin
+- family-names: Brugman
+  given-names: Simon
+- family-names: Khaustova
+  given-names: Elena
+- family-names: Ko
+  given-names: Elijah
 title: Kedro
-version: 1.4.0
-date-released: 2026-05-22
+version: 1.3.1
+date-released: 2026-04-07
 url: https://github.com/kedro-org/kedro

@@ -10,6 +10,6 @@ class ParameterValidationError(Exception):
 
 
 class ModelInstantiationError(ParameterValidationError):
-    """Raised when a typed model fails to instantiate from raw parameters."""
+    """Raised when a typed model (Pydantic/dataclass) fails to instantiate from raw parameters."""
 
     pass

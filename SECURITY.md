@@ -1,7 +1,5 @@
 # Security policy
 
-For Kedro's trust boundaries, user responsibilities, and what counts as a framework vulnerability, see the [Kedro security model](https://docs.kedro.org/en/stable/about/security_model/).
-
 Kedro and its community take security bugs seriously. We appreciate efforts to improve the security of all Kedro products
 and follow the [GitHub coordinated disclosure of security vulnerabilities](https://docs.github.com/en/code-security/security-advisories/about-coordinated-disclosure-of-security-vulnerabilities#about-reporting-and-disclosing-vulnerabilities-in-projects-on-github)
 for responsible disclosure and prompt mitigation. We are committed to working with security researchers to

@@ -40,73 +40,6 @@ class TestParameterValidator:
 
         assert isinstance(result["model_options"], SamplePydanticModel)
 
-    def test_validate_raw_params_scoped_to_constructed_pipelines(self):
-        """Validation is scoped to whichever pipelines the validator was
-        constructed with — callers limit the scope by passing a single
-        pipeline (rather than threading a pipeline name through every
-        method)."""
-
-        def ds_func(opts: SampleDataclass) -> None:
-            pass
-
-        def pydantic_func(cfg: SamplePydanticModel) -> None:
-            pass
-
-        node_a = kedro_node(
-            func=ds_func,
-            inputs="params:config_a",
-            outputs="o1",
-            name="node_a",
-        )
-        node_b = kedro_node(
-            func=pydantic_func,
-            inputs="params:config_b",
-            outputs="o2",
-            name="node_b",
-        )
-
-        pipeline_a = MagicMock()
-        pipeline_a.nodes = [node_a]
-        pipeline_b = MagicMock()
-        pipeline_b.nodes = [node_b]
-
-        # Caller constructs the validator with only the target pipeline.
-        validator = ParameterValidator(pipelines={"pipeline_a": pipeline_a})
-
-        raw = {
-            "config_a": {"name": "test", "value": 1.5},
-            "config_b": {"test_size": 0.2, "random_state": 3},
-        }
-
-        result = validator.validate_raw_params(raw)
-
-        # config_a should be validated (it's in pipeline_a)
-        assert isinstance(result["config_a"], SampleDataclass)
-        # config_b should remain a raw dict (pipeline_b was not inspected)
-        assert isinstance(result["config_b"], dict)
-
-    def test_validate_raw_params_optional_none(self):
-        """Test Optional[Model] = None is validated correctly via full extraction."""
-
-        def my_func(model_options: SamplePydanticModel | None) -> None:
-            pass
-
-        test_node = kedro_node(
-            func=my_func,
-            inputs="params:model_options",
-            outputs="output",
-            name="test_node",
-        )
-
-        pipeline = MagicMock()
-        pipeline.nodes = [test_node]
-
-        validator = ParameterValidator(pipelines={"data_science": pipeline})
-        raw = {"model_options": None}
-        result = validator.validate_raw_params(raw)
-
-        assert result["model_options"] is None
-
 
 class TestApplyValidation:
     def test_pydantic_model_success(self, parameter_validator):
@@ -196,17 +129,3 @@ class TestApplyValidation:
 
         parameter_validator._apply_validation(raw, requirements)
         assert isinstance(raw["config"], dict)
-
-    def test_none_param_raises_when_not_optional(self, parameter_validator):
-        raw = {"model_options": None}
-        requirements = {"model_options": SamplePydanticModel}
-        with pytest.raises(
-            ParameterValidationError, match="Parameter validation failed"
-        ):
-            parameter_validator._apply_validation(raw, requirements)
-
-    def test_none_param_skips_when_optional(self, parameter_validator):
-        raw = {"model_options": None}
-        requirements = {"model_options": SamplePydanticModel | None}
-        result = parameter_validator._apply_validation(raw, requirements)
-        assert result["model_options"] is None

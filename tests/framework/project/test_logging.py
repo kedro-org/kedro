@@ -1,5 +1,4 @@
 import importlib
-import io
 import logging
 import sys
 from pathlib import Path
@@ -7,12 +6,10 @@ from unittest import mock
 
 import pytest
 import yaml
-from rich.console import Console
 
 from kedro.framework.project import LOGGING, configure_logging, configure_project
 from kedro.io import DataCatalog
 from kedro.logging import RichHandler, _format_rich
-from kedro.pipeline import node
 from kedro.utils import _has_rich_handler
 
 
@@ -227,68 +224,6 @@ def test_logger_without_rich_markup():
 
     for record in custom_handler.records:
         assert "[dark_orange]" not in record.message
-
-
-def test_data_catalog_rich_markup_does_not_leak_to_plain_handlers():
-    class CustomHandler(logging.Handler):
-        def __init__(self):
-            super().__init__()
-            self.messages = []
-
-        def emit(self, record):
-            self.messages.append(record.getMessage())
-
-    stream = io.StringIO()
-    rich_handler = RichHandler(
-        console=Console(file=stream, force_terminal=True, color_system=None, width=120),
-        show_time=False,
-        show_level=False,
-        show_path=False,
-    )
-    custom_handler = CustomHandler()
-    root_logger = logging.getLogger()
-    original_handlers = root_logger.handlers[:]
-    original_level = root_logger.level
-
-    try:
-        root_logger.handlers[:] = [rich_handler, custom_handler]
-        root_logger.setLevel(logging.INFO)
-
-        catalog = DataCatalog.from_config({"dummy": {"type": "MemoryDataset"}})
-        catalog.save("dummy", ("data",))
-
-        assert any("Saving data to dummy" in msg for msg in custom_handler.messages)
-        assert all("[dark_orange]" not in msg for msg in custom_handler.messages)
-    finally:
-        root_logger.handlers[:] = original_handlers
-        root_logger.setLevel(original_level)
-
-
-def test_rich_handler_preserves_node_brackets():
-    stream = io.StringIO()
-    rich_handler = RichHandler(
-        console=Console(file=stream, force_terminal=True, color_system=None, width=120),
-        show_time=False,
-        show_level=False,
-        show_path=False,
-    )
-    logger = logging.getLogger("kedro.pipeline.node")
-    original_handlers = logger.handlers[:]
-    original_level = logger.level
-    original_propagate = logger.propagate
-
-    try:
-        logger.handlers[:] = [rich_handler]
-        logger.setLevel(logging.INFO)
-        logger.propagate = False
-
-        node(lambda x: x, "in", "out").run({"in": "value"})
-
-        assert "Running node: <lambda>([in]) -> [out]" in stream.getvalue()
-    finally:
-        logger.handlers[:] = original_handlers
-        logger.setLevel(original_level)
-        logger.propagate = original_propagate
 
 
 def test_configure_project_preserve_logging_keeps_runtime_handlers():

@@ -2,21 +2,9 @@
 
 from __future__ import annotations
 
-import re
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-from kedro.inspection.models import (  # noqa: TCH001
-    DatasetSnapshot,
-    PipelineSnapshot,
-    ProjectMetadataSnapshot,
-)
-
-# Matches a valid Python dotted identifier, e.g. "SequentialRunner" or
-# "mypackage.runners.MyRunner".  Prevents passing arbitrary strings to
-# importlib.import_module before the AbstractRunner subclass check runs.
-_RUNNER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$")
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RunRequest(BaseModel):
@@ -51,18 +39,6 @@ class RunRequest(BaseModel):
         default=None,
         description="Runner to use. Any importable subclass of `kedro.runner.AbstractRunner`.",
     )
-
-    @field_validator("runner")
-    @classmethod
-    def _validate_runner_format(cls, v: str | None) -> str | None:
-        if v is not None and not _RUNNER_PATTERN.match(v):
-            raise ValueError(
-                f"runner '{v}' is not a valid Python dotted identifier. "
-                "Expected a class name or dotted module path, e.g. 'SequentialRunner' "
-                "or 'mypackage.runners.MyRunner'."
-            )
-        return v
-
     is_async: bool = Field(
         default=False,
         description="Load and save node inputs and outputs asynchronously with threads.",
@@ -101,26 +77,22 @@ class ErrorDetail(BaseModel):
 
     type: str = Field(description="Exception type name.")
     message: str = Field(description="Error message.")
+    traceback: list[str] | None = Field(
+        default=None,
+        description="Stack trace lines, if available. Only included for errors raised during pipeline execution.",
+    )
 
 
-class RunSuccess(BaseModel):
-    """Response model for a successful pipeline run."""
+class RunResponse(BaseModel):
+    """Response model for pipeline execution."""
 
-    status: Literal["success"] = Field(description="Run status.")
     run_id: str = Field(description="Unique identifier for this pipeline run.")
+    status: Literal["success", "failure"] = Field(description="Run status.")
     duration_ms: float = Field(description="Total execution time in milliseconds.")
-
-
-class RunFailure(BaseModel):
-    """Response model for a failed pipeline run."""
-
-    status: Literal["failure"] = Field(description="Run status.")
-    run_id: str = Field(description="Unique identifier for this pipeline run.")
-    duration_ms: float = Field(description="Total execution time in milliseconds.")
-    error: ErrorDetail = Field(description="Error details.")
-
-
-RunResponse = Annotated[RunSuccess | RunFailure, Field(discriminator="status")]
+    error: ErrorDetail | None = Field(
+        default=None,
+        description="Error details if status is 'failure'.",
+    )
 
 
 class HealthResponse(BaseModel):
@@ -130,31 +102,7 @@ class HealthResponse(BaseModel):
         default="healthy", description="Server health status."
     )
     kedro_version: str = Field(description="Kedro version.")
-
-
-class SnapshotSuccess(BaseModel):
-    """Response model for a successful project snapshot."""
-
-    status: Literal["success"] = Field(description="Snapshot status.")
-    metadata: ProjectMetadataSnapshot = Field(description="Project metadata snapshot.")
-    pipelines: list[PipelineSnapshot] = Field(
-        description="Registered pipeline snapshots."
+    project_path: str | None = Field(
+        default=None,
+        description="Path to the Kedro project being served.",
     )
-    datasets: dict[str, DatasetSnapshot] = Field(
-        description="Catalog dataset snapshots keyed by dataset name."
-    )
-    parameters: list[str] = Field(
-        description="Sorted list of top-level parameter keys."
-    )
-
-
-class SnapshotFailure(BaseModel):
-    """Response model for a failed project snapshot."""
-
-    status: Literal["failure"] = Field(description="Snapshot status.")
-    error: ErrorDetail = Field(description="Error details.")
-
-
-SnapshotResponse = Annotated[
-    SnapshotSuccess | SnapshotFailure, Field(discriminator="status")
-]

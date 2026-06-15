@@ -3,7 +3,6 @@ just for illustrating basic Kedro features.
 
 Delete this when you start working on your own Kedro project.
 """
-
 # noqa: invalid-name
 from __future__ import annotations
 

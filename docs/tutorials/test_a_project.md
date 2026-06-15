@@ -207,7 +207,7 @@ When we put this together, we get the following test:
             }
         )
 
-        dummy_parameters = {
+        duummy_parameters = {
             "model_options": {
                 "test_size": 0.2,
                 "random_state": 3,

@@ -9,13 +9,7 @@ from typing import TYPE_CHECKING, Any
 from .exceptions import ParameterValidationError
 from .model_factory import instantiate_model
 from .type_extractor import TypeExtractor
-from .utils import (
-    _MISSING,
-    _is_optional,
-    _unwrap_optional,
-    resolve_nested_dict_path,
-    set_nested_dict_value,
-)
+from .utils import resolve_nested_dict_path, set_nested_dict_value
 
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
@@ -56,26 +50,16 @@ class ParameterValidator:
             try:
                 raw_value = resolve_nested_dict_path(raw_params, param_key)
 
-                if raw_value is _MISSING:
+                if raw_value is None:
                     logger.debug(
                         "Parameter '%s' not found in config, skipping validation",
                         param_key,
                     )
                     continue
 
-                if raw_value is None:
-                    if _is_optional(expected_type):
-                        continue
-                    error_msg = (
-                        f"Parameter '{param_key}': value is None but type "
-                        "is not Optional"
-                    )
-                    validation_errors.append(error_msg)
-                    logger.error(error_msg)
-                    continue
-
-                inner_type = _unwrap_optional(expected_type)
-                validated_instance = instantiate_model(param_key, raw_value, inner_type)
+                validated_instance = instantiate_model(
+                    param_key, raw_value, expected_type
+                )
 
                 if validated_instance is not raw_value:
                     set_nested_dict_value(
@@ -84,7 +68,7 @@ class ParameterValidator:
                     instantiated_count += 1
                     logger.debug(
                         "Successfully instantiated %s for parameter '%s'",
-                        getattr(inner_type, "__name__", str(inner_type)),
+                        expected_type.__name__,
                         param_key,
                     )
 

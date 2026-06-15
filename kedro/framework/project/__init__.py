@@ -4,7 +4,6 @@ configure a Kedro project and access its settings."""
 from __future__ import annotations
 
 import importlib.resources
-import inspect
 import logging.config
 import operator
 import os
@@ -139,7 +138,6 @@ class _ProjectSettings(LazySettings):
     )
     _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={})
     _DISABLE_HOOKS_FOR_PLUGINS = Validator("DISABLE_HOOKS_FOR_PLUGINS", default=tuple())
-    _RUNNER_MODULES_WHITELIST = Validator("RUNNER_MODULES_WHITELIST", default=tuple())
     _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
         "CONFIG_LOADER_CLASS",
         default=_get_default_class("kedro.config.OmegaConfigLoader"),
@@ -162,7 +160,6 @@ class _ProjectSettings(LazySettings):
                 self._SESSION_STORE_CLASS,
                 self._SESSION_STORE_ARGS,
                 self._DISABLE_HOOKS_FOR_PLUGINS,
-                self._RUNNER_MODULES_WHITELIST,
                 self._CONFIG_LOADER_CLASS,
                 self._CONFIG_LOADER_ARGS,
                 self._DATA_CATALOG_CLASS,
@@ -181,16 +178,6 @@ def _load_data_wrapper(func: Any) -> Any:
         return func(self._content, *args, **kwargs)
 
     return inner
-
-
-def _callable_supports_selective(fn: Any) -> bool:
-    """Return whether ``fn`` accepts the ``pipelines_to_find`` keyword argument."""
-    try:
-        signature = inspect.signature(inspect.unwrap(fn))
-    except (StopIteration, TypeError, ValueError):
-        return False
-
-    return "pipelines_to_find" in signature.parameters
 
 
 class _ProjectPipelines(MutableMapping):
@@ -213,7 +200,6 @@ class _ProjectPipelines(MutableMapping):
     def __init__(self) -> None:
         self._pipelines_module: str | None = None
         self._is_data_loaded = False
-        self._loaded_pipeline_keys: set[str] = set()
         self._content: dict[str, Pipeline] = {}
 
     @staticmethod
@@ -222,7 +208,7 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def _load_data(self, pipeline_name: str | None = None) -> None:
+    def _load_data(self) -> None:
         """Lazily read pipelines defined in the pipelines registry module."""
 
         # If the pipelines dictionary has not been configured with a pipelines module
@@ -230,26 +216,13 @@ class _ProjectPipelines(MutableMapping):
         if self._pipelines_module is None or self._is_data_loaded:
             return
 
-        if pipeline_name is not None and pipeline_name in self._loaded_pipeline_keys:
-            return
-
         register_pipelines = self._get_pipelines_registry_callable(
             self._pipelines_module
         )
-
-        if pipeline_name is not None and _callable_supports_selective(
-            register_pipelines
-        ):
-            project_pipelines = register_pipelines(pipelines_to_find=[pipeline_name])
-            self._content.update(project_pipelines)
-            self._loaded_pipeline_keys.add(pipeline_name)
-            return
-
         project_pipelines = register_pipelines()
 
         self._content = project_pipelines
         self._is_data_loaded = True
-        self._loaded_pipeline_keys.clear()
 
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
@@ -258,14 +231,10 @@ class _ProjectPipelines(MutableMapping):
         """
         self._pipelines_module = pipelines_module
         self._is_data_loaded = False
-        self._loaded_pipeline_keys.clear()
         self._content = {}
 
     # Dict-like interface
-    def __getitem__(self, key: str) -> Pipeline:
-        self._load_data(pipeline_name=key)
-        return self._content[key]
-
+    __getitem__ = _load_data_wrapper(operator.getitem)
     __setitem__ = _load_data_wrapper(operator.setitem)
     __delitem__ = _load_data_wrapper(operator.delitem)
     __iter__ = _load_data_wrapper(iter)

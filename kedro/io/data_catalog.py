@@ -29,6 +29,7 @@ from kedro.io.core import (
 )
 from kedro.io.memory_dataset import MemoryDataset, _is_memory_dataset
 from kedro.io.shared_memory_dataset import SharedMemoryDataset
+from kedro.utils import _format_rich, _has_rich_handler
 
 if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager
@@ -264,6 +265,8 @@ class DataCatalog(CatalogProtocol):
         self._load_versions, self._save_version = self._validate_versions(
             datasets, load_versions or {}, save_version
         )
+
+        self._use_rich_markup = _has_rich_handler()
 
         for ds_name in list(self._config_resolver.config):
             if ds_name in self._datasets:
@@ -1005,9 +1008,9 @@ class DataCatalog(CatalogProtocol):
 
         self._logger.info(
             "Saving data to %s (%s)...",
-            ds_name,
+            _format_rich(ds_name, "dark_orange") if self._use_rich_markup else ds_name,
             type(dataset).__name__,
-            extra={"rich_format": ["dark_orange"]},
+            extra={"markup": True},
         )
 
         try:
@@ -1049,9 +1052,9 @@ class DataCatalog(CatalogProtocol):
 
         self._logger.info(
             "Loading data from %s (%s)...",
-            ds_name,
+            _format_rich(ds_name, "dark_orange") if self._use_rich_markup else ds_name,
             type(dataset).__name__,
-            extra={"rich_format": ["dark_orange"]},
+            extra={"markup": True},
         )
 
         try:

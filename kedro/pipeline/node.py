@@ -443,7 +443,7 @@ class Node:
                 mermaid = "graph LR\\n"
                 for i, step in enumerate(steps):
                     if i < len(steps) - 1:
-                        mermaid += f"    {step} --> {steps[i + 1]}\\n"
+                        mermaid += f"    {step} --> {steps[i+1]}\\n"
 
                 return MermaidPreview(content=mermaid)
 
@@ -528,7 +528,7 @@ class Node:
             keys are defined by the node outputs.
 
         """
-        self._logger.info("Running node: %s", str(self), extra={"markup": False})
+        self._logger.info("Running node: %s", str(self))
 
         outputs = None
 
@@ -557,7 +557,7 @@ class Node:
                 "Node %s failed with error: \n%s",
                 str(self),
                 str(exc),
-                extra={"markup": False},
+                extra={"markup": True},
             )
             raise exc
 

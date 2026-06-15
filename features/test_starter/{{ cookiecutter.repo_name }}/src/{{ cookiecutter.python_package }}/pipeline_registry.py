@@ -1,5 +1,4 @@
 """Project pipelines."""
-
 from __future__ import annotations
 
 from kedro.framework.project import find_pipelines

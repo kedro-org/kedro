@@ -1,9 +1,16 @@
 # Quick start with Kedro
-This quick-start guide uses the **CLI**.
-<br>
-If you prefer a **GUI-based approach**, [try our interactive Kedro Builder](https://demo.kedro.org/kedro-builder/)!
+This quick-start guide has 3 sections:
+
+* **Explore**: A 10-minute guide from installing Kedro, creating a starter project to visualising the pipelines.
+
+* **Explain**: An introduction to the 4 key concepts: project template, data catalog, node, and pipeline.
+
+* **Explore**: Next steps, resources, and links to continue your Kedro journey.
 
 ## Experience
+This section we use the **CLI** to install Kedro, create a starter project, and visualise the pipelines.
+<br>
+If you prefer a **GUI approach**, [try our interactive Kedro Builder](https://demo.kedro.org/kedro-builder/)!
 
 ### Step 0. Prerequisites
 Before you begin, make sure the following are installed:
@@ -58,6 +65,15 @@ uv run kedro viz run
 
 
 ## Explain
+Here we talk about 4 key concepts in Kedro:
+
+* Project template
+
+* Data catalog
+
+* Node
+
+* Pipeline
 
 <!---
 ## 4 key concepts
@@ -153,6 +169,8 @@ trained_model:
 * Building blocks of pipelines. Functions you can unit test in isolation.
 
 ```python
+# src/.../nodes.py
+
 import pandas as pd
 
 
@@ -182,6 +200,8 @@ def create_model_input_table(
 <!--- * Each `node` declares its inputs and outputs by name. Kedro resolves the DAG, runs in topological order, and reads/writes through the catalog. --->
 
 ```python
+# src/.../pipeline.py
+
 from kedro.pipeline import Node, Pipeline
 
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
@@ -213,4 +233,18 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 
 ## Explore
-* [Check out the spaceflights tutorial](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial/)!
+To continue your Kedro journey, here are the resources and links for your next steps:
+
+* [Spaceflights tutorial](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial/)!
+
+* [Kedro video course](https://docs.kedro.org/en/stable/getting-started/course/)!
+
+* [What's new](https://kedro.org/whats-new)!
+
+* [Kedro official site](https://kedro.org/)!
+
+* [Kedro documentation](https://docs.kedro.org/en/stable/)!
+
+* [Kedro github](https://github.com/kedro-org)!
+
+* [Kedro slack](https://kedro-org.slack.com/join/shared_invite/zt-3x46bmmmt-tbr9Dj3vEu07vsFWGhevxQ)!

@@ -14,7 +14,7 @@ from collections import namedtuple
 from datetime import datetime, timezone
 from functools import wraps
 from glob import iglob
-from inspect import getcallargs
+from inspect import getcallargs, isabstract
 from pathlib import Path, PurePath, PurePosixPath
 from typing import (  # noqa: UP035
     TYPE_CHECKING,
@@ -194,6 +194,12 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         try:
             dataset = class_obj(**config)
         except TypeError as err:
+            if isabstract(class_obj):
+                raise DatasetError(
+                    f"\n{err}.\nDataset '{name}' cannot be instantiated. "
+                    f"Please implement the missing abstract methods in "
+                    f"'{class_obj.__module__}.{class_obj.__qualname__}'."
+                ) from err
             raise DatasetError(
                 f"\n{err}.\nDataset '{name}' must only contain arguments valid for the "
                 f"constructor of '{class_obj.__module__}.{class_obj.__qualname__}'."

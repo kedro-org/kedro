@@ -1,6 +1,6 @@
 # AWS Step Functions
 
-[AWS Step Functions](https://aws.amazon.com/step-functions/) orchestrates [AWS Lambda](https://aws.amazon.com/lambda/) functions into a state machine. This guide walks you through deploying a **Kedro 1.x** project so each pipeline node runs as a Lambda function, with datasets stored on Amazon S3.
+[AWS Step Functions](https://aws.amazon.com/step-functions/) orchestrates [AWS Lambda](https://aws.amazon.com/lambda/) functions into a state machine. This guide walks you through deploying a **Kedro 1.x** project so each **pipeline-level namespace** runs as one Lambda function, with datasets stored on Amazon S3.
 
 ## What you will do
 
@@ -40,9 +40,18 @@ Name the project directory `spaceflights-step-functions`. Complete the [Spacefli
 
 ### Strategy
 
-Each Kedro node becomes a Lambda function that shares the same container image. Step Functions runs nodes in parallel within each dependency group and sequentially across groups, following the same principles as [running Kedro in a distributed environment](../distributed.md).
+Each **pipeline-level namespace** becomes one Lambda function that shares the same container image. A single invocation runs every node in that namespace with `session.run(namespaces=[...])`, which reduces cold starts, Lambda count, and Step Functions state transitions compared with mapping one node per function.
 
-Because Lambda functions are isolated, every dataset that crosses node boundaries must use persistent storage (for example S3). `MemoryDataset` entries cannot be shared between functions.
+Step Functions runs namespace groups in parallel when dependencies allow. It runs them sequentially across dependency waves — the same model as [running Kedro in a distributed environment](../distributed.md) and [grouping nodes for deployment](../nodes_grouping.md).
+
+Because Lambda functions are isolated, every dataset that crosses namespace boundaries must use persistent storage (for example S3). `MemoryDataset` entries cannot be shared between functions.
+
+Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-level namespaces. Node-level namespaces are for Kedro-Viz layout and do not group execution. See [Group nodes with namespaces](../../build/namespaces.md#group-nodes-with-namespaces).
+
+For Spaceflights `__default__`, this pattern creates **three** Lambda functions (`data_processing`, `data_science`, and `reporting`) instead of one per node.
+
+!!! note "Deploying without pipeline-level namespaces"
+    If your project has no pipeline-level namespaces, you can still deploy with the same `deploy.py` and `lambda_handler.py` from this guide. `Pipeline.group_nodes_by("namespace")` treats each node without a namespace as its own group, so you get **one Lambda per node**. The handler runs `session.run(node_names=[...])` for those groups instead of `session.run(namespaces=[...])`. Skip [Assign pipeline-level namespaces](#assign-pipeline-level-namespaces) and continue from Step 2. Expect more Lambda functions and Step Functions tasks; add namespaces later if you want fewer, coarser invocations.
 
 ### Why a container image?
 
@@ -72,6 +81,46 @@ kedro run
 ```
 
 Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in a separate environment in the next step.
+
+### Assign pipeline-level namespaces
+
+This step is **recommended** for fewer Lambda functions and lower orchestration overhead. If your pipeline has no pipeline-level namespaces, skip to [Step 2](#step-2-configure-kedro-for-aws) — see the note under [Strategy](#strategy).
+
+Before deploying, assign a **pipeline-level namespace** to each sub-pipeline you want to run as one Lambda function. In Spaceflights, update `create_pipeline()` in each module under `src/<PACKAGE_NAME>/pipelines/`:
+
+```python
+def create_pipeline(**kwargs) -> Pipeline:
+    return Pipeline(
+        [
+            # ... nodes unchanged ...
+        ],
+        namespace="data_processing",
+        prefix_datasets_with_namespace=False,
+        inputs={"companies", "shuttles", "reviews"},
+        outputs={"model_input_table"},
+    )
+```
+
+Set `prefix_datasets_with_namespace=False` so dataset names in `conf/base/catalog.yml` and `conf/aws/catalog.yml` keep their original names (for example `model_input_table`, not `data_processing.model_input_table`). Declare explicit `inputs` and `outputs` for each namespace so datasets shared across Lambda functions keep the same names.
+
+Repeat for the other sub-pipelines in `__default__`:
+
+| Sub-pipeline | `namespace` | `inputs` | `outputs` |
+| --- | --- | --- | --- |
+| `data_science` | `data_science` | `{"model_input_table"}` | `{"regressor", "X_train", "X_test", "y_train", "y_test"}` |
+| `reporting` | `reporting` | `{"preprocessed_shuttles"}` | `{"shuttle_passenger_capacity_plot_exp", "shuttle_passenger_capacity_plot_go", "dummy_confusion_matrix"}` |
+
+See [Group nodes with namespaces](../../build/namespaces.md#group-nodes-with-namespaces) for the full Spaceflights example.
+
+!!! note "Update `conf/base/catalog.yml` for reporting"
+    If the starter lists `matplotlib.MatplotlibWriter` for `dummy_confusion_matrix`, change it to `matplotlib.MatplotlibDataset` in **`conf/base/catalog.yml`** before running locally. The `aws` catalog in Step 2 already uses `MatplotlibDataset`.
+
+Verify locally after adding namespaces:
+
+```bash
+kedro run --namespaces=data_processing
+kedro run
+```
 
 ---
 
@@ -242,7 +291,7 @@ aws ecr create-repository --repository-name "${ECR_REPO}" --region "${AWS_REGION
 
 ## Step 5: Create the Lambda handler
 
-Create `lambda_handler.py` in the project root. Each Lambda invocation runs a single node named in the event payload.
+Create `lambda_handler.py` in the project root. Each Lambda invocation runs every node in the namespace named in the event payload.
 
 !!! note "Use `configure_project` inside Lambda"
     Call `configure_project("<PACKAGE_NAME>")` in the handler, not `bootstrap_project()`. The packaged wheel is installed into the container; `bootstrap_project()` expects `pyproject.toml` and a `src/` tree that are not copied into the image.
@@ -253,11 +302,10 @@ from unittest.mock import patch
 
 
 def handler(event, context):
-    """AWS Lambda entrypoint that runs a single Kedro node."""
+    """AWS Lambda entrypoint that runs a Kedro namespace group."""
     from kedro.framework.project import configure_project
     from kedro.framework.session import KedroSession
 
-    node_to_run = event["node_name"]
     project_path = Path(__file__).resolve().parent
 
     # SemLock is not available on Lambda; mock it so Kedro can import safely.
@@ -268,7 +316,10 @@ def handler(event, context):
             env="aws",
             conf_source=str(project_path / "conf"),
         ) as session:
-            session.run(node_names=[node_to_run])
+            if "namespace" in event:
+                session.run(namespaces=[event["namespace"]])
+            else:
+                session.run(node_names=[event["node_name"]])
 ```
 
 Replace `spaceflights_step_functions` with your package name if you used a different starter.
@@ -336,7 +387,7 @@ constructs>=10.0.0
 pip install -r deploy_requirements.txt
 ```
 
-Create `deploy.py`. This script reads the Kedro pipeline, creates one Lambda function per node, and wires them into a Step Functions state machine. Update `s3_data_bucket_name` to match your bucket.
+Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-level namespace with `Pipeline.group_nodes_by("namespace")`, creates one Lambda function per group, and wires them into a Step Functions state machine. Update `s3_data_bucket_name` to match your bucket.
 
 ??? example "View `deploy.py`"
     ```python
@@ -356,12 +407,35 @@ Create `deploy.py`. This script reads the Kedro pipeline, creates one Lambda fun
     from constructs import Construct
     from kedro.framework.project import pipelines
     from kedro.framework.startup import bootstrap_project
-    from kedro.pipeline.node import Node
+    from kedro.pipeline.node import GroupedNodes
 
 
     def _clean_name(name: str) -> str:
         """Reformat a name to be compliant with AWS naming rules."""
         return re.sub(r"[\W_]+", "-", name).strip("-")[:63]
+
+
+    def _namespace_execution_waves(
+        groups: list[GroupedNodes],
+    ) -> list[list[GroupedNodes]]:
+        """Return namespace groups in dependency order for Step Functions."""
+        group_map = {group.name: group for group in groups}
+        done: set[str] = set()
+        waves: list[list[GroupedNodes]] = []
+
+        while len(done) < len(group_map):
+            ready_names = [
+                name
+                for name, group in group_map.items()
+                if name not in done
+                and all(dep in done for dep in group.dependencies)
+            ]
+            if not ready_names:
+                raise ValueError("Circular dependencies among namespace groups")
+            waves.append([group_map[name] for name in ready_names])
+            done.update(ready_names)
+
+        return waves
 
 
     class KedroStepFunctionsStack(Stack):
@@ -406,12 +480,14 @@ Create `deploy.py`. This script reads the Kedro pipeline, creates one Lambda fun
                 self, "RawDataBucket", self.s3_data_bucket_name
             )
 
-        def _convert_kedro_node_to_lambda_function(self, node: Node) -> lambda_.Function:
-            """Convert a Kedro node into an AWS Lambda function"""
+        def _convert_group_to_lambda_function(
+            self, group: GroupedNodes
+        ) -> lambda_.Function:
+            """Convert a namespace group into an AWS Lambda function"""
             func = lambda_.Function(
                 self,
-                id=_clean_name(f"{node.name}_fn"),
-                description=str(node),
+                id=_clean_name(f"{group.name}_fn"),
+                description=", ".join(group.nodes),
                 code=self.ecr_image,
                 handler=lambda_.Handler.FROM_IMAGE,
                 runtime=lambda_.Runtime.FROM_IMAGE,
@@ -419,31 +495,46 @@ Create `deploy.py`. This script reads the Kedro pipeline, creates one Lambda fun
                     "S3_BUCKET": self.s3_data_bucket_name,
                     "MPLCONFIGDIR": "/tmp/matplotlib",
                 },
-                function_name=_clean_name(node.name),
+                function_name=_clean_name(group.name),
                 memory_size=1024,
                 timeout=Duration.minutes(15),
             )
             self.s3_bucket.grant_read_write(func)
             return func
 
-        def _convert_kedro_node_to_sfn_task(self, node: Node) -> tasks.LambdaInvoke:
-            """Convert a Kedro node into an AWS Step Functions Task"""
+        def _convert_group_to_sfn_task(
+            self, group: GroupedNodes, func: lambda_.Function
+        ) -> tasks.LambdaInvoke:
+            """Convert a namespace group into an AWS Step Functions Task"""
+            if group.type == "namespace":
+                payload = {"namespace": group.name}
+            else:
+                payload = {"node_name": group.nodes[0]}
+
             return tasks.LambdaInvoke(
                 self,
-                _clean_name(node.name),
-                lambda_function=self._convert_kedro_node_to_lambda_function(node),
-                payload=sfn.TaskInput.from_object({"node_name": node.name}),
+                _clean_name(group.name),
+                lambda_function=func,
+                payload=sfn.TaskInput.from_object(payload),
             )
 
         def _convert_kedro_pipeline_to_step_functions_state_machine(self) -> None:
             """Convert Kedro pipeline into an AWS Step Functions State Machine"""
+            groups = self.pipeline.group_nodes_by("namespace")
+            waves = _namespace_execution_waves(groups)
+            lambdas = {
+                group.name: self._convert_group_to_lambda_function(group)
+                for group in groups
+            }
+
             definition = sfn.Pass(self, "Start")
 
-            for index, group in enumerate(self.pipeline.grouped_nodes, start=1):
-                group_name = f"Group {index}"
-                parallel_state = sfn.Parallel(self, group_name)
-                for node in group:
-                    parallel_state.branch(self._convert_kedro_node_to_sfn_task(node))
+            for index, wave in enumerate(waves, start=1):
+                parallel_state = sfn.Parallel(self, f"Group {index}")
+                for group in wave:
+                    parallel_state.branch(
+                        self._convert_group_to_sfn_task(group, lambdas[group.name])
+                    )
                 definition = definition.next(parallel_state)
 
             sfn.StateMachine(
@@ -485,7 +576,7 @@ After deployment, open the [Step Functions console](https://console.aws.amazon.c
 
 ![](../../meta/images/aws_step_functions_state_machine_listing.png)
 
-You will also see one Lambda function per Kedro node:
+You will also see one Lambda function per pipeline-level namespace (three for Spaceflights `__default__`):
 
 ![](../../meta/images/aws_lambda_functions.png)
 
@@ -535,8 +626,11 @@ If the execution failed, see [Troubleshooting](#troubleshooting).
 | --- | --- | --- |
 | `Runtime.InvalidEntrypoint` / `ProcessSpawnFailed` | Container image built for ARM (Apple Silicon) but Lambda runs x86_64 | Rebuild with `docker build --platform linux/amd64` and push again |
 | `Could not find pyproject.toml` in `/var/task` | `bootstrap_project` called inside Lambda | Use `configure_project("<package_name>")` in `lambda_handler.py` as shown in Step 5 |
-| `Dataset 'MatplotlibWriter' not found` | Outdated dataset type name in catalog | Use `matplotlib.MatplotlibDataset` (Kedro Datasets 3.x+) |
-| `MemoryDataset` errors between nodes | Dataset not listed in `conf/aws/catalog.yml` | Add an S3-backed entry for every dataset shared across Lambda invocations |
+| `Dataset 'MatplotlibWriter' not found` | Outdated dataset type in `conf/base/catalog.yml` or `conf/aws/catalog.yml` | Use `matplotlib.MatplotlibDataset` in both catalogs (Kedro Datasets 3.x+) |
+| `MemoryDataset` errors between namespace groups | Dataset not listed in `conf/aws/catalog.yml` | Add an S3-backed entry for every dataset shared across Lambda invocations |
+| S3 errors during `kedro run --env aws` locally | Missing AWS CRT support in `botocore` | Run `pip install 'botocore[crt]'` and retry |
+| `cdk deploy` fails or creates unexpected Lambdas | An older per-node stack is still deployed | Run `cdk destroy`, then `cdk deploy` again after switching to namespace grouping |
+| Lambda times out mid-namespace | Namespace contains too much work for one 15-minute invocation | Split the namespace into smaller pipeline groups, or run heavy nodes on [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md) |
 | Step Functions times out | State machine timeout too short for your pipeline | Increase `timeout=Duration.minutes(...)` in `deploy.py` |
 | Lambda out of memory | Default memory too low for modelling nodes | Increase `memory_size` in `deploy.py` (for example `1024` or higher) |
 | `ModuleNotFoundError: No module named 'aws_cdk'` | CDK dependencies not installed in the Python env used by `cdk.json` | Install `deploy_requirements.txt` in that environment, or update `cdk.json` to point at the correct interpreter |
@@ -547,7 +641,7 @@ If the execution failed, see [Troubleshooting](#troubleshooting).
 
 ## Limitations
 
-Each Lambda function has a [15-minute timeout](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html), a 10 GB memory limit, and a 10 GB container image size limit. If a node exceeds these limits, run it on another AWS service such as [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md).
+Each Lambda function has a [15-minute timeout](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html), a 10 GB memory limit, and a 10 GB container image size limit. Namespace grouping runs all nodes in a namespace inside one invocation, so a namespace must finish within those limits. If it does not, split namespaces further or run heavy stages on another AWS service such as [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md).
 
 !!! warning "Image size with the full Spaceflights starter"
     The Spaceflights starter includes Jupyter, Viz, and reporting dependencies that increase image size. For production deployments, consider trimming `pyproject.toml` dependencies to what your pipeline requires.
@@ -559,6 +653,8 @@ Each Lambda function has a [15-minute timeout](https://docs.aws.amazon.com/lambd
 ### Kedro
 
 - [Running Kedro in a distributed environment](../distributed.md)
+- [Grouping nodes for deployment](../nodes_grouping.md)
+- [Group nodes with namespaces](../../build/namespaces.md#group-nodes-with-namespaces)
 - [Package a Kedro project](../package_a_project.md)
 - [Run a packaged project](../package_a_project.md#run-a-packaged-project)
 - [Catalog globals](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params)

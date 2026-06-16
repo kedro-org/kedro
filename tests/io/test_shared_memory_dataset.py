@@ -45,9 +45,6 @@ class TestSharedMemoryDataset:
 
         assert not _check_equals(shared_memory_dataset.load(), new_data)
 
-    @pytest.mark.parametrize(
-        "input_data", ["dummy_dataframe", "dummy_numpy_array"], indirect=True
-    )
     def test_load_returns_new_object(self, shared_memory_dataset, input_data):
         """Test that consecutive loads point to different objects in case of a
         pandas DataFrame and numpy array"""

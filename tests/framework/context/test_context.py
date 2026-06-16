@@ -109,9 +109,9 @@ def local_config(tmp_path):
     }
 
 
-@pytest.fixture(params=[None])
+@pytest.fixture
 def env(request):
-    return request.param
+    return getattr(request, "param", None)
 
 
 @pytest.fixture
@@ -181,9 +181,9 @@ pyproject_toml_payload = {
 }
 
 
-@pytest.fixture(params=[None])
+@pytest.fixture
 def runtime_params(request):
-    return request.param
+    return getattr(request, "param", None)
 
 
 @pytest.fixture

@@ -165,14 +165,14 @@ class MyOtherVersionedDataset(MyLocalVersionedDataset):
         return self._fs.exists(load_path)
 
 
-@pytest.fixture(params=[None])
+@pytest.fixture
 def load_version(request):
-    return request.param
+    return getattr(request, "param", None)
 
 
-@pytest.fixture(params=[None])
+@pytest.fixture
 def save_version(request):
-    return request.param or generate_timestamp()
+    return getattr(request, "param", None) or generate_timestamp()
 
 
 @pytest.fixture(params=[None])

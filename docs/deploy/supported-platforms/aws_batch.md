@@ -1,8 +1,6 @@
 # AWS Batch
 
-[AWS Batch](https://aws.amazon.com/batch/) runs containerised batch jobs at scale. Each job runs in an isolated Docker container. You can submit **one Batch job per Kedro node** and let Batch manage compute capacity — a good fit for parallel Kedro pipelines.
-
-This guide walks you through deploying a **Kedro 1.x** project on **AWS Batch** — from a local Kedro project to a successful multi-node pipeline run on AWS.
+[AWS Batch](https://aws.amazon.com/batch/) runs containerised batch jobs at scale. Each job runs in an isolated Docker container. This guide walks you through deploying a **Kedro 1.x** project so each **pipeline-level namespace** runs as one Batch job — with datasets stored on Amazon S3.
 
 ## What you will do
 
@@ -29,30 +27,29 @@ This guide walks you through deploying a **Kedro 1.x** project on **AWS Batch** 
 Create the project with:
 
 ```bash
-kedro new -s spaceflights-pandas -n "Spaceflights Batch" --name spaceflights_batch
+kedro new -s spaceflights-pandas -n spaceflights_batch
 ```
 
 Name the project directory `spaceflights-batch`. Complete the [Spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) if you are new to the project layout.
-
-### Tested versions
-
-| Component | Version |
-| --- | --- |
-| Kedro | 1.0.0 |
-| Python (container image) | 3.12 |
-| `boto3` | 1.34+ |
 
 ### Strategy
 
 A custom **`AWSBatchRunner`** runs on your local machine (or a CI agent). It does **not** execute node logic itself. Instead, it:
 
-1. Inspects the Kedro pipeline dependency graph
-2. Submits one AWS Batch job per node, with `dependsOn` links between jobs
+1. Groups the pipeline by top-level namespace with `Pipeline.group_nodes_by("namespace")`
+2. Submits one AWS Batch job per namespace group, with `dependsOn` links between jobs
 3. Polls Batch until each job reaches `SUCCEEDED` or `FAILED`
 
-Each Batch job runs a single Kedro node inside the container image using your packaged project CLI (for example `spaceflights-batch run --env aws_batch --nodes <node_name>`).
+Each Batch job runs every node in that namespace inside the container using your packaged project CLI (for example `spaceflights-batch run --env aws_batch --namespaces data_processing --conf-source /app/conf`).
 
-Because containers are isolated, every dataset shared between nodes must use persistent storage (for example S3). `MemoryDataset` entries cannot be shared between Batch jobs.
+For Spaceflights `__default__`, this creates **three** Batch jobs (`data_processing`, `data_science`, and `reporting`) instead of one per node — fewer container starts and less orchestration overhead, similar to [grouping nodes for deployment](../nodes_grouping.md) and the [AWS Step Functions guide](aws_step_functions.md).
+
+Because containers are isolated, every dataset shared between namespace groups must use persistent storage (for example S3). `MemoryDataset` entries cannot be shared between Batch jobs.
+
+Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-level namespaces. Node-level namespaces are for Kedro-Viz layout and do not group execution.
+
+!!! note "Submitting without pipeline-level namespaces"
+    If your project has no pipeline-level namespaces, the same `AWSBatchRunner` treats each node without a namespace as its own group and submits **one Batch job per node** using `--nodes <node_name>`. Skip [Assign pipeline-level namespaces](#assign-pipeline-level-namespaces) and continue from Step 2. Expect more jobs and longer total runtime; add namespaces later for coarser grouping.
 
 ### Placeholders used in this guide
 
@@ -81,7 +78,45 @@ kedro run
 
 Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in a separate environment in the next step.
 
-Each node should have a meaningful `name` in its `Node(...)` definition. Batch job names and log streams use these names.
+Each node should have a meaningful `name` in its `Node(...)` definition. Batch job names and log streams use namespace or node names.
+
+### Assign pipeline-level namespaces
+
+This step is **recommended** for fewer Batch jobs and lower orchestration overhead. If your pipeline has no pipeline-level namespaces, skip to [Step 2](#step-2-configure-kedro-for-aws-batch) — see the note under [Strategy](#strategy).
+
+Before deploying, assign a **pipeline-level namespace** to each sub-pipeline you want to run as one Batch job. In Spaceflights, update `create_pipeline()` in each module under `src/<PACKAGE_NAME>/pipelines/`:
+
+```python
+def create_pipeline(**kwargs) -> Pipeline:
+    return Pipeline(
+        [
+            # ... nodes unchanged ...
+        ],
+        namespace="data_processing",
+        prefix_datasets_with_namespace=False,
+        inputs={"companies", "shuttles", "reviews"},
+        outputs={"model_input_table"},
+    )
+```
+
+Set `prefix_datasets_with_namespace=False` so dataset names in `conf/base/catalog.yml` and `conf/aws_batch/catalog.yml` keep their original names. Declare explicit `inputs` and `outputs` for each namespace.
+
+| Sub-pipeline | `namespace` | `inputs` | `outputs` |
+| --- | --- | --- | --- |
+| `data_science` | `data_science` | `{"model_input_table"}` | `{"regressor", "X_train", "X_test", "y_train", "y_test"}` |
+| `reporting` | `reporting` | `{"preprocessed_shuttles"}` | `{"shuttle_passenger_capacity_plot_exp", "shuttle_passenger_capacity_plot_go", "dummy_confusion_matrix"}` |
+
+See [Group nodes with namespaces](../../build/namespaces.md#group-nodes-with-namespaces) for the full Spaceflights example.
+
+!!! note "Update `conf/base/catalog.yml` for reporting"
+    If the starter lists `matplotlib.MatplotlibWriter` for `dummy_confusion_matrix`, change it to `matplotlib.MatplotlibDataset` in **`conf/base/catalog.yml`** before running locally.
+
+Verify locally after adding namespaces:
+
+```bash
+kedro run --namespaces=data_processing
+kedro run
+```
 
 ---
 
@@ -119,7 +154,7 @@ aws_batch:
 Add `s3fs` and `boto3` to `pyproject.toml`:
 
 ```toml
-"s3fs>=2021.4",
+"s3fs>=2024.6.0",
 "boto3>=1.34.0",
 ```
 
@@ -307,11 +342,11 @@ The compute environment does not launch instances until jobs are submitted, so c
 
 ## Step 6: Create the custom AWS Batch runner
 
-Create `src/<PACKAGE_NAME>/runner/batch_runner.py` with an `AWSBatchRunner` class that extends `AbstractRunner` and submits Batch jobs instead of running nodes locally.
+Create `src/<PACKAGE_NAME>/runner/batch_runner.py` with an `AWSBatchRunner` class that extends `AbstractRunner` and submits Batch jobs for each namespace group (or each node when no namespace is defined).
 
 ??? example "View `batch_runner.py`"
     ```python
-    """``AWSBatchRunner`` submits each Kedro node as an AWS Batch job."""
+    """``AWSBatchRunner`` submits Kedro namespace groups as AWS Batch jobs."""
 
     from __future__ import annotations
 
@@ -323,7 +358,8 @@ Create `src/<PACKAGE_NAME>/runner/batch_runner.py` with an `AWSBatchRunner` clas
     from pluggy import PluginManager
 
     from kedro.io import CatalogProtocol
-    from kedro.pipeline import Node, Pipeline
+    from kedro.pipeline import Pipeline
+    from kedro.pipeline.node import GroupedNodes
     from kedro.runner import AbstractRunner
 
 
@@ -347,7 +383,7 @@ Create `src/<PACKAGE_NAME>/runner/batch_runner.py` with an `AWSBatchRunner` clas
 
 
     class AWSBatchRunner(AbstractRunner):
-        """Submit Kedro nodes to AWS Batch with dependency ordering."""
+        """Submit Kedro namespace groups to AWS Batch with dependency ordering."""
 
         def __init__(
             self,
@@ -366,8 +402,8 @@ Create `src/<PACKAGE_NAME>/runner/batch_runner.py` with an `AWSBatchRunner` clas
             self._conf_source = conf_source
             self._client = boto3.client("batch")
 
-        def _get_required_workers_count(self, pipeline: Pipeline) -> int:
-            required = len(pipeline.nodes) - len(pipeline.grouped_nodes) + 1
+        def _get_required_workers_count(self, groups: list[GroupedNodes]) -> int:
+            required = len(groups)
             if self._max_workers is not None:
                 return min(required, self._max_workers)
             return required
@@ -382,13 +418,15 @@ Create `src/<PACKAGE_NAME>/runner/batch_runner.py` with an `AWSBatchRunner` clas
             hook_manager: PluginManager | None = None,
             run_id: str | None = None,
         ) -> None:
-            nodes = pipeline.nodes
-            node_dependencies = pipeline.node_dependencies
-            todo_nodes = set(node_dependencies.keys())
-            node_to_job: dict[Node, str] = {}
-            done_nodes: set[Node] = set()
+            groups = pipeline.group_nodes_by("namespace")
+            group_map = {group.name: group for group in groups}
+            group_deps = {group.name: set(group.dependencies) for group in groups}
+
+            todo_groups = set(group_map.keys())
+            group_to_job: dict[str, str] = {}
+            done_groups: set[str] = set()
             futures: set = set()
-            max_workers = self._get_required_workers_count(pipeline)
+            max_workers = self._get_required_workers_count(groups)
 
             self._logger.info("Max workers: %d", max_workers)
             with ThreadPoolExecutor(max_workers=max_workers) as pool:
@@ -397,61 +435,69 @@ Create `src/<PACKAGE_NAME>/runner/batch_runner.py` with an `AWSBatchRunner` clas
                     futures -= done
                     for future in done:
                         try:
-                            node = future.result()
+                            group_name = future.result()
                         except Exception:
-                            self._suggest_resume_scenario(pipeline, done_nodes, catalog)
+                            self._suggest_resume_scenario(
+                                pipeline, set(), catalog
+                            )
                             raise
-                        done_nodes.add(node)
+                        done_groups.add(group_name)
                         self._logger.info(
                             "Completed %d out of %d jobs",
-                            len(done_nodes),
-                            len(nodes),
+                            len(done_groups),
+                            len(groups),
                         )
 
                     ready = {
-                        node
-                        for node in todo_nodes
-                        if node_dependencies[node] <= set(node_to_job)
+                        name
+                        for name in todo_groups
+                        if group_deps[name] <= done_groups
                     }
-                    todo_nodes -= ready
-                    for node in ready:
+                    todo_groups -= ready
+                    for name in ready:
                         future = pool.submit(
                             self._submit_job,
-                            node,
-                            node_to_job,
-                            node_dependencies[node],
+                            group_map[name],
+                            group_to_job,
+                            group_deps[name],
                             run_id,
                         )
                         futures.add(future)
 
                     if not futures:
-                        if todo_nodes:
+                        if todo_groups:
                             raise RuntimeError(
-                                f"Unresolved nodes: {[n.name for n in todo_nodes]}"
+                                f"Unresolved groups: {sorted(todo_groups)}"
                             )
                         break
 
         def _submit_job(
             self,
-            node: Node,
-            node_to_job: dict[Node, str],
-            node_dependencies: set[Node],
+            group: GroupedNodes,
+            group_to_job: dict[str, str],
+            group_dependencies: set[str],
             run_id: str | None,
-        ) -> Node:
-            self._logger.info("Submitting the job for node: %s", node.name)
+        ) -> str:
+            self._logger.info("Submitting the job for group: %s", group.name)
 
             run_suffix = run_id or "local"
-            job_name = f"kedro-{run_suffix}-{node.name}".replace(".", "-")[:128]
-            depends_on = [{"jobId": node_to_job[dep]} for dep in node_dependencies]
+            job_name = f"kedro-{run_suffix}-{group.name}".replace(".", "-")[:128]
+            depends_on = [
+                {"jobId": group_to_job[dep]}
+                for dep in group_dependencies
+                if dep in group_to_job
+            ]
 
             command = [
                 self._package_cli,
                 "run",
                 "--env",
                 "aws_batch",
-                "--nodes",
-                node.name,
             ]
+            if group.type == "namespace":
+                command.extend(["--namespaces", group.name])
+            else:
+                command.extend(["--nodes", group.nodes[0]])
             if self._conf_source:
                 command.extend(["--conf-source", self._conf_source])
 
@@ -464,9 +510,9 @@ Create `src/<PACKAGE_NAME>/runner/batch_runner.py` with an `AWSBatchRunner` clas
             )
 
             job_id = response["jobId"]
-            node_to_job[node] = job_id
+            group_to_job[group.name] = job_id
             _track_batch_job(job_id, self._client)
-            return node
+            return group.name
     ```
 
 Export the runner from `src/<PACKAGE_NAME>/runner/__init__.py`:
@@ -522,7 +568,7 @@ spaceflights-batch run \
   --runner spaceflights_batch.runner.AWSBatchRunner
 ```
 
-The `AWSBatchRunner` on your machine submits Batch jobs. Each job runs inside the container image and executes a single node.
+The `AWSBatchRunner` on your machine submits Batch jobs. Each job runs inside the container image and executes one namespace group (or a single node when no namespace is defined). For Spaceflights `__default__`, expect **three** jobs.
 
 Track jobs in the [Batch console](https://console.aws.amazon.com/batch/) or with:
 
@@ -562,7 +608,10 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 | --- | --- | --- |
 | `Cannot install ... s3fs` dependency conflict | `kedro-viz` pins an older `s3fs` range | Use `s3fs>=2021.4` locally; omit Kedro-Viz from the Batch image for production |
 | `AccessDenied` on S3 inside Batch jobs | Job role lacks bucket permissions | Attach an IAM policy scoped to `<your-bucket>` on the job role |
-| `MemoryDataset` errors between nodes | Dataset missing from `conf/aws_batch/catalog.yml` | Add S3-backed entries for all shared datasets |
+| `MemoryDataset` errors between jobs | Dataset missing from `conf/aws_batch/catalog.yml` | Add S3-backed entries for all shared datasets |
+| Batch job times out mid-namespace | Namespace contains too much work for one job timeout | Split namespaces further or increase job definition timeout/memory |
+| `Dataset 'MatplotlibWriter' not found` | Outdated dataset type in `conf/base/catalog.yml` | Use `matplotlib.MatplotlibDataset` in base and aws_batch catalogs |
+| S3 errors during `kedro run --env aws_batch` locally | Missing AWS CRT support in `botocore` | Run `pip install 'botocore[crt]'` and retry |
 | Jobs stuck in `RUNNABLE` | Compute environment not scaled or no capacity | Check compute environment status; increase `maxvCpus` or instance types |
 | `Essential container exited` immediately | Wrong `--conf-source` or missing `conf/` in image | Verify `COPY conf/ /app/conf/` in the Dockerfile and `conf_source: /app/conf` in parameters |
 | `ModuleNotFoundError` for runner kwargs | Built-in `kedro run` used instead of custom `cli.py` | Use `<PACKAGE_CLI> run` after adding the customised `cli.py` from Step 7 |
@@ -574,7 +623,8 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 
 ## Limitations
 
-- Each Batch job runs **one Kedro node**. Pipelines with dozens of nodes increase Batch job count and ECR pulls; consider grouping nodes or using [Amazon EMR Serverless](amazon_emr_serverless.md) for Spark-heavy workloads.
+- Each Batch job runs **one namespace group** (or one node when no namespace is defined). A namespace must finish within the job definition timeout and memory limits.
+- Pipelines with dozens of ungrouped nodes increase Batch job count and ECR pulls; add pipeline-level namespaces or use [Amazon EMR Serverless](amazon_emr_serverless.md) for Spark-heavy workloads.
 - The driver machine (where you run `AWSBatchRunner`) must stay online until all jobs complete.
 - Batch job dependencies use AWS Batch `dependsOn`; this matches Kedro's DAG but does not replace Kedro's own `ThreadRunner` parallelism on a single machine.
 
@@ -585,6 +635,8 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 ### Kedro
 
 - [Running Kedro in a distributed environment](../distributed.md)
+- [Grouping nodes for deployment](../nodes_grouping.md)
+- [Group nodes with namespaces](../../build/namespaces.md#group-nodes-with-namespaces)
 - [Package a Kedro project](../package_a_project.md)
 - [Customise project-specific Kedro commands](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands)
 - [Catalog globals](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params)

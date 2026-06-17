@@ -111,9 +111,6 @@ class TestMemoryDataset:
 
         assert not _check_equals(memory_dataset.load(), new_data)
 
-    @pytest.mark.parametrize(
-        "input_data", ["dummy_dataframe", "dummy_numpy_array"], indirect=True
-    )
     def test_load_returns_new_object(self, memory_dataset, input_data):
         """Test that consecutive loads point to different objects in case of a
         pandas DataFrame and numpy array"""
@@ -141,22 +138,13 @@ class TestMemoryDataset:
         with pytest.raises(DatasetError, match=pattern):
             MemoryDataset().save(None)
 
-    @pytest.mark.parametrize(
-        "input_data,expected",
-        [
-            (
-                "dummy_dataframe",
-                "kedro.io.memory_dataset.MemoryDataset(data='<DataFrame>')",
-            ),
-            (
-                "dummy_numpy_array",
-                "kedro.io.memory_dataset.MemoryDataset(data='<ndarray>')",
-            ),
-        ],
-        indirect=["input_data"],
-    )
-    def test_str_repr_representation(self, memory_dataset, input_data, expected):
+    def test_str_repr_representation(self, memory_dataset, input_data):
         """Test string representation of the dataset"""
+        _expected = {
+            pd.DataFrame: "kedro.io.memory_dataset.MemoryDataset(data='<DataFrame>')",
+            np.ndarray: "kedro.io.memory_dataset.MemoryDataset(data='<ndarray>')",
+        }
+        expected = _expected[type(input_data)]
         assert expected in str(memory_dataset)
         assert expected in repr(memory_dataset)
 

@@ -44,15 +44,17 @@ flowchart LR
   subgraph aws [AWS]
     SFN[Step Functions]
     L1[Lambda data_processing]
+    P[Parallel state]
     L2[Lambda reporting]
     L3[Lambda data_science]
     S3[(S3 bucket)]
   end
   CDK --> SFN
   SFN --> L1
-  SFN --> L2
-  SFN --> L3
   L1 --> S3
+  L1 --> P
+  P --> L2
+  P --> L3
   L2 --> S3
   L3 --> S3
 ```
@@ -77,16 +79,16 @@ If a namespace outgrows Lambda, run those stages on [AWS Batch](aws_batch.md) or
 
 #### Plan execution order and storage
 
-Namespace groups with no upstream dependencies run together in a Step Functions [Parallel workflow state](https://docs.aws.amazon.com/step-functions/latest/dg/state-parallel.html). Groups that depend on earlier outputs run after those groups finish. The state machine chains one `Parallel` block per dependency level.
+Namespace groups with no upstream dependencies run together in a Step Functions [Parallel workflow state](https://docs.aws.amazon.com/step-functions/latest/dg/state-parallel.html). Groups that depend on earlier outputs run after those groups finish. The state machine chains one `Parallel` block per dependency level, using the `dependencies` list on each `GroupedNodes` object from `Pipeline.group_nodes_by("namespace")`.
 
-For Spaceflights, `data_processing` and `reporting` can run in parallel because raw inputs are enough for both. `data_science` runs after `data_processing` produces `model_input_table`. The same dependency rules apply in [distributed Kedro runs](../distributed.md) and in [grouping nodes for deployment](../nodes_grouping.md).
+For Spaceflights, `data_processing` runs at the first dependency level to produce intermediate datasets on S3. `data_science` and `reporting` run in parallel at the next level because both depend on `data_processing` outputs (`model_input_table` and `preprocessed_shuttles`) but not on each other. The same dependency rules apply in [distributed Kedro runs](../distributed.md) and in [grouping nodes for deployment](../nodes_grouping.md).
 
 List **every dataset shared across namespace groups** in `conf/aws/catalog.yml` on S3. Omitting a dataset causes `MemoryDataset` errors when Step Functions moves between Lambda invocations.
 
 #### Configure before you deploy
 
 - Assign **pipeline-level namespaces** with explicit `inputs` / `outputs` and `prefix_datasets_with_namespace=False`
-- Run each namespace locally (`kedro run --namespace <name>`) to estimate duration and memory, then set `memory_size` and `timeout_minutes` in `NAMESPACE_LAMBDA_CONFIG` in your CDK deployment script for the heaviest node in each namespace
+- Run each namespace locally (`kedro run --namespaces=<name>`) to estimate duration and memory, then set `memory_size` and `timeout_minutes` in `NAMESPACE_LAMBDA_CONFIG` in your CDK deployment script for the heaviest node in each namespace
 - Trim **image dependencies** if the container approaches Lambda size limits
 
 !!! note "Deploying without pipeline-level namespaces"
@@ -471,13 +473,13 @@ Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-le
         return re.sub(r"[\W_]+", "-", name).strip("-")[:63]
 
 
-    def _namespace_execution_waves(
+    def _namespace_dependency_levels(
         groups: list[GroupedNodes],
     ) -> list[list[GroupedNodes]]:
-        """Return namespace groups in dependency order for Step Functions."""
+        """Return namespace groups grouped by dependency level for Step Functions."""
         group_map = {group.name: group for group in groups}
         done: set[str] = set()
-        waves: list[list[GroupedNodes]] = []
+        dependency_levels: list[list[GroupedNodes]] = []
 
         while len(done) < len(group_map):
             ready_names = [
@@ -488,10 +490,10 @@ Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-le
             ]
             if not ready_names:
                 raise ValueError("Circular dependencies among namespace groups")
-            waves.append([group_map[name] for name in ready_names])
+            dependency_levels.append([group_map[name] for name in ready_names])
             done.update(ready_names)
 
-        return waves
+        return dependency_levels
 
 
     # Size each namespace Lambda for its heaviest node (from local runs or CloudWatch).
@@ -589,7 +591,7 @@ Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-le
         def _convert_kedro_pipeline_to_step_functions_state_machine(self) -> None:
             """Convert Kedro pipeline into an AWS Step Functions State Machine"""
             groups = self.pipeline.group_nodes_by("namespace")
-            waves = _namespace_execution_waves(groups)
+            dependency_levels = _namespace_dependency_levels(groups)
             lambdas = {
                 group.name: self._convert_group_to_lambda_function(group)
                 for group in groups
@@ -597,9 +599,9 @@ Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-le
 
             definition = sfn.Pass(self, "Start")
 
-            for index, wave in enumerate(waves, start=1):
-                parallel_state = sfn.Parallel(self, f"Group {index}")
-                for group in wave:
+            for index, level in enumerate(dependency_levels, start=1):
+                parallel_state = sfn.Parallel(self, f"Dependency level {index}")
+                for group in level:
                     parallel_state.branch(
                         self._convert_group_to_sfn_task(group, lambdas[group.name])
                     )

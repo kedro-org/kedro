@@ -9,7 +9,7 @@
 3. [Package the Kedro project](#step-3-package-the-kedro-project)
 4. [Build and push the container image](#step-4-build-and-push-the-container-image)
 5. [Set up AWS Batch](#step-5-set-up-aws-batch)
-6. [Create the custom Batch runner](#step-6-create-the-custom-batch-runner)
+6. [Create the custom Batch runner](#step-6-create-the-custom-aws-batch-runner)
 7. [Customise the project CLI](#step-7-customise-the-project-cli)
 8. [Submit the pipeline from your machine](#step-8-submit-the-pipeline-from-your-machine)
 9. [Verify the jobs succeeded](#step-9-verify-the-jobs-succeeded)
@@ -42,14 +42,18 @@ A custom **`AWSBatchRunner`** runs on your local machine (or a CI agent). It doe
 
 Each Batch job runs every node in that namespace inside the container using your packaged project CLI (for example `spaceflights-batch run --env aws_batch --namespaces data_processing --conf-source /app/conf`).
 
-For Spaceflights `__default__`, this creates **three** Batch jobs (`data_processing`, `data_science`, and `reporting`) instead of one per node — fewer container starts and less orchestration overhead, similar to [grouping nodes for deployment](../nodes_grouping.md) and the [AWS Step Functions guide](aws_step_functions.md).
+For Spaceflights `__default__`, this creates **three** Batch jobs (`data_processing`, `data_science`, and `reporting`) instead of one per node.
+
+This matches [grouping nodes for deployment](../nodes_grouping.md) and the [AWS Step Functions guide](aws_step_functions.md).
 
 Because containers are isolated, every dataset shared between namespace groups must use persistent storage (for example S3). `MemoryDataset` entries cannot be shared between Batch jobs.
 
 Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-level namespaces. Node-level namespaces are for Kedro-Viz layout and do not group execution.
 
 !!! note "Submitting without pipeline-level namespaces"
-    If your project has no pipeline-level namespaces, the same `AWSBatchRunner` treats each node without a namespace as its own group and submits **one Batch job per node** using `--nodes <node_name>`. Skip [Assign pipeline-level namespaces](#assign-pipeline-level-namespaces) and continue from Step 2. Expect more jobs and longer total runtime; add namespaces later for coarser grouping.
+    If your project has no pipeline-level namespaces, `AWSBatchRunner` still works. Each node without a namespace becomes its own group — **one Batch job per node** with `--nodes <node_name>`.
+
+    Skip [Assign pipeline-level namespaces](#assign-pipeline-level-namespaces) and continue from Step 2. Expect more jobs and longer runtime; add namespaces later for coarser grouping.
 
 ### Placeholders used in this guide
 
@@ -624,7 +628,7 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 ## Limitations
 
 - Each Batch job runs **one namespace group** (or one node when no namespace is defined). A namespace must finish within the job definition timeout and memory limits.
-- Pipelines with dozens of ungrouped nodes increase Batch job count and ECR pulls; add pipeline-level namespaces or use [Amazon EMR Serverless](amazon_emr_serverless.md) for Spark-heavy workloads.
+- Pipelines with dozens of nodes without namespaces increase Batch job count and ECR pulls; add pipeline-level namespaces or use [Amazon EMR Serverless](amazon_emr_serverless.md) for Spark-heavy workloads.
 - The driver machine (where you run `AWSBatchRunner`) must stay online until all jobs complete.
 - Batch job dependencies use AWS Batch `dependsOn`; this matches Kedro's DAG but does not replace Kedro's own `ThreadRunner` parallelism on a single machine.
 

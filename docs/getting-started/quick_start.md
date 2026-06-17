@@ -1,7 +1,7 @@
 # Quick start with Kedro
 This quick-start guide has 3 sections:
 
-* **Explore**: A 10-minute guide from installing Kedro, creating a starter project to visualising the pipelines.
+* **Experience**: A 10-minute guide from installing Kedro, creating a starter project to visualising the pipelines.
 
 * **Explain**: An introduction to the 4 key concepts: project template, data catalog, node, and pipeline.
 
@@ -57,7 +57,7 @@ uv run kedro run --pipeline __default__
 
 
 ### Step 5. Visualise the default pipeline
-To **visualise the default pipeline** with **Kedro-Viz**, our interactive development tool for building data pipelines with Kedro, enter the following command in **Terminal**. Kedro-Viz will open separately in your browser.:
+To **visualise the default pipeline** with **Kedro-Viz**, our interactive development tool for building data pipelines with Kedro, enter the following command in **Terminal**. Kedro-Viz will open separately in your browser.
 ```bash
 uv run kedro viz run
 ```

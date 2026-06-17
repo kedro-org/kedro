@@ -2,20 +2,9 @@
 
 [AWS Step Functions](https://aws.amazon.com/step-functions/) orchestrates [AWS Lambda](https://aws.amazon.com/lambda/) functions into a state machine. The sections below show how to deploy a **Kedro 1.x** project so each **pipeline-level namespace** runs as one Lambda function, with datasets stored on Amazon S3.
 
-The worked example uses the Spaceflights starter. Read [the deployment strategy](#strategy) first if you want to adapt this pattern without following every Spaceflights detail.
+This guide uses the Spaceflights starter as a worked example. Read [the deployment strategy](#strategy) first if you are deploying your own Kedro project and need guidance on grouping, storage, and Lambda memory and timeout settings.
 
-## Before you start
-
-### Prerequisites
-
-- A **Kedro 1.x** project (`requires-python = ">=3.10"` in `pyproject.toml`)
-- Python **>=3.10** locally
-- [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI)
-- [Node.js](https://nodejs.org/) and the [CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/cli.html) (`npm install -g aws-cdk`)
-- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region
-- An AWS account with permissions for S3, ECR, Lambda, Step Functions, IAM, and CloudFormation
-
-### Strategy
+## Strategy
 
 Read this section before you deploy your own project. It starts with an overview of the approach, then gives practical advice for adapting it to your pipelines.
 
@@ -32,7 +21,7 @@ The approach in brief:
 
 #### Why use a container image?
 
-Lambda [container images for AWS Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html) let you package Kedro, project dependencies, and configuration into one artefact. You can build and test that artefact locally before pushing it to [Amazon Elastic Container Registry](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html). The [AWS Lambda Python 3.12 base image](https://gallery.ecr.aws/lambda/python) provides the runtime interface. Your `Dockerfile` installs the packaged Kedro wheel and copies `conf/`.
+[Container images for AWS Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html) lets you package Kedro, project dependencies, and configuration into one artefact. You can build and test that artefact locally before pushing it to [Amazon Elastic Container Registry](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html).
 
 <!-- vale off -->
 
@@ -75,13 +64,14 @@ Namespace grouping suits most production pipelines where related nodes share dep
 | One Lambda per **node** | Full isolation. Easy to debug a single node | More functions, cold starts, more Step Functions tasks | Small pipelines or prototyping |
 | **Offload heavy stages** to Batch or EMR Serverless | Long jobs and large memory needs fit better | Extra infrastructure to set up and operate | Spark workloads or nodes that exceed Lambda limits |
 
-If a namespace outgrows Lambda, run those stages on [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md) instead of Step Functions.
+!!! note "When a namespace exceeds Lambda limits"
+    If a namespace outgrows Lambda, run those stages on [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md) instead of Step Functions.
 
 #### Plan execution order and storage
 
 Namespace groups with no upstream dependencies run together in a Step Functions [Parallel workflow state](https://docs.aws.amazon.com/step-functions/latest/dg/state-parallel.html). Groups that depend on earlier outputs run after those groups finish. The state machine chains one `Parallel` block per dependency level, using the `dependencies` list on each `GroupedNodes` object from `Pipeline.group_nodes_by("namespace")`.
 
-For Spaceflights, `data_processing` runs at the first dependency level to produce intermediate datasets on S3. `data_science` and `reporting` run in parallel at the next level because both depend on `data_processing` outputs (`model_input_table` and `preprocessed_shuttles`) but not on each other. The same dependency rules apply in [distributed Kedro runs](../distributed.md) and in [grouping nodes for deployment](../nodes_grouping.md).
+For Spaceflights, `data_processing` pipeline runs at the first dependency level to produce intermediate datasets on S3. `data_science` and `reporting` pipelines run in parallel at the next level because both depend on `data_processing` outputs (`model_input_table` and `preprocessed_shuttles`) but not on each other. The same dependency rules apply in [distributed Kedro runs](../distributed.md) and in [grouping nodes for deployment](../nodes_grouping.md).
 
 List **every dataset shared across namespace groups** in `conf/aws/catalog.yml` on S3. Omitting a dataset causes `MemoryDataset` errors when Step Functions moves between Lambda invocations.
 
@@ -92,11 +82,29 @@ List **every dataset shared across namespace groups** in `conf/aws/catalog.yml` 
 - Trim **image dependencies** if the container approaches Lambda size limits
 
 !!! note "Deploying without pipeline-level namespaces"
-    If your project has no pipeline-level namespaces, you can still deploy with the same `deploy.py` and `lambda_handler.py` from this guide. `Pipeline.group_nodes_by("namespace")` treats each node without a namespace as its own group, so you get **one Lambda per node**. The handler runs `session.run(node_names=[...])` for those groups instead of `session.run(namespaces=[...])`. Skip [how to assign pipeline-level namespaces](#assign-pipeline-level-namespaces) and continue from Step 2. Expect more Lambda functions and Step Functions tasks. Add namespaces later if you want fewer, coarser invocations.
+    If your project has no pipeline-level namespaces, you can still deploy with the same `deploy.py` and `lambda_handler.py` from this guide. `Pipeline.group_nodes_by("namespace")` treats each node without a namespace as its own group, so you get **one Lambda per node**. The handler runs `session.run(node_names=[...])` for those groups instead of `session.run(namespaces=[...])`. Skip [how to assign pipeline-level namespaces](#assign-pipeline-level-namespaces) and continue from [Step 2: Set up AWS](#step-2-set-up-aws). Expect more Lambda functions and Step Functions tasks. Add namespaces later if you want fewer, coarser invocations.
 
 ## Working example
 
-The steps below deploy the Spaceflights starter end to end. If you use your own Kedro project, replace the placeholders in the next section and follow the same steps.
+### Prerequisites
+
+These apply to the **step-by-step guide** below. This guide builds and deploys from your machine with Kedro, Docker, the AWS CDK, and the AWS CLI. You use the [AWS Management Console](https://aws.amazon.com/console/) to inspect the state machine and Lambda functions after deployment, but you cannot complete the guide with the console alone.
+
+| You need | Used for |
+| --- | --- |
+| A **Kedro 1.x** project (`requires-python = ">=3.10"` in `pyproject.toml`) and Python **>=3.10** locally | Packaging the project, local test runs, and the CDK script that reads your pipeline |
+| [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI) | Building the Lambda container image |
+| [Node.js](https://nodejs.org/) and the [CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/cli.html) (`npm install -g aws-cdk`) | Deploying Lambda functions and the Step Functions state machine with `deploy.py` |
+| [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region | Uploading data to S3, pushing the image to ECR, starting executions, and verifying outputs |
+| An AWS account with permissions for S3, ECR, Lambda, Step Functions, IAM, and CloudFormation | Creating and running the deployed resources |
+
+The steps that follow deploy the [Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/) end to end. Create the project with:
+
+```bash
+kedro new -s spaceflights-pandas -n spaceflights_step_functions
+```
+
+If you are new to the project layout, [complete the Spaceflights tutorial](../../tutorials/spaceflights_tutorial.md). If you use your own Kedro project, replace the placeholders below and follow the same steps.
 
 ### Placeholders used in this guide
 
@@ -113,9 +121,9 @@ Replace these before building and deploying:
 ### What you will do
 
 1. [Prepare your Kedro project](#step-1-prepare-your-kedro-project)
-2. [Configure Kedro for AWS](#step-2-configure-kedro-for-aws)
-3. [Package the Kedro project](#step-3-package-the-kedro-project)
-4. [Set up AWS](#step-4-set-up-aws)
+2. [Set up AWS](#step-2-set-up-aws)
+3. [Configure Kedro for AWS](#step-3-configure-kedro-for-aws)
+4. [Package the Kedro project](#step-4-package-the-kedro-project)
 5. [Create the Lambda handler](#step-5-create-the-lambda-handler)
 6. [Build the Lambda container image](#step-6-build-the-lambda-container-image)
 7. [Write the CDK deployment script](#step-7-write-the-cdk-deployment-script)
@@ -138,11 +146,11 @@ pip install -e .
 kedro run
 ```
 
-Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in a separate environment in the next step.
+Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in Step 3 after you create the bucket in Step 2.
 
 ### Assign pipeline-level namespaces
 
-This step is **recommended** for fewer Lambda functions and lower orchestration overhead. Read [the deployment strategy](#strategy) for grouping trade-offs and namespace requirements. If your pipeline has no pipeline-level namespaces, skip to [Step 2: Configure Kedro for AWS](#step-2-configure-kedro-for-aws) and see the note in that section.
+This step is **recommended** for fewer Lambda functions and lower orchestration overhead. Read [the deployment strategy](#strategy) for grouping trade-offs and namespace requirements. If your pipeline has no pipeline-level namespaces, skip to [Step 2: Set up AWS](#step-2-set-up-aws) and see the note in that section.
 
 Assign a **pipeline-level namespace** to each sub-pipeline you want to run as one Lambda function. In Spaceflights, update `create_pipeline()` in each module under `src/<PACKAGE_NAME>/pipelines/`:
 
@@ -171,7 +179,7 @@ Repeat for the other sub-pipelines in `__default__`:
 [Learn how to group nodes with namespaces in Kedro using the full Spaceflights example](../../build/namespaces.md#group-nodes-with-namespaces).
 
 !!! note "Update `conf/base/catalog.yml` for reporting"
-    If the starter lists `matplotlib.MatplotlibWriter` for the confusion matrix output, change it to `matplotlib.MatplotlibDataset` in **`conf/base/catalog.yml`** before running locally. In Spaceflights the catalog entry is named `dummy_confusion_matrix`. The `aws` catalog in Step 2 already uses `MatplotlibDataset`.
+    If the starter lists `matplotlib.MatplotlibWriter` for the confusion matrix output, change it to `matplotlib.MatplotlibDataset` in **`conf/base/catalog.yml`** before running locally. In Spaceflights the catalog entry is named `dummy_confusion_matrix`. The `aws` catalog in Step 3 already uses `MatplotlibDataset`.
 
 Verify locally after adding namespaces:
 
@@ -182,7 +190,49 @@ kedro run
 
 ---
 
-## Step 2: Configure Kedro for AWS
+## Step 2: Set up AWS
+
+Create the AWS resources your Kedro project will use before you point configuration at them. Complete this setup for each AWS account and region.
+
+### Create an S3 bucket and upload raw data
+
+Create a globally unique bucket and upload the raw datasets. Follow the AWS guides for [creating an Amazon S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) and [uploading objects to Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html):
+
+```bash
+export AWS_ACCOUNT_ID=<your-aws-account-id>
+export AWS_REGION=<your-aws-region>
+export S3_BUCKET=<your-bucket>
+
+aws s3 mb "s3://${S3_BUCKET}" --region "${AWS_REGION}"
+aws s3 sync data/01_raw/ "s3://${S3_BUCKET}/01_raw/"
+```
+
+!!! note "`shuttles.xlsx` may be missing locally"
+    The starter gitignores `data/01_raw/shuttles.xlsx`. Copy it from the [Spaceflights starter repository on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) if `kedro new` did not place it in your project.
+
+### Create an ECR repository
+
+| Resource | AWS documentation | What you need for Kedro |
+| --- | --- | --- |
+| **ECR repository** | [Create a private Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html) | One **private** repo for the Lambda image (for example `spaceflights-step-functions`) |
+| **CDK bootstrap** | [Bootstrap AWS CDK in your account](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) | One-time per account/region before `cdk deploy` in Step 8 |
+| **IAM** | Created by CDK | Lambda execution roles and Step Functions permissions are provisioned by the CDK stack |
+
+Create the ECR repository:
+
+```bash
+export ECR_REPO=spaceflights-step-functions
+
+aws ecr create-repository --repository-name "${ECR_REPO}" --region "${AWS_REGION}"
+```
+
+Keep `AWS_ACCOUNT_ID`, `AWS_REGION`, `S3_BUCKET`, and `ECR_REPO` exported for later steps.
+
+---
+
+## Step 3: Configure Kedro for AWS
+
+Set `s3_bucket` in `conf/aws/globals.yml` to the same value as `S3_BUCKET` from Step 2.
 
 ### Create an `aws` config environment
 
@@ -285,21 +335,6 @@ The Spaceflights starter uses Parquet for intermediate tables and includes a rep
       versioned: true
     ```
 
-### Create an S3 bucket and upload raw data
-
-Create a globally unique bucket and upload the raw datasets. Follow the AWS guides for [creating an Amazon S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) and [uploading objects to Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html):
-
-```bash
-export AWS_REGION=<your-aws-region>
-export S3_BUCKET=<your-bucket>
-
-aws s3 mb "s3://${S3_BUCKET}" --region "${AWS_REGION}"
-aws s3 sync data/01_raw/ "s3://${S3_BUCKET}/01_raw/"
-```
-
-!!! note "`shuttles.xlsx` may be missing locally"
-    The starter gitignores `data/01_raw/shuttles.xlsx`. Copy it from the [Spaceflights starter repository on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) if `kedro new` did not place it in your project.
-
 ### Verify the AWS environment locally
 
 ```bash
@@ -308,13 +343,9 @@ kedro run --env aws
 
 Confirm outputs appear under your S3 bucket paths.
 
-### How config reaches Lambda
-
-`kedro package` produces a `.whl` file; the wheel does **not** include `conf/`. The `Dockerfile` copies the `conf/` directory into `${LAMBDA_TASK_ROOT}/conf`. The handler passes `conf_source` to `KedroSession.create()` so Kedro loads the `aws` environment from that path.
-
 ---
 
-## Step 3: Package the Kedro project
+## Step 4: Package the Kedro project
 
 Run this in your project root. Repeat whenever you change pipeline code or dependencies:
 
@@ -323,27 +354,6 @@ kedro package
 ```
 
 This creates `dist/spaceflights_step_functions-0.1-py3-none-any.whl` (the exact filename depends on your package version). [Learn how to package a Kedro project](../package_a_project.md#package-a-kedro-project).
-
----
-
-## Step 4: Set up AWS
-
-Complete this setup for each AWS account/region. Follow the linked AWS guides for console and CLI steps. This section lists what you need and Kedro-specific settings.
-
-| Resource | AWS documentation | What you need for Kedro |
-| --- | --- | --- |
-| **S3 bucket** | [Create an Amazon S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) | Store raw data and pipeline outputs (`s3://<your-bucket>/01_raw/`, `02_intermediate/`, and so on) |
-| **ECR repository** | [Create a private Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html) | One **private** repo for the Lambda image (for example `spaceflights-step-functions`) |
-| **CDK bootstrap** | [Bootstrap AWS CDK in your account](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) | One-time per account/region before `cdk deploy` |
-| **IAM** | Created by CDK | Lambda execution roles and Step Functions permissions are provisioned by the CDK stack |
-
-```bash
-export AWS_ACCOUNT_ID=<your-aws-account-id>
-export AWS_REGION=<your-aws-region>
-export ECR_REPO=spaceflights-step-functions
-
-aws ecr create-repository --repository-name "${ECR_REPO}" --region "${AWS_REGION}"
-```
 
 ---
 
@@ -415,6 +425,14 @@ docker build --platform linux/amd64 -t ${ECR_IMAGE} .
 
 If you build with a local tag (for example `spaceflights-step-functions`), run `docker tag spaceflights-step-functions:latest <ecr-image-uri>` right before pushing.
 
+### How config reaches Lambda
+
+Now that you have built the image, here is how your Step 3 configuration reaches Lambda at runtime:
+
+1. **The wheel carries pipeline code.** `kedro package` bundles your pipeline code and dependencies into a `.whl` file. It does not include `conf/`.
+2. **The `Dockerfile` carries `conf/`.** `COPY conf/` places your `conf/aws/` settings at `${LAMBDA_TASK_ROOT}/conf` inside the container image.
+3. **The handler selects the `aws` environment.** `lambda_handler.py` passes `conf_source=str(project_path / "conf")` and `env="aws"` to `KedroSession.create()`, so Lambda loads `conf/aws/catalog.yml` at runtime.
+
 ### Push to ECR
 
 Follow the AWS guide for [pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
@@ -445,7 +463,9 @@ constructs>=10.0.0
 pip install -r deploy_requirements.txt
 ```
 
-Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-level namespace with `Pipeline.group_nodes_by("namespace")`, creates one Lambda function per group, and wires them into a Step Functions state machine. Update `s3_data_bucket_name` to match your bucket. Tune `NAMESPACE_LAMBDA_CONFIG` from local run times and CloudWatch memory metrics so each namespace fits the heaviest node in that group.
+Create `deploy.py` in your project root. It groups your pipeline by namespace, creates one Lambda function per group, and wires them into a Step Functions state machine.
+
+Before you deploy, set `s3_data_bucket_name` to your bucket from Step 2. Adjust `NAMESPACE_LAMBDA_CONFIG` from local run times or CloudWatch metrics so each namespace fits its heaviest node.
 
 ??? example "View `deploy.py`"
     ```python

@@ -2,7 +2,7 @@
 
 [AWS Step Functions](https://aws.amazon.com/step-functions/) orchestrates [AWS Lambda](https://aws.amazon.com/lambda/) functions into a state machine. The sections below show how to deploy a **Kedro 1.x** project so each **pipeline-level namespace** runs as one Lambda function, with datasets stored on Amazon S3.
 
-The worked example uses the Spaceflights starter. Read [Strategy](#strategy) first if you want to adapt this pattern without following every Spaceflights detail.
+The worked example uses the Spaceflights starter. Read [the deployment strategy](#strategy) first if you want to adapt this pattern without following every Spaceflights detail.
 
 ## Before you start
 
@@ -79,14 +79,14 @@ If a namespace outgrows Lambda, run those stages on [AWS Batch](aws_batch.md) or
 
 Namespace groups with no upstream dependencies run together in a Step Functions [Parallel workflow state](https://docs.aws.amazon.com/step-functions/latest/dg/state-parallel.html). Groups that depend on earlier outputs run after those groups finish. The state machine chains one `Parallel` block per dependency level.
 
-For Spaceflights, `data_processing` and `reporting` can run in parallel because raw inputs are enough for both. `data_science` runs after `data_processing` produces `model_input_table`. The same dependency rules apply when [running Kedro in a distributed environment](../distributed.md) and when [grouping nodes for deployment](../nodes_grouping.md).
+For Spaceflights, `data_processing` and `reporting` can run in parallel because raw inputs are enough for both. `data_science` runs after `data_processing` produces `model_input_table`. The same dependency rules apply in [distributed Kedro runs](../distributed.md) and in [grouping nodes for deployment](../nodes_grouping.md).
 
 List **every dataset shared across namespace groups** in `conf/aws/catalog.yml` on S3. Omitting a dataset causes `MemoryDataset` errors when Step Functions moves between Lambda invocations.
 
 #### Configure before you deploy
 
 - Assign **pipeline-level namespaces** with explicit `inputs` / `outputs` and `prefix_datasets_with_namespace=False`
-- Run each namespace locally (`kedro run --namespace <name>`) to estimate duration and memory, then set `memory_size` and `timeout` in `_convert_group_to_lambda_function` in your CDK deployment script for the heaviest node in each namespace
+- Run each namespace locally (`kedro run --namespace <name>`) to estimate duration and memory, then set `memory_size` and `timeout_minutes` in `NAMESPACE_LAMBDA_CONFIG` in your CDK deployment script for the heaviest node in each namespace
 - Trim **image dependencies** if the container approaches Lambda size limits
 
 !!! note "Deploying without pipeline-level namespaces"
@@ -140,7 +140,7 @@ Keep `conf/base/catalog.yml` on **local file paths** for local development. You 
 
 ### Assign pipeline-level namespaces
 
-This step is **recommended** for fewer Lambda functions and lower orchestration overhead. For grouping trade-offs and when to use namespaces, read the [deployment strategy for your own project](#strategy). If your pipeline has no pipeline-level namespaces, skip to [Step 2: Configure Kedro for AWS](#step-2-configure-kedro-for-aws) and see the note under [deployment strategy for your own project](#strategy).
+This step is **recommended** for fewer Lambda functions and lower orchestration overhead. Read [the deployment strategy](#strategy) for grouping trade-offs and namespace requirements. If your pipeline has no pipeline-level namespaces, skip to [Step 2: Configure Kedro for AWS](#step-2-configure-kedro-for-aws) and see the note in that section.
 
 Assign a **pipeline-level namespace** to each sub-pipeline you want to run as one Lambda function. In Spaceflights, update `create_pipeline()` in each module under `src/<PACKAGE_NAME>/pipelines/`:
 
@@ -169,7 +169,7 @@ Repeat for the other sub-pipelines in `__default__`:
 [Learn how to group nodes with namespaces in Kedro using the full Spaceflights example](../../build/namespaces.md#group-nodes-with-namespaces).
 
 !!! note "Update `conf/base/catalog.yml` for reporting"
-    If the starter lists `matplotlib.MatplotlibWriter` for `dummy_confusion_matrix`, change it to `matplotlib.MatplotlibDataset` in **`conf/base/catalog.yml`** before running locally. The `aws` catalog in Step 2 already uses `MatplotlibDataset`.
+    If the starter lists `matplotlib.MatplotlibWriter` for the confusion matrix output, change it to `matplotlib.MatplotlibDataset` in **`conf/base/catalog.yml`** before running locally. In Spaceflights the catalog entry is named `dummy_confusion_matrix`. The `aws` catalog in Step 2 already uses `MatplotlibDataset`.
 
 Verify locally after adding namespaces:
 
@@ -434,7 +434,7 @@ Install CDK Python dependencies into the **same environment** as your Kedro proj
 
 `deploy_requirements.txt`:
 
-```
+```text
 aws-cdk-lib>=2.170.0
 constructs>=10.0.0
 ```
@@ -443,7 +443,7 @@ constructs>=10.0.0
 pip install -r deploy_requirements.txt
 ```
 
-Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-level namespace with `Pipeline.group_nodes_by("namespace")`, creates one Lambda function per group, and wires them into a Step Functions state machine. Update `s3_data_bucket_name` to match your bucket.
+Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-level namespace with `Pipeline.group_nodes_by("namespace")`, creates one Lambda function per group, and wires them into a Step Functions state machine. Update `s3_data_bucket_name` to match your bucket. Tune `NAMESPACE_LAMBDA_CONFIG` from local run times and CloudWatch memory metrics so each namespace fits the heaviest node in that group.
 
 ??? example "View `deploy.py`"
     ```python
@@ -494,6 +494,15 @@ Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-le
         return waves
 
 
+    # Size each namespace Lambda for its heaviest node (from local runs or CloudWatch).
+    NAMESPACE_LAMBDA_CONFIG: dict[str, dict[str, int]] = {
+        "data_processing": {"memory_size": 512, "timeout_minutes": 5},
+        "data_science": {"memory_size": 2048, "timeout_minutes": 15},
+        "reporting": {"memory_size": 1024, "timeout_minutes": 10},
+    }
+    DEFAULT_LAMBDA_CONFIG = {"memory_size": 1024, "timeout_minutes": 15}
+
+
     class KedroStepFunctionsStack(Stack):
         """A CDK stack that deploys a Kedro pipeline to AWS Step Functions."""
 
@@ -540,6 +549,9 @@ Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-le
             self, group: GroupedNodes
         ) -> lambda_.Function:
             """Convert a namespace group into an AWS Lambda function"""
+            config = self.NAMESPACE_LAMBDA_CONFIG.get(
+                group.name, self.DEFAULT_LAMBDA_CONFIG
+            )
             func = lambda_.Function(
                 self,
                 id=_clean_name(f"{group.name}_fn"),
@@ -552,8 +564,8 @@ Create `deploy.py`. This script reads the Kedro pipeline, groups nodes by top-le
                     "MPLCONFIGDIR": "/tmp/matplotlib",
                 },
                 function_name=_clean_name(group.name),
-                memory_size=1024,
-                timeout=Duration.minutes(15),
+                memory_size=config["memory_size"],
+                timeout=Duration.minutes(config["timeout_minutes"]),
             )
             self.s3_bucket.grant_read_write(func)
             return func
@@ -670,7 +682,7 @@ aws s3 ls "s3://<your-bucket>/" --recursive
 
 You should see objects under `02_intermediate/`, `03_primary/`, `04_feature/`, `06_models/`, and `08_reporting/`.
 
-If the execution failed, [read the troubleshooting section](#troubleshooting).
+If the execution failed, see [Troubleshooting](#troubleshooting).
 
 ---
 
@@ -686,9 +698,9 @@ If the execution failed, [read the troubleshooting section](#troubleshooting).
 | `MemoryDataset` errors between namespace groups | Dataset not listed in `conf/aws/catalog.yml` | Add an S3-backed entry for every dataset shared across Lambda invocations |
 | S3 errors during `kedro run --env aws` locally | Missing AWS CRT support in `botocore` | Run `pip install 'botocore[crt]'` and retry |
 | `cdk deploy` fails or creates unexpected Lambdas | An older per-node stack is still deployed | Run `cdk destroy`, then `cdk deploy` again after switching to namespace grouping |
-| Lambda times out mid-namespace | Namespace contains too much work for one 15-minute invocation | Split the namespace into smaller pipeline groups, or run heavy nodes on [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md) |
+| Lambda times out mid-namespace | Namespace contains too much work for one 15-minute invocation | Increase `timeout_minutes` for that namespace in `NAMESPACE_LAMBDA_CONFIG`, split the namespace, or run heavy nodes on [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md) |
 | Step Functions times out | State machine timeout too short for your pipeline | Increase `timeout=Duration.minutes(...)` in `deploy.py` |
-| Lambda out of memory | Default memory too low for modelling nodes | Increase `memory_size` in `deploy.py` (for example `1024` or higher) |
+| Lambda out of memory | Default memory too low for modelling nodes | Increase `memory_size` for that namespace in `NAMESPACE_LAMBDA_CONFIG` |
 | `ModuleNotFoundError: No module named 'aws_cdk'` | CDK dependencies not installed in the Python env used by `cdk.json` | Install `deploy_requirements.txt` in that environment, or update `cdk.json` to point at the correct interpreter |
 
 <!-- vale on -->
@@ -697,7 +709,7 @@ If the execution failed, [read the troubleshooting section](#troubleshooting).
 
 ## Limitations
 
-Each Lambda function has a [15-minute Lambda timeout limit](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html), a 10 GB memory limit, and a 10 GB container image size limit. Namespace grouping runs all nodes in a namespace inside one invocation, so a namespace must finish within those limits. If it does not, split namespaces further or run heavy stages on another AWS service such as [Deploy Kedro on AWS Batch](aws_batch.md) or [Deploy Kedro on Amazon EMR Serverless](amazon_emr_serverless.md).
+Each Lambda function has a [15-minute Lambda timeout limit](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html), a 10 GB memory limit, and a 10 GB container image size limit. Namespace grouping runs all nodes in a namespace inside one invocation, so a namespace must finish within those limits. If it does not, split namespaces further or run heavy stages on [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md).
 
 !!! warning "Image size with the full Spaceflights starter"
     The Spaceflights starter includes Jupyter, Viz, and reporting dependencies that increase image size. For production deployments, consider trimming `pyproject.toml` dependencies to what your pipeline requires.

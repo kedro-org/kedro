@@ -15,11 +15,13 @@ PACKAGE_NAME = "dummy_package"
 PIPELINE_NAME = "my_pipeline"
 
 
-@pytest.fixture(params=["base"])
+@pytest.fixture
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
     tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
-    conf_path = fake_repo_path / settings.CONF_SOURCE / request.param
+    conf_path = (
+        fake_repo_path / settings.CONF_SOURCE / getattr(request, "param", "base")
+    )
     # old conf structure for 'pipeline delete' command backward compatibility
     old_conf_path = conf_path / "parameters"
 

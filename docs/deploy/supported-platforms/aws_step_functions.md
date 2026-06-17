@@ -82,7 +82,7 @@ List **every dataset shared across namespace groups** in `conf/aws/catalog.yml` 
 - Trim **image dependencies** if the container approaches Lambda size limits
 
 !!! note "Deploying without pipeline-level namespaces"
-    If your project has no pipeline-level namespaces, you can still deploy with the same `deploy.py` and `lambda_handler.py` from this guide. `Pipeline.group_nodes_by("namespace")` treats each node without a namespace as its own group, so you get **one Lambda per node**. The handler runs `session.run(node_names=[...])` for those groups instead of `session.run(namespaces=[...])`. Skip [how to assign pipeline-level namespaces](#assign-pipeline-level-namespaces) and continue from [Step 2: Set up AWS](#step-2-set-up-aws). Expect more Lambda functions and Step Functions tasks. Add namespaces later if you want fewer, coarser invocations.
+    If your project has no pipeline-level namespaces, you can still deploy with the same `deploy.py` and `lambda_handler.py` from this guide. `Pipeline.group_nodes_by("namespace")` treats each node without a namespace as its own group, so you get **one Lambda per node**. The handler runs `session.run(node_names=[...])` for those groups instead of `session.run(namespaces=[...])`.
 
 ## Working example
 
@@ -676,7 +676,7 @@ The CloudFormation stack `KedroStepFunctionsStack` should reach **`CREATE_COMPLE
 
 ## Step 9: Run the state machine
 
-[Start a state machine execution from the AWS Step Functions console](https://console.aws.amazon.com/states/) or with the AWS CLI. [Follow the AWS guide for starting a state machine execution](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html):
+Start a state machine execution from the AWS Step Functions console or with the AWS CLI. [Follow the AWS guide for starting a state machine execution](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html):
 
 ```bash
 STATE_MACHINE_ARN=$(aws stepfunctions list-state-machines \
@@ -694,9 +694,7 @@ Poll until the execution status is **`SUCCEEDED`**.
 
 ## Step 10: Verify outputs on S3
 
-1. **Check execution status.** Confirm the Step Functions run reached **SUCCEEDED**.
-
-2. **Check S3 outputs.** List the output paths from your `conf/aws/catalog.yml`. [Follow the AWS guide for listing objects in an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ListingObjects.html):
+**Check S3 outputs.** List the output paths from your `conf/aws/catalog.yml`. [Follow the AWS guide for listing objects in an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ListingObjects.html):
 
 ```bash
 aws s3 ls "s3://<your-bucket>/" --recursive

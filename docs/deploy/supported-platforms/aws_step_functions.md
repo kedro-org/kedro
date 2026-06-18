@@ -16,9 +16,9 @@ This guide deploys a Kedro pipeline as an AWS Step Functions state machine backe
 
 The approach in brief:
 
-1. **Package the project** as a Lambda container image. Every namespace group uses the same image.
-2. **Group nodes by pipeline-level namespace**. Each group becomes one Lambda function. When Step Functions invokes it, the handler runs every node in that namespace with `session.run(namespaces=[...])`.
-3. **Store shared datasets on S3**. Lambda functions are isolated, so datasets that cross namespace boundaries cannot use `MemoryDataset`.
+1. **Group nodes by pipeline-level namespace**. Each group becomes one Lambda function. When Step Functions invokes it, the handler runs every node in that namespace with `session.run(namespaces=[...])`.
+2. **Store shared datasets on S3**. Lambda functions are isolated, so datasets that cross namespace boundaries cannot use `MemoryDataset`.
+3. **Package the project** as a Lambda container image. Every namespace group uses the same image.
 4. **Build the state machine from your pipeline graph**. A CDK deployment script reads your pipeline, creates one Lambda per namespace group, and wires them into Step Functions.
 
 #### Why use a container image?

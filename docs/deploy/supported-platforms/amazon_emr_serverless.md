@@ -103,7 +103,7 @@ At job submission, pass `--conf-source /home/hadoop/conf`. The Dockerfile copies
 #### Configure before you deploy
 
 - Create `conf/emr/` (or your environment name) with **full** S3 catalog entries for every dataset the job touches
-- Add **`s3fs`** when pandas datasets use `s3://` paths
+- Update **project dependencies** in [Step 3](#step-3-configure-kedro-for-emr) before you package the image
 - Keep **`conf/base/catalog.yml` on local paths** for local development; use the EMR environment for cloud runs
 - Run **`kedro run --env emr`** locally before building the image to catch catalog and dependency errors early
 - Decide **`--pipelines`** scope for each job (full pipeline vs one pipeline per submission)
@@ -244,16 +244,22 @@ preprocessed_companies:
 - Use **`s3://`** for pandas datasets (with `s3fs`).
 - Use **`s3a://`** for `spark.SparkDatasetV2` paths so Spark uses the Hadoop S3 filesystem bundled with EMR.
 
-### Add `s3fs` to project dependencies
+### Add project dependencies
 
-When pandas datasets read from `s3://` paths, add `s3fs` to `pyproject.toml`:
+Update `pyproject.toml` before you package the image:
 
 ```toml
 dependencies = [
     # ...
     "s3fs>=2024.0",
+    "hdfs",
 ]
 ```
+
+!!! note "Dependencies for EMR"
+    - Add **`s3fs`** when pandas datasets use `s3://` paths.
+    - Add **`hdfs`** when you use Spark datasets (`SparkDataset` / `SparkDatasetV2` import it at load time).
+    - Do not put spaces inside `kedro-datasets[...]` extra names (for example `kedro-datasets[pandas-csvdataset,spark-sparkdataset]`, not `pandas-csvdataset, spark-sparkdataset`). Some dependency resolvers treat spaced names as invalid.
 
 ### Verify the EMR environment locally
 
@@ -290,12 +296,19 @@ USER root
 
 RUN dnf install -y python3.12 python3.12-pip
 
+ENV SPARK_HOME=/usr/lib/spark
 ENV KEDRO_PACKAGE=<PACKAGE_WHEEL_NAME>
 ENV KEDRO_CONF=<PACKAGE_CONF_ARCHIVE>
 COPY dist/$KEDRO_PACKAGE /tmp/dist/$KEDRO_PACKAGE
 RUN python3.12 -m pip install --upgrade pip && \
     python3.12 -m pip install /tmp/dist/$KEDRO_PACKAGE && \
     rm -f /tmp/dist/$KEDRO_PACKAGE
+
+# Custom Python cannot import EMR's bundled PySpark without this path. spark-submit
+# overrides ENV PYTHONPATH, so a .pth file in site-packages is the reliable fix.
+RUN PY4J_ZIP=$(ls ${SPARK_HOME}/python/lib/py4j-*-src.zip) && \
+    SITE_PACKAGES=$(python3.12 -c "import site; print(site.getsitepackages()[0])") && \
+    printf '%s\n%s\n' "${SPARK_HOME}/python" "${PY4J_ZIP}" > "${SITE_PACKAGES}/pyspark.pth"
 
 ADD --chown=hadoop:hadoop dist/$KEDRO_CONF /home/hadoop/
 RUN chmod -R a+rX /home/hadoop/conf
@@ -338,6 +351,8 @@ docker run --rm --user hadoop --entrypoint head ${ECR_IMAGE} \
   -n 6 /home/hadoop/conf/<emr-conf>/catalog.yml
 docker run --rm --user hadoop --entrypoint python3.12 ${ECR_IMAGE} \
   -c "import s3fs; print(s3fs.__version__)"
+docker run --rm --user hadoop --entrypoint python3.12 ${ECR_IMAGE} \
+  -c "import pyspark; print(pyspark.__version__)"
 ```
 
 ### Push to ECR
@@ -516,6 +531,9 @@ aws emr-serverless start-job-run \
 | `entryPointArguments` | Kedro CLI flags (`--env`, `--conf-source`, `--pipelines`, `--runner`) |
 | `sparkSubmitParameters` | Tells Spark which Python interpreter to use on driver and executors |
 
+!!! note "Kedro version and `--pipelines`"
+    The `--pipelines` flag (run one or more named pipelines in a single job) requires **Kedro 1.2.0+**. On earlier Kedro versions, use `--pipeline` (singular) for one pipeline, or omit the flag to run `__default__`.
+
 Read the AWS guide for [viewing EMR Serverless job runs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-monitor.html) for logging and status checks.
 
 ---
@@ -622,6 +640,7 @@ RUN python -m pip install --upgrade pip && \
         "kedro~=1.4.0" \
         "kedro-datasets[pandas-csvdataset,pandas-exceldataset,spark-sparkdataset]>=9.1" \
         "s3fs>=2024.0" \
+        "hdfs" \
         "pandas>=1.5,<2.0" \
         "numpy<2" && \
     rm -f /tmp/dist/$KEDRO_PACKAGE
@@ -639,6 +658,7 @@ USER hadoop:hadoop
     - **Amazon Linux 2 (GCC 7.3)** cannot compile some packages (for example scikit-learn 1.8+) from source when wheels are unavailable.
     - **Spark 3.3** on EMR 6.x requires **Python 3.10** and **`pandas>=1.5,<2.0`**, which may differ from your local `pyproject.toml`.
     - **Dev-only packages** (Jupyter, Kedro-Viz, and so on) are not needed on the cluster.
+    - **`hdfs`** is listed in the runtime `pip install` because the wheel is installed with **`--no-deps`** and Spark datasets import it at load time.
 
     Alternatively, maintain a project-owned `requirements-emr.txt` subset and `pip install -r requirements-emr.txt` after the `--no-deps` wheel install.
 
@@ -726,8 +746,8 @@ If you change `PYTHON_VERSION` in the Dockerfile, keep the Spark Python paths in
 | Python | 3.12 with `dnf` | 3.10.16 standalone |
 | Dockerfile | `Dockerfile` | `Dockerfile.emr6` |
 | Wheel install | full dependencies OK | `--no-deps` + slim runtime |
-| Spark Python | `/usr/bin/python3.12` | `/opt/python/bin/python` |
-| Extra environment variables | none | `KEDRO_PIPELINES_TO_FIND`, `PYTHONPATH` |
+| Spark Python | `/usr/bin/python3.12` + `pyspark.pth` in site-packages | `/opt/python/bin/python` + `PYTHONPATH` |
+| Extra environment variables | none (PySpark path in Dockerfile) | `KEDRO_PIPELINES_TO_FIND`, `PYTHONPATH` |
 
 ### Alternative: pyenv on EMR 6.x
 
@@ -761,6 +781,7 @@ RUN python -m pip install --upgrade pip && \
         "kedro~=1.4.0" \
         "kedro-datasets[pandas-csvdataset,pandas-exceldataset,spark-sparkdataset]>=9.1" \
         "s3fs>=2024.0" \
+        "hdfs" \
         "pandas>=1.5,<2.0" \
         "numpy<2" && \
     rm -f /tmp/dist/$KEDRO_PACKAGE
@@ -784,7 +805,10 @@ For pyenv, set `sparkSubmitParameters` to `/usr/.pyenv/versions/3.10.16/bin/pyth
 | `Custom image architecture doesn't match application architecture` | Image built for ARM on Apple Silicon | Rebuild with `--platform linux/amd64` |
 | `Permission denied` on `/home/hadoop/conf/...` | Config copied as root without read permissions for `hadoop` | Use `ADD --chown=hadoop:hadoop` and `chmod -R a+rX /home/hadoop/conf` in the Dockerfile |
 | `'type' is missing from dataset catalog configuration` | `conf/<emr-conf>/catalog.yml` overrides a dataset using `filepath` alone, or an old ECR image is still running | Add full dataset entries (including `type`) or enable soft catalog merge; tag and push the new image, then restart the application |
-| `s3fs not installed` | Pandas datasets use `s3://` paths | Add `s3fs` to `pyproject.toml`, repackage, rebuild, and push |
+| `s3fs not installed` | Pandas datasets use `s3://` paths | See [Step 3](#step-3-configure-kedro-for-emr) |
+| `ModuleNotFoundError: No module named 'hdfs'` | `SparkDataset` / `SparkDatasetV2` imports `hdfs` at load time | See [Step 3](#step-3-configure-kedro-for-emr) |
+| `ModuleNotFoundError: No module named 'spark'` or `pyspark` on EMR 7.x | Custom Python in the image cannot see EMR's bundled PySpark; `ENV PYTHONPATH` is overridden by spark-submit | Add the `pyspark.pth` step to the EMR 7.x Dockerfile in [Step 5](#step-5-build-the-custom-docker-image); verify with `import pyspark` in [Step 6](#step-6-validate-and-push-the-image-to-ecr) |
+| `No such option '--pipelines'` | Packaged Kedro is older than 1.2.0 | Upgrade to **Kedro 1.2.0+**, or use `--pipeline` (singular) for one pipeline, or omit the flag to run `__default__` |
 | `BatchGetImage` / ECR access denied | ECR repository policy missing or incorrect | Apply the [AWS policy template](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html) with `ArnLike` and `ecr:DescribeImages`; **omit `"Resource"`** when applying with `aws ecr set-repository-policy` |
 | Job uses stale configuration after a rebuild | EMR application still holds warm workers on the old image digest | Stop and start the application after each ECR push |
 | `Installing Python-3.12.8...` hangs during EMR 6.x image build | pyenv is compiling Python from source under `linux/amd64` emulation (common on Apple Silicon) | Use the [pre-built Python Dockerfile](#step-5-emr-6x-build-the-custom-docker-image), build on an `x86_64` host/CI, or run `pyenv install -v` and expect a long wait |

@@ -16,9 +16,9 @@ This guide deploys a Kedro pipeline on AWS Batch using a custom **`AWSBatchRunne
 
 The approach in brief:
 
-1. **Package the project** as a wheel and copy `conf/` into a container image. Every namespace group uses the same image.
-2. **Group nodes by pipeline-level namespace**. Each group becomes one Batch job. Inside the container, the job runs every node in that namespace with your packaged project CLI.
-3. **Store shared datasets on S3**. Batch containers are isolated, so datasets that cross namespace boundaries cannot use `MemoryDataset`.
+1. **Group nodes by pipeline-level namespace**. Each group becomes one Batch job. Inside the container, the job runs every node in that namespace with your packaged project CLI.
+2. **Store shared datasets on S3**. Batch containers are isolated, so datasets that cross namespace boundaries cannot use `MemoryDataset`.
+3. **Package the project into a container image** (wheel plus `conf/`). Every namespace group uses the same image.
 4. **Submit jobs from a custom runner**. `AWSBatchRunner` groups the pipeline with `Pipeline.group_nodes_by("namespace")`, submits one Batch job per group with `dependsOn` links, and polls until each job finishes.
 
 #### Why use a container image?
@@ -128,12 +128,11 @@ Replace these before building and submitting jobs:
 1. [Prepare your Kedro project](#step-1-prepare-your-kedro-project)
 2. [Set up AWS](#step-2-set-up-aws)
 3. [Configure Kedro for AWS Batch](#step-3-configure-kedro-for-aws-batch)
-4. [Package the Kedro project](#step-4-package-the-kedro-project)
-5. [Build and push the container image](#step-5-build-and-push-the-container-image)
-6. [Create the custom Batch runner](#step-6-create-the-custom-aws-batch-runner)
-7. [Customise the project CLI](#step-7-customise-the-project-cli)
-8. [Submit the pipeline from your machine](#step-8-submit-the-pipeline-from-your-machine)
-9. [Verify the jobs succeeded](#step-9-verify-the-jobs-succeeded)
+4. [Create the custom AWS Batch runner](#step-4-create-the-custom-aws-batch-runner)
+5. [Customise the project CLI](#step-5-customise-the-project-cli)
+6. [Package, build, and push the container image](#step-6-package-build-and-push-the-container-image)
+7. [Submit the pipeline from your machine](#step-7-submit-the-pipeline-from-your-machine)
+8. [Verify the jobs succeeded](#step-8-verify-the-jobs-succeeded)
 
 ---
 
@@ -201,7 +200,7 @@ Create the AWS resources your Kedro project will use before you point configurat
 | **IAM job role** | [IAM roles for Batch](https://docs.aws.amazon.com/batch/latest/userguide/IAM_policies.html) | S3 read/write for datasets; attach to the job definition as `jobRoleArn` |
 | **Compute environment** | [Compute environments](https://docs.aws.amazon.com/batch/latest/userguide/compute_environments.html) | Managed EC2 environment (for example `spaceflights_env`) |
 | **Job queue** | [Job queues](https://docs.aws.amazon.com/batch/latest/userguide/job_queues.html) | Links jobs to the compute environment (for example `spaceflights_queue`) |
-| **Job definition** | [Job definitions](https://docs.aws.amazon.com/batch/latest/userguide/job_definitions.html) | Points at `<ecr-image-uri>` after you push in Step 5; leave `command` empty (overridden per job) |
+| **Job definition** | [Job definitions](https://docs.aws.amazon.com/batch/latest/userguide/job_definitions.html) | Points at `<ecr-image-uri>` after you push in Step 6; leave `command` empty (overridden per job) |
 
 !!! warning "Avoid overly broad IAM policies"
     For production, scope the policy to your bucket ARN.
@@ -223,7 +222,7 @@ aws s3 sync data/01_raw/ "s3://${S3_BUCKET}/01_raw/"
 
 ### Create the Amazon ECR repository
 
-Create the repository now. You push the image in [Step 5](#step-5-build-and-push-the-container-image):
+Create the repository now. You push the image in [Step 6](#step-6-package-build-and-push-the-container-image):
 
 ```bash
 aws ecr create-repository --repository-name spaceflights-batch --region <your-aws-region>
@@ -235,7 +234,7 @@ When creating the job definition (for example `kedro_run`), set:
 
 | Setting | Recommended value |
 | --- | --- |
-| **Image** | `<ecr-image-uri>` (after Step 5 push) |
+| **Image** | `<ecr-image-uri>` (after Step 6 push) |
 | **vCPUs** | `2` |
 | **Memory** | `4096` MiB (increase for heavy modelling nodes) |
 | **Job role** | `<batch-job-role-arn>` with S3 access |
@@ -258,7 +257,7 @@ Add `conf/aws_batch/` with `globals.yml`, `catalog.yml`, and `parameters.yml`. S
 s3_bucket: <your-bucket>
 ```
 
-`conf/aws_batch/parameters.yml` (used by the custom runner in Step 7):
+`conf/aws_batch/parameters.yml` (used by the custom runner in Step 5):
 
 ```yaml
 aws_batch:
@@ -371,73 +370,7 @@ Confirm outputs appear under your S3 bucket paths.
 
 ---
 
-## Step 4: Package the Kedro project
-
-Run this in your project root. Repeat whenever you change pipeline code or dependencies:
-
-```bash
-kedro package
-```
-
-This creates a `.whl` in `dist/`. [Learn how to package a Kedro project](../package_a_project.md#package-a-kedro-project).
-
----
-
-## Step 5: Build and push the container image
-
-Create a `Dockerfile` in your project root:
-
-```dockerfile
-FROM python:3.12-slim
-
-WORKDIR /app
-
-COPY dist/*.whl /tmp/
-RUN pip install --no-cache-dir /tmp/*.whl && rm -f /tmp/*.whl
-
-COPY conf/ /app/conf/
-```
-
-!!! tip "Apple Silicon (ARM) builders"
-    Batch on EC2 compute environments uses **`x86_64`** instances. Build with `--platform linux/amd64` (Docker or Podman).
-
-Build the image. Tag it with your ECR URI at build time:
-
-```bash
-export ECR_IMAGE=<ecr-image-uri>
-
-kedro package
-docker build --platform linux/amd64 -t ${ECR_IMAGE} .
-```
-
-If you build with a local tag first, run `docker tag spaceflights-batch:latest <ecr-image-uri>` right before pushing.
-
-### How config reaches the job
-
-Now that you have built the image, here is how your Step 3 configuration reaches each Batch container at runtime:
-
-1. **The wheel carries pipeline code.** `pip install dist/*.whl` in the Dockerfile installs your packaged project and dependencies.
-2. **The Dockerfile carries `conf/`.** `COPY conf/` places your `conf/aws_batch/` settings at `/app/conf` inside the container.
-3. **The Batch job command selects the environment.** `AWSBatchRunner` passes `--env aws_batch --conf-source /app/conf --namespaces <name>` (or `--nodes <name>` for nodes without a namespace) through `containerOverrides`.
-
-### Push the image to Amazon ECR
-
-Follow the AWS guide for [pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
-
-```bash
-aws ecr get-login-password --region <your-aws-region> | \
-  docker login --username AWS --password-stdin <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com
-docker push ${ECR_IMAGE}
-```
-
-!!! note "Trim dependencies for production images"
-    The Spaceflights starter includes Jupyter and Kedro-Viz, which increase image size. For production Batch images, consider a slimmer `requirements` subset or a multi-stage Dockerfile that omits development dependencies.
-
-Update the job definition **Image** field to `<ecr-image-uri>` if you created the definition before pushing.
-
----
-
-## Step 6: Create the custom AWS Batch runner
+## Step 4: Create the custom AWS Batch runner
 
 Create `src/<PACKAGE_NAME>/runner/batch_runner.py` with an `AWSBatchRunner` class that extends `AbstractRunner` and submits Batch jobs for each namespace group (or each node when no namespace is defined).
 
@@ -622,7 +555,9 @@ __all__ = ["AWSBatchRunner"]
 
 ---
 
-## Step 7: Customise the project CLI
+## Step 5: Customise the project CLI
+
+Add the custom runner and CLI on your driver machine before you build the container image. Push the image in Step 6 and update the job definition **Image** field before you submit jobs in Step 7.
 
 Kedro's built-in `kedro run` passes `is_async` to the runner constructor and nothing else. `AWSBatchRunner` needs `job_queue`, `job_definition`, and other settings from `conf/aws_batch/parameters.yml`.
 
@@ -655,7 +590,73 @@ with KedroSession.create(
 
 ---
 
-## Step 8: Submit the pipeline from your machine
+## Step 6: Package, build, and push the container image
+
+Package the project, then build and push the Batch image. Repeat this step when you change pipeline code, dependencies, or `conf/aws_batch/`.
+
+Run this in your project root:
+
+```bash
+kedro package
+```
+
+This creates a `.whl` in `dist/`. [Learn how to package a Kedro project](../package_a_project.md#package-a-kedro-project).
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl && rm -f /tmp/*.whl
+
+COPY conf/ /app/conf/
+```
+
+!!! tip "Apple Silicon (ARM) builders"
+    Batch on EC2 compute environments uses **`x86_64`** instances. Build with `--platform linux/amd64` (Docker or Podman).
+
+Build the image. Tag it with your ECR URI at build time:
+
+```bash
+export ECR_IMAGE=<ecr-image-uri>
+
+docker build --platform linux/amd64 -t ${ECR_IMAGE} .
+```
+
+If you build with a local tag first, run `docker tag spaceflights-batch:latest <ecr-image-uri>` right before pushing.
+
+### How config reaches the job
+
+Now that you have built the image, here is how your Step 3 configuration reaches each Batch container at runtime:
+
+1. **The wheel carries pipeline code.** `kedro package` bundles your pipeline code and dependencies into a `.whl` file. It does not include `conf/`.
+2. **The Dockerfile carries `conf/`.** `COPY conf/` places your `conf/aws_batch/` settings at `/app/conf` inside the container.
+3. **The Batch job command selects the environment.** [AWSBatchRunner](#step-4-create-the-custom-aws-batch-runner) passes `--env aws_batch --conf-source /app/conf --namespaces <name>` (or `--nodes <name>` for nodes without a namespace) through `containerOverrides`.
+
+### Push the image to Amazon ECR
+
+Follow the AWS guide for [pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
+
+```bash
+aws ecr get-login-password --region <your-aws-region> | \
+  docker login --username AWS --password-stdin <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com
+docker push ${ECR_IMAGE}
+```
+
+!!! note "Trim dependencies for production images"
+    The Spaceflights starter includes Jupyter and Kedro-Viz, which increase image size. For production Batch images, consider a slimmer `requirements` subset or a multi-stage Dockerfile that omits development dependencies.
+
+!!! note "Re-push after catalog or pipeline changes"
+    When you change `conf/aws_batch/` or rebuild the wheel, repeat Step 6 and push a new image tag. Update the job definition **Image** field to `<ecr-image-uri>` if you created the definition before pushing.
+
+---
+
+## Step 7: Submit the pipeline from your machine
+
+Complete Step 6 first so your job definition points at the image in ECR.
 
 From your project root (with AWS credentials configured), use your packaged project CLI and the custom runner:
 
@@ -677,7 +678,7 @@ Logs are available in [CloudWatch Logs](https://docs.aws.amazon.com/batch/latest
 
 ---
 
-## Step 9: Verify the jobs succeeded
+## Step 8: Verify the jobs succeeded
 
 1. **Check Batch job states.** All jobs should reach **SUCCEEDED**. [Learn how to check AWS Batch job status](https://docs.aws.amazon.com/batch/latest/userguide/monitoring.html):
 
@@ -711,7 +712,7 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 | S3 errors during `kedro run --env aws_batch` locally | Missing AWS CRT support in `botocore` | Run `pip install 'botocore[crt]'` and retry |
 | Jobs stuck in `RUNNABLE` | Compute environment not scaled or no capacity | Check compute environment status; increase `maxvCpus` or instance types |
 | `Essential container exited` immediately | Wrong `--conf-source` or missing `conf/` in image | Verify `COPY conf/ /app/conf/` in the Dockerfile and `conf_source: /app/conf` in parameters |
-| `ModuleNotFoundError` for runner kwargs | Built-in `kedro run` used instead of custom `cli.py` | Use `<PACKAGE_CLI> run` after adding the customised `cli.py` from Step 7 |
+| `ModuleNotFoundError` for runner kwargs | Built-in `kedro run` used instead of custom `cli.py` | Use `<PACKAGE_CLI> run` after adding the customised `cli.py` from Step 5 |
 | Job fails with out-of-memory | Default memory too low for sklearn/matplotlib nodes | Increase memory in the job definition (for example `4096` or `8192` MiB) |
 
 <!-- vale on -->
@@ -723,7 +724,7 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 - Each Batch job runs **one namespace group** (or one node when no namespace is defined). A namespace must finish within the job definition timeout and memory limits.
 - **Not for Spark:** This pattern is for non-distributed Python stages. Run PySpark workloads on [Amazon EMR Serverless](amazon_emr_serverless.md) instead.
 - **Driver machine:** The machine where you run `AWSBatchRunner` must stay online until all jobs complete. For managed orchestration of lightweight stages, consider [AWS Step Functions](aws_step_functions.md).
-- **Image lifecycle:** When you change pipeline code, dependencies, or `conf/aws_batch/`, rebuild the image, push to ECR, and update the job definition image URI before the next run.
+- **Image lifecycle:** When you change pipeline code, dependencies, or `conf/aws_batch/`, repeat [Step 6](#step-6-package-build-and-push-the-container-image), push to ECR, and update the job definition image URI before the next run.
 - Pipelines with dozens of nodes without namespaces increase Batch job count and ECR pulls. Add pipeline-level namespaces for coarser grouping.
 - Batch job dependencies use AWS Batch `dependsOn`. This matches Kedro's DAG but does not replace Kedro's own `ThreadRunner` parallelism on a single machine.
 

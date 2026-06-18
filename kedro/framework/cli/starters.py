@@ -6,6 +6,7 @@ projects.
 
 from __future__ import annotations
 
+import keyword
 import os
 import re
 import shutil
@@ -182,6 +183,29 @@ def _validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
             fg="red",
             err=True,
         )
+        sys.exit(1)
+
+
+def _validate_project_name_is_importable(project_name: str) -> None:
+    """Ensure the Python package derived from the project name does not clash
+    with a Python keyword or a standard library module.
+
+    ``kedro new`` derives the package name from the project name and uses it to
+    import the generated project (e.g. ``<package>.pipeline_registry``). If the
+    derived name shadows a stdlib module such as ``email`` or ``json``, or is a
+    Python keyword, the generated project cannot be imported and ``kedro run``
+    fails later with a confusing ``ModuleNotFoundError``. Catching it at creation
+    time mirrors how tools like Django and npm validate package names.
+    """
+    package_name = project_name.strip().replace(" ", "_").replace("-", "_").lower()
+    if keyword.iskeyword(package_name) or package_name in sys.stdlib_module_names:
+        message = (
+            f"'{project_name}' is an invalid value for project name. It would create "
+            f"a Python package named '{package_name}', which clashes with a Python "
+            f"keyword or standard library module and would prevent the project from "
+            f"being imported. Please choose a different name."
+        )
+        click.secho(message, fg="red", err=True)
         sys.exit(1)
 
 
@@ -374,6 +398,10 @@ def new(  # noqa: PLR0913
         project_name=project_name,
         example_pipeline=example_pipeline,
         starter_alias=starter_alias,
+    )
+
+    _validate_project_name_is_importable(
+        extra_context.get("project_name", "New Kedro Project")
     )
 
     cookiecutter_args, project_template = _make_cookiecutter_args_and_fetch_template(

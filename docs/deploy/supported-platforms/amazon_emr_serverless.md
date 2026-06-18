@@ -48,9 +48,15 @@ EMR Serverless **ignores** `[CMD]` and `[ENTRYPOINT]` in the Dockerfile. The job
 
 #### Why use a custom image?
 
-EMR Serverless supports installing Python and dependencies at job-submit time, but that approach is error-prone and hard to debug. A [custom image for EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html) packages Python, your Kedro wheel, and configuration into one immutable container you can test locally before pushing to [Amazon Elastic Container Registry](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html). On managed EMR clusters, teams typically use [bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html) or [custom AMIs](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html) instead.
+EMR Serverless supports installing Python and dependencies at job-submit time, but that approach is error-prone and hard to debug. A [custom image for EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html) packages Python, your Kedro wheel, and configuration into one immutable container you can test locally before pushing to [Amazon Elastic Container Registry](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html).
 
-For more on why we recommend this over AWS virtual-environment approaches, see [Why not use AWS's virtual-environment approach for Python dependencies?](#why-not-use-awss-virtual-environment-approach-for-python-dependencies).
+On managed EMR clusters, teams typically use [bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html) or [custom AMIs](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html) instead. See the [Kedro EMR blog post](https://kedro.org/blog/how-to-deploy-kedro-pipelines-on-amazon-emr) for an older virtual-environment approach on managed EMR.
+
+<!-- vale off -->
+
+AWS also documents a [virtual-environment and venv-pack workflow](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python.html) for EMR Serverless. That path is easy to break when Python is symlinked ([venv-pack](https://pypi.org/project/venv-pack/) does not bundle the interpreter). Kedro's older experiments with [pyenv](https://github.com/pyenv/pyenv) on top of it hit symlink errors such as `Too many levels of symbolic links`. A custom image avoids those packaging steps and keeps Python, dependencies, and your Kedro project in one testable artefact.
+
+<!-- vale on -->
 
 #### Choose EMR 7.x or 6.x
 
@@ -428,7 +434,7 @@ aws emr-serverless get-application \
 
 ## Step 8: Create and upload the entrypoint script
 
-EMR Serverless **ignores** `[CMD]` and `[ENTRYPOINT]` in the Dockerfile. You must upload a Python script to S3 and reference it as the Spark `entryPoint`.
+EMR Serverless **ignores** `[CMD]` and `[ENTRYPOINT]` in the Dockerfile. Package the project into a wheel, install it in the image, and invoke it from an S3-hosted script. We recommend calling your packaged project's `__main__` module directly rather than shelling out to `kedro run` with [subprocess](https://docs.python.org/3/library/subprocess.html).
 
 Create `entrypoint.py`:
 
@@ -447,7 +453,41 @@ aws s3 cp entrypoint.py s3://<your-bucket>/scripts/entrypoint.py
 
 The `entryPointArguments` you pass at job submission are forwarded to `main()` as CLI arguments (for example `--env`, `--conf-source`, `--pipelines`, `--runner`).
 
-See [How about using KedroSession?](#how-about-using-kedrosession) if you prefer the session API over `__main__`.
+### Optional: invoke with KedroSession
+
+You can run Kedro with `KedroSession` inside your Spark `entrypoint.py` instead of calling your packaged project's `__main__` module. You still package the project and install the wheel in the custom image; the session API is an alternative way to *invoke* the pipeline.
+
+| CLI flag | `KedroSession` API | Method |
+| --- | --- | --- |
+| `--env` | `env` | `KedroSession.create()` |
+| `--params` | `runtime_params` | `KedroSession.create()` |
+| `--conf-source` | `conf_source` | `KedroSession.create()` |
+| `--pipelines` | `pipeline_names` (a list of strings) | `session.run()` |
+| `--nodes` | `node_names` | `session.run()` |
+| `--runner` | `runner` (an `AbstractRunner` instance, for example `ThreadRunner()`) | `session.run()` |
+| `--tags` | `tags` | `session.run()` |
+| `--from-nodes` / `--to-nodes` | `from_nodes` / `to_nodes` | `session.run()` |
+| `--load-versions` | `load_versions` | `session.run()` |
+
+In a packaged EMR deployment, call `configure_project()` (not `bootstrap_project()`) before creating the session:
+
+```python
+from kedro.framework.project import configure_project
+from kedro.framework.session import KedroSession
+from kedro.runner import ThreadRunner
+
+configure_project("<PACKAGE_NAME>")
+
+with KedroSession.create(env="<emr-conf>", conf_source="/home/hadoop/conf") as session:
+    session.run(
+        pipeline_names=["<kedro-pipeline-name>"],
+        runner=ThreadRunner(),
+    )
+```
+
+Upload this script to S3 and reference it as the Spark `entryPoint`.
+
+Use the **`__main__` entrypoint** when you want the same interface as `python -m <package_name>` or `kedro run` at the command line. Use **`KedroSession`** when you prefer explicit Python control over run options.
 
 ---
 
@@ -764,65 +804,6 @@ To confirm which config is inside the image EMR will run:
 docker run --rm --user hadoop --entrypoint head <ecr-image-uri> \
   -n 8 /home/hadoop/conf/<emr-conf>/catalog.yml
 ```
-
----
-
-## Frequently asked questions
-
-### Should we use EMR 6.x or 7.x?
-
-Use **EMR 7.x** for all new deployments. EMR 6.x releases are in [end of support or end of life](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-standard-support.html). See [Choose EMR 7.x or 6.x](#choose-emr-7x-or-6x) and [Legacy: EMR 6.x](#legacy-emr-6x) if you must stay on 6.x.
-
-### How is this different from the Kedro blog post on deploying to Amazon EMR?
-
-The [Kedro blog post on deploying pipelines to Amazon EMR](https://kedro.org/blog/how-to-deploy-kedro-pipelines-on-amazon-emr) provides Python dependencies in a virtual environment. This guide packages a custom Python version and dependencies into a **custom Docker image** for EMR *Serverless*. That approach applies to EMR Serverless specifically; for managed EMR clusters, consider [custom AMIs](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html) as an alternative to bootstrap actions.
-
-### Why package the Kedro project instead of using `kedro run` in the Dockerfile?
-
-EMR Serverless ignores `[CMD]` and `[ENTRYPOINT]` in the Dockerfile. Package the project into a wheel, install it in the image, and invoke it from an S3-hosted `entrypoint.py` script. We recommend calling your packaged project's `__main__` module directly rather than shelling out to `kedro run` with [subprocess](https://docs.python.org/3/library/subprocess.html).
-
-### Why not use AWS's virtual-environment approach for Python dependencies?
-
-You may encounter difficulties with the [virtual environment approach for EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python.html) when using [pyenv](https://github.com/pyenv/pyenv). With [venv-pack](https://pypi.org/project/venv-pack/) we found [a limitation that returned `Too many levels of symbolic links`](https://jcristharif.com/venv-pack/#caveats). A custom image bundles Python, dependencies, and your Kedro project in one place you can test locally.
-
-### How about using KedroSession?
-
-You can run Kedro with `KedroSession` inside your Spark `entrypoint.py` instead of calling your packaged project's `__main__` module. You still package the project and install the wheel in the custom image; the session API is an alternative way to *invoke* the pipeline.
-
-| CLI flag | `KedroSession` API | Method |
-| --- | --- | --- |
-| `--env` | `env` | `KedroSession.create()` |
-| `--params` | `runtime_params` | `KedroSession.create()` |
-| `--conf-source` | `conf_source` | `KedroSession.create()` |
-| `--pipelines` | `pipeline_names` (a list of strings) | `session.run()` |
-| `--nodes` | `node_names` | `session.run()` |
-| `--runner` | `runner` (an `AbstractRunner` instance, for example `ThreadRunner()`) | `session.run()` |
-| `--tags` | `tags` | `session.run()` |
-| `--from-nodes` / `--to-nodes` | `from_nodes` / `to_nodes` | `session.run()` |
-| `--load-versions` | `load_versions` | `session.run()` |
-
-In a packaged EMR deployment, call `configure_project()` (not `bootstrap_project()`) before creating the session:
-
-```python
-from kedro.framework.project import configure_project
-from kedro.framework.session import KedroSession
-from kedro.runner import ThreadRunner
-
-configure_project("<PACKAGE_NAME>")
-
-with KedroSession.create(env="<emr-conf>", conf_source="/home/hadoop/conf") as session:
-    session.run(
-        pipeline_names=["<kedro-pipeline-name>"],
-        runner=ThreadRunner(),
-    )
-```
-
-Upload this script to S3 and reference it as the Spark `entryPoint`.
-
-**When to use which approach:**
-
-- Use the **`__main__` entrypoint** when you want the same interface as `python -m <package_name>` or `kedro run` at the command line.
-- Use **`KedroSession`** when you prefer explicit Python control over run options.
 
 ---
 

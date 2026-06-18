@@ -1,61 +1,115 @@
 # AWS Batch
 
-[AWS Batch](https://aws.amazon.com/batch/) runs containerised batch jobs at scale. Each job runs in an isolated Docker container. This guide walks you through deploying a **Kedro 1.x** project so each **pipeline-level namespace** runs as one Batch job — with datasets stored on Amazon S3.
+[AWS Batch](https://aws.amazon.com/batch/) runs containerised batch jobs at scale. Each job runs in an isolated Docker container. The sections below show how to deploy a Kedro project so each **pipeline-level namespace** runs as one Batch job, with datasets stored on Amazon S3.
 
-## What you will do
+AWS Batch fits Kedro pipelines whose stages need **more time or memory than [AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) allows**, but do not require **PySpark** or distributed Spark. For lightweight stages with managed orchestration, use [AWS Step Functions](aws_step_functions.md). For Spark workloads, use [Amazon EMR Serverless](amazon_emr_serverless.md).
 
-1. [Prepare your Kedro project](#step-1-prepare-your-kedro-project)
-2. [Configure Kedro for AWS Batch](#step-2-configure-kedro-for-aws-batch)
-3. [Package the Kedro project](#step-3-package-the-kedro-project)
-4. [Build and push the container image](#step-4-build-and-push-the-container-image)
-5. [Set up AWS Batch](#step-5-set-up-aws-batch)
-6. [Create the custom Batch runner](#step-6-create-the-custom-aws-batch-runner)
-7. [Customise the project CLI](#step-7-customise-the-project-cli)
-8. [Submit the pipeline from your machine](#step-8-submit-the-pipeline-from-your-machine)
-9. [Verify the jobs succeeded](#step-9-verify-the-jobs-succeeded)
+This guide targets Kedro 1.x (`kedro>=1.0`) and uses the Spaceflights starter as a worked example. Read [the deployment strategy](#strategy) first if you are deploying your own Kedro project and need guidance on namespace grouping, S3 storage, the custom Batch runner, and job definition settings.
 
-## Before you start
+## Strategy
+
+Read this section before you deploy your own project. It starts with an overview of the approach, then gives practical advice for adapting it to your pipelines.
+
+#### Overview
+
+This guide deploys a Kedro pipeline on AWS Batch using a custom **`AWSBatchRunner`** on your local machine (or CI agent) and a shared container image on Amazon S3-backed storage.
+
+The approach in brief:
+
+1. **Package the project** as a wheel and copy `conf/` into a container image. Every namespace group uses the same image.
+2. **Group nodes by pipeline-level namespace**. Each group becomes one Batch job. Inside the container, the job runs every node in that namespace with your packaged project CLI.
+3. **Store shared datasets on S3**. Batch containers are isolated, so datasets that cross namespace boundaries cannot use `MemoryDataset`.
+4. **Submit jobs from a custom runner**. `AWSBatchRunner` groups the pipeline with `Pipeline.group_nodes_by("namespace")`, submits one Batch job per group with `dependsOn` links, and polls until each job finishes.
+
+#### Why use a container image?
+
+A container image lets you package Kedro, project dependencies, and configuration into one artefact. You can build and test that artefact locally before pushing it to [Amazon Elastic Container Registry](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html). Each Batch job overrides the container command to run one namespace group.
+
+<!-- vale off -->
+
+```mermaid
+flowchart LR
+  subgraph driver [Your machine]
+    Runner[AWSBatchRunner]
+  end
+  subgraph aws [AWS]
+    Q[Batch job queue]
+    J1[Job data_processing]
+    J2[Job data_science]
+    J3[Job reporting]
+    S3[(S3 bucket)]
+  end
+  Runner --> Q
+  Q --> J1
+  J1 --> S3
+  J1 --> J2
+  J1 --> J3
+  J2 --> S3
+  J3 --> S3
+```
+
+<!-- vale on -->
+
+For the Spaceflights starter, this pattern creates **three** Batch jobs (`data_processing`, `data_science`, and `reporting`) instead of one per node.
+
+Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-level namespaces. Node-level namespaces are for Kedro-Viz layout and do not group execution. [Learn how to group nodes with namespaces in Kedro](../../build/namespaces.md#group-nodes-with-namespaces).
+
+#### Choose how to group nodes
+
+Namespace grouping suits most production pipelines where related nodes share dependencies and finish within Batch job timeout and memory limits.
+
+| Grouping | Pros | Cons | When to use |
+| --- | --- | --- | --- |
+| One Batch job per **namespace** (recommended) | Fewer jobs. Related nodes run together | Whole namespace must fit job timeout and memory | Most production Spaceflights-style pipelines |
+| One Batch job per **node** | Full isolation. Easy to debug a single node | More jobs, longer total runtime, more ECR pulls | Small pipelines or prototyping |
+| **Offload Spark stages** to EMR Serverless | Distributed Spark fits better | Extra infrastructure to set up and operate | PySpark pipelines or nodes that need Spark |
+
+!!! note "When a namespace exceeds Batch limits"
+    If a namespace outgrows your job definition timeout or memory, split it further or increase job definition resources.
+    Run Spark stages on [Amazon EMR Serverless](amazon_emr_serverless.md) instead of Batch.
+
+#### Plan execution order and storage
+
+`AWSBatchRunner` submits namespace groups when their upstream dependencies have finished. Groups with no upstream dependencies can run in parallel, up to `max_workers` in `conf/aws_batch/parameters.yml`. The runner uses the `dependencies` list on each `GroupedNodes` object from `Pipeline.group_nodes_by("namespace")`.
+
+For Spaceflights, `data_processing` runs first to produce intermediate datasets on S3. `data_science` and `reporting` can run in parallel at the next level because both depend on `data_processing` outputs (`model_input_table` and `preprocessed_shuttles`) but not on each other. The same dependency rules apply in [distributed Kedro runs](../distributed.md) and in [grouping nodes for deployment](../nodes_grouping.md).
+
+List **every dataset shared across namespace groups** in `conf/aws_batch/catalog.yml` on S3. Omitting a dataset causes `MemoryDataset` errors when Batch moves between jobs.
+
+#### Configure before you deploy
+
+- Assign **pipeline-level namespaces** with explicit `inputs` / `outputs` and `prefix_datasets_with_namespace=False`
+- Run each namespace locally (`kedro run --namespaces=<name>`) to estimate duration and memory, then set job definition **timeout** and **memory** for the heaviest namespace
+- Add **`s3fs`** and **`boto3`** when using S3-backed datasets and the Batch API from your driver machine
+- Trim **image dependencies** if the container grows too large for your compute environment
+
+!!! note "Deploying without pipeline-level namespaces"
+    If your project has no pipeline-level namespaces, `AWSBatchRunner` still works. `Pipeline.group_nodes_by("namespace")` treats each node without a namespace as its own group, so you get **one Batch job per node**. The runner passes `--nodes <node_name>` for those groups instead of `--namespaces <name>`.
+
+## Working example
 
 ### Prerequisites
 
-- A Kedro 1.x project from the [Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/) (`requires-python = ">=3.10"` in `pyproject.toml`)
-- Python **>=3.10** locally (the driver machine that submits Batch jobs)
-- [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI)
-- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region
-- An AWS account with permissions for Batch, S3, ECR, IAM, and EC2 (for the Batch compute environment)
+These apply to the **step-by-step guide** below. This guide builds and deploys from your machine with Kedro, Docker, and the AWS CLI. You use the [AWS Management Console](https://aws.amazon.com/console/) to inspect the job queue and job runs after submission, but you cannot complete the guide with the console alone.
 
-Create the project with:
+| You need | Used for |
+| --- | --- |
+| A **Kedro project** (`requires-python = ">=3.10"` in `pyproject.toml`) and Python **>=3.10** locally | Packaging the project, local test runs, and running `AWSBatchRunner` on your driver machine |
+| [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI) | Building the Batch container image |
+| [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region | Creating S3 and Batch resources, uploading data, pushing the image to ECR, and submitting jobs |
+| An AWS account with permissions for Batch, S3, ECR, IAM, and EC2 (for the Batch compute environment) | Creating and running the deployed resources |
+
+The steps that follow deploy the [Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/) end to end. Create the project with:
 
 ```bash
 kedro new -s spaceflights-pandas -n spaceflights_batch
 ```
 
-Name the project directory `spaceflights-batch`. Complete the [Spaceflights tutorial](../../tutorials/spaceflights_tutorial.md) if you are new to the project layout.
-
-### Strategy
-
-A custom **`AWSBatchRunner`** runs on your local machine (or a CI agent). It does **not** execute node logic itself. Instead, it:
-
-1. Groups the pipeline by top-level namespace with `Pipeline.group_nodes_by("namespace")`
-2. Submits one AWS Batch job per namespace group, with `dependsOn` links between jobs
-3. Polls Batch until each job reaches `SUCCEEDED` or `FAILED`
-
-Each Batch job runs every node in that namespace inside the container using your packaged project CLI (for example `spaceflights-batch run --env aws_batch --namespaces data_processing --conf-source /app/conf`).
-
-For Spaceflights `__default__`, this creates **three** Batch jobs (`data_processing`, `data_science`, and `reporting`) instead of one per node.
-
-This matches [grouping nodes for deployment](../nodes_grouping.md) and the [AWS Step Functions guide](aws_step_functions.md).
-
-Because containers are isolated, every dataset shared between namespace groups must use persistent storage (for example S3). `MemoryDataset` entries cannot be shared between Batch jobs.
-
-Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-level namespaces. Node-level namespaces are for Kedro-Viz layout and do not group execution.
-
-!!! note "Submitting without pipeline-level namespaces"
-    If your project has no pipeline-level namespaces, `AWSBatchRunner` still works. Each node without a namespace becomes its own group — **one Batch job per node** with `--nodes <node_name>`.
-
-    Skip [Assign pipeline-level namespaces](#assign-pipeline-level-namespaces) and continue from Step 2. Expect more jobs and longer runtime; add namespaces later for coarser grouping.
+If you are new to the project layout, [complete the Spaceflights tutorial](../../tutorials/spaceflights_tutorial.md). If you use your own Kedro project, replace the placeholders below and follow the same steps.
 
 ### Placeholders used in this guide
+
+Replace these before building and submitting jobs:
 
 | Placeholder | Example |
 | --- | --- |
@@ -69,6 +123,18 @@ Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-l
 | `<batch-job-queue>` | `spaceflights_queue` |
 | `<batch-job-definition>` | `kedro_run` |
 
+### What you will do
+
+1. [Prepare your Kedro project](#step-1-prepare-your-kedro-project)
+2. [Set up AWS](#step-2-set-up-aws)
+3. [Configure Kedro for AWS Batch](#step-3-configure-kedro-for-aws-batch)
+4. [Package the Kedro project](#step-4-package-the-kedro-project)
+5. [Build and push the container image](#step-5-build-and-push-the-container-image)
+6. [Create the custom Batch runner](#step-6-create-the-custom-aws-batch-runner)
+7. [Customise the project CLI](#step-7-customise-the-project-cli)
+8. [Submit the pipeline from your machine](#step-8-submit-the-pipeline-from-your-machine)
+9. [Verify the jobs succeeded](#step-9-verify-the-jobs-succeeded)
+
 ---
 
 ## Step 1: Prepare your Kedro project
@@ -80,15 +146,15 @@ pip install -e .
 kedro run
 ```
 
-Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in a separate environment in the next step.
+Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in [Step 3](#step-3-configure-kedro-for-aws-batch) after you create the bucket in [Step 2](#step-2-set-up-aws).
 
 Each node should have a meaningful `name` in its `Node(...)` definition. Batch job names and log streams use namespace or node names.
 
 ### Assign pipeline-level namespaces
 
-This step is **recommended** for fewer Batch jobs and lower orchestration overhead. If your pipeline has no pipeline-level namespaces, skip to [Step 2](#step-2-configure-kedro-for-aws-batch) — see the note under [Strategy](#strategy).
+This step is **recommended** for fewer Batch jobs and lower orchestration overhead. Read [the deployment strategy](#strategy) for grouping trade-offs and namespace requirements. If your pipeline has no pipeline-level namespaces, skip to [Step 2: Set up AWS](#step-2-set-up-aws).
 
-Before deploying, assign a **pipeline-level namespace** to each sub-pipeline you want to run as one Batch job. In Spaceflights, update `create_pipeline()` in each module under `src/<PACKAGE_NAME>/pipelines/`:
+Assign a **pipeline-level namespace** to each sub-pipeline you want to run as one Batch job. In Spaceflights, update `create_pipeline()` in each module under `src/<PACKAGE_NAME>/pipelines/`:
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
@@ -110,7 +176,7 @@ Set `prefix_datasets_with_namespace=False` so dataset names in `conf/base/catalo
 | `data_science` | `data_science` | `{"model_input_table"}` | `{"regressor", "X_train", "X_test", "y_train", "y_test"}` |
 | `reporting` | `reporting` | `{"preprocessed_shuttles"}` | `{"shuttle_passenger_capacity_plot_exp", "shuttle_passenger_capacity_plot_go", "dummy_confusion_matrix"}` |
 
-See [Group nodes with namespaces](../../build/namespaces.md#group-nodes-with-namespaces) for the full Spaceflights example.
+[Learn how to group nodes with namespaces in Kedro using the full Spaceflights example](../../build/namespaces.md#group-nodes-with-namespaces).
 
 !!! note "Update `conf/base/catalog.yml` for reporting"
     If the starter lists `matplotlib.MatplotlibWriter` for `dummy_confusion_matrix`, change it to `matplotlib.MatplotlibDataset` in **`conf/base/catalog.yml`** before running locally.
@@ -124,11 +190,67 @@ kedro run
 
 ---
 
-## Step 2: Configure Kedro for AWS Batch
+## Step 2: Set up AWS
+
+Create the AWS resources your Kedro project will use before you point configuration at them. Complete this setup for each AWS account and region. Follow the linked AWS guides for console and CLI steps. This section lists what you need and Kedro-specific settings.
+
+| Resource | AWS documentation | What you need for Kedro |
+| --- | --- | --- |
+| **S3 bucket** | [Creating a bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) | Raw data and pipeline outputs (`s3://<your-bucket>/...`) |
+| **ECR repository** | [Create a private repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html) | One **private** repo for the Batch container image (for example `spaceflights-batch`) |
+| **IAM job role** | [IAM roles for Batch](https://docs.aws.amazon.com/batch/latest/userguide/IAM_policies.html) | S3 read/write for datasets; attach to the job definition as `jobRoleArn` |
+| **Compute environment** | [Compute environments](https://docs.aws.amazon.com/batch/latest/userguide/compute_environments.html) | Managed EC2 environment (for example `spaceflights_env`) |
+| **Job queue** | [Job queues](https://docs.aws.amazon.com/batch/latest/userguide/job_queues.html) | Links jobs to the compute environment (for example `spaceflights_queue`) |
+| **Job definition** | [Job definitions](https://docs.aws.amazon.com/batch/latest/userguide/job_definitions.html) | Points at `<ecr-image-uri>` after you push in Step 5; leave `command` empty (overridden per job) |
+
+!!! warning "Avoid overly broad IAM policies"
+    For production, scope the policy to your bucket ARN.
+
+### Upload raw data to S3
+
+Upload input data before you configure the catalog. Follow the AWS guide for [uploading objects to S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html):
+
+```bash
+export AWS_REGION=<your-aws-region>
+export S3_BUCKET=<your-bucket>
+
+aws s3 mb "s3://${S3_BUCKET}" --region "${AWS_REGION}"
+aws s3 sync data/01_raw/ "s3://${S3_BUCKET}/01_raw/"
+```
+
+!!! note "`shuttles.xlsx` may be missing locally"
+    The starter gitignores `data/01_raw/shuttles.xlsx`. Copy it from the [Spaceflights starter repository on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) if `kedro new` did not place it in your project.
+
+### Create the Amazon ECR repository
+
+Create the repository now. You push the image in [Step 5](#step-5-build-and-push-the-container-image):
+
+```bash
+aws ecr create-repository --repository-name spaceflights-batch --region <your-aws-region>
+```
+
+### Job definition settings (Kedro-specific)
+
+When creating the job definition (for example `kedro_run`), set:
+
+| Setting | Recommended value |
+| --- | --- |
+| **Image** | `<ecr-image-uri>` (after Step 5 push) |
+| **vCPUs** | `2` |
+| **Memory** | `4096` MiB (increase for heavy modelling nodes) |
+| **Job role** | `<batch-job-role-arn>` with S3 access |
+| **Timeout** | `3600` seconds or higher |
+| **Command** | leave empty (the runner overrides per job) |
+
+The compute environment does not launch instances until jobs are submitted, so creating it does not incur immediate cost.
+
+---
+
+## Step 3: Configure Kedro for AWS Batch
 
 ### Create an `aws_batch` config environment
 
-Add `conf/aws_batch/` with `globals.yml`, `catalog.yml`, and `parameters.yml`. Use [catalog globals](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params) for the S3 bucket name.
+Add `conf/aws_batch/` with `globals.yml`, `catalog.yml`, and `parameters.yml`. Set `s3_bucket` in `conf/aws_batch/globals.yml` to the same value as `S3_BUCKET` from Step 2. [Learn how to use catalog globals in Kedro configuration](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params).
 
 `conf/aws_batch/globals.yml`:
 
@@ -239,19 +361,6 @@ The Spaceflights starter uses Parquet for intermediate tables. Use `matplotlib.M
       versioned: true
     ```
 
-### Create an S3 bucket and upload raw data
-
-```bash
-export AWS_REGION=<your-aws-region>
-export S3_BUCKET=<your-bucket>
-
-aws s3 mb "s3://${S3_BUCKET}" --region "${AWS_REGION}"
-aws s3 sync data/01_raw/ "s3://${S3_BUCKET}/01_raw/"
-```
-
-!!! note "`shuttles.xlsx` may be missing locally"
-    The starter gitignores `data/01_raw/shuttles.xlsx`. Copy it from the [starter repository](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) if `kedro new` did not place it in your project.
-
 ### Verify the AWS Batch environment locally
 
 ```bash
@@ -262,17 +371,19 @@ Confirm outputs appear under your S3 bucket paths.
 
 ---
 
-## Step 3: Package the Kedro project
+## Step 4: Package the Kedro project
+
+Run this in your project root. Repeat whenever you change pipeline code or dependencies:
 
 ```bash
 kedro package
 ```
 
-This creates a `.whl` in `dist/`. See [Package a Kedro project](../package_a_project.md#package-a-kedro-project) for details.
+This creates a `.whl` in `dist/`. [Learn how to package a Kedro project](../package_a_project.md#package-a-kedro-project).
 
 ---
 
-## Step 4: Build and push the container image
+## Step 5: Build and push the container image
 
 Create a `Dockerfile` in your project root:
 
@@ -290,6 +401,8 @@ COPY conf/ /app/conf/
 !!! tip "Apple Silicon (ARM) builders"
     Batch on EC2 compute environments uses **`x86_64`** instances. Build with `--platform linux/amd64` (Docker or Podman).
 
+Build the image. Tag it with your ECR URI at build time:
+
 ```bash
 export ECR_IMAGE=<ecr-image-uri>
 
@@ -297,10 +410,21 @@ kedro package
 docker build --platform linux/amd64 -t ${ECR_IMAGE} .
 ```
 
-Push to ECR — see [Pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
+If you build with a local tag first, run `docker tag spaceflights-batch:latest <ecr-image-uri>` right before pushing.
+
+### How config reaches the job
+
+Now that you have built the image, here is how your Step 3 configuration reaches each Batch container at runtime:
+
+1. **The wheel carries pipeline code.** `pip install dist/*.whl` in the Dockerfile installs your packaged project and dependencies.
+2. **The Dockerfile carries `conf/`.** `COPY conf/` places your `conf/aws_batch/` settings at `/app/conf` inside the container.
+3. **The Batch job command selects the environment.** `AWSBatchRunner` passes `--env aws_batch --conf-source /app/conf --namespaces <name>` (or `--nodes <name>` for nodes without a namespace) through `containerOverrides`.
+
+### Push to ECR.
+
+Follow the AWS guide for [pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
 
 ```bash
-aws ecr create-repository --repository-name spaceflights-batch --region <your-aws-region>
 aws ecr get-login-password --region <your-aws-region> | \
   docker login --username AWS --password-stdin <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com
 docker push ${ECR_IMAGE}
@@ -309,38 +433,7 @@ docker push ${ECR_IMAGE}
 !!! note "Trim dependencies for production images"
     The Spaceflights starter includes Jupyter and Kedro-Viz, which increase image size. For production Batch images, consider a slimmer `requirements` subset or a multi-stage Dockerfile that omits development dependencies.
 
----
-
-## Step 5: Set up AWS Batch
-
-Complete this setup for each AWS account/region. Follow the linked AWS guides — this section lists Kedro-specific settings.
-
-| Resource | AWS documentation | What you need for Kedro |
-| --- | --- | --- |
-| **S3 bucket** | [Creating a bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html) | Raw data and pipeline outputs |
-| **ECR repository** | [Create a private repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html) | Container image from Step 4 |
-| **IAM job role** | [IAM roles for Batch](https://docs.aws.amazon.com/batch/latest/userguide/IAM_policies.html) | S3 read/write for datasets; attach to the job definition as `jobRoleArn` |
-| **Compute environment** | [Compute environments](https://docs.aws.amazon.com/batch/latest/userguide/compute_environments.html) | Managed EC2 environment (for example `spaceflights_env`) |
-| **Job queue** | [Job queues](https://docs.aws.amazon.com/batch/latest/userguide/job_queues.html) | Links jobs to the compute environment (for example `spaceflights_queue`) |
-| **Job definition** | [Job definitions](https://docs.aws.amazon.com/batch/latest/userguide/job_definitions.html) | Points at `<ecr-image-uri>`; leave `command` empty (overridden per node) |
-
-!!! warning "Avoid overly broad IAM policies"
-    Older tutorials attach `AmazonS3FullAccess` to the job role. For production, scope the policy to your bucket ARN.
-
-### Job definition settings (Kedro-specific)
-
-When creating the job definition (for example `kedro_run`), set:
-
-| Setting | Recommended value |
-| --- | --- |
-| **Image** | `<ecr-image-uri>` |
-| **vCPUs** | `2` |
-| **Memory** | `4096` MiB (increase for heavy modelling nodes) |
-| **Job role** | `<batch-job-role-arn>` with S3 access |
-| **Timeout** | `3600` seconds or higher |
-| **Command** | leave empty (the runner overrides per job) |
-
-The compute environment does not launch instances until jobs are submitted, so creating it does not incur immediate cost.
+Update the job definition **Image** field to `<ecr-image-uri>` if you created the definition before pushing.
 
 ---
 
@@ -558,7 +651,7 @@ with KedroSession.create(
     )
 ```
 
-See the [common use cases guide](../../extend/common_use_cases.md) for more on customising Kedro commands.
+[Learn how to customise Kedro commands in common use cases](../../extend/common_use_cases.md).
 
 ---
 
@@ -574,7 +667,7 @@ spaceflights-batch run \
 
 The `AWSBatchRunner` on your machine submits Batch jobs. Each job runs inside the container image and executes one namespace group (or a single node when no namespace is defined). For Spaceflights `__default__`, expect **three** jobs.
 
-Track jobs in the [Batch console](https://console.aws.amazon.com/batch/) or with:
+Track jobs in the [AWS Batch console](https://console.aws.amazon.com/batch/) or with:
 
 ```bash
 aws batch list-jobs --job-queue <batch-job-queue> --job-status RUNNING
@@ -586,13 +679,13 @@ Logs are available in [CloudWatch Logs](https://docs.aws.amazon.com/batch/latest
 
 ## Step 9: Verify the jobs succeeded
 
-1. **Check Batch job states** — all jobs should reach **SUCCEEDED**.
+1. **Check Batch job states.** All jobs should reach **SUCCEEDED**. [Learn how to check AWS Batch job status](https://docs.aws.amazon.com/batch/latest/userguide/monitoring.html):
 
 ```bash
 aws batch list-jobs --job-queue <batch-job-queue> --job-status SUCCEEDED
 ```
 
-2. **Check S3 outputs** — list paths from your `conf/aws_batch/catalog.yml`:
+2. **Check S3 outputs.** List paths from your `conf/aws_batch/catalog.yml`. [Learn how to list objects in Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ListingObjects.html):
 
 ```bash
 aws s3 ls "s3://<your-bucket>/" --recursive
@@ -613,13 +706,13 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 | `Cannot install ... s3fs` dependency conflict | `kedro-viz` pins an older `s3fs` range | Use `s3fs>=2021.4` locally; omit Kedro-Viz from the Batch image for production |
 | `AccessDenied` on S3 inside Batch jobs | Job role lacks bucket permissions | Attach an IAM policy scoped to `<your-bucket>` on the job role |
 | `MemoryDataset` errors between jobs | Dataset missing from `conf/aws_batch/catalog.yml` | Add S3-backed entries for all shared datasets |
-| Batch job times out mid-namespace | Namespace contains too much work for one job timeout | Split namespaces further or increase job definition timeout/memory |
+| Batch job times out mid-namespace | Namespace contains too much work for one job timeout | Split namespaces further, or increase job definition timeout/memory, or run heavy stages on [Amazon EMR Serverless](amazon_emr_serverless.md) |
 | `Dataset 'MatplotlibWriter' not found` | Outdated dataset type in `conf/base/catalog.yml` | Use `matplotlib.MatplotlibDataset` in base and aws_batch catalogs |
 | S3 errors during `kedro run --env aws_batch` locally | Missing AWS CRT support in `botocore` | Run `pip install 'botocore[crt]'` and retry |
 | Jobs stuck in `RUNNABLE` | Compute environment not scaled or no capacity | Check compute environment status; increase `maxvCpus` or instance types |
 | `Essential container exited` immediately | Wrong `--conf-source` or missing `conf/` in image | Verify `COPY conf/ /app/conf/` in the Dockerfile and `conf_source: /app/conf` in parameters |
 | `ModuleNotFoundError` for runner kwargs | Built-in `kedro run` used instead of custom `cli.py` | Use `<PACKAGE_CLI> run` after adding the customised `cli.py` from Step 7 |
-| Job fails with out-of-memory | Default 2 GB too low for sklearn/matplotlib nodes | Increase memory in the job definition (for example `4096` or `8192` MiB) |
+| Job fails with out-of-memory | Default memory too low for sklearn/matplotlib nodes | Increase memory in the job definition (for example `4096` or `8192` MiB) |
 
 <!-- vale on -->
 
@@ -628,9 +721,11 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 ## Limitations
 
 - Each Batch job runs **one namespace group** (or one node when no namespace is defined). A namespace must finish within the job definition timeout and memory limits.
-- Pipelines with dozens of nodes without namespaces increase Batch job count and ECR pulls; add pipeline-level namespaces or use [Amazon EMR Serverless](amazon_emr_serverless.md) for Spark-heavy workloads.
-- The driver machine (where you run `AWSBatchRunner`) must stay online until all jobs complete.
-- Batch job dependencies use AWS Batch `dependsOn`; this matches Kedro's DAG but does not replace Kedro's own `ThreadRunner` parallelism on a single machine.
+- **Not for Spark:** This pattern is for non-distributed Python stages. Run PySpark workloads on [Amazon EMR Serverless](amazon_emr_serverless.md) instead.
+- **Driver machine:** The machine where you run `AWSBatchRunner` must stay online until all jobs complete. For managed orchestration of lightweight stages, consider [AWS Step Functions](aws_step_functions.md).
+- **Image lifecycle:** When you change pipeline code, dependencies, or `conf/aws_batch/`, rebuild the image, push to ECR, and update the job definition image URI before the next run.
+- Pipelines with dozens of nodes without namespaces increase Batch job count and ECR pulls. Add pipeline-level namespaces for coarser grouping.
+- Batch job dependencies use AWS Batch `dependsOn`. This matches Kedro's DAG but does not replace Kedro's own `ThreadRunner` parallelism on a single machine.
 
 ---
 
@@ -638,17 +733,17 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 
 ### Kedro
 
-- [Running Kedro in a distributed environment](../distributed.md)
-- [Grouping nodes for deployment](../nodes_grouping.md)
-- [Group nodes with namespaces](../../build/namespaces.md#group-nodes-with-namespaces)
-- [Package a Kedro project](../package_a_project.md)
-- [Customise project-specific Kedro commands](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands)
-- [Catalog globals](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params)
+- [Learn how to run Kedro in a distributed environment](../distributed.md)
+- [Learn how to group nodes for deployment](../nodes_grouping.md)
+- [Learn how to group nodes with namespaces in Kedro](../../build/namespaces.md#group-nodes-with-namespaces)
+- [Learn how to package a Kedro project](../package_a_project.md)
+- [Learn how to customise project-specific Kedro commands](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands)
+- [Learn how to use catalog globals in Kedro configuration](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params)
 
 ### AWS
 
-- [AWS Batch User Guide](https://docs.aws.amazon.com/batch/latest/userguide/what-is-aws-batch.html)
-- [Creating a job definition](https://docs.aws.amazon.com/batch/latest/userguide/job_definitions.html)
-- [IAM policies for Batch](https://docs.aws.amazon.com/batch/latest/userguide/IAM_policies.html)
-- [Pushing a Docker image to ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html)
-- [Batch monitoring and logging](https://docs.aws.amazon.com/batch/latest/userguide/monitoring.html)
+- [Read the AWS Batch user guide](https://docs.aws.amazon.com/batch/latest/userguide/what-is-aws-batch.html)
+- [Learn how to create an AWS Batch job definition](https://docs.aws.amazon.com/batch/latest/userguide/job_definitions.html)
+- [Learn how to configure IAM policies for AWS Batch](https://docs.aws.amazon.com/batch/latest/userguide/IAM_policies.html)
+- [Learn how to push a Docker image to Amazon ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html)
+- [Learn how to check AWS Batch job status](https://docs.aws.amazon.com/batch/latest/userguide/monitoring.html)

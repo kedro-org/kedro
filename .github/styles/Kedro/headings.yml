@@ -23,6 +23,7 @@ exceptions:
   - Azure Event Hub
   - Azure ML
   - CI/CD
+  - CDK
   - CLI
   - DataCatalog
   - Data Catalog
@@ -36,6 +37,7 @@ exceptions:
   - Docker Swarm
   - Dockerfile
   - EMR Serverless
+  - ECR
   - Excel
   - GitHub
   - GitHub Actions
@@ -80,6 +82,7 @@ exceptions:
   - Red Hat
   - Redis
   - SageMaker
+  - S3
   - Slack
   - SSH
   - Spark

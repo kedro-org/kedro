@@ -4,7 +4,7 @@
 
 EMR Serverless suits pipelines with **PySpark or other distributed Spark work**. Single-node stages (pandas, scikit-learn, reporting) may fit better on [AWS Step Functions](aws_step_functions.md) or [AWS Batch](aws_batch.md), or as separate jobs you orchestrate around Spark stages.
 
-This guide targets **Kedro 1.x** (`kedro>=1.0`) and uses a PySpark project as a worked example. Read [the deployment strategy](#strategy) if you are deploying your own project and need guidance on release choice, pipeline grouping, storage, and custom image settings.
+This guide targets Kedro 1.x (kedro>=1.0) and uses the Spaceflights PySpark starter as a worked example. Read [the deployment strategy](#strategy) if you are deploying your own project and need guidance on EMR release choice, job scope, S3 storage and catalog configuration, and custom images.
 
 ## Strategy
 
@@ -83,9 +83,6 @@ Unlike Step Functions, EMR Serverless does not automatically wire pipeline depen
 
 When pipelines depend on each other, submit jobs in **dependency order**: run upstream pipelines before downstream ones that read their S3 outputs. For automatic ordering across stages that fit within Lambda limits, combine [AWS Step Functions](aws_step_functions.md) (or [AWS Batch](aws_batch.md)) with EMR Serverless for Spark-heavy work. The same dependency rules apply in [distributed Kedro runs](../distributed.md) and in [grouping nodes for deployment](../nodes_grouping.md).
 
-!!! note "When Lambda limits are the bottleneck"
-    If a stage outgrows Lambda timeout or memory, run it on EMR Serverless or [AWS Batch](aws_batch.md) instead of [AWS Step Functions](aws_step_functions.md).
-
 #### Plan storage and configuration
 
 List **every dataset your pipeline reads or writes on EMR** in `conf/emr/catalog.yml` (or your chosen environment) with full S3 paths:
@@ -120,13 +117,13 @@ These apply to the **step-by-step guide** below. This guide builds and deploys f
 | [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region | Creating S3 and ECR resources, uploading data, pushing the image, and submitting jobs |
 | An AWS account with permissions for EMR Serverless, S3, ECR, and IAM | Creating and running the deployed resources |
 
-The steps that follow deploy a **PySpark Kedro project** end to end. Create the project with:
+The steps that follow deploy the [Spaceflights PySpark starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark) end to end. Create the project with:
 
 ```bash
-kedro new
+kedro new -s spaceflights-pyspark -n spaceflights_emr
 ```
 
-Kedro requires **Python >=3.10**. This guide uses **Python 3.12** on **EMR 7.13.0**. Install the same Python version locally. If you use your own Kedro project, replace the placeholders below and follow the same steps.
+If you are new to the project layout, [complete the Spaceflights tutorial](../../tutorials/spaceflights_tutorial.md). Kedro requires **Python >=3.10**. This guide uses **Python 3.12** on **EMR 7.13.0**; install the same Python version locally. If you use your own Kedro project, replace the placeholders below and follow the same steps.
 
 ### Placeholders used in this guide
 
@@ -134,9 +131,9 @@ Replace these before building and submitting jobs:
 
 | Placeholder | Example |
 | --- | --- |
-| `<PACKAGE_WHEEL_NAME>` | `spaceflights-0.1-py3-none-any.whl` |
-| `<PACKAGE_CONF_ARCHIVE>` | `conf-spaceflights.tar.gz` |
-| `<PACKAGE_NAME>` | `spaceflights` |
+| `<PACKAGE_WHEEL_NAME>` | `spaceflights_emr-0.1-py3-none-any.whl` |
+| `<PACKAGE_CONF_ARCHIVE>` | `conf-spaceflights_emr.tar.gz` |
+| `<PACKAGE_NAME>` | `spaceflights_emr` |
 | `<your-bucket>` | `my-kedro-emr-bucket` |
 | `<your-aws-region>` | `us-east-1` |
 | `<ecr-image-uri>` | `123456789012.dkr.ecr.us-east-1.amazonaws.com/kedro-emr-7:latest` |
@@ -165,13 +162,15 @@ If your organisation requires **EMR 6.x**, follow the same steps for EMR 7.x, th
 
 ## Step 1: Prepare your Kedro project
 
-Create a Kedro project (or use an existing one) with PySpark tooling:
+From the project root, install dependencies and run the pipeline locally:
 
 ```bash
-kedro new
+pip install -e .
+pip install "kedro-datasets[spark-local]"
+kedro run
 ```
 
-This guide uses **Python 3.12** on **EMR 7.13.0**. Install the same Python version locally.
+The PySpark starter does not include a local Spark runtime by default. Install `kedro-datasets[spark-local]` so `kedro run` works on your machine before you submit to EMR. For more detail, read [Get started with the PySpark starter](../../integrations-and-plugins/pyspark_integration.md#get-started-with-the-pyspark-starter).
 
 Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in a separate environment in [Step 3](#step-3-configure-kedro-for-emr). For release choice, pipeline grouping, and storage planning, see [Strategy](#strategy).
 
@@ -205,6 +204,9 @@ Upload input data before you submit the job. Follow the AWS guide for [uploading
 ```bash
 aws s3 sync data/01_raw/ s3://<your-bucket>/data/01_raw/
 ```
+
+!!! note "`shuttles.xlsx` may be missing locally"
+    The starter gitignores `data/01_raw/shuttles.xlsx`. Copy it from the [Spaceflights PySpark starter repository on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark) if `kedro new` did not place it in your project.
 
 ---
 
@@ -267,7 +269,7 @@ Run this in your project root. Repeat whenever you change pipeline code or depen
 kedro package
 ```
 
-This creates a `.whl` file and `conf-<package_name>.tar.gz` in `dist/` (for example `conf-spaceflights.tar.gz`). For more detail, read [Package a Kedro project](../package_a_project.md#package-a-kedro-project).
+This creates a `.whl` file and `conf-<package_name>.tar.gz` in `dist/` (for example `conf-spaceflights_emr.tar.gz`). For more detail, read [Package a Kedro project](../package_a_project.md#package-a-kedro-project).
 
 ---
 

@@ -2,9 +2,9 @@
 
 [AWS Batch](https://aws.amazon.com/batch/) runs containerised batch jobs at scale. Each job runs in an isolated Docker container. The sections below show how to deploy a Kedro project so each **pipeline-level namespace** runs as one Batch job, with datasets stored on Amazon S3.
 
-AWS Batch fits Kedro pipelines whose stages need **more time or memory than [AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) allows**, but do not require **PySpark** or distributed Spark. For lightweight stages with managed orchestration, use [AWS Step Functions](aws_step_functions.md). For Spark workloads, use [Amazon EMR Serverless](amazon_emr_serverless.md).
+AWS Batch fits Kedro pipelines that need **more time or memory than [AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) allows**, but do not require **PySpark** or distributed Spark. For lightweight stages with managed orchestration, use [AWS Step Functions](aws_step_functions.md). For Spark workloads, use [Amazon EMR Serverless](amazon_emr_serverless.md).
 
-This guide targets Kedro 1.x (`kedro>=1.0`) and uses the Spaceflights starter as a worked example. Read [the deployment strategy](#strategy) first if you are deploying your own Kedro project and need guidance on namespace grouping, S3 storage, the custom Batch runner, and job definition settings.
+This guide targets Kedro 1.x (`kedro>=1.0`) and uses the [Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/) as a worked example. Read [the deployment strategy](#strategy) first if you are deploying your own Kedro project and need guidance on namespace grouping, S3 storage, the custom Batch runner, and job definition settings.
 
 ## Strategy
 
@@ -52,7 +52,7 @@ flowchart LR
 
 For the Spaceflights starter, this pattern creates **three** Batch jobs (`data_processing`, `data_science`, and `reporting`) instead of one per node.
 
-Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-level namespaces. Node-level namespaces are for Kedro-Viz layout and do not group execution. [Learn how to group nodes with namespaces in Kedro](../../build/namespaces.md#group-nodes-with-namespaces).
+Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-level namespaces. Node-level namespaces are for Kedro-Viz layout and do not group execution. See the section on [grouping nodes with namespaces in Kedro](../../build/namespaces.md#group-nodes-with-namespaces) for further explanation.
 
 #### Choose how to group nodes
 
@@ -175,7 +175,7 @@ Set `prefix_datasets_with_namespace=False` so dataset names in `conf/base/catalo
 | `data_science` | `data_science` | `{"model_input_table"}` | `{"regressor", "X_train", "X_test", "y_train", "y_test"}` |
 | `reporting` | `reporting` | `{"preprocessed_shuttles"}` | `{"shuttle_passenger_capacity_plot_exp", "shuttle_passenger_capacity_plot_go", "dummy_confusion_matrix"}` |
 
-[Learn how to group nodes with namespaces in Kedro using the full Spaceflights example](../../build/namespaces.md#group-nodes-with-namespaces).
+See the section on [grouping nodes with namespaces in Kedro using the full Spaceflights example](../../build/namespaces.md#group-nodes-with-namespaces) for further explanation.
 
 !!! note "Update `conf/base/catalog.yml` for reporting"
     If the starter lists `matplotlib.MatplotlibWriter` for `dummy_confusion_matrix`, change it to `matplotlib.MatplotlibDataset` in **`conf/base/catalog.yml`** before running locally.

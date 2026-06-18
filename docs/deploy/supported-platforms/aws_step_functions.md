@@ -1,8 +1,10 @@
 # AWS Step Functions
 
-[AWS Step Functions](https://aws.amazon.com/step-functions/) orchestrates [AWS Lambda](https://aws.amazon.com/lambda/) functions into a state machine. The sections below show how to deploy a **Kedro 1.x** project so each **pipeline-level namespace** runs as one Lambda function, with datasets stored on Amazon S3.
+[AWS Step Functions](https://aws.amazon.com/step-functions/) orchestrates [AWS Lambda](https://aws.amazon.com/lambda/) functions into a state machine. The sections below show how to deploy a Kedro project so each **pipeline-level namespace** runs as one Lambda function, with datasets stored on Amazon S3.
 
-This guide uses the Spaceflights starter as a worked example. Read [the deployment strategy](#strategy) first if you are deploying your own Kedro project and need guidance on grouping, storage, and Lambda memory and timeout settings.
+Step Functions fits Kedro pipelines whose stages are **pandas, scikit-learn, or other lightweight Python** work that fits [Lambda limits](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html). For **PySpark** or **long-running distributed** workloads, use [Amazon EMR Serverless](amazon_emr_serverless.md) or [AWS Batch](aws_batch.md) instead.
+
+This guide targets Kedro 1.x (`kedro>=1.0`) and uses the Spaceflights starter as a worked example. Read [the deployment strategy](#strategy) first if you are deploying your own Kedro project and need guidance on grouping, storage, and Lambda memory and timeout settings.
 
 ## Strategy
 
@@ -92,7 +94,7 @@ These apply to the **step-by-step guide** below. This guide builds and deploys f
 
 | You need | Used for |
 | --- | --- |
-| A **Kedro 1.x** project (`requires-python = ">=3.10"` in `pyproject.toml`) and Python **>=3.10** locally | Packaging the project, local test runs, and the CDK script that reads your pipeline |
+| A **Kedro project** (`requires-python = ">=3.10"` in `pyproject.toml`) and Python **>=3.10** locally | Packaging the project, local test runs, and the CDK script that reads your pipeline |
 | [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI) | Building the Lambda container image |
 | [Node.js](https://nodejs.org/) and the [CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/cli.html) (`npm install -g aws-cdk`) | Deploying Lambda functions and the Step Functions state machine with `deploy.py` |
 | [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region | Uploading data to S3, pushing the image to ECR, starting executions, and verifying outputs |
@@ -150,7 +152,7 @@ Keep `conf/base/catalog.yml` on **local file paths** for local development. You 
 
 ### Assign pipeline-level namespaces
 
-This step is **recommended** for fewer Lambda functions and lower orchestration overhead. Read [the deployment strategy](#strategy) for grouping trade-offs and namespace requirements. If your pipeline has no pipeline-level namespaces, skip to [Step 2: Set up AWS](#step-2-set-up-aws) and see the note in that section.
+This step is **recommended** for fewer Lambda functions and lower orchestration overhead. Read [the deployment strategy](#strategy) for grouping trade-offs and namespace requirements. If your pipeline has no pipeline-level namespaces, skip to [Step 2: Set up AWS](#step-2-set-up-aws).
 
 Assign a **pipeline-level namespace** to each sub-pipeline you want to run as one Lambda function. In Spaceflights, update `create_pipeline()` in each module under `src/<PACKAGE_NAME>/pipelines/`:
 
@@ -729,7 +731,11 @@ If the execution failed, see [Troubleshooting](#troubleshooting).
 
 ## Limitations
 
-Each Lambda function has a [15-minute Lambda timeout limit](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html), a 10 GB memory limit, and a 10 GB container image size limit. Namespace grouping runs all nodes in a namespace inside one invocation, so a namespace must finish within those limits. If it does not, split namespaces further or run heavy stages on [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md).
+- **Lambda limits:** Each invocation has a [15-minute timeout](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html), a 10 GB memory limit, and a 10 GB container image limit. Namespace grouping runs every node in a namespace in one invocation, so the whole namespace must fit within those limits.
+- **Step Functions timeout:** The state machine has its own timeout, separate from Lambda. The example `deploy.py` sets a 60-minute state machine timeout; increase it if your pipeline needs longer end-to-end runtime.
+- **Not for Spark:** This pattern is for non-distributed Python stages. Run PySpark workloads on [Amazon EMR Serverless](amazon_emr_serverless.md) instead.
+- **Image lifecycle:** When you change `lambda_handler.py`, `conf/aws/`, or rebuild the wheel, push a new image tag and update each Lambda function (see the note in [Step 6](#step-6-build-the-lambda-container-image)).
+- **Heavy stages:** If a namespace outgrows Lambda, split it further or run those stages on [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md).
 
 !!! warning "Image size with the full Spaceflights starter"
     The Spaceflights starter includes Jupyter, Viz, and reporting dependencies that increase image size. For production deployments, consider trimming `pyproject.toml` dependencies to what your pipeline requires.

@@ -125,13 +125,12 @@ Replace these before building and deploying:
 1. [Prepare your Kedro project](#step-1-prepare-your-kedro-project)
 2. [Set up AWS](#step-2-set-up-aws)
 3. [Configure Kedro for AWS](#step-3-configure-kedro-for-aws)
-4. [Package the Kedro project](#step-4-package-the-kedro-project)
-5. [Create the Lambda handler](#step-5-create-the-lambda-handler)
-6. [Build the Lambda container image](#step-6-build-the-lambda-container-image)
-7. [Write the CDK deployment script](#step-7-write-the-cdk-deployment-script)
-8. [Deploy with CDK](#step-8-deploy-with-cdk)
-9. [Run the state machine](#step-9-run-the-state-machine)
-10. [Verify outputs on S3](#step-10-verify-outputs-on-s3)
+4. [Create the Lambda handler](#step-4-create-the-lambda-handler)
+5. [Write the CDK deployment script](#step-5-write-the-cdk-deployment-script)
+6. [Package, build, and push the container image](#step-6-package-build-and-push-the-container-image)
+7. [Deploy with CDK](#step-7-deploy-with-cdk)
+8. [Run the state machine](#step-8-run-the-state-machine)
+9. [Verify outputs on S3](#step-9-verify-outputs-on-s3)
 
 The deployed state machine looks like this in the AWS Management Console:
 
@@ -217,7 +216,7 @@ aws s3 sync data/01_raw/ "s3://${S3_BUCKET}/01_raw/"
 | Resource | AWS documentation | What you need for Kedro |
 | --- | --- | --- |
 | **ECR repository** | [Create a private Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html) | One **private** repo for the Lambda image (for example `spaceflights-step-functions`) |
-| **CDK bootstrap** | [Bootstrap AWS CDK in your account](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) | One-time per account/region before `cdk deploy` in Step 8 |
+| **CDK bootstrap** | [Bootstrap AWS CDK in your account](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) | One-time per account/region before `cdk deploy` in Step 7 |
 | **IAM** | Created by CDK | Lambda execution roles and Step Functions permissions are provisioned by the CDK stack |
 
 Create the ECR repository:
@@ -347,19 +346,7 @@ Confirm outputs appear under your S3 bucket paths.
 
 ---
 
-## Step 4: Package the Kedro project
-
-Run this in your project root. Repeat whenever you change pipeline code or dependencies:
-
-```bash
-kedro package
-```
-
-This creates `dist/spaceflights_step_functions-0.1-py3-none-any.whl` (the exact filename depends on your package version). [Learn how to package a Kedro project](../package_a_project.md#package-a-kedro-project).
-
----
-
-## Step 5: Create the Lambda handler
+## Step 4: Create the Lambda handler
 
 Create `lambda_handler.py` in the project root. Each Lambda invocation runs every node in the namespace named in the event payload.
 
@@ -396,61 +383,9 @@ Replace `spaceflights_step_functions` with your package name if you used a diffe
 
 ---
 
-## Step 6: Build the Lambda container image
+## Step 5: Write the CDK deployment script
 
-Create a `Dockerfile` in your project root:
-
-```dockerfile
-FROM public.ecr.aws/lambda/python:3.12
-
-COPY lambda_handler.py ${LAMBDA_TASK_ROOT}/
-COPY conf/ ${LAMBDA_TASK_ROOT}/conf/
-
-COPY dist/*.whl /tmp/
-RUN pip install --no-cache-dir /tmp/*.whl --target "${LAMBDA_TASK_ROOT}" \
-    && rm -f /tmp/*.whl
-
-CMD ["lambda_handler.handler"]
-```
-
-!!! tip "Apple Silicon (ARM) builders"
-    Lambda functions use **`x86_64`** by default. Build with `--platform linux/amd64` (Docker or Podman) or invocations may fail with `Runtime.InvalidEntrypoint` / `ProcessSpawnFailed`.
-
-Build the image. Tag it with your ECR URI at build time so the image you push is the one you built:
-
-```bash
-export ECR_IMAGE=<ecr-image-uri>
-
-kedro package
-docker build --platform linux/amd64 -t ${ECR_IMAGE} .
-```
-
-If you build with a local tag (for example `spaceflights-step-functions`), run `docker tag spaceflights-step-functions:latest <ecr-image-uri>` right before pushing.
-
-### How config reaches Lambda
-
-Now that you have built the image, here is how your Step 3 configuration reaches Lambda at runtime:
-
-1. **The wheel carries pipeline code.** `kedro package` bundles your pipeline code and dependencies into a `.whl` file. It does not include `conf/`.
-2. **The `Dockerfile` carries `conf/`.** `COPY conf/` places your `conf/aws/` settings at `${LAMBDA_TASK_ROOT}/conf` inside the container image.
-3. **The handler selects the `aws` environment.** `lambda_handler.py` passes `conf_source=str(project_path / "conf")` and `env="aws"` to `KedroSession.create()`, so Lambda loads `conf/aws/catalog.yml` at runtime.
-
-### Push to ECR
-
-Follow the AWS guide for [pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
-
-```bash
-aws ecr get-login-password --region <your-aws-region> | \
-  docker login --username AWS --password-stdin <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com
-docker push ${ECR_IMAGE}
-```
-
-!!! note "Re-push after handler or catalog changes"
-    When you change `lambda_handler.py`, `conf/aws/`, or rebuild the wheel, push a new image tag and update each Lambda function. If you reuse an existing CDK stack, run `aws lambda update-function-code --image-uri <ecr-image-uri>` on each image-based function, or redeploy with `cdk deploy`.
-
----
-
-## Step 7: Write the CDK deployment script
+Create the CDK deployment files before you build the container image. The stack references the ECR repository from Step 2. Push the image in Step 6 before you run `cdk deploy` in Step 7.
 
 Install CDK Python dependencies into the **same environment** as your Kedro project:
 
@@ -468,6 +403,8 @@ pip install -r deploy_requirements.txt
 Create `deploy.py` in your project root. It groups your pipeline by namespace, creates one Lambda function per group, and wires them into a Step Functions state machine.
 
 Before you deploy, set `s3_data_bucket_name` to your bucket from Step 2. Adjust `NAMESPACE_LAMBDA_CONFIG` from local run times or CloudWatch metrics so each namespace fits its heaviest node.
+
+The example sets `ecr_repository_name = project_path.name`, so your project directory name must match the ECR repository name from Step 2 (for example `spaceflights-step-functions`).
 
 ??? example "View `deploy.py`"
     ```python
@@ -655,7 +592,72 @@ Register the app with CDK by creating `cdk.json`:
 
 ---
 
-## Step 8: Deploy with CDK
+## Step 6: Package, build, and push the container image
+
+Package the project, then build and push the Lambda image. Repeat this step when you change pipeline code, dependencies, `conf/aws/`, or `lambda_handler.py`.
+
+Run this in your project root:
+
+```bash
+kedro package
+```
+
+This creates `dist/spaceflights_step_functions-0.1-py3-none-any.whl` (the exact filename depends on your package version). [Learn how to package a Kedro project](../package_a_project.md#package-a-kedro-project).
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile
+FROM public.ecr.aws/lambda/python:3.12
+
+COPY lambda_handler.py ${LAMBDA_TASK_ROOT}/
+COPY conf/ ${LAMBDA_TASK_ROOT}/conf/
+
+COPY dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl --target "${LAMBDA_TASK_ROOT}" \
+    && rm -f /tmp/*.whl
+
+CMD ["lambda_handler.handler"]
+```
+
+!!! tip "Apple Silicon (ARM) builders"
+    Lambda functions use **`x86_64`** by default. Build with `--platform linux/amd64` (Docker or Podman) or invocations may fail with `Runtime.InvalidEntrypoint` / `ProcessSpawnFailed`.
+
+Build the image. Tag it with your ECR URI at build time so the image you push is the one you built:
+
+```bash
+export ECR_IMAGE=<ecr-image-uri>
+
+docker build --platform linux/amd64 -t ${ECR_IMAGE} .
+```
+
+If you build with a local tag (for example `spaceflights-step-functions`), run `docker tag spaceflights-step-functions:latest <ecr-image-uri>` right before pushing.
+
+### How config reaches Lambda
+
+Now that you have built the image, here is how your Step 3 configuration reaches Lambda at runtime:
+
+1. **The wheel carries pipeline code.** `kedro package` bundles your pipeline code and dependencies into a `.whl` file. It does not include `conf/`.
+2. **The `Dockerfile` carries `conf/`.** `COPY conf/` places your `conf/aws/` settings at `${LAMBDA_TASK_ROOT}/conf` inside the container image.
+3. **The handler selects the `aws` environment.** `lambda_handler.py` passes `conf_source=str(project_path / "conf")` and `env="aws"` to `KedroSession.create()`, so Lambda loads `conf/aws/catalog.yml` at runtime.
+
+### Push to ECR
+
+Follow the AWS guide for [pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
+
+```bash
+aws ecr get-login-password --region <your-aws-region> | \
+  docker login --username AWS --password-stdin <your-aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com
+docker push ${ECR_IMAGE}
+```
+
+!!! note "Re-push after handler or catalog changes"
+    When you change `lambda_handler.py`, `conf/aws/`, or rebuild the wheel, repeat Step 6 and push a new image tag. If you already deployed in Step 7, run `aws lambda update-function-code --image-uri <ecr-image-uri>` on each image-based function, or redeploy with `cdk deploy`.
+
+---
+
+## Step 7: Deploy with CDK
+
+Complete Step 6 first so your ECR repository contains the image. The CDK stack creates Lambdas that reference the `latest` tag in that repository.
 
 Bootstrap CDK in your account (first time per account/region) and deploy the stack. [Follow the AWS CDK bootstrapping guide](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html):
 
@@ -676,7 +678,7 @@ The CloudFormation stack `KedroStepFunctionsStack` should reach **`CREATE_COMPLE
 
 ---
 
-## Step 9: Run the state machine
+## Step 8: Run the state machine
 
 Start a state machine execution from the AWS Step Functions console or with the AWS CLI. [Follow the AWS guide for starting a state machine execution](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html):
 
@@ -694,7 +696,7 @@ Poll until the execution status is **`SUCCEEDED`**.
 
 ---
 
-## Step 10: Verify outputs on S3
+## Step 9: Verify outputs on S3
 
 **Check S3 outputs.** List the output paths from your `conf/aws/catalog.yml`. [Follow the AWS guide for listing objects in an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ListingObjects.html):
 
@@ -715,7 +717,7 @@ If the execution failed, see [Troubleshooting](#troubleshooting).
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `Runtime.InvalidEntrypoint` / `ProcessSpawnFailed` | Container image built for ARM (Apple Silicon) but Lambda runs x86_64 | Rebuild with `docker build --platform linux/amd64` and push again |
-| `Could not find pyproject.toml` in `/var/task` | `bootstrap_project` called inside Lambda | Use `configure_project("<package_name>")` in `lambda_handler.py` as shown in Step 5 |
+| `Could not find pyproject.toml` in `/var/task` | `bootstrap_project` called inside Lambda | Use `configure_project("<package_name>")` in `lambda_handler.py` as shown in Step 4 |
 | `Dataset 'MatplotlibWriter' not found` | Outdated dataset type in `conf/base/catalog.yml` or `conf/aws/catalog.yml` | Use `matplotlib.MatplotlibDataset` in both catalogs (Kedro Datasets 3.x+) |
 | `MemoryDataset` errors between namespace groups | Dataset not listed in `conf/aws/catalog.yml` | Add an S3-backed entry for every dataset shared across Lambda invocations |
 | S3 errors during `kedro run --env aws` locally | Missing AWS CRT support in `botocore` | Run `pip install 'botocore[crt]'` and retry |
@@ -734,7 +736,7 @@ If the execution failed, see [Troubleshooting](#troubleshooting).
 - **Lambda limits:** Each invocation has a [15-minute timeout](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html), a 10 GB memory limit, and a 10 GB container image limit. Namespace grouping runs every node in a namespace in one invocation, so the whole namespace must fit within those limits.
 - **Step Functions timeout:** The state machine has its own timeout, separate from Lambda. The example `deploy.py` sets a 60-minute state machine timeout; increase it if your pipeline needs longer end-to-end runtime.
 - **Not for Spark:** This pattern is for non-distributed Python stages. Run PySpark workloads on [Amazon EMR Serverless](amazon_emr_serverless.md) instead.
-- **Image lifecycle:** When you change `lambda_handler.py`, `conf/aws/`, or rebuild the wheel, push a new image tag and update each Lambda function (see the note in [Step 6](#step-6-build-the-lambda-container-image)).
+- **Image lifecycle:** When you change `lambda_handler.py`, `conf/aws/`, or rebuild the wheel, repeat [Step 6](#step-6-package-build-and-push-the-container-image) and update each Lambda function.
 - **Heavy stages:** If a namespace outgrows Lambda, split it further or run those stages on [AWS Batch](aws_batch.md) or [Amazon EMR Serverless](amazon_emr_serverless.md).
 
 !!! warning "Image size with the full Spaceflights starter"

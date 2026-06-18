@@ -1,8 +1,10 @@
 # Amazon EMR Serverless
 
-[Amazon EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html) runs Apache Spark jobs without you managing clusters. EMR allocates resources per job and releases them when the job finishes. The sections below show how to deploy a **Kedro 1.x** project as a Spark job on EMR Serverless, with datasets stored on Amazon S3.
+[Amazon EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html) runs Apache Spark jobs without you managing clusters. EMR allocates resources per job and releases them when the job finishes. The sections below show how to deploy a Kedro project as a Spark job on EMR Serverless, with datasets stored on Amazon S3.
 
-This guide uses a PySpark Kedro project as a worked example. Read [the deployment strategy](#strategy) first if you are deploying your own Kedro project and need guidance on release choice, pipeline grouping, storage, and custom image settings.
+EMR Serverless suits pipelines with **PySpark or other distributed Spark work**. Single-node stages (pandas, scikit-learn, reporting) may fit better on [AWS Step Functions](aws_step_functions.md) or [AWS Batch](aws_batch.md), or as separate jobs you orchestrate around Spark stages.
+
+This guide targets **Kedro 1.x** (`kedro>=1.0`) and uses a PySpark project as a worked example. Read [the deployment strategy](#strategy) if you are deploying your own project and need guidance on release choice, pipeline grouping, storage, and custom image settings.
 
 ## Strategy
 
@@ -15,7 +17,7 @@ This guide deploys a Kedro pipeline as an EMR Serverless Spark job backed by a c
 The approach in brief:
 
 1. **Package the project** with `kedro package`. You get a wheel and a `conf-<package_name>.tar.gz` archive. The wheel does not include `conf/`.
-2. **Build a custom Docker image** that installs Python >=3.10, your Kedro wheel, and the config archive. EMR base images ship with Python below Kedro's minimum, so a custom image is required for Kedro 1.x.
+2. **Build a custom Docker image** that installs Python >=3.10, your Kedro wheel, and the config archive. EMR base images ship with Python below Kedro's minimum, so a custom image is required.
 3. **Push the image to ECR** and create an EMR Serverless application that references it.
 4. **Submit a Spark job** with an S3-hosted entrypoint script. Pass Kedro CLI flags (`--env`, `--conf-source`, `--pipelines`, `--runner`) as `entryPointArguments`.
 
@@ -46,13 +48,13 @@ EMR Serverless **ignores** `[CMD]` and `[ENTRYPOINT]` in the Dockerfile. The job
 
 #### Why use a custom image?
 
-EMR Serverless supports installing Python and dependencies at job-submit time, but that approach is error-prone and hard to debug. A [custom image for EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html) packages Python, your Kedro wheel, and configuration into one immutable container you can test locally before pushing to [Amazon Elastic Container Registry](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html).
+EMR Serverless supports installing Python and dependencies at job-submit time, but that approach is error-prone and hard to debug. A [custom image for EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html) packages Python, your Kedro wheel, and configuration into one immutable container you can test locally before pushing to [Amazon Elastic Container Registry](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html). On managed EMR clusters, teams typically use [bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html) or [custom AMIs](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html) instead.
 
 For more on why we recommend this over AWS virtual-environment approaches, see [Why not use AWS's virtual-environment approach for Python dependencies?](#why-not-use-awss-virtual-environment-approach-for-python-dependencies).
 
 #### Choose EMR 7.x or 6.x
 
-Use **EMR 7.x** for all new Kedro 1.x deployments. EMR base images ship with Python below Kedro's minimum (>=3.10), so you build a **custom Docker image** that installs Python >=3.10 and your Kedro project.
+Use **EMR 7.x** for all new deployments. EMR base images ship with Python below Kedro's minimum (>=3.10), so you build a **custom Docker image** that installs Python >=3.10 and your Kedro project.
 
 | | **EMR 7.x (recommended)** | **EMR 6.x (legacy)** |
 |--|---------------------------|----------------------|
@@ -113,7 +115,7 @@ These apply to the **step-by-step guide** below. This guide builds and deploys f
 
 | You need | Used for |
 | --- | --- |
-| A **Kedro 1.x** project (`requires-python = ">=3.10"` in `pyproject.toml`) and Python **>=3.10** locally | Packaging the project, local test runs, and matching the Python version in the custom image |
+| A **Kedro project** (`requires-python = ">=3.10"` in `pyproject.toml`) and Python **>=3.10** locally | Packaging the project, local test runs, and matching the Python version in the custom image |
 | [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI) | Building the custom EMR container image |
 | [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region | Creating S3 and ECR resources, uploading data, pushing the image, and submitting jobs |
 | An AWS account with permissions for EMR Serverless, S3, ECR, and IAM | Creating and running the deployed resources |
@@ -124,7 +126,7 @@ The steps that follow deploy a **PySpark Kedro project** end to end. Create the 
 kedro new
 ```
 
-Kedro 1.x requires **Python >=3.10**. This guide uses **Python 3.12** on **EMR 7.13.0**. Install the same Python version locally. If you use your own Kedro project, replace the placeholders below and follow the same steps.
+Kedro requires **Python >=3.10**. This guide uses **Python 3.12** on **EMR 7.13.0**. Install the same Python version locally. If you use your own Kedro project, replace the placeholders below and follow the same steps.
 
 ### Placeholders used in this guide
 
@@ -169,7 +171,7 @@ Create a Kedro project (or use an existing one) with PySpark tooling:
 kedro new
 ```
 
-Kedro 1.x requires **Python >=3.10**. This guide uses **Python 3.12** on **EMR 7.13.0**. Install the same Python version locally.
+This guide uses **Python 3.12** on **EMR 7.13.0**. Install the same Python version locally.
 
 Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in a separate environment in [Step 3](#step-3-configure-kedro-for-emr). For release choice, pipeline grouping, and storage planning, see [Strategy](#strategy).
 
@@ -765,9 +767,9 @@ docker run --rm --user hadoop --entrypoint head <ecr-image-uri> \
 
 ## Frequently asked questions
 
-### Should we use EMR 6.x or 7.x with Kedro 1.x?
+### Should we use EMR 6.x or 7.x?
 
-Use **EMR 7.x** for all new Kedro 1.x deployments. EMR 6.x releases are in [end of support or end of life](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-standard-support.html). See [Choose EMR 7.x or 6.x](#choose-emr-7x-or-6x) and [Legacy: EMR 6.x](#legacy-emr-6x) if you must stay on 6.x.
+Use **EMR 7.x** for all new deployments. EMR 6.x releases are in [end of support or end of life](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-standard-support.html). See [Choose EMR 7.x or 6.x](#choose-emr-7x-or-6x) and [Legacy: EMR 6.x](#legacy-emr-6x) if you must stay on 6.x.
 
 ### How is this different from the Kedro blog post on deploying to Amazon EMR?
 
@@ -822,20 +824,30 @@ Upload this script to S3 and reference it as the Spark `entryPoint`.
 
 ---
 
+## Limitations
+
+- EMR Serverless runs **Spark jobs**. It is not a general-purpose Python batch platform for non-Spark Kedro pipelines.
+- EMR Serverless does **not orchestrate** multi-pipeline dependency order. Submit jobs in dependency order yourself, or use [AWS Step Functions](aws_step_functions.md) or Airflow.
+- Each deployment uses a **custom container image**. After you change code or dependencies, rebuild the image, push to ECR, and restart the application before the next job run.
+- Jobs are subject to [EMR Serverless service quotas and Spark limits](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless-quotas.html) on memory, vCPU, and runtime.
+- **Mixed Spark and pandas** in one job is supported, but Python and dependency versions must stay compatible with the EMR release (see [Legacy: EMR 6.x](#legacy-emr-6x) for EMR 6.x constraints).
+
+---
+
 ## Further reading
 
 ### Kedro
 
-- [Package a Kedro project](../package_a_project.md#package-a-kedro-project)
-- [Run a packaged project](../package_a_project.md#run-a-packaged-project)
-- [Lifecycle management with KedroSession](../../extend/session.md)
+- [Learn how to run Kedro in a distributed environment](../distributed.md)
+- [Learn how to group nodes for deployment](../nodes_grouping.md)
+- [Learn how to package a Kedro project](../package_a_project.md)
+- [Learn how to run a packaged Kedro project](../package_a_project.md#run-a-packaged-project)
+- [Learn how to manage Kedro sessions and lifecycle](../../extend/session.md)
 
 ### AWS
 
-- [EMR Serverless User Guide](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html)
-- [Getting started with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/getting-started.html)
-- [Custom images for EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
-- [Using custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-custom-images.html)
-- [Submitting Spark jobs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark-submit.html)
-- [EMR Serverless 7.13.0 release notes](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/release-version-7130.html)
-- [AWS custom Python version samples (EMR 6.x)](https://github.com/aws-samples/emr-serverless-samples/tree/main/examples/pyspark/custom_python_version)
+- [Read the EMR Serverless user guide](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html)
+- [Learn how to get started with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/getting-started.html)
+- [Learn how to use custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
+- [Learn how to submit Spark jobs to EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark-submit.html)
+- [Read the EMR Serverless 7.13.0 release notes](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/release-version-7130.html)

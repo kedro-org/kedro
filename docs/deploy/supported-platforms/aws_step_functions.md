@@ -2,9 +2,9 @@
 
 [AWS Step Functions](https://aws.amazon.com/step-functions/) orchestrates [AWS Lambda](https://aws.amazon.com/lambda/) functions into a state machine. The sections below show how to deploy a Kedro project so each **pipeline-level namespace** runs as one Lambda function, with datasets stored on Amazon S3.
 
-Step Functions fits Kedro pipelines whose stages are **pandas, scikit-learn, or other lightweight Python** work that fits [Lambda limits](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html). For **PySpark** or **long-running distributed** workloads, use [Amazon EMR Serverless](amazon_emr_serverless.md) or [AWS Batch](aws_batch.md) instead.
+Step Functions fits Kedro pipelines that consist of **pandas, scikit-learn, or other lightweight Python** work that fits [Lambda limits](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html). For **PySpark** or **long-running distributed** workloads, use [Amazon EMR Serverless](amazon_emr_serverless.md) or [AWS Batch](aws_batch.md) instead.
 
-This guide targets Kedro 1.x (`kedro>=1.0`) and uses the Spaceflights starter as a worked example. Read [the deployment strategy](#strategy) first if you are deploying your own Kedro project and need guidance on grouping, storage, and Lambda memory and timeout settings.
+This guide targets Kedro 1.x (`kedro>=1.0`) and uses the [Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/) as a worked example. Read [the deployment strategy](#strategy) first if you are deploying your own Kedro project and need guidance on grouping, storage, and Lambda memory and timeout settings.
 
 ## Strategy
 
@@ -54,7 +54,7 @@ flowchart LR
 
 For Spaceflights starter, this pattern creates **three** Lambda functions (`data_processing`, `data_science`, and `reporting`) instead of one per node.
 
-Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-level namespaces. Node-level namespaces are for Kedro-Viz layout and do not group execution. [Learn how to group nodes with namespaces in Kedro](../../build/namespaces.md#group-nodes-with-namespaces).
+Use **pipeline-level namespaces** (defined on the `Pipeline` object), not node-level namespaces. Node-level namespaces are for Kedro-Viz layout and do not group execution. See the section on [grouping nodes with namespaces in Kedro](../../build/namespaces.md#group-nodes-with-namespaces) for further explanation.
 
 #### Choose how to group nodes
 

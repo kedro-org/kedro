@@ -420,7 +420,7 @@ Now that you have built the image, here is how your Step 3 configuration reaches
 2. **The Dockerfile carries `conf/`.** `COPY conf/` places your `conf/aws_batch/` settings at `/app/conf` inside the container.
 3. **The Batch job command selects the environment.** `AWSBatchRunner` passes `--env aws_batch --conf-source /app/conf --namespaces <name>` (or `--nodes <name>` for nodes without a namespace) through `containerOverrides`.
 
-### Push to ECR.
+### Push the image to Amazon ECR
 
 Follow the AWS guide for [pushing a Docker image to an Amazon ECR repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html):
 

@@ -15,6 +15,7 @@ exceptions:
   - AWS Batch
   - AWS Step Functions
   - AWS Systems Manager
+  - AWS
   - Azure
   - Azure App Service
   - Azure App Service Plan
@@ -22,6 +23,7 @@ exceptions:
   - Azure Event Hub
   - Azure ML
   - CI/CD
+  - CDK
   - CLI
   - DataCatalog
   - Data Catalog
@@ -35,6 +37,7 @@ exceptions:
   - Docker Swarm
   - Dockerfile
   - EMR Serverless
+  - ECR
   - Excel
   - GitHub
   - GitHub Actions
@@ -79,6 +82,7 @@ exceptions:
   - Red Hat
   - Redis
   - SageMaker
+  - S3
   - Slack
   - SSH
   - Spark

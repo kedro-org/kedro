@@ -532,7 +532,9 @@ aws emr-serverless start-job-run \
 | `sparkSubmitParameters` | Tells Spark which Python interpreter to use on driver and executors |
 
 !!! note "Kedro version and `--pipelines`"
-    The `--pipelines` flag (run one or more named pipelines in a single job) requires **Kedro 1.2.0+**. On earlier Kedro versions, use `--pipeline` (singular) for one pipeline, or omit the flag to run `__default__`.
+    The `--pipelines` flag runs one or more named pipelines in a single job. It requires **Kedro 1.2.0+**.
+
+    On Kedro before 1.2.0, use `--pipeline` (singular) to run one pipeline. To run `__default__`, omit both flags.
 
 Read the AWS guide for [viewing EMR Serverless job runs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-monitor.html) for logging and status checks.
 

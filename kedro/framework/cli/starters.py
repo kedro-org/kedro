@@ -186,24 +186,28 @@ def _validate_input_with_regex_pattern(pattern_name: str, input: str) -> None:
         sys.exit(1)
 
 
-def _validate_project_name_is_importable(project_name: str) -> None:
-    """Ensure the Python package derived from the project name does not clash
-    with a Python keyword or a standard library module.
+def _derive_package_name(project_name: str) -> str:
+    """Derive the Python package name from the project name, matching the
+    transformation used in the project template's ``cookiecutter.json``."""
+    return project_name.strip().replace(" ", "_").replace("-", "_").lower()
 
-    ``kedro new`` derives the package name from the project name and uses it to
-    import the generated project (e.g. ``<package>.pipeline_registry``). If the
-    derived name shadows a stdlib module such as ``email`` or ``json``, or is a
-    Python keyword, the generated project cannot be imported and ``kedro run``
-    fails later with a confusing ``ModuleNotFoundError``. Catching it at creation
-    time mirrors how tools like Django and npm validate package names.
+
+def _validate_package_name_is_importable(package_name: str) -> None:
+    """Ensure the project's Python package name does not clash with a Python
+    keyword or a standard library module.
+
+    ``kedro new`` uses this package name to import the generated project
+    (e.g. ``<package>.pipeline_registry``). If it shadows a stdlib module such as
+    ``email`` or ``json``, or is a Python keyword, the generated project cannot be
+    imported and ``kedro run`` fails later with a confusing ``ModuleNotFoundError``.
+    Catching it at creation time mirrors how tools like Django and npm validate
+    package names.
     """
-    package_name = project_name.strip().replace(" ", "_").replace("-", "_").lower()
     if keyword.iskeyword(package_name) or package_name in sys.stdlib_module_names:
         message = (
-            f"'{project_name}' is an invalid value for project name. It would create "
-            f"a Python package named '{package_name}', which clashes with a Python "
-            f"keyword or standard library module and would prevent the project from "
-            f"being imported. Please choose a different name."
+            f"'{package_name}' is an invalid Python package name for the project. "
+            f"It clashes with a Python keyword or standard library module and would "
+            f"prevent the project from being imported. Please choose a different name."
         )
         click.secho(message, fg="red", err=True)
         sys.exit(1)
@@ -400,9 +404,13 @@ def new(  # noqa: PLR0913
         starter_alias=starter_alias,
     )
 
-    _validate_project_name_is_importable(
+    # Validate the package name cookiecutter will actually use: an explicit
+    # ``python_package`` from a config file takes precedence over the name derived
+    # from ``project_name``.
+    package_name = extra_context.get("python_package") or _derive_package_name(
         extra_context.get("project_name", "New Kedro Project")
     )
+    _validate_package_name_is_importable(package_name)
 
     cookiecutter_args, project_template = _make_cookiecutter_args_and_fetch_template(
         config=extra_context,

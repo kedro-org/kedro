@@ -14,7 +14,7 @@ At this stage, you should be able to see the `conda` environment that you have c
 [Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) supports Kedro 0.19+. It helps you navigate your Kedro project by finding dataset definitions, locating references in your code, and more.
 
 !!! note
-    The extension also works in [Cursor](https://cursor.com). Cursor is built on VS Code and supports VS Code extensions, so every feature on this page works there too. Install it from Cursor's Extensions panel, powered by the [Open VSX Registry](https://open-vsx.org/extension/kedro/Kedro)—no Cursor-specific setup required.
+    The extension also works in [Cursor](https://cursor.com). Cursor is built on VS Code and supports VS Code extensions, so every feature on this page works there too. Install it from Cursor's Extensions panel, powered by the [Open VSX Registry](https://open-vsx.org/extension/kedro/Kedro).
 
 ![Kedro VS Code gif](https://github.com/kedro-org/vscode-kedro/blob/main/assets/lsp-go-to-definition.gif?raw=true)
 

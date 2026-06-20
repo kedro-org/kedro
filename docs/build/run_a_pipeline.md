@@ -252,7 +252,7 @@ where `config.yml` is formatted as below (for example):
 ```yaml
 run:
   tags: tag1, tag2, tag3
-  pipeline: pipeline1
+  pipelines: pipeline1
   runner: ParallelRunner
   node_names: node1, node2
   env: env1

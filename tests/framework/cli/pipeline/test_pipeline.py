@@ -43,6 +43,7 @@ def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
 LETTER_ERROR = "It must contain only letters, digits, and/or underscores."
 FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
+DUNDER_ERROR = "is a reserved dunder name and cannot be used as a pipeline name."
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")
@@ -276,6 +277,8 @@ class TestPipelineCreateCommand:
             ("bad%name", LETTER_ERROR),
             ("1bad", FIRST_CHAR_ERROR),
             ("a", TOO_SHORT_ERROR),
+            ("__init__", DUNDER_ERROR),
+            ("__main__", DUNDER_ERROR),
         ],
     )
     def test_bad_pipeline_name(

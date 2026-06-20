@@ -556,6 +556,10 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
         # Prevent imports of hidden directories/files
         if pipeline_name.startswith("."):
             continue
+        # Skip dunder directories — importing e.g. package.pipelines.__init__
+        # resolves to the pipelines package itself, not the subdirectory.
+        if pipeline_name.startswith("__") and pipeline_name.endswith("__"):
+            continue
 
         if requested_pipelines is not None and pipeline_name not in requested_pipelines:
             continue

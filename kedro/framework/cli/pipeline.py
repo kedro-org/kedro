@@ -66,6 +66,12 @@ def _assert_pkg_name_ok(pkg_name: str) -> None:
             base_message + " It must contain only letters, digits, and/or underscores."
         )
         raise KedroCliError(message)
+    if pkg_name.startswith("__") and pkg_name.endswith("__"):
+        message = (
+            base_message
+            + f" '{pkg_name}' is a reserved dunder name and cannot be used as a pipeline name."
+        )
+        raise KedroCliError(message)
 
 
 def _check_pipeline_name(ctx: click.Context, param: Any, value: str) -> str:

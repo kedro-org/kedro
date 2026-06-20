@@ -119,6 +119,38 @@ def test_find_pipelines_skips_hidden_modules(
     [(x, x) for x in [set(), {"my_pipeline"}]],
     indirect=True,
 )
+def test_find_pipelines_skips_dunder_directories(
+    mock_package_name_with_pipelines, pipeline_names
+):
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    for dunder_name in ("__init__", "__main__"):
+        pipeline_dir = pipelines_dir / dunder_name
+        pipeline_dir.mkdir()
+        (pipeline_dir / "__init__.py").write_text(
+            textwrap.dedent(
+                """
+                from __future__ import annotations
+
+                from kedro.pipeline import Pipeline, node, pipeline
+
+
+                def create_pipeline(**kwargs) -> Pipeline:
+                    return pipeline([node(lambda: 1, None, "simple_pipeline")])
+                """
+            )
+        )
+
+    configure_project(mock_package_name_with_pipelines)
+    pipelines = find_pipelines()
+    assert set(pipelines) == pipeline_names | {"__default__"}
+    assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"my_pipeline"}]],
+    indirect=True,
+)
 def test_find_pipelines_skips_modules_with_unexpected_return_value_type(
     mock_package_name_with_pipelines, pipeline_names
 ):

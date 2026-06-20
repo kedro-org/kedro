@@ -211,7 +211,7 @@ Here is an example configuration for dvc.yaml:
 ```yaml
 stages:
   data_processing:
-    cmd: kedro run --pipeline data_processing
+    cmd: kedro run --pipelines data_processing
     deps:
       - data/01_raw/companies.csv
       - data/01_raw/reviews.csv
@@ -222,7 +222,7 @@ stages:
       - data/03_primary/model_input_table.parquet
 
   data_science:
-    cmd: kedro run --pipeline data_science
+    cmd: kedro run --pipelines data_science
     deps:
       - data/03_primary/model_input_table.parquet
     outs:
@@ -248,7 +248,7 @@ You can track changes to your code by adding the relevant files to the `deps` se
 ```yaml
 stages:
   data_processing:
-    cmd: kedro run --pipeline data_processing
+    cmd: kedro run --pipelines data_processing
     deps:
       - data/01_raw/companies.csv
       - data/01_raw/reviews.csv
@@ -277,7 +277,7 @@ To track parameters, you can include them under the `params` section in `dvc.yam
 ```yaml
 stages:
   data_science:
-    cmd: kedro run --pipeline data_science
+    cmd: kedro run --pipelines data_science
     deps:
       - data/03_primary/model_input_table.parquet
       - src/space_dvc/pipelines/data_science/nodes.py

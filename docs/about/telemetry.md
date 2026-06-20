@@ -19,7 +19,7 @@ which is installed as one of Kedro’s dependencies.
 ## Collected data fields
 
 - **Unique User Identifier (UUID):** The UUID is a randomly generated anonymous identifier, stored within an OS-specific configuration folder for Kedro, named `telemetry.toml`. If a UUID does not already exist, the telemetry plugin generates a new one, stores it, and then uses this UUID in following telemetry events.
-- **CLI Command (Masked Arguments):** The command used, with sensitive arguments masked for privacy. Example Input: `kedro run --pipeline=ds --env=test` What we receive: `kedro run --pipeline ***** --env *****`
+- **CLI Command (Masked Arguments):** The command used, with sensitive arguments masked for privacy. Example Input: `kedro run --pipelines=ds --env=test` What we receive: `kedro run --pipelines ***** --env *****`
 - **Project UUID:** The hash of project UUID (randomly generated anonymous project identifier) and the package name. If project UUID does not already exist, the telemetry plugin generates a new one, stores it in `pyproject.toml`, and then joins this project UUID with the package name, hashes the joined result and uses it in following telemetry events.
 - **Kedro Project Version:** The version of Kedro being used.
 - **Kedro-Telemetry Version:** The version of the Kedro-Telemetry plugin.

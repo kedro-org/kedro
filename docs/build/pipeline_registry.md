@@ -25,7 +25,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     }
 ```
 
-As a reminder, [running `kedro run` without the `--pipeline` option runs the default pipeline](./run_a_pipeline.md#run-a-pipeline-by-name).
+As a reminder, [running `kedro run` without the `--pipelines` option runs the default pipeline](./run_a_pipeline.md#run-a-pipeline-by-name).
 
 !!! note
     The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
@@ -73,7 +73,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     return pipelines
 ```
 !!! note
-    In the case above, `kedro run --tags data_engineering` will not run the data engineering pipeline, as it is not part of the default pipeline. To run the data engineering pipeline, you need to specify `kedro run --pipeline data_engineering --tags data_engineering`.
+    In the case above, `kedro run --tags data_engineering` will not run the data engineering pipeline, as it is not part of the default pipeline. To run the data engineering pipeline, you need to specify `kedro run --pipelines data_engineering --tags data_engineering`.
 
 You can also change pipelines *before* assigning `pipelines["__default__"] = sum(pipelines.values())`, which includes them in the default pipeline. For example, you can update the `data_processing` pipeline with the `data_engineering` tag in `pipeline_registry.py` and also include this change in the default pipeline:
 

@@ -187,30 +187,30 @@ To run the pipeline by its name, you need to add your new pipeline to the `regis
 Then, from the command line, execute the following:
 
 ```bash
-kedro run --pipeline=my_pipeline
+kedro run --pipelines=my_pipeline
 ```
 
 !!! note
-    If you specify `kedro run` without the `--pipeline` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
+    If you specify `kedro run` without the `--pipelines` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run).
 
 ## Selective pipeline loading
 
-When you run `kedro run --pipeline <name>`, Kedro imports the pipeline modules required for that run and skips unrelated modules. This speeds up startup time in large projects.
+When you run `kedro run --pipelines <name>`, Kedro imports the pipeline modules required for that run and skips unrelated modules. This speeds up startup time in large projects.
 
 ```bash
-kedro run --pipeline data_science
+kedro run --pipelines data_science
 ```
 
 You can also run multiple named pipelines in a single command:
 
 ```bash
-kedro run --pipeline data_engineering --pipeline data_science
+kedro run --pipelines data_engineering,data_science
 ```
 
-Passing `__default__` (or omitting `--pipeline` entirely) loads all registered pipelines as normal.
+Passing `__default__` (or omitting `--pipelines` entirely) loads all registered pipelines as normal.
 
 !!! note "Limitation"
     Selective loading requires that `register_pipelines()` uses [`find_pipelines()`](../api/framework/kedro.framework.project.md) for discovery. Top-level imports in `pipeline_registry.py` (outside the function body) fire before any filter is applied. Similarly, direct access to the `pipelines` dictionary outside of `session.run()` (for example, during bootstrapping) bypasses the filter.

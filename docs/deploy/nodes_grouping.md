@@ -19,7 +19,7 @@ If you want to group nodes differently from the existing pipeline structure, you
 **How to use**
 
 ```bash
-  # Run a single pipeline
+# Run a single pipeline
 kedro run --pipelines=<pipeline_name>
 
 # Run multiple pipelines in one command

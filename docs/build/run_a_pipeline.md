@@ -190,6 +190,13 @@ Then, from the command line, execute the following:
 kedro run --pipelines=my_pipeline
 ```
 
+To run multiple pipelines in a single command, pass a comma-separated 
+list of pipeline names:
+
+```bash
+kedro run --pipelines=data_processing,data_science
+```
+
 !!! note
     If you specify `kedro run` without the `--pipelines` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 

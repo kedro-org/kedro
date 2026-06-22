@@ -39,6 +39,7 @@ def describe_registered_pipeline(
     pipelines.set_requested([name])
     pipeline_obj = pipelines.get(name)
     if not pipeline_obj:
+        # Reset to None so keys() loads all pipelines for the error message.
         pipelines.set_requested(None)
         all_pipeline_names = pipelines.keys()
         existing_pipelines = ", ".join(sorted(all_pipeline_names))

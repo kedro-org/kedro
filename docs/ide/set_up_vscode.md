@@ -272,7 +272,7 @@ Edit the `launch.json` that opens in the editor with:
             "module": "kedro",
             "args": ["run"]
             // Any other arguments should be passed as a comma-separated-list
-            // e.g "args": ["run", "--pipelines", "pipeline_name"]
+            // e.g "args": ["run", "--pipeline", "pipeline_name"]
         }
     ]
 }

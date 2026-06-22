@@ -56,7 +56,7 @@ To run your packaged project interactively using code, you can import `main` fro
 from <package_name>.__main__ import main
 
 main(
-    ["--pipelines", "__default__"]
+    ["--pipeline", "__default__"]
 )  # or simply main() if you don't want to provide any arguments
 ```
 

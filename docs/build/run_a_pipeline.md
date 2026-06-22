@@ -187,11 +187,11 @@ To run the pipeline by its name, you need to add your new pipeline to the `regis
 Then, from the command line, execute the following:
 
 ```bash
-kedro run --pipelines=my_pipeline
+kedro run --pipeline=my_pipeline
 ```
 
 !!! note
-    If you specify `kedro run` without the `--pipelines` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
+    If you specify `kedro run` without the `--pipeline` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run).

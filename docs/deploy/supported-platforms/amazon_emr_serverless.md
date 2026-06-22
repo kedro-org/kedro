@@ -179,7 +179,7 @@ aws emr-serverless start-job-run \
     --job-driver '{
         "sparkSubmit": {
             "entryPoint": "<s3-path-to-entrypoint-script>",
-            "entryPointArguments": ["--env", "<emr-conf>", "--runner", "ThreadRunner", "--pipelines", "<kedro-pipeline-name>"],
+            "entryPointArguments": ["--env", "<emr-conf>", "--runner", "ThreadRunner", "--pipeline", "<kedro-pipeline-name>"],
             "sparkSubmitParameters": "--conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/usr/.pyenv/versions/3.9.16/bin/python --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/3.9.16/bin/python --conf spark.executorEnv.PYSPARK_PYTHON=/usr/.pyenv/versions/3.9.16/bin/python"
         }
     }'

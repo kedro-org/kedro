@@ -297,6 +297,7 @@ These are common patterns that make docs harder to read. Vale flags most of them
 | "in order to" | Verbose | Replace with "to" |
 | "utilize" | Bureaucratic | Replace with "use" |
 | "leverage" | Jargon | Replace with "use" |
+| "allows" | Incorrect | Replace with "enables" |
 | "via" | Ambiguous | Replace with "with" or "through" |
 | "once" (meaning "after") | Ambiguous | Replace with "after" |
 | Weasel adverbs: "absolutely", "basically", "arguably" | Hedge without adding meaning | Delete |

@@ -23,7 +23,7 @@ Before you begin, make sure the following are installed:
 
 
 ### Step 1. Download the Kedro starter project
-**Navigate to a folder** where you want to download the Kedro project.
+**Navigate to a folder** where you want to download the Kedro starter project.
 <br>
 In **Terminal**, enter the following command. This creates a fully functioning Kedro project from a template without installing Kedro globally.
 ```bash

@@ -137,6 +137,42 @@ class TestNameFromCLI:
             in result.output
         )
 
+    @pytest.mark.parametrize(
+        "name",
+        ["email", "json", "string", "JSON", " email ", "import"],
+    )
+    def test_project_name_clashing_with_stdlib_or_keyword_is_rejected(
+        self, fake_kedro_cli, name
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--name", name],
+            input=_make_cli_prompt_input_without_name(),
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "clashes with a Python keyword or standard library module" in result.output
+        )
+
+    @pytest.mark.parametrize(
+        "name",
+        ["email-service", "my-json-app", "import_data"],
+    )
+    def test_project_name_containing_but_not_equal_to_stdlib_is_allowed(
+        self, fake_kedro_cli, name
+    ):
+        """Names that merely contain a stdlib/keyword substring derive to a valid
+        package name (e.g. 'email-service' -> 'email_service') and must be allowed."""
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--name", name],
+            input=_make_cli_prompt_input_without_name(),
+        )
+
+        assert result.exit_code == 0
+        _assert_name_ok(result, project_name=name)
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestTelemetryCLIFlag:

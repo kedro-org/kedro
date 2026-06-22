@@ -15,11 +15,13 @@ PACKAGE_NAME = "dummy_package"
 PIPELINE_NAME = "my_pipeline"
 
 
-@pytest.fixture(params=["base"])
+@pytest.fixture
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
     tests_path = fake_repo_path / "tests" / "pipelines" / PIPELINE_NAME
-    conf_path = fake_repo_path / settings.CONF_SOURCE / request.param
+    conf_path = (
+        fake_repo_path / settings.CONF_SOURCE / getattr(request, "param", "base")
+    )
     # old conf structure for 'pipeline delete' command backward compatibility
     old_conf_path = conf_path / "parameters"
 
@@ -41,6 +43,7 @@ def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
 LETTER_ERROR = "It must contain only letters, digits, and/or underscores."
 FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
+KEYWORD_ERROR = "is a Python keyword and cannot be used as a package name."
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")
@@ -274,6 +277,10 @@ class TestPipelineCreateCommand:
             ("bad%name", LETTER_ERROR),
             ("1bad", FIRST_CHAR_ERROR),
             ("a", TOO_SHORT_ERROR),
+            ("for", KEYWORD_ERROR),
+            ("if", KEYWORD_ERROR),
+            ("import", KEYWORD_ERROR),
+            ("return", KEYWORD_ERROR),
         ],
     )
     def test_bad_pipeline_name(

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import keyword
 import re
 import shutil
 from pathlib import Path
@@ -64,6 +65,12 @@ def _assert_pkg_name_ok(pkg_name: str) -> None:
     if not re.match(r"^\w+$", pkg_name[1:]):
         message = (
             base_message + " It must contain only letters, digits, and/or underscores."
+        )
+        raise KedroCliError(message)
+    if keyword.iskeyword(pkg_name):
+        message = (
+            base_message
+            + f" '{pkg_name}' is a Python keyword and cannot be used as a package name."
         )
         raise KedroCliError(message)
 

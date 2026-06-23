@@ -36,6 +36,8 @@ exceptions:
   - Docker Compose
   - Docker Swarm
   - Dockerfile
+  - ECR
+  - EMR
   - EMR Serverless
   - ECR
   - Excel

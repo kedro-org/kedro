@@ -221,7 +221,7 @@ You need to add a new dataset in your `catalog.yml` as follows:
 With `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
 
 ### Saving data with generators
-To use generators to save data in chunks, you need do three things:
+To use generators to save data in chunks, you need to do three things:
 - Update the `make_prediction` function definition to use `yield` instead of `return`.
 - Create a [custom dataset](../extend/how_to_create_a_custom_dataset.md) called `ChunkWiseCSVDataset`
 - Update `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.

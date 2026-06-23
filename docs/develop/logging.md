@@ -199,7 +199,7 @@ export COLUMNS=120 LINES=25
 ```
 
 !!! note
-    You must provide a value for both `COLUMNS` and `LINES` even when you want to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINE=25`.
+    You must provide a value for both `COLUMNS` and `LINES` even when you want to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINES=25`.
 
 ## How to enable rich logging in Jupyter
 

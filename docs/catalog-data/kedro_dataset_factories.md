@@ -131,3 +131,7 @@ The `DataCatalog` exposes a small set of pipeline-aware commands that inspect ho
 - `kedro catalog resolve-patterns` — resolves datasets used in a pipeline against all dataset patterns, returning their full catalog configuration.
 
 These commands are implemented by `CatalogCommandsMixin`, which Kedro composes into the catalog automatically when initialising a session. You don't need to do anything to use them through the CLI or in interactive environments like IPython and Jupyter. For programmatic access outside a Kedro session, see [how to access pipeline-aware catalog commands in code](how_to_use_dataset_factories.md#how-to-access-pipeline-aware-catalog-commands-in-code).
+
+## How to override the default dataset creation with dataset factories
+
+This procedural content has moved. See [how to override the default dataset creation with dataset factories](how_to_use_dataset_factories.md#how-to-override-the-default-dataset-creation-with-dataset-factories) on the dataset factories how-to page.

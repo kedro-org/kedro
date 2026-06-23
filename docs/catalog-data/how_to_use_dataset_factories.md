@@ -1,6 +1,6 @@
 # How to use dataset factories
 
-This guide shows how to apply dataset factory patterns to common situations: collapsing similar entries, handling namespaces and layers, combining multiple patterns, overriding the default dataset creation, and using the pipeline-aware catalog commands. For an explanation of what dataset factories are and the rules Kedro uses to match them, see the [concept page](kedro_dataset_factories.md).
+This guide shows how to apply dataset factory patterns to common situations. It covers collapsing similar entries, handling namespaces and layers, combining multiple patterns, overriding the default dataset creation, and using the pipeline-aware catalog commands. For an explanation of what dataset factories are and the rules Kedro uses to match them, see the [concept page](kedro_dataset_factories.md).
 
 ## How dataset factory resolution works in practice
 

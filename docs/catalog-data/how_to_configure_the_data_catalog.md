@@ -1,6 +1,6 @@
 # How to configure the Data Catalog
 
-This guide shows how to configure the most common settings on a Data Catalog entry: load and save arguments, filesystem arguments, credentials, dataset versioning, and how to override entries across configuration environments.
+This guide shows how to configure the most common settings on a Data Catalog entry. It covers load and save arguments, filesystem arguments, credentials, dataset versioning, and how to override entries across configuration environments.
 
 For an explanation of the concepts these settings are based on, see the [Data Catalog introduction](data_catalog.md). For a wider range of YAML recipes (load from S3, GCS, Azure, SQL, and so on), see [Data Catalog YAML examples](data_catalog_yaml_examples.md).
 

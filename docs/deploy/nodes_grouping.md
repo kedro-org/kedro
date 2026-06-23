@@ -115,5 +115,3 @@ This reduces the number of Airflow tasks and keeps logically related nodes toget
 | **What Doesn't Work** | If you want to group nodes differently from the current pipeline structure, instead of creating a new pipeline, you can use alternative grouping methods such as tags or namespaces. | Lack of hierarchical structure, using tags makes debugging and maintaining the codebase more challenging | Defining namespaces at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps create a modular structure by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline. |
 | **Syntax** | `kedro run --pipelines=<your_pipeline_names>` | `kedro run --tags=<your_tag_name>` | `kedro run --namespaces=< namespace1,namespace2 >` |
 | **Deployment Plugin Support** | N/A | N/A | `kedro airflow create --group-by namespace`; [AWS Step Functions](./supported-platforms/aws_step_functions.md) |
-
-

@@ -116,3 +116,4 @@ This reduces the number of Airflow tasks and keeps logically related nodes toget
 | **Syntax** | `kedro run --pipelines=<your_pipeline_names>` | `kedro run --tags=<your_tag_name>` | `kedro run --namespaces=< namespace1,namespace2 >` |
 | **Deployment Plugin Support** | N/A | N/A | `kedro airflow create --group-by namespace`; [AWS Step Functions](./supported-platforms/aws_step_functions.md) |
 
+

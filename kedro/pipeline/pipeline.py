@@ -89,8 +89,12 @@ def _validate_datasets_exist(
     if non_existent:
         sorted_non_existent = sorted(non_existent)
         possible_matches = get_close_matches(sorted_non_existent, existing)
+        verb = "does" if len(sorted_non_existent) == 1 else "do"
 
-        error_msg = f"Failed to map datasets and/or parameters onto the nodes provided: {', '.join(sorted_non_existent)}"
+        error_msg = (
+            "Failed to map datasets and/or parameters onto the nodes provided: "
+            f"{', '.join(sorted_non_existent)} {verb} not exist in the pipeline."
+        )
         suggestions = (
             f" - did you mean one of these instead: {', '.join(possible_matches)}"
             if possible_matches

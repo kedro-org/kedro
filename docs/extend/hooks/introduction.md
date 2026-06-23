@@ -41,7 +41,7 @@ This diagram illustrates the execution order of hooks during `kedro run`:
 
 ### Available arguments per hook
 
-The table below summarises which arguments each Hook specification exposes. You can declare a subset of these in your implementation. Thanks to [the opt-in argument behaviour in pluggy](https://pluggy.readthedocs.io/en/stable/#opt-in-arguments), unused arguments may be omitted from the signature. Kedro will pass only the arguments you declare. Refer to the [API reference for `kedro.framework.hooks.specs`](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) for a detailed description of each argument.
+The table below summarises which arguments each Hook specification exposes. You can declare a subset of these in your implementation. Thanks to [the opt-in argument behaviour in pluggy](https://pluggy.readthedocs.io/en/stable/#opt-in-arguments), unused arguments may be omitted from the signature. Kedro passes the exact arguments you declare. Refer to the [API reference for `kedro.framework.hooks.specs`](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) for a detailed description of each argument.
 
 | Hook                     | Available arguments |
 |--------------------------|---------------------|

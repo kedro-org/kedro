@@ -41,7 +41,7 @@ This diagram illustrates the execution order of hooks during `kedro run`:
 
 ### Available arguments per hook
 
-The table below summarises which arguments each Hook specification exposes. You can declare a subset of these in your implementation: thanks to [pluggy's opt-in argument behaviour](https://pluggy.readthedocs.io/en/stable/#opt-in-arguments), unused arguments may be omitted from the signature and Kedro will only pass what you declare. Refer to the [API reference for `kedro.framework.hooks.specs`](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) for the exact type of each argument and its full docstring.
+The table below summarises which arguments each Hook specification exposes. You can declare a subset of these in your implementation. Thanks to [the opt-in argument behaviour in pluggy](https://pluggy.readthedocs.io/en/stable/#opt-in-arguments), unused arguments may be omitted from the signature. Kedro will pass only the arguments you declare. Refer to the [API reference for `kedro.framework.hooks.specs`](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs) for a detailed description of each argument.
 
 | Hook                     | Available arguments |
 |--------------------------|---------------------|
@@ -58,7 +58,7 @@ The table below summarises which arguments each Hook specification exposes. You 
 | `before_dataset_saved`   | `dataset_name`, `data`, `node` |
 | `after_dataset_saved`    | `dataset_name`, `data`, `node` |
 
-The `run_params` argument carries the same dictionary in `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error`. Its schema is documented inline on each spec, e.g. [`before_pipeline_run`](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs.PipelineSpecs.before_pipeline_run).
+The `run_params` argument carries the same dictionary in `before_pipeline_run`, `after_pipeline_run`, and `on_pipeline_error`. Its schema is documented inline on each spec, for example, [`before_pipeline_run`](../../api/framework/kedro.framework.hooks.md#kedro.framework.hooks.specs.PipelineSpecs.before_pipeline_run).
 
 ### CLI Hooks
 

@@ -288,7 +288,7 @@ conf_loader["catalog"] = {"catalog_config": "something_new"}
 
 ## How to change the merge strategy used by `OmegaConfigLoader`
 
-By default, `OmegaConfigLoader` merges configuration [in different environments](configuration_explanation.md#configuration-environments) as well as runtime parameters in a destructive way. This means that whatever configuration resides in your overriding environment (`local` by default) takes precedence when the same top-level key is present in the base and overriding environment. Any configuration for that key **besides that given in the overriding environment** is discarded.
+By default, `OmegaConfigLoader` merges configuration [in different environments](configuration_basics.md#configuration-environments) as well as runtime parameters in a destructive way. This means that whatever configuration resides in your overriding environment (`local` by default) takes precedence when the same top-level key is present in the base and overriding environment. Any configuration for that key **besides that given in the overriding environment** is discarded.
 The same behaviour applies to runtime parameters overriding any configuration in the `base` environment.
 You can change the merge strategy for each configuration type in your project's `src/<package_name>/settings.py`. The accepted merging strategies are `soft` and `destructive`.
 

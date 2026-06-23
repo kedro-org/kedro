@@ -50,4 +50,4 @@ To do this, add them to `conf/local/credentials.yml` (some examples are included
 * Do not commit notebook output cells (data can sneak into notebooks when you do not delete output cells).
 * Do not commit credentials in `conf/`. Keep the sensitive information in the `conf/local/` folder.
 
-You can find additional information in the [documentation on configuration](../configure/configuration_explanation.md).
+You can find additional information in the [documentation on configuration](../configure/configuration_basics.md).

@@ -187,11 +187,17 @@ To run the pipeline by its name, you need to add your new pipeline to the `regis
 Then, from the command line, execute the following:
 
 ```bash
-kedro run --pipeline=my_pipeline
+kedro run --pipelines=my_pipeline
+```
+
+To run multiple pipelines in a single command, pass a comma-separated list of pipeline names:
+
+```bash
+kedro run --pipelines=data_processing,data_science
 ```
 
 !!! note
-    If you specify `kedro run` without the `--pipeline` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
+    If you specify `kedro run` without the `--pipelines` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run).
@@ -252,7 +258,7 @@ where `config.yml` is formatted as below (for example):
 ```yaml
 run:
   tags: tag1, tag2, tag3
-  pipeline: pipeline1
+  pipelines: pipeline1
   runner: ParallelRunner
   node_names: node1, node2
   env: env1

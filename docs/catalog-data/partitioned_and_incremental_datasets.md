@@ -1,391 +1,109 @@
-# Advanced: Partitioned and incremental datasets
+# Partitioned and incremental datasets
+
+This page explains what `PartitionedDataset` and `IncrementalDataset` are, the model behind partition IDs, credentials, and checkpoints, and when each dataset type is the right choice. For step-by-step recipes covering YAML configuration, lazy saving, checkpoint customisation, and confirmation, see [how to use partitioned and incremental datasets](how_to_use_partitioned_and_incremental_datasets.md).
 
 ## Partitioned datasets
 
-Distributed systems play an increasingly important role in ETL data pipelines. They increase the processing throughput, enabling us to work with much larger volumes of input data. A situation may arise where your Kedro node needs to read the data from a directory full of uniform files of the same type like JSON or CSV. Tools like `PySpark` and the corresponding [SparkDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkDataset/) cater for such use cases but may not always be possible.
+Distributed systems play an increasingly important role in ETL data pipelines. They increase processing throughput and let us work with much larger volumes of input data. A situation may arise where your Kedro node needs to read data from a directory full of uniform files of the same type, such as JSON or CSV. Tools like `PySpark` and the corresponding [SparkDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkDataset/) cater for such use cases but may not always be possible.
 
 This is why Kedro provides [PartitionedDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.PartitionedDataset/) with the following features:
 
-* `PartitionedDataset` can recursively load/save all or specific files from a given location.
-* It is platform agnostic, and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and others.
+* `PartitionedDataset` can recursively load and save all or specific files from a given location.
+* It is platform agnostic and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/), including local, S3, GCS, and others.
 * It implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach, and does not attempt to load any partition data until a processing node explicitly requests it.
 * It supports lazy saving by using `Callable`s.
 
 !!! note
     In this section, each individual file inside a given location is called a partition.
 
-### How to use `PartitionedDataset`
+### `PartitionedDataset` arguments
 
-You can use a `PartitionedDataset` in `catalog.yml` file like any other regular dataset definition:
+Here is the full list of arguments supported by `PartitionedDataset`:
 
-```yaml
-# conf/base/catalog.yml
-
-my_partitioned_dataset:
-  type: partitions.PartitionedDataset
-  path: s3://my-bucket-name/path/to/folder  # path to the location of partitions
-  dataset: pandas.CSVDataset  # shorthand notation for the dataset which will handle individual partitions
-  credentials: my_credentials
-  load_args:
-    load_arg1: value1
-    load_arg2: value2
-```
-
-!!! note
-    Like any other dataset, `PartitionedDataset` can also be instantiated programmatically in Python:
-
-```python
-from kedro_datasets.pandas import CSVDataset
-from kedro_datasets.partitions import PartitionedDataset
-
-my_credentials = {...}  # credentials dictionary
-
-my_partitioned_dataset = PartitionedDataset(
-    path="s3://my-bucket-name/path/to/folder",
-    dataset=CSVDataset,
-    credentials=my_credentials,
-    load_args={"load_arg1": "value1", "load_arg2": "value2"},
-)
-```
-
-If you need more granular configuration of the underlying dataset, provide its definition in full:
-
-```yaml
-# conf/base/catalog.yml
-
-my_partitioned_dataset:
-  type: partitions.PartitionedDataset
-  path: s3://my-bucket-name/path/to/folder
-  dataset:  # full dataset config notation
-    type: pandas.CSVDataset
-    load_args:
-      delimiter: ","
-    save_args:
-      index: false
-  credentials: my_credentials
-  load_args:
-    load_arg1: value1
-    load_arg2: value2
-  filepath_arg: filepath  # the argument of the dataset to pass the filepath to
-  filename_suffix: ".csv"
-```
-
-Here is an exhaustive list of the arguments supported by `PartitionedDataset`:
-
-| Argument          | Required                       | Supported types                                  | Description                                                                                                                                                                                                                                   |
-| ----------------- | ------------------------------ | ------------------------------------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `path`            | Yes                            | `str`                                            | Path to the folder containing partitioned data. If path starts with the protocol (for example, `s3://`) then the corresponding `fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
-| `dataset`         | Yes                            | `str`, `Type[AbstractDataset]`, `Dict[str, Any]` | Underlying dataset definition, for more details see the section below                                                                                                                                                                         |
-| `credentials`     | No                             | `Dict[str, Any]`                                 | Protocol-specific options that will be passed to `fsspec.filesystemcall`, for more details see the section below                                                                                                                              |
-| `load_args`       | No                             | `Dict[str, Any]`                                 | Keyword arguments to be passed into `find()` method of the corresponding filesystem implementation                                                                                                                                            |
-| `filepath_arg`    | No                             | `str` (defaults to `filepath`)                   | Argument name of the underlying dataset initialiser that will contain a path to an individual partition                                                                                                                                       |
-| `filename_suffix` | No                             | `str` (defaults to an empty string)              | If specified, partitions that don't end with this string will be ignored                                                                                                                                                                      |
+| Argument          | Required | Supported types                                  | Description                                                                                                                                                                                                                                   |
+| ----------------- | -------- | ------------------------------------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `path`            | Yes      | `str`                                            | Path to the folder containing partitioned data. If the path starts with a protocol (for example, `s3://`) the corresponding `fsspec` concrete filesystem implementation will be used. If no protocol is specified, the local filesystem will be used. |
+| `dataset`         | Yes      | `str`, `Type[AbstractDataset]`, `Dict[str, Any]` | Underlying dataset definition. For details, see [Dataset definition](#dataset-definition).                                                                                                                                                    |
+| `credentials`     | No       | `Dict[str, Any]`                                 | Protocol-specific options that will be passed to `fsspec.filesystem`. For details, see [Partitioned dataset credentials](#partitioned-dataset-credentials).                                                                                                              |
+| `load_args`       | No       | `Dict[str, Any]`                                 | Keyword arguments to be passed into the `find()` method of the corresponding filesystem implementation.                                                                                                                                       |
+| `filepath_arg`    | No       | `str` (defaults to `filepath`)                   | Argument name of the underlying dataset initialiser that will contain a path to an individual partition.                                                                                                                                       |
+| `filename_suffix` | No       | `str` (defaults to an empty string)              | If specified, partitions that don't end with this string will be ignored.                                                                                                                                                                      |
 
 ### Dataset definition
 
-The dataset definition should be passed into the `dataset` argument of the `PartitionedDataset`. The dataset definition is used to instantiate a new dataset object for each individual partition, and use that dataset object for load and save operations. Dataset definition supports shorthand and full notations.
+The dataset definition is passed into the `dataset` argument of the `PartitionedDataset`. It is used to instantiate a new dataset object for each individual partition, and that dataset object is used for load and save operations. The definition supports a shorthand and a full notation.
 
-#### Shorthand notation
+**Shorthand notation**
 
-Specify the underlying dataset class either as a string (for example, `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [kedro.io.AbstractDataset][].
+Specify the underlying dataset class either as a string (for example, `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of [kedro.io.AbstractDataset][].
 
-#### Full notation
+**Full notation**
 
-Full notation allows you to specify a dictionary with the full underlying dataset definition _except_ the following arguments:
+The full notation allows you to specify a dictionary with the full underlying dataset definition _except_ the following arguments:
 
-* The argument that receives the partition path (`filepath` by default) - if specified, a `UserWarning` will be emitted stating that this value will be overridden by individual partition paths
-* `credentials` key - specifying it will result in a `DatasetError` being raised; dataset credentials should be passed into the `credentials` argument of the `PartitionedDataset` rather than the underlying dataset definition - see the section below on [partitioned dataset credentials](#partitioned-dataset-credentials) for details
-* `versioned` flag - specifying it will result in a `DatasetError` being raised; versioning cannot be enabled for the underlying datasets
+* The argument that receives the partition path (`filepath` by default) — if specified, a `UserWarning` is emitted stating that this value will be overridden by individual partition paths.
+* `credentials` key — specifying it will result in a `DatasetError`. Dataset credentials should be passed into the `credentials` argument of the `PartitionedDataset` rather than the underlying dataset definition. See [Partitioned dataset credentials](#partitioned-dataset-credentials).
+* `versioned` flag — specifying it will result in a `DatasetError`. Versioning cannot be enabled for the underlying datasets.
 
 ### Partitioned dataset credentials
 
 !!! note
-    Support for `dataset_credentials` key in the credentials for `PartitionedDataset` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
+    Support for the `dataset_credentials` key in the credentials for `PartitionedDataset` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 
-Credentials management for `PartitionedDataset` is somewhat special, because it might contain credentials for both `PartitionedDataset` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config (unless such config already has credentials configured), but not the other way around - dataset credentials are never propagated to the filesystem.
+Credentials management for `PartitionedDataset` is somewhat special, because it may contain credentials for both `PartitionedDataset` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config (unless that config already has credentials configured), but not the other way around — dataset credentials are never propagated to the filesystem.
 
-Here is the full list of possible scenarios:
+For a worked breakdown of every combination of top-level and underlying-dataset credentials, see [how partitioned dataset credentials interact](how_to_use_partitioned_and_incremental_datasets.md#how-partitioned-dataset-credentials-interact).
 
-| Top-level credentials | Underlying dataset credentials | Example `PartitionedDataset` definition                                                                                                                                    | Description                                                                                                                                                                                     |
-| --------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Undefined             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas.CSVDataset")`                                                                                  | Credentials are not passed to the underlying dataset or the filesystem                                                                                                                          |
-| Undefined             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": {"secret": True}})`                                       | Underlying dataset credentials are passed to the `CSVDataset` constructor, filesystem is instantiated without credentials                                                                       |
-| Specified             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas.CSVDataset", credentials={"secret": True})`                                                    | Top-level credentials are passed to the underlying `CSVDataset` constructor and the filesystem                                                                                                  |
-| Specified             | `None`                         | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": None}, credentials={"dataset_secret": True})`             | Top-level credentials are passed to the filesystem, `CSVDataset` is instantiated without credentials - this way you can stop the top-level credentials from propagating into the dataset config |
-| Specified             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": {"dataset_secret": True}}, credentials={"secret": True})` | Top-level credentials are passed to the filesystem, underlying dataset credentials are passed to the `CSVDataset` constructor                                                                   |
+### How partitions are identified
 
-### Partitioned dataset load
+On load, `PartitionedDataset` _does not_ automatically load the data from the located partitions. Instead, it returns a dictionary with partition IDs as keys and the corresponding load functions as values. This design lets the consuming node decide which partitions to load and how to process the data.
 
-Let's assume that the Kedro pipeline that you are working with contains the node, defined as follows:
+A partition ID _does not_ represent the whole partition path, but only the part of it that is unique to a given partition (and filename suffix):
 
-```python
-from kedro.pipeline import Node
+* Example 1: if `path=s3://my-bucket-name/folder` and a partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, its partition ID is `2019-12-04/data.csv`.
+* Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and a partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, its partition ID is `2019-12-04/data`.
 
-Node(concat_partitions, inputs="my_partitioned_dataset", outputs="concatenated_result")
-```
+`PartitionedDataset` caches the load operation, which means that if multiple nodes consume the same `PartitionedDataset`, they all receive the same partition dictionary even if some new partitions were added to the folder after the first load completed. This behaviour guarantees consistent load operations between nodes and avoids race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
 
-The underlying node function `concat_partitions` might look like this:
+### Lazy saving
 
-```python
-from typing import Any, Callable, Dict
-import pandas as pd
+`PartitionedDataset` also supports lazy saving, where a partition's data is not materialised until it is time to write. Lazy saving is enabled by default: when a node returns a `Callable` value for a partition, the dataset is written _after_ the [`after_node_run` hook](../extend/hooks/introduction.md) finishes.
 
-
-def concat_partitions(partitioned_input: Dict[str, Callable[[], Any]]) -> pd.DataFrame:
-    """Concatenate input partitions into one pandas DataFrame.
-
-    Args:
-        partitioned_input: A dictionary with partition ids as keys and load functions as values.
-
-    Returns:
-        Pandas DataFrame representing a concatenation of all loaded partitions.
-    """
-    result = pd.DataFrame()
-
-    for partition_key, partition_load_func in sorted(partitioned_input.items()):
-        partition_data = partition_load_func()  # load the actual partition data
-        # concat with existing result
-        result = pd.concat([result, partition_data], ignore_index=True, sort=True)
-
-    return result
-```
-
-As you can see from the above example, on load `PartitionedDataset` _does not_ automatically load the data from the located partitions. Instead, `PartitionedDataset` returns a dictionary with partition IDs as keys and the corresponding load functions as values. This design lets the consuming node decide which partitions to load and how to process the data.
-
-Partition ID _does not_ represent the whole partition path, but only a part of it that is unique for a given partition _and_ filename suffix:
-
-* Example 1: if `path=s3://my-bucket-name/folder` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, then its Partition ID is `2019-12-04/data.csv`.
-
-
-* Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, then its Partition ID is `2019-12-04/data`.
-
-`PartitionedDataset` caches the load operation, which means that if multiple nodes consume the same `PartitionedDataset`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This behaviour guarantees consistent load operations between nodes and avoids race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
-
-### Partitioned dataset save
-
-`PartitionedDataset` also supports a save operation. Let's assume the following configuration:
-
-```yaml
-# conf/base/catalog.yml
-
-new_partitioned_dataset:
-  type: partitions.PartitionedDataset
-  path: s3://my-bucket-name
-  dataset: pandas.CSVDataset
-  filename_suffix: ".csv"
-  save_lazily: True
-```
-
-Here is the node definition:
-
-```python
-from kedro.pipeline import Node
-
-Node(create_partitions, inputs=None, outputs="new_partitioned_dataset")
-```
-
-The underlying node function is as follows in `create_partitions`:
-
-```python
-from typing import Any, Dict
-import pandas as pd
-
-
-def create_partitions() -> Dict[str, Any]:
-    """Create new partitions and save using PartitionedDataset.
-
-    Returns:
-        Dictionary with the partitions to create.
-    """
-    return {
-        # create a file "s3://my-bucket-name/part/foo.csv"
-        "part/foo": pd.DataFrame({"data": [1, 2]}),
-        # create a file "s3://my-bucket-name/part/bar.csv.csv"
-        "part/bar.csv": pd.DataFrame({"data": [3, 4]}),
-    }
-```
-
-!!! note
-    Writing to an existing partition may result in its data being overwritten if the underlying dataset implementation does not handle this case. Add checks to ensure that no existing data is lost when writing to a `PartitionedDataset`. The simplest safety mechanism could be to use partition IDs with a high chance of uniqueness, such as the current timestamp.
-
-### Partitioned dataset lazy saving
-`PartitionedDataset` also supports lazy saving, where the partition's data is not materialised until it is time to write.
-
-To use this, return `Callable` types in the dictionary like this:
-
-```python
-from typing import Any, Dict, Callable
-import pandas as pd
-
-
-def create_partitions() -> Dict[str, Callable[[], Any]]:
-    """Create new partitions and save using PartitionedDataset.
-
-    Returns:
-        Dictionary of the partitions to create to a function that creates them.
-    """
-    return {
-        # create a file "s3://my-bucket-name/part/foo.csv"
-        "part/foo": lambda: pd.DataFrame({"data": [1, 2]}),
-        # create a file "s3://my-bucket-name/part/bar.csv"
-        "part/bar": lambda: pd.DataFrame({"data": [3, 4]}),
-    }
-```
-
-!!! note
-    When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../extend/hooks/introduction.md).
-
-!!! note
-    Lazy saving is enabled by default. When a `Callable` type is provided, the dataset is written _after_ the `after_node_run` hook finishes.
-
-In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (for example, a TensorFlow model) and you prefer to write the data straight away.
-To disable lazy saving, set the `save_lazily` parameter to `False`:
-
-```yaml
-# conf/base/catalog.yml
-
-new_partitioned_dataset:
-  type: partitions.PartitionedDataset
-  path: s3://my-bucket-name
-  dataset: pandas.CSVDataset
-  filename_suffix: ".csv"
-  save_lazily: False
-```
-
-!!! note
-    If creating lambdas in a list/dictionary comprehension or a for loop, be cautious when referencing variables defined outside the scope of the lambdas. See the [Python Programming FAQ](https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result) for an explanation of how this can result in unexpected values being returned from the lambdas.
+In certain cases, it might be useful to disable lazy saving — for example, when your object is already a `Callable` (such as a TensorFlow model) and you prefer to write the data straight away. See [how to control lazy saving](how_to_use_partitioned_and_incremental_datasets.md#how-to-control-lazy-saving) for the configuration.
 
 ## Incremental datasets
 
-[IncrementalDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.IncrementalDataset/) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, that is, each following pipeline run should process the partitions which were not processed by the previous runs.
+[IncrementalDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.IncrementalDataset/) is a subclass of `PartitionedDataset` that stores information about the last processed partition in a `checkpoint`. `IncrementalDataset` addresses the use case where partitions have to be processed incrementally — that is, each following pipeline run should process only the partitions that were not processed by previous runs.
 
-This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataset` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
+This checkpoint, by default, is persisted to the location of the data partitions. For example, for an `IncrementalDataset` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint is saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless the checkpoint configuration is explicitly overridden.
 
-The checkpoint file is created _after_ [the partitioned dataset is explicitly confirmed](#incremental-dataset-confirm).
+The checkpoint file is created _after_ the partitioned dataset is explicitly confirmed.
 
-### Incremental dataset loads
+### How incremental loads differ from partitioned loads
 
-Loading `IncrementalDataset` works similarly to [`PartitionedDataset`](#partitioned-dataset-load) with several exceptions:
-1. `IncrementalDataset` loads the data _eagerly_, so the values in the returned dictionary represent the actual data stored in the corresponding partition, rather than a pointer to the load function. `IncrementalDataset` considers a partition relevant for processing if its ID satisfies the comparison function, given the checkpoint value.
-2. `IncrementalDataset` _does not_ raise a `DatasetError` if load finds no partitions to return - an empty dictionary is returned instead. An empty list of available partitions is part of a normal workflow for `IncrementalDataset`.
+Loading `IncrementalDataset` works similarly to `PartitionedDataset` with several exceptions:
 
-### Incremental dataset save
+1. `IncrementalDataset` loads data _eagerly_, so the values in the returned dictionary represent the actual data stored in the corresponding partition rather than a pointer to a load function. `IncrementalDataset` considers a partition relevant for processing if its ID satisfies the comparison function, given the checkpoint value.
+2. `IncrementalDataset` _does not_ raise a `DatasetError` if load finds no partitions — an empty dictionary is returned instead. An empty list of available partitions is part of a normal workflow for `IncrementalDataset`.
 
-The `IncrementalDataset` save operation is identical to the [save operation of the `PartitionedDataset`](#partitioned-dataset-save).
+The save operation is identical to that of `PartitionedDataset`.
 
-### Incremental dataset confirm
+### The confirmation step
 
-!!! note
-    The checkpoint value *is not* automatically updated when a new set of partitions is successfully loaded or saved.
+The checkpoint value *is not* automatically updated when a new set of partitions is successfully loaded or saved. Checkpoint update is triggered by an explicit `confirms` instruction on one of the downstream nodes. This separation lets you defer confirmation until after additional validation has succeeded.
 
-Partitioned dataset checkpoint update is triggered by an explicit `confirms` instruction in one of the nodes downstream. It can be the same node, which processes the partitioned dataset:
-
-```python
-from kedro.pipeline import Node
-
-# process and then confirm `IncrementalDataset` within the same node
-Node(
-    process_partitions,
-    inputs="my_partitioned_dataset",
-    outputs="my_processed_dataset",
-    confirms="my_partitioned_dataset",
-)
-```
-
-You can defer confirmation to a downstream node to run additional validation before treating the loaded partitions as processed:
-
-```python
-from kedro.pipeline import Node, Pipeline
-
-Pipeline(
-    [
-        Node(
-            func=process_partitions,
-            inputs="my_partitioned_dataset",
-            outputs="my_processed_dataset",
-        ),
-        # do something else
-        Node(
-            func=confirm_partitions,
-            # note that the node may not require 'my_partitioned_dataset' as an input
-            inputs="my_processed_dataset",
-            outputs=None,
-            confirms="my_partitioned_dataset",
-        ),
-        # ...
-        Node(
-            func=do_something_else_with_partitions,
-            # will return the same partitions even though they were already confirmed
-            inputs=["my_partitioned_dataset", "my_processed_dataset"],
-            outputs=None,
-        ),
-    ]
-)
-```
+For worked examples covering same-node and deferred confirmation, see [how to confirm incremental datasets](how_to_use_partitioned_and_incremental_datasets.md#how-to-confirm-incremental-datasets).
 
 Important notes about the confirmation operation:
 
-* Confirming a partitioned dataset does not affect any following loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the `release()` method is called on the dataset object.
+* Confirming a partitioned dataset does not affect any following loads within the same run. All downstream nodes that take the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will not affect subsequent loads and won't appear in the list of loaded partitions until the next run, or until `release()` is called on the dataset object.
 * A pipeline cannot contain more than one node confirming the same dataset.
-
 
 ### Checkpoint configuration
 
-`IncrementalDataset` does not require explicit configuration of the checkpoint unless there is a need to deviate from the defaults. To update the checkpoint configuration, add a `checkpoint` key containing the valid dataset configuration. This may be required if, say, the pipeline has read access to the location of partitions without write permissions (or write operations are undesirable for any other reason). In such cases, `IncrementalDataset` can be configured to save the checkpoint elsewhere. The `checkpoint` key also supports partial config updates where a subset of checkpoint attributes is overwritten while the defaults are kept for the rest:
+`IncrementalDataset` does not require explicit configuration of the checkpoint unless you need to deviate from the defaults. The `checkpoint` configuration accepts standard dataset attributes (used when the pipeline has read access to the location of partitions but no write access, for example) plus two special optional keys:
 
-```yaml
-my_partitioned_dataset:
-  type: partitions.IncrementalDataset
-  path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
-  checkpoint:
-    # update the filepath and load_args, but keep the dataset type unchanged
-    filepath: gcs://other-bucket/CHECKPOINT
-    load_args:
-      k1: v1
-```
+* `comparison_func` — a fully qualified import path to the function that compares a partition ID with the checkpoint value, used to determine whether a partition should be processed. Functions must accept two positional string arguments (partition ID and checkpoint value) and return `True` if the partition is considered to be past the checkpoint. The default is `operator.gt`. Customising `comparison_func` is useful when you need a different filtration mechanism (for example, windowed loading of the last calendar month).
+* `force_checkpoint` — if set, the partitioned dataset uses this value as the checkpoint instead of loading the corresponding checkpoint file. This is useful when you need to roll back the processing steps and reprocess some (or all) of the available partitions.
 
-### Special checkpoint config keys
-
-Along with the standard dataset attributes, `checkpoint` config also accepts two special optional keys:
-* `comparison_func` (defaults to `operator.gt`) - a fully qualified import path to the function that will be used to compare a partition ID with the checkpoint value, to determine whether a partition should be processed. Such functions must accept two positional string arguments - partition ID and checkpoint value - and return `True` if such partition is considered to be past the checkpoint. It might be useful to specify your own `comparison_func` if you need to customise the checkpoint filtration mechanism - for example, you might want to introduce windowed loading, where you always load the partitions representing the last calendar month. See the example config specifying a custom comparison function:
-
-```yaml
-my_partitioned_dataset:
-  type: partitions.IncrementalDataset
-  path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
-  checkpoint:
-    comparison_func: my_module.path.to.custom_comparison_function  # the path must be importable
-```
-
-* `force_checkpoint` - if set, the partitioned dataset will use this value as the checkpoint instead of loading the corresponding checkpoint file. This might be useful if you need to roll back the processing steps and reprocess some (or all) of the available partitions. See the example config forcing the checkpoint value:
-
-```yaml
-my_partitioned_dataset:
-  type: partitions.IncrementalDataset
-  path: s3://my-bucket-name/path/to/folder
-  dataset: pandas.CSVDataset
-  checkpoint:
-    force_checkpoint: 2020-01-01/data.csv
-```
-
-!!! note
-    Specification of `force_checkpoint` is also supported through the shorthand notation, as follows:
-    ```yaml
-    my_partitioned_dataset:
-    type: partitions.IncrementalDataset
-    path: s3://my-bucket-name/path/to/folder
-    dataset: pandas.CSVDataset
-    checkpoint: 2020-01-01/data.csv
-    ```
-
-!!! note
-    If you need to force the partitioned dataset to load all available partitions, set `checkpoint` to an empty string:
-    ```yaml
-    my_partitioned_dataset:
-    type: partitions.IncrementalDataset
-    path: s3://my-bucket-name/path/to/folder
-    dataset: pandas.CSVDataset
-    checkpoint: ""
-    ```
+For YAML examples of each, see [how to configure incremental dataset checkpoints](how_to_use_partitioned_and_incremental_datasets.md#how-to-configure-incremental-dataset-checkpoints).

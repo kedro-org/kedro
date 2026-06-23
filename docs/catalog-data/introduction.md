@@ -5,30 +5,28 @@ In a Kedro project, the Data Catalog is a registry of all data sources available
 
 The [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/) package offers built-in datasets for common file types and file systems.
 
-## Introduction to the Data Catalog
+## Concepts
 
-We first introduce the basic sections of `catalog.yml`, which is the file used to register data sources for a Kedro project.
+These pages explain how the Data Catalog works and the model behind each feature:
 
-- [Introduction to the Data Catalog](data_catalog.md)
+- [Data Catalog](data_catalog.md) — what the catalog is and how it organises data.
+- [Dataset factories](kedro_dataset_factories.md) — generalising catalog entries with patterns.
+- [Partitioned and incremental datasets](partitioned_and_incremental_datasets.md) — working with data split across many files.
+- [Lazy loading](lazy_loading.md) — how Kedro defers dataset instantiation until access.
 
-## Examples of data catalog YAML
+## How-to guides
 
-The following page offers a range of examples of YAML specification for various Data Catalog use cases:
+These pages give step-by-step procedures for common catalog tasks:
 
-- [Data Catalog YAML Examples](data_catalog_yaml_examples.md)
+- [How to configure the Data Catalog](how_to_configure_the_data_catalog.md) — load and save arguments, credentials, versioning, environments.
+- [How to use dataset factories](how_to_use_dataset_factories.md) — applying factory patterns to your catalog.
+- [How to use partitioned and incremental datasets](how_to_use_partitioned_and_incremental_datasets.md) — YAML and Python recipes.
+- [How to access the Data Catalog in code](how_to_access_the_data_catalog_in_code.md) — programmatic catalog usage.
 
-Once you are familiar with the format of `catalog.yml`, you may find your catalog gets repetitive if you need to load multiple datasets with similar configuration. From Kedro 0.18.12 you can use dataset factories to generalise the configuration and reduce the number of similar catalog entries. This works by matching datasets used in your project’s pipelines to dataset factory patterns and is explained in a new page about Kedro dataset factories:
+## Examples
 
-- [Kedro Dataset Factories](kedro_dataset_factories.md)
+- [Data Catalog YAML examples](data_catalog_yaml_examples.md) — a wide range of `catalog.yml` recipes.
 
+## Related
 
-## Advanced concepts
-Further pages describe more advanced concepts:
-
-- [Advanced: Access the Data Catalog in code](advanced_data_catalog_usage.md)
-- [Advanced: Lazy loading](lazy_loading.md)
-- [Advanced: Partitioned and incremental datasets](partitioned_and_incremental_datasets.md)
-
-This section on handing data with Kedro concludes with an advanced use case, illustrated with a tutorial that explains how to create your own custom dataset:
-
-- [Advanced: Tutorial to create a custom dataset](../extend/how_to_create_a_custom_dataset.md)
+For an advanced tutorial that explains how to create your own custom dataset, see [Tutorial to create a custom dataset](../extend/how_to_create_a_custom_dataset.md).

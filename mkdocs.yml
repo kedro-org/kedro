@@ -136,12 +136,15 @@ plugins:
 
         Data Management:
           - catalog-data/introduction.md: Introduction to the Data Catalog
-          - catalog-data/data_catalog.md: Complete guide to Kedro Data Catalog
-          - catalog-data/data_catalog_yaml_examples.md: YAML configuration examples
-          - catalog-data/kedro_dataset_factories.md: Using dataset factories for dynamic catalogs
-          - catalog-data/partitioned_and_incremental_datasets.md: Working with partitioned and incremental data
-          - catalog-data/advanced_data_catalog_usage.md: Programmatic catalog usage
+          - catalog-data/data_catalog.md: Data Catalog concepts and structure
+          - catalog-data/kedro_dataset_factories.md: How dataset factories generalise catalog entries
+          - catalog-data/partitioned_and_incremental_datasets.md: Partitioned and incremental dataset concepts
           - catalog-data/lazy_loading.md: Lazy loading for performance optimization
+          - catalog-data/how_to_configure_the_data_catalog.md: How to configure load/save arguments, credentials, versioning, and environments
+          - catalog-data/how_to_use_dataset_factories.md: How to apply dataset factory patterns
+          - catalog-data/how_to_use_partitioned_and_incremental_datasets.md: How to configure and use partitioned and incremental datasets
+          - catalog-data/how_to_access_the_data_catalog_in_code.md: How to use the DataCatalog programmatically
+          - catalog-data/data_catalog_yaml_examples.md: YAML configuration examples
 
         Building Pipelines:
           - build/nodes.md: Creating and using nodes - the building blocks of pipelines
@@ -342,12 +345,18 @@ nav:
               - Config loader migration: configure/config_loader_migration.md
       - Catalog Data:
           - Introduction: catalog-data/introduction.md
-          - Kedro data catalog: catalog-data/data_catalog.md
-          - Data Catalog YAML examples: catalog-data/data_catalog_yaml_examples.md
-          - Dataset factories: catalog-data/kedro_dataset_factories.md
-          - Partitioned and incremental datasets: catalog-data/partitioned_and_incremental_datasets.md
-          - Programmatic usage: catalog-data/advanced_data_catalog_usage.md
-          - Lazy loading: catalog-data/lazy_loading.md
+          - Concepts:
+              - Data Catalog: catalog-data/data_catalog.md
+              - Dataset factories: catalog-data/kedro_dataset_factories.md
+              - Partitioned and incremental datasets: catalog-data/partitioned_and_incremental_datasets.md
+              - Lazy loading: catalog-data/lazy_loading.md
+          - How-to Guides:
+              - Configure the Data Catalog: catalog-data/how_to_configure_the_data_catalog.md
+              - Use dataset factories: catalog-data/how_to_use_dataset_factories.md
+              - Use partitioned and incremental datasets: catalog-data/how_to_use_partitioned_and_incremental_datasets.md
+              - Access the Data Catalog in code: catalog-data/how_to_access_the_data_catalog_in_code.md
+          - Examples:
+              - Data Catalog YAML examples: catalog-data/data_catalog_yaml_examples.md
       - Build:
           - Nodes: build/nodes.md
           - Pipeline object: build/pipeline_introduction.md

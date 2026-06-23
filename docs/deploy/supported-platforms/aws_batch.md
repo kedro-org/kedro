@@ -564,22 +564,23 @@ Kedro's built-in `kedro run` passes `is_async` to the runner constructor and not
 Add `src/<PACKAGE_NAME>/cli.py` using [the project CLI template](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands). Override the `run` command so the runner is constructed with Batch parameters from the active Kedro session:
 
 ```python
-def _instantiate_runner(runner: str, is_async: bool, params: dict[str, Any]):
+def _instantiate_runner(runner: str | None, is_async: bool, params: dict[str, Any]):
     runner_class = load_obj(runner or "SequentialRunner", "kedro.runner")
     runner_kwargs: dict[str, Any] = {"is_async": is_async}
-    if runner.endswith("AWSBatchRunner"):
+    if runner and runner.endswith("AWSBatchRunner"):
         batch_kwargs = params.get("aws_batch") or {}
         runner_kwargs.update(batch_kwargs)
     return runner_class(**runner_kwargs)
 ```
 
-Inside `run()`, create the session, build the runner from `session.params`, and pass it to `session.run()`:
+Inside `run()`, create the session, load the context, build the runner from `context.params`, and pass it to `session.run()`. When `runner` is omitted (for example inside a Batch container job), Kedro defaults to `SequentialRunner` and does not pass Batch driver settings to the constructor:
 
 ```python
 with KedroSession.create(
     env=env, conf_source=conf_source, runtime_params=params
 ) as session:
-    runner_instance = _instantiate_runner(runner, is_async, dict(session.params))
+    context = session.load_context()
+    runner_instance = _instantiate_runner(runner, is_async, dict(context.params))
     return session.run(
         runner=runner_instance,
         # ... other run arguments ...

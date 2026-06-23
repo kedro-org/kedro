@@ -56,14 +56,14 @@ Specify the **Run / Debug Configuration** name in the **Name** field, and edit t
 - Enter ``kedro`` in the **Module Name** field
 - Enter ``run`` in the **Parameters** field
 - Enter the path of your project directory into the **Working directory** field
-- Pick ``Emulate terminal in output console`` from the **Modify options** dropdown, and then click **OK**
+- Pick ``Emulate terminal in output console`` from the `Modify options` dropdown, and then click **OK**
 
 ![](../meta/images/pycharm_edit_py_run_config.png)
 
 !!! note
     **Emulate terminal in output console** enables PyCharm to show [rich terminal output](../develop/logging.md).
 
-To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar (if that toolbar is not visible, you can enable it by going to **View > Toolbar**). Click the green triangle:
+To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar. If that toolbar is not visible, enable it by going to **View > Toolbar**. Click the green triangle:
 
 ![](../meta/images/pycharm_conf_run_button.png)
 
@@ -156,7 +156,7 @@ With this configuration, when you create a Python Console you should be able to 
 
 ## Configuring the Kedro catalog validation schema
 
-You can enable the Kedro catalog validation schema in your PyCharm IDE to enable real-time validation, autocompletion, and see documentation about the different fields in your `catalog` as you write it. To enable this, open a `catalog.yml` file and you should see "No JSON Schema" in the bottom right corner of your window. Click it and select "Edit Schema Mapping".
+You can enable the Kedro catalog validation schema in your PyCharm IDE for real-time validation, autocompletion, and documentation about the different fields in your `catalog` as you write it. To enable this, open a `catalog.yml` file and you should see "No JSON Schema" in the bottom right corner of your window. Click it and select "Edit Schema Mapping".
 
 ![](../meta/images/pycharm_edit_schema_mapping.png)
 

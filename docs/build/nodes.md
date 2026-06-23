@@ -91,9 +91,9 @@ Any combinations of the above are possible, except nodes of the form `Node(f, No
 ## `*args` node functions
 It is common to have functions that take an arbitrary number of inputs, like a function that combines multiple dataframes. You can use the `*args` argument in the node function, while declaring the names of the datasets in the node's inputs.
 
-## `**kwargs`-only node functions
+## `**kwargs` node functions
 
-Sometimes, when creating reporting nodes for instance, you need to know the names of the datasets that your node receives, but you might not have this information in advance. This can be solved by defining a `**kwargs`-only function:
+Sometimes, when creating reporting nodes for instance, you need to know the names of the datasets that your node receives, but you might not have this information in advance. This can be solved by defining a function that takes `**kwargs`:
 
 ```python
 def reporting(**kwargs):
@@ -168,7 +168,7 @@ kedro run --tags=pipeline_tag
 This runs the nodes found within the pipeline tagged with `pipeline_tag`.
 
 !!! note
-    Node or tag names must ONLY contain letters, digits, hyphens, underscores, and periods. Other symbols are not permitted.
+    Node or tag names must contain letters, digits, hyphens, underscores, and periods. Other symbols are not permitted.
 
 
 ## How to run a node
@@ -221,7 +221,7 @@ You need to add a new dataset in your `catalog.yml` as follows:
 With `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
 
 ### Saving data with generators
-To use generators to save data lazily, you need do three things:
+To use generators to save data in chunks, you need do three things:
 - Update the `make_prediction` function definition to use `yield` instead of `return`.
 - Create a [custom dataset](../extend/how_to_create_a_custom_dataset.md) called `ChunkWiseCSVDataset`
 - Update `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.
@@ -331,7 +331,7 @@ After that, you need to update the `catalog.yml` to use this new dataset.
 +  filepath: data/07_model_output/y_pred.csv
 ```
 
-With these changes, when you run `kedro run` in your terminal, you should see `y_pred` being saved multiple times in the logs as the generator lazily processes and saves the data in smaller chunks.
+With these changes, when you run `kedro run` in your terminal, you should see `y_pred` being saved multiple times in the logs as the generator processes and saves the data in smaller chunks.
 
 ```
 ...

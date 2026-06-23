@@ -6,7 +6,7 @@ You can load multiple datasets with similar configuration using dataset factorie
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
 
-The dataset factories introduce a syntax that allows you to generalise your configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
+Dataset factories introduce a syntax that lets you generalise your configuration and reduce the number of similar catalog entries. They match datasets used in your project's pipelines to dataset factory patterns.
 
 For example:
 ```yaml
@@ -109,7 +109,7 @@ Internal fallback behaviour provided by Kedro. These patterns are built into the
 
 By default, runtime patterns are not used when calling `catalog.get()` unless explicitly enabled using the `fallback_to_runtime_pattern=True` flag.
 
-**Case 1: Dataset pattern only**
+**Case 1: Single dataset pattern**
 
 ```yaml
 "{dataset_name}#csv":

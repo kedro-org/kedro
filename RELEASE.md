@@ -45,8 +45,10 @@ NOTE: This session implementation is under active development and may occasional
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.
 * Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
+* Added a per-hook argument summary table and an explicit link to the `kedro.framework.hooks.specs` API reference on the Hooks introduction page, with a note about pluggy's opt-in argument behaviour.
 * Added security model documentation covering trust boundaries, user responsibilities, and framework vulnerabilities.
 * Updated `advanced_configuration.md` with custom loader info.
+
 
 ## Community contributions
 * [BhavayChopra](https://github.com/BhavayChopra)

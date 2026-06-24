@@ -25,7 +25,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     }
 ```
 
-As a reminder, [running `kedro run` without the `--pipeline` option runs the default pipeline](./run_a_pipeline.md#run-a-pipeline-by-name).
+As a reminder, [running `kedro run` without the `--pipelines` option runs the default pipeline](./run_a_pipeline.md#run-a-pipeline-by-name).
 
 !!! note
     The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.

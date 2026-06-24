@@ -53,7 +53,7 @@ To run the pipeline, ensure all required input datasets exist; otherwise you may
 
 
 ```bash
-kedro run --pipeline=data_science
+kedro run --pipelines=data_science
 
 2019-10-04 12:36:12,158 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataset)...
 2019-10-04 12:36:12,158 - kedro.runner.sequential_runner - WARNING - There are 3 nodes that have not run.

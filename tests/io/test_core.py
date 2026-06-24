@@ -67,6 +67,11 @@ class MyDataset(AbstractDataset):
             file.write(data)
 
 
+class IncompleteDataset(AbstractDataset):
+    def load(self):
+        return None
+
+
 class MyVersionedDataset(AbstractVersionedDataset[str, str]):
     def __init__(
         self,
@@ -160,14 +165,14 @@ class MyOtherVersionedDataset(MyLocalVersionedDataset):
         return self._fs.exists(load_path)
 
 
-@pytest.fixture(params=[None])
+@pytest.fixture
 def load_version(request):
-    return request.param
+    return getattr(request, "param", None)
 
 
-@pytest.fixture(params=[None])
+@pytest.fixture
 def save_version(request):
-    return request.param or generate_timestamp()
+    return getattr(request, "param", None) or generate_timestamp()
 
 
 @pytest.fixture(params=[None])
@@ -438,6 +443,29 @@ class TestAbstractDataset:
                 save_version=None,
             )
             assert "must only contain arguments valid" in str(exc_info.value)
+
+    def test_from_config_abstract_dataset_type_error(self, mocker):
+        mocker.patch(
+            "kedro.io.core.parse_dataset_definition",
+            return_value=(IncompleteDataset, {}),
+        )
+
+        with pytest.raises(DatasetError) as exc_info:
+            MyDataset.from_config(
+                name="abstract_dataset",
+                config={"type": "IncompleteDataset"},
+                load_version=None,
+                save_version=None,
+            )
+
+        message = str(exc_info.value)
+        assert "abstract class IncompleteDataset" in message
+        assert "Dataset 'abstract_dataset' cannot be instantiated" in message
+        assert (
+            "Please implement the missing abstract methods in "
+            f"'{IncompleteDataset.__module__}.{IncompleteDataset.__qualname__}'"
+        ) in message
+        assert "must only contain arguments valid" not in message
 
     def test_from_config_class_obj_exception(self, mocker):
         mock_class_obj = mocker.Mock()

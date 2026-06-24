@@ -306,7 +306,7 @@ The list of all available parameters is given in the [Paramiko documentation](ht
 
 ## Load multiple datasets with similar configuration using YAML anchors
 
-Different datasets might use the same file format, share the same load and save arguments, and be stored in the same folder. [YAML has a built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets, so that you need not spend time copying and pasting dataset configurations in the `catalog.yml` file.
+Different datasets might use the same file format, share the same load and save arguments, and be stored in the same folder. [YAML has a built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file. This means you can decide what is generalisable across your datasets, so that you need not spend time copying and pasting dataset configurations in the `catalog.yml` file.
 
 You can see this in the following example:
 

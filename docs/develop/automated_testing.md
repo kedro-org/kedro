@@ -7,9 +7,9 @@ Software testing is the process of checking that the code you have written fulfi
 - **Manual testing** is when you run part or the entire project and check that the results are what you expect.
 - **Automated testing** is writing new code (using libraries called _testing frameworks_) that runs part or the entire project and automatically checks the results against what you expect.
 
-As a project grows larger, new code will increasingly rely on existing code. As these interdependencies grow, making changes in one part of the code base can unexpectedly break the intended functionality in another part.
+As a project grows larger, new code will increasingly rely on existing code. As these interdependencies grow, making changes in one part of the code base can break the intended functionality in another part.
 
-The major disadvantage of manual testing is that it is time-consuming. Manual tests are usually run once, directly after new functionality has been added. It is impractical to repeat manual tests for the entire code base each time a change is made, which means this strategy often misses breaking changes.
+The major disadvantage of manual testing is that it is time-consuming. Teams typically run manual tests one time, after they add new functionality. It is impractical to repeat manual tests for the entire code base each time a change is made, which means this strategy often misses breaking changes.
 
 The solution to this problem is automated testing. Automated testing runs comprehensive test suites across the whole code base in seconds, every time a new feature is added or an old one is changed. In this way, breaking changes can be discovered during development rather than in production.
 
@@ -108,7 +108,7 @@ This test is redundant, but it introduces several of `pytest`'s core features an
 
 Although this specific example does not use fixtures, they are an essential part of pytest for defining reusable resources across tests. See [Fixtures](https://docs.pytest.org/en/7.1.x/explanation/fixtures.html#about-fixtures)
 
-Tests should be named as descriptively as possible, especially if you are working with other people. For example, it is easier to understand the purpose of a test with the name `test_node_passes_with_valid_input` than a test with the name `test_passes`.
+Tests should be named as descriptively as possible. This is critical when you are working with other people. For example, it is easier to understand the purpose of a test with the name `test_node_passes_with_valid_input` than a test with the name `test_passes`.
 
 You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using the full feature set of `pytest`, see the [project documentation](https://docs.pytest.org/).
 

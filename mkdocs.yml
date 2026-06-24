@@ -249,7 +249,7 @@ plugins:
           - integrations-and-plugins/dvc.md: DVC data versioning integration
           - integrations-and-plugins/deltalake_versioning.md: Delta Lake versioning
           - integrations-and-plugins/iceberg_versioning.md: Apache Iceberg versioning
-          - ide/set_up_vscode.md: Visual Studio Code setup for Kedro
+          - ide/set_up_vscode.md: Visual Studio Code and Cursor setup for Kedro
           - ide/set_up_pycharm.md: PyCharm setup for Kedro
 
         About Kedro:
@@ -470,7 +470,7 @@ nav:
           - Great Expectations: integrations-and-plugins/great_expectations.md
           - Pandera: integrations-and-plugins/pandera.md
       - IDE Support:
-          - Visual Studio Code: ide/set_up_vscode.md
+          - Visual Studio Code & Cursor: ide/set_up_vscode.md
           - PyCharm: ide/set_up_pycharm.md
       - About:
           - Kedro architecture: getting-started/architecture_overview.md

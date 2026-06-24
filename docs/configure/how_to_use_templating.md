@@ -14,7 +14,7 @@ This guide shows you how to work with templating in your Kedro project.
 
 ## How to template parameters
 
-Templating or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation), as it's called in `OmegaConf`, for parameters works out of the box if the template values are within the parameter files or the name of the file that contains the template values follows the same config pattern specified for parameters.
+Templating, or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation) as `OmegaConf` calls it, works out of the box for parameters. The template values must be within the parameter files, or the name of the file that contains them must follow the same config pattern specified for parameters.
 By default, the config pattern for parameters is: `["parameters*", "parameters*/**", "**/parameters*"]`.
 Suppose you have one parameters file called `parameters.yml` containing parameters with `omegaconf` placeholders like this:
 
@@ -34,7 +34,7 @@ Since both of the file names (`parameters.yml` and `parameters_variables.yml`) m
 
 ## How to template catalog files
 
-From Kedro `0.18.10` templating also works for catalog files. To enable templating in the catalog you need to ensure that the template values are within the catalog files or the name of the file that contains the template values follows the same config pattern specified for catalogs.
+From Kedro `0.18.10` templating also works for catalog files. To enable it, ensure that the template values are within the catalog files. Or, the name of the file that contains them must follow the same config pattern specified for catalogs.
 By default, the config pattern for catalogs is: `["catalog*", "catalog*/**", "**/catalog*"]`.
 
 Any template values in the catalog need to start with an underscore `_`. This is because of how catalog entries are validated. Templated values will neither trigger a key duplication error nor appear in the resulting configuration dictionary.

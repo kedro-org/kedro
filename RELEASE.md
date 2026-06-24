@@ -7,8 +7,24 @@
 
 
 ## Bug fixes and other changes
+* Fixed Rich logging integration so node input/output brackets render correctly in console logs and dataset colour markup does not leak into plain log handlers.
+* Improved the `AbstractDataset.from_config()` error message for custom dataset classes that are still abstract, so it no longer suggests invalid constructor arguments when required dataset methods are missing.
+* Fixed `kedro new` accepting project names whose derived package name shadows a Python standard library module or is a Python keyword (e.g. `email`, `json`, `import`), which silently produced a broken, unimportable project. Such names are now rejected at creation time with a clear message.
+* Fixed `kedro pipeline create` accepting Python keywords (e.g. `for`, `import`, `return`) as pipeline names. Such names are now rejected at creation time with a clear error message.
+
 ## Documentation changes
+* Documented hooks limitation when using `ParallelRunner`.
+* Updated the Amazon EMR Serverless deployment guide with a strategy-first layout, custom container images, Spark catalog configuration, and troubleshooting for common deployment issues.
+* Updated the AWS Step Functions deployment guide with a strategy-first layout, pipeline-level namespace grouping, Lambda container deployment, and an end-to-end Spaceflights walkthrough.
+* Updated the AWS Batch deployment guide with a strategy-first layout, custom `AWSBatchRunner` usage, namespace-based job submission, and S3-backed catalog configuration.
+
 ## Community contributions
+* [Feng Jikui](https://github.com/fengjikui)
+* [Rudra Dudhat](https://github.com/RudraDudhat2509)
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [Simon Bull](https://github.com/simon-b)
 
 # Release 1.4.0
 
@@ -32,8 +48,10 @@ NOTE: This session implementation is under active development and may occasional
 ## Documentation changes
 * Added documentation for `KedroServiceSession`.
 * Updated the API documentation for `kedro.framework.session` to include the new `KedroServiceSession` and `AbstractSession` classes.
+* Added a per-hook argument summary table and an explicit link to the `kedro.framework.hooks.specs` API reference on the Hooks introduction page, with a note about pluggy's opt-in argument behaviour.
 * Added security model documentation covering trust boundaries, user responsibilities, and framework vulnerabilities.
 * Updated `advanced_configuration.md` with custom loader info.
+
 
 ## Community contributions
 * [BhavayChopra](https://github.com/BhavayChopra)

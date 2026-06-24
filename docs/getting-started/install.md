@@ -38,7 +38,7 @@ cd spaceflights
 Lastly, verify that everything works:
 
 ```bash
-uv run kedro run --pipeline __default__
+uv run kedro run --pipelines __default__
 ```
 
 ## How to verify your Kedro installation

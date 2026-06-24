@@ -166,7 +166,7 @@ A comprehensive list of available options can be found in the [RichHandler docum
 
 ## How to enable file-based logging
 
-File-based logging in Python projects aids troubleshooting and debugging. It offers better visibility into the application's behaviour and keeps the logs searchable. It does not work well with read-only systems such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
+File-based logging in Python projects aids troubleshooting and debugging. It offers better visibility into the application's behaviour and keeps the logs searchable. It does not work well with `read-only` systems such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
 
 To enable file-based logging, add `info_file_handler` in your `root` logger in your `conf/logging.yml` as follows:
 
@@ -199,7 +199,7 @@ export COLUMNS=120 LINES=25
 ```
 
 !!! note
-    You must provide a value for both `COLUMNS` and `LINES` even if you only wish to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINE=25`.
+    You must provide a value for both `COLUMNS` and `LINES` even when you want to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINES=25`.
 
 ## How to enable rich logging in Jupyter
 

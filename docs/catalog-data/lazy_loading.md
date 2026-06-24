@@ -48,4 +48,4 @@ This lazy loading mechanism is useful before runtime, during the warm-up phase o
 - Validate external dependencies
 - Ensure all datasets can be created before execution begins
 
-Although `_LazyDataset` is not exposed to end users and doesn't affect your usual catalog usage, it is a useful concept to understand when debugging catalog behaviour or troubleshooting dataset instantiation issues.
+Although `_LazyDataset` is not exposed to end users and doesn't affect your usual catalog usage, it is a useful concept to understand. It helps when debugging catalog behaviour or troubleshooting dataset instantiation issues.

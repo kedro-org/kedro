@@ -4,7 +4,7 @@
     This page contains outdated documentation that has not been tested against recent Kedro releases. If you manage to use AWS Batch with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
 
 ## Why use AWS Batch
-[AWS Batch](https://aws.amazon.com/batch/) is optimised for batch computing and applications that scale with the number of jobs running in parallel. It manages job execution and compute resources, and dynamically provisions the optimal quantity and type. AWS Batch can assist with planning, scheduling, and executing your batch computing workloads, using [Amazon EC2](https://aws.amazon.com/ec2/) On-Demand and [Spot Instances](https://aws.amazon.com/ec2/spot/), and it has native integration with [CloudWatch](https://aws.amazon.com/cloudwatch/) for log collection.
+[AWS Batch](https://aws.amazon.com/batch/) is optimised for batch computing and applications that scale with the number of jobs running in parallel. It manages job execution and compute resources, and dynamically provisions the optimal quantity and type. AWS Batch can assist with planning, scheduling, and executing your batch computing workloads. It uses [Amazon EC2](https://aws.amazon.com/ec2/) On-Demand and [Spot Instances](https://aws.amazon.com/ec2/spot/), and integrates natively with [CloudWatch](https://aws.amazon.com/cloudwatch/) for log collection.
 
 AWS Batch helps you run massively parallel Kedro pipelines in a cost-effective way. It also allows you to parallelise the pipeline execution across multiple compute instances. Each Batch job is run in an isolated Docker container environment.
 
@@ -86,7 +86,7 @@ If you store datasets in S3, create an IAM role so Batch can read and write to t
 
 #### Create AWS Batch job definition
 
-Job definitions specify the resources needed to run a job. Create a job definition named `kedro_run`, assign it the `batchJobRole` IAM role, select the container image you built earlier, set the execution timeout to 300 seconds, and allocate 2000 MB of memory. Leave `Command` blank and keep the defaults.
+Job definitions specify the resources needed to run a job. Create a job definition named `kedro_run`, assign it the `batchJobRole` IAM role, select the container image you built earlier, set the execution timeout to 300 seconds, and reserve 2000 MB of memory. Leave `Command` blank and keep the defaults.
 
 #### Create AWS Batch compute environment
 
@@ -216,7 +216,7 @@ class AWSBatchRunner(ThreadRunner):
 
 Next you will want to add the implementation of the `_submit_job()` method referenced in `_run()`. This method will create and submit jobs to AWS Batch with the following:
 
-* Correctly specified upstream dependencies
+* Accurate upstream dependencies
 * A unique job name
 * The corresponding command to run, namely `kedro run --nodes=<node_name>`.
 
@@ -284,7 +284,7 @@ def _track_batch_job(job_id: str, client: Any) -> None:
             return
 ```
 
-#### Set up Batch-related configuration
+#### Configure AWS Batch settings
 
 You'll need to set the Batch-related configuration that the runner will use. Add a `parameters.yml` file inside the `conf/aws_batch/` directory created as part of the prerequisites with the following keys:
 
@@ -347,4 +347,4 @@ kedro run --env=aws_batch --runner=kedro_tutorial.runner.AWSBatchRunner
 
 You should start seeing jobs appearing on your Jobs dashboard, under the `Runnable` tab - meaning they're ready to start as soon as the resources are provisioned in the compute environment.
 
-AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on [the Batch job in the Jobs tab](https://console.aws.amazon.com/batch/home/jobs) and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.
+AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. To find logs, click on [the Batch job in the Jobs tab](https://console.aws.amazon.com/batch/home/jobs) and choose `View logs` in the pop-up panel. Or, go to the [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar, and find `/aws/batch/job`.

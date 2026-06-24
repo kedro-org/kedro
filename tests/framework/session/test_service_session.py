@@ -491,6 +491,30 @@ class TestKedroServiceSession:
         assert "__default__" in msg
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_nonexistent_pipeline_resets_filter_for_suggestions(
+        self, fake_project, mock_context_class, mock_runner, mocker
+    ):
+        """set_requested(None) is called before keys() in the error path so that
+        suggestions are drawn from all registered pipelines, not just the active filter."""
+        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.service_session.pipelines"
+        )
+        mock_pipelines.__getitem__.side_effect = KeyError("nonexistent")
+        mock_pipelines.keys.return_value = ["__default__", "data_engineering"]
+        mock_runner.__name__ = "SequentialRunner"
+
+        with pytest.raises(ValueError):
+            with KedroServiceSession.create(project_path=fake_project) as session:
+                session.run(runner=mock_runner, pipeline_names=["nonexistent"])
+
+        assert mock_pipelines.set_requested.call_args_list == [
+            mocker.call(["nonexistent"]),
+            mocker.call(None),
+        ]
+        mock_pipelines.keys.assert_called_once()
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, [_FAKE_PIPELINE_NAME]])
     def test_run_exception(
         self,

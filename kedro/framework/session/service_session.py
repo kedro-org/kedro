@@ -168,6 +168,8 @@ class KedroServiceSession(AbstractSession):
             try:
                 combined_pipeline += pipelines[name]
             except KeyError as exc:
+                # Reset to None so keys() loads all pipelines for suggestions.
+                pipelines.set_requested(None)
                 matches = get_close_matches(name, pipelines.keys())
                 if matches:
                     suggestion = (

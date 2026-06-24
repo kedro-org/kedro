@@ -119,7 +119,7 @@ It is your responsibility to create functional Cookiecutter templates for custom
 Make sure you understand the basic structure of a pipeline before you start.
 Your template should render to a valid, importable Python module containing a `create_pipeline` function at the top level that returns a `Pipeline` object.
 You will also need appropriate `config` and `tests` subdirectories; Kedro copies them to the project `config` and `tests` directories when the pipeline is created.
-The `config` and `tests` directories need to follow the same layout as in the default template and cannot be customised, although the contents of the parameters and the actual test file can be changed.
+The `config` and `tests` directories need to follow the same layout as in the default template and cannot be customised. You can still change the contents of the parameters and the actual test file.
 File and folder names or structure do not matter beyond that and can be customised according to your needs.
 You can use [the default template that Kedro](https://github.com/kedro-org/kedro/tree/main/kedro/templates/pipeline) uses as a starting point.
 

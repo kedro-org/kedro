@@ -179,6 +179,6 @@ snapshot = get_project_snapshot("/path/to/my_project", conf_source="conf/custom"
 
 ## How to access the snapshot through the HTTP server
 
-The Kedro HTTP server exposes the same snapshot data at `GET /snapshot`. On success, the response contains the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, serialised as JSON. On failure, only `status` and `error` are returned — the data fields are absent.
+The Kedro HTTP server exposes the same snapshot data at `GET /snapshot`. On success, the response contains the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, serialised as JSON. On failure, the response returns `status` and `error` with no data fields.
 
 See [Serving Kedro pipelines over HTTP](../extend/serving.md#get-snapshot) for the full endpoint reference, example responses, and failure behaviour.

@@ -1,6 +1,6 @@
 # How to access the Data Catalog in code
 
-You can define a Data Catalog in two ways. Most projects rely on a YAML configuration file as [illustrated in the Data Catalog introduction](./data_catalog.md). You can also access the Data Catalog programmatically through [kedro.io.DataCatalog][] using an API that allows you to configure data sources in code and use the IO module within notebooks.
+You can define a Data Catalog in two ways. Most projects rely on a YAML configuration file as [illustrated in the Data Catalog introduction](./data_catalog.md). You can also access the Data Catalog programmatically through [kedro.io.DataCatalog][]. The API lets you configure data sources in code and use the IO module within notebooks.
 
 !!! Warning
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
@@ -166,7 +166,7 @@ The following steps happened behind the scenes when `load` was called:
 ## How to save data programmatically
 
 !!! warning "Memory Dataset Warning"
-    This pattern is not recommended unless you are using a hosted notebook environment such as SageMaker or Databricks, or writing unit or integration tests for your Kedro pipeline. Use the YAML approach in preference.
+    This pattern is not recommended unless you are using a hosted notebook environment such as SageMaker or Databricks. The pattern is also acceptable when writing unit or integration tests for your Kedro pipeline. Use the YAML approach in preference.
 
 ### How to save data to memory
 

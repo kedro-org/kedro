@@ -6,7 +6,7 @@ You can load multiple datasets with similar configuration using dataset factorie
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
-Dataset factories introduce a syntax that lets you generalise your configuration and reduce the number of similar catalog entries by matching the datasets used in your project's pipelines to dataset factory patterns.
+Dataset factories introduce a syntax that lets you generalise your configuration and reduce the number of similar catalog entries. They match datasets used in your project's pipelines to dataset factory patterns.
 
 For example:
 

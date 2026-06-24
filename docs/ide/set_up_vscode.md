@@ -1,6 +1,6 @@
-# Set up Visual Studio Code
+# Set up Visual Studio Code and Cursor
 
-Open a new project directory in VS Code and install the Python plugin under **Tools and languages**:
+Open a new project directory in VS Code and install the Python plugin under **Tools and languages**. These steps apply to Cursor as well, since Cursor supports VS Code extensions:
 
 ![](../meta/images/vscode_startup.png)
 
@@ -13,6 +13,9 @@ At this stage, you should be able to see the `conda` environment that you have c
 ## Kedro VS Code extension
 [Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) supports Kedro 0.19+. It helps you navigate your Kedro project by finding dataset definitions, locating references in your code, and more.
 
+!!! note
+    The extension also works in [Cursor](https://cursor.com). Cursor is built on VS Code and supports VS Code extensions, so every feature on this page works there too. Install it from Cursor's Extensions panel, powered by the [Open VSX Registry](https://open-vsx.org/extension/kedro/Kedro).
+
 ![Kedro VS Code gif](https://github.com/kedro-org/vscode-kedro/blob/main/assets/lsp-go-to-definition.gif?raw=true)
 
 ## Set up `venv` or `virtualenv` in VS Code
@@ -23,7 +26,7 @@ To ensure your virtual environments appear in the Python interpreter list, open 
 "python.venvPath": "/path/containing/your/venvs/"
 ```
 
-If you create a `venv` / `virtualenv` in your project directory named `venv`, VS Code (much like PyCharm) automatically loads it as the Python interpreter unless you manually define a different interpreter as described above.
+If you create a `venv` or `virtualenv` in your project directory named `venv`, VS Code automatically loads it as the Python interpreter (much like PyCharm). This is the default unless you manually define a different interpreter as described above.
 
 
 ## Set up tasks
@@ -272,7 +275,7 @@ Edit the `launch.json` that opens in the editor with:
             "module": "kedro",
             "args": ["run"]
             // Any other arguments should be passed as a comma-separated-list
-            // e.g "args": ["run", "--pipeline", "pipeline_name"]
+            // e.g "args": ["run", "--pipelines", "pipeline_name"]
         }
     ]
 }

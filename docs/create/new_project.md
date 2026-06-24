@@ -19,7 +19,7 @@ uvx kedro new
 
 The command line interface (CLI) first asks for a name for the project. This is the human-readable name, and it may contain alphanumeric symbols, spaces, underscores, and hyphens. It must be at least two characters long.
 
-Keep the name short because the choice is set as the value of `project_name`. Kedro also uses it to generate the folder and package names for the project automatically. For example, if you enter "Get Started", the folder for the project (`repo_name`) is automatically set to be `get-started`, and the Python package name (`python_package`) for the project is set to be `get_started`.
+Keep the name short because the choice is set as the value of `project_name`. Kedro also uses it to generate the folder and package names for the project automatically. For example, if you enter "Get Started", the folder for the project (`repo_name`) is automatically set to be `get-started`, and the Python package name (`python_package`) for the project is set to be `get_started`. Names whose derived package name matches a Python keyword or standard library module (for example `email`, `json`, or `import`) are rejected to prevent import conflicts.
 
 
 | Description                                                     | Setting          | Example       |

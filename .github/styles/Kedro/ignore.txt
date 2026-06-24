@@ -117,6 +117,7 @@ transcoding
 untyped
 untrusted
 validators
+vCPUs
 Unsplash
 uv
 VSCode

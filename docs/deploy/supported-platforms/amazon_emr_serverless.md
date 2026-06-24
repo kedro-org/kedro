@@ -178,6 +178,9 @@ kedro run
 
 The PySpark starter does not include a local Spark runtime by default. Install `kedro-datasets[spark-local]` so `kedro run` works on your machine before you submit to EMR. For more detail, read [Get started with the PySpark starter](../../integrations-and-plugins/pyspark_integration.md#get-started-with-the-pyspark-starter).
 
+!!! note "Java required for local Spark"
+    Local runs with `kedro-datasets[spark-local]` need a **JDK** installed and **`JAVA_HOME` set** to that JDK. Check with `java -version` and `echo $JAVA_HOME`. If `kedro run` fails with `[JAVA_GATEWAY_EXITED]`, PySpark could not start the JVM — fix `JAVA_HOME`, ensure Java is on your `PATH`, and retry before you package for EMR.
+
 Keep `conf/base/catalog.yml` on **local file paths** for local development. You add S3 paths in a separate environment in [Step 3](#step-3-configure-kedro-for-emr). For release choice, pipeline grouping, and storage planning, see [Strategy](#strategy).
 
 ---

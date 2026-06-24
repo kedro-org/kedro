@@ -237,7 +237,7 @@ Set `s3_bucket` in `conf/aws/globals.yml` to the same value as `S3_BUCKET` from 
 
 ### Create an `aws` config environment
 
-Add `conf/aws/` with a `globals.yml` file and a `catalog.yml` that points every dataset to S3. [Use catalog globals to define the S3 bucket name in one place](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params).
+Add `conf/aws/` with a `globals.yml` file and a `catalog.yml` that points every dataset to S3. [Use catalog globals to define the S3 bucket name in one place](../../configure/advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader).
 
 `conf/aws/globals.yml`:
 
@@ -753,7 +753,7 @@ If the execution failed, see [Troubleshooting](#troubleshooting).
 - [Learn how to group nodes with namespaces in Kedro](../../build/namespaces.md#group-nodes-with-namespaces)
 - [Learn how to package a Kedro project](../package_a_project.md)
 - [Learn how to run a packaged Kedro project](../package_a_project.md#run-a-packaged-project)
-- [Learn how to use catalog globals in Kedro configuration](https://docs.kedro.org/en/stable/configure/advanced_configuration.html#how-to-use-globals-and-runtime-params)
+- [Learn how to use catalog globals in Kedro configuration](../../configure/advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader)
 - [Learn how to manage Kedro sessions and lifecycle](../../extend/session.md)
 
 ### AWS

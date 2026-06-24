@@ -105,6 +105,8 @@ This reduces the number of Airflow tasks and keeps logically related nodes toget
 
 **AWS Step Functions**: The [AWS Step Functions deployment guide](./supported-platforms/aws_step_functions.md) uses `Pipeline.group_nodes_by("namespace")` so each pipeline-level namespace maps to one Lambda function and one Step Functions task.
 
+**AWS Batch**: The [AWS Batch deployment guide](./supported-platforms/aws_batch.md) uses `Pipeline.group_nodes_by("namespace")` so each pipeline-level namespace maps to one Batch job.
+
 ---
 
 **Summary table**
@@ -114,4 +116,4 @@ This reduces the number of Airflow tasks and keeps logically related nodes toget
 | **What Works** | If you're happy with how the nodes are structured in your existing pipeline, or your pipeline is low complexity and a new grouping view is not required then you don't have to use any alternatives | Tagging individual nodes or the entire pipeline allows flexible execution of specific sections without altering the pipeline structure, and Kedro-Viz offers clear visualisation of these tagged nodes for better understanding. | Namespaces group nodes to ensure clear dependencies and separation within a pipeline, allow selective execution, and can be visualised using Kedro-Viz. |
 | **What Doesn't Work** | If you want to group nodes differently from the current pipeline structure, instead of creating a new pipeline, you can use alternative grouping methods such as tags or namespaces. | Lack of hierarchical structure, using tags makes debugging and maintaining the codebase more challenging | Defining namespaces at the node level behaves like tags without ensuring execution consistency, while defining them at the pipeline level helps create a modular structure by renaming inputs, outputs, and parameters but can introduce naming conflicts if the pipeline is connected elsewhere or parameters are referenced outside the pipeline. |
 | **Syntax** | `kedro run --pipelines=<your_pipeline_names>` | `kedro run --tags=<your_tag_name>` | `kedro run --namespaces=< namespace1,namespace2 >` |
-| **Deployment Plugin Support** | N/A | N/A | `kedro airflow create --group-by namespace`; [AWS Step Functions](./supported-platforms/aws_step_functions.md) |
+| **Deployment Plugin Support** | N/A | N/A | `kedro airflow create --group-by namespace`; [AWS Step Functions](./supported-platforms/aws_step_functions.md); [AWS Batch](./supported-platforms/aws_batch.md) |

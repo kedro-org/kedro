@@ -58,22 +58,22 @@ For a worked breakdown of every combination of top-level and underlying-dataset 
 
 On load, `PartitionedDataset` _does not_ automatically load the data from the located partitions. Instead, it returns a dictionary with partition IDs as keys and the corresponding load functions as values. This design lets the consuming node decide which partitions to load and how to process the data.
 
-A partition ID _does not_ represent the whole partition path, but only the part of it that is unique to a given partition (and filename suffix):
+A partition ID represents the part of the partition path that is unique to a given partition (and filename suffix), not the whole path:
 
 * Example 1: if `path=s3://my-bucket-name/folder` and a partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, its partition ID is `2019-12-04/data.csv`.
 * Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and a partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, its partition ID is `2019-12-04/data`.
 
-`PartitionedDataset` caches the load operation, which means that if multiple nodes consume the same `PartitionedDataset`, they all receive the same partition dictionary even if some new partitions were added to the folder after the first load completed. This behaviour guarantees consistent load operations between nodes and avoids race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
+`PartitionedDataset` caches the load operation. If multiple nodes consume the same `PartitionedDataset`, they all receive the same partition dictionary, even when new partitions were added to the folder after the first load completed. This behaviour guarantees consistent load operations between nodes and avoids race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
 
 ### Lazy saving
 
 `PartitionedDataset` also supports lazy saving, where a partition's data is not materialised until it is time to write. Lazy saving is enabled by default: when a node returns a `Callable` value for a partition, the dataset is written _after_ the [`after_node_run` hook](../extend/hooks/introduction.md) finishes.
 
-In certain cases, it might be useful to disable lazy saving — for example, when your object is already a `Callable` (such as a TensorFlow model) and you prefer to write the data straight away. See [how to control lazy saving](how_to_use_partitioned_and_incremental_datasets.md#how-to-control-lazy-saving) for the configuration.
+In certain cases, it might be useful to disable lazy saving. For example, when your object is already a `Callable` (such as a TensorFlow model) and you prefer to write the data straight away. See [how to control lazy saving](how_to_use_partitioned_and_incremental_datasets.md#how-to-control-lazy-saving) for the configuration.
 
 ## Incremental datasets
 
-[IncrementalDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.IncrementalDataset/) is a subclass of `PartitionedDataset` that stores information about the last processed partition in a `checkpoint`. `IncrementalDataset` addresses the use case where partitions have to be processed incrementally — that is, each following pipeline run should process only the partitions that were not processed by previous runs.
+[IncrementalDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.IncrementalDataset/) is a subclass of `PartitionedDataset` that stores information about the last processed partition in a `checkpoint`. `IncrementalDataset` addresses the use case where partitions have to be processed incrementally — that is, each pipeline run picks up the partitions that previous runs have not processed.
 
 This checkpoint, by default, is persisted to the location of the data partitions. For example, for an `IncrementalDataset` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint is saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless the checkpoint configuration is explicitly overridden.
 
@@ -90,13 +90,13 @@ The save operation is identical to that of `PartitionedDataset`.
 
 ### The confirmation step
 
-The checkpoint value *is not* automatically updated when a new set of partitions is successfully loaded or saved. Checkpoint update is triggered by an explicit `confirms` instruction on one of the downstream nodes. This separation lets you defer confirmation until after additional validation has succeeded.
+The checkpoint value *is not* automatically updated when a new set of partitions is loaded or saved. Checkpoint update is triggered by an explicit `confirms` instruction on one of the downstream nodes. This separation lets you defer confirmation until after additional validation has passed.
 
 For worked examples covering same-node and deferred confirmation, see [how to confirm incremental datasets](how_to_use_partitioned_and_incremental_datasets.md#how-to-confirm-incremental-datasets).
 
 Important notes about the confirmation operation:
 
-* Confirming a partitioned dataset does not affect any following loads within the same run. All downstream nodes that take the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will not affect subsequent loads and won't appear in the list of loaded partitions until the next run, or until `release()` is called on the dataset object.
+* Confirming a partitioned dataset does not affect any following loads within the same run. All downstream nodes that take the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will not affect later loads and won't appear in the list of loaded partitions until the next run, or until `release()` is called on the dataset object.
 * A pipeline cannot contain more than one node confirming the same dataset.
 
 ### Checkpoint configuration

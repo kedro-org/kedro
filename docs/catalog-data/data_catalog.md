@@ -126,7 +126,7 @@ Kedro enables dataset and ML model versioning through the `versioned: True` flag
 
 By default, `kedro run` loads the latest version of a versioned dataset. See [how to version a dataset](how_to_configure_the_data_catalog.md#how-to-version-a-dataset) for the steps to enable versioning, load a specific version, and list available versions.
 
-A dataset supports versioning if it extends the [kedro.io.AbstractVersionedDataset][] class to accept a `version` keyword argument as part of the constructor and adapts the `_save` and `_load` methods to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
+A dataset supports versioning if it extends the [kedro.io.AbstractVersionedDataset][] class to accept a `version` keyword argument as part of the constructor. It must also adapt the `_save` and `_load` methods to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
 
 To verify whether a dataset supports versioning, examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check whether the dataset class inherits from `AbstractVersionedDataset`. For example, a class declared as `CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])` is set up to support versioning.
 

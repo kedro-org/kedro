@@ -155,7 +155,7 @@ def create_partitions() -> Dict[str, Any]:
 ```
 
 !!! note
-    Writing to an existing partition may overwrite its data if the underlying dataset implementation does not handle this case. Add checks to ensure no existing data is lost. A simple safety mechanism is to use partition IDs with a high chance of uniqueness, such as the current timestamp.
+    Writing to an existing partition may overwrite its data if the underlying dataset implementation does not handle this case. Add checks to ensure no existing data is lost. One safeguard is to use partition IDs with a high chance of uniqueness, such as the current timestamp.
 
 ## How to control lazy saving
 

@@ -89,7 +89,7 @@ Feature: Run Project
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
     And I have broken the "data_science" pipeline with an unimportable dependency
-    When I execute the kedro command "run --pipeline data_engineering"
+    When I execute the kedro command "run --pipelines data_engineering"
     Then I should get a successful exit code
     And the logs should show that 1 nodes were run
     And the logs should show that "split_data_node" was run

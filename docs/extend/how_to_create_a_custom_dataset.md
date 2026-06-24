@@ -1,6 +1,6 @@
 # Advanced: Tutorial to create a custom dataset
 
-[Kedro supports several datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
+[Kedro supports several datasets](https://docs.kedro.org/projects/kedro-datasets/en/stable/) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline. Or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## Understand `AbstractDataset`
 
@@ -98,7 +98,7 @@ src/kedro_pokemon/datasets
 └── image_dataset.py
 ```
 
-## Implement the `load` method with `fsspec`
+## Write the `load` method with `fsspec`
 
 Several built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](../catalog-data/data_catalog.md#dataset-filepath). In this example, using `fsspec` with `Pillow` keeps the dataset flexible across different image locations and formats.
 
@@ -171,7 +171,7 @@ In [2]: from PIL import Image
 In [3]: Image.fromarray(image).show()
 ```
 
-## Implement the `save` method with `fsspec`
+## Write the `save` method with `fsspec`
 
 Similarly, define the `_save` method as follows:
 
@@ -196,7 +196,7 @@ In [2]: context.catalog.save('pikachu', data=image)
 
 You can open the file to verify that the data was written back as expected.
 
-## Implement the `_describe` method
+## Write the `_describe` method
 
 The `_describe` method is used for printing purposes. The convention in Kedro is for the method to return a dictionary describing the attributes of the dataset.
 
@@ -510,7 +510,7 @@ Inspect the content of the data directory to find a new version of the data, wri
 
 ## Thread-safety
 
-Kedro datasets should work with the [kedro.runner.SequentialRunner][] and the [kedro.runner.ParallelRunner][], so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
+Kedro datasets should work with the [kedro.runner.SequentialRunner][] and the [kedro.runner.ParallelRunner][], so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, or closures. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
 
 [SparkDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/spark.SparkDataset/) is one exception.
 [Apache Spark](https://spark.apache.org/) uses its own parallelism, so it doesn't work with Kedro [kedro.runner.ParallelRunner][].

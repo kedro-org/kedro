@@ -202,7 +202,7 @@ HOOKS = (AzureSecretsHook(),)
 
 ## Use stateful Hooks to share context between Hook methods
 
-Hooks are instantiated once per Kedro session, so instance attributes persist across hook calls.
+Each Hook has a single instance per Kedro session, so instance attributes persist across hook calls.
 This lets you capture data from `after_context_created` and reuse it in hooks that do not receive the context (such as `before_pipeline_run` or `before_node_run`).
 
 ```python
@@ -230,7 +230,7 @@ class RuntimeConfigHook:
 This pattern is useful when migrating older projects that passed `context` through custom integrations, or when coordinating configuration and runtime behaviour across multiple Hook points.
 
 !!! note
-    Keep stored data small and treat it as read-only to avoid surprising side effects across hooks.
+    Keep stored data small and treat it as `read-only` to avoid surprising side effects across hooks.
 
 ## Use Hooks to read `metadata` from `DataCatalog`
 Use the `after_catalog_created` Hook to access `metadata` to extend Kedro.

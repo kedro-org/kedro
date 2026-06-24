@@ -255,4 +255,4 @@ cars:
   type: pandas.CSVDataset
 ```
 
-In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml`. Kedro detects which definition of `cars` dataset to use in your pipeline.
+In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml`.

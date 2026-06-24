@@ -80,7 +80,7 @@ Feature: Run Project
   Scenario: Run kedro run with selective pipeline loading
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
-    When I execute the kedro command "run --pipeline data_engineering"
+    When I execute the kedro command "run --pipelines data_engineering"
     Then I should get a successful exit code
     And the logs should show that 1 nodes were run
     And the logs should show that "split_data_node" was run

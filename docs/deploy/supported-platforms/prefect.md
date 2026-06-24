@@ -2,7 +2,7 @@
 
 This page explains how to run your Kedro pipeline using [Prefect 2.0](https://www.prefect.io/opensource), an open-source workflow management system.
 
-The scope of this documentation is the deployment to a self hosted [Prefect Server](https://docs-2.prefect.io/latest/guides/host/). Prefect Server is an open-source backend that helps you track and execute your Prefect flows and automatically extends Prefect 2.0. We will use an [Agent that pulls submitted flow runs from a Work Queue](https://docs-2.prefect.io/latest/concepts/deployments/#workers-and-work-pools).
+The scope of this documentation is the deployment to a self-hosted [Prefect Server](https://docs-2.prefect.io/latest/guides/host/). Prefect Server is an open-source backend that helps you track and execute your Prefect flows. It automatically extends Prefect 2.0. We will use an Agent that pulls submitted flow runs from a [Work Queue](https://docs-2.prefect.io/latest/concepts/deployments/#workers-and-work-pools).
 
 !!! note
     This deployment has been tested using Kedro 0.18.10 with Prefect version 2.10.17. If you want to deploy with Prefect 1.0, we recommend you review [earlier versions of Kedro's Prefect deployment documentation](https://docs.kedro.org/en/stable/deploy/supported-platforms/prefect/).
@@ -24,7 +24,7 @@ prefect config set PREFECT_API_URL="http://127.0.0.1:4200/api"
 For each new Kedro project you create, you need to decide whether to opt into [usage analytics](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry). Your decision is recorded in the `.telemetry` file stored in the project root.
 
 !!! warning
-    When you run a Kedro project locally, you are asked on the first `kedro` command for the project, but in this use case, the project will hang unless you follow these instructions.
+    When you run a Kedro project locally, you are asked on the first `kedro` command for the project. In this use case, the project will hang unless you follow these instructions.
 
 Create a `.telemetry` file manually and put it in the **root of your Kedro project** and add your preference to give or decline consent. To do this, specify either `true` (to give consent) or `false`. The example given below accepts Kedro's usage analytics.
 
@@ -55,7 +55,7 @@ prefect agent start --pool <work_pool_name> --work-queue <work_queue_name>
 
 ### Convert your Kedro pipeline to Prefect 2.0 flow
 
-To build a [Prefect flow](https://docs-2.prefect.io/latest/concepts/flows/) for your Kedro pipeline programmatically and register it with the Prefect API, use the following Python script, which should be stored in your project’s **root directory**:
+To build a [Prefect flow](https://docs-2.prefect.io/latest/concepts/flows/) for your Kedro pipeline programmatically and register it with the Prefect API, use the following Python script. Store the script in your project’s **root directory**:
 
 ```python
 # <project_root>/register_prefect_flow.py

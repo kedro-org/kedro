@@ -38,7 +38,7 @@ For technical information on how the telemetry collection works, you can browse
 To withdraw consent, you have several options:
 
 1 - **Set Environment Variables**:
-   Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of any of these environment variables will disable telemetry for all Kedro projects in that environment and will override any consent specified in the `.telemetry` file of the specific project.
+   Set the environment variables `DO_NOT_TRACK` or `KEDRO_DISABLE_TELEMETRY` to any value. The presence of any of these environment variables disables telemetry for all Kedro projects in that environment. It overrides any consent specified in the `.telemetry` file of the specific project.
 
 2 - **CLI Option When Creating a New Project**:
    When creating a new project, you can use the command:

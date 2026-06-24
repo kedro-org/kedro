@@ -4,7 +4,7 @@
     "project_url": "https://kedro.org/",
     "repo": ".",
     "install_command": [
-        "pip install -e .  kedro-datasets[pandas-csvdataset]"
+        "pip install -e .[pydantic] kedro-datasets[pandas-csvdataset]"
     ],
     "branches": [
         "main"

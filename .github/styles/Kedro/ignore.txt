@@ -2,11 +2,14 @@ agentic
 Aneira
 AMI
 AMIs
+anonymised
 APIs
 Astro
 async
 autodiscovery
 breakpoint
+callables
+callouts
 chonky
 Claypot
 Colab
@@ -31,6 +34,8 @@ docstrings
 doxenix
 ethanknights
 filepath
+filesystem
+filesystem's
 fsspec
 gif
 Globals
@@ -38,6 +43,8 @@ globals
 Grafana
 hyperparameter
 hyperparameters
+initialiser
+interdependencies
 ipdb
 IPython
 Jupyter
@@ -84,6 +91,7 @@ Printify
 Pylint
 pyenv
 pytest
+reformats
 regressors
 Repo
 Repos

@@ -90,7 +90,7 @@ When you validate data, Great Expectations:
 2. Runs each expectation against it
 3. Returns detailed results showing what passed and what failed
 
-- During quick interactive work you may use an ephemeral GX Data Context (no files persisted between runs). This is fine for exploration and iterative expectation creation.
+- During interactive work you may use an ephemeral GX Data Context (no files persisted between runs). This is fine for exploration and iterative expectation creation.
 - For production runs, persist expectation suites and use a file-based Data Context so suites, validation results and histories are reproducible and shareable.
 
 ## Integration options

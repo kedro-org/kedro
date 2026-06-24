@@ -4,7 +4,7 @@ Kedro is a graduate-stage project within [LF AI & Data](https://lfaidata.foundat
 
 The term "Technical Steering Committee" (TSC) describes the group of Kedro maintainers, committers, and advisors. We list Kedro's [current](#current-tsc-members) and [past](#past-tsc-members) TSC members on this page.
 
-The TSC is responsible for the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members into the TSC to fuel Kedro's continued development.
+The TSC oversees the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members into the TSC to fuel Kedro's continued development.
 
 On this page we describe:
 
@@ -22,7 +22,7 @@ On this page we describe:
 
 ## Kedro TSC roles
 
-The Kedro TSC is responsible for the project's future development. The TSC is made up of the following roles:
+The Kedro TSC oversees the project's future development. The TSC is made up of the following roles:
 
 ### Maintainers
 
@@ -155,37 +155,38 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at [QuantumBlack](https://www.mckinsey.com/capabilities/quantumblack) to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
 
-Former core team members with significant contributions include
-[Ahdra Merali](https://github.com/AhdraMeraliQB),
-[Amanda Koh](https://github.com/amandakys),
-[Andrew Mackay](https://github.com/Mackay031),
-[Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
-[Anton Kirilenko](https://github.com/Flid),
-[Antony Milne](https://github.com/antonymilne),
-[Cvetanka Nechevska](https://github.com/cvetankanechevska),
-[Dmitrii Deriabin](https://github.com/dmder),
-[Dmitry Sorokin](https://github.com/DimedS),
-[Gabriel Comym](https://github.com/comym),
-[Gordon Wrigley](https://github.com/tolomea),
-[Hamza Oza](https://github.com/hamzaoza),
-[Ignacio Paricio](https://github.com/ignacioparicio),
-[Jannic Holzer](https://github.com/jmholzer),
-[Jo Stichbury](https://github.com/stichbury),
-[Juan Luis Cano](https://github.com/astrojuanlu),
-[Jiri Klein](https://github.com/jiriklein),
-[Kiyohito Kunii](https://github.com/921kiyo),
-[Laís Carvalho](https://github.com/laisbsc),
-[Liam Brummitt](https://github.com/bru5),
-[Lim Hoang](https://github.com/limdauto),
-[Lorena Bălan](https://github.com/lorenabalan),
-[Mehdi Naderi Varandi](https://github.com/MehdiNV),
-[Nasef Khan](https://github.com/nakhan98),
-[Nero Okwa](https://github.com/NeroOkwa),
-[Richard Westenra](https://github.com/richardwestenra),
-[Stephanie Kaiser](https://github.com/stephkaiser),
-[Susanna Wong](https://github.com/studioswong),
-[Vladimir Nikolic](https://github.com/vladimir-mck) and
-[Zain Patel](https://github.com/mzjp2).
+Former core team members with significant contributions include:
+
+- [Ahdra Merali](https://github.com/AhdraMeraliQB)
+- [Amanda Koh](https://github.com/amandakys)
+- [Andrew Mackay](https://github.com/Mackay031)
+- [Andrii Ivaniuk](https://github.com/andrii-ivaniuk)
+- [Anton Kirilenko](https://github.com/Flid)
+- [Antony Milne](https://github.com/antonymilne)
+- [Cvetanka Nechevska](https://github.com/cvetankanechevska)
+- [Dmitrii Deriabin](https://github.com/dmder)
+- [Dmitry Sorokin](https://github.com/DimedS)
+- [Gabriel Comym](https://github.com/comym)
+- [Gordon Wrigley](https://github.com/tolomea)
+- [Hamza Oza](https://github.com/hamzaoza)
+- [Ignacio Paricio](https://github.com/ignacioparicio)
+- [Jannic Holzer](https://github.com/jmholzer)
+- [Jo Stichbury](https://github.com/stichbury)
+- [Juan Luis Cano](https://github.com/astrojuanlu)
+- [Jiri Klein](https://github.com/jiriklein)
+- [Kiyohito Kunii](https://github.com/921kiyo)
+- [Laís Carvalho](https://github.com/laisbsc)
+- [Liam Brummitt](https://github.com/bru5)
+- [Lim Hoang](https://github.com/limdauto)
+- [Lorena Bălan](https://github.com/lorenabalan)
+- [Mehdi Naderi Varandi](https://github.com/MehdiNV)
+- [Nasef Khan](https://github.com/nakhan98)
+- [Nero Okwa](https://github.com/NeroOkwa)
+- [Richard Westenra](https://github.com/richardwestenra)
+- [Stephanie Kaiser](https://github.com/stephkaiser)
+- [Susanna Wong](https://github.com/studioswong)
+- [Vladimir Nikolic](https://github.com/vladimir-mck)
+- [Zain Patel](https://github.com/mzjp2)
 
 
 ## Voting process
@@ -209,7 +210,7 @@ Any member may choose to step out of their current role at any time by communica
 Any member may request to step down to a non voting category at any time if they believe they can contribute more effectively in that role. This change does not require a vote.
 
 ### Step-up procedure
-Members who wish to move up to a category that requires a higher commitment (advisor to maintainer or committer, or committer to maintainer) must receive formal approval through a TSC vote. The member must also have an active TSC [maintainer](#maintainers) advocate to support their nomination.
+Members who wish to move up to a category that requires a higher commitment (advisor to maintainer, or committer to maintainer) must receive formal approval through a TSC vote. The member must also have an active TSC [maintainer](#maintainers) advocate to support their nomination.
 
 ### Automatic removal and transition option
 If a member is automatically removed from their current category (due to inactivity), they can request placement in the next lower level within two weeks of their removal. If no request is made within that time frame, the member will be removed from the TSC entirely.

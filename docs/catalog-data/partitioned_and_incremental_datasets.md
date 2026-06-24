@@ -35,7 +35,7 @@ The dataset definition is passed into the `dataset` argument of the `Partitioned
 
 **Shorthand notation**
 
-Specify the underlying dataset class either as a string (for example, `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of [kedro.io.AbstractDataset][].
+Specify the underlying dataset class either as a string or as a class object. As a string, you can use a short name (for example, `pandas.CSVDataset`) or a fully qualified class path (such as `kedro_datasets.pandas.CSVDataset`). A class object must be a subclass of [kedro.io.AbstractDataset][].
 
 **Full notation**
 
@@ -50,7 +50,7 @@ The full notation allows you to specify a dictionary with the full underlying da
 !!! note
     Support for the `dataset_credentials` key in the credentials for `PartitionedDataset` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 
-Credentials management for `PartitionedDataset` is somewhat special, because it may contain credentials for both `PartitionedDataset` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config (unless that config already has credentials configured), but not the other way around — dataset credentials are never propagated to the filesystem.
+Credentials management for `PartitionedDataset` is somewhat special, because it might contain credentials for both `PartitionedDataset` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config, unless that config already has credentials configured. The reverse does not happen — dataset credentials are never propagated to the filesystem.
 
 For a worked breakdown of every combination of top-level and underlying-dataset credentials, see [how partitioned dataset credentials interact](how_to_use_partitioned_and_incremental_datasets.md#how-partitioned-dataset-credentials-interact).
 

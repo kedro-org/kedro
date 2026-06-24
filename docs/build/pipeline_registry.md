@@ -2,7 +2,7 @@
 
 Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This populates the `pipelines` variable in [`kedro.framework.project`][kedro.framework.project] that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to [`Pipeline`][kedro.pipeline.pipeline.Pipeline] objects.
 
-For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipeline_registry.py) defines the following `register_pipelines()` function. It exposes the data processing pipeline, the data science pipeline, and a default pipeline that combines both:
+For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) defines the following `register_pipelines()` function. It exposes the data processing pipeline, the data science pipeline, and a default pipeline that combines both:
 
 ```python
 import spaceflights.pipelines.data_processing as dp
@@ -25,10 +25,10 @@ def register_pipelines() -> Dict[str, Pipeline]:
     }
 ```
 
-As a reminder, [running `kedro run` without the `--pipeline` option runs the default pipeline](./run_a_pipeline.md#run-a-pipeline-by-name).
+As a reminder, [running `kedro run` without the `--pipelines` option runs the default pipeline](./run_a_pipeline.md#run-a-pipeline-by-name).
 
 !!! note
-    The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
+    The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result). Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
 
 ## Pipeline autodiscovery
 

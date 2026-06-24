@@ -28,8 +28,6 @@ kedro run --runner=SequentialRunner
 
 ### `ParallelRunner`
 
-#### Multiprocessing
-
 You can also run the nodes within the pipeline concurrently, using a `ParallelRunner` as follows:
 ```bash
 kedro run --runner=ParallelRunner
@@ -45,17 +43,21 @@ For the `ParallelRunner`, it is possible to manually select which multiprocessin
 
 To control which multiprocessing start method is used by `ParallelRunner`, set `KEDRO_MP_CONTEXT` to `fork`, `forkserver`, or `spawn`. If the variable is not set, the runner uses the system default.
 
-#### Multithreading
-While `ParallelRunner` uses multiprocessing, you can also run the pipeline with multithreading for concurrent execution by specifying `ThreadRunner` as follows:
-
-```bash
-kedro run --runner=ThreadRunner
-```
+!!! warning
+    `ParallelRunner` does not execute `node` and `dataset` hooks. If your project relies on these hooks, use `SequentialRunner` or `ThreadRunner` instead.
 
 !!! note
     `SparkDataset` doesn't work as expected with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataset`, you must use `ThreadRunner`.
 
 For more information on how to maximise concurrency when using Kedro with PySpark, read our guide on [how to build a Kedro pipeline with PySpark](../integrations-and-plugins/pyspark_integration.md).
+
+### `ThreadRunner`
+
+While `ParallelRunner` uses multiprocessing, you can also run the pipeline with multithreading for concurrent execution by specifying `ThreadRunner` as follows:
+
+```bash
+kedro run --runner=ThreadRunner
+```
 
 ## Custom runners
 
@@ -185,11 +187,17 @@ To run the pipeline by its name, you need to add your new pipeline to the `regis
 Then, from the command line, execute the following:
 
 ```bash
-kedro run --pipeline=my_pipeline
+kedro run --pipelines=my_pipeline
+```
+
+To run multiple pipelines in a single command, pass a comma-separated list of pipeline names:
+
+```bash
+kedro run --pipelines=data_processing,data_science
 ```
 
 !!! note
-    If you specify `kedro run` without the `--pipeline` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
+    If you specify `kedro run` without the `--pipelines` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run).
@@ -250,7 +258,7 @@ where `config.yml` is formatted as below (for example):
 ```yaml
 run:
   tags: tag1, tag2, tag3
-  pipeline: pipeline1
+  pipelines: pipeline1
   runner: ParallelRunner
   node_names: node1, node2
   env: env1

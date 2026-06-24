@@ -6,7 +6,7 @@ This guide shows how to apply dataset factory patterns to common situations. It 
 
 By default, runtime patterns are not used when calling `catalog.get()` unless explicitly enabled using the `fallback_to_runtime_pattern=True` flag.
 
-**Case 1: Dataset pattern only**
+**Case 1: User-specified dataset pattern**
 
 ```yaml
 "{dataset_name}#csv":

@@ -8,7 +8,7 @@ In this section, we introduce namespaces - a powerful tool for grouping and isol
 
 ## How to reuse your pipelines
 
-If you want to create a new pipeline that performs similar tasks with different inputs/outputs/parameters as your `existing_pipeline`, you can use the same `Pipeline` class as described in [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
+To create a new pipeline that performs similar tasks with different inputs, outputs, or parameters as your `existing_pipeline`, you can use the same `Pipeline` class. See [How to structure your pipeline creation](modular_pipelines.md#how-to-structure-your-pipeline-creation). This function allows you to overwrite inputs, outputs, and parameters. Your new pipeline creation code should look like this:
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
@@ -20,7 +20,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-This means you can create multiple pipelines based on the `existing_pipeline` pipeline to test different approaches with various input datasets and model training parameters. For example, for the `data_science` pipeline from our [Spaceflights tutorial](../tutorials/add_another_pipeline.md#data-science-pipeline), you can restructure the `src/project_name/pipelines/data_science/pipeline.py` file by separating the `data_science` pipeline creation code into a separate `base_data_science` pipeline object, then reusing it inside the `create_pipeline()` function:
+This means you can create multiple pipelines based on the `existing_pipeline` pipeline to test different approaches with various input datasets and model training parameters. For example, take the `data_science` pipeline from our [Spaceflights tutorial](../tutorials/add_another_pipeline.md#data-science-pipeline). You can restructure the `src/project_name/pipelines/data_science/pipeline.py` file by separating the `data_science` pipeline creation code into a `base_data_science` pipeline object, then reusing it inside the `create_pipeline()` function:
 
 ```python
 #src/project_name/pipelines/data_science/pipeline.py
@@ -84,7 +84,7 @@ If you want to execute `base_data_science` and `data_science` pipelines together
 A namespace is a way to isolate nodes, inputs, outputs, and parameters inside your pipeline. If you put `namespace="namespace_name"` attribute inside the `Pipeline` class, it will add the `namespace_name.` prefix to all nodes, inputs, outputs, and parameters inside your new pipeline.
 
 !!! note
-    If you don't want to change the names of your inputs, outputs, or parameters with the `namespace_name.` prefix while using a namespace, you can disable it by setting the `prefix_datasets_with_namespace` parameter to `False`. This keeps the original names of your inputs, outputs, and parameters. The nodes are still prefixed with the namespace name. For example:
+    To skip prefixing your inputs, outputs, or parameters with `namespace_name.` while using a namespace, set the `prefix_datasets_with_namespace` parameter to `False`. This keeps the original names of your inputs, outputs, and parameters. The nodes are still prefixed with the namespace name. For example:
 
 ```python
 Pipeline(
@@ -237,7 +237,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 You can further nest namespaces by assigning namespaces at the node level with the `namespace` argument of the `Node` class. Namespacing at node level should be done to enhance visualisation by creating collapsible pipeline parts on Kedro-Viz. In this case, the node name is prefixed with `namespace_name`, while inputs, outputs, and parameters remain unchanged. This behaviour differs from [namespacing at the pipeline level](#what-is-a-namespace).
 
-For example, if you want to group the first two nodes of the `data_processing` pipeline from [Spaceflights tutorial](../tutorials/add_another_pipeline.md#data-science-pipeline) into the same collapsible namespace for visualisation, you can update your pipeline like this:
+For example, suppose you want to group the first two nodes of the `data_processing` pipeline from [Spaceflights tutorial](../tutorials/add_another_pipeline.md#data-science-pipeline) into the same collapsible namespace for visualisation. You can update your pipeline like this:
 
 ```python
 #src/project_name/pipelines/data_science/pipeline.py

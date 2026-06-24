@@ -109,7 +109,7 @@ Internal fallback behaviour provided by Kedro. These patterns are built into the
 
 By default, runtime patterns are not used when calling `catalog.get()` unless explicitly enabled using the `fallback_to_runtime_pattern=True` flag.
 
-**Case 1: Single dataset pattern**
+**Case 1: User-specified dataset pattern**
 
 ```yaml
 "{dataset_name}#csv":

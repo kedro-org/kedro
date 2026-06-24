@@ -91,7 +91,9 @@ Any combinations of the above are possible, except nodes of the form `Node(f, No
 ## `*args` node functions
 It is common to have functions that take an arbitrary number of inputs, like a function that combines multiple dataframes. You can use the `*args` argument in the node function, while declaring the names of the datasets in the node's inputs.
 
-## `**kwargs` node functions
+<!-- vale Kedro.weaselwords = NO -->
+## `**kwargs`-only node functions
+<!-- vale Kedro.weaselwords = YES -->
 
 Sometimes, when creating reporting nodes for instance, you need to know the names of the datasets that your node receives, but you might not have this information in advance. This can be solved by defining a function that takes `**kwargs`:
 
@@ -221,7 +223,9 @@ You need to add a new dataset in your `catalog.yml` as follows:
 With `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
 
 ### Saving data with generators
-To use generators to save data in chunks, you need to do three things:
+<!-- vale Kedro.weaselwords = NO -->
+To use generators to save data lazily, you need to do three things:
+<!-- vale Kedro.weaselwords = YES -->
 - Update the `make_prediction` function definition to use `yield` instead of `return`.
 - Create a [custom dataset](../extend/how_to_create_a_custom_dataset.md) called `ChunkWiseCSVDataset`
 - Update `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.

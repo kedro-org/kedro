@@ -17,7 +17,7 @@ Kedro provides two session classes, based on the abstract base class `AbstractSe
 
 
 !!! note
-    `KedroServiceSession` is currently in active development and might be subject to occasional breaking changes. We encourage you to try it out and share your feedback with us.
+    `KedroServiceSession` is in active development and might be subject to occasional breaking changes. We encourage you to try it out and share your feedback with us.
 
 
 The main methods and properties of both `KedroSession` and `KedroServiceSession` are:
@@ -58,7 +58,7 @@ You can provide the following optional arguments in `KedroSession.create()`:
 - `conf_source`: Optional argument to specify the configuration source for the `KedroContext`
 
 ## Create a `KedroServiceSession`
-The following code creates a `KedroServiceSession` object as a context manager and runs a pipeline inside the context, with session data provided. Similar to the above example, this script can be called from anywhere in your Kedro project as the root folder will automatically be located. The session automatically closes after exit:
+The following code creates a `KedroServiceSession` object as a context manager and runs a pipeline inside the context, with session data provided. Like the above example, this script can be called from anywhere in your Kedro project as the root folder will automatically be located. The session automatically closes after exit:
 
 ```python
 from pathlib import Path

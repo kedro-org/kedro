@@ -26,7 +26,7 @@ To ensure your virtual environments appear in the Python interpreter list, open 
 "python.venvPath": "/path/containing/your/venvs/"
 ```
 
-If you create a `venv` / `virtualenv` in your project directory named `venv`, VS Code (much like PyCharm) automatically loads it as the Python interpreter unless you manually define a different interpreter as described above.
+If you create a `venv` or `virtualenv` in your project directory named `venv`, VS Code automatically loads it as the Python interpreter (much like PyCharm). This is the default unless you manually define a different interpreter as described above.
 
 
 ## Set up tasks

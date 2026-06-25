@@ -15,6 +15,9 @@
 
 ## Documentation changes
 * Documented hooks limitation when using `ParallelRunner`.
+* Updated the Amazon EMR Serverless deployment guide with a strategy-first layout, custom container images, Spark catalog configuration, and troubleshooting for common deployment issues.
+* Updated the AWS Step Functions deployment guide with a strategy-first layout, pipeline-level namespace grouping, Lambda container deployment, and an end-to-end Spaceflights walkthrough.
+* Updated the AWS Batch deployment guide with a strategy-first layout, custom `AWSBatchRunner` usage, namespace-based job submission, and S3-backed catalog configuration.
 
 ## Community contributions
 * [Feng Jikui](https://github.com/fengjikui)

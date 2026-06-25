@@ -87,7 +87,7 @@ The dataset definition should be passed into the `dataset` argument of the `Part
 
 #### Shorthand notation
 
-Specify the underlying dataset class either as a string (for example, `pandas.CSVDataset` or a fully qualified class path like `kedro_datasets.pandas.CSVDataset`) or as a class object that is a subclass of the [kedro.io.AbstractDataset][].
+Specify the underlying dataset class either as a string or as a class object. As a string, you can use a short name (for example, `pandas.CSVDataset`) or a fully qualified class path (such as `kedro_datasets.pandas.CSVDataset`). A class object must be a subclass of [kedro.io.AbstractDataset][].
 
 #### Full notation
 
@@ -102,7 +102,7 @@ Full notation allows you to specify a dictionary with the full underlying datase
 !!! note
     Support for `dataset_credentials` key in the credentials for `PartitionedDataset` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 
-Credentials management for `PartitionedDataset` is somewhat special, because it might contain credentials for both `PartitionedDataset` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config (unless such config already has credentials configured), but not the other way around - dataset credentials are never propagated to the filesystem.
+Credentials management for `PartitionedDataset` is somewhat special, because it might contain credentials for both `PartitionedDataset` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config, unless that config already has credentials configured. The reverse does not happen — dataset credentials are never propagated to the filesystem.
 
 Here is the full list of possible scenarios:
 
@@ -152,14 +152,14 @@ def concat_partitions(partitioned_input: Dict[str, Callable[[], Any]]) -> pd.Dat
 
 As you can see from the above example, on load `PartitionedDataset` _does not_ automatically load the data from the located partitions. Instead, `PartitionedDataset` returns a dictionary with partition IDs as keys and the corresponding load functions as values. This design lets the consuming node decide which partitions to load and how to process the data.
 
-Partition ID _does not_ represent the whole partition path, but only a part of it that is unique for a given partition _and_ filename suffix:
+Partition ID represents the part of the partition path that is unique for a given partition _and_ filename suffix, not the whole path:
 
 * Example 1: if `path=s3://my-bucket-name/folder` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, then its Partition ID is `2019-12-04/data.csv`.
 
 
 * Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, then its Partition ID is `2019-12-04/data`.
 
-`PartitionedDataset` caches the load operation, which means that if multiple nodes consume the same `PartitionedDataset`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This behaviour guarantees consistent load operations between nodes and avoids race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
+`PartitionedDataset` caches the load operation. If multiple nodes consume the same `PartitionedDataset`, they will all receive the same partition dictionary, even when new partitions were added to the folder after the first load completed. This behaviour guarantees consistent load operations between nodes and avoids race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
 
 ### Partitioned dataset save
 
@@ -238,7 +238,7 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
 !!! note
     Lazy saving is enabled by default. When a `Callable` type is provided, the dataset is written _after_ the `after_node_run` hook finishes.
 
-In certain cases, it might be useful to disable lazy saving, such as when your object is already a `Callable` (for example, a TensorFlow model) and you prefer to write the data straight away.
+In certain cases, it might be useful to disable lazy saving. For example, when your object is already a `Callable` (such as a TensorFlow model) and you prefer to write the data straight away.
 To disable lazy saving, set the `save_lazily` parameter to `False`:
 
 ```yaml
@@ -276,7 +276,7 @@ The `IncrementalDataset` save operation is identical to the [save operation of t
 ### Incremental dataset confirm
 
 !!! note
-    The checkpoint value *is not* automatically updated when a new set of partitions is successfully loaded or saved.
+    The checkpoint value *is not* automatically updated when a new set of partitions is loaded or saved.
 
 Partitioned dataset checkpoint update is triggered by an explicit `confirms` instruction in one of the nodes downstream. It can be the same node, which processes the partitioned dataset:
 

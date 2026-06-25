@@ -16,6 +16,11 @@ from kedro.pipeline import node
 from kedro.utils import _has_rich_handler
 
 
+class KeepOnlyFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "KEEP" in record.getMessage()
+
+
 @pytest.fixture
 def default_logging_config_with_project():
     logging_config = {
@@ -459,6 +464,64 @@ def test_validate_logging_class_bare_name_passes():
 
     logging_instance = _ProjectLogging()
     logging_instance._validate_logging_class("StreamHandler")  # should not raise
+
+
+def test_configure_logging_instantiates_custom_filter_class():
+    from kedro.framework.project import _ProjectLogging
+
+    stream = io.StringIO()
+    filter_class = f"{__name__}.KeepOnlyFilter"
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "filters": {"keep_only": {"class": filter_class}},
+        "handlers": {
+            "stream": {
+                "class": "logging.StreamHandler",
+                "filters": ["keep_only"],
+                "stream": stream,
+            }
+        },
+        "root": {"handlers": ["stream"], "level": "INFO"},
+    }
+
+    logging_instance = _ProjectLogging()
+    logging_instance.configure(logging_config)
+
+    [handler] = logging.getLogger().handlers
+    assert isinstance(handler.filters[0], KeepOnlyFilter)
+    assert logging_instance.data["filters"]["keep_only"] == {"class": filter_class}
+
+    drop_record = logging.LogRecord(
+        "test_logger", logging.INFO, __file__, 1, "DROP this message", (), None
+    )
+    keep_record = logging.LogRecord(
+        "test_logger", logging.INFO, __file__, 1, "KEEP this message", (), None
+    )
+    handler.handle(drop_record)
+    handler.handle(keep_record)
+
+    assert stream.getvalue() == "KEEP this message\n"
+
+
+def test_configure_logging_rejects_non_filter_class_in_filters():
+    from kedro.framework.project import _ProjectLogging
+
+    logging_config = {
+        "version": 1,
+        "filters": {"not_a_filter": {"class": "logging.StreamHandler"}},
+        "handlers": {
+            "stream": {
+                "class": "logging.StreamHandler",
+                "filters": ["not_a_filter"],
+            }
+        },
+        "root": {"handlers": ["stream"], "level": "INFO"},
+    }
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="Must be a subclass of logging.Filter"):
+        logging_instance.configure(logging_config)
 
 
 def test_validate_config_blocks_rce_via_class():

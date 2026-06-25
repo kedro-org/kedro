@@ -1,0 +1,51 @@
+[backlog]
+provider = "github"
+
+[skills]
+providers = ["filesystem", "cursor"]
+
+[skills.cursor]
+enabled = true
+
+[review]
+base_ref = "origin/main"
+
+# Kedro code changes — requires: pip install -e ".[test]" (or make install-test-requirements)
+[[review.checks]]
+id = "kedro-ruff"
+when = ["kedro/**", "tests/**"]
+command = ["python", "-m", "ruff", "check", "kedro/", "tests/", "--exclude", "kedro/templates"]
+
+[[review.checks]]
+id = "kedro-mypy"
+when = ["kedro/**"]
+command = ["python", "-m", "mypy", "kedro", "--strict", "--allow-any-generics", "--no-warn-unused-ignores"]
+
+[[review.checks]]
+id = "kedro-unit-tests"
+when = ["kedro/**", "tests/**"]
+command = ["python", "-m", "pytest", "tests/", "-q", "--tb=short", "-x"]
+
+# Packaging — runs when pyproject.toml changes
+[[review.checks]]
+id = "kedro-packaging-exclude"
+when = ["pyproject.toml"]
+command = ["python", "-c", "import sys; t=open('pyproject.toml').read(); sys.exit(0 if 'exclude = [\"kedro_benchmarks*\"]' in t else 1)"]
+
+[[review.checks]]
+id = "kedro-packaging-wheel"
+when = ["pyproject.toml"]
+command = ["bash", "-c", "set -euo pipefail; tmp=$(mktemp -d); python -m pip wheel . -w \"$tmp\" --no-deps -q; if unzip -l \"$tmp\"/*.whl | grep -q kedro_benchmarks; then echo 'kedro_benchmarks found in wheel'; exit 1; fi"]
+
+# PDLC plan for this feature (update path when planning other work)
+[[review.checks]]
+id = "pdlc-plan"
+when = ["pdlc/spec/changes/exclude-benchmark-tests-from-packaging/**"]
+command = ["pdlc", "plan", "validate", "pdlc/spec/changes/exclude-benchmark-tests-from-packaging/", "--require-complete"]
+
+[backlog.github]
+owner = "ravi-kumar-pilla"
+repo = "kedro-forked"
+hierarchy_mode = "issues"
+label = "pdlc"
+token_env_var = "GITHUB_TOKEN"

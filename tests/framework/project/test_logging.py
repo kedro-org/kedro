@@ -501,7 +501,24 @@ def test_configure_logging_instantiates_custom_filter_class():
     handler.handle(drop_record)
     handler.handle(keep_record)
 
-    assert stream.getvalue() == "KEEP this message\n"
+    logged_messages = stream.getvalue()
+    assert "DROP this message" not in logged_messages
+    assert logged_messages == "KEEP this message\n"
+
+
+def test_prepare_logging_config_without_filters_does_not_add_filters_key():
+    from kedro.framework.project import _ProjectLogging
+
+    logging_config = {
+        "version": 1,
+        "handlers": {"stream": {"class": "logging.StreamHandler"}},
+        "root": {"handlers": ["stream"], "level": "INFO"},
+    }
+
+    logging_instance = _ProjectLogging()
+    prepared_config = logging_instance._prepare_logging_config(logging_config)
+
+    assert "filters" not in prepared_config
 
 
 def test_configure_logging_rejects_non_filter_class_in_filters():

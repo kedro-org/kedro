@@ -361,7 +361,11 @@ class _ProjectLogging(UserDict):
         without allowing user-provided factories.
         """
         prepared_config = logging_config.copy()
-        filters = logging_config.get("filters", {})
+
+        if "filters" not in logging_config:
+            return prepared_config
+
+        filters = logging_config["filters"]
 
         if not isinstance(filters, dict):
             return prepared_config

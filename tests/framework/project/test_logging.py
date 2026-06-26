@@ -521,6 +521,50 @@ def test_prepare_logging_config_without_filters_does_not_add_filters_key():
     assert "filters" not in prepared_config
 
 
+def test_prepare_logging_config_with_non_dict_filters_is_unchanged():
+    from kedro.framework.project import _ProjectLogging
+
+    logging_config = {
+        "version": 1,
+        "filters": ["not-a-filter-config"],
+    }
+
+    logging_instance = _ProjectLogging()
+    prepared_config = logging_instance._prepare_logging_config(logging_config)
+
+    assert prepared_config == logging_config
+    assert prepared_config is not logging_config
+
+
+@pytest.mark.parametrize("filter_config", [{"name": "kedro"}, "not-a-dict"])
+def test_prepare_logging_config_ignores_filters_without_class(filter_config):
+    from kedro.framework.project import _ProjectLogging
+
+    logging_config = {
+        "version": 1,
+        "filters": {"passthrough": filter_config},
+    }
+
+    logging_instance = _ProjectLogging()
+    prepared_config = logging_instance._prepare_logging_config(logging_config)
+
+    assert prepared_config["filters"]["passthrough"] == filter_config
+
+
+def test_prepare_logging_config_ignores_bare_filter_class_name():
+    from kedro.framework.project import _ProjectLogging
+
+    logging_config = {
+        "version": 1,
+        "filters": {"keep_only": {"class": "Filter"}},
+    }
+
+    logging_instance = _ProjectLogging()
+    prepared_config = logging_instance._prepare_logging_config(logging_config)
+
+    assert prepared_config["filters"]["keep_only"] == {"class": "Filter"}
+
+
 def test_configure_logging_rejects_non_filter_class_in_filters():
     from kedro.framework.project import _ProjectLogging
 

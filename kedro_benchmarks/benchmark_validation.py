@@ -1,3 +1,6 @@
+# Write the benchmarking functions here.
+# See "Writing benchmarks" in the asv docs for more information.
+
 import dataclasses
 import inspect
 from pathlib import Path
@@ -97,6 +100,40 @@ def _make_pipeline_dict(node_count: int, typed_params_per_node: int = 1):
     return {"data_science": _make_pipeline(node_count, typed_params_per_node)}
 
 
+def _make_scoped_pipeline(pipeline_name: str, node_count: int, typed_params_per_node: int):
+    nodes = []
+    for node_index in range(node_count):
+        node_func = _make_node_func(
+            f"{pipeline_name}_typed_node_{node_index}",
+            BenchmarkPydanticModel,
+            typed_params_per_node,
+        )
+        node_inputs = [
+            f"params:{pipeline_name}_model_options_{node_index}_{param_index}"
+            for param_index in range(typed_params_per_node)
+        ]
+        nodes.append(
+            node(
+                node_func,
+                node_inputs,
+                f"{pipeline_name}_output_{node_index}",
+                name=f"{pipeline_name}_typed_node_{node_index}",
+            )
+        )
+    return pipeline(nodes)
+
+
+def _make_scoped_pipeline_dict(node_count: int, typed_params_per_node: int = 1):
+    return {
+        "data_science": _make_scoped_pipeline(
+            "data_science", node_count, typed_params_per_node
+        ),
+        "data_engineering": _make_scoped_pipeline(
+            "data_engineering", node_count, typed_params_per_node
+        ),
+    }
+
+
 def _make_raw_params(node_count: int, typed_params_per_node: int = 1):
     return {
         f"model_options_{node_index}_{param_index}": _make_raw_value(
@@ -107,7 +144,21 @@ def _make_raw_params(node_count: int, typed_params_per_node: int = 1):
     }
 
 
+def _make_scoped_raw_params(node_count: int, typed_params_per_node: int = 1):
+    pipeline_names = ("data_science", "data_engineering")
+    return {
+        f"{pipeline_name}_model_options_{node_index}_{param_index}": _make_raw_value(
+            node_index + param_index
+        )
+        for pipeline_name in pipeline_names
+        for node_index in range(node_count)
+        for param_index in range(typed_params_per_node)
+    }
+
+
 class InstantiateModelTimeSuite:
+    """Benchmark model instantiation for supported typed parameter models."""
+
     params = ("pydantic", "dataclass")
     param_names = ("model_kind",)
 
@@ -124,6 +175,8 @@ class InstantiateModelTimeSuite:
 
 
 class TypeExtractorTimeSuite:
+    """Benchmark extracting typed parameter requirements from pipelines."""
+
     params = ([10, 100, 500], [1, 5])
     param_names = ("node_count", "typed_params_per_node")
 
@@ -135,6 +188,8 @@ class TypeExtractorTimeSuite:
 
 
 class ParameterValidatorTimeSuite:
+    """Benchmark validating raw parameters against pipeline type hints."""
+
     params = ([10, 100, 500], [1, 5])
     param_names = ("node_count", "typed_params_per_node")
 
@@ -148,6 +203,8 @@ class ParameterValidatorTimeSuite:
 
 
 class ContextParamsTimeSuite:
+    """Benchmark context parameter validation and cached parameter access."""
+
     params = ([10, 100, 500], [1, 5])
     param_names = ("node_count", "typed_params_per_node")
 
@@ -189,3 +246,37 @@ class ContextParamsTimeSuite:
 
     def time_context_params_cached(self, node_count, typed_params_per_node):
         self.cached_context.params
+
+
+class ScopedContextParamsTimeSuite:
+    """Benchmark context parameter validation scoped to selected pipelines."""
+
+    params = ([10, 100, 500], [1, 5])
+    param_names = ("node_count", "typed_params_per_node")
+
+    def setup(self, node_count, typed_params_per_node):
+        import kedro.framework.project as project_module
+
+        self.project_module = project_module
+        self.original_pipelines = project_module.pipelines
+        self.pipelines = _make_scoped_pipeline_dict(node_count, typed_params_per_node)
+        project_module.pipelines = self.pipelines
+
+        self.context = KedroContext(
+            project_path=Path.cwd(),
+            config_loader=_BenchmarkConfigLoader(
+                _make_scoped_raw_params(node_count, typed_params_per_node)
+            ),
+            env="base",
+            package_name="benchmark_project",
+            hook_manager=None,
+        )
+        self.context._pipelines_to_validate = ["data_science"]
+
+    def teardown(self, node_count, typed_params_per_node):
+        self.project_module.pipelines = self.original_pipelines
+
+    def time_context_params_scoped_validation(self, node_count, typed_params_per_node):
+        self.context._validated_params_cache = None
+        self.context._cached_validation_scope = None
+        self.context.params

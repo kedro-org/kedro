@@ -48,7 +48,22 @@ class TestRegistryDescribeCommand:
         yaml_dump_mock,
         pipeline_name,
         pipelines_dict,
+        mocker,
     ):
+        mock_nodes = []
+        for node_str in pipelines_dict[pipeline_name]:
+            node_name, func_part = node_str.split(" (", 1)
+            mock_node = mocker.Mock()
+            mock_node.name = node_name
+            mock_node._func_name = func_part.rstrip(")")
+            mock_nodes.append(mock_node)
+
+        mock_pipeline = mocker.Mock()
+        mock_pipeline.nodes = mock_nodes
+
+        mock_pipes = mocker.patch("kedro.framework.cli.registry.pipelines")
+        mock_pipes.get.return_value = mock_pipeline
+
         result = CliRunner().invoke(
             fake_project_cli,
             ["registry", "describe", pipeline_name],
@@ -56,15 +71,31 @@ class TestRegistryDescribeCommand:
         )
 
         assert not result.exit_code
+        mock_pipes.set_requested.assert_called_once_with([pipeline_name])
         expected_dict = {"Nodes": pipelines_dict[pipeline_name]}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_registered_pipeline_not_found(self, fake_project_cli, fake_metadata):
+    def test_registered_pipeline_not_found(
+        self, fake_project_cli, fake_metadata, mocker
+    ):
+        mock_pipes = mocker.patch("kedro.framework.cli.registry.pipelines")
+        mock_pipes.get.return_value = None
+        mock_pipes.keys.return_value = [
+            "__default__",
+            "data_engineering",
+            "data_processing",
+            "data_science",
+        ]
+
         result = CliRunner().invoke(
             fake_project_cli, ["registry", "describe", "missing"], obj=fake_metadata
         )
 
         assert result.exit_code
+        assert mock_pipes.set_requested.call_args_list == [
+            mocker.call(["missing"]),
+            mocker.call(None),
+        ]
         expected_output = (
             "Error: 'missing' pipeline not found. Existing pipelines: "
             "[__default__, data_engineering, data_processing, data_science]\n"
@@ -77,7 +108,22 @@ class TestRegistryDescribeCommand:
         fake_metadata,
         yaml_dump_mock,
         pipelines_dict,
+        mocker,
     ):
+        mock_nodes = []
+        for node_str in pipelines_dict["__default__"]:
+            node_name, func_part = node_str.split(" (", 1)
+            mock_node = mocker.Mock()
+            mock_node.name = node_name
+            mock_node._func_name = func_part.rstrip(")")
+            mock_nodes.append(mock_node)
+
+        mock_pipeline = mocker.Mock()
+        mock_pipeline.nodes = mock_nodes
+
+        mock_pipes = mocker.patch("kedro.framework.cli.registry.pipelines")
+        mock_pipes.get.return_value = mock_pipeline
+
         result = CliRunner().invoke(
             fake_project_cli,
             ["registry", "describe"],
@@ -85,5 +131,6 @@ class TestRegistryDescribeCommand:
         )
 
         assert not result.exit_code
+        mock_pipes.set_requested.assert_called_once_with(["__default__"])
         expected_dict = {"Nodes": pipelines_dict["__default__"]}
         yaml_dump_mock.assert_called_once_with(expected_dict)

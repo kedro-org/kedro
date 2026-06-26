@@ -768,6 +768,24 @@ def step_uninstall_rich(context):
     ), f"Failed to uninstall rich:\n{result.stdout}\n{result.stderr}"
 
 
+@given('I have broken the "{pipeline_name}" pipeline with an unimportable dependency')
+def step_break_pipeline_import(context, pipeline_name):
+    """Prepend a bad import to a pipeline's nodes.py to simulate a missing dependency."""
+    nodes_file = (
+        context.root_project_dir
+        / "src"
+        / context.package_name
+        / "pipelines"
+        / pipeline_name
+        / "nodes.py"
+    )
+    content = nodes_file.read_text(encoding="utf-8")
+    nodes_file.write_text(
+        "import _this_package_does_not_exist_kedro_selective_loading_test\n" + content,
+        encoding="utf-8",
+    )
+
+
 @when('I delete the file "{filepath}" from the project')
 def delete_project_file(context, filepath):
     """Deletes a specified file within the root_project_dir."""

@@ -301,7 +301,7 @@ class _ProjectLogging(UserDict):
         self.configure(yaml.safe_load(logging_config))
         logger.info(msg)
 
-    def _validate_logging_class(self, class_path: str) -> None:
+    def _validate_logging_class(self, class_path: str) -> type | None:
         """Validate that a class referenced in logging configuration is a legitimate
         logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
         logging.Filter).
@@ -316,7 +316,7 @@ class _ProjectLogging(UserDict):
         module_path, _, class_name = class_path.rpartition(".")
         if not module_path:
             # Bare name (e.g. "StreamHandler") resolved internally by logging machinery.
-            return
+            return None
 
         try:
             module = importlib.import_module(module_path)
@@ -339,6 +339,8 @@ class _ProjectLogging(UserDict):
                 f"Got {type(cls).__name__!r}."
             )
 
+        return cls
+
     def _validate_logging_config(self, config: Any) -> Any:
         """Recursively check the logging configuration and raise an error if dangerous
         '()' factory keys are encountered or if any 'class' value is not a legitimate
@@ -359,13 +361,37 @@ class _ProjectLogging(UserDict):
         else:
             return config
 
+    def _prepare_logging_config(self, config: dict[str, Any]) -> dict[str, Any]:
+        """Prepare validated logging configuration for ``dictConfig``."""
+        filters = config.get("filters")
+        if not isinstance(filters, dict):
+            return config
+
+        prepared_config = {**config}
+        prepared_filters = {**filters}
+
+        for filter_name, filter_config in filters.items():
+            if not isinstance(filter_config, dict) or "class" not in filter_config:
+                continue
+
+            filter_class = self._validate_logging_class(filter_config["class"])
+            if filter_class and issubclass(filter_class, logging.Filter):
+                prepared_filter_config = {
+                    key: value for key, value in filter_config.items() if key != "class"
+                }
+                prepared_filter_config["()"] = filter_class
+                prepared_filters[filter_name] = prepared_filter_config
+
+        prepared_config["filters"] = prepared_filters
+        return prepared_config
+
     def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
         """
         validated_config = self._validate_logging_config(logging_config)
-        logging.config.dictConfig(validated_config)
+        logging.config.dictConfig(self._prepare_logging_config(validated_config))
         self.data = validated_config
 
     def set_project_logging(

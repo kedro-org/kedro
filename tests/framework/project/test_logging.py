@@ -9,11 +9,21 @@ import pytest
 import yaml
 from rich.console import Console
 
-from kedro.framework.project import LOGGING, configure_logging, configure_project
+from kedro.framework.project import (
+    LOGGING,
+    _ProjectLogging,
+    configure_logging,
+    configure_project,
+)
 from kedro.io import DataCatalog
 from kedro.logging import RichHandler, _format_rich
 from kedro.pipeline import node
 from kedro.utils import _has_rich_handler
+
+
+class KeepMessageFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "KEEP" in record.getMessage()
 
 
 @pytest.fixture
@@ -480,6 +490,53 @@ def test_validate_config_blocks_rce_via_class():
     logging_instance = _ProjectLogging()
     with pytest.raises(ValueError, match="Invalid logging class"):
         logging_instance.configure(malicious_config)
+
+
+def test_configure_logging_instantiates_custom_filter_class():
+    """Custom filter classes configured with 'class' must be attached to handlers."""
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "filters": {
+            "keep_message": {"class": f"{__name__}.KeepMessageFilter"},
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "filters": ["keep_message"],
+            },
+        },
+        "root": {"handlers": ["console"], "level": "INFO"},
+    }
+
+    logging_instance = _ProjectLogging()
+    logging_instance.configure(logging_config)
+
+    attached_filter = logging.getLogger().handlers[0].filters[0]
+    assert isinstance(attached_filter, KeepMessageFilter)
+    assert attached_filter.filter(
+        logging.LogRecord("kedro", logging.INFO, "", 1, "KEEP this", (), None)
+    )
+    assert not attached_filter.filter(
+        logging.LogRecord("kedro", logging.INFO, "", 1, "DROP this", (), None)
+    )
+    assert logging_instance.data == logging_config
+
+
+def test_prepare_logging_config_preserves_filter_config_without_class():
+    """Filter config without 'class' should not be rewritten for dictConfig."""
+    logging_config = {
+        "version": 1,
+        "filters": {
+            "plain_filter": {},
+            "disabled_filter": None,
+        },
+    }
+
+    prepared_config = _ProjectLogging()._prepare_logging_config(logging_config)
+
+    assert prepared_config == logging_config
+    assert prepared_config["filters"] is not logging_config["filters"]
 
 
 @pytest.mark.parametrize(

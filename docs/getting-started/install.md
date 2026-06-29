@@ -1,13 +1,15 @@
 # Set up Kedro
 
 ## Installation prerequisites
-* **Python**: Kedro works on macOS, Linux, and Windows and requires Python 3.10+. You should create a new virtual environment for *each* new Kedro project you work on to isolate its Python dependencies from those of other projects.
 
-* **git**: You must install `git` onto your machine if you do not already have it. Type `git -v` into your terminal window to confirm it is installed; it will return the version of `git` available or an error message. [You can download `git` from the official website](https://git-scm.com/).
+- **Python**: Kedro works on macOS, Linux, and Windows and requires Python 3.10+. You should create a new virtual environment for *each* new Kedro project you work on to isolate its Python dependencies from those of other projects.
+
+- **git**: You must install `git` onto your machine if you do not already have it. Type `git -v` into your terminal window to confirm it is installed; it will return the version of `git` available or an error message. [You can download `git` from the official website](https://git-scm.com/).
 
 ## Python version support policy
-* The core [Kedro Framework](https://github.com/kedro-org/kedro) supports all Python versions that are actively maintained by the `CPython` core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from Kedro. This is not considered a breaking change.
-* The [Kedro Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package follows the [NEP 29](https://numpy.org/neps/nep-0029-deprecation_policy.html) Python version support policy. This means that `kedro-datasets` generally drops Python version support before `kedro`. This is because `kedro-datasets` has a lot of dependencies that follow NEP 29 and the more conservative version support approach of the Kedro Framework makes it hard to manage those dependencies properly.
+
+- The core [Kedro Framework](https://github.com/kedro-org/kedro) supports all Python versions that are actively maintained by the `CPython` core team. When a [Python version reaches end of life](https://devguide.python.org/versions/#versions), support for that version is dropped from Kedro. This is not considered a breaking change.
+- The [Kedro Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package follows the [NEP 29](https://numpy.org/neps/nep-0029-deprecation_policy.html) Python version support policy. This means that `kedro-datasets` generally drops Python version support before `kedro`. This is because `kedro-datasets` has a lot of dependencies that follow NEP 29 and the more conservative version support approach of the Kedro Framework makes it hard to manage those dependencies properly.
 
 ## Quickstart
 
@@ -23,6 +25,7 @@ uvx kedro new --starter spaceflights-pandas --name spaceflights
 ```
 
 !!! note
+
     Using `uvx` lets you run Kedro without installing it into your system or virtual environment. It downloads and runs Kedro in a clean temporary environment each time. If you prefer a standard installation (for example pip + virtual environment), see the [installation guide](#alternative-methods).
 
 The command will create a directory with the contents of your project.
@@ -33,6 +36,7 @@ cd spaceflights
 ```
 
 !!! note
+
     Now that the project exists, you'll work within it using its own virtual environment. The commands below (`uv sync` and `uv run`) create and use the project's environment, rather than the temporary environment that `uvx` used.
 
 Lastly, verify that everything works:
@@ -117,6 +121,7 @@ The former are created with tools like `venv`, `virtualenv` and also `uv`,
 and the latter are created with `conda`.
 
 !!! tip
+
     [Read more about virtual environments for Python projects](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 
 === "uv"
@@ -321,6 +326,7 @@ scikit-learn~=1.0
 ## Other setup steps
 
 ### How to integrate Kedro in your IDE
+
 Working in an IDE can be a great productivity boost.
 
 For VS Code users: Check out [Set up Visual Studio Code](../ide/set_up_vscode.md) and [Kedro VS Code Extension](../ide/set_up_vscode.md#kedro-vs-code-extension).
@@ -343,8 +349,8 @@ Apart from installing the latest version (see above),
 when migrating an existing project to a newer Kedro version
 make sure you also update the `kedro_init_version`:
 
-* For projects generated with versions of Kedro > 0.17.0, you'll do this in the `pyproject.toml` file from the project root directory.
-* If your project was generated with a version of Kedro <0.17.0, you will instead need to update the `ProjectContext`, which is found in `src/<package_name>/run.py`.
+- For projects generated with versions of Kedro > 0.17.0, you'll do this in the `pyproject.toml` file from the project root directory.
+- If your project was generated with a version of Kedro `<0.17.0`, you will instead need to update the `ProjectContext`, which is found in `src/<package_name>/run.py`.
 
 Once Kedro is installed, you can check your version as follows:
 
@@ -354,9 +360,9 @@ kedro --version
 
 ## Summary
 
-* Kedro can be used on Windows, macOS or Linux.
-* Installation prerequisites include a Python 3.10+ and `git`.
-* The simplest way to get started with Kedro is to create a new project using our starters.
-* `uv` is a great choice for managing Kedro projects, but you can use other tools such as `pip`, `Poetry`, `conda`, and more.
+- Kedro can be used on Windows, macOS or Linux.
+- Installation prerequisites include a Python 3.10+ and `git`.
+- The simplest way to get started with Kedro is to create a new project using our starters.
+- `uv` is a great choice for managing Kedro projects, but you can use other tools such as `pip`, `Poetry`, `conda`, and more.
 
 If you encounter any problems as you set up Kedro, ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or review the [searchable archive of Slack discussions](https://linen-slack.kedro.org/).

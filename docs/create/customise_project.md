@@ -1,13 +1,16 @@
 # Customise a new project
+
 As you saw from the [First steps](./new_project.md) section, after you have [set up Kedro](../getting-started/install.md), you can create a new project with `kedro new`. You can then customise the code added to that project for its tooling and example code requirements.
 
 The pages in this section describe in detail the various options available.
 
 ## Tools to customise a new Kedro project
-- [Tools and example code options](./new_project_tools.md)
-## Kedro starters
-- [Starters](./starters.md)
 
+- [Tools and example code options](./new_project_tools.md)
+
+## Kedro starters
+
+- [Starters](./starters.md)
 
 **Use `kedro new` to create a basic project** <br />
 Run `kedro new` to create a project and choose from [tools and example code options](./new_project_tools.md) to extend the basic project.
@@ -43,11 +46,12 @@ python_package: test_kedro
 ```
 
 !!! note
-    When the `--config` flag is used together with `--name`, `--tools`, or `--example`, the values provided directly on the CLI will overwrite those specified in the configuration file.
 
+    When the `--config` flag is used together with `--name`, `--tools`, or `--example`, the values provided directly on the CLI will overwrite those specified in the configuration file.
 
 **Use `kedro new` with a `--starter`** <br />
 You can create a new Kedro project with a [starter](./starters.md) that adds code for a common project use case.
 
 !!! warning
+
     You cannot combine the use of a Kedro starter with the tools and example code options listed above.

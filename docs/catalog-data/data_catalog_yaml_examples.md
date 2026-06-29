@@ -3,9 +3,9 @@
 This page contains a set of examples to help you structure your YAML configuration file in `conf/base/catalog.yml` or `conf/local/catalog.yml`.
 
 !!! Warning
+
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
-
 
 ## Load data from a local binary file using `utf-8` encoding
 
@@ -108,7 +108,6 @@ rockets:
     sheet_name: Sheet1
 ```
 
-
 ## Load a multi-sheet Excel file from a local file system
 
 ```yaml
@@ -129,7 +128,6 @@ results_plot:
     project: my-project
   credentials: my_gcp_credentials
 ```
-
 
 ## Load/save an HDF file on local file system storage, using specified load/save arguments
 
@@ -162,7 +160,6 @@ trucks:
     partition_on: [name]
 ```
 
-
 ## Load/save a Spark table on S3, using specified load/save arguments
 
 ```yaml
@@ -178,7 +175,6 @@ weather:
     sep: '|'
     header: True
 ```
-
 
 ## Load/save a SQL table using credentials, a database connection, and specified load/save arguments
 
@@ -196,7 +192,6 @@ scooters:
 
 ## Load a SQL table with credentials and a database connection, and apply a SQL query to the table
 
-
 ```yaml
 scooters_query:
   type: pandas.SQLQueryDataset
@@ -209,7 +204,6 @@ scooters_query:
 When you use [pandas.SQLTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.SQLTableDataset/), or [pandas.SQLQueryDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/pandas.SQLQueryDataset/) you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
 
 `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` when using `pandas.SQLTableDataset`.
-
 
 ## Load data from an API endpoint
 
@@ -238,9 +232,7 @@ usda_credentials:
   - password
 ```
 
-
 ## Load data from MinIO (S3-compatible storage)
-
 
 ```yaml
 test:
@@ -248,6 +240,7 @@ test:
   filepath: s3://your_bucket/test.csv # assume `test.csv` is uploaded to the MinIO server.
   credentials: dev_minio
 ```
+
 In `credentials.yml`, define the `key`, `secret` and the `endpoint_url` as follows:
 
 ```yaml
@@ -259,10 +252,10 @@ dev_minio:
 ```
 
 !!! note
+
     The easiest way to setup MinIO is to run a Docker image. After the following command, you can access the MinIO server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
-
 
 ## Load a model saved as a pickle from Azure Blob Storage
 
@@ -273,6 +266,7 @@ ml_model:
   versioned: True
   credentials: dev_abs
 ```
+
 In the `credentials.yml` file, define the `account_name` and `account_key`:
 
 ```yaml
@@ -281,10 +275,10 @@ dev_abs:
   account_key: key
 ```
 
-
 ## Load a CSV file stored in a remote location through SSH
 
 !!! note
+
     This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
 
 ```yaml
@@ -293,6 +287,7 @@ cool_dataset:
   filepath: "sftp:///path/to/remote_cluster/cool_data.csv"
   credentials: cluster_credentials
 ```
+
 All parameters required to establish the SFTP connection can be defined through `fs_args` or in the `credentials.yml` file as follows:
 
 ```yaml
@@ -302,6 +297,7 @@ cluster_credentials:
   port: 22
   password: password
 ```
+
 The list of all available parameters is given in the [Paramiko documentation](https://docs.paramiko.org/en/2.4/api/client.html#paramiko.client.SSHClient.connect).
 
 ## Load multiple datasets with similar configuration using YAML anchors
@@ -338,6 +334,7 @@ bikes:
 The syntax `&csv` names the following block `csv` and the syntax `<<: *csv` inserts the contents of the block named `csv`. Locally declared keys entirely override inserted ones as seen in `bikes`.
 
 !!! note
+
     It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
 
 You can also nest reusable YAML syntax:
@@ -381,7 +378,7 @@ my_dataframe@pandas:
   filepath: data/02_intermediate/data.parquet
 ```
 
- When using transcoding you must ensure the file paths defined for each catalog entry share the same format (for example: CSV, JSON, Parquet). These entries can then be used in the pipeline as follows:
+When using transcoding you must ensure the file paths defined for each catalog entry share the same format (for example: CSV, JSON, Parquet). These entries can then be used in the pipeline as follows:
 
 ```python
 Pipeline(

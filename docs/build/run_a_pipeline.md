@@ -29,6 +29,7 @@ kedro run --runner=SequentialRunner
 ### `ParallelRunner`
 
 You can also run the nodes within the pipeline concurrently, using a `ParallelRunner` as follows:
+
 ```bash
 kedro run --runner=ParallelRunner
 ```
@@ -44,9 +45,11 @@ For the `ParallelRunner`, it is possible to manually select which multiprocessin
 To control which multiprocessing start method is used by `ParallelRunner`, set `KEDRO_MP_CONTEXT` to `fork`, `forkserver`, or `spawn`. If the variable is not set, the runner uses the system default.
 
 !!! warning
+
     `ParallelRunner` does not execute `node` and `dataset` hooks. If your project relies on these hooks, use `SequentialRunner` or `ThreadRunner` instead.
 
 !!! note
+
     `SparkDataset` doesn't work as expected with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataset`, you must use `ThreadRunner`.
 
 For more information on how to maximise concurrency when using Kedro with PySpark, read our guide on [how to build a Kedro pipeline with PySpark](../integrations-and-plugins/pyspark_integration.md).
@@ -64,7 +67,9 @@ kedro run --runner=ThreadRunner
 If the built-in Kedro runners do not meet your requirements, you can also define your own runner within your project. For example, you may want to add a dry runner, which lists which nodes would run without executing them:
 
 <!--vale off-->
+
 ??? example "View code"
+
     ```python
     # in src/<package_name>/runner.py
     from kedro.io import DataCatalog
@@ -129,6 +134,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
             if missing_inputs:
                 raise KeyError(f"Datasets {missing_inputs} not found.")
     ```
+
 <!--vale on-->
 
 And use it with `kedro run` through the `--runner` flag:
@@ -140,13 +146,14 @@ $ kedro run --runner=<package_name>.runner.DryRunner
 ## Load and save asynchronously
 
 !!! note
+
     `ThreadRunner` doesn't support asynchronous load-input or save-output operations.
 
 When processing a node, both `SequentialRunner` and `ParallelRunner` perform the following steps in order:
 
 1. Load data based on node input(s)
-2. Execute node function with the input(s)
-3. Save the output(s)
+1. Execute node function with the input(s)
+1. Save the output(s)
 
 If a node has multiple inputs or outputs (for example, `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
 
@@ -158,6 +165,7 @@ $ kedro run --async
 ```
 
 !!! note
+
     All the datasets used in the run have to be [thread-safe](https://www.quora.com/What-is-thread-safety-in-Python) in order for asynchronous loading/saving to work properly.
 
 ## Run a pipeline by name
@@ -165,6 +173,7 @@ $ kedro run --async
 To run the pipeline by its name, you need to add your new pipeline to the `register_pipelines()` function in `src/<package_name>/pipeline_registry.py`:
 
 ??? example "View code"
+
     ```python
     def register_pipelines():
         """Register the project's pipelines.
@@ -183,7 +192,6 @@ To run the pipeline by its name, you need to add your new pipeline to the `regis
         return pipelines
     ```
 
-
 Then, from the command line, execute the following:
 
 ```bash
@@ -197,8 +205,8 @@ kedro run --pipelines=data_processing,data_science
 ```
 
 !!! note
-    If you specify `kedro run` without the `--pipelines` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
+    If you specify `kedro run` without the `--pipelines` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run).
 
@@ -219,6 +227,7 @@ kedro run --pipelines data_engineering,data_science
 Passing `__default__` (or omitting `--pipelines` entirely) loads all registered pipelines as normal.
 
 !!! note "Limitation"
+
     Selective loading requires that `register_pipelines()` uses [`find_pipelines()`](../api/framework/kedro.framework.project.md) for discovery. Top-level imports in `pipeline_registry.py` (outside the function body) fire before any filter is applied. Similarly, direct access to the `pipelines` dictionary outside of `session.run()` (for example, during bootstrapping) bypasses the filter.
 
 ## Run pipelines with IO
@@ -232,6 +241,7 @@ Through `DataCatalog`, we can control where inputs are loaded from, where interm
 In the below example, we define a `MemoryDataset` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, instantiate `SequentialRunner`, and call its `run` method with the pipeline and data catalog instances:
 
 ??? example "View code"
+
     ```python
     io = DataCatalog(dict(xs=MemoryDataset()))
     ```
@@ -260,13 +270,11 @@ In the below example, we define a `MemoryDataset` called `xs` to store our input
     Out[11]: {'v': 0.666666666666667}
     ```
 
-
 ## Configure `kedro run` arguments
 
 The [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run) lists the available CLI options for `kedro run`. You can also supply a configuration file that contains the arguments to `kedro run`.
 
 Here is an example file named `config.yml`, but you can choose any name for the file:
-
 
 ```console
 $ kedro run --config=config.yml
@@ -295,6 +303,7 @@ This is because the configuration file gets parsed by [Click](https://click.pall
 Variable names and arguments in Python must contain alphanumeric characters and underscores, so you cannot include a dash in the option names when using the configuration file.
 
 !!! note
+
     If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
 
 ## Running pipelines programmatically with runners
@@ -303,8 +312,8 @@ Kedro runners provide a consistent interface for executing pipelines, whether yo
 
 ### Output from `runner.run()`
 
-* The `runner.run()` method **returns a dictionary of pipeline output datasets**, where keys are dataset names and values are the dataset objects (not the data itself).
-* It **does not return raw data** — to retrieve the actual data, call `.load()` on each dataset object or through the catalog.
+- The `runner.run()` method **returns a dictionary of pipeline output datasets**, where keys are dataset names and values are the dataset objects (not the data itself).
+- It **does not return raw data** — to retrieve the actual data, call `.load()` on each dataset object or through the catalog.
 
 ```python
 from kedro.framework.project import pipelines
@@ -335,9 +344,9 @@ To support multiprocessing, `ParallelRunner` requires a special catalog: **`Shar
 
 This catalog:
 
-* Extends `DataCatalog`
-* Ensures datasets are safe for multiprocessing
-* Uses shared memory for inter-process communication
+- Extends `DataCatalog`
+- Ensures datasets are safe for multiprocessing
+- Uses shared memory for inter-process communication
 
 ```python
 from kedro.framework.project import pipelines
@@ -372,8 +381,8 @@ You don’t need to worry about which catalog to use — Kedro takes care of tha
 
 ### Summary
 
-* `runner.run()` always returns a **dictionary of output dataset names and dataset objects**, not the data itself.
-* Use `catalog[ds_name].load()` or `.load()` on each dataset object to get the actual data.
-* `ParallelRunner` requires `SharedMemoryDataCatalog` for multiprocessing.
-* The Kedro CLI selects the correct catalog automatically.
-* When using the Python API, **you must explicitly choose the appropriate catalog based on the runner you select.**
+- `runner.run()` always returns a **dictionary of output dataset names and dataset objects**, not the data itself.
+- Use `catalog[ds_name].load()` or `.load()` on each dataset object to get the actual data.
+- `ParallelRunner` requires `SharedMemoryDataCatalog` for multiprocessing.
+- The Kedro CLI selects the correct catalog automatically.
+- When using the Python API, **you must explicitly choose the appropriate catalog based on the runner you select.**

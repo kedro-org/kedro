@@ -1,17 +1,19 @@
 # Single-machine deployment
+
 This topic explains how to deploy Kedro on a production server. You can use three alternative methods to deploy your Kedro pipelines:
 
 - [Container-based deployment](#container-based)
 - [Package-based deployment](#package-based)
 - [CLI-based deployment](#cli-based)
 
-
 ## Container-based
+
 This approach uses containers, such as [`Docker`](https://www.docker.com/) or any other container solution, to build an image and run the entire Kedro project in your preferred environment.
 
 For this walk-through, we assume a Docker workflow. We recommend the [Kedro-Docker plugin](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to streamline the process, and [usage instructions are in the plugin README](https://github.com/kedro-org/kedro-plugins/blob/main/README.md). After you’ve built the Docker image for your project locally, transfer the image to the production server. You can do this as follows:
 
 ### How to use container registry
+
 A container registry allows you to store and share container images. [Docker Hub](https://www.docker.com/products/docker-hub) is one example of a container registry you can use for deploying your Kedro project. If you have a [Docker ID](https://docs.docker.com/docker-id) you can use it to push and pull your images from the Docker server using the following steps.
 
 Tag your image on your local machine:
@@ -33,11 +35,13 @@ docker pull <DockerID>/<image-name>
 ```
 
 !!! note
+
     Repositories on Docker Hub are set to public visibility by default. You can change your project to private on the Docker Hub website.
 
 The procedure for using other container registries, like AWS ECR or GitLab Container Registry, is almost identical to the steps described above. Authentication differs for each solution.
 
 ## Package-based
+
 If you prefer not to use containerisation, you can instead package your Kedro project using [`kedro package`](../getting-started/commands_reference.md#kedro-package).
 
 Run the following in your project’s root directory:
@@ -65,11 +69,13 @@ python -m project_name
 ```
 
 ## CLI-based
+
 If neither containers nor packages suit your project, clone the codebase to a production server with the [Kedro CLI](../getting-started/commands_reference.md).
 
 You will need to follow these steps to get your project running:
 
 ### Use GitHub workflow to copy your project
+
 This workflow assumes that development of the Kedro project is done on a local environment under version control by Git. Commits are pushed to a remote server (for example, GitHub, GitLab, or Bitbucket).
 
 Deployment of the (latest) code on a production server is accomplished through cloning and the periodic pulling of changes from the Git remote. The pipeline is then executed on the server.
@@ -96,6 +102,7 @@ git clone <repository>
 ```
 
 ### Install and run the Kedro project
+
 Once you have copied your Kedro project to the server, you need to follow these steps to install all project requirements and run the project.
 
 Install Kedro on the server using pip:

@@ -3,11 +3,13 @@
 Kedro includes a built-in HTTP server that lets external systems interact with a Kedro project over REST — triggering pipeline runs, inspecting project metadata, and more. It is backed by [`KedroServiceSession`](./session.md#create-a-kedroservicesession), which keeps the session alive across multiple requests.
 
 The HTTP server requires optional dependencies. Install them with:
+
 ```bash
 pip install 'kedro[server]'
 ```
 
 !!! note
+
     The HTTP server is intentionally minimal and meant to provide an interface that can be extended for custom use cases. It does not include authentication, authorisation, request queuing, async job execution, run history, or per-request session isolation. Do not expose it publicly without adding appropriate security controls.
 
 ## Starting the server
@@ -22,13 +24,13 @@ This starts the server at `http://127.0.0.1:8000` by default.
 
 ### Options
 
-| Option | Short | Default | Description |
-|---|---|---|---|
-| `--host` | `-H` | `127.0.0.1` | Host to bind the server to |
-| `--port` | `-p` | `8000` | Port to bind the server to |
-| `--reload` | | `False` | Enable auto-reload on code changes. Intended for development, do not use in production. |
-| `--env` | `-e` | | Kedro configuration environment |
-| `--conf-source` | | | Path to a custom configuration directory |
+| Option          | Short | Default     | Description                                                                             |
+| --------------- | ----- | ----------- | --------------------------------------------------------------------------------------- |
+| `--host`        | `-H`  | `127.0.0.1` | Host to bind the server to                                                              |
+| `--port`        | `-p`  | `8000`      | Port to bind the server to                                                              |
+| `--reload`      |       | `False`     | Enable auto-reload on code changes. Intended for development, do not use in production. |
+| `--env`         | `-e`  |             | Kedro configuration environment                                                         |
+| `--conf-source` |       |             | Path to a custom configuration directory                                                |
 
 Examples:
 
@@ -115,6 +117,7 @@ If the snapshot cannot be built (for example, due to a catalog error), the respo
 ```
 
 !!! note
+
     The `/snapshot` endpoint uses the environment and configuration source configured at server startup (`--env` / `KEDRO_SERVER_ENV` and `--conf-source` / `KEDRO_SERVER_CONF_SOURCE`). It does not accept per-request `env` or `conf_source` parameters.
 
 See [Inspect a Kedro project](../inspect/inspect-project.md) for the programmatic API and details on the snapshot structure.
@@ -141,21 +144,21 @@ curl -X POST http://127.0.0.1:8000/run \
 
 Key request fields:
 
-| Field | Type | Description |
-|---|---|---|
-| `from_inputs` | `list[str]` | Start the pipeline from these dataset names |
-| `to_outputs` | `list[str]` | End the pipeline at these dataset names |
-| `from_nodes` | `list[str]` | Start the pipeline from these node names |
-| `to_nodes` | `list[str]` | End the pipeline at these node names |
-| `node_names` | `list[str]` | Run specific nodes |
-| `runner` | `str` | Runner class name or full dotted path, should be a subclass of `kedro.runner.AbstractRunner` (default: `SequentialRunner`) |
-| `is_async` | `bool` | Load and save node inputs and outputs asynchronously with threads (default: `false`) |
-| `tags` | `list[str]` | Run nodes with these tags |
-| `load_versions` | `dict[str, str]` | Pin specific dataset versions for loading, as `{"dataset_name": "version"}` |
-| `pipeline_names` | `list[str]` | Pipelines to run (default pipeline if omitted) |
-| `namespaces` | `list[str]` | Run nodes in these namespaces |
-| `params` | `dict` | Runtime parameters passed to the context |
-| `only_missing_outputs` | `bool` | Skip nodes whose outputs already exist and are persisted |
+| Field                  | Type             | Description                                                                                                                |
+| ---------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `from_inputs`          | `list[str]`      | Start the pipeline from these dataset names                                                                                |
+| `to_outputs`           | `list[str]`      | End the pipeline at these dataset names                                                                                    |
+| `from_nodes`           | `list[str]`      | Start the pipeline from these node names                                                                                   |
+| `to_nodes`             | `list[str]`      | End the pipeline at these node names                                                                                       |
+| `node_names`           | `list[str]`      | Run specific nodes                                                                                                         |
+| `runner`               | `str`            | Runner class name or full dotted path, should be a subclass of `kedro.runner.AbstractRunner` (default: `SequentialRunner`) |
+| `is_async`             | `bool`           | Load and save node inputs and outputs asynchronously with threads (default: `false`)                                       |
+| `tags`                 | `list[str]`      | Run nodes with these tags                                                                                                  |
+| `load_versions`        | `dict[str, str]` | Pin specific dataset versions for loading, as `{"dataset_name": "version"}`                                                |
+| `pipeline_names`       | `list[str]`      | Pipelines to run (default pipeline if omitted)                                                                             |
+| `namespaces`           | `list[str]`      | Run nodes in these namespaces                                                                                              |
+| `params`               | `dict`           | Runtime parameters passed to the context                                                                                   |
+| `only_missing_outputs` | `bool`           | Skip nodes whose outputs already exist and are persisted                                                                   |
 
 On success the response contains `run_id`, `status`, and `duration_ms`:
 
@@ -182,11 +185,13 @@ On failure the response also contains an `error` object with the exception type 
 ```
 
 !!! note
+
     `RunRequest` model uses strict validation, unknown fields return an error rather than being ignored.
 
 The first `/run` request creates a `KedroServiceSession` which the following requests reuse. The endpoint runs in a thread pool, so concurrent `/run` requests share the same session and pipeline runs are not isolated from each other.
 
 !!! note
+
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the `--env` and `--conf-source` options instead.
 
 #### Runner security
@@ -218,7 +223,6 @@ app = create_http_server(
 import uvicorn
 uvicorn.run(app, host="127.0.0.1", port=8000)
 ```
-
 
 ## Extending the server
 

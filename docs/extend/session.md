@@ -1,32 +1,33 @@
 # Lifecycle management with `KedroSession` and `KedroServiceSession`
 
 ## Overview
+
 A session allows you to manage the lifecycle of Kedro runs, decoupling Kedro's library components, managed by `KedroContext`, and any session data (both static and dynamic data). As a result, Kedro components and plugins can access session data without the need to import the `KedroContext` object and library components.
 
 Kedro provides two session classes, based on the abstract base class `AbstractSession`:
 
-* `KedroSession`:
-    * Manages the lifecycle of a Kedro run, for single-run execution of Kedro pipelines.
-    * Persists runtime parameters with corresponding session IDs.
-    * Captures session metadata, including CLI context and environment information, alongside runtime parameters.
+- `KedroSession`:
 
-* `KedroServiceSession`:
-    * Manages the lifecycle of Kedro components in a multi-run execution environment.
-    * Allows you to run pipelines multiple times in the same session, with different runtime parameters for each run.
-    * Ideal for service use cases, where you want to keep the session alive and run pipelines on demand, such as in a web service or API.
+    - Manages the lifecycle of a Kedro run, for single-run execution of Kedro pipelines.
+    - Persists runtime parameters with corresponding session IDs.
+    - Captures session metadata, including CLI context and environment information, alongside runtime parameters.
 
+- `KedroServiceSession`:
+
+    - Manages the lifecycle of Kedro components in a multi-run execution environment.
+    - Allows you to run pipelines multiple times in the same session, with different runtime parameters for each run.
+    - Ideal for service use cases, where you want to keep the session alive and run pipelines on demand, such as in a web service or API.
 
 !!! note
-    `KedroServiceSession` is in active development and might be subject to occasional breaking changes. We encourage you to try it out and share your feedback with us.
 
+    `KedroServiceSession` is in active development and might be subject to occasional breaking changes. We encourage you to try it out and share your feedback with us.
 
 The main methods and properties of both `KedroSession` and `KedroServiceSession` are:
 
 - `create()`: Create a new instance of session class with session data
 - `load_context()`: Instantiate `KedroContext` object. For `KedroServiceSession`, this method accepts an optional `runtime_params` argument, which allows you to update the `KedroContext` parameters for that run
 - `close()`: Close the current session. For `KedroSession`, this also saves the session data to disk if `save_on_close` is set to `True`.
-- `run()`: Run the pipeline with the arguments provided; see  [Running pipelines](../build/run_a_pipeline.md) for details
-
+- `run()`: Run the pipeline with the arguments provided; see [Running pipelines](../build/run_a_pipeline.md) for details
 
 ## Create a `KedroSession`
 
@@ -58,6 +59,7 @@ You can provide the following optional arguments in `KedroSession.create()`:
 - `conf_source`: Optional argument to specify the configuration source for the `KedroContext`
 
 ## Create a `KedroServiceSession`
+
 The following code creates a `KedroServiceSession` object as a context manager and runs a pipeline inside the context, with session data provided. Like the above example, this script can be called from anywhere in your Kedro project as the root folder will automatically be located. The session automatically closes after exit:
 
 ```python
@@ -91,13 +93,10 @@ You can provide the following optional arguments in `KedroServiceSession.create(
 - `env`: Environment for the `KedroContext`
 - `conf_source`: Optional argument to specify the configuration source for the `KedroContext`
 
-
 The main differences in the `create()` method between `KedroSession` and `KedroServiceSession` are:
 
 - `KedroServiceSession` does not have the `save_on_close` argument.
 - `KedroServiceSession` does not have the `runtime_params` argument, as runtime parameters are provided in the `run()` method for each run, allowing you to update the `KedroContext` parameters for that specific run.
-
-
 
 ## `bootstrap_project` and `configure_project`
 
@@ -127,9 +126,11 @@ This function uses `configure_project`, and also reads metadata from `pyproject.
 This function reads `settings.py` and `pipeline_registry.py` and registers the configuration before Kedro's run starts. If you have a packaged Kedro project, run `configure_project` before executing your pipeline.
 
 #### `ValueError`: package name not found
+
 > ValueError: Package name not found. Make sure you have configured the project using `bootstrap_project`. This should happen automatically if you are using Kedro command line interface.
 
 If you are using `multiprocessing`, you need to be careful about this. Depending on your Operating System, you may have [different default](https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods). If the processes are `spawn`, Python will re-import all the modules in each process and thus you need to run `configure_project` again at the start of the new process. For example, this is how Kedro handles this in `ParallelRunner`:
+
 ```python
 if multiprocessing.get_start_method() == "spawn" and package_name:
         _bootstrap_subprocess(package_name, logging_config)

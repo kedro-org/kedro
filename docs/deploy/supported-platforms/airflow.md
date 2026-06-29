@@ -24,10 +24,10 @@ The following tutorial shows how to deploy an example [Spaceflights Kedro projec
 
 To follow this tutorial, ensure you have the following:
 
-* The [Astro CLI installed](https://www.astronomer.io/docs/astro/cli/install-cli)
-* A container service like [Docker Desktop](https://docs.docker.com/get-docker/) (v18.09 or higher)
-* `kedro>=0.19` installed
-* [`kedro-airflow>=0.8`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) installed. We will use this plugin to convert the Kedro pipeline into an Airflow DAG.
+- The [Astro CLI installed](https://www.astronomer.io/docs/astro/cli/install-cli)
+- A container service like [Docker Desktop](https://docs.docker.com/get-docker/) (v18.09 or higher)
+- `kedro>=0.19` installed
+- [`kedro-airflow>=0.8`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) installed. We will use this plugin to convert the Kedro pipeline into an Airflow DAG.
 
 ### Create, prepare and package example Kedro project
 
@@ -39,7 +39,7 @@ In this section, you will create a new Kedro project equipped with an example pi
     kedro new --example=yes --name=new-kedro-project --tools=log
     ```
 
-2. Navigate to your project's directory, create a new `conf/airflow` directory for Airflow-specific configurations, and copy the `catalog.yml` file from `conf/base` to `conf/airflow`. This setup allows you to customise the `DataCatalog` for use with Airflow:
+1. Navigate to your project's directory, create a new `conf/airflow` directory for Airflow-specific configurations, and copy the `catalog.yml` file from `conf/base` to `conf/airflow`. This setup allows you to customise the `DataCatalog` for use with Airflow:
 
     ```shell
     cd new-kedro-project
@@ -47,7 +47,7 @@ In this section, you will create a new Kedro project equipped with an example pi
     cp conf/base/catalog.yml conf/airflow/catalog.yml
     ```
 
-3. Open `conf/airflow/catalog.yml` to view the datasets used in the project. Additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) live in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure the datasets persist across tasks in Airflow, include them in the `DataCatalog`. Instead of repeating similar code for each dataset, use [Dataset Factories](https://docs.kedro.org/en/stable/catalog-data/kedro_dataset_factories/), a syntax that lets you define a catch-all pattern to replace the default `MemoryDataset` creation. Add the following to the end of the file:
+1. Open `conf/airflow/catalog.yml` to view the datasets used in the project. Additional intermediate datasets (`X_train`, `X_test`, `y_train`, `y_test`) live in memory. You can locate these in the pipeline description under `/src/new_kedro_project/pipelines/data_science/pipeline.py`. To ensure the datasets persist across tasks in Airflow, include them in the `DataCatalog`. Instead of repeating similar code for each dataset, use [Dataset Factories](https://docs.kedro.org/en/stable/catalog-data/kedro_dataset_factories/), a syntax that lets you define a catch-all pattern to replace the default `MemoryDataset` creation. Add the following to the end of the file:
 
     ```yaml
     "{base_dataset}":
@@ -59,7 +59,7 @@ In this section, you will create a new Kedro project equipped with an example pi
 
     Starting with `kedro-airflow` release 0.9.0, you can adopt a different strategy instead of following steps 2-3: group nodes that use intermediate `MemoryDatasets` into larger tasks using `--group-by memory`. This approach allows intermediate data manipulation to occur within a single task, eliminating the need to transfer data between nodes. Enable this behaviour by running `kedro airflow create` with the `--group-by memory` flag on Step 6.
 
-4. Open `conf/logging.yml` and change the `root: handlers` section to `[console]` at the end of the file. By default, Kedro uses the [Rich library](https://rich.readthedocs.io/en/stable/index.html) to enhance log output with sophisticated formatting. Some deployment systems, including Airflow, do not work well with Rich, so update the logging configuration to a simpler console version. For more information on logging in Kedro, see the [Kedro docs](https://docs.kedro.org/en/stable/develop/logging/).
+1. Open `conf/logging.yml` and change the `root: handlers` section to `[console]` at the end of the file. By default, Kedro uses the [Rich library](https://rich.readthedocs.io/en/stable/index.html) to enhance log output with sophisticated formatting. Some deployment systems, including Airflow, do not work well with Rich, so update the logging configuration to a simpler console version. For more information on logging in Kedro, see the [Kedro docs](https://docs.kedro.org/en/stable/develop/logging/).
 
     > ⚠️ **Note**: This step is optional for Airflow from version `2.11.0` onward, as the compatibility issue has been confirmed fixed at least from this version.
 
@@ -68,7 +68,7 @@ In this section, you will create a new Kedro project equipped with an example pi
       handlers: [console]
     ```
 
-5. Package the Kedro pipeline as a Python package so you can install it into the Airflow container later on:
+1. Package the Kedro pipeline as a Python package so you can install it into the Airflow container later on:
 
     ```shell
     kedro package
@@ -76,7 +76,7 @@ In this section, you will create a new Kedro project equipped with an example pi
 
     This step should produce a wheel file called `new_kedro_project-0.1-py3-none-any.whl` located at `dist/`.
 
-6. Convert the Kedro pipeline into an Airflow DAG with `kedro airflow`
+1. Convert the Kedro pipeline into an Airflow DAG with `kedro airflow`
 
     ```shell
     kedro airflow create --target-dir=dags/ --env=airflow
@@ -85,6 +85,7 @@ In this section, you will create a new Kedro project equipped with an example pi
     This step should produce a `.py` file called `new_kedro_project_airflow_dag.py` located at `dags/`.
 
     Optionally, you can use the `--group-by` flag to group nodes:
+
     - `--group-by memory`: Groups nodes connected through `MemoryDatasets`
     - `--group-by namespace`: Groups nodes by their namespace
 
@@ -94,7 +95,7 @@ In this section, you will set up a new blank Airflow project using Astro and cop
 
 1. To complete this section, you have to install both the [Astro CLI](https://www.astronomer.io/docs/astro/cli/install-cli) and [Docker Desktop](https://docs.docker.com/get-docker/).
 
-2. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of your Kedro project. Let's call it `kedro-airflow-spaceflights`
+1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/develop-project) in a new folder outside of your Kedro project. Let's call it `kedro-airflow-spaceflights`
 
     ```shell
     cd ..
@@ -103,7 +104,8 @@ In this section, you will set up a new blank Airflow project using Astro and cop
     astro dev init
     ```
 
-3. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run the Kedro project there, you need to copy several items from the previous section into it:
+1. The folder `kedro-airflow-spaceflights` will be executed within the Airflow container. To run the Kedro project there, you need to copy several items from the previous section into it:
+
     - the `/data` folder from Step 1, containing sample input datasets for our pipeline. This folder will also store the output results.
     - the `/conf` folder from Steps 2-4, which includes our `DataCatalog`, parameters, and customised logging files. These files will be used by Kedro during its execution in the Airflow container.
     - the `.whl` file from Step 5, which you will need to install in the Airflow Docker container to execute our project node by node.
@@ -119,7 +121,7 @@ In this section, you will set up a new blank Airflow project using Astro and cop
 
     You can copy the entire `new-kedro-project` directory into `kedro-airflow-spaceflights` if the project requires frequent updates, DAG recreation, and repackaging. Working with Kedro and Astro projects in a single folder saves you from copying files for each development iteration. Be aware that the projects will then share files such as `requirements.txt`, `README.md`, and `.gitignore`.
 
-4. Add the following lines to the `Dockerfile` located in the `kedro-airflow-spaceflights` folder to set the environment variable `KEDRO_LOGGING_CONFIG` to point to `conf/logging.yml`, enabling custom logging in Kedro (from Kedro 0.19.6 onward, this step is unnecessary because Kedro uses the `conf/logging.yml` file by default), and to install the `.whl` file of the prepared Kedro project into the Airflow container:
+1. Add the following lines to the `Dockerfile` located in the `kedro-airflow-spaceflights` folder to set the environment variable `KEDRO_LOGGING_CONFIG` to point to `conf/logging.yml`, enabling custom logging in Kedro (from Kedro 0.19.6 onward, this step is unnecessary because Kedro uses the `conf/logging.yml` file by default), and to install the `.whl` file of the prepared Kedro project into the Airflow container:
 
     ```Dockerfile
     ENV KEDRO_LOGGING_CONFIG="conf/logging.yml" # This line is not needed from Kedro 0.19.6
@@ -127,29 +129,31 @@ In this section, you will set up a new blank Airflow project using Astro and cop
     RUN pip install --user dist/new_kedro_project-0.1-py3-none-any.whl
     ```
 
-5. Navigate to `kedro-airflow-spaceflights` folder and launch the local Airflow cluster with Astronomer
+1. Navigate to `kedro-airflow-spaceflights` folder and launch the local Airflow cluster with Astronomer
 
     ```shell
     cd kedro-airflow-spaceflights
     astro dev start
     ```
 
-6. Visit the Airflow web server UI at its default address, http://localhost:8080, using the default login credentials: username and password both set to `admin`. There, you'll find a list of all DAGs. Navigate to the `new-kedro-project` DAG and press the `Trigger DAG` play button to start it. You can then observe the steps of your project as they run:
+1. Visit the Airflow web server UI at its default address, http://localhost:8080, using the default login credentials: username and password both set to `admin`. There, you'll find a list of all DAGs. Navigate to the `new-kedro-project` DAG and press the `Trigger DAG` play button to start it. You can then observe the steps of your project as they run:
 
     ![](../../meta/images/kedro_airflow_dag_run.png)
 
-7. The Kedro project was run inside an Airflow Docker container, and the results are stored there as well. To copy these results to your host, first identify the relevant Docker containers by listing them:
+1. The Kedro project was run inside an Airflow Docker container, and the results are stored there as well. To copy these results to your host, first identify the relevant Docker containers by listing them:
+
     ```shell
     docker ps
     ```
+
     Select the container acting as the scheduler and note its ID. Then, use the following command to copy the results, substituting `d36ef786892a` with the actual container ID:
 
     ```shell
     docker cp  d36ef786892a:/usr/local/airflow/data/ ./data/
     ```
 
+1. To stop the Astro Airflow environment, you can use the command:
 
-8. To stop the Astro Airflow environment, you can use the command:
     ```shell
     astro dev stop
     ```
@@ -161,51 +165,64 @@ You can deploy and run your project on Astro Cloud, the cloud infrastructure pro
 1. Log in to your account on the [Astronomer portal](https://www.astronomer.io/) and create a new deployment if you don't already have one:
     ![](../../meta/images/astronomer_new_deployment.png)
 
-2. Use the Astro CLI to log in to your Astro Cloud account:
+1. Use the Astro CLI to log in to your Astro Cloud account:
+
     ```shell
     astro auth
     ```
+
     You will be redirected to enter your login credentials in your browser. Successful login indicates that your terminal is now linked with your Astro Cloud account:
 
     ![](../../meta/images/astronomer_connected.png)
 
-3. To deploy your local project to the cloud, navigate to the `kedro-airflow-spaceflights` folder and run:
+1. To deploy your local project to the cloud, navigate to the `kedro-airflow-spaceflights` folder and run:
+
     ```shell
     astro deploy
     ```
 
-4. At the end of the deployment process, you receive a link that lets you manage your project in the cloud:
+1. At the end of the deployment process, you receive a link that lets you manage your project in the cloud:
 
     ![](../../meta/images/astronomer_cloud_deployment.png)
 
 ## How to run a Kedro pipeline on Amazon AWS Managed Workflows for Apache Airflow (MWAA)
 
 ### Kedro project preparation
+
 MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it easier to set up, operate, and scale Apache Airflow in the cloud. Deploying a Kedro pipeline to MWAA shares several steps with Astronomer. There are key differences: you need to store your project data in an AWS S3 bucket and update the `DataCatalog`. You must also plan how you upload your Kedro configuration, install your Kedro package, and set the required environment variables.
 
 1. Complete steps 1-4 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section.
-2. Your project's data should not sit in the working directory of the Airflow container. Instead, [create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html) and [upload your data folder from the new-kedro-project folder to your S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html).
-3. Update the `DataCatalog` to reference data in your S3 bucket by adjusting the filepath and adding a credentials entry for each dataset in `new-kedro-project/conf/airflow/catalog.yml`. Add the S3 prefix to the filepath, as shown below:
+
+1. Your project's data should not sit in the working directory of the Airflow container. Instead, [create an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html) and [upload your data folder from the new-kedro-project folder to your S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html).
+
+1. Update the `DataCatalog` to reference data in your S3 bucket by adjusting the filepath and adding a credentials entry for each dataset in `new-kedro-project/conf/airflow/catalog.yml`. Add the S3 prefix to the filepath, as shown below:
+
     ```shell
     companies:
       type: pandas.CSVDataset
       filepath: s3://<your_S3_bucket>/data/01_raw/companies.csv
       credentials: dev_s3
     ```
-4. [Set up AWS credentials](https://docs.aws.amazon.com/keyspaces/latest/devguide/access.credentials.html) to provide read and write access to your S3 bucket. Update `new-kedro-project/conf/local/credentials.yml` with your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and copy it to the `new-kedro-project/conf/airflow/` folder:
+
+1. [Set up AWS credentials](https://docs.aws.amazon.com/keyspaces/latest/devguide/access.credentials.html) to provide read and write access to your S3 bucket. Update `new-kedro-project/conf/local/credentials.yml` with your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and copy it to the `new-kedro-project/conf/airflow/` folder:
+
     ```shell
     dev_s3:
       client_kwargs:
         aws_access_key_id: *********************
         aws_secret_access_key: ******************************************
     ```
-5. Add `s3fs` to your project’s `requirements.txt` in `new-kedro-project` to enable communication with AWS S3. Some libraries trigger dependency conflicts in the Airflow environment, so keep the requirements list lean and avoid adding `kedro-viz` and `pytest`.
+
+1. Add `s3fs` to your project’s `requirements.txt` in `new-kedro-project` to enable communication with AWS S3. Some libraries trigger dependency conflicts in the Airflow environment, so keep the requirements list lean and avoid adding `kedro-viz` and `pytest`.
+
     ```shell
     s3fs
     ```
 
-6. Follow steps 5-6 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section to package your Kedro project and generate an Airflow DAG.
-7. Update the DAG file `new_kedro_project_airflow_dag.py` located in the `dags/` folder by adding `conf_source="plugins/conf-new_kedro_project.tar.gz"` to the arguments of `KedroSession.create()` in the Kedro operator execution function. This change is necessary because your Kedro configuration archive will be stored in the `plugins/` folder, not the root directory:
+1. Follow steps 5-6 from the [Create, prepare and package example Kedro project](#create-prepare-and-package-example-kedro-project) section to package your Kedro project and generate an Airflow DAG.
+
+1. Update the DAG file `new_kedro_project_airflow_dag.py` located in the `dags/` folder by adding `conf_source="plugins/conf-new_kedro_project.tar.gz"` to the arguments of `KedroSession.create()` in the Kedro operator execution function. This change is necessary because your Kedro configuration archive will be stored in the `plugins/` folder, not the root directory:
+
     ```shell
         def execute(self, context):
             configure_project(self.package_name)
@@ -215,24 +232,33 @@ MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it e
     ```
 
 ### Deployment on MWAA
+
 1. Archive your three files: `new_kedro_project-0.1-py3-none-any.whl` and `conf-new_kedro_project.tar.gz` located in `new-kedro-project/dist`, and `logging.yml` located in `new-kedro-project/conf/` into a file called `plugins.zip` and upload it to `s3://your_S3_bucket`.
+
     ```shell
     zip -j plugins.zip dist/new_kedro_project-0.1-py3-none-any.whl dist/conf-new_kedro_project.tar.gz conf/logging.yml
     ```
+
     This archive will be later unpacked to the `/plugins` folder in the working directory of the Airflow container.
 
-2. Create a new `requirements.txt` file, add the path where your Kedro project will be unpacked in the Airflow container, and upload `requirements.txt` to `s3://your_S3_bucket`:
+1. Create a new `requirements.txt` file, add the path where your Kedro project will be unpacked in the Airflow container, and upload `requirements.txt` to `s3://your_S3_bucket`:
+
     ```shell
     ./plugins/new_kedro_project-0.1-py3-none-any.whl
     ```
+
     Libraries from `requirements.txt` will be installed during container initialisation.
 
-3. Upload `new_kedro_project_airflow_dag.py` from the `new-kedro-project/dags` to `s3://your_S3_bucket/dags`.
-4. Create an empty `startup.sh` file for container startup commands. Set an environment variable for custom Kedro logging:
+1. Upload `new_kedro_project_airflow_dag.py` from the `new-kedro-project/dags` to `s3://your_S3_bucket/dags`.
+
+1. Create an empty `startup.sh` file for container startup commands. Set an environment variable for custom Kedro logging:
+
     ```shell
     export KEDRO_LOGGING_CONFIG="plugins/logging.yml"
     ```
-5. Set up a new [AWS MWAA environment](https://docs.aws.amazon.com/mwaa/latest/userguide/create-environment.html) using the following settings:
+
+1. Set up a new [AWS MWAA environment](https://docs.aws.amazon.com/mwaa/latest/userguide/create-environment.html) using the following settings:
+
     ```shell
     S3 Bucket:
       s3://your_S3_bucket
@@ -245,9 +271,10 @@ MWAA, or Managed Workflows for Apache Airflow, is an AWS service that makes it e
     Startup script file - optional
       s3://your_S3_bucket/startup.sh
     ```
+
     On the next page, set the `Public network (Internet accessible)` option in the `Web server access` section if you want to access your Airflow UI from the internet. Continue with the default options on the remaining pages.
 
-6. Once the environment is created, use the `Open Airflow UI` button to access the standard Airflow interface, where you can manage your DAG.
+1. Once the environment is created, use the `Open Airflow UI` button to access the standard Airflow interface, where you can manage your DAG.
 
 ## How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
 
@@ -257,11 +284,11 @@ If you want to execute your DAG in an isolated environment on Airflow using a Ku
 
     [Use the `kedro docker init` and `kedro docker build` commands](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to containerise your Kedro project.
 
-2. **Push the Docker image to a container registry**
+1. **Push the Docker image to a container registry**
 
     Upload the built Docker image to a cloud container registry, such as AWS ECR, Google Container Registry, or Docker Hub.
 
-3. **Generate an Airflow DAG**
+1. **Generate an Airflow DAG**
 
     Run the following command to generate an Airflow DAG:
 
@@ -273,7 +300,7 @@ If you want to execute your DAG in an isolated environment on Airflow using a Ku
 
     Optionally, use `--group-by memory` or `--group-by namespace` to group nodes into fewer tasks.
 
-4. **Update the DAG to use `KubernetesPodOperator`**
+1. **Update the DAG to use `KubernetesPodOperator`**
 
     To execute each Kedro node (or group of nodes) in an isolated Kubernetes pod, replace `KedroOperator()` with `KubernetesPodOperator()`, as shown in the example below:
 
@@ -303,6 +330,7 @@ If you want to execute your DAG in an isolated environment on Airflow using a Ku
 By default, this approach runs each node in an isolated Docker container. To reduce computational overhead, you can run multiple nodes together within the same container.
 
 The `--group-by` option in `kedro airflow create` provides an automated way to group nodes:
+
 - `--group-by memory`: Groups nodes connected through `MemoryDatasets`
 - `--group-by namespace`: Groups nodes by their namespace
 
@@ -351,7 +379,7 @@ The `--group-by` option provides two grouping strategies:
 
 ### Grouping by memory
 
-When running Kedro nodes using Airflow, `MemoryDatasets` are not shared across operators, which can cause the DAG run to fail. Nodes connected through  can be grouped together using the `--group-by memory` flag:
+When running Kedro nodes using Airflow, `MemoryDatasets` are not shared across operators, which can cause the DAG run to fail. Nodes connected through can be grouped together using the `--group-by memory` flag:
 
 ```bash
 kedro airflow create --group-by memory
@@ -369,9 +397,9 @@ kedro airflow create --group-by namespace
 
 This is useful when:
 
-* You have logically grouped nodes using namespaces and want to execute them together
-* You want to reduce the number of Airflow tasks while maintaining the namespace structure
-* Your namespaced nodes share intermediate data that doesn't need to be persisted between tasks
+- You have logically grouped nodes using namespaces and want to execute them together
+- You want to reduce the number of Airflow tasks while maintaining the namespace structure
+- Your namespaced nodes share intermediate data that doesn't need to be persisted between tasks
 
 Nodes without a namespace will each be converted to individual Airflow tasks.
 

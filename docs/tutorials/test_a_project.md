@@ -4,16 +4,14 @@ It is important to test our Kedro projects to validate and verify that our nodes
 
 This section explains the following:
 
-* How to test a Kedro node
-* How to test a Kedro pipeline
-* Testing best practices
-
+- How to test a Kedro node
+- How to test a Kedro pipeline
+- Testing best practices
 
 This section does not cover:
 
-* Automating your tests - instead read our [automated testing documentation](../develop/automated_testing.md).
-* More advanced features of testing, including [mocking](https://realpython.com/python-mock-library/#what-is-mocking) and [parameterising tests](https://docs.pytest.org/en/7.1.x/example/parametrize.html).
-
+- Automating your tests - instead read our [automated testing documentation](../develop/automated_testing.md).
+- More advanced features of testing, including [mocking](https://realpython.com/python-mock-library/#what-is-mocking) and [parameterising tests](https://docs.pytest.org/en/7.1.x/example/parametrize.html).
 
 ## Writing tests for Kedro nodes: Unit testing
 
@@ -22,6 +20,7 @@ Kedro expects node functions to be [pure functions](https://realpython.com/pytho
 Let us explore what this looks like in practice. Consider the node function `split_data` defined in the data science pipeline:
 
 ??? example "View code"
+
     ```python
     def split_data(data: pd.DataFrame, parameters: dict[str, Any]) -> Tuple:
         """Splits data into features and targets training and test sets.
@@ -40,11 +39,11 @@ Let us explore what this looks like in practice. Consider the node function `spl
         return X_train, X_test, y_train, y_test
     ```
 
-The function takes a pandas `DataFrame` and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following [the pytest anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into four  steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
+The function takes a pandas `DataFrame` and dictionary of parameters as input, and splits the input data into four different data objects as per the parameters provided. We recommend following [the pytest anatomy of a test](https://docs.pytest.org/en/7.1.x/explanation/anatomy.html#anatomy-of-a-test) which breaks a test down into four steps: arrange, act, assert, and cleanup. For this specific function, these steps will be:
 
 1. Arrange: Prepare the inputs `data` and `parameters`.
-2. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
-3. Assert: Ensure that the length of the outputs are the same as the expected lengths
+1. Act: Make a call to `split_data` and capture the outputs with `X_train`, `X_test`, `Y_train`, and `Y_test`.
+1. Assert: Ensure that the length of the outputs are the same as the expected lengths
 
 Use a cleanup step when earlier steps update shared resources, such as input files reused in other tests. The example tests below do not require cleanup, so that step is omitted.
 
@@ -53,6 +52,7 @@ Remember to import the function being tested and any necessary modules at the to
 When we put these steps together, we have the following test:
 
 ??? example "View code"
+
     ```python
     # NOTE: This example test is yet to be refactored.
     # A complete version is available under the testing best practices section.
@@ -89,12 +89,12 @@ When we put these steps together, we have the following test:
         assert len(y_test) == 1
     ```
 
-
 This test is an example of positive testing - it confirms that a valid input produces the expected output. The inverse, testing that an invalid input is rejected, is called negative testing and is as important.
 
 Using the same steps as above, we can write the following test to validate an error is thrown when price data is not available:
 
 ??? example "View code"
+
     ```python
     # NOTE: This example test is yet to be refactored.
     # A complete version is available under the testing best practices section.
@@ -136,7 +136,9 @@ Writing tests for each node ensures each node will behave as expected when run i
 Consider the data science pipeline as a whole:
 
 <!-- vale off -->
+
 ??? example "View code"
+
     ```python
     from kedro.pipeline import Node, Pipeline
     from .nodes import evaluate_model, split_data, train_model
@@ -166,6 +168,7 @@ Consider the data science pipeline as a whole:
             ]
         )
     ```
+
 <!-- vale on -->
 
 The pipeline takes a pandas `DataFrame` and dictionary of parameters as input, splits the data in accordance to the parameters, and uses it to train and assess a regression model. With an integration test, we can confirm that this sequence of nodes runs as expected.
@@ -175,12 +178,13 @@ From earlier in this tutorial we know a successful pipeline run will conclude wi
 As we did with our unit tests, we break this down into several steps:
 
 1. Arrange: Prepare the runner and its inputs `pipeline` and `catalog`, and any additional test setup.
-2. Act: Run the pipeline.
-3. Assert: Ensure a successful run message was logged.
+1. Act: Run the pipeline.
+1. Assert: Ensure a successful run message was logged.
 
 When we put this together, we get the following test:
 
 ??? example "View code"
+
     ```python
     # NOTE: This example test is yet to be refactored.
     # A complete version is available under the testing best practices section.
@@ -253,12 +257,12 @@ tests
 │       │   test_data_science_pipeline.py
 ```
 
-
 ### Using fixtures
 
 In our tests, we can see that `dummy_data` and `dummy_parameters` have been defined three times with almost the same values. Instead, we can define these outside of our tests as [pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html#fixture):
 
 ??? example "View code"
+
     ```python
     import pytest
 
@@ -305,10 +309,10 @@ def test_data_science_pipeline(self):
 
 This ensures that the test will still perform as designed, even with the addition of more nodes to the pipeline.
 
-
 After incorporating these testing practices, our test file `test_data_science_pipeline.py` becomes:
 
 ??? example "View code"
+
     ```python
     # tests/pipelines/test_data_science_pipeline.py
 
@@ -391,6 +395,7 @@ pip install -e .
 This step allows pytest to accurately resolve the import statements in your test files.
 
 !!! note
+
     The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
 
 Ensure you have `pytest` installed. Please see our [automated testing documentation](../develop/automated_testing.md) for more information on getting set up with pytest.

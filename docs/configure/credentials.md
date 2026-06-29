@@ -10,7 +10,6 @@ If you prefer to store credentials in environment variables rather than a file, 
 
 Credentials configuration can be loaded the same way as any other project configuration using the configuration loader class `OmegaConfigLoader`.
 
-
 ```python
 from pathlib import Path
 
@@ -43,6 +42,7 @@ except MissingConfigException:
 ```
 
 !!! note
+
     The `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
 
 ## How to work with AWS credentials

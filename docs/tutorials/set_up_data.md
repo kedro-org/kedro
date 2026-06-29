@@ -6,9 +6,9 @@ This section shows how to add datasets to the project's `data` folder. It also r
 
 The spaceflights tutorial makes use of three fictional datasets of companies shuttling customers to the Moon and back. The data comes in two different formats: `.csv` and `.xlsx`:
 
-* `companies.csv` contains data about space travel companies, such as their location, fleet count and rating
-* `reviews.csv` is a set of reviews from customers for categories, such as comfort and price
-* `shuttles.xlsx` is a set of attributes for spacecraft across the fleet, such as their engine type and passenger capacity
+- `companies.csv` contains data about space travel companies, such as their location, fleet count and rating
+- `reviews.csv` is a set of reviews from customers for categories, such as comfort and price
+- `shuttles.xlsx` is a set of attributes for spacecraft across the fleet, such as their engine type and passenger capacity
 
 The spaceflights starter has already added the datasets to the `data/01_raw` folder of your project.
 
@@ -16,15 +16,17 @@ The spaceflights starter has already added the datasets to the `data/01_raw` fol
 
 The following information about a dataset must be registered before Kedro can load it:
 
-* File location (path)
-* Parameters for the given dataset
-* Dataset type
-* Versioning
+- File location (path)
+- Parameters for the given dataset
+- Dataset type
+- Versioning
 
 Open `conf/base/catalog.yml` for the spaceflights project to inspect the contents. The two `csv` datasets are registered as follows:
 
 <!-- vale off -->
+
 ??? example "View code"
+
     ```yaml
     companies:
       type: pandas.CSVDataset
@@ -38,6 +40,7 @@ Open `conf/base/catalog.yml` for the spaceflights project to inspect the content
 Likewise for the `xlsx` dataset:
 
 ??? example "View code"
+
     ```yaml
     shuttles:
       type: pandas.ExcelDataset
@@ -45,6 +48,7 @@ Likewise for the `xlsx` dataset:
       load_args:
         engine: openpyxl # Use modern Excel engine (the default since Kedro 0.18.0)
     ```
+
 <!-- vale on -->
 
 The additional line, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the corresponding output argument is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
@@ -64,11 +68,13 @@ companies = catalog.load("companies")
 companies.head()
 ```
 
-* The first command creates a variable (`companies`) of type `pandas.DataFrame`. It loads the dataset (also named `companies` as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv`.
-* The `head` method from `pandas` displays the first five rows of the DataFrame.
+- The first command creates a variable (`companies`) of type `pandas.DataFrame`. It loads the dataset (also named `companies` as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv`.
+- The `head` method from `pandas` displays the first five rows of the DataFrame.
 
 <!-- vale off -->
+
 ??? example "View code"
+
     ```
     INFO     Loading data from 'companies' (CSVDataset)
     Out[1]:
@@ -91,6 +97,7 @@ shuttles.head()
 You should see output such as the following:
 
 ??? example "View code"
+
     ```
     INFO     Loading data from 'shuttles' (ExcelDataset)
     Out[1]:
@@ -101,6 +108,7 @@ You should see output such as the following:
     3  14035               Barbados      Type V5      Plasma  ...                f                        f  $4,770.0       8238
     4  10036  Sao Tome and Principe      Type V2      Plasma  ...                f                        f  $2,820.0      30342
     ```
+
 <!-- vale on -->
 
 When you have finished, close `ipython` session with `exit()`.
@@ -111,8 +119,6 @@ When you have finished, close `ipython` session with `exit()`.
 
 <iframe width="100%" height="460" src="https://www.youtube.com/embed/rl2cncGxyts"
 frameborder="0" allowfullscreen></iframe>
-
-
 
 ### Custom data
 

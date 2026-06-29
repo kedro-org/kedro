@@ -46,6 +46,7 @@ Advisors are individuals who are not actively contributing to the codebase or at
 - Attend regular team meetings to discuss the project plans and roadmap
 
 ### Voting rights
+
 Maintainers take part in four types of votes:
 
 - Membership additions – new maintainers must receive majority approval (≥50%) from existing maintainers (see more details below)
@@ -53,8 +54,8 @@ Maintainers take part in four types of votes:
 - Code modifications – follows the [KEP process](https://github.com/kedro-org/kedro/discussions/5150)
 - Core dataset additions or removals – follows the [kedro-datasets contribution guide](https://github.com/kedro-org/kedro-plugins/blob/main/kedro-datasets/CONTRIBUTING.md)
 
-
 ## Process to become a maintainer
+
 Just contributing does not make you a maintainer. You need to show commitment to Kedro's long-term success by being an advisor or committer on the TSC for at least six months.
 
 We look for people who can do at least some of the following on top of the responsibility of a maintainer:
@@ -68,6 +69,7 @@ Any current maintainer may nominate a new candidate and will serve as their advo
 The voting period should remain open for at least two weeks, and the proposal will pass with a majority approval. Once voting concludes, the #kedro-tsc channel should be updated with the final results.
 
 ### Inactivity and removal
+
 Maintainers may be automatically removed after 6 months of inactivity, without requiring a formal vote. Inactivity is defined as:
 
 - Not participating in any votes for 6 consecutive months (if any votes were required)
@@ -76,6 +78,7 @@ Maintainers may be automatically removed after 6 months of inactivity, without r
 A former maintainer may rejoin in the future, provided they secure an advocate among current maintainers who will sponsor their nomination for a new vote.
 
 ## Responsibilities of a committer
+
 Depending on the role of the committer in the team, they are responsible for some of the following:
 
 - Driving implementation, technical quality, and code excellence
@@ -93,8 +96,8 @@ Depending on the role of the committer in the team, they are responsible for som
     - [GitHub discussions](https://github.com/kedro-org/kedro/discussions) to discuss the future of the Kedro project
     - [Slack](https://slack.kedro.org) for questions and to support other users
 
-
 ## Process to become a committer
+
 Any current maintainer may nominate a new candidate and will serve as their advocate, responsible for initiating and managing the voting process. The nominating member should open a pull request and formally call for a vote on the candidate, posting the announcement in the #kedro-tsc channel on the Kedro Slack organisation.
 
 The voting period should remain open for at least two weeks, and the proposal will pass with a majority approval. Once voting concludes, the #kedro-tsc channel should be updated with the final results.
@@ -103,8 +106,8 @@ The new committer should then be added to the `kedro-developers` team on the Ked
 the `kedro-tsc` channel on the Kedro Slack organisation, the regular TSC meetings, and the `CITATION.cff` file.
 
 ### Inactivity and removal
-Committers who do not contribute code, documentation, or attend regular meetings for 6 months will be automatically removed from the [current TSC members](#current-tsc-members) list, `kedro-developers` team, and `CITATION.cff` file. They may be invited to join the [advisor](#advisors) role if they are interested in continuing to support and contribute to the project in a different capacity.
 
+Committers who do not contribute code, documentation, or attend regular meetings for 6 months will be automatically removed from the [current TSC members](#current-tsc-members) list, `kedro-developers` team, and `CITATION.cff` file. They may be invited to join the [advisor](#advisors) role if they are interested in continuing to support and contribute to the project in a different capacity.
 
 ## Responsibilities of an advisor
 
@@ -113,43 +116,42 @@ Committers who do not contribute code, documentation, or attend regular meetings
 - Sharing lessons learned and best practices from adjacent domains
 
 ## Process to become an advisor
+
 Any current maintainer may nominate a new candidate and will serve as their advocate, responsible for initiating and managing the voting process. The nominating member should open a pull request and formally call for a vote on the candidate, posting the announcement in the #kedro-tsc channel on the Kedro Slack organisation.
 
 The voting period should remain open for at least two weeks, and the proposal will pass with a majority approval. Once voting concludes, the #kedro-tsc channel should be updated with the final results.
 
-
 ### Inactivity and removal
-Advisors may be automatically removed after 6 months of inactivity. Inactivity is defined as a lack of any engagement with Kedro during this period.
 
+Advisors may be automatically removed after 6 months of inactivity. Inactivity is defined as a lack of any engagement with Kedro during this period.
 
 ## Current TSC members
 
 <!-- DO NOT EDIT THIS AND MERGE A PR WITHOUT A VOTE TO SIGN OFF ANY CHANGES -->
 
-| Name                                                     | Organisation                                                                            | Role |
-|----------------------------------------------------------|-----------------------------------------------------------------------------------------|------|
-| [Alice Cima](https://github.com/AliceCima10)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer |
-| [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer |
+| Name                                                     | Organisation                                                                            | Role       |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------- |
+| [Alice Cima](https://github.com/AliceCima10)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer  |
+| [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer  |
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Goldman Sachs](https://www.goldmansachs.com/)                                          | Maintainer |
 | [Elena Khaustova](https://github.com/ElenaKhaustova)     | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
-| [Elijah Koh](https://github.com/iamelijahko)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer |
-| [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | |
-| [Ivan Danov](https://github.com/idanov)                  | [PhysicsX](https://www.physicsx.ai/)                                                    | Advisor |
-| [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer |
-| [Joel Schwarzmann](https://github.com/datajoely)         | [PhysicsX](https://www.physicsx.ai/)                                                    | Advisor |
+| [Elijah Koh](https://github.com/iamelijahko)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer  |
+| [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |            |
+| [Ivan Danov](https://github.com/idanov)                  | [PhysicsX](https://www.physicsx.ai/)                                                    | Advisor    |
+| [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer  |
+| [Joel Schwarzmann](https://github.com/datajoely)         | [PhysicsX](https://www.physicsx.ai/)                                                    | Advisor    |
 | [Joseph Perkins](https://github.com/Joseph-Perkins)      | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
-| [Marcin Zabłocki](https://github.com/marrrcin)           | [FYUL](https://www.fyul.com/)                                                           | Advisor |
+| [Marcin Zabłocki](https://github.com/marrrcin)           | [FYUL](https://www.fyul.com/)                                                           | Advisor    |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Rashida Kanchwala](https://github.com/rashidakanchwala) | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla)  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Sajid Alam](https://github.com/SajidAlamQB)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
-| [Simon Brugman](https://github.com/sbrugman)             | [ING](https://www.ing.com/)                                                             | Advisor |
-| [Tynan DeBold](https://github.com/tynandebold)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Advisor |
-| [Yetunde Dada](https://github.com/yetudada)              | [Astronomer](https://www.astronomer.io/)                                                | Advisor |
-| [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei) | [Société Générale Assurances](https://www.assurances.societegenerale.com/en/individual) | Advisor |
-
+| [Simon Brugman](https://github.com/sbrugman)             | [ING](https://www.ing.com/)                                                             | Advisor    |
+| [Tynan DeBold](https://github.com/tynandebold)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Advisor    |
+| [Yetunde Dada](https://github.com/yetudada)              | [Astronomer](https://www.astronomer.io/)                                                | Advisor    |
+| [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei) | [Société Générale Assurances](https://www.assurances.societegenerale.com/en/individual) | Advisor    |
 
 ## Past TSC members
 
@@ -188,7 +190,6 @@ Former core team members with significant contributions include:
 - [Vladimir Nikolic](https://github.com/vladimir-mck)
 - [Zain Patel](https://github.com/mzjp2)
 
-
 ## Voting process
 
 Voting can change TSC members and decide on the future of Kedro. The [maintainers](#maintainers) of the TSC lead the process. The voting period is two weeks and through a GitHub discussion or through a pull request.
@@ -204,13 +205,17 @@ The addition or removal of core datasets is done through a vote by the TSC. The 
 ## Adding or removing TSC members
 
 ### Voluntary step-out
+
 Any member may choose to step out of their current role at any time by communicating their decision to the TSC. No vote is required.
 
 ### Voluntary step-down
+
 Any member may request to step down to a non voting category at any time if they believe they can contribute more effectively in that role. This change does not require a vote.
 
 ### Step-up procedure
+
 Members who wish to move up to a category that requires a higher commitment (advisor to maintainer, or committer to maintainer) must receive formal approval through a TSC vote. The member must also have an active TSC [maintainer](#maintainers) advocate to support their nomination.
 
 ### Automatic removal and transition option
+
 If a member is automatically removed from their current category (due to inactivity), they can request placement in the next lower level within two weeks of their removal. If no request is made within that time frame, the member will be removed from the TSC entirely.

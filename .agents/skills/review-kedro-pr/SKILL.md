@@ -5,6 +5,7 @@ description: >-
   clarity. Optionally post findings as a GitHub PR comment. Use when the user
   asks to review a PR, review this PR, or do a PR review.
 ---
+
 # Review Kedro PR
 
 Review a Kedro pull request. Start with general review guidelines (any project), then apply Kedro-specific checks. Output findings to chat by default, or post to GitHub when asked.
@@ -38,6 +39,7 @@ Work through the general review guidelines first, then the Kedro-specific review
 ### 4. Verify findings
 
 Before delivering, go through every finding one by one and check:
+
 - Is this actually a problem, or a false positive?
 - Is the file path and line number correct?
 - Is the severity (Critical vs Suggestion) appropriate?
@@ -52,7 +54,7 @@ Format findings using the "Output format" section at the end of this file. Two m
 - **Review only (default):** Output all findings as chat messages. The user can read, edit, or discard before deciding whether to post.
 - **Review and post:** When the user explicitly says "post", "submit", or "review and post", post findings directly to the PR on GitHub. See "Output format" for the exact commands.
 
----
+______________________________________________________________________
 
 ## General review guidelines
 
@@ -62,9 +64,9 @@ These apply to any project. Work through them in order.
 
 - Understand what problem the PR is solving.
 - Read the PR description thoroughly, including:
-  - Dev notes
-  - Linked issues
-  - Any prior discussions or comments
+    - Dev notes
+    - Linked issues
+    - Any prior discussions or comments
 
 ### 2. Evaluate PR scope
 
@@ -77,22 +79,22 @@ These apply to any project. Work through them in order.
 - Check if QA/testing steps are mentioned in the PR description.
 - If not, ask the author to add clear steps to validate the changes.
 - Mentally walk through the described QA steps and verify:
-  - Expected functionality
-  - Edge cases and failure scenarios
+    - Expected functionality
+    - Edge cases and failure scenarios
 - Watch out for regressions or unintended side effects.
 
 ### 4. Code review and readability
 
 - Go through the file changes and understand the logic.
 - Suggest improvements where needed:
-  - Better variable/function names
-  - Cleaner structure or readability
+    - Better variable/function names
+    - Cleaner structure or readability
 
 ### 5. Code design and modularity
 
 - Look for opportunities to improve structure:
-  - Can large functions be split?
-  - Can logic be broken into smaller, reusable pieces?
+    - Can large functions be split?
+    - Can logic be broken into smaller, reusable pieces?
 - Suggest helper/utility functions if the same logic is repeated.
 - Aim for simple, maintainable code.
 
@@ -101,18 +103,18 @@ These apply to any project. Work through them in order.
 - Check if docstrings are present on new/changed classes, functions, and methods.
 - Docstrings must use Google style (`Args:`, `Returns:`, `Raises:`) to avoid rendering issues in the API docs.
 - For public APIs:
-  - Ensure inputs/outputs are clearly documented.
-  - Suggest adding examples if helpful.
+    - Ensure inputs/outputs are clearly documented.
+    - Suggest adding examples if helpful.
 
 ### 7. Testing and coverage
 
 - Check if there are enough unit tests.
 - Make sure tests cover:
-  - Core logic
-  - Edge cases
+    - Core logic
+    - Edge cases
 - Tests should be meaningful and easy to follow, not just for coverage.
 
----
+______________________________________________________________________
 
 ## Kedro-specific: PR checklist compliance
 
@@ -145,7 +147,7 @@ If the PR changes public API behavior or adds new features, check whether the Ke
 
 If the change affects pipeline structure, metadata, catalog behavior, or dataset output, flag for Viz team coordination.
 
----
+______________________________________________________________________
 
 ## Kedro-specific: API usage
 
@@ -161,7 +163,7 @@ For full API signatures and the complete list of base classes, read [reference.m
 
 **Non-obvious patterns:** Some files use complex patterns on purpose (e.g. `__getattr__`, `__init_subclass__` wrapping). If the PR touches `kedro/io/core.py`, `kedro/framework/hooks/manager.py`, or `kedro/io/shared_memory_dataset.py`, read [reference.md](reference.md) section "Non-obvious patterns" before flagging anything — those patterns are intentional.
 
----
+______________________________________________________________________
 
 ## Out of scope
 
@@ -170,15 +172,15 @@ Do NOT flag:
 - **Pre-existing issues** — only review changes in the diff.
 - **Security issues** — handled by the separate `kedro-security-review` skill.
 - **Anything CI already checks mechanically** — the following are handled by the `kedro-babysit` skill, which runs and fixes them automatically:
-  - Linting and formatting (ruff)
-  - Running unit tests (pytest)
-  - Import-linter contract execution (architecture compliance)
-  - DCO sign-off verification
-  - Any other CI check with a pass/fail outcome
+    - Linting and formatting (ruff)
+    - Running unit tests (pytest)
+    - Import-linter contract execution (architecture compliance)
+    - DCO sign-off verification
+    - Any other CI check with a pass/fail outcome
 
 This skill is about reviewing code, not running checks.
 
----
+______________________________________________________________________
 
 ## Output format
 
@@ -187,6 +189,7 @@ Each finding gets an **inline comment** on the specific line, plus there's a **s
 ### Review only (default) — output to chat
 
 Present all findings as chat messages. For each finding, include:
+
 - The file path and line number.
 - **Critical:** or **Suggestion:** prefix.
 - A concise explanation and suggested fix.

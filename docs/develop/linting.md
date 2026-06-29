@@ -13,12 +13,15 @@ As a project grows and goes through various stages of development it becomes imp
 There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use [`ruff`](https://beta.ruff.rs).
 
 **`ruff`** is a fast linter and formatter that replaces `flake8`, `pylint`, `pyupgrade`, `isort`, `black` and [more](https://beta.ruff.rs/docs/rules/).
-  - It helps to make your code compliant to [PEP 8](https://peps.python.org/pep-0008/).
-  - It reformats code and sorts imports alphabetically and automatically separating them into sections by
-type.
+
+- It helps to make your code compliant to [PEP 8](https://peps.python.org/pep-0008/).
+- It reformats code and sorts imports alphabetically and automatically separating them into sections by
+    type.
 
 ### Install the tools
+
 To install `ruff` add the following section to the `pyproject.toml` file located in the project root:
+
 ```toml
 [project.optional-dependencies]
 dev = ["ruff"]
@@ -42,6 +45,7 @@ pip install ruff
 `ruff` read configurations from `pyproject.toml` within your project root. You can enable different rule sets within the `[tool.ruff]` section. For example, the rule set `F` matches `Pyflakes`.
 
 To start with `ruff`, we recommend adding this section to enable the following basic rule sets.
+
 ```toml
 [tool.ruff]
 select = [
@@ -55,15 +59,18 @@ select = [
 ```
 
 !!! note
+
     It is a good practice to [split your line when it is too long](https://beta.ruff.rs/docs/rules/line-too-long/), so it remains readable even on a small screen. `ruff` treats this rule slightly differently from `black`, so when using them together we recommend disabling rule `E501` to avoid conflicts.
 
 ### Run the tools
 
 Use the following commands to run lint checks:
+
 ```bash
 ruff format --check <project_root>
 ruff check <project_root>
 ```
+
 You can also have `ruff format` automatically format your code by omitting the `--check` flag.
 
 ## Automated formatting and linting with `pre-commit` hooks
@@ -80,6 +87,7 @@ Kedro project by adding the following line:
 ```text
 pre-commit
 ```
+
 You can also install `pre-commit` using the following command:
 
 ```bash

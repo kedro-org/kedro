@@ -10,6 +10,7 @@ finding is actually a Kedro issue.
 ### `candidate_kedro_vulnerability`
 
 Use when the finding points to behavior in Kedro framework code where:
+
 - data may become executable behavior
 - Kedro appears to use unsafe deserialization on user-controlled input
 - Kedro appears to bypass or fail a documented safety restriction
@@ -19,15 +20,15 @@ Severity determines how the finding is surfaced to the user (the skill itself
 does not enforce anything — it only reports):
 
 - **ERROR severity** — the rule has high confidence and critical impact (e.g.
-  RCE, arbitrary code execution, credential exposure). **Flag prominently and
-  recommend fixing before the code is merged or released.** Suggest discussing
-  with maintainers as part of the PR review. If the same pattern is later
-  confirmed to exist in an already-released version, that is when a Security
-  Advisory becomes relevant — not at PR time.
+    RCE, arbitrary code execution, credential exposure). **Flag prominently and
+    recommend fixing before the code is merged or released.** Suggest discussing
+    with maintainers as part of the PR review. If the same pattern is later
+    confirmed to exist in an already-released version, that is when a Security
+    Advisory becomes relevant — not at PR time.
 - **WARNING severity** — plausible risk but lower confidence or limited impact.
-  **Recommend investigating and fixing, but it does not need to block the
-  merge.** Suggest opening a maintainer follow-up issue if it can't be resolved
-  in the current PR.
+    **Recommend investigating and fixing, but it does not need to block the
+    merge.** Suggest opening a maintainer follow-up issue if it can't be resolved
+    in the current PR.
 
 ### `project_developer_responsibility`
 
@@ -76,9 +77,10 @@ For every function that takes a `dict` from user config (YAML, env var, API),
 ask: **does this library treat any key as a callable specification?**
 
 Known dangerous key conventions:
+
 - `()` — Python logging `dictConfig` factory callable
 - `class` — Python logging `dictConfig` handler/formatter class (fully-qualified
-  dotted path, resolved via dynamic import)
+    dotted path, resolved via dynamic import)
 - `py/object`, `py/reduce` — jsonpickle
 - `!!python/object` — yaml.load without safe loader
 - `_target_` — Hydra/OmegaConf structured config instantiation
@@ -101,6 +103,7 @@ no validation, classify as `candidate_kedro_vulnerability`.
 
 For any new code that constructs a file path from a string that originates
 outside Kedro's own defaults (CLI arg, env var, catalog config, API param):
+
 - Check whether `..` or absolute path segments are rejected before use
 - If not: `needs_manual_review` at minimum
 
@@ -178,16 +181,16 @@ class paths, pipeline modules, and settings are all loaded this way from
 project config.
 
 - If the module path originates from `catalog.yml`, `settings.py`, or other
-  **project developer-authored config**, classify as
-  `project_developer_responsibility`.
+    **project developer-authored config**, classify as
+    `project_developer_responsibility`.
 - If the module path could be influenced by **external runtime input** with no
-  validation (e.g. user-supplied parameters flowing into an import call),
-  classify as `candidate_kedro_vulnerability`.
+    validation (e.g. user-supplied parameters flowing into an import call),
+    classify as `candidate_kedro_vulnerability`.
 - If the call is inside Kedro framework code and the input path is not
-  validated or allowlisted before importing, classify as
-  `candidate_kedro_vulnerability`.
+    validated or allowlisted before importing, classify as
+    `candidate_kedro_vulnerability`.
 - In most cases this will be `false_positive_or_informational` — confirm by
-  tracing where the argument originates.
+    tracing where the argument originates.
 
 ### `kedro-taint-config-to-callable-sink`
 
@@ -208,14 +211,14 @@ any config data reaching a callable sink is tracked regardless of how it was
 parsed.
 
 - If the tainted value flows into any sink with no sanitization and the source
-  is user-controllable at runtime (env var, API, external file): classify as
-  `candidate_kedro_vulnerability`.
+    is user-controllable at runtime (env var, API, external file): classify as
+    `candidate_kedro_vulnerability`.
 - If the source is a framework-internal default file with no external override
-  path: classify as `false_positive_or_informational`.
+    path: classify as `false_positive_or_informational`.
 - If the source is developer-authored project config not reachable by external
-  users: classify as `project_developer_responsibility`.
+    users: classify as `project_developer_responsibility`.
 - Trace whether the taint path crosses a sanitizer (e.g. `()` key rejection,
-  allowlist check) before classifying.
+    allowlist check) before classifying.
 
 ### `kedro-taint-string-param-to-path`
 
@@ -226,17 +229,18 @@ are intentionally out of scope to limit noise — flag any untyped string
 parameters reaching path sinks as `needs_manual_review` instead.
 
 Triage steps:
+
 1. Trace where the `str` parameter originates. If it comes from developer-authored
-   config (`catalog.yml`, `settings.py`, project code), classify as
-   `project_developer_responsibility`.
-2. If the parameter can be set by an untrusted external caller (API input, CI
-   trigger, multi-tenant platform), classify as `candidate_kedro_vulnerability`
-   if there is no `..` / absolute-path check anywhere in the call chain, or
-   `deployment_or_environment_issue` if the deployment is expected to sanitize.
-3. If the path operation is a read-only probe (`.exists()`, `.is_absolute()`,
-   `.is_dir()`), classify as `false_positive_or_informational`.
-4. If the flagged function is itself a sanitizer (checking for `..` or absolute
-   paths), classify as `false_positive_or_informational`.
+    config (`catalog.yml`, `settings.py`, project code), classify as
+    `project_developer_responsibility`.
+1. If the parameter can be set by an untrusted external caller (API input, CI
+    trigger, multi-tenant platform), classify as `candidate_kedro_vulnerability`
+    if there is no `..` / absolute-path check anywhere in the call chain, or
+    `deployment_or_environment_issue` if the deployment is expected to sanitize.
+1. If the path operation is a read-only probe (`.exists()`, `.is_absolute()`,
+    `.is_dir()`), classify as `false_positive_or_informational`.
+1. If the flagged function is itself a sanitizer (checking for `..` or absolute
+    paths), classify as `false_positive_or_informational`.
 
 ### `kedro-subprocess-shell-injection`
 
@@ -245,26 +249,25 @@ plain string literal. This includes:
 
 - Variable-derived strings (most common case — possible RCE)
 - List-form calls (`subprocess.run([cmd], shell=True)`) — flagged because
-  Python only passes the first list element to the shell, which is rarely
-  intentional and easy to misuse, even when the list contents are literals
+    Python only passes the first list element to the shell, which is rarely
+    intentional and easy to misuse, even when the list contents are literals
 
 Triage steps:
 
-1. **List with only literal elements** (e.g. `subprocess.run(["ls", "-l"],
-   shell=True)`): code smell but not exploitable in isolation. Classify as
-   `false_positive_or_informational`; recommend converting to `shell=False`
-   with the same list.
-2. Trace where `$CMD` originates. If it is a hardcoded string assembled only
-   from framework-internal defaults (no external input), classify as
-   `false_positive_or_informational`.
-3. If `$CMD` is constructed from a developer-authored project value
-   (e.g. a Kedro node name, pipeline name, or catalog key provided in
-   `catalog.yml`), classify as `project_developer_responsibility`.
-4. If `$CMD` can be influenced by an untrusted external caller (env var, API
-   input, CI trigger, user-supplied CLI flag) with no allowlist or escaping,
-   classify as `candidate_kedro_vulnerability` at ERROR severity.
-5. If the origin is unclear without deeper runtime context, classify as
-   `needs_manual_review`.
+1. **List with only literal elements** (e.g. `subprocess.run(["ls", "-l"], shell=True)`): code smell but not exploitable in isolation. Classify as
+    `false_positive_or_informational`; recommend converting to `shell=False`
+    with the same list.
+1. Trace where `$CMD` originates. If it is a hardcoded string assembled only
+    from framework-internal defaults (no external input), classify as
+    `false_positive_or_informational`.
+1. If `$CMD` is constructed from a developer-authored project value
+    (e.g. a Kedro node name, pipeline name, or catalog key provided in
+    `catalog.yml`), classify as `project_developer_responsibility`.
+1. If `$CMD` can be influenced by an untrusted external caller (env var, API
+    input, CI trigger, user-supplied CLI flag) with no allowlist or escaping,
+    classify as `candidate_kedro_vulnerability` at ERROR severity.
+1. If the origin is unclear without deeper runtime context, classify as
+    `needs_manual_review`.
 
 Note: `shell=False` with an explicit list argument (`[cmd, arg1, arg2]`) is
 always safe regardless of where the arguments come from, because the shell
@@ -277,22 +280,22 @@ Fires on `yaml.load()` without a safe Loader. Kedro should always use
 config files are user-controlled data.
 
 - If found in **Kedro framework code** (`kedro/` package): classify as
-  `candidate_kedro_vulnerability` — unsafe YAML deserialization on
-  user-controlled config can execute arbitrary Python objects.
+    `candidate_kedro_vulnerability` — unsafe YAML deserialization on
+    user-controlled config can execute arbitrary Python objects.
 - If found in **project developer code**: classify as
-  `project_developer_responsibility`.
+    `project_developer_responsibility`.
 - `yaml.safe_load()` is a separate function and is never matched by this rule
-  (the pattern is `yaml.load(...)` only). For `yaml.load(...)`, safe loaders
-  are excluded via `pattern-not` for both the fully-qualified forms
-  (`Loader=yaml.SafeLoader`, `Loader=yaml.CSafeLoader`, and positional
-  `yaml.SafeLoader` / `yaml.CSafeLoader`) and the unqualified forms used after
-  `from yaml import SafeLoader` (`Loader=SafeLoader`, `Loader=CSafeLoader`,
-  and positional `SafeLoader` / `CSafeLoader`).
+    (the pattern is `yaml.load(...)` only). For `yaml.load(...)`, safe loaders
+    are excluded via `pattern-not` for both the fully-qualified forms
+    (`Loader=yaml.SafeLoader`, `Loader=yaml.CSafeLoader`, and positional
+    `yaml.SafeLoader` / `yaml.CSafeLoader`) and the unqualified forms used after
+    `from yaml import SafeLoader` (`Loader=SafeLoader`, `Loader=CSafeLoader`,
+    and positional `SafeLoader` / `CSafeLoader`).
 - `yaml.CLoader` is **not** safe — it is the C extension of `FullLoader`, not
-  `SafeLoader`. Do not treat `yaml.load(..., Loader=yaml.CLoader)` as safe; the
-  rule will fire on it and it should be classified as
-  `candidate_kedro_vulnerability` in Kedro framework code.
+    `SafeLoader`. Do not treat `yaml.load(..., Loader=yaml.CLoader)` as safe; the
+    rule will fire on it and it should be classified as
+    `candidate_kedro_vulnerability` in Kedro framework code.
 - `yaml.FullLoader` is **not** excluded — it is not safe for user-controlled
-  data (can deserialise Python objects via `!!python/object/apply`). Treat any
-  `yaml.load(..., Loader=yaml.FullLoader)` in Kedro framework code as
-  `candidate_kedro_vulnerability`.
+    data (can deserialise Python objects via `!!python/object/apply`). Treat any
+    `yaml.load(..., Loader=yaml.FullLoader)` in Kedro framework code as
+    `candidate_kedro_vulnerability`.

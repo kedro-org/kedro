@@ -1,6 +1,6 @@
 # Nodes
 
-In this section, we introduce the concept of a node, for which the relevant API documentation is [`node`][kedro.pipeline.node].
+In this section, we introduce the concept of a node, for which the relevant API documentation is \[`node`\][kedro.pipeline.node].
 
 Nodes are the building blocks of pipelines, and represent tasks. Pipelines are used to combine nodes to build workflows, which range from basic machine learning workflows to end-to-end (E2E) production workflows.
 
@@ -58,10 +58,10 @@ adding_a_and_b: add([a,b]) -> [sum]
 
 Let's break down the node definition:
 
-* `add` is the Python function that will execute when the node runs
-* `['a', 'b']` specify the input variable names
-* `sum` specifies the return variable name. The value returned by `add` will be bound in this variable
-* `name` is an optional label for the node, which can be used to provide description of the business logic it provides
+- `add` is the Python function that will execute when the node runs
+- `['a', 'b']` specify the input variable names
+- `sum` specifies the return variable name. The value returned by `add` will be bound in this variable
+- `name` is an optional label for the node, which can be used to provide description of the business logic it provides
 
 ### Node definition syntax
 
@@ -79,20 +79,23 @@ A syntax describes function inputs and outputs. This syntax allows different Pyt
 
 ### Syntax for output variables
 
-| Output syntax              | Meaning           | Example return statement            |
-| -------------------------- | ----------------- | ----------------------------------- |
-| `None`                     | No output         | Does not return                     |
-| `'a'`                      | Single output     | `return a`                          |
-| `['a', 'b']`               | List output       | `return [a, b]`                     |
-| `dict(key1='a', key2='b')` | Dictionary output | `return dict(key1=a, key2=b)`       |
+| Output syntax              | Meaning           | Example return statement      |
+| -------------------------- | ----------------- | ----------------------------- |
+| `None`                     | No output         | Does not return               |
+| `'a'`                      | Single output     | `return a`                    |
+| `['a', 'b']`               | List output       | `return [a, b]`               |
+| `dict(key1='a', key2='b')` | Dictionary output | `return dict(key1=a, key2=b)` |
 
 Any combinations of the above are possible, except nodes of the form `Node(f, None, None)` (at least a single input or output must be provided).
 
 ## `*args` node functions
+
 It is common to have functions that take an arbitrary number of inputs, like a function that combines multiple dataframes. You can use the `*args` argument in the node function, while declaring the names of the datasets in the node's inputs.
 
 <!-- vale Kedro.weaselwords = NO -->
+
 ## `**kwargs`-only node functions
+
 <!-- vale Kedro.weaselwords = YES -->
 
 Sometimes, when creating reporting nodes for instance, you need to know the names of the datasets that your node receives, but you might not have this information in advance. This can be solved by defining a function that takes `**kwargs`:
@@ -148,7 +151,6 @@ You can also make use of a helper function that creates the mapping for you, so 
  )
 ```
 
-
 ## How to tag a node
 
 Tags might be useful to run part of a pipeline without changing the code. For instance, `kedro run --tags=ds` runs nodes that have a `ds` tag attached.
@@ -170,8 +172,8 @@ kedro run --tags=pipeline_tag
 This runs the nodes found within the pipeline tagged with `pipeline_tag`.
 
 !!! note
-    Node or tag names must contain letters, digits, hyphens, underscores, and periods. Other symbols are not permitted.
 
+    Node or tag names must contain letters, digits, hyphens, underscores, and periods. Other symbols are not permitted.
 
 ## How to run a node
 
@@ -188,11 +190,13 @@ Out[2]: {'sum': 5}
 ```
 
 !!! note
+
     You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
 
 ## How to use generator functions in a node
 
 !!! warning
+
     This documentation section uses the `pandas-iris` starter that is unavailable in Kedro version 0.19.0 and beyond. The latest version of Kedro that supports `pandas-iris` is Kedro 0.18.14: install that or an earlier version to work through this example `pip install kedro==0.18.14`).
 
 To check the version installed, type `kedro -V` in your terminal window.
@@ -212,6 +216,7 @@ kedro new --starter=pandas-iris --checkout=0.18.14
 To use generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.
 
 You need to add a new dataset in your `catalog.yml` as follows:
+
 ```diff
 + X_test:
 +  type: pandas.CSVDataset
@@ -223,9 +228,13 @@ You need to add a new dataset in your `catalog.yml` as follows:
 With `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
 
 ### Saving data with generators
+
 <!-- vale Kedro.weaselwords = NO -->
+
 To use generators to save data lazily, you need to do three things:
+
 <!-- vale Kedro.weaselwords = YES -->
+
 - Update the `make_prediction` function definition to use `yield` instead of `return`.
 - Create a [custom dataset](../extend/how_to_create_a_custom_dataset.md) called `ChunkWiseCSVDataset`
 - Update `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.
@@ -233,7 +242,9 @@ To use generators to save data lazily, you need to do three things:
 Copy the following code to `nodes.py`. The main change is to use a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
 
 <!--vale off-->
+
 ??? example "View code"
+
     ```python
     import logging
     from typing import Any, Dict, Tuple, Iterator, Generator
@@ -297,6 +308,7 @@ Copy the following code to `nodes.py`. The main change is to use a new model `De
         logger = logging.getLogger(__name__)
         logger.info("Model has accuracy of %.3f on test data.", accuracy)
     ```
+
 <!--vale on-->
 
 The `ChunkWiseCSVDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
@@ -352,7 +364,8 @@ With these changes, when you run `kedro run` in your terminal, you should see `y
 ## How to add preview functions to nodes
 
 !!! warning
-    This functionality is experimental and may change or be removed in future releases. Experimental features follow the process described in  [`docs/about/experimental.md`](../about/experimental.md).
+
+    This functionality is experimental and may change or be removed in future releases. Experimental features follow the process described in [`docs/about/experimental.md`](../about/experimental.md).
 
 Preview function enables you to inject a callable which helps in debugging and monitoring. Instead of loading full datasets, preview functions can return lightweight summaries, code snippets, charts, or diagrams.
 
@@ -594,7 +607,7 @@ The `renderer_key` identifies which frontend component should handle rendering t
 All preview types support optional metadata with `meta` parameter. The `meta` parameter serves two purposes:
 
 1. **General metadata**: Add contextual information like versions, timestamps, or data sources
-2. **Rendering configuration**: Control how previews are displayed in Kedro-Viz (for example, Mermaid diagram layout, syntax highlighting)
+1. **Rendering configuration**: Control how previews are displayed in Kedro-Viz (for example, Mermaid diagram layout, syntax highlighting)
 
 **Example: Adding general metadata**
 
@@ -652,8 +665,8 @@ node(
 ### Best practices
 
 1. **Keep previews lightweight**: Preview functions should return summaries, not full datasets. For dataset previews, use the [dataset preview feature](https://docs.kedro.org/projects/kedro-viz/en/stable/preview_datasets/) instead of node previews.
-2. **Make previews fast**: Avoid expensive computations in preview functions
-3. **Use appropriate types**: Choose the preview type that best matches your data
-4. **Add metadata**: Include context like timestamps, versions, or data sources
-5. **Handle errors**: Wrap preview logic in try-except if needed
-6. **Test preview functions**: Ensure they return valid preview objects
+1. **Make previews fast**: Avoid expensive computations in preview functions
+1. **Use appropriate types**: Choose the preview type that best matches your data
+1. **Add metadata**: Include context like timestamps, versions, or data sources
+1. **Handle errors**: Wrap preview logic in try-except if needed
+1. **Test preview functions**: Ensure they return valid preview objects

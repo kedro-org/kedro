@@ -13,7 +13,7 @@ You will need the following:
 
 - A working Kedro project in a virtual environment. The examples in this document assume the `spaceflights-pandas` starter. If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
 - The MLflow client installed into the same virtual environment. For the purposes of this tutorial,
-  you can use [MLflow](https://mlflow.org/docs/latest/)`in its simplest configuration <tracking>`.
+    you can use [MLflow](https://mlflow.org/docs/latest/)`in its simplest configuration <tracking>`.
 
 To set yourself up, create a new Kedro project:
 
@@ -35,12 +35,12 @@ This will make MLflow record metadata and artifacts for each run
 to a local directory called `mlflow_runs`.
 
 !!! note
+
     If you want to use a more sophisticated setup, review these MLflow guides:
 
     - [MLflow tracking server](https://mlflow.org/docs/latest/tracking/server/)
     - [The official MLflow tracking server five-minute overview](https://mlflow.org/docs/latest/getting-started/tracking-server-overview/)
     - [The MLflow tracking server documentation](https://mlflow.org/docs/latest/tracking/server)
-
 
 ## Simple use cases
 
@@ -100,6 +100,7 @@ An example is `MlflowArtifactDataset`, which can be used to wrap any of your exi
 Use of this dataset has the advantage that the preview capabilities of the MLflow UI can be used.
 
 !!! warning
+
     This will work for datasets that are outputs of a node,
     and will have no effect for datasets that are free inputs because they are loaded without modification.
 
@@ -124,6 +125,7 @@ and you would be able to preview it in the MLflow web UI:
 ![MLflow image preview thanks to the artifact tracking capabilities of kedro-mlflow](../meta/images/mlflow-artifact-preview-image.png)
 
 !!! warning
+
     If you get a `Failed while saving data to dataset MlflowArtifactDataset` error,
     it's probably because you had already executed `kedro run` while the dataset was marked as `versioned: true`.
     The solution is to clean up the old `data/08_reporting/dummy_confusion_matrix.png` directory.
@@ -202,9 +204,10 @@ $ kedro run --from-nodes=evaluate_model_node --params mlflow_run_id=4cba84...
 ```
 
 !!! note
-    Notice that MLflow runs are immutable for reproducibility purposes,
-so you cannot _save_ a model in an existing run.
 
+    Notice that MLflow runs are immutable for reproducibility purposes,
+
+so you cannot _save_ a model in an existing run.
 
 ## Advanced use cases
 
@@ -213,7 +216,7 @@ so you cannot _save_ a model in an existing run.
 So far, `kedro-mlflow` has proven abundantly useful already.
 And yet, you might have the need to track additional metadata in the run.
 
-One possible way of doing it is using the [`before_pipeline_run`][kedro.framework.hooks.specs.PipelineSpecs.before_pipeline_run] Hook to log the `run_params` passed to the Hook.
+One possible way of doing it is using the \[`before_pipeline_run`\][kedro.framework.hooks.specs.PipelineSpecs.before_pipeline_run] Hook to log the `run_params` passed to the Hook.
 An implementation would look as follows:
 
 ```python

@@ -69,48 +69,48 @@ Each starter example is tailored to show the capabilities and integrations of th
 
 1. To create a default Kedro project called `My-Project` with no tools and no example code:
 
-```text
-kedro new ⮐
-My-Project ⮐
-none ⮐
-no ⮐
-```
+    ```text
+    kedro new ⮐
+    My-Project ⮐
+    none ⮐
+    no ⮐
+    ```
 
-You can also enter this in a single line as follows:
+    You can also enter this in a single line as follows:
 
-```bash
-uvx kedro new --name=My-Project --tools=none --example=n
-```
+    ```bash
+    uvx kedro new --name=My-Project --tools=none --example=n
+    ```
 
 2. To create a spaceflights project called `spaceflights` with test setup and example code:
 
-```text
-kedro new ⮐
-spaceflights ⮐
-2 ⮐
-yes ⮐
-```
+    ```text
+    kedro new ⮐
+    spaceflights ⮐
+    2 ⮐
+    yes ⮐
+    ```
 
-You can also enter this in a single line as follows:
+    You can also enter this in a single line as follows:
 
-```bash
-uvx kedro new --name=spaceflights --tools=test --example=y
-```
+    ```bash
+    uvx kedro new --name=spaceflights --tools=test --example=y
+    ```
 
 3. To create a project, called `testproject` containing linting, documentation, and PySpark, but no example code:
 
-```text
-kedro new ⮐
-testproject ⮐
-1,4,6 ⮐
-no ⮐
-```
+    ```text
+    kedro new ⮐
+    testproject ⮐
+    1,4,6 ⮐
+    no ⮐
+    ```
 
-You can also enter this in a single line as follows:
+    You can also enter this in a single line as follows:
 
-```bash
-uvx kedro new --name=testproject --tools=lint,docs,pyspark --example=n
-```
+    ```bash
+    uvx kedro new --name=testproject --tools=lint,docs,pyspark --example=n
+    ```
 
 ### Telemetry consent
 

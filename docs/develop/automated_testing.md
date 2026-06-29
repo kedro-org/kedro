@@ -24,35 +24,40 @@ Before getting started with test requirements, it is important to ensure you hav
 
 
 To install your project including all the project-specific dependencies and test requirements:
+
 1. Add the following section to the `pyproject.toml` file located in the project root:
-```toml
-[project.optional-dependencies]
-dev = [
-    "pytest-cov",
-    "pytest-mock",
-    "pytest",
-]
-```
+
+    ```toml
+    [project.optional-dependencies]
+    dev = [
+        "pytest-cov",
+        "pytest-mock",
+        "pytest",
+    ]
+    ```
 
 2. Navigate to the root directory of the project and run:
-```bash
-pip install ."[dev]"
-```
+
+    ```bash
+    pip install ."[dev]"
+    ```
 
 You can also install test requirements individually as you would install other packages with `pip`, making sure you have installed your project locally and your [project's virtual environment is active](../getting-started/install.md#how-to-manually-create-a-virtual-environment-for-your-kedro-project).
 
 1. To install your project, navigate to your project root and run the following command:
 
-```bash
-pip install -e .
-```
-!!! note
-    The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
+    ```bash
+    pip install -e .
+    ```
+
+    !!! note
+        The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
 
 2. Install test requirements one by one:
-```bash
-pip install pytest
-```
+
+    ```bash
+    pip install pytest
+    ```
 
 ### Create a `/tests` directory
 

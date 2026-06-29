@@ -337,10 +337,11 @@ The following sequence occurs when `%debug` runs after an error occurs:
 You can then inspect the value of expressions and arguments, or add breakpoints to the code.
 
 Here is example debugging workflow after discovering a node in your pipeline is failing:
+
 1. Inspect the logs to find the name of the failing node. We can see below the problematic node is `split_data_node`.
 
-??? example "Click to see the pipeline failure logs"
-    ![Pipeline error logs](../../meta/images/pipeline_error_logs.png)
+    ??? example "Click to see the pipeline failure logs"
+        ![Pipeline error logs](../../meta/images/pipeline_error_logs.png)
 
 2. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#kedro-line-magics).
 3. Run the populated cells to examine the node's behaviour in isolation.

@@ -683,9 +683,9 @@ Logs are available in [CloudWatch Logs](https://docs.aws.amazon.com/batch/latest
 
 1. **Check Batch job states.** All jobs should reach **SUCCEEDED**. [Learn how to check AWS Batch job status](https://docs.aws.amazon.com/batch/latest/userguide/monitoring.html):
 
-```bash
-aws batch list-jobs --job-queue <batch-job-queue> --job-status SUCCEEDED
-```
+    ```bash
+    aws batch list-jobs --job-queue <batch-job-queue> --job-status SUCCEEDED
+    ```
 
 2. **Check S3 outputs.** List paths from your `conf/aws_batch/catalog.yml`. [Learn how to list objects in Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ListingObjects.html):
 

@@ -581,15 +581,16 @@ We provide additional examples of [how to use parameters through the data catalo
 One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a `kedro-datasets` package in the [`kedro-plugins` repository](https://github.com/kedro-org/kedro-plugins), where you can add a new custom dataset implementation to share with others. You can find more information in the [Kedro contribution guide on GitHub](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
 
 To contribute your custom dataset:
+
 1. Add your dataset package to `kedro-plugins/kedro-datasets/kedro_datasets/`.
 
-For example, in our `ImageDataset` example, the directory structure should be:
+    For example, in our `ImageDataset` example, the directory structure should be:
 
-```
-kedro-plugins/kedro-datasets/kedro_datasets/image
-├── __init__.py
-└── image_dataset.py
-```
+    ```
+    kedro-plugins/kedro-datasets/kedro_datasets/image
+    ├── __init__.py
+    └── image_dataset.py
+    ```
 
 2. If the dataset is complex, create a `README.md` file to explain how it works and document its API.
 3. Core datasets should be accompanied by full test coverage in `kedro-plugins/kedro-datasets/tests/`.

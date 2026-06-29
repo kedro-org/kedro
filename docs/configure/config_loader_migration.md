@@ -120,37 +120,39 @@ Templating of values is done through native [variable interpolation in `OmegaCon
 The variable interpolation is scoped to a specific configuration type and environment. If you want to share templated values across configuration types and environments, [you will need to use globals](#7-globals).
 
 Suppose you are migrating a templated **catalog** file from using `TemplatedConfigLoader` to `OmegaConfigLoader` you would do the following:
+
 1. Rename `conf/base/globals.yml` to match the patterns specified for catalog (`["catalog*", "catalog*/**", "**/catalog*"]`), for example `conf/base/catalog_variables.yml`
 2. Add an underscore `_` to any catalog template values. This is needed because of how catalog entries are validated.
 
-```diff
-- bucket_name: "my_s3_bucket"
-+ _bucket_name: "my_s3_bucket" # kedro requires `_` to mark templatable keys
-- key_prefix: "my/key/prefix/"
-+ _key_prefix: "my/key/prefix/"
+    ```diff
+    - bucket_name: "my_s3_bucket"
+    + _bucket_name: "my_s3_bucket" # kedro requires `_` to mark templatable keys
+    - key_prefix: "my/key/prefix/"
+    + _key_prefix: "my/key/prefix/"
 
-- datasets:
-+ _datasets:
-    csv: "pandas.CSVDataset"
-    spark: "spark.SparkDataset"
+    - datasets:
+    + _datasets:
+        csv: "pandas.CSVDataset"
+        spark: "spark.SparkDataset"
 
-```
+    ```
 
 3. Update `catalog.yml` with the underscores `_` at the beginning of the templated value names.
-```diff
-raw_boat_data:
--   type: "${datasets.spark}"
-+   type: "${_datasets.spark}"
--   filepath: "s3a://${bucket_name}/${key_prefix}/raw/boats.csv"
-+   filepath: "s3a://${_bucket_name}/${_key_prefix}/raw/boats.csv"
-    file_format: parquet
 
-raw_car_data:
--    type: "${datasets.csv}"
-+    type: "${_datasets.csv}"
--    filepath: "s3://${bucket_name}/data/${key_prefix}/raw/cars.csv"
-+    filepath: "s3://${_bucket_name}/data/${_key_prefix}/raw/cars.csv"
-```
+    ```diff
+    raw_boat_data:
+    -   type: "${datasets.spark}"
+    +   type: "${_datasets.spark}"
+    -   filepath: "s3a://${bucket_name}/${key_prefix}/raw/boats.csv"
+    +   filepath: "s3a://${_bucket_name}/${_key_prefix}/raw/boats.csv"
+        file_format: parquet
+
+    raw_car_data:
+    -    type: "${datasets.csv}"
+    +    type: "${_datasets.csv}"
+    -    filepath: "s3://${bucket_name}/data/${key_prefix}/raw/cars.csv"
+    +    filepath: "s3://${_bucket_name}/data/${_key_prefix}/raw/cars.csv"
+    ```
 
 #### Providing default values for templates with `oc.select`
 To provide a default for any template values you have to use [the OmegaConf `oc.select` resolver](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-select).

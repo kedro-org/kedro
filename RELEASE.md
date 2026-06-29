@@ -1368,7 +1368,7 @@ The parameters should look like this:
 * Pinned `dynaconf` to `<3.1.6` because the method signature for `_validate_items` changed which is used in Kedro.
 
 ## Upcoming deprecations for Kedro 0.18.0
-* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`.
+* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list` and `kedro registry describe`.
 * `kedro install` is being deprecated in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 
 ## Thanks for supporting contributions
@@ -2330,25 +2330,25 @@ The easiest way to migrate your project from Kedro 0.14.* to Kedro 0.15.0 is to 
 1. Create a new project with the same name by running `kedro new`
 
 2. Copy the following folders to the new project:
- - `results/`
- - `references/`
- - `notebooks/`
- - `logs/`
- - `data/`
- - `conf/`
+    - `results/`
+    - `references/`
+    - `notebooks/`
+    - `logs/`
+    - `data/`
+    - `conf/`
 
 3. If you customised your `src/<package>/run.py`, make sure you apply the same customisations to `src/<package>/run.py`
- - If you customised `get_config()`, you can override `config_loader` property in `ProjectContext` derived class
- - If you customised `create_catalog()`, you can override `catalog()` property in `ProjectContext` derived class
- - If you customised `run()`, you can override `run()` method in `ProjectContext` derived class
- - If you customised default `env`, you can override it in `ProjectContext` derived class or pass it at construction. By default, `env` is `local`.
- - If you customised default `root_conf`, you can override `CONF_ROOT` attribute in `ProjectContext` derived class. By default, `KedroContext` base class has `CONF_ROOT` attribute set to `conf`.
+    - If you customised `get_config()`, you can override `config_loader` property in `ProjectContext` derived class
+    - If you customised `create_catalog()`, you can override `catalog()` property in `ProjectContext` derived class
+    - If you customised `run()`, you can override `run()` method in `ProjectContext` derived class
+    - If you customised default `env`, you can override it in `ProjectContext` derived class or pass it at construction. By default, `env` is `local`.
+    - If you customised default `root_conf`, you can override `CONF_ROOT` attribute in `ProjectContext` derived class. By default, `KedroContext` base class has `CONF_ROOT` attribute set to `conf`.
 
 4. The following syntax changes are introduced in ipython or Jupyter notebook/labs:
- - `proj_dir` -> `context.project_path`
- - `proj_name` -> `context.project_name`
- - `conf` -> `context.config_loader`.
- - `io` -> `context.catalog` (e.g., `io.load()` -> `context.catalog.load()`)
+    - `proj_dir` -> `context.project_path`
+    - `proj_name` -> `context.project_name`
+    - `conf` -> `context.config_loader`.
+    - `io` -> `context.catalog` (e.g., `io.load()` -> `context.catalog.load()`)
 
 5. If you customised your `kedro_cli.py`, you need to apply the same customisations to your `kedro_cli.py` in the new project.
 

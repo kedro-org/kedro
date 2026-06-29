@@ -547,20 +547,20 @@ Read the AWS guide for [viewing EMR Serverless job runs](https://docs.aws.amazon
 
 1. **Check job state**. Confirm the job reached **SUCCESS**. Read the AWS guide for [viewing EMR Serverless job runs](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-monitor.html):
 
-```bash
-aws emr-serverless get-job-run \
-  --application-id <application-id> \
-  --job-run-id <job-run-id> \
-  --region <your-aws-region> \
-  --query 'jobRun.state' --output text
-```
+    ```bash
+    aws emr-serverless get-job-run \
+      --application-id <application-id> \
+      --job-run-id <job-run-id> \
+      --region <your-aws-region> \
+      --query 'jobRun.state' --output text
+    ```
 
 2. **Check S3 outputs**. List the output paths from your `conf/emr/catalog.yml`. Follow the AWS guide for [listing objects in S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ListingObjects.html):
 
-```bash
-aws s3 ls s3://<your-bucket>/data/02_intermediate/
-aws s3 ls s3://<your-bucket>/data/03_primary/
-```
+    ```bash
+    aws s3 ls s3://<your-bucket>/data/02_intermediate/
+    aws s3 ls s3://<your-bucket>/data/03_primary/
+    ```
 
 If the job failed, see [Troubleshooting](#troubleshooting).
 
@@ -581,25 +581,25 @@ Kedro's default [`find_pipelines()`](../../build/pipeline_registry.md) imports *
 
 1. Use this `pipeline_registry.py` pattern:
 
-```python
-import os
+    ```python
+    import os
 
-from kedro.framework.project import find_pipelines
-from kedro.pipeline import Pipeline
+    from kedro.framework.project import find_pipelines
+    from kedro.pipeline import Pipeline
 
 
-def register_pipelines() -> dict[str, Pipeline]:
-    pipelines_to_find = os.getenv("KEDRO_PIPELINES_TO_FIND")
-    if pipelines_to_find:
-        names = [name.strip() for name in pipelines_to_find.split(",") if name.strip()]
-        pipelines = find_pipelines(pipelines_to_find=names, raise_errors=True)
-    else:
-        pipelines = find_pipelines(raise_errors=True)
-    pipelines["__default__"] = sum(pipelines.values())
-    return pipelines
-```
+    def register_pipelines() -> dict[str, Pipeline]:
+        pipelines_to_find = os.getenv("KEDRO_PIPELINES_TO_FIND")
+        if pipelines_to_find:
+            names = [name.strip() for name in pipelines_to_find.split(",") if name.strip()]
+            pipelines = find_pipelines(pipelines_to_find=names, raise_errors=True)
+        else:
+            pipelines = find_pipelines(raise_errors=True)
+        pipelines["__default__"] = sum(pipelines.values())
+        return pipelines
+    ```
 
-When `KEDRO_PIPELINES_TO_FIND` is unset (local development), all pipelines are registered as usual.
+    When `KEDRO_PIPELINES_TO_FIND` is unset (local development), all pipelines are registered as usual.
 
 2. Move datasets for pipelines you are **not** running into `conf/local/catalog.yml`. Kedro merges `conf/base/` with `conf/emr/` when you pass `--env emr`; entries left in `conf/base/` are still loaded and validated.
 

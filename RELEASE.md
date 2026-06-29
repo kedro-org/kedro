@@ -1,9 +1,16 @@
 # Upcoming Release
-
 ## Major features and improvements
-* Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests.
+## Bug fixes and other changes
+## Documentation changes
+## Community contributions
+
+# Release 1.5.0
+## Major features and improvements
+* Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests. It offers the following endpoints:
+  * `/run` to run pipelines with optional runtime parameters.
+  * `/health` to check the server's health status.
+  * `/snapshot` to retrieve the current project snapshot.
 * Added a new CLI command `kedro server start` to run the server.
-* Added an HTTP endpoint `/snapshot` for accessing project snapshot.
 * Added selective pipeline loading: when `--pipelines` is specified, only the requested pipeline modules are imported.
 
 ## Bug fixes and other changes
@@ -19,12 +26,13 @@
 * Updated the AWS Batch deployment guide with a strategy-first layout, custom `AWSBatchRunner` usage, namespace-based job submission, and S3-backed catalog configuration.
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
 * [Feng Jikui](https://github.com/fengjikui)
 * [Rudra Dudhat](https://github.com/RudraDudhat2509)
+* [Jean-Baptiste Braun](https://github.com/jbbqqf)
+* [Gargi](https://github.com/Kaliagargi)
+* [Simon](https://github.com/simon-b)
 
-Many thanks to the following Kedroids for contributing PRs to this release:
-
-* [Simon Bull](https://github.com/simon-b)
 
 # Release 1.4.0
 

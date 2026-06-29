@@ -16,6 +16,19 @@ repos:
           files: "^kedro/|^features/|^tests/"
           exclude: "^features/test_starter|^kedro/templates/"
 
+    - repo: https://github.com/hukkin/mdformat
+      rev: 1.0.0
+      hooks:
+        - id: mdformat
+          name: "mdformat on Markdown files"
+          additional_dependencies:
+            - mdformat-mkdocs==5.1.4 # MkDocs/Material syntax (admonitions, tabs, snippets)
+            - mdformat-gfm==1.0.0 # GitHub Flavored Markdown (tables, strikethrough, autolinks)
+            - mdformat-frontmatter==2.1.2 # YAML front matter
+          # docs/api/ (mkdocstrings) and commands_reference.md (mkdocs-click) use
+          # ::: directives whose indented options mdformat strips; exclude them.
+          exclude: "^kedro/templates/|^features/test_starter/|^docs/api/|^docs/getting-started/commands_reference\\.md$"
+
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.6.0
       hooks:

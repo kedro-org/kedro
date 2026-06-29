@@ -12,6 +12,7 @@ from collections.abc import Callable, Iterable, KeysView
 from enum import Enum, auto
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import fsspec
 from omegaconf import DictConfig, OmegaConf
@@ -100,6 +101,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         custom_resolvers: dict[str, Callable] | None = None,
         merge_strategy: dict[str, str] | None = None,
         ignore_hidden: bool = True,
+        allowed_schemes: Iterable[str] | None = None,
+        allowed_hosts: Iterable[str] | None = None,
     ):
         if isinstance(conf_source, Path):
             conf_source = str(conf_source)
@@ -129,6 +132,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
             ignore_hidden: A boolean flag that determines whether hidden files and directories should be
                 ignored when loading configuration files. If True, ignore hidden files and files in hidden directories.
+            allowed_schemes: Optional iterable of URL schemes that remote ``conf_source``
+                values may use. Defaults to None, which allows all supported schemes.
+            allowed_hosts: Optional iterable of hosts that remote ``conf_source`` values
+                may use. Defaults to None, which allows all hosts.
         """
         self.ignore_hidden = ignore_hidden
         self.base_env = base_env or ""
@@ -154,6 +161,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._register_globals_resolver()
 
         # Setup file system and protocol
+        self._validate_allowed_remote_conf_source(
+            conf_source, allowed_schemes, allowed_hosts
+        )
         self._fs, self._protocol = self._initialise_filesystem_and_protocol(conf_source)
 
         # Store remote root path if using cloud protocol
@@ -413,6 +423,41 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             # Default to local filesystem
             return fsspec.filesystem(protocol="file", fo=conf_source), "file"
+
+    @staticmethod
+    def _validate_allowed_remote_conf_source(
+        conf_source: str,
+        allowed_schemes: Iterable[str] | None,
+        allowed_hosts: Iterable[str] | None,
+    ) -> None:
+        """Validate remote configuration sources against optional allowlists."""
+        if allowed_schemes is None and allowed_hosts is None:
+            return
+
+        options = _parse_filepath(conf_source)
+        protocol = options["protocol"].lower()
+
+        if protocol == "file":
+            return
+
+        if allowed_schemes is not None:
+            allowed_scheme_set = {
+                scheme.lower().removesuffix("://") for scheme in allowed_schemes
+            }
+            if protocol not in allowed_scheme_set:
+                raise ValueError(
+                    f"Configuration source scheme '{protocol}' is not allowed. "
+                    f"Allowed schemes are: {sorted(allowed_scheme_set)}."
+                )
+
+        if allowed_hosts is not None:
+            host = urlsplit(conf_source).hostname
+            allowed_host_set = {host.lower() for host in allowed_hosts}
+            if host is None or host.lower() not in allowed_host_set:
+                raise ValueError(
+                    f"Configuration source host '{host}' is not allowed. "
+                    f"Allowed hosts are: {sorted(allowed_host_set)}."
+                )
 
     def _merge_configs(
         self,

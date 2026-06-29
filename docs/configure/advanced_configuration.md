@@ -16,6 +16,7 @@ This page also contains a set of guidance for advanced configuration requirement
 - [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
 - [How to load credentials through environment variables with `OmegaConfigLoader`](#how-to-load-credentials-through-environment-variables)
 - [How to change the merge strategy used by `OmegaConfigLoader`](#how-to-change-the-merge-strategy-used-by-omegaconfigloader)
+- [How to restrict remote configuration sources with `OmegaConfigLoader`](#how-to-restrict-remote-configuration-sources-with-omegaconfigloader)
 
 
 ### How to use a custom configuration loader
@@ -347,6 +348,26 @@ CONFIG_LOADER_ARGS = {
 
 If no merge strategy is defined, the default destructive strategy will be applied. **Note**: this merge strategy setting applies when configuration files are located in **different** environments.
 When files are part of the same environment, they are always merged in a soft way. An error is thrown when files in the same environment contain the same top-level keys.
+
+### How to restrict remote configuration sources with `OmegaConfigLoader`
+`OmegaConfigLoader` can load configuration from local paths and from remote URLs such as `s3://` and `https://` sources. Treat `conf_source` as trusted operator input. Do not derive it from untrusted external data such as HTTP request parameters, queue messages, or user-controlled environment variables.
+
+For multi-tenant or network-facing deployments, you can restrict remote configuration sources by passing `allowed_schemes` or `allowed_hosts` to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`:
+
+```python
+from kedro.config import OmegaConfigLoader
+
+CONFIG_LOADER_CLASS = OmegaConfigLoader
+
+CONFIG_LOADER_ARGS = {
+    "allowed_schemes": ["s3"],
+    "allowed_hosts": ["trusted-config-bucket"],
+}
+```
+
+When these allowlists are set, `OmegaConfigLoader` raises a `ValueError` if a remote `conf_source` uses a scheme or host that is not allowed. Local configuration paths are unaffected.
+
+If your catalog uses `PickleDataset`, only point it at trusted data. This requirement is especially important when the configuration source itself is remote.
 
 
 ## Advanced configuration without a full Kedro project

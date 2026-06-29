@@ -1685,6 +1685,65 @@ class TestRemotePathHandling:
         ):
             conf["catalog"]
 
+    def test_remote_conf_source_allowed_scheme(self, mocker):
+        mock_fs = mocker.patch("fsspec.filesystem")
+        mock_filesystem = mocker.MagicMock()
+        mock_fs.return_value = mock_filesystem
+
+        config_loader = OmegaConfigLoader(
+            "s3://trusted-bucket/configs", allowed_schemes=["s3"]
+        )
+
+        mock_fs.assert_called_once_with(protocol="s3")
+        assert config_loader._protocol == "s3"
+
+    def test_remote_conf_source_disallowed_scheme(self, mocker):
+        mock_fs = mocker.patch("fsspec.filesystem")
+
+        with pytest.raises(
+            ValueError,
+            match="Configuration source scheme 'http' is not allowed",
+        ):
+            OmegaConfigLoader("http://example.com/configs", allowed_schemes=["s3"])
+
+        mock_fs.assert_not_called()
+
+    def test_remote_conf_source_allowed_host(self, mocker):
+        mock_fs = mocker.patch("fsspec.filesystem")
+        mock_filesystem = mocker.MagicMock()
+        mock_fs.return_value = mock_filesystem
+
+        config_loader = OmegaConfigLoader(
+            "https://trusted.example.com:443/configs",
+            allowed_hosts=["trusted.example.com"],
+        )
+
+        mock_fs.assert_called_once_with(protocol="https")
+        assert config_loader._protocol == "https"
+
+    def test_remote_conf_source_disallowed_host(self, mocker):
+        mock_fs = mocker.patch("fsspec.filesystem")
+
+        with pytest.raises(
+            ValueError,
+            match="Configuration source host 'example.com' is not allowed",
+        ):
+            OmegaConfigLoader(
+                "https://example.com/configs",
+                allowed_hosts=["trusted.example.com"],
+            )
+
+        mock_fs.assert_not_called()
+
+    def test_local_conf_source_ignores_remote_allowlists(self, tmp_path):
+        config_loader = OmegaConfigLoader(
+            conf_source=tmp_path,
+            allowed_schemes=["s3"],
+            allowed_hosts=["trusted.example.com"],
+        )
+
+        assert config_loader._protocol == "file"
+
     def test_hidden_files_ignored_by_default(self, tmp_path):
         base_dir = tmp_path / "base"
         base_dir.mkdir()

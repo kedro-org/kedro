@@ -6,7 +6,6 @@
 
 If you are a contributor and would like to submit a new dataset, extend the [kedro.io.AbstractDataset][] interface, or [kedro.io.AbstractVersionedDataset][] if you plan to support versioning. Subclasses must provide concrete `load` and `save` methods with consistent error handling wrappers. They also override `_describe`, which logs internal information about each instance of your custom `AbstractDataset`.
 
-
 ## Scenario
 
 In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types/). The goal is to train a model that classifies each [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon)—for example, Water, Fire, or Bug—based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataset` to read and save image data.
@@ -31,9 +30,9 @@ Consult the [Pillow documentation](https://pillow.readthedocs.io/en/stable/insta
 
 At the minimum, a valid Kedro dataset needs to subclass the base [kedro.io.AbstractDataset][] and provide an implementation for the following abstract methods:
 
-* `load`
-* `save`
-* `_describe`
+- `load`
+- `save`
+- `_describe`
 
 `AbstractDataset` is generically typed with an input data type for saving data, and an output data type for loading data.
 This typing is optional and defaults to the `Any` type.
@@ -41,12 +40,15 @@ This typing is optional and defaults to the `Any` type.
 The `_EPHEMERAL` Boolean attribute in `AbstractDataset` indicates if a dataset is persistent. For example, for [kedro.io.MemoryDataset][], which is not persistent, it is set to True. By default, `_EPHEMERAL` is set to False.
 
 !!! note
+
     Name the parameter that specifies the location of the data file or folder `filename`, `filepath`, or `path` in the constructor of the custom dataset class. This keeps dataset constructors consistent with the Kedro convention.
 
 Here is an example skeleton for `ImageDataset`:
 
 <!-- vale off -->
+
 ??? example "View code"
+
     ```python
     from typing import Any, Dict
 
@@ -88,6 +90,7 @@ Here is an example skeleton for `ImageDataset`:
             """Returns a dict that describes the attributes of the dataset"""
             ...
     ```
+
 <!-- vale on -->
 
 Create a subdirectory called `datasets` in `src/kedro_pokemon/` to store the dataset definition `image_dataset.py`, adding `__init__.py` to make Python treat the directory as a package that you can import from:
@@ -105,7 +108,9 @@ Several built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthe
 Here is the implementation of the `load` method using `fsspec` and `Pillow` to read the data of a single image into a `numpy` array:
 
 <!-- vale off -->
+
 ??? example "View code"
+
     ```python
     from pathlib import PurePosixPath
     from typing import Any, Dict
@@ -145,11 +150,13 @@ Here is the implementation of the `load` method using `fsspec` and `Pillow` to r
 
         ...
     ```
+
 <!-- vale on -->
 
 To test this out, add a dataset to the data catalog to load the image of Pikachu.
 
 <!-- vale off -->
+
 ```yaml
 # in conf/base/catalog.yml
 
@@ -158,6 +165,7 @@ pikachu:
   filepath: data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   # Note: the duplicated `images` path is part of the original Kaggle dataset
 ```
+
 <!-- vale on -->
 
 Then launch an IPython session with `kedro ipython` to preview the data:
@@ -174,7 +182,6 @@ In [3]: Image.fromarray(image).show()
 ## Write the `save` method with `fsspec`
 
 Similarly, define the `_save` method as follows:
-
 
 ```python
 class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
@@ -212,7 +219,9 @@ class ImageDataset(AbstractDataset[np.ndarray, np.ndarray]):
 Here is the full implementation of our basic `ImageDataset`:
 
 <!-- vale off -->
+
 ??? example "View code"
+
     ```python
     from pathlib import PurePosixPath
     from typing import Any, Dict
@@ -267,6 +276,7 @@ Here is the full implementation of our basic `ImageDataset`:
             """Returns a dict that describes the attributes of the dataset."""
             return dict(filepath=self._filepath, protocol=self._protocol)
     ```
+
 <!-- vale on -->
 
 ## Integration with `PartitionedDataset`
@@ -307,19 +317,21 @@ $ ls -la data/01_raw/pokemon-images-and-types/images/images/*.png | wc -l
 ### How to add versioning to your dataset
 
 !!! note
+
     Versioning doesn't work with `PartitionedDataset`. You can't use both of them at the same time.
 
 To add versioning support to the new dataset we need to extend the
- [kedro.io.AbstractVersionedDataset][] to:
+[kedro.io.AbstractVersionedDataset][] to:
 
-* Accept a `version` keyword argument as part of the constructor
-* Adapt the `load` and `save` method to use the versioned data path obtained from `_get_load_path` and `_get_save_path` respectively
+- Accept a `version` keyword argument as part of the constructor
+- Adapt the `load` and `save` method to use the versioned data path obtained from `_get_load_path` and `_get_save_path` respectively
 
 The following amends the full implementation of our basic `ImageDataset`. It now loads and saves data to and from a versioned subdirectory (`data/01_raw/pokemon-images-and-types/images/images/pikachu.png/<version>/pikachu.png` with `version` being a datetime-formatted string `YYYY-MM-DDThh.mm.ss.sssZ` by default):
 
-
 <!-- vale off -->
+
 ??? example "View code"
+
     ```python
     from pathlib import PurePosixPath
     from typing import Any, Dict
@@ -383,7 +395,9 @@ The following amends the full implementation of our basic `ImageDataset`. It now
                 filepath=self._filepath, version=self._version, protocol=self._protocol
             )
     ```
+
 <!-- vale on -->
+
 <!-- vale on -->
 
 All versioned datasets automatically inherit a `list_versions()` method from `AbstractVersionedDataset` that allows you to retrieve all available versions of the dataset. This can be useful for tracking dataset history or implementing custom version selection logic.
@@ -391,8 +405,11 @@ All versioned datasets automatically inherit a `list_versions()` method from `Ab
 The difference between the original `ImageDataset` and the versioned `ImageDataset` is as follows:
 
 <!-- Generated by saving the original and versioned examples to a file and running `diff original.py versioned.py -U -1` -->
+
 <!-- vale off -->
+
 ??? example "View code"
+
     ```diff
     from pathlib import PurePosixPath
     from typing import Any, Dict
@@ -464,6 +481,7 @@ The difference between the original `ImageDataset` and the versioned `ImageDatas
     +            filepath=self._filepath, version=self._version, protocol=self._protocol
     +        )
     ```
+
 <!-- vale on -->
 
 To test the code, you need to enable versioning support in the data catalog:
@@ -478,6 +496,7 @@ pikachu:
 ```
 
 !!! note
+
     Using an HTTP(S)-based `filepath` with `versioned: true` is NOT supported.
 
 Create an initial version of the data by creating an example first version (for example, `2020-02-22T00.00.00.000Z`):
@@ -507,7 +526,6 @@ In [2]: context.catalog.save('pikachu', data=img)
 
 Inspect the content of the data directory to find a new version of the data, written by `save`.
 
-
 ## Thread-safety
 
 Kedro datasets should work with the [kedro.runner.SequentialRunner][] and the [kedro.runner.ParallelRunner][], so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, or closures. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
@@ -531,6 +549,7 @@ ForkingPickler.dumps(dataset)
 If your use case requires them, Kedro allows you to pass `credentials` and filesystem-specific `fs_args` parameters to your dataset. For example, if the Pokémon data sits in an S3 bucket, we can add the `credentials` and `fs_args` to the data catalog as follows:
 
 <!-- vale off -->
+
 ```yaml
 # in conf/base/catalog.yml
 
@@ -541,6 +560,7 @@ pikachu:
   fs_args:
     arg_1: <value>
 ```
+
 <!-- vale on -->
 
 These parameters are then passed to the dataset constructor so you can use them with `fsspec`:
@@ -592,21 +612,24 @@ To contribute your custom dataset:
     └── image_dataset.py
     ```
 
-2. If the dataset is complex, create a `README.md` file to explain how it works and document its API.
-3. Core datasets should be accompanied by full test coverage in `kedro-plugins/kedro-datasets/tests/`.
-4. Datasets should also be added to the documentation.
+1. If the dataset is complex, create a `README.md` file to explain how it works and document its API.
+
+1. Core datasets should be accompanied by full test coverage in `kedro-plugins/kedro-datasets/tests/`.
+
+1. Datasets should also be added to the documentation.
     To ensure your dataset appears properly in the documentation you need to:
 
     1. Ensure your dataset class has a markdown-parseable docstring.
-    2. Add an entry to the table in `index.md` within either:
+    1. Add an entry to the table in `index.md` within either:
         - `docs/pages/api/kedro_datasets/` (for core datasets), or
         - `docs/pages/api/kedro_datasets_experimental/` (for experimental datasets).
-    3. Create a markdown file for your dataset in the corresponding directory.
-    4. Add the dataset markdown file to the navigation section of `mkdocs.yml`.
+    1. Create a markdown file for your dataset in the corresponding directory.
+    1. Add the dataset markdown file to the navigation section of `mkdocs.yml`.
 
-5. Make a pull request against the `main` branch of the [Kedro plugins repository](https://github.com/kedro-org/kedro-plugins).
+1. Make a pull request against the `main` branch of the [Kedro plugins repository](https://github.com/kedro-org/kedro-plugins).
 
 !!! info
+
     There are two types of datasets you can contribute: **core** and **experimental**.
 
     - **Core datasets** are officially maintained by the Kedro Technical Steering Committee (TSC) and must meet high standards, including full documentation, 100% test coverage, cross-platform support, and compatibility with supported Python versions.

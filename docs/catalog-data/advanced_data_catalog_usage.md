@@ -3,6 +3,7 @@
 You can define a Data Catalog in two ways. Most projects rely on a YAML configuration file as [illustrated earlier](./data_catalog.md). You can also access the Data Catalog programmatically through [kedro.io.DataCatalog][]. The API lets you configure data sources in code and use the IO module within notebooks.
 
 !!! Warning
+
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
@@ -82,12 +83,16 @@ intermediate_ds = catalog.get("intermediate_ds", fallback_to_runtime_pattern=Tru
 ```
 
 - Both methods retrieve a dataset by name from the catalog’s internal collection.
+
 - If the dataset isn’t materialised but matches a configured pattern, it is instantiated and returned.
 
 - The `.get()` method accepts:
+
     - `fallback_to_runtime_pattern` (`bool`): If True, unresolved names fallback to `MemoryDataset` or `SharedMemoryDataset` (in `SharedMemoryDataCatalog`).
     - `version`: Specify dataset version if versioning is enabled.
+
 - If no match is found and fallback is disabled, `.get()` method returns `None`.
+
 - Dictionary-style access raises a `DatasetNotFoundError` if the dataset is missing.
 
 ## How to add datasets to the catalog
@@ -102,6 +107,7 @@ catalog["bikes"] = bikes_ds  # Add dataset instance
 
 catalog["cars"] = ["Ferrari", "Audi"]  # Add raw data
 ```
+
 When raw data is added, it's automatically wrapped in a `MemoryDataset`.
 
 ## How to iterate through datasets in the catalog
@@ -166,6 +172,7 @@ The following steps happened behind the scenes when `load` was called:
 ## How to save data programmatically
 
 !!! warning "Memory Dataset Warning"
+
     This pattern is not recommended unless you are using a hosted notebook environment such as SageMaker or Databricks. The pattern is also acceptable when writing unit or integration tests for your Kedro pipeline. Use the YAML approach in preference.
 
 ### How to save data to memory
@@ -209,6 +216,7 @@ catalog.save("ranked", ranked)
 ```
 
 !!! warning "Null Value Warning"
+
     Saving `None` to a dataset is not allowed!
 
 ## How to access a dataset with credentials
@@ -275,7 +283,6 @@ assert data2.equals(reloaded)
 
 In the example above, we do not fix any versions. The behaviour of load and save operations becomes slightly different when we set a version:
 
-
 ```python
 version = Version(
     load="my_exact_version",  # load exact version
@@ -338,6 +345,7 @@ patterns = catalog.config_resolver.list_patterns() # List all patterns
 ```
 
 !!! note
+
     `DataCatalog` does not support all dictionary methods, such as `pop()`, `popitem()`, or `del`.
 
 ## How to save catalog to config
@@ -358,11 +366,13 @@ config, credentials, load_versions, save_version = catalog.to_config()
 ```
 
 To reconstruct the catalog later:
+
 ```python
 new_catalog = DataCatalog.from_config(config, credentials, load_versions, save_version)
 ```
 
 !!! note
+
     This method works for datasets with static, serialisable parameters. For example, you can serialise credentials passed as dictionaries, but not actual credential objects (such as `google.auth.credentials.Credentials)`. In-memory datasets are excluded.
 
 ## How to filter catalog datasets
@@ -383,6 +393,7 @@ catalog.filter(name_regex="data", by_type=[MemoryDataset, SQLQueryDataset])  # M
 ```
 
 ## How to get dataset type
+
 You can check the dataset type without materialising or adding it to the catalog:
 
 ```python

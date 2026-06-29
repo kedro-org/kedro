@@ -1,9 +1,11 @@
 # Automated testing
 
 An important step towards achieving high code quality and maintainability in your Kedro project is the use of automated tests. Let's look at how you can set this up.
+
 ## Introduction
 
 Software testing is the process of checking that the code you have written fulfills its requirements. Software testing can either be **manual** or **automated**. In the context of Kedro:
+
 - **Manual testing** is when you run part or the entire project and check that the results are what you expect.
 - **Automated testing** is writing new code (using libraries called _testing frameworks_) that runs part or the entire project and automatically checks the results against what you expect.
 
@@ -20,8 +22,8 @@ Python offers several testing frameworks. One of the most popular is `pytest` (s
 Let's look at how you can start working with `pytest` in your Kedro project.
 
 ### Install test requirements
-Before getting started with test requirements, it is important to ensure you have installed your project locally. This allows you to test different parts of your project by importing them into your test files.
 
+Before getting started with test requirements, it is important to ensure you have installed your project locally. This allows you to test different parts of your project by importing them into your test files.
 
 To install your project including all the project-specific dependencies and test requirements:
 
@@ -36,7 +38,7 @@ To install your project including all the project-specific dependencies and test
     ]
     ```
 
-2. Navigate to the root directory of the project and run:
+1. Navigate to the root directory of the project and run:
 
     ```bash
     pip install ."[dev]"
@@ -51,9 +53,10 @@ You can also install test requirements individually as you would install other p
     ```
 
     !!! note
+
         The option `-e` installs an editable version of your project, allowing you to make changes to the project files without needing to re-install them each time.
 
-2. Install test requirements one by one:
+1. Install test requirements one by one:
 
     ```bash
     pip install pytest
@@ -108,6 +111,7 @@ class TestKedroRun:
 ```
 
 This test is redundant, but it introduces several of `pytest`'s core features and demonstrates the layout of a test file:
+
 - Tests are implemented in methods or functions beginning with `test_` and classes beginning with `Test`.
 - The `assert` statement is used to compare the result of the test with an expected value.
 
@@ -116,7 +120,6 @@ Although this specific example does not use fixtures, they are an essential part
 Tests should be named as descriptively as possible. This is critical when you are working with other people. For example, it is easier to understand the purpose of a test with the name `test_node_passes_with_valid_input` than a test with the name `test_passes`.
 
 You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using the full feature set of `pytest`, see the [project documentation](https://docs.pytest.org/).
-
 
 ### Run your tests
 

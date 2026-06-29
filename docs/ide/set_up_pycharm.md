@@ -35,7 +35,6 @@ Lastly, in the **Project Explorer** right-click on `src` and then go to **Mark D
 
 ![](../meta/images/pycharm_mark_dir_as_sources_root.png)
 
-
 ## Set up run configurations
 
 [PyCharm Run configurations](https://www.jetbrains.com/help/pycharm/creating-run-debug-configuration-for-tests.html) allow you to execute ready-made scripts with a click. This helps with testing, running, and packaging your Kedro projects.
@@ -53,14 +52,15 @@ Add a new **Python** Run configuration:
 Specify the **Run / Debug Configuration** name in the **Name** field, and edit the new Run configuration as follows:
 
 - Pick **Module** from the dropdown
-- Enter ``kedro`` in the **Module Name** field
-- Enter ``run`` in the **Parameters** field
+- Enter `kedro` in the **Module Name** field
+- Enter `run` in the **Parameters** field
 - Enter the path of your project directory into the **Working directory** field
-- Pick ``Emulate terminal in output console`` from the `Modify options` dropdown, and then click **OK**
+- Pick `Emulate terminal in output console` from the `Modify options` dropdown, and then click **OK**
 
 ![](../meta/images/pycharm_edit_py_run_config.png)
 
 !!! note
+
     **Emulate terminal in output console** enables PyCharm to show [rich terminal output](../develop/logging.md).
 
 To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar. If that toolbar is not visible, enable it by going to **View > Toolbar**. Click the green triangle:
@@ -73,7 +73,6 @@ You may also select **Run** from the toolbar and execute from there. <br />
 
 For other `kedro` commands, follow the same steps but replace `run` in the `Parameters` field with the other commands that are to be used (for example, `jupyter`, `package`, `registry`, and others).
 
-
 ## Debugging
 
 To debug, click the line number in the source where you want execution to break:
@@ -84,12 +83,12 @@ Then click the bug button in the toolbar (![](../meta/images/pycharm_debugger_bu
 
 ![](../meta/images/pycharm_debugger_break.png)
 
->For more information about debugging with PyCharm take a look at the [debugging guide on jetbrains.com](https://www.jetbrains.com/help/pycharm/part-1-debugging-python-code.html).
-
+> For more information about debugging with PyCharm take a look at the [debugging guide on jetbrains.com](https://www.jetbrains.com/help/pycharm/part-1-debugging-python-code.html).
 
 ## Advanced: remote SSH interpreter
 
 !!! note
+
     This section covers features available in PyCharm Professional Edition.
 
 Firstly, add an SSH interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **SSH Interpreter** and fill in details of the remote computer:
@@ -114,10 +113,10 @@ Click **OK** and then select **Remote Run** from the toolbar and click **Run** t
 
 [To debug remotely, click the debugger button as described above](#debugging).
 
-
 ## Advanced: Docker interpreter
 
 !!! note
+
     This section covers features available in PyCharm Professional Edition.
 
 First, add a Docker interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **Docker Interpreter** and then choose the target Docker image:

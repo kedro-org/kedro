@@ -1,6 +1,6 @@
 # Inspect a Kedro project
 
-The inspection API lets you read the structure of a Kedro project without running it. It returns a [`ProjectSnapshot`][kedro.inspection.models.ProjectSnapshot] that captures:
+The inspection API lets you read the structure of a Kedro project without running it. It returns a \[`ProjectSnapshot`\][kedro.inspection.models.ProjectSnapshot] that captures:
 
 - Project metadata (name, package, Kedro version)
 - All registered pipelines and their nodes in topological order
@@ -17,6 +17,7 @@ Use `get_project_snapshot` when you need to read the structure of a Kedro projec
 - **Programmatic access**: query project structure in scripts or notebooks
 
 !!! note
+
     The inspection API reads configuration and pipeline definitions. It does not load datasets, execute nodes, or write data.
 
 The following sections explain how to use the inspection API:
@@ -31,7 +32,7 @@ The following sections explain how to use the inspection API:
 
 ## How to get a project snapshot
 
-Call [`get_project_snapshot`][kedro.inspection.get_project_snapshot] with the path to your project root — the directory that contains `pyproject.toml`:
+Call \[`get_project_snapshot`\][kedro.inspection.get_project_snapshot] with the path to your project root — the directory that contains `pyproject.toml`:
 
 ```python
 from kedro.inspection import get_project_snapshot
@@ -48,11 +49,11 @@ from kedro.inspection import get_project_snapshot
 snapshot = get_project_snapshot(Path.cwd())
 ```
 
-The returned [`ProjectSnapshot`][kedro.inspection.models.ProjectSnapshot] is a data class with four attributes: `metadata`, `pipelines`, `datasets`, and `parameters`.
+The returned \[`ProjectSnapshot`\][kedro.inspection.models.ProjectSnapshot] is a data class with four attributes: `metadata`, `pipelines`, `datasets`, and `parameters`.
 
 ## How to access project metadata
 
-The `metadata` attribute is a [`ProjectMetadataSnapshot`][kedro.inspection.models.ProjectMetadataSnapshot] with the project name, Python package name, and the Kedro version declared in `pyproject.toml`:
+The `metadata` attribute is a \[`ProjectMetadataSnapshot`\][kedro.inspection.models.ProjectMetadataSnapshot] with the project name, Python package name, and the Kedro version declared in `pyproject.toml`:
 
 ```python
 print(snapshot.metadata.project_name)   # "My Project"
@@ -62,7 +63,7 @@ print(snapshot.metadata.kedro_version)  # "1.0.0"
 
 ## How to explore pipeline structure
 
-The `pipelines` attribute is a list of [`PipelineSnapshot`][kedro.inspection.models.PipelineSnapshot] objects, one per registered pipeline. Each snapshot exposes the pipeline name, its nodes in topological order, and its free inputs and outputs:
+The `pipelines` attribute is a list of \[`PipelineSnapshot`\][kedro.inspection.models.PipelineSnapshot] objects, one per registered pipeline. Each snapshot exposes the pipeline name, its nodes in topological order, and its free inputs and outputs:
 
 ```python
 for pipeline in snapshot.pipelines:
@@ -96,11 +97,11 @@ for node in default_pipeline.nodes:
     print("  tags:     ", node.tags)
 ```
 
-Each node is represented as a [`NodeSnapshot`][kedro.inspection.models.NodeSnapshot] with `name`, `namespace`, `inputs`, `outputs`, and `tags` fields.
+Each node is represented as a \[`NodeSnapshot`\][kedro.inspection.models.NodeSnapshot] with `name`, `namespace`, `inputs`, `outputs`, and `tags` fields.
 
 ## How to inspect catalog datasets
 
-The `datasets` attribute is a dictionary mapping dataset names to [`DatasetSnapshot`][kedro.inspection.models.DatasetSnapshot] objects. Each snapshot contains the dataset type and, where present, its file path:
+The `datasets` attribute is a dictionary mapping dataset names to \[`DatasetSnapshot`\][kedro.inspection.models.DatasetSnapshot] objects. Each snapshot contains the dataset type and, where present, its file path:
 
 ```python
 for name, dataset in snapshot.datasets.items():
@@ -129,6 +130,7 @@ print(iris.filepath)  # "data/01_raw/iris.csv"
 ```
 
 !!! note
+
     Datasets resolved from [dataset factory patterns](../catalog-data/kedro_dataset_factories.md) are included in the snapshot. Datasets that appear as node inputs or outputs but have no catalog entry are not included.
 
 ## How to list parameter keys
@@ -164,6 +166,7 @@ snapshot = get_project_snapshot("/path/to/my_project", conf_source="conf/custom"
 ```
 
 !!! note
+
     To compare snapshots across environments in the same process, bootstrap the project and pass the result to each call:
 
     ```python

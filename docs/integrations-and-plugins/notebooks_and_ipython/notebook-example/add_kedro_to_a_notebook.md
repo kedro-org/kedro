@@ -15,15 +15,17 @@ jupyter:
 
 <!-- This is markdown extracted from the Jupyter notebook of the same name. If you want to change the content to publish as new HTML on docs.kedro.org, first `pip install jupytext`. Then open the markdown (this page) in a basic text editor (not an IDE) to make and save your changes. Next, type `jupytext --set-formats md,ipynb add_kedro_to_a_notebook.md` on the command line in the folder this file is located and regenerate the notebook. -->
 
-
 # Add Kedro features to a notebook
 
 This page describes how to add Kedro features incrementally to a notebook.
 
 It starts with a notebook example which does NOT use Kedro. It then explains how to convert portions of the code to use Kedro features while remaining runnable within a notebook. For that part of the example, you need to have [set up Kedro](../../../getting-started/install.md).
 
-!!!  note
-    If you want to experiment with the code in a notebook, you can find it in the [`notebook-example` folder on GitHub](https://github.com/kedro-org/kedro/tree/main/docs/source/notebooks_and_ipython/notebook-example). Be sure to download the entire folder, or clone the entire repo, because the `add_kedro_to_spaceflights_notebook.ipynb` notebook relies upon files stored in the `notebook-example` folder.
+!!! note
+
+```
+If you want to experiment with the code in a notebook, you can find it in the [`notebook-example` folder on GitHub](https://github.com/kedro-org/kedro/tree/main/docs/source/notebooks_and_ipython/notebook-example). Be sure to download the entire folder, or clone the entire repo, because the `add_kedro_to_spaceflights_notebook.ipynb` notebook relies upon files stored in the `notebook-example` folder.
+```
 
 ## Kedro spaceflights
 
@@ -33,8 +35,8 @@ _It is 2160, and the space tourism industry is booming. Globally, thousands of s
 
 _Project: You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight._
 
-
 ### The notebook example
+
 The full example code is given below. To run this, you will need:
 
 ```python
@@ -98,6 +100,7 @@ r2_score(y_test, y_pred)
 ```
 
 ## Use Kedro for data processing
+
 Even if you’re not ready to work with a full Kedro project, you can still use its for data handling within an existing notebook project. This section shows you how.
 
 Kedro’s Data Catalog is a registry of all data sources available for use by the project. It offers a separate place to declare details of the datasets your projects use. Kedro provides built-in datasets for different file types and file systems so you don’t have to write any of the logic for reading or writing data.
@@ -147,6 +150,7 @@ The rest of the spaceflights notebook code for data processing and model evaluat
 ## Use a YAML configuration file
 
 ### Use a configuration file for "magic numbers"
+
 When writing exploratory code, it’s tempting to hard code values to save time, but it makes code harder to maintain in the longer-term. The example code for model evaluation above calls `sklearn.model_selection.train_test_split()`, passing in a model input table and outputs the test and train datasets. There are hard-code values supplied to `test_size` and `random_state`.
 
 ```python
@@ -154,7 +158,6 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 ```
 
 [Good software engineering practice](https://medium.com/towards-data-science/five-software-engineering-principles-for-collaborative-data-science-ab26667a311) suggests that we extract *‘magic numbers’* into named constants. These could be defined at the top of a file or in a utility file, in a format such as yaml.
-
 
 ```yaml
 # params.yml
@@ -219,6 +222,7 @@ r2_score(y_test, y_pred)
 ```
 
 ### Use a configuration file for all "magic values"
+
 If we extend the concept of magic numbers to encompass magic values in general, it seems possible that the variable `features` might also be reusable elsewhere. Extracting it from code into the configuration file named `parameters.yml` leads to the following:
 
 ```yaml
@@ -237,6 +241,7 @@ model_options:
     - company_rating
     - review_scores_rating
 ```
+
 The `parameters.yml` file is included in the example folder so you can reference the values with notebook code as follows:
 
 ```python
@@ -277,9 +282,11 @@ r2_score(y_test, y_pred)
 ```
 
 ## Use Kedro configuration
+
 Kedro offers a [configuration loader](../../../api/config/kedro.config.OmegaConfigLoader.md) to abstract loading values from a yaml file. You can use Kedro configuration loading without a full Kedro project and this approach replaces the need to load the configuration file with `yaml.safe_load`.
 
 ### Use Kedro's configuration loader to load "magic values"
+
 To use Kedro's `OmegaConfigLoader` to load `parameters.yml` the code is as follows:
 
 ```python
@@ -319,6 +326,7 @@ r2_score(y_test, y_pred)
 ```
 
 ### Use Kedro's configuration loader to load the Data Catalog
+
 Earlier in the example, we saw how to use Kedro's Data Catalog to load a `yaml` file, with `safe_load` and pass it to the `DataCatalog` class.
 
 ```python
@@ -362,9 +370,11 @@ shuttles = catalog.load("shuttles")
 ```
 
 ## Where next?
+
 At this point in the notebook, we've introduced Kedro data management (using the Data Catalog) and configuration loader. You have now "Kedro-ised" the notebook code to make it more reusable in future. You can go further if your ultimate goal is to migrate code out of the notebook and use it in a full-blown Kedro project.
 
 ## Refactor your code into functions
+
 Code in a Kedro project runs in one or more pipelines, where a pipeline is a series of "nodes", which wrap discrete functions. One option is to put everything into a single function. Let's try this.
 
 ```python
@@ -441,7 +451,7 @@ big_function()
 
 In truth, this code is not much more maintainable than previous versions.
 
-Maybe we could do better with a series of smaller functions that map to the Kedro vision of a pipeline of nodes. A node should behave consistently, repeatably, and predictably, so that a given input  to a node always returns the same output. For those in the know, this is the definition of a pure function. Nodes/pure functions should be small single responsibility functions that perform a single specific task.
+Maybe we could do better with a series of smaller functions that map to the Kedro vision of a pipeline of nodes. A node should behave consistently, repeatably, and predictably, so that a given input to a node always returns the same output. For those in the know, this is the definition of a pure function. Nodes/pure functions should be small single responsibility functions that perform a single specific task.
 
 Let's try this with our code. We'll split it into a set of functions to process the data, which are based on the code in `big_function` but where each function has a single responsibility. Then we'll add a set of data science functions which split the model training and evaluation code into three separate functions.
 

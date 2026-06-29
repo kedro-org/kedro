@@ -34,7 +34,6 @@ Kedro also provides several platform-specific Spark datasets:
 - [`spark.SparkJDBCDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/spark.SparkJDBCDataset/)
 - [`spark.SparkHiveDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.1.1/api/kedro_datasets/spark.SparkHiveDataset/)
 
-
 ## Spark and Delta Lake interaction
 
 [Delta Lake](https://delta.io/) is an open-source project that enables building a lake house architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
@@ -123,7 +122,7 @@ The `assign` copy mode ensures that the `MemoryDataset` will be assigned the Spa
 
 ## Tips for maximising concurrency using `ThreadRunner`
 
-Under the hood, every Kedro node that performs a Spark action (for example, `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. To do that, you will need to run your Kedro pipeline with the [kedro.runner.ThreadRunner][]:
+Under the hood, every Kedro node that performs a Spark action (for example, `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. To do that, you will need to run your Kedro pipeline with the [kedro.runner.ThreadRunner]\[\]:
 
 ```bash
 kedro run --runner=ThreadRunner

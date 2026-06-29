@@ -5,6 +5,7 @@
 ## Migrate an existing project that uses Kedro 0.19.\* to use 1.\*
 
 ### Using Kedro as a framework
+
 If you're using Kedro as a framework, you need to update your Kedro project to use Kedro 1.0.0. To do this, you need to follow these steps:
 
 - Update your project's `kedro_init_version` in `pyproject.toml` to `1.0.0`:
@@ -55,21 +56,26 @@ def create_pipeline(**kwargs) -> Pipeline:
         ]
     )
 ```
+
 - If you're using the `pipeline()` function, make sure to rename the first argument from `pipe` to `nodes` to be consistent with the argument names of the `Pipeline` class.
+
 ```diff
 - pipeline(pipe=[node1, node2])
 + pipeline(nodes=[node1, node2])
 ```
 
 - `--namespace` argument in `kedro run` command was removed in favour of `--namespaces` which accepts multiple namespaces. If you used the `--namespace` argument, you need to change it to `--namespaces` and pass a comma-separated list of namespaces. For example, if you used this command:
+
 ```bash
 kedro run --namespace=preprocessing
 ```
+
 You should now use the following:
 
 ```bash
 kedro run --namespaces=preprocessing
 ```
+
 - `kedro catalog create` command was removed in Kedro 1.0.0.
 - If you were using the experimental `KedroDataCatalog` class, note that it has been renamed to `DataCatalog` in Kedro 1.0.0. You should remove the following lines from your `settings.py` file:
 
@@ -78,8 +84,8 @@ kedro run --namespaces=preprocessing
 - DATA_CATALOG_CLASS = KedroDataCatalog
 ```
 
-
 ### Using Kedro as a library
+
 If you're using Kedro as a library, you might need to make the following changes to your workflow:
 
 - Rename the `extra_params` argument to `runtime_params` in `KedroSession`:
@@ -92,19 +98,20 @@ with KedroSession.create(
 ) as session:
     session.run()
 ```
+
 - The following `DataCatalog` methods and CLI commands have been removed in Kedro version **`1.0`**.
-Please update your code and workflows accordingly. Where possible, recommended alternatives are provided.
+    Please update your code and workflows accordingly. Where possible, recommended alternatives are provided.
 
-| Deprecated Item           | Type        | Replacement / Notes                                                |
-| ------------------------- | ----------- | ------------------------------------------------------------------ |
-| `catalog._get_dataset()`  | Method      | Intended for internal use; use `catalog.get()` instead             |
-| `catalog.add_all()`       | Method      | Prefer explicit catalog construction or use `catalog.add()`        |
-| `catalog.add_feed_dict()` | Method      | Use `catalog["my_dataset"] = ...` (dict-style assignment)          |
-| `catalog.list()`          | Method      | Replaced by `catalog.filter()`                                     |
-| `catalog.shallow_copy()`  | Method      | Removed; no longer needed after internal refactor                  |
-
+| Deprecated Item           | Type   | Replacement / Notes                                         |
+| ------------------------- | ------ | ----------------------------------------------------------- |
+| `catalog._get_dataset()`  | Method | Intended for internal use; use `catalog.get()` instead      |
+| `catalog.add_all()`       | Method | Prefer explicit catalog construction or use `catalog.add()` |
+| `catalog.add_feed_dict()` | Method | Use `catalog["my_dataset"] = ...` (dict-style assignment)   |
+| `catalog.list()`          | Method | Replaced by `catalog.filter()`                              |
+| `catalog.shallow_copy()`  | Method | Removed; no longer needed after internal refactor           |
 
 ### Other API changes
+
 The following API changes might be relevant to advanced users of Kedro or plugin developers:
 
 - Kedro 1.0.0 made the following private methods `_is_project` and `_find_kedro_project` public. To update, you need to use `is_kedro_project` and `find_kedro_project` respectively.
@@ -114,10 +121,10 @@ The following API changes might be relevant to advanced users of Kedro or plugin
 - Renamed `ModularPipelineError` to `PipelineError`.
 - The `session_id` parameter has been renamed to `run_id` in all runner methods and hooks.
 
-
 ## Migrate an existing project that uses Kedro 0.18.\* to use 0.19.\*
 
 ### Custom syntax for `--params` was removed
+
 [Kedro 0.19.0](https://github.com/kedro-org/kedro/releases/tag/0.19.0) removed the custom Kedro syntax for `--params`. To update, you need to use the OmegaConf syntax instead by replacing `:` with `=`.
 
 If you used this command to pass parameters to `kedro run`:
@@ -125,6 +132,7 @@ If you used this command to pass parameters to `kedro run`:
 ```bash
 kedro run --params=param_key1:value1,param_key2:2.0
 ```
+
 You should now use the following:
 
 ```bash
@@ -134,6 +142,7 @@ kedro run --params=param_key1=value1,param_key2=2.0
 For more information see ["How to specify parameters at runtime"](https://docs.kedro.org/en/stable/configure/parameters/#how-to-specify-parameters-at-runtime).
 
 ### `create_default_data_set()` was removed from `Runner`
+
 Kedro 0.19 removed the `create_default_data_set()` method in the `Runner`. To overwrite the default dataset creation, you need to use the new `Runner` class argument `extra_dataset_patterns` instead.
 
 On class instantiation, pass the `extra_dataset_patterns` argument, and overwrite the default `MemoryDataset` creation as follows:
@@ -145,6 +154,7 @@ runner = ThreadRunner(extra_dataset_patterns={"{default}": {"type": "MyCustomDat
 ```
 
 ### `project_version` was removed
+
 Kedro 0.19 removed `project_version` in `pyproject.toml`. Use `kedro_init_version` instead:
 
 ```diff
@@ -158,7 +168,8 @@ project_name = "my project"
 ### Datasets changes in 0.19
 
 #### The `layer` attribute in `catalog.yml` has moved
-From 0.19, the `layer` attribute at the top level has been  moved inside the `metadata` -> `kedro-viz` attribute. You need to update `catalog.yml` accordingly.
+
+From 0.19, the `layer` attribute at the top level has been moved inside the `metadata` -> `kedro-viz` attribute. You need to update `catalog.yml` accordingly.
 
 The following `catalog.yml` entry changes from the following in 0.18.x code:
 
@@ -182,8 +193,8 @@ companies:
 
 [See the Kedro-Viz documentation for more information](https://docs.kedro.org/projects/kedro-viz/en/stable/)
 
-
 #### For `APIDataset`, the `requests`-specific arguments in `catalog.yml` have moved
+
 From 0.19, if you use `APIDataset`, you need to move all `requests`-specific arguments, such as `params`, `headers`, in the hierarchy to sit under `load_args`. The `url` and `method` arguments are not affected.
 
 For example the following `APIDataset` in `catalog.yml` changes from the following in 0.18.x code:
@@ -212,35 +223,36 @@ us_corn_yield_data:
 ```
 
 #### Dataset renaming
+
 In 0.19.0 we renamed dataset and error classes to follow the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide).
 
-* Dataset classes ending with `DataSet` are replaced by classes that end with `Dataset`.
-* Error classes starting with `DataSet` are replaced by classes that start with `Dataset`.
+- Dataset classes ending with `DataSet` are replaced by classes that end with `Dataset`.
+- Error classes starting with `DataSet` are replaced by classes that start with `Dataset`.
 
 All the classes below are also importable from `kedro.io`; the module where they are defined is listed as the location.
 
-| Type                        | Removed Alias               | Location                       |
-| --------------------------- | --------------------------- | ------------------------------ |
-| `AbstractDataset`           | `AbstractDataSet`           | `kedro.io.core`                |
-| `AbstractVersionedDataset`  | `AbstractVersionedDataSet`  | `kedro.io.core`                |
-| `CachedDataset`             | `CachedDataSet`             | `kedro.io.cached_dataset`      |
-| `LambdaDataset`             | `LambdaDataSet`             | `kedro.io.lambda_dataset`      |
-| `MemoryDataset`             | `MemoryDataSet`             | `kedro.io.memory_dataset`      |
-| `DatasetError`              | `DataSetError`              | `kedro.io.core`                |
-| `DatasetAlreadyExistsError` | `DataSetAlreadyExistsError` | `kedro.io.core`                |
-| `DatasetNotFoundError`      | `DataSetNotFoundError`      | `kedro.io.core`                |
-
+| Type                        | Removed Alias               | Location                  |
+| --------------------------- | --------------------------- | ------------------------- |
+| `AbstractDataset`           | `AbstractDataSet`           | `kedro.io.core`           |
+| `AbstractVersionedDataset`  | `AbstractVersionedDataSet`  | `kedro.io.core`           |
+| `CachedDataset`             | `CachedDataSet`             | `kedro.io.cached_dataset` |
+| `LambdaDataset`             | `LambdaDataSet`             | `kedro.io.lambda_dataset` |
+| `MemoryDataset`             | `MemoryDataSet`             | `kedro.io.memory_dataset` |
+| `DatasetError`              | `DataSetError`              | `kedro.io.core`           |
+| `DatasetAlreadyExistsError` | `DataSetAlreadyExistsError` | `kedro.io.core`           |
+| `DatasetNotFoundError`      | `DataSetNotFoundError`      | `kedro.io.core`           |
 
 #### All other dataset classes are removed from the core Kedro repository (`kedro.extras.datasets`)
+
 You now need to install and import datasets from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 
 ### Configuration changes in 0.19
 
 The `ConfigLoader` and `TemplatedConfigLoader` classes were deprecated in Kedro 0.18.12 and were removed in Kedro 0.19.0. To use that release or later, you must now adopt the `OmegaConfigLoader`. The [configuration migration guide](../configure/config_loader_migration.md) outlines the primary distinctions between the old loaders and the OmegaConfigLoader. It also provides step-by-step instructions on updating your code base to use the new class effectively.
 
-
 #### Changes to the default environments
-The default configuration environment has changed in 0.19 and needs to be declared in `settings.py` explicitly if you have custom arguments. For example, if you use `CONFIG_LOADER_ARGS`  in `settings.py` to read Spark configuration, you need to add `base_env` and `default_run_env` explicitly.
+
+The default configuration environment has changed in 0.19 and needs to be declared in `settings.py` explicitly if you have custom arguments. For example, if you use `CONFIG_LOADER_ARGS` in `settings.py` to read Spark configuration, you need to add `base_env` and `default_run_env` explicitly.
 
 Before 0.19.x:
 
@@ -268,6 +280,6 @@ CONFIG_LOADER_ARGS = {
 
 If you didn't use `CONFIG_LOADER_ARGS` in your code, this change is not needed because Kedro sets it by default.
 
-
 ### Logging
+
 `logging.yml` is now independent of Kedro's run environment and is used when `KEDRO_LOGGING_CONFIG` is set to point to it. The [documentation on logging](https://docs.kedro.org/en/stable/develop/logging/) describes in detail how logging works in Kedro and how it can be customised.

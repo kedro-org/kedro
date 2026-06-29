@@ -4,7 +4,7 @@ Kedro provides several built-in mechanisms that let you extend its behaviour. Th
 
 ## Use Case 1: How to add extra behaviour to Kedro's execution timeline
 
-The execution timeline of a Kedro pipeline is a sequence of actions performed by various Kedro library components. Examples include the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/), [kedro.io.DataCatalog][], the [`Pipeline`][kedro.pipeline.pipeline.Pipeline] class, [kedro.pipeline.node.Node][], and [kedro.framework.context.KedroContext][].
+The execution timeline of a Kedro pipeline is a sequence of actions performed by various Kedro library components. Examples include the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/), [kedro.io.DataCatalog][], the \[`Pipeline`\][kedro.pipeline.pipeline.Pipeline] class, [kedro.pipeline.node.Node][], and [kedro.framework.context.KedroContext][].
 
 At different points in the lifecycle of these components, you might want to add extra behaviour. For example, you could add extra computation for profiling purposes _before_ and _after_ a node runs. You might also insert behaviour around the I/O actions of a dataset, namely the `load` and `save` actions.
 
@@ -18,10 +18,10 @@ You can use [`Datasets`](https://docs.kedro.org/projects/kedro-datasets/en/stabl
 
 If you want to customise a built-in Kedro command, such as `kedro run`, for a specific project, add a `cli.py` file that defines a custom `run()` function. Add the `cli.py` file at the same level as `settings.py`, which in a default project is the `src/PROJECT_NAME` directory. See the [template for the `cli.py` file](../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands).
 
-
 If you want to customise a Kedro command from a command group, such as `kedro pipeline` or `kedro jupyter`, you need to import the corresponding click command group from the Kedro framework `cli`. For `kedro pipeline` commands this would be `from kedro.framework.cli.pipeline import pipeline`, and for `kedro jupyter` commands `from kedro.framework.cli.jupyter import jupyter`. **Note**: you must still add the `cli` click group from the snippet above, even if you do not change it.
 
 You can then add or overwrite any command by adding it to the click group, as in the snippet below:
+
 ```
 @jupyter.command("notebook")
 @env_option(
@@ -34,6 +34,7 @@ def notebook_run(...):
 To inject additional CLI commands intended to be reused across projects, see [our plugin system](./plugins.md). An example of one such command is the `kedro viz run` command introduced by the [Kedro-Viz plugin](https://github.com/kedro-org/kedro-viz). This command is intended to work on every Kedro project which is why it comes from a standalone plugin.
 
 !!! note
+
     Your plugin's implementation can take advantage of other extension mechanisms such as Hooks.
 
 ## Use Case 4: How to customise the initial boilerplate of your project

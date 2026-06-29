@@ -1,6 +1,6 @@
 # The pipeline registry
 
-Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This populates the `pipelines` variable in [`kedro.framework.project`][kedro.framework.project] that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to [`Pipeline`][kedro.pipeline.pipeline.Pipeline] objects.
+Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. This populates the `pipelines` variable in \[`kedro.framework.project`\][kedro.framework.project] that the Kedro CLI and plugins use to access project pipelines. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to \[`Pipeline`\][kedro.pipeline.pipeline.Pipeline] objects.
 
 For example, the [pipeline registry in the Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) defines the following `register_pipelines()` function. It exposes the data processing pipeline, the data science pipeline, and a default pipeline that combines both:
 
@@ -28,11 +28,12 @@ def register_pipelines() -> Dict[str, Pipeline]:
 As a reminder, [running `kedro run` without the `--pipelines` option runs the default pipeline](./run_a_pipeline.md#run-a-pipeline-by-name).
 
 !!! note
+
     The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result). Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
 
 ## Pipeline autodiscovery
 
-In the above example, you need to update the `register_pipelines()` function whenever you create a pipeline that should be returned as part of the project's pipelines. Since Kedro 0.18.3, you can achieve the same result with less code using [`find_pipelines()`][kedro.framework.project.find_pipelines]. The [updated pipeline registry](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) contains no project-specific code:
+In the above example, you need to update the `register_pipelines()` function whenever you create a pipeline that should be returned as part of the project's pipelines. Since Kedro 0.18.3, you can achieve the same result with less code using \[`find_pipelines()`\][kedro.framework.project.find_pipelines]. The [updated pipeline registry](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) contains no project-specific code:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -46,11 +47,11 @@ def register_pipelines() -> Dict[str, Pipeline]:
     return pipelines
 ```
 
-Under the hood, the `find_pipelines()` function traverses the `src/<package_name>/pipelines/` directory and returns a mapping from pipeline directory name to [`Pipeline`][kedro.pipeline.pipeline.Pipeline] object by:
+Under the hood, the `find_pipelines()` function traverses the `src/<package_name>/pipelines/` directory and returns a mapping from pipeline directory name to \[`Pipeline`\][kedro.pipeline.pipeline.Pipeline] object by:
 
 1. Importing the `<package_name>.pipelines.<pipeline_name>` module
-2. Calling the `create_pipeline()` function exposed by the `<package_name>.pipelines.<pipeline_name>` module
-3. Validating that the constructed object is a [`Pipeline`][kedro.pipeline.pipeline.Pipeline]
+1. Calling the `create_pipeline()` function exposed by the `<package_name>.pipelines.<pipeline_name>` module
+1. Validating that the constructed object is a \[`Pipeline`\][kedro.pipeline.pipeline.Pipeline]
 
 By default, if any of these steps fail, `find_pipelines()` (or `find_pipelines(raise_errors=False)`) raises an appropriate warning and skips the current pipeline but continues traversal. During development, this enables you to run your project with some pipelines, even if other pipelines are broken or works in progress.
 
@@ -72,7 +73,9 @@ def register_pipelines() -> Dict[str, Pipeline]:
     )
     return pipelines
 ```
+
 !!! note
+
     In the case above, `kedro run --tags data_engineering` will not run the data engineering pipeline, as it is not part of the default pipeline. To run the data engineering pipeline, you need to specify `kedro run --pipelines data_engineering --tags data_engineering`.
 
 You can also change pipelines *before* assigning `pipelines["__default__"] = sum(pipelines.values())`, which includes them in the default pipeline. For example, you can update the `data_processing` pipeline with the `data_engineering` tag in `pipeline_registry.py` and also include this change in the default pipeline:
@@ -111,4 +114,5 @@ def register_pipelines() -> Dict[str, Pipeline]:
 Passing `None` (the default) or a list containing `"__default__"` loads all pipelines, which is the same as calling `find_pipelines()` with no arguments.
 
 !!! note
+
     If a pipeline name in `pipelines_to_find` does not match any pipeline in `src/<package_name>/pipelines/`, `find_pipelines()` will raise a warning and skip it. Set `raise_errors=True` to turn that into an error instead.

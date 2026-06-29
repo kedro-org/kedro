@@ -2,16 +2,16 @@
 
 Sometimes it is desirable to run a subset, or a 'slice' of a pipeline's nodes. There are two primary ways to achieve this:
 
-
 1. **Visually through Kedro-Viz:** This approach allows you to visually choose and slice pipeline nodes, which then generates a run command for executing the slice within your Kedro project. Detailed steps on how to achieve this are available in the Kedro-Viz documentation: [Slice a Pipeline](https://docs.kedro.org/projects/kedro-viz/en/stable/slice_a_pipeline/).
 
     ![](../meta/images/slice_pipeline_kedro_viz.gif)
 
-2. **Programmatically with the Kedro CLI.** You can also use the [Kedro CLI to pass parameters to `kedro run`](../getting-started/commands_reference.md#kedro-run) command and slice a pipeline. In this page, we illustrate the programmatic options that Kedro provides.
+1. **Programmatically with the Kedro CLI.** You can also use the [Kedro CLI to pass parameters to `kedro run`](../getting-started/commands_reference.md#kedro-run) command and slice a pipeline. In this page, we illustrate the programmatic options that Kedro provides.
 
 Let's look again at the example pipeline from the [pipeline introduction documentation](./pipeline_introduction.md#how-to-build-a-pipeline), which computes the variance of a set of numbers:
 
 ??? example "View code"
+
     ```python
     def mean(xs, n):
         return sum(xs) / n
@@ -38,7 +38,9 @@ Let's look again at the example pipeline from the [pipeline introduction documen
 The `Pipeline.describe()` method returns the following output:
 
 <!--vale off-->
+
 ??? example "View code"
+
     ```console
     #### Pipeline execution order ####
     Name: None
@@ -52,11 +54,15 @@ The `Pipeline.describe()` method returns the following output:
     Outputs: v
     ##################################
     ```
+
 <!--vale on-->
+
 ## Slice a pipeline by providing inputs
+
 One way to slice a pipeline is to provide a set of pre-calculated inputs which should serve as a start of the pipeline. For example, to slice the pipeline to run from input `m2` downstream you can specify it like this:
 
 ??? example "View code"
+
     ```python
     print(full_pipeline.from_inputs("m2").describe())
     ```
@@ -77,6 +83,7 @@ One way to slice a pipeline is to provide a set of pre-calculated inputs which s
 Slicing the pipeline from inputs `m` and `xs` results in the following pipeline:
 
 ??? example "View code"
+
     ```python
     print(full_pipeline.from_inputs("m", "xs").describe())
     ```
@@ -100,9 +107,11 @@ Slicing the pipeline from inputs `m` and `xs` results in the following pipeline:
 Adding `m` in the `from_inputs` list does not guarantee that it will not be recomputed if another input like `xs` is specified.
 
 ## Slice a pipeline by specifying nodes
+
 Another way of slicing a pipeline is to specify the nodes which should be used as a start of the new pipeline. For example:
 
 ??? example "View code"
+
     ```python
     print(full_pipeline.from_nodes("mean_node").describe())
     ```
@@ -130,10 +139,12 @@ kedro run --from-nodes=mean_node
 ```
 
 ## Slice a pipeline by specifying final nodes
+
 Similarly, you can specify the nodes which should be used to end a pipeline. For example:
 
 ??? example "View code"
-    ```python
+
+    ````python
         print(full_pipeline.to_nodes("mean_node").describe())
         ```
 
@@ -149,7 +160,7 @@ Similarly, you can specify the nodes which should be used to end a pipeline. For
 
         Outputs: m
         ##################################
-    ```
+    ````
 
 This slices the pipeline so it runs from the beginning and ends with the specified node:
 
@@ -170,9 +181,11 @@ kedro run --from-nodes=A,D --to-nodes=X,Y,Z
 ```
 
 ## Slice a pipeline with tagged nodes
+
 You can also slice a pipeline from the nodes that have specific tags attached to them. For example, for nodes that have both tag `mean` *AND* tag `variance`, you can run the following:
 
 ??? example "View code"
+
     ```python
     print(full_pipeline.only_nodes_with_tags("mean", "variance").describe())
     ```
@@ -189,10 +202,10 @@ You can also slice a pipeline from the nodes that have specific tags attached to
     ##################################
     ```
 
-
 To slice a pipeline from nodes that have tag `mean` *OR* tag `variance`:
 
 ??? example "View code"
+
     ```python
     sliced_pipeline = full_pipeline.only_nodes_with_tags(
         "mean"
@@ -215,9 +228,11 @@ To slice a pipeline from nodes that have tag `mean` *OR* tag `variance`:
     ```
 
 ## Slice a pipeline by running specified nodes
+
 Sometimes you might need to run a subset of the nodes in a pipeline, as follows:
 
 ??? example "View code"
+
     ```python
     print(full_pipeline.only_nodes("mean_node", "mean_sos").describe())
     ```
@@ -239,14 +254,15 @@ Sometimes you might need to run a subset of the nodes in a pipeline, as follows:
 This will create a sliced pipeline, comprised of the nodes you specify in the method call.
 
 !!! note
-    All the inputs required by the specified nodes must exist, that is, already produced or present in the data catalog.
 
+    All the inputs required by the specified nodes must exist, that is, already produced or present in the data catalog.
 
 ## How to recreate missing outputs
 
 Kedro can automatically generate a sliced pipeline from existing node outputs. This can be helpful if you want to avoid re-running nodes that take a long time:
 
 ??? example "View code"
+
     ```python
     print(full_pipeline.describe())
     ```
@@ -270,7 +286,9 @@ Kedro can automatically generate a sliced pipeline from existing node outputs. T
 To illustrate this, let us save the intermediate output `n` using a `JSONDataset`.
 
 <!--vale off-->
+
 ??? example "View code"
+
     ```python
     from kedro_datasets.pandas import JSONDataset
     from kedro.io import DataCatalog, MemoryDataset
@@ -282,6 +300,7 @@ To illustrate this, let us save the intermediate output `n` using a `JSONDataset
 Because `n` had not been saved, checking for its existence returns `False`:
 
 ??? example "View code"
+
     ```python
     io.exists("n")
     ```
@@ -295,6 +314,7 @@ Because `n` had not been saved, checking for its existence returns `False`:
 Running the pipeline calculates `n` and saves the result to disk:
 
 ??? example "View code"
+
     ```python
     SequentialRunner().run(full_pipeline, io)
     ```
@@ -318,6 +338,7 @@ Running the pipeline calculates `n` and saves the result to disk:
 We can avoid re-calculating `n` (and all other results that have already been saved) by using the `Runner.run_only_missing` method. **Note**: the first node of the original pipeline (`len([xs]) -> [n]`) has not been run:
 
 ??? example "View code"
+
     ```python
     SequentialRunner().run_only_missing(full_pipeline, io)
     ```

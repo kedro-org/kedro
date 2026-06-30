@@ -2,6 +2,8 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 * Added justification comments to `# nosec` suppression markers to document why each suppression is safe.
+* Added a security scan check that flags `# nosec` and `# nosemgrep` suppression comments for manual review.
+
 ## Documentation changes
 ## Community contributions
 

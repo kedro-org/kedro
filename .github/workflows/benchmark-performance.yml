@@ -3,8 +3,7 @@ name: ASV Benchmark
 on:
   push:
     branches:
-      - main
-      - fix/asv-benchmark-multiple-wheels # for testing  # Run benchmarks on every commit to the main branch
+      - main  # Run benchmarks on every commit to the main branch
   workflow_dispatch:
 
 

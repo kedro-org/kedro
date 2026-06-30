@@ -132,6 +132,10 @@ The `DataCatalog` exposes a small set of pipeline-aware commands that inspect ho
 
 These commands are implemented by `CatalogCommandsMixin`, which Kedro composes into the catalog automatically when initialising a session. You don't need to do anything to use them through the CLI or in interactive environments like IPython and Jupyter. For programmatic access outside a Kedro session, see [how to access pipeline-aware catalog commands in code](how_to_use_dataset_factories.md#how-to-access-pipeline-aware-catalog-commands-in-code).
 
-## How to override the default dataset creation with dataset factories
+## Overriding the default dataset creation
 
-This procedural content has moved. See [how to override the default dataset creation with dataset factories](how_to_use_dataset_factories.md#how-to-override-the-default-dataset-creation-with-dataset-factories) on the dataset factories how-to page.
+<a id="how-to-override-the-default-dataset-creation-with-dataset-factories"></a>
+
+A catch-all factory pattern replaces the default `MemoryDataset` creation for any unresolved dataset name. This lets you control how Kedro materialises intermediate or unknown datasets at runtime, rather than relying on the built-in default runtime pattern.
+
+For step-by-step instructions, see [how to override the default dataset creation with dataset factories](how_to_use_dataset_factories.md#how-to-override-the-default-dataset-creation-with-dataset-factories).

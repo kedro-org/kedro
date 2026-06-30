@@ -83,7 +83,7 @@ motorbikes:
 
 The Data Catalog looks up `dev_s3` in the credentials dictionary and passes its values into the dataset as the `credentials` argument to `__init__`.
 
-For background on how Kedro loads credentials, see [the credentials section of the configuration documentation](../configure/parameters_and_credentials_explanation.md#credentials).
+For background on how Kedro loads credentials, see [the credentials section of the configuration documentation](../configure/parameters_and_credentials.md#credentials).
 
 ## How to version a dataset
 
@@ -148,4 +148,4 @@ cars:
 
 When the `cars` dataset is referenced in pipeline code, Kedro uses the entry from `conf/local/catalog.yml` while running locally, and the production entry when the local override is absent.
 
-For the full set of merge rules across environments, see the [configuration documentation](../configure/configuration_explanation.md).
+For the full set of merge rules across environments, see the [configuration documentation](../configure/configuration_basics.md).

@@ -1,6 +1,6 @@
 # Configuration
 
-This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters_and_credentials_explanation.md#parameters), [credentials](./parameters_and_credentials_explanation.md#credentials), the [data catalog](../catalog-data/data_catalog.md), and [logging information](../develop/logging.md).
+This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters_and_credentials.md#parameters), [credentials](./parameters_and_credentials.md#credentials), the [data catalog](../catalog-data/data_catalog.md), and [logging information](../develop/logging.md).
 
 Kedro makes use of a configuration loader to load any project configuration files, which you can access through [kedro.config.OmegaConfigLoader][].
 
@@ -75,7 +75,7 @@ Kedro merges configuration information and returns a configuration dictionary ac
 * If any two parameter configuration files contain the same top-level key, the configuration loader checks the sub-keys for duplicates. If there are any, it raises a `ValueError` indicating that duplicates are not allowed.
 
 When using any of the configuration loaders, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. You can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet)
-or [to enable templating in the catalog when using the `OmegaConfigLoader`](templating_explanation.md).
+or [to enable templating in the catalog when using the `OmegaConfigLoader`](templating.md).
 
 ### Configuration file names
 Configuration files will be matched according to file name and type rules. Suppose the config loader needs to fetch the catalog configuration, it will search according to the following rules:

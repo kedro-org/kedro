@@ -213,7 +213,7 @@ catalog.save("ranked", ranked)
 
 ## How to access a dataset with credentials
 
-Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configure/parameters_and_credentials_explanation.md#credentials). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
+Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configure/parameters_and_credentials.md#credentials). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 

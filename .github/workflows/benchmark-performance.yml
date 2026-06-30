@@ -33,15 +33,17 @@ jobs:
       - name: Run ASV benchmarks
         run: |
           cd kedro
-          asv machine --machine=github-actions
-          asv run -v --machine=github-actions
+          asv machine --yes --machine=github-actions
+          asv run -v --machine=github-actions HEAD
 
       - name: Set git email and name
+        if: github.ref == 'refs/heads/main'
         run: |
           git config --global user.email "kedro@kedro.com"
           git config --global user.name "Kedro"
 
       - name: Checkout target repository
+        if: github.ref == 'refs/heads/main'
         uses: actions/checkout@v6
         with:
           repository: kedro-org/kedro-benchmark-results
@@ -50,10 +52,12 @@ jobs:
           path: "kedro-benchmark-results"
 
       - name: Copy files to target repository
+        if: github.ref == 'refs/heads/main'
         run: |
           cp -r /home/runner/work/kedro/kedro/kedro/.asv /home/runner/work/kedro/kedro/kedro-benchmark-results/
 
       - name: Commit and Push changes to kedro-org/kedro-benchmark-results
+        if: github.ref == 'refs/heads/main'
         run: |
           cd kedro-benchmark-results
           git add .

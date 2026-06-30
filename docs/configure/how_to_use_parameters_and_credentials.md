@@ -111,7 +111,7 @@ except MissingConfigException:
 !!! note
     The `kedro.framework.context.KedroContext` class uses the approach above to load project parameters.
 
-[Parameters can then be used on their own or fed in as function inputs](parameters_and_credentials_explanation.md#how-parameters-work).
+[Parameters can then be used on their own or fed in as function inputs](parameters_and_credentials.md#how-parameters-work).
 
 ## How to specify parameters at runtime
 

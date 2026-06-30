@@ -114,7 +114,7 @@ For examples of each, see [how to specify load, save and filesystem arguments](h
 
 ### Dataset access credentials
 
-The Data Catalog reads credentials from `credentials.yml` (typically in `conf/local/`) and passes them into the dataset constructor. Before instantiating the `DataCatalog`, Kedro first attempts to read [the credentials from the project configuration](../configure/parameters_and_credentials_explanation.md#credentials). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
+The Data Catalog reads credentials from `credentials.yml` (typically in `conf/local/`) and passes them into the dataset constructor. Before instantiating the `DataCatalog`, Kedro first attempts to read [the credentials from the project configuration](../configure/parameters_and_credentials.md#credentials). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
 
 A `catalog.yml` entry refers to a credentials block by name through a top-level `credentials:` key. The Data Catalog looks up the matching block in the credentials dictionary and passes its values into the dataset as the `credentials` argument to `__init__`.
 
@@ -137,7 +137,8 @@ To verify whether a dataset supports versioning, examine the dataset class code 
 
 Kedro configuration enables you to organise your project for different stages of your data pipeline. For example, you might need different Data Catalog settings for development, testing, and production environments.
 
-By default, Kedro has a `base` and a `local` folder for configuration. A configuration loader class scans for configuration files inside the `conf` folder, starting in `conf/base` and then in `conf/local` (the designated overriding environment). Kedro merges the configuration information and returns a configuration dictionary, following the rules set out in the [configuration documentation](../configure/configuration_explanation.md).
+
+By default, Kedro has a `base` and a `local` folder for configuration. A configuration loader class scans for configuration files inside the `conf` folder, starting in `conf/base` and then in `conf/local` (the designated overriding environment). Kedro merges the configuration information and returns a configuration dictionary, following the rules set out in the [configuration documentation](../configure/configuration_basics.md).
 
 In summary, if you need to configure your datasets for different environments, you can create both `conf/base/catalog.yml` and `conf/local/catalog.yml`. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production. You can then add a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets for prototyping your data pipelines.
 

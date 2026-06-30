@@ -290,18 +290,18 @@ my_partitioned_dataset:
     Specifying `force_checkpoint` is also supported through shorthand notation:
     ```yaml
     my_partitioned_dataset:
-    type: partitions.IncrementalDataset
-    path: s3://my-bucket-name/path/to/folder
-    dataset: pandas.CSVDataset
-    checkpoint: 2020-01-01/data.csv
+      type: partitions.IncrementalDataset
+      path: s3://my-bucket-name/path/to/folder
+      dataset: pandas.CSVDataset
+      checkpoint: 2020-01-01/data.csv
     ```
 
 !!! note
     To force the partitioned dataset to load all available partitions, set `checkpoint` to an empty string:
     ```yaml
     my_partitioned_dataset:
-    type: partitions.IncrementalDataset
-    path: s3://my-bucket-name/path/to/folder
-    dataset: pandas.CSVDataset
-    checkpoint: ""
+      type: partitions.IncrementalDataset
+      path: s3://my-bucket-name/path/to/folder
+      dataset: pandas.CSVDataset
+      checkpoint: ""
     ```

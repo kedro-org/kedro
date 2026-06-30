@@ -173,6 +173,22 @@ class TestNewFromConfigFileInvalid:
             in result.output
         )
 
+    def test_explicit_python_package_clashing_with_stdlib_is_rejected(
+        self, fake_kedro_cli
+    ):
+        """An innocent project_name with an explicit python_package that shadows a
+        stdlib module must still be rejected (the config file sets the package name
+        directly, bypassing the project_name derivation)."""
+        config = _default_config(project_name="My Email Tool", python_package="email")
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+        assert result.exit_code != 0
+        assert (
+            "clashes with a Python keyword or standard library module" in result.output
+        )
+
 
 @pytest.mark.usefixtures("chdir_to_tmp", "patch_cookiecutter_args")
 class TestToolsAndExampleFromConfigFile:

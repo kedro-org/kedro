@@ -44,8 +44,8 @@ to a local directory called `mlflow_runs`.
 
 ## Simple use cases
 
-Although MLflow works best when working with machine learning (ML) and AI pipelines,
-you can track your regular Kedro runs as experiments in MLflow even if they do not use ML.
+MLflow works best with machine learning (ML) and AI pipelines.
+You can still track regular Kedro runs as experiments in MLflow, even when they do not use ML.
 
 This section explains how you can use the [`kedro-mlflow`](https://kedro-mlflow.readthedocs.io/) plugin
 to track your Kedro pipelines in MLflow in a straightforward way.
@@ -94,8 +94,8 @@ for more detailed steps.
 ### Artifact tracking in MLflow using `kedro-mlflow`
 
 `kedro-mlflow` provides some out-of-the-box artifact tracking capabilities
-that connect your Kedro project with your MLflow deployment, such as `MlflowArtifactDataset`,
-which can be used to wrap any of your existing Kedro datasets.
+that connect your Kedro project with your MLflow deployment.
+An example is `MlflowArtifactDataset`, which can be used to wrap any of your existing Kedro datasets.
 
 Use of this dataset has the advantage that the preview capabilities of the MLflow UI can be used.
 

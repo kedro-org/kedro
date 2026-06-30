@@ -229,10 +229,10 @@ As you can see, the `data_processing` and `data_science` pipelines ran without e
 
 There may be occasions when you want to run part of the default pipeline. For example, you could skip `data_processing` execution and run the `data_science` pipeline to tune the hyperparameters of the price prediction model.
 
-You can 'slice' the pipeline and specify the part you want to run by using the `--pipeline` option. For example, to run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
+You can 'slice' the pipeline and specify the part you want to run by using the `--pipelines` option. For example, to run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
 ```bash
-kedro run --pipeline=data_science
+kedro run --pipelines=data_science
 ```
 
 There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../build/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../getting-started/commands_reference.md#kedro-run).

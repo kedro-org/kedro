@@ -167,7 +167,7 @@ On success the response contains `run_id`, `status`, and `duration_ms`:
 }
 ```
 
-On failure the response additionally contains an `error` object with the exception type and message:
+On failure the response also contains an `error` object with the exception type and message:
 
 ```json
 {

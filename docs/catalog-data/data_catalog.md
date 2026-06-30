@@ -224,7 +224,7 @@ Versions are returned in reverse chronological order (newest first).
 
 #### How versioning works
 
-A dataset offers versioning support if it extends the [kedro.io.AbstractVersionedDataset][] class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
+A dataset offers versioning support if it extends the [kedro.io.AbstractVersionedDataset][] class to accept a version keyword argument as part of the constructor. It must also adapt the `_save` and `_load` methods to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
 
 To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataset`. For instance, if you encounter a class like `CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
 
@@ -235,9 +235,10 @@ To verify whether a dataset can undergo versioning, you should examine the datas
 
 Kedro configuration enables you to organise your project for different stages of your data pipeline. For example, you might need different Data Catalog settings for development, testing, and production environments.
 
-By default, Kedro has a `base` and a `local` folder for configuration. The Data Catalog configuration is loaded by a configuration loader class. This class recursively scans for configuration files inside the `conf` folder, firstly in `conf/base` and then in `conf/local` (the designated overriding environment). Kedro merges the configuration and returns a dictionary. See the [configuration documentation](../configure/configuration_basics.md) for the full rules.
 
-In summary, if you need to configure your datasets for different environments, you can create both `conf/base/catalog.yml` and `conf/local/catalog.yml`. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production, while adding a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets while you are using them for prototyping data pipeline(s).
+By default, Kedro has a `base` and a `local` folder for configuration. A configuration loader class scans for configuration files inside the `conf` folder, starting in `conf/base` and then in `conf/local` (the designated overriding environment). Kedro merges the configuration information and returns a configuration dictionary, following the rules set out in the [configuration documentation](../configure/configuration_explanation.md).
+
+In summary, if you need to configure your datasets for different environments, you can create both `conf/base/catalog.yml` and `conf/local/catalog.yml`. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production. You can then add a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets for prototyping your data pipelines.
 
 To illustrate this, consider the following catalog entry for a dataset named `cars` in `conf/base/catalog.yml`, which points to a CSV file stored in a bucket on AWS S3:
 
@@ -255,4 +256,4 @@ cars:
   type: pandas.CSVDataset
 ```
 
-In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml` and rely on Kedro to detect which definition of `cars` dataset to use in your pipeline.
+In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml`.

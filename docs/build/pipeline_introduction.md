@@ -217,7 +217,7 @@ Format should be: Node(function, inputs, outputs)
 
 ### Pipeline with circular dependencies
 
-For every two variables where the first depends on the second, there must not be a way in which the second also depends on the first, otherwise, a circular dependency will prevent us from compiling the pipeline.
+For every two variables where the first depends on the second, the second must not also depend on the first. Otherwise, a circular dependency will prevent us from compiling the pipeline.
 
 The first node captures the relationship of how to calculate `y` from `x` and the second captures the relationship of how to calculate `x` knowing `y`. The pair of nodes cannot co-exist in the same pipeline:
 

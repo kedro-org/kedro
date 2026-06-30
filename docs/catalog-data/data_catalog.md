@@ -236,7 +236,7 @@ To verify whether a dataset can undergo versioning, you should examine the datas
 Kedro configuration enables you to organise your project for different stages of your data pipeline. For example, you might need different Data Catalog settings for development, testing, and production environments.
 
 
-By default, Kedro has a `base` and a `local` folder for configuration. A configuration loader class scans for configuration files inside the `conf` folder, starting in `conf/base` and then in `conf/local` (the designated overriding environment). Kedro merges the configuration information and returns a configuration dictionary, following the rules set out in the [configuration documentation](../configure/configuration_explanation.md).
+By default, Kedro has a `base` and a `local` folder for configuration. A configuration loader class scans for configuration files inside the `conf` folder, starting in `conf/base` and then in `conf/local` (the designated overriding environment). Kedro merges the configuration information and returns a configuration dictionary, following the rules set out in the [configuration documentation](../configure/configuration_basics.md).
 
 In summary, if you need to configure your datasets for different environments, you can create both `conf/base/catalog.yml` and `conf/local/catalog.yml`. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production. You can then add a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets for prototyping your data pipelines.
 

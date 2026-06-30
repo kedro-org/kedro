@@ -60,6 +60,7 @@ plugins:
         'configure/parameters.md': 'configure/how_to_use_parameters_and_credentials.md'
         'configure/credentials.md': 'configure/how_to_use_parameters_and_credentials.md'
         'configure/parameter_validation.md': 'configure/how_to_use_parameters_and_credentials.md'
+        'catalog-data/advanced_data_catalog_usage.md': 'catalog-data/how_to_access_the_data_catalog_in_code.md'
   - mkdocstrings:
       handlers:
         python:

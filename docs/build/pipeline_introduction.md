@@ -2,7 +2,7 @@
 
 The [Nodes](./nodes.md) guide introduced nodes as building blocks that represent tasks, and can be combined in a pipeline to build your workflow. A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline resolves dependencies to determine the node execution order, and does *not* necessarily run the nodes in the order in which they are passed in.
 
-To use Kedro's automatic dependency resolution, chain your nodes into a [`Pipeline`][kedro.pipeline.pipeline.Pipeline] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the [`Pipeline`][kedro.pipeline.pipeline.Pipeline] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
+To use Kedro's automatic dependency resolution, chain your nodes into a \[`Pipeline`\][kedro.pipeline.pipeline.Pipeline] object, which is a list of nodes that use a shared set of variables. That class can be instantiated using the \[`Pipeline`\][kedro.pipeline.pipeline.Pipeline] constructor, based on nodes or other pipelines (in which case all nodes from that pipeline will be used).
 
 The following sections explain how to create and use Kedro pipelines:
 
@@ -14,11 +14,6 @@ The following sections explain how to create and use Kedro pipelines:
 - [How to tag a pipeline](#how-to-tag-a-pipeline)
 - [How to avoid creating bad pipelines](#how-to-avoid-creating-bad-pipelines)
 - [How to store pipeline code in a Kedro project](#how-to-store-pipeline-code-in-a-kedro-project)
-
-
-
-
-
 
 ## How to build a pipeline
 
@@ -48,13 +43,13 @@ variance_pipeline = Pipeline(
 ```
 
 Kedro determines the order of execution of these nodes based on the inputs and outputs specified for each node. In this example:
+
 1. The first node computes the length of `xs` and outputs it as `n`.
-2. The second node calculates the mean using `xs` and `n`, and outputs it as `m`.
-3. The third node computes the mean sum of squares (`mean_sos`) using `xs` and `n`, and outputs it as `m2`.
-4. The fourth node calculates the variance using the mean (`m`) and mean sum of squares (`m2`), and outputs it as `v`.
+1. The second node calculates the mean using `xs` and `n`, and outputs it as `m`.
+1. The third node computes the mean sum of squares (`mean_sos`) using `xs` and `n`, and outputs it as `m2`.
+1. The fourth node calculates the variance using the mean (`m`) and mean sum of squares (`m2`), and outputs it as `v`.
 
 Kedro's dependency resolution algorithm ensures that each node runs after its required inputs are available from the outputs of previous nodes. This way, the nodes are executed in the correct order automatically, based on the defined dependencies.
-
 
 ## How to use `describe` to discover what nodes are part of the pipeline
 
@@ -114,7 +109,6 @@ Outputs: None
 ##################################
 ```
 
-
 ## How to receive information about the nodes in a pipeline
 
 Pipelines provide access to their nodes in a topological order to enable custom functionality, for example, pipeline visualisation. Each node has information about its inputs and outputs:
@@ -171,7 +165,6 @@ Displays the output:
 Out[8]: {'v'}
 ```
 
-
 ## How to tag a pipeline
 
 You can also tag your pipeline by providing the `tags` argument, which will tag every node in the pipeline. In the following example, both nodes are tagged with `pipeline_tag`.
@@ -199,7 +192,6 @@ A pipeline can typically resolve its dependencies. In some cases, resolution is 
 
 In this case, we have a pipeline consisting of a single node with no input and output:
 
-
 ```python
 try:
     Pipeline([Node(lambda: print("!"), None, None)])
@@ -214,13 +206,11 @@ Invalid Node definition: it must have some `inputs` or `outputs`.
 Format should be: Node(function, inputs, outputs)
 ```
 
-
 ### Pipeline with circular dependencies
 
 For every two variables where the first depends on the second, the second must not also depend on the first. Otherwise, a circular dependency will prevent us from compiling the pipeline.
 
 The first node captures the relationship of how to calculate `y` from `x` and the second captures the relationship of how to calculate `x` knowing `y`. The pair of nodes cannot co-exist in the same pipeline:
-
 
 ```python
 try:
@@ -241,6 +231,7 @@ Circular dependencies exist among these items: ['first node: <lambda>([x]) -> [y
 ```
 
 ### Pipeline nodes named with the dot notation
+
 Nodes named with dot notation may behave strangely.
 
 ```python
@@ -252,7 +243,6 @@ Nodes that are created with input or output names that contain `.` risk a discon
 This is because `.` has a special meaning internally and indicates a namespace pipeline. In the example, the outputs segment should be disconnected as the name implies there is an "output1" namespace pipeline. The input is not namespaced, but the output is through its dot notation. This leads to Kedro processing each separately. For this example, a better approach would've been writing both as `input1_kedro` and `output1_kedro`.
 
 We recommend use of characters like `_` instead of `.` as name separators.
-
 
 ## How to store pipeline code in a Kedro project
 

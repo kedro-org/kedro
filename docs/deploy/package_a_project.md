@@ -7,8 +7,8 @@ Kedro also has an advanced feature which supports packaging on a pipeline level 
 ## Add documentation to a Kedro project if you have not selected `docs` tool
 
 !!! note
-    These steps are for projects without the `docs` tool option. You can verify this by looking to see if you don't have a `docs` directory in your project.
 
+    These steps are for projects without the `docs` tool option. You can verify this by looking to see if you don't have a `docs` directory in your project.
 
 ## Package a Kedro project
 
@@ -35,10 +35,11 @@ pip install <path-to-wheel-file>
 ```
 
 !!! note
+
     Once the packaged project is installed, you will need to add:
 
-    * a `conf` folder
-    * a `data` folder if the pipeline loads or saves local data
+    - a `conf` folder
+    - a `data` folder if the pipeline loads or saves local data
 
 You can also use the `OmegaConfigLoader` to run the configuration directly from the compressed `.tar.gz` configuration file by running:
 
@@ -63,6 +64,7 @@ main(
 This mirrors running `python -m <package_name>` at the command line, and you can pass in all the arguments that correspond to the options described by `python -m <package_name> --help`.
 
 !!! note
+
     If you run the packaged project in the interactive environment like IPython or Databricks you can also consume the output of the `main()`
     which returns the `session.run()` output.
 
@@ -78,6 +80,6 @@ def run_kedro_pipeline():
 
 There are various methods to deploy packaged pipelines through Kedro plugins:
 
-* [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
-* [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) to convert your Kedro project into an [Airflow](https://airflow.apache.org/) project.
-* The [Deployment guide](../deploy/index.md) touches on other deployment targets such as AWS Batch and Prefect, and there is a [range of third-party plugins for deployment](../extend/plugins.md#community-developed-plugins).
+- [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
+- [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) to convert your Kedro project into an [Airflow](https://airflow.apache.org/) project.
+- The [Deployment guide](../deploy/index.md) touches on other deployment targets such as AWS Batch and Prefect, and there is a [range of third-party plugins for deployment](../extend/plugins.md#community-developed-plugins).

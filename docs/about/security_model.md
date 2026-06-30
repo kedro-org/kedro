@@ -3,6 +3,7 @@
 This document describes Kedro's security model from the perspective of Kedro users. It is intended to help users understand Kedro's trust assumptions and make informed decisions about how to develop and deploy Kedro projects.
 
 !!! info "Reporting security issues"
+
     To report a vulnerability, or to learn how the Kedro team handles reports, see [Kedro's Security Policy](https://github.com/kedro-org/kedro/blob/main/SECURITY.md).
 
 ## Understanding Kedro's security model
@@ -26,6 +27,7 @@ The main security boundary in Kedro is the distinction between **code** and **da
 - **Data** is inputs meant to configure or feed code, not define new executable behaviour. This includes YAML files such as `catalog.yml`, `parameters.yml`, and `logging.yml`, runtime parameters, and dataset contents.
 
 !!! tip "The golden rule"
+
     **Code = responsibility**
 
     **Data becoming code = vulnerability**
@@ -83,6 +85,7 @@ Project developers are responsible for the safety of the code they add to a Kedr
 ## Reporting security vulnerabilities
 
 !!! info "What to include in your report"
+
     See [SECURITY.md](https://github.com/kedro-org/kedro/blob/main/SECURITY.md) for the full process. It helps if you explain:
 
     - Whether the issue is in Kedro's framework code or in user-authored project code
@@ -95,10 +98,11 @@ Project developers are responsible for the safety of the code they add to a Kedr
 Kedro assumes that the people or systems authoring project code are trusted to write safe code that follows their organisation's security policies. Kedro's responsibility is to ensure that the framework code it ships does not turn configuration or other inputs into unintended code execution.
 
 !!! question "Is it a Kedro vulnerability?"
+
     If you are unsure, ask:
 
     1. Is the behaviour coming from Kedro's own framework code, or from user-authored project code?
-    2. Is an input that should be treated as data being interpreted as executable behaviour instead?
-    3. Does Kedro fail to enforce a safety check it claims to provide?
+    1. Is an input that should be treated as data being interpreted as executable behaviour instead?
+    1. Does Kedro fail to enforce a safety check it claims to provide?
 
 For security reports, follow the process in [SECURITY.md](https://github.com/kedro-org/kedro/blob/main/SECURITY.md).

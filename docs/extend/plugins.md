@@ -29,15 +29,18 @@ def to_json(metadata):
     pipeline = pipelines["__default__"]
     print(pipeline.to_json())
 ```
+
 From version 0.18.14, Kedro replaced `setup.py` with `pyproject.toml`. The plugin needs to provide entry points in either file. If you use `setup.py`, see the [`0.18.13` documentation](https://docs.kedro.org/en/0.18.13/extend_kedro/plugins.html).
 
 To add the entry point to `pyproject.toml`, the plugin needs to provide the following `entry_points` configuration:
+
 ```toml
 [project.entry-points."kedro.project_commands"]
 kedrojson = "kedrojson.plugin:commands"
 ```
 
 Once the plugin is installed, you can run it as follows:
+
 ```bash
 kedro to_json
 ```
@@ -71,8 +74,8 @@ If the plugin initialisation needs to occur before Kedro starts, it can declare 
 
 Plugins may also add commands to the Kedro CLI, which supports two types of commands:
 
-* _global_ - available both inside and outside a Kedro project. Global commands use the `entry_point` key `kedro.global_commands`.
-* _project_ - available when a Kedro project is detected in the current directory. Project commands use the `entry_point` key `kedro.project_commands`.
+- _global_ - available both inside and outside a Kedro project. Global commands use the `entry_point` key `kedro.global_commands`.
+- _project_ - available when a Kedro project is detected in the current directory. Project commands use the `entry_point` key `kedro.project_commands`.
 
 ## Suggested command convention
 
@@ -86,6 +89,7 @@ If your plugin includes a sizable set of CLI commands or heavy dependencies that
 Consider the previous example of the `kedrojson` plugin. Suppose the plugin has two commands, `kedro to_json pipelines` and `kedro to_json nodes`. The `to_json pipelines` command is used more frequently than the `to_json nodes` command and the `to_json nodes` command requires a large library to be imported. In this case, you can define your commands with lazy loading and delayed imports as follows:
 
 In `kedrojson/plugin.py`:
+
 ```python
 import click
 from kedro.framework.project import pipelines
@@ -123,7 +127,6 @@ def pipelines():
 
 The loading of the individual `nodes` and `pipelines` commands, and the related imports, will be delayed until the respective commands are called.
 
-
 ## Hooks
 
 You can develop hook implementations and have them automatically registered to the project context when the plugin is installed.
@@ -131,6 +134,7 @@ You can develop hook implementations and have them automatically registered to t
 To enable this for your custom plugin, add the following entry in `pyproject.toml`
 
 To use `pyproject.toml`, specify
+
 ```toml
 [project.entry-points."kedro.hooks"]
 plugin_name = "plugin_name.plugin:hooks"
@@ -154,12 +158,12 @@ hooks = MyHooks()
 ```
 
 !!! note
+
     `hooks` should be an instance of the class defining the Hooks.
 
 ## CLI Hooks
 
 You can also develop Hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI Hooks, see our [kedro.framework.cli.hooks][] API documentation. To register CLI Hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
-
 
 ```toml
 [project.entry-points."kedro.cli_hooks"]
@@ -190,28 +194,27 @@ cli_hooks = MyCLIHooks()
 When you are ready to submit your code:
 
 1. Create a separate repository using our naming convention for `plugin`s (`kedro-<plugin-name>`)
-2. Choose a command approach: `global` and / or `project` commands:
-   - All `global` commands should be provided as a single `click` group
-   - All `project` commands should be provided as another `click` group
-   - The `click` groups are declared through the [entry points mechanism](https://setuptools.pypa.io/en/latest/userguide/entry_point.html)
-3. Include a `README.md` describing your plugin's functionality and all dependencies that should be included
-4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can find it
+1. Choose a command approach: `global` and / or `project` commands:
+    - All `global` commands should be provided as a single `click` group
+    - All `project` commands should be provided as another `click` group
+    - The `click` groups are declared through the [entry points mechanism](https://setuptools.pypa.io/en/latest/userguide/entry_point.html)
+1. Include a `README.md` describing your plugin's functionality and all dependencies that should be included
+1. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can find it
 
 ## Supported Kedro plugins
 
 - [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets), a collection of Kedro's data connectors. These data
-connectors are implementations of the `AbstractDataset`
+    connectors are implementations of the `AbstractDataset`
 - [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow), a tool for converting your Kedro project into an Airflow project
 - [Kedro-Viz](https://github.com/kedro-org/kedro-viz), a tool for visualising your Kedro pipelines
-
 
 ## Community-developed plugins
 
 Several community-developed plugins are available and a comprehensive list of plugins is published on the [`awesome-kedro`](https://github.com/kedro-org/awesome-kedro) GitHub repository. The list below is a small snapshot of some of those under active maintenance.
 
-
 !!! note
+
     Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 
 - [kedro-mlflow](https://github.com/Galileo-Galilei/kedro-mlflow), by [Yolan Honoré-Rougé](https://github.com/galileo-galilei) and [Takieddine Kadiri](https://github.com/takikadiri), facilitates [MLflow](https://www.mlflow.org/) integration within a Kedro project. Its main features are modular configuration, automatic parameters tracking, datasets versioning, Kedro pipelines packaging and serving and automatic synchronisation between training and inference pipelines for high reproducibility of machine learning experiments and ease of deployment. A tutorial is provided in the [kedro-mlflow-tutorial repo](https://github.com/Galileo-Galilei/kedro-mlflow-tutorial). You can find more information in the [kedro-mlflow documentation](https://kedro-mlflow.readthedocs.io/en/stable/).

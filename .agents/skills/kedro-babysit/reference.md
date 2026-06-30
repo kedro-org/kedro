@@ -4,7 +4,7 @@ Detailed reference for the `kedro-babysit` skill. Read sections selectively — 
 
 For the **invocation tracks** (L = Local dev / C = CI diagnosis & fix) and which workflow steps each track requires, see [SKILL.md](SKILL.md) section "How to invoke this skill". This reference does not duplicate that routing — it just provides the underlying recipes each step calls into.
 
----
+______________________________________________________________________
 
 ## Environment setup
 
@@ -28,8 +28,8 @@ Kedro supports **Python 3.10–3.14** (see [pyproject.toml `requires-python`](..
 `bootstrap_env.sh` resolves the env's Python version as follows, in order:
 
 1. `--python <version>` if explicitly passed (no validation; user's choice).
-2. Else, the version of the current `python` interpreter on PATH, **if** it's in 3.10–3.14.
-3. Else, falls back to **3.11** (the version the lint job uses on CI).
+1. Else, the version of the current `python` interpreter on PATH, **if** it's in 3.10–3.14.
+1. Else, falls back to **3.11** (the version the lint job uses on CI).
 
 For the install flow (env already active), the script prints a soft warning if the active env's Python is outside 3.10–3.14 — it does not refuse, since the user has already chosen.
 
@@ -73,11 +73,11 @@ make install-docs-requirements   # uv pip install -e ".[docs]"
 
 Three external tools may be required depending on what checks run:
 
-| Tool     | Used by                          | Required for             |
-| -------- | -------------------------------- | ------------------------ |
-| `gh`     | `watch_ci.sh`, `bootstrap_env.sh`| All CI interactions      |
-| `vale`   | `make language-lint`             | Docs language linter     |
-| `lychee` | `make linkcheck`                 | Docs link check          |
+| Tool     | Used by                           | Required for         |
+| -------- | --------------------------------- | -------------------- |
+| `gh`     | `watch_ci.sh`, `bootstrap_env.sh` | All CI interactions  |
+| `vale`   | `make language-lint`              | Docs language linter |
+| `lychee` | `make linkcheck`                  | Docs link check      |
 
 Install hints (skill prints these if missing; never installs them itself):
 
@@ -87,42 +87,42 @@ Install hints (skill prints these if missing; never installs them itself):
 
 Docs checks that depend on missing system tools are reported as `[SKIP missing tool]` rather than `[FAIL]`.
 
----
+______________________________________________________________________
 
 ## Sandbox & permissions
 
 When invoking the commands below through a sandboxed shell tool, **request the listed permissions upfront** — guessing wrong wastes a run.
 
-| Command | Permissions |
-|---|---|
-| `make test`, `pytest …` (any path) | **`all`** |
-| `make linkcheck`, `bash scripts/watch_ci.sh`, `bash scripts/bootstrap_env.sh` (install flow) | **`network`** |
-| `make lint`, per-hook recipes (`pre-commit run …`, `ruff …`, `mypy …`, `lint-imports`), `make language-lint` | default |
-| `bash scripts/run_local_checks.sh` | union of the above based on the plan it prints |
+| Command                                                                                                      | Permissions                                    |
+| ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| `make test`, `pytest …` (any path)                                                                           | **`all`**                                      |
+| `make linkcheck`, `bash scripts/watch_ci.sh`, `bash scripts/bootstrap_env.sh` (install flow)                 | **`network`**                                  |
+| `make lint`, per-hook recipes (`pre-commit run …`, `ruff …`, `mypy …`, `lint-imports`), `make language-lint` | default                                        |
+| `bash scripts/run_local_checks.sh`                                                                           | union of the above based on the plan it prints |
 
 **Rule for `pytest`**: always `all`, regardless of which path or test method you're targeting. Kedro's shared CLI test fixtures invoke `cookiecutter` during fixture setup, which writes `~/.cookiecutter_replay/<template>.json` outside the workspace. Some narrow paths (`tests/io/...`, `tests/runner/...`) don't strictly need it, but the cost of an unnecessary approval click is trivial vs. wasting a 6-min test run on a sandbox block.
 
----
+______________________________________________________________________
 
 ## CI-to-local mapping
 
 Canonical mapping of CI check name -> local invocation. The skill always prefers the Make target.
 
-| CI check                     | Workflow file                                                          | Local command                                              | Notes                                                                                                              |
-| ---------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `lint`                       | [lint.yml](../../../.github/workflows/lint.yml)                        | `make lint` (full sweep, 3–5 min) **or** targeted recipes  | See "Fast lint iteration" below. Fires on both code and docs PRs.                                                  |
-| `unit-tests`                 | [unit-tests.yml](../../../.github/workflows/unit-tests.yml)            | `make test` (~6 min)                                       | See cookbook entry "`unit-tests` failure" below. Coverage `fail_under = 100` enforced via `pyproject.toml`.        |
-| `e2e-tests`                  | [e2e-tests.yml](../../../.github/workflows/e2e-tests.yml)              | **Out of scope locally** (would be `make e2e-tests`)       | See cookbook entry "`e2e-tests` failure" below.                                                                    |
-| `detect-secrets`             | [detect-secrets.yml](../../../.github/workflows/detect-secrets.yml)    | `git ls-files -z \| xargs -0 detect-secrets-hook --baseline .secrets.baseline` | **No Make target.** Full-tree scan. Differs from the pre-commit hook in `make lint` (which only checks changed files) and can fail in CI even when `make lint` is green. |
-| `docs-linkcheck`             | [docs-linkcheck.yml](../../../.github/workflows/docs-linkcheck.yml)    | `make linkcheck`                                           | `mkdocs build --strict` + `lychee --max-concurrency 32 --exclude "@.lycheeignore" site/`. Slow + needs network. Requires `lychee`. **CI fires on any `**.md` change; `run_local_checks.sh` auto-detect only fires on `docs/**`** — for `*.md` files outside docs/ (`RELEASE.md` etc.), invoke `make linkcheck` directly if you want to pre-check, or rely on Track C after push. |
-| `docs-language-linter`       | [docs-language-linter.yml](../../../.github/workflows/docs-language-linter.yml) | `make language-lint dir=docs`                              | `vale docs`. **Non-blocking** — `merge-gatekeeper` ignores `runner / vale` (see the `ignored:` setting in [merge-gatekeeper.yml](../../../.github/workflows/merge-gatekeeper.yml)). Requires `vale`. Same auto-detect divergence as `docs-linkcheck` above. |
-| `merge-gatekeeper`           | [merge-gatekeeper.yml](../../../.github/workflows/merge-gatekeeper.yml) | n/a                                                        | Aggregator. Turns green when all required checks pass. Nothing to fix directly.                                    |
-| `pipeline-performance-test`  | [pipeline-performance-test.yml](../../../.github/workflows/pipeline-performance-test.yml) | n/a                                                        | Label-triggered (only fires when a maintainer adds the `performance` label). Reports timing, not pass/fail. The skill surfaces the timing delta but does not auto-fix perf regressions. |
-| DCO sign-off                 | GitHub App `dco` (not a workflow file)                                 | `git log <base>..HEAD --format='%H %(trailers:key=Signed-off-by)'` | Detects missing `Signed-off-by:` trailers. See "DCO sign-off recipes" below.                                       |
+| CI check                    | Workflow file                                                                             | Local command                                                                  | Notes                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lint`                      | [lint.yml](../../../.github/workflows/lint.yml)                                           | `make lint` (full sweep, 3–5 min) **or** targeted recipes                      | See "Fast lint iteration" below. Fires on both code and docs PRs.                                                                                                                                                                                                                                                                                                                |
+| `unit-tests`                | [unit-tests.yml](../../../.github/workflows/unit-tests.yml)                               | `make test` (~6 min)                                                           | See cookbook entry "`unit-tests` failure" below. Coverage `fail_under = 100` enforced via `pyproject.toml`.                                                                                                                                                                                                                                                                      |
+| `e2e-tests`                 | [e2e-tests.yml](../../../.github/workflows/e2e-tests.yml)                                 | **Out of scope locally** (would be `make e2e-tests`)                           | See cookbook entry "`e2e-tests` failure" below.                                                                                                                                                                                                                                                                                                                                  |
+| `detect-secrets`            | [detect-secrets.yml](../../../.github/workflows/detect-secrets.yml)                       | `git ls-files -z \| xargs -0 detect-secrets-hook --baseline .secrets.baseline` | **No Make target.** Full-tree scan. Differs from the pre-commit hook in `make lint` (which only checks changed files) and can fail in CI even when `make lint` is green.                                                                                                                                                                                                         |
+| `docs-linkcheck`            | [docs-linkcheck.yml](../../../.github/workflows/docs-linkcheck.yml)                       | `make linkcheck`                                                               | `mkdocs build --strict` + `lychee --max-concurrency 32 --exclude "@.lycheeignore" site/`. Slow + needs network. Requires `lychee`. **CI fires on any `**.md` change; `run_local_checks.sh` auto-detect only fires on `docs/**`** — for `*.md` files outside docs/ (`RELEASE.md` etc.), invoke `make linkcheck` directly if you want to pre-check, or rely on Track C after push. |
+| `docs-language-linter`      | [docs-language-linter.yml](../../../.github/workflows/docs-language-linter.yml)           | `make language-lint dir=docs`                                                  | `vale docs`. **Non-blocking** — `merge-gatekeeper` ignores `runner / vale` (see the `ignored:` setting in [merge-gatekeeper.yml](../../../.github/workflows/merge-gatekeeper.yml)). Requires `vale`. Same auto-detect divergence as `docs-linkcheck` above.                                                                                                                      |
+| `merge-gatekeeper`          | [merge-gatekeeper.yml](../../../.github/workflows/merge-gatekeeper.yml)                   | n/a                                                                            | Aggregator. Turns green when all required checks pass. Nothing to fix directly.                                                                                                                                                                                                                                                                                                  |
+| `pipeline-performance-test` | [pipeline-performance-test.yml](../../../.github/workflows/pipeline-performance-test.yml) | n/a                                                                            | Label-triggered (only fires when a maintainer adds the `performance` label). Reports timing, not pass/fail. The skill surfaces the timing delta but does not auto-fix perf regressions.                                                                                                                                                                                          |
+| DCO sign-off                | GitHub App `dco` (not a workflow file)                                                    | `git log <base>..HEAD --format='%H %(trailers:key=Signed-off-by)'`             | Detects missing `Signed-off-by:` trailers. See "DCO sign-off recipes" below.                                                                                                                                                                                                                                                                                                     |
 
 All other workflows in [.github/workflows/](../../../.github/workflows/) (`benchmark-performance`, `check-release`, `nightly-build`, `release-starters`, `auto-merge-prs`, `sync`, `label-community-issues`, `no-response`) are scheduled, release-triggered, or issue-only — out of scope for this skill.
 
----
+______________________________________________________________________
 
 ## DCO sign-off recipes
 
@@ -166,7 +166,7 @@ make sign-off
 
 This installs `.git/hooks/commit-msg` to append `Signed-off-by:` automatically (see the `sign-off` target in [Makefile](../../../Makefile)). One-time setup per clone.
 
----
+______________________________________________________________________
 
 ## Fast lint iteration
 
@@ -175,25 +175,25 @@ This installs `.git/hooks/commit-msg` to append `Signed-off-by:` automatically (
 ### Targeting strategy
 
 1. **Identify which hook is failing** from the CI log or local output (the hook name appears in `make lint` output as `>>>>>>>> <hook name>`).
-2. **Run only that hook on only the changed files**: `pre-commit run <hook-id> --files <file1> <file2> ...`. If you don't know the changed file list, derive it relative to the PR's base branch:
-   ```bash
-   BASE="$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || echo main)"
-   git diff --name-only "origin/$BASE"...HEAD
-   ```
-   This mirrors the auto-detect logic in `scripts/run_local_checks.sh`. Don't hardcode `origin/main` — Kedro PRs may target `develop` or other branches.
-3. **For tools that can be invoked directly**, skip pre-commit altogether (faster, no hook overhead): see the per-tool recipes below.
-4. **Re-run `make lint`** only as a final belt-and-suspenders check before commit/push.
+1. **Run only that hook on only the changed files**: `pre-commit run <hook-id> --files <file1> <file2> ...`. If you don't know the changed file list, derive it relative to the PR's base branch:
+    ```bash
+    BASE="$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || echo main)"
+    git diff --name-only "origin/$BASE"...HEAD
+    ```
+    This mirrors the auto-detect logic in `scripts/run_local_checks.sh`. Don't hardcode `origin/main` — Kedro PRs may target `develop` or other branches.
+1. **For tools that can be invoked directly**, skip pre-commit altogether (faster, no hook overhead): see the per-tool recipes below.
+1. **Re-run `make lint`** only as a final belt-and-suspenders check before commit/push.
 
 ### Per-hook recipes
 
-| Failing CI / local check | Targeted command (fast) | Notes |
-|---|---|---|
-| `ruff` (lint) | `ruff check --fix <file>` or `pre-commit run ruff --files <file>` | The hook is configured with `--fix --exit-non-zero-on-fix`, so it auto-fixes and reports. Direct `ruff check --fix` is fastest. |
-| `ruff-format` | `ruff format <file>` or `pre-commit run ruff-format --files <file>` | Reformats in place. |
-| `trailing-whitespace`, `end-of-file-fixer`, `check-yaml`, `check-json`, `debug-statements`, `requirements-txt-fixer`, `check-added-large-files`, `check-case-conflict`, `check-merge-conflict` | `pre-commit run <hook-id> --files <file>` | Auto-fixers (whitespace, EOF) modify in place; checkers report violations. |
-| `imports` (Import Linter) | `lint-imports --config pyproject.toml` | The hook has `pass_filenames: false`, so `--files` is ignored — it always scans the whole project. Direct invocation is the same speed but skips pre-commit's setup overhead. Contracts live in the `[[tool.importlinter.contracts]]` blocks of [pyproject.toml](../../../pyproject.toml). |
-| `detect-secrets` (pre-commit hook on changed files) | `pre-commit run detect-secrets --files <file>` | Different from the CI's full-tree scan. To reproduce CI's check, see the cookbook entry below. |
-| `mypy` | `mypy <file> --strict --allow-any-generics --no-warn-unused-ignores` or `mypy <subpackage>/ --strict --allow-any-generics --no-warn-unused-ignores` | Single file: ~5–10s (vs. 1–2 min for the whole `kedro/` package). Mypy config in the `[tool.mypy]` section of [pyproject.toml](../../../pyproject.toml). |
+| Failing CI / local check                                                                                                                                                                       | Targeted command (fast)                                                                                                                             | Notes                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ruff` (lint)                                                                                                                                                                                  | `ruff check --fix <file>` or `pre-commit run ruff --files <file>`                                                                                   | The hook is configured with `--fix --exit-non-zero-on-fix`, so it auto-fixes and reports. Direct `ruff check --fix` is fastest.                                                                                                                                                            |
+| `ruff-format`                                                                                                                                                                                  | `ruff format <file>` or `pre-commit run ruff-format --files <file>`                                                                                 | Reformats in place.                                                                                                                                                                                                                                                                        |
+| `trailing-whitespace`, `end-of-file-fixer`, `check-yaml`, `check-json`, `debug-statements`, `requirements-txt-fixer`, `check-added-large-files`, `check-case-conflict`, `check-merge-conflict` | `pre-commit run <hook-id> --files <file>`                                                                                                           | Auto-fixers (whitespace, EOF) modify in place; checkers report violations.                                                                                                                                                                                                                 |
+| `imports` (Import Linter)                                                                                                                                                                      | `lint-imports --config pyproject.toml`                                                                                                              | The hook has `pass_filenames: false`, so `--files` is ignored — it always scans the whole project. Direct invocation is the same speed but skips pre-commit's setup overhead. Contracts live in the `[[tool.importlinter.contracts]]` blocks of [pyproject.toml](../../../pyproject.toml). |
+| `detect-secrets` (pre-commit hook on changed files)                                                                                                                                            | `pre-commit run detect-secrets --files <file>`                                                                                                      | Different from the CI's full-tree scan. To reproduce CI's check, see the cookbook entry below.                                                                                                                                                                                             |
+| `mypy`                                                                                                                                                                                         | `mypy <file> --strict --allow-any-generics --no-warn-unused-ignores` or `mypy <subpackage>/ --strict --allow-any-generics --no-warn-unused-ignores` | Single file: ~5–10s (vs. 1–2 min for the whole `kedro/` package). Mypy config in the `[tool.mypy]` section of [pyproject.toml](../../../pyproject.toml).                                                                                                                                   |
 
 ### Convenience: `make lint hook=<id>`
 
@@ -202,11 +202,12 @@ The Makefile already supports `make lint hook=<hook-id>` (see the `lint` target 
 ### When to fall back to `make lint`
 
 Run the full sweep when:
+
 - Final verification before commit/push (or just call `bash scripts/run_local_checks.sh` which wraps it).
 - You've changed something cross-cutting (renamed a public API, edited many files) and want the whole-tree confidence.
 - The targeted recipes pass but you suspect side effects in untouched files.
 
----
+______________________________________________________________________
 
 ## Common CI failures and fixes
 
@@ -217,8 +218,8 @@ Short cookbook keyed by CI check. Fast-verify commands for all `lint` sub-cases 
 Fast verify is in the per-hook recipes table. Read the violated contract from the `[[tool.importlinter.contracts]]` blocks in [pyproject.toml](../../../pyproject.toml):
 
 1. **Layered**: `framework.cli > framework.session > framework.context > framework.project > runner > io > pipeline > config`. Higher layers may import lower layers, never the reverse.
-2. **Independence**: `kedro.pipeline` and `kedro.io` cannot import each other.
-3. **Forbidden**: `kedro.config` cannot import `kedro.runner`/`io`/`pipeline` (and vice versa, with explicit exceptions for `framework.context.context` and `framework.session.session`).
+1. **Independence**: `kedro.pipeline` and `kedro.io` cannot import each other.
+1. **Forbidden**: `kedro.config` cannot import `kedro.runner`/`io`/`pipeline` (and vice versa, with explicit exceptions for `framework.context.context` and `framework.session.session`).
 
 Fix the import. Only if the architectural change is intentional (rare), propose adjusting `ignore_imports` in the relevant contract — but stop and ask the user first.
 
@@ -270,7 +271,7 @@ Not auto-fixed. The skill reports the timing delta and asks the user to investig
 
 Nothing to fix directly. Turns green when all required checks pass.
 
----
+______________________________________________________________________
 
 ## gh CLI cheatsheet
 

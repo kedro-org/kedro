@@ -1,4 +1,5 @@
 # Distributed deployment
+
 This topic explains how to deploy Kedro in a distributed system.
 
 A distributed application is software that runs on multiple computers within a network at the same time. The software can be stored on servers or with cloud computing. Unlike traditional applications that run on a single machine, distributed applications run on multiple systems simultaneously for a single task or job.
@@ -18,7 +19,6 @@ pip-compile --output-file=<project_root>/requirements.txt --input-file=<project_
 ```
 
 We recommend the [`kedro-docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process of building the image. [Instructions for using this are in the plugin README](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
-
 
 After you build the Docker image for your project locally, transfer the image to a container registry such as Docker Hub or AWS Elastic Container Registry. You can find instructions on how to pull the image on remote servers [in our guide for single-machine deployment](./single_machine.md#how-to-use-container-registry).
 

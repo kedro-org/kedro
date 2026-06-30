@@ -14,6 +14,7 @@ Parameter validation supports two kinds of typed objects:
 - **Dataclasses**: Basic type checking using Python's built-in `dataclasses` module. No extra dependencies needed.
 
 !!! note
+
     You can use either Pydantic models or dataclasses. You do not need both.
 
 Raw values (`int`, `str`, `float`, and others) are passed through unchanged with no validation applied.
@@ -21,10 +22,10 @@ Raw values (`int`, `str`, `float`, and others) are passed through unchanged with
 ### How validation works
 
 1. When you execute a Kedro run or access `context.params` directly, Kedro loads your `parameters.yml` as a dictionary.
-2. Kedro inspects the signatures of all registered pipeline node functions. For any `params:` input with a Pydantic model or dataclass type hint, it records the expected type.
-3. For each typed parameter, Kedro converts the raw dictionary into the declared type using `model_validate` (Pydantic) or keyword-argument instantiation (dataclasses).
-4. If any conversion fails, Kedro raises a `ParameterValidationError` with details about the failure, before any node runs.
-5. Validated parameters are cached, so repeated access to `context.params` does not re-validate.
+1. Kedro inspects the signatures of all registered pipeline node functions. For any `params:` input with a Pydantic model or dataclass type hint, it records the expected type.
+1. For each typed parameter, Kedro converts the raw dictionary into the declared type using `model_validate` (Pydantic) or keyword-argument instantiation (dataclasses).
+1. If any conversion fails, Kedro raises a `ParameterValidationError` with details about the failure, before any node runs.
+1. Validated parameters are cached, so repeated access to `context.params` does not re-validate.
 
 ### Fail-fast behaviour
 
@@ -66,7 +67,7 @@ Kedro validates `params` against `TrainingParams` even though the hint is `Train
 - **Dataset inputs are not validated**: Validation applies to parameters loaded through `params:` or `parameters`. It does not cover dataset inputs.
 - **Multi-type unions are not validated**: Union type hints with multiple non-None types (for example `ModelA | ModelB`) are skipped and no validation is applied. `Optional[Model]` (one model type plus `None`) is unwrapped and validated. Support for multi-type unions may be added in a future release.
 
----
+______________________________________________________________________
 
 ## How to validate parameters in Kedro
 
@@ -236,6 +237,7 @@ eval:
 ```
 
 !!! note
+
     Dataclasses do not have built-in field validation like Pydantic. Kedro instantiates the dataclass from the dictionary and checks that the required fields are present, but it does not enforce constraints like `ge`, `le`, or custom validators. Use Pydantic models if you need richer validation.
 
 ### Use multiple typed parameters in one node

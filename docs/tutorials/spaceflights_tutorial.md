@@ -52,17 +52,21 @@ These are Python packages or libraries that an individual project depends upon t
 When you build a Kedro project, you will typically follow a standard development workflow:
 
 1. **Set up the project template**
+
     - Create a new project and install project dependencies.
     - Configure credentials and any other sensitive/personal content, and logging.
 
-2. **Set up the data**
+1. **Set up the data**
+
     - Add data to the `data` folder.
     - Reference all datasets for the project.
 
-3. **Create the pipeline**
+1. **Create the pipeline**
+
     - Construct nodes to make up the pipeline.
     - Choose how to run the pipeline: sequentially or in parallel.
 
-4. **Package the project**
+1. **Package the project**
+
     - Build the project documentation.
     - Package the project for distribution.

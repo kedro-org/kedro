@@ -13,6 +13,7 @@ description: >-
   ad-hoc** — Kedro's pre-commit configuration, pyproject settings, and an
   isolated venv are required for the results to match CI.
 ---
+
 # Babysit Kedro PR
 
 Drive Kedro changes toward a mergeable state — locally before push, or on an open PR with failing CI. Fix mechanical CI failures, resolve clear merge conflicts, ensure DCO sign-off. Use a conservative posture: stop and ask the user before every commit, push, force-push, and merge-conflict resolution.
@@ -25,10 +26,10 @@ This skill complements `review-kedro-pr` (judgment-based code review). It does *
 
 **Pick a track first**, then run only the steps that track requires. There are two tracks, mapped to the two real situations users hit:
 
-| Track | When the user says... | What to do |
-|---|---|---|
-| **L. Local dev** | "babysit my local changes", "verify before push", "run checks locally", "are my changes ready?", "lint my diff" | Step 2 (env) → Step 5a (full sweep to surface FAILs) → Step 4 (per-failure fix loop with targeted commands) → Step 5a (final re-verify) → optional Step 5b (commit + push). **No PR required.** Skips GitHub fetch entirely. |
-| **C. CI diagnosis & fix** | "CI is failing", "fix the lint job", "what's failing on CI?", "fix the X check on this PR", "babysit this PR" | Step 1 (PR detection) → Step 2 (env) → Step 3 (snapshot via `scripts/watch_ci.sh`) → Step 4 (fix only the failing checks; verify each with the most targeted command — see [reference.md](reference.md) section "Fast lint iteration") → Step 5b (commit + push). **Skip Step 5a** — per-check verify already happened in Step 4. |
+| Track                     | When the user says...                                                                                           | What to do                                                                                                                                                                                                                                                                                                                        |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **L. Local dev**          | "babysit my local changes", "verify before push", "run checks locally", "are my changes ready?", "lint my diff" | Step 2 (env) → Step 5a (full sweep to surface FAILs) → Step 4 (per-failure fix loop with targeted commands) → Step 5a (final re-verify) → optional Step 5b (commit + push). **No PR required.** Skips GitHub fetch entirely.                                                                                                      |
+| **C. CI diagnosis & fix** | "CI is failing", "fix the lint job", "what's failing on CI?", "fix the X check on this PR", "babysit this PR"   | Step 1 (PR detection) → Step 2 (env) → Step 3 (snapshot via `scripts/watch_ci.sh`) → Step 4 (fix only the failing checks; verify each with the most targeted command — see [reference.md](reference.md) section "Fast lint iteration") → Step 5b (commit + push). **Skip Step 5a** — per-check verify already happened in Step 4. |
 
 ### Picking the right track
 
@@ -41,7 +42,7 @@ Each step header below is annotated with the tracks that need it (e.g. `Tracks: 
 
 ## Workflow
 
-### 1. Identify the PR + preflight   _Track: C_
+### 1. Identify the PR + preflight _Track: C_
 
 Detect the PR from the current branch, or accept a PR URL/number from the user:
 
@@ -55,11 +56,12 @@ gh pr view <number-or-url> --json number,title,baseRefName,headRefName
 If the user provided an explicit PR, **thread it through every subsequent command** as `gh pr view <num> ...` and `bash scripts/watch_ci.sh --pr <num>`. The default (no `--pr`) only works for the current branch's PR.
 
 Preflight checks:
+
 - `gh` is installed and authenticated. If not, stop and ask the user to install/authenticate.
 - The working tree is clean enough to operate on. Run `git status --porcelain`; if there are uncommitted changes unrelated to the planned fixes, warn the user and ask whether to stash or proceed.
 - A PR exists for the current branch. **If no PR exists**, ask the user whether to switch to Track L (local-only) or stop and open a PR first (`gh pr create`); creating PRs is out of scope for this skill.
 
-### 2. Set up the Python environment   _Tracks: L, C_
+### 2. Set up the Python environment _Tracks: L, C_
 
 Run `scripts/bootstrap_env.sh`. The script:
 
@@ -69,12 +71,13 @@ Run `scripts/bootstrap_env.sh`. The script:
 - Probes for system tools `vale`, `lychee`, `gh`. Prints platform-specific install hints if missing; does not install them.
 
 **Determining whether to pass `--with-docs`:**
+
 - Track L (no PR exists, so `origin/main` is the default base): `git diff --name-only "$(git merge-base HEAD origin/main)"...HEAD | grep -E '^docs/|\.md$'`. Pass `--with-docs` if there's a match.
 - Track C (PR's actual base may differ): `gh pr view --json files -q '.files[].path' | grep -E '^docs/|\.md$'`. Pass `--with-docs` if there's a match.
 
 Read [reference.md](reference.md) section "Environment setup" for manual recipes and cross-platform install hints.
 
-### 3. Snapshot the PR state   _Track: C_
+### 3. Snapshot the PR state _Track: C_
 
 Single read-only pass:
 
@@ -90,13 +93,14 @@ Drop the `[<num>]` / `[--pr <num>]` brackets when operating on the current branc
 Don't hardcode `origin/main` — Kedro PRs may target `develop` or other branches.
 
 Show the user a one-screen summary:
+
 - Mergeable status (`CLEAN` / `BEHIND` / `DIRTY` / `BLOCKED`).
 - Failing CI checks, each annotated with the local Make target from [reference.md](reference.md) section "CI-to-local mapping".
 - Commits missing DCO `Signed-off-by:` trailer.
 
 `scripts/watch_ci.sh` is snapshot-only: it fetches the current state and exits without blocking on still-running checks. Re-run it later for a refreshed snapshot.
 
-### 4. Fix in this fixed order   _Tracks: L, C — sub-bullets gate per track too_
+### 4. Fix in this fixed order _Tracks: L, C — sub-bullets gate per track too_
 
 Each sub-step ends with **stop and ask before staging / committing / pushing / amending**.
 
@@ -105,19 +109,26 @@ The Track C sub-bullets (Merge conflicts → CI failures → DCO sign-off) run i
 **Merge conflicts** (Track C). If `mergeStateStatus` is `DIRTY` or `BEHIND`, sync with the base branch. Resolve conflicts only when the intent is unambiguous; otherwise stop and ask the user.
 
 **CI failures** (Track C). For each failing check:
-1. Look up the local invocation in [reference.md](reference.md) section "CI-to-local mapping" (and the cookbook entry below it for `e2e-tests`, which is intentionally out of scope locally).
-2. The failed-job logs were already dumped by `watch_ci.sh` in Step 3. If the snapshot is stale (e.g., new check runs completed since Step 3), re-run `bash scripts/watch_ci.sh [--pr <num>]` for a fresh snapshot — keep the `--pr` flag if the user supplied a PR in Step 1.
-3. Propose the smallest scoped fix using [reference.md](reference.md) section "Common CI failures and fixes".
-4. Apply the fix to the working tree only (no `git add` / `git commit`).
-5. **Verify with the most targeted command available** — almost never `make lint`, which runs *every* pre-commit hook on *every* file plus mypy on the whole `kedro/` package (typically 3–5 min per iteration). Instead:
-   - For a single failing pre-commit hook: `pre-commit run <hook-id> --files <changed-files>` (seconds).
-   - For ruff/format: `ruff check --fix <file>` or `ruff format <file>` (sub-second).
-   - For mypy: `mypy <file> --strict --allow-any-generics --no-warn-unused-ignores` (5–10s vs. 1–2 min).
-   - For Import Linter: `lint-imports --config pyproject.toml` (it scans the whole project regardless — but skips pre-commit overhead).
-   - For unit tests: `pytest --no-cov tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (~6 min for the full suite + 100% coverage check). **`--no-cov` is required** because `pyproject.toml` always applies `--cov` with `fail_under = 100`, which would otherwise exit non-zero even on a passing single-test run. **Never run `make test` during the fix loop** — pick the failing test path from the CI log and target it directly. **Sandbox: always request `all` permissions when running any `pytest` in this repo** (see [reference.md](reference.md) section "Sandbox & permissions").
 
-   Full per-hook recipes in [reference.md](reference.md) section "Fast lint iteration". Track C does **not** run `scripts/run_local_checks.sh` here.
-6. Move to the next finding.
+1. Look up the local invocation in [reference.md](reference.md) section "CI-to-local mapping" (and the cookbook entry below it for `e2e-tests`, which is intentionally out of scope locally).
+
+1. The failed-job logs were already dumped by `watch_ci.sh` in Step 3. If the snapshot is stale (e.g., new check runs completed since Step 3), re-run `bash scripts/watch_ci.sh [--pr <num>]` for a fresh snapshot — keep the `--pr` flag if the user supplied a PR in Step 1.
+
+1. Propose the smallest scoped fix using [reference.md](reference.md) section "Common CI failures and fixes".
+
+1. Apply the fix to the working tree only (no `git add` / `git commit`).
+
+1. **Verify with the most targeted command available** — almost never `make lint`, which runs *every* pre-commit hook on *every* file plus mypy on the whole `kedro/` package (typically 3–5 min per iteration). Instead:
+
+    - For a single failing pre-commit hook: `pre-commit run <hook-id> --files <changed-files>` (seconds).
+    - For ruff/format: `ruff check --fix <file>` or `ruff format <file>` (sub-second).
+    - For mypy: `mypy <file> --strict --allow-any-generics --no-warn-unused-ignores` (5–10s vs. 1–2 min).
+    - For Import Linter: `lint-imports --config pyproject.toml` (it scans the whole project regardless — but skips pre-commit overhead).
+    - For unit tests: `pytest --no-cov tests/path/to/test_thing.py::TestClass::test_method` (sub-second per test) instead of `make test` (~6 min for the full suite + 100% coverage check). **`--no-cov` is required** because `pyproject.toml` always applies `--cov` with `fail_under = 100`, which would otherwise exit non-zero even on a passing single-test run. **Never run `make test` during the fix loop** — pick the failing test path from the CI log and target it directly. **Sandbox: always request `all` permissions when running any `pytest` in this repo** (see [reference.md](reference.md) section "Sandbox & permissions").
+
+    Full per-hook recipes in [reference.md](reference.md) section "Fast lint iteration". Track C does **not** run `scripts/run_local_checks.sh` here.
+
+1. Move to the next finding.
 
 **DCO sign-off** (Track C). List commits without `Signed-off-by:`. Apply one of the recipes from [reference.md](reference.md) section "DCO sign-off recipes" (typically `git rebase <base> --signoff` for older commits). Ask the user before amending; **explicitly warn that amend requires a force-push** (`git push --force-with-lease`).
 
@@ -127,7 +138,7 @@ The Track C sub-bullets (Merge conflicts → CI failures → DCO sign-off) run i
 
 Two sub-steps. Run the ones your track requires.
 
-#### 5a. Verify locally (full sweep)   _Track: L_
+#### 5a. Verify locally (full sweep) _Track: L_
 
 ```bash
 bash scripts/run_local_checks.sh
@@ -138,6 +149,7 @@ The script auto-detects scope from the changed files (`code`, `docs`, or `code+d
 **Local scope is narrower than CI's path filter.** Only `docs/**` changes trigger local docs checks. Generic `*.md` files outside `docs/` (e.g., `RELEASE.md`, root `README.md`) are skipped locally because they don't affect the docs build — but CI's `docs-only-checks` workflow *will* still fire on them. The script prints a one-line note when this divergence applies, with the recommended local pre-check command (`make linkcheck` / `make language-lint dir=docs`). If those checks fail on CI later, Track C is the safety net.
 
 **Before invoking the script, warn the user about the wait time.** Total wall time depends on scope:
+
 - `code` only: **~10–12 min** (lint ~3-5 + test ~6 + detect-secrets ~30s)
 - `docs` only: **~5–10 min** (lint ~3-5 + linkcheck ~2-5 + language-lint ~30s)
 - `code+docs` (mixed PR): **~12–17 min** (everything above)
@@ -150,9 +162,10 @@ Show the user the per-check pass/fail/skip summary at the end. Any FAILs feed in
 
 **Track C skips 5a entirely** — per-check verification already happened in Step 4 for the specific failing checks; running the full sweep would be redundant and slow.
 
-#### 5b. Commit + push   _Tracks: L (optional), C_
+#### 5b. Commit + push _Tracks: L (optional), C_
 
 On user confirmation:
+
 - `git add` only the touched files.
 - `git commit` with a message you propose (or the user provides). Use `-s` for DCO sign-off.
 - `git push` (or `git push --force-with-lease` for the DCO rebase case — warn explicitly).

@@ -10,7 +10,6 @@ If you are using macOS or Linux, you can set up your shell to autocomplete `kedr
 echo $0
 ```
 
-
 === "If you are using Bash"
     <br/>
     Add the following to your <code>~/.bashrc</code> (or run it on the command line):
@@ -18,7 +17,6 @@ echo $0
     ```bash
     eval "$(_KEDRO_COMPLETE=bash_source kedro)"
     ```
-
 
 === "If you are using Z shell (ZSh)"
     <br/>
@@ -28,7 +26,6 @@ echo $0
     eval "$(_KEDRO_COMPLETE=zsh_source kedro)"
     ```
 
-
 === "If you are using Fish"
     <br/>
     Add the following to <code>~/.config/fish/completions/foo-bar.fish</code>:
@@ -37,8 +34,8 @@ echo $0
     eval (env _KEDRO_COMPLETE=fish_source kedro)
     ```
 
-
 ## Invoke Kedro CLI from Python (optional)
+
 You can invoke the Kedro CLI as a Python module:
 
 ```bash
@@ -46,21 +43,24 @@ python -m kedro
 ```
 
 ## Kedro commands
+
 Kedro provides a set of CLI commands, which are automatically grouped and documented below using their inline docstrings.
 
 - **Global commands** can be run from anywhere and are not tied to any specific Kedro project.
 - **Project commands** must be run from within a Kedro project directory and apply to that project.
 
 <!-- vale off -->
+
 ### Global Kedro commands
+
 ::: mkdocs-click
     :module: kedro.framework.cli.cli
     :command: global_commands
     :depth: 2
     :style: plain
 
-
 ### Project Kedro commands
+
 ::: mkdocs-click
     :module: kedro.framework.cli.cli
     :command: project_commands
@@ -78,6 +78,7 @@ Kedro's command line interface (CLI) allows you to associate a set of commands a
 The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it through the [`plugin` framework](../extend/plugins.md). Find the template for the `cli.py` file below.
 
 <!-- vale off -->
+
 ??? example "View code"
     ```python
     """Command line tools for manipulating a Kedro project.

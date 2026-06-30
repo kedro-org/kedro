@@ -1,6 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+* Added justification comments to `# nosec` suppression markers to document why each suppression is safe.
 ## Documentation changes
 ## Community contributions
 

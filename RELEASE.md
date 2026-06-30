@@ -18,6 +18,7 @@
 * Improved the `AbstractDataset.from_config()` error message for custom dataset classes that are still abstract, so it no longer suggests invalid constructor arguments when required dataset methods are missing.
 * Fixed `kedro new` accepting project names whose derived package name shadows a Python standard library module or is a Python keyword (e.g. `email`, `json`, `import`), which silently produced a broken, unimportable project. Such names are now rejected at creation time with a clear message.
 * Fixed `kedro pipeline create` accepting Python keywords (e.g. `for`, `import`, `return`) as pipeline names. Such names are now rejected at creation time with a clear error message.
+* Added ASV benchmarks for the parameter validation framework.
 
 ## Documentation changes
 * Documented hooks limitation when using `ParallelRunner`.
@@ -32,6 +33,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Jean-Baptiste Braun](https://github.com/jbbqqf)
 * [Gargi](https://github.com/Kaliagargi)
 * [Simon](https://github.com/simon-b)
+* [samiat4911](https://github.com/samiat4911)
 
 
 # Release 1.4.0

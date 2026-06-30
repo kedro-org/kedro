@@ -7,7 +7,7 @@
         "PIP_NO_BUILD_ISOLATION=false python -m pip wheel --no-deps --no-index -w {build_cache_dir} {build_dir}"
     ],
     "install_command": [
-        "pip install -e .  kedro-datasets[pandas-csvdataset]"
+        "pip install -e .[pydantic] kedro-datasets[pandas-csvdataset]"
     ],
     "branches": [
         "main"

@@ -10,6 +10,7 @@ import importlib
 import inspect
 import logging
 import os
+import re
 import sys
 import typing
 import warnings
@@ -55,6 +56,13 @@ FunctionParameters = MappingProxyType
 
 RICH_INSTALLED: Final = importlib.util.find_spec("rich") is not None
 
+_PARAM_VALUE_SINGLE_QUOTED = re.compile(
+    r"(?P<prefix>(?:^|\s)--params(?:=|\s+)[^=\s]+)='(?P<value>[^']*)'"
+)
+_PARAM_ITEM_SINGLE_QUOTED = re.compile(
+    r"(?P<prefix>(?:^|\s)--params(?:=|\s+))'(?P<value>[^']*)'"
+)
+
 
 def load_ipython_extension(ipython: InteractiveShell) -> None:
     """
@@ -76,6 +84,18 @@ def load_ipython_extension(ipython: InteractiveShell) -> None:
         return
 
     reload_kedro()
+
+
+def _normalise_reload_kedro_params(line: str) -> str:
+    """Normalise single-quoted ``--params`` values before IPython splits them."""
+    line = _PARAM_VALUE_SINGLE_QUOTED.sub(
+        lambda match: f'{match.group("prefix")}="{match.group("value")}"',
+        line,
+    )
+    return _PARAM_ITEM_SINGLE_QUOTED.sub(
+        lambda match: f'{match.group("prefix")}"{match.group("value")}"',
+        line,
+    )
 
 
 @typing.no_type_check
@@ -109,6 +129,7 @@ def magic_reload_kedro(
     See https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks/#reload_kedro-line-magic
     for more.
     """
+    line = _normalise_reload_kedro_params(line)
     args = parse_argstring(magic_reload_kedro, line)
     reload_kedro(args.path, args.env, args.params, local_ns, args.conf_source)
 

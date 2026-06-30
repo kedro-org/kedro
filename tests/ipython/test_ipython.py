@@ -222,6 +222,39 @@ class TestLoadIPythonExtension:
 
         ipython.run_line_magic("reload_kedro", args)
 
+    @pytest.mark.parametrize(
+        ("args", "expected_path", "expected_env", "expected_conf_source"),
+        [
+            ("--params foo='bar baz'", None, None, None),
+            ("--params 'foo=bar baz'", None, None, None),
+            (
+                ". --env=base --params foo='bar baz' --conf-source=new_conf",
+                ".",
+                "base",
+                "new_conf",
+            ),
+        ],
+    )
+    def test_line_magic_params_with_single_quoted_spaces(
+        self,
+        mocker,
+        args,
+        expected_path,
+        expected_env,
+        expected_conf_source,
+        ipython,
+    ):
+        mocker.patch("kedro.ipython.find_kedro_project")
+        mock_reload_kedro = mocker.patch("kedro.ipython.reload_kedro")
+
+        ipython.run_line_magic("reload_kedro", args)
+
+        path, env, runtime_params, _, conf_source = mock_reload_kedro.call_args.args
+        assert path == expected_path
+        assert env == expected_env
+        assert runtime_params == {"foo": "bar baz"}
+        assert conf_source == expected_conf_source
+
     def test_line_magic_with_invalid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython.find_kedro_project")
         mocker.patch("kedro.ipython.reload_kedro")

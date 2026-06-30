@@ -464,11 +464,17 @@ class TestPipelineHelper:
             ]
         )
 
-        pattern = r"Failed to map datasets and/or parameters onto the nodes provided: params:beta"
+        pattern = (
+            r"Failed to map datasets and/or parameters onto the nodes provided: "
+            r"params:beta does not exist in the pipeline\."
+        )
         with pytest.raises(PipelineError, match=pattern):
             pipeline(raw_pipeline, parameters={"beta": "gamma"})
 
-        pattern = r"Failed to map datasets and/or parameters onto the nodes provided: parameters"
+        pattern = (
+            r"Failed to map datasets and/or parameters onto the nodes provided: "
+            r"parameters does not exist in the pipeline\."
+        )
         with pytest.raises(PipelineError, match=pattern):
             pipeline(raw_pipeline, parameters={"parameters": "some_yaml_dataset"})
 

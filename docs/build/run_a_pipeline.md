@@ -202,6 +202,25 @@ kedro run --pipelines=data_processing,data_science
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../getting-started/commands_reference.md#kedro-run).
 
+## Selective pipeline loading
+
+When you run `kedro run --pipelines <name>`, Kedro imports the pipeline modules required for that run and skips unrelated modules. This speeds up startup time in large projects.
+
+```bash
+kedro run --pipelines data_science
+```
+
+You can also run multiple named pipelines in a single command:
+
+```bash
+kedro run --pipelines data_engineering,data_science
+```
+
+Passing `__default__` (or omitting `--pipelines` entirely) loads all registered pipelines as normal.
+
+!!! note "Limitation"
+    Selective loading requires that `register_pipelines()` uses [`find_pipelines()`](../api/framework/kedro.framework.project.md) for discovery. Top-level imports in `pipeline_registry.py` (outside the function body) fire before any filter is applied. Similarly, direct access to the `pipelines` dictionary outside of `session.run()` (for example, during bootstrapping) bypasses the filter.
+
 ## Run pipelines with IO
 
 The above definition of pipelines applies to non-stateful or "pure" pipelines that do not interact with the outside world. In practice, we would like to interact with APIs, databases, files, and other sources of data. By combining IO and pipelines, we can tackle these more complex use cases.

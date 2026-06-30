@@ -342,6 +342,8 @@ class KedroSession(AbstractSession):
         session_id = self.store["session_id"]
         save_version = session_id
         runtime_params = self.store.get("runtime_params") or {}
+        # Must be called before load_context(), which triggers the first pipelines dict access.
+        pipelines.set_requested(pipeline_names or None)
         context = self.load_context()
 
         names = pipeline_names or ["__default__"]
@@ -350,6 +352,8 @@ class KedroSession(AbstractSession):
             try:
                 combined_pipelines += pipelines[name]
             except KeyError as exc:
+                # Reset to None so keys() loads all pipelines for suggestions.
+                pipelines.set_requested(None)
                 matches = get_close_matches(name, pipelines.keys())
                 if matches:
                     suggestion = (

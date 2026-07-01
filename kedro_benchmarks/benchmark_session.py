@@ -2,7 +2,6 @@ import shutil
 from pathlib import Path
 
 from kedro.framework.session import KedroSession
-
 from kedro_benchmarks._utils import build_benchmark_project, teardown_benchmark_project
 
 

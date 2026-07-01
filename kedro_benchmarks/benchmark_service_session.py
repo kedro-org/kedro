@@ -3,7 +3,7 @@ from pathlib import Path
 
 from kedro.framework.session import KedroServiceSession
 
-from ._utils import build_benchmark_project, teardown_benchmark_project
+from kedro_benchmarks._utils import build_benchmark_project, teardown_benchmark_project
 
 
 class ServiceSessionTimeSuite:

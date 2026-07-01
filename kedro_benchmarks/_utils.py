@@ -98,33 +98,33 @@ def build_benchmark_project(project_path: Path, original_cwd: Path) -> tuple[str
         except Exception as e:
             logger.debug(f"Failed to create pipeline '{pipeline_name}': {e}")
 
-    dummy_task_code = '''
-def dummy_task():
-    """A simple dummy task that creates and returns a dictionary."""
-    result = {}
-    for i in range(100):
-        result[f"key_{i}"] = i * 2
-    return result
-'''
+    import textwrap
+
+    dummy_task_code = textwrap.dedent(
+        '''
+        def dummy_task():
+            """A simple dummy task that creates and returns a dictionary."""
+            result = {}
+            for i in range(100):
+                result[f"key_{i}"] = i * 2
+            return result
+        '''
+    ).strip("\n")
 
     for i, pipeline_name in enumerate(PIPELINE_NAMES, 1):
         pipeline_file = package_dir / "pipelines" / pipeline_name / "pipeline.py"
         output_name = f"output_{i}"
         node_name = f"node_{i}"
-        pipeline_content = f'''"""
-This is a boilerplate pipeline '{pipeline_name}'
-generated using Kedro
-"""
-
-from kedro.pipeline import Node, Pipeline
-
-{dummy_task_code}
-
-def create_pipeline(**kwargs) -> Pipeline:
-    return Pipeline([
-        Node(dummy_task, None, "{output_name}", name="{node_name}")
-    ])
-'''
+        pipeline_content = (
+            '"""\n'
+            f"This is a boilerplate pipeline '{pipeline_name}'\n"
+            "generated using Kedro\n"
+            '"""\n\n'
+            "from kedro.pipeline import Node, Pipeline\n\n"
+            f"{dummy_task_code}\n\n"
+            "def create_pipeline(**kwargs) -> Pipeline:\n"
+            f"    return Pipeline([Node(dummy_task, None, \"{output_name}\", name=\"{node_name}\")])\n"
+        )
         pipeline_file.write_text(pipeline_content)
 
     # Update catalog.yml to add output datasets
@@ -134,22 +134,19 @@ def create_pipeline(**kwargs) -> Pipeline:
     else:
         catalog_content = ""
 
-    catalog_content += """
-output_1:
-    type: kedro.io.MemoryDataset
-
-output_2:
-    type: kedro.io.MemoryDataset
-
-output_3:
-    type: kedro.io.MemoryDataset
-
-output_4:
-    type: kedro.io.MemoryDataset
-
-output_5:
-    type: kedro.io.MemoryDataset
-"""
+    catalog_content += (
+        "\n"
+        "output_1:\n"
+        "    type: kedro.io.MemoryDataset\n\n"
+        "output_2:\n"
+        "    type: kedro.io.MemoryDataset\n\n"
+        "output_3:\n"
+        "    type: kedro.io.MemoryDataset\n\n"
+        "output_4:\n"
+        "    type: kedro.io.MemoryDataset\n\n"
+        "output_5:\n"
+        "    type: kedro.io.MemoryDataset\n"
+    )
     catalog_file.write_text(catalog_content)
 
     return package_name, package_dir

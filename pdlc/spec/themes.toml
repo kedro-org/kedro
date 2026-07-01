@@ -1,0 +1,13 @@
+# Global product topics. Managed via `pdlc spec theme`.
+[[themes]]
+id = "pdlc"
+title = "PDLC workflow, CLI, and agent tooling"
+
+[[themes]]
+id = "general"
+title = "Cross-cutting product capabilities (use sparingly)"
+
+[[themes]]
+id = "packaging"
+title = "PyPI packaging and distribution"
+

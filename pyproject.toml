@@ -121,6 +121,7 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 include = ["kedro*"]
+exclude = ["kedro_benchmarks*"]
 
 [tool.setuptools.package-data]
 kedro = ["py.typed"]

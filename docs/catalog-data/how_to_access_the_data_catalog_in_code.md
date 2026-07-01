@@ -1,6 +1,6 @@
-# Advanced: Access the Data Catalog in code
+# How to access the Data Catalog in code
 
-You can define a Data Catalog in two ways. Most projects rely on a YAML configuration file as [illustrated earlier](./data_catalog.md). You can also access the Data Catalog programmatically through [kedro.io.DataCatalog][]. The API lets you configure data sources in code and use the IO module within notebooks.
+You can define a Data Catalog in two ways. Most projects rely on a YAML configuration file as [illustrated in the Data Catalog introduction](./data_catalog.md). You can also access the Data Catalog programmatically through [kedro.io.DataCatalog][]. The API lets you configure data sources in code and use the IO module within notebooks.
 
 !!! Warning
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
@@ -242,7 +242,7 @@ CSVDataset(
 
 ## How to version a dataset using the Code API
 
-In an earlier section of the documentation we described how [Kedro enables dataset and ML model versioning](./data_catalog.md/#dataset-versioning).
+For the concept of how [Kedro enables dataset and ML model versioning](./data_catalog.md#dataset-versioning), see the Data Catalog introduction. For YAML-based versioning steps, see [how to version a dataset](./how_to_configure_the_data_catalog.md#how-to-version-a-dataset).
 
 If you require programmatic control over load and save versions of a specific dataset, you can instantiate `Version` and pass it as a parameter to the dataset initialisation:
 

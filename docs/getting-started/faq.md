@@ -55,12 +55,12 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 ## Data Catalog
 * [How to create dataset entries in catalog.yml?](../catalog-data/data_catalog.md)
 * [How to use the same file with different formats using transcoding?](../catalog-data/data_catalog_yaml_examples.md#read-the-same-file-using-different-datasets-with-transcoding)
-* [How to use dataset factories?](../catalog-data/kedro_dataset_factories.md)
-* [How to override the default dataset creation with a default dataset factory pattern?](../catalog-data/kedro_dataset_factories.md#how-to-override-the-default-dataset-creation-with-dataset-factories)
-* [How to load and save incremental or partitioned datasets?](../catalog-data/partitioned_and_incremental_datasets.md)
+* [How to use dataset factories?](../catalog-data/how_to_use_dataset_factories.md)
+* [How to override the default dataset creation with a default dataset factory pattern?](../catalog-data/how_to_use_dataset_factories.md#how-to-override-the-default-dataset-creation-with-dataset-factories)
+* [How to load and save incremental or partitioned datasets?](../catalog-data/how_to_use_partitioned_and_incremental_datasets.md)
 
 ## Advanced topics
-* [How to use the `DataCatalog` programmatically in code?](../catalog-data/advanced_data_catalog_usage.md)
+* [How to use the `DataCatalog` programmatically in code?](../catalog-data/how_to_access_the_data_catalog_in_code.md)
 
 ## Nodes and pipelines
 

@@ -6,19 +6,19 @@ from pathlib import Path
 import tomllib
 
 from kedro.framework.cli.cli import KedroCLI
-from kedro.framework.session import KedroSession
+from kedro.framework.session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
 
 logger = logging.getLogger(__name__)
 
 
-class SessionTimeSuite:
-    """Benchmark suite for KedroSession startup and run times."""
+class ServiceSessionTimeSuite:
+    """Benchmark suite for KedroServiceSession startup and run times."""
 
     def setup(self): #noqa: PLR0912, PLR0915
         """Set up a minimal Kedro project structure for benchmarking."""
 
-        self.project_path = Path("benchmarks/session_project")
+        self.project_path = Path("benchmarks/service_session_project")
 
         # Clean up any existing project directory to avoid conflicts
         if self.project_path.exists():
@@ -172,30 +172,22 @@ output_5:
             shutil.rmtree(self.project_path, ignore_errors=True)
 
     def time_session_run_single_pipeline(self):
-        """Benchmark creating a session and running only one specific pipeline."""
-        with KedroSession.create(
-            project_path=self.project_path, save_on_close=False
-        ) as session:
-            session.run(pipeline_name="pipeline_1")
+        """Benchmark creating a service session and running only one specific pipeline."""
+        with KedroServiceSession.create(project_path=self.project_path) as session:
+            session.run(pipeline_names=["pipeline_1"])
 
     def time_session_run_all_pipelines(self):
-        """Benchmark creating a session and running all pipelines."""
-        with KedroSession.create(
-            project_path=self.project_path, save_on_close=False
-        ) as session:
+        """Benchmark creating a service session and running all pipelines."""
+        with KedroServiceSession.create(project_path=self.project_path) as session:
             session.run()  # Runs the __default__ pipeline which will run all of them
 
     def time_session_startup_only(self):
-        """Benchmark just the session creation/startup time without running."""
-        session = KedroSession.create(
-            project_path=self.project_path, save_on_close=False
-        )
+        """Benchmark just the service session creation/startup time without running."""
+        session = KedroServiceSession.create(project_path=self.project_path)
         session.close()
 
     def time_session_startup_and_context_load(self):
-        """Benchmark session creation and context loading."""
-        session = KedroSession.create(
-            project_path=self.project_path, save_on_close=False
-        )
+        """Benchmark service session creation and context loading."""
+        session = KedroServiceSession.create(project_path=self.project_path)
         session.load_context()
         session.close()

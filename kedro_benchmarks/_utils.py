@@ -8,6 +8,7 @@ Keep that logic here so a fix only has to be made once.
 import logging
 import os
 import shutil
+import textwrap
 from pathlib import Path
 
 from kedro.framework.cli.cli import KedroCLI
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 PIPELINE_NAMES = ["pipeline_1", "pipeline_2", "pipeline_3", "pipeline_4", "pipeline_5"]
 
 
-def build_benchmark_project(project_path: Path, original_cwd: Path) -> tuple[str, Path]:  # noqa: PLR0912
+def build_benchmark_project(project_path: Path, original_cwd: Path) -> tuple[str, Path]:  # noqa: PLR0912  # branchy one-off benchmark setup; not worth splitting
     """Set up a minimal Kedro project structure for benchmarking.
 
     Args:
@@ -98,8 +99,6 @@ def build_benchmark_project(project_path: Path, original_cwd: Path) -> tuple[str
         except Exception as e:
             logger.debug(f"Failed to create pipeline '{pipeline_name}': {e}")
 
-    import textwrap
-
     dummy_task_code = textwrap.dedent(
         '''
         def dummy_task():
@@ -134,18 +133,9 @@ def build_benchmark_project(project_path: Path, original_cwd: Path) -> tuple[str
     else:
         catalog_content = ""
 
-    catalog_content += (
-        "\n"
-        "output_1:\n"
-        "    type: kedro.io.MemoryDataset\n\n"
-        "output_2:\n"
-        "    type: kedro.io.MemoryDataset\n\n"
-        "output_3:\n"
-        "    type: kedro.io.MemoryDataset\n\n"
-        "output_4:\n"
-        "    type: kedro.io.MemoryDataset\n\n"
-        "output_5:\n"
-        "    type: kedro.io.MemoryDataset\n"
+    catalog_content += "\n" + "\n".join(
+        f"output_{i}:\n    type: kedro.io.MemoryDataset\n"
+        for i in range(1, len(PIPELINE_NAMES) + 1)
     )
     catalog_file.write_text(catalog_content)
 

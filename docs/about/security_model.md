@@ -54,7 +54,7 @@ Kedro is designed to be extensible. Project developers provide custom runners, d
 
 Kedro's extensibility points include:
 
-- **Custom runners** — invoked with `kedro run --runner my.CustomRunner`
+- **Custom runners** — invoked with `kedro run --runner my.CustomRunner` or specified in `settings.py`
 - **Custom datasets** — registered in the data catalog and instantiated at runtime
 - **Hooks** — auto-discovered from installed plugins or explicitly registered in `settings.py`
 - **Config loaders** — specified in `settings.py`

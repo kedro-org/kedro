@@ -1,4 +1,4 @@
-# Next steps: spaceflights tutorial
+# Spaceflights tutorial
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 
@@ -10,13 +10,13 @@ The tutorial takes about **30 minutes** to complete. You will work in the termin
 
 ## Tutorial steps
 
-- [Tutorial Template](tutorial_template.md)
-- [Set Up Data](../tutorials/set_up_data.md)
-- [Create a Pipeline](../tutorials/create_a_pipeline.md)
-- [Add Another Pipeline](../tutorials/add_another_pipeline.md)
-- [Test a Project](../tutorials/test_a_project.md)
-- [Package a Project](../deploy/package_a_project.md)
-- [Spaceflights Tutorial FAQs](spaceflights_tutorial_faqs.md)
+- [Tutorial template](tutorial_template.md)
+- [Set up data](../tutorials/set_up_data.md)
+- [Create a pipeline](../tutorials/create_a_pipeline.md)
+- [Add another pipeline](../tutorials/add_another_pipeline.md)
+- [Test a project](../tutorials/test_a_project.md)
+- [Package a project](../deploy/package_a_project.md)
+- [Tutorial FAQs](spaceflights_tutorial_faqs.md)
 
 ![](../meta/images/moon-rocket.png)
 

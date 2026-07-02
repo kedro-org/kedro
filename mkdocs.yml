@@ -97,6 +97,7 @@ plugins:
       sections:
         Get Started:
           - index.md: Welcome to Kedro documentation
+          - getting-started/quick_start.md: Quick start guide to using Kedro
           - getting-started/install.md: Installation guide for pip, conda, and development setup
           - getting-started/kedro_concepts.md: Core concepts - nodes, pipelines, catalog, and more
           - getting-started/faq.md: Frequently asked questions
@@ -106,7 +107,7 @@ plugins:
           - tutorials/spaceflights_tutorial.md: Complete tutorial building a spaceflight price prediction project
           - tutorials/tutorial_template.md: Tutorial project template guide
           - tutorials/set_up_data.md: Setting up data for the tutorial
-          - tutorials/create_a_pipeline.md: Step-by-step guide to creating pipelines
+          - tutorials/create_a_data_processing_pipeline.md: Step-by-step guide to creating a data processing pipelines
           - tutorials/add_another_pipeline.md: Adding multiple pipelines to a project
           - tutorials/settings.md: Configuring project settings
           - tutorials/test_a_project.md: Testing your Kedro project
@@ -303,16 +304,17 @@ nav:
   - Welcome: index.md
   - Kedro:
       - Get Started:
+          - Quick start: getting-started/quick_start.md
           - Installation: getting-started/install.md
           - Concepts: getting-started/kedro_concepts.md
           - FAQs: getting-started/faq.md
           - Kedro's video course: getting-started/course.md
       - Tutorials:
           - Kedro Spaceflights tutorial:
-            - Spaceflight tutorial: tutorials/spaceflights_tutorial.md
-            - Spaceflight tutorial template: tutorials/tutorial_template.md
+            - Spaceflights tutorial: tutorials/spaceflights_tutorial.md
+            - Tutorial template: tutorials/tutorial_template.md
             - Set up data: tutorials/set_up_data.md
-            - Create a pipeline: tutorials/create_a_pipeline.md
+            - Create a data processing pipeline: tutorials/create_a_data_processing_pipeline.md
             - Add another pipeline: tutorials/add_another_pipeline.md
             - Settings: tutorials/settings.md
             - Test a project: tutorials/test_a_project.md

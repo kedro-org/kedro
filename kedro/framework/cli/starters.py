@@ -915,6 +915,7 @@ def _validate_tool_selection(tools: list[str]) -> None:
     # '20' is not a valid selection instead of '8'
     for tool in tools[::-1]:
         if tool not in NUMBER_TO_TOOLS_NAME:
+            # nosec B608 — user-facing error message printed to stderr, not a query
             message = f"'{tool}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
             if tool == "7":
                 message += "\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."
@@ -939,6 +940,7 @@ def _parse_tools_input(tools_str: str | None) -> list[str]:
             sys.exit(1)
         # safeguard to prevent passing of excessively large intervals that could cause freezing:
         if int(end) > len(NUMBER_TO_TOOLS_NAME):
+            # nosec B608 — user-facing error message printed to stderr, not a query
             message = f"'{end}' is not a valid selection.\nPlease select from the available tools: 1, 2, 3, 4, 5, 6."  # nosec
             if end == "7":
                 message += "\nKedro Viz is automatically included in the project. Please remove 7 from your tool selection."

@@ -301,13 +301,16 @@ class _ProjectLogging(UserDict):
         self.configure(yaml.safe_load(logging_config))
         logger.info(msg)
 
-    def _validate_logging_class(self, class_path: str) -> None:
-        """Validate that a class referenced in logging configuration is a legitimate
-        logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
-        logging.Filter).
+    def _resolve_logging_class(self, class_path: str) -> type[Any] | None:
+        """Resolve and validate that a class referenced in logging configuration is
+        a legitimate logging class (i.e. a subclass of logging.Handler,
+        logging.Formatter, or logging.Filter).
 
         Args:
             class_path: Dotted import path to the class, e.g. ``logging.StreamHandler``.
+
+        Returns:
+            Resolved class, or ``None`` for bare names resolved internally by logging.
 
         Raises:
             ValueError: If the class cannot be imported or is not a logging base class.
@@ -316,7 +319,7 @@ class _ProjectLogging(UserDict):
         module_path, _, class_name = class_path.rpartition(".")
         if not module_path:
             # Bare name (e.g. "StreamHandler") resolved internally by logging machinery.
-            return
+            return None
 
         try:
             module = importlib.import_module(module_path)
@@ -339,6 +342,14 @@ class _ProjectLogging(UserDict):
                 f"Got {type(cls).__name__!r}."
             )
 
+        return cls
+
+    def _validate_logging_class(self, class_path: str) -> None:
+        """Validate that a class referenced in logging configuration is a legitimate
+        logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
+        logging.Filter)."""
+        self._resolve_logging_class(class_path)
+
     def _validate_logging_config(self, config: Any) -> Any:
         """Recursively check the logging configuration and raise an error if dangerous
         '()' factory keys are encountered or if any 'class' value is not a legitimate
@@ -359,13 +370,59 @@ class _ProjectLogging(UserDict):
         else:
             return config
 
+    def _prepare_logging_config(self, logging_config: dict[str, Any]) -> dict[str, Any]:
+        """Prepare a validated logging configuration for ``dictConfig``.
+
+        ``logging.config.dictConfig`` only instantiates custom filters through the
+        ``()`` factory key, which Kedro rejects in user configuration for security
+        reasons. For validated top-level filter definitions, convert ``class`` to an
+        internal callable so custom ``logging.Filter`` subclasses are instantiated
+        without allowing user-provided factories.
+        """
+        prepared_config = logging_config.copy()
+
+        if "filters" not in logging_config:
+            return prepared_config
+
+        filters = logging_config["filters"]
+
+        if not isinstance(filters, dict):
+            return prepared_config
+
+        prepared_filters = filters.copy()
+        prepared_config["filters"] = prepared_filters
+
+        for filter_name, filter_config in prepared_filters.items():
+            if not isinstance(filter_config, dict) or "class" not in filter_config:
+                continue
+
+            class_path = filter_config["class"]
+            filter_class = self._resolve_logging_class(class_path)
+
+            if filter_class is None:
+                continue
+
+            if not issubclass(filter_class, logging.Filter):
+                raise ValueError(
+                    f"Invalid logging filter class '{class_path}' for filter "
+                    f"'{filter_name}'. Must be a subclass of logging.Filter."
+                )
+
+            prepared_filter_config = {
+                key: value for key, value in filter_config.items() if key != "class"
+            }
+            prepared_filter_config["()"] = filter_class
+            prepared_filters[filter_name] = prepared_filter_config
+
+        return prepared_config
+
     def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
         """
         validated_config = self._validate_logging_config(logging_config)
-        logging.config.dictConfig(validated_config)
+        logging.config.dictConfig(self._prepare_logging_config(validated_config))
         self.data = validated_config
 
     def set_project_logging(

@@ -89,7 +89,7 @@ Here are some examples of how to work with the Kedro variables. To explore the f
 
 ### `catalog`
 
-`catalog` can be used to explore your project's \[`kedro.io.DataCatalog`\][] using methods such as \[`kedro.io.DataCatalog.keys`\][], \[`kedro.io.DataCatalog.load`\][] and \[`kedro.io.DataCatalog.save`\][].
+`catalog` can be used to explore your project's [kedro.io.DataCatalog][] using methods such as [kedro.io.DataCatalog.keys][], [kedro.io.DataCatalog.load][] and [kedro.io.DataCatalog.save][].
 
 For example, add the following to a cell in your notebook to run `catalog.keys`:
 

@@ -6,7 +6,7 @@ A Hook consists of a Hook specification, and Hook implementation.
 
 ## Hook specifications
 
-Kedro defines Hook specifications for particular execution points where users can inject additional behaviour. The following Hook specifications are provided in [kedro.framework.hooks]\[\]:
+Kedro defines Hook specifications for particular execution points where users can inject additional behaviour. The [kedro.framework.hooks][] module provides the following Hook specifications:
 
 - `after_context_created`
 - `after_catalog_created`
@@ -82,7 +82,7 @@ The Hook implementation should have the same name as the specification. The Hook
 
 To declare a Hook implementation, use the `@hook_impl` decorator.
 
-For example, the full signature of the \[`after_catalog_created`\][kedro.framework.hooks.specs.DataCatalogSpecs.after_catalog_created] Hook specification is:
+For example, the full signature of the [after_catalog_created][kedro.framework.hooks.specs.DataCatalogSpecs.after_catalog_created] Hook specification is:
 
 ```python
 @hook_spec

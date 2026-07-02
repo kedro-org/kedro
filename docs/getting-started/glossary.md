@@ -36,7 +36,7 @@ You can use Kedro-Viz to visualise your Kedro data pipelines:
 - Get a clear picture when you have lots of datasets and nodes by using tags to visualise sub-pipelines
 - Search for nodes and datasets
 
-[Further information from the Kedro-Viz repository](https://github.com/kedro-org/kedro-viz) and [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/)\`.
+[Further information from the Kedro-Viz repository](https://github.com/kedro-org/kedro-viz) and [Kedro-Viz documentation](https://docs.kedro.org/projects/kedro-viz/en/stable/).
 
 ## Layers (data engineering convention)
 

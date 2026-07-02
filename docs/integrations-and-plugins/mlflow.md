@@ -206,8 +206,7 @@ $ kedro run --from-nodes=evaluate_model_node --params mlflow_run_id=4cba84...
 !!! note
 
     Notice that MLflow runs are immutable for reproducibility purposes,
-
-so you cannot _save_ a model in an existing run.
+    so you cannot _save_ a model in an existing run.
 
 ## Advanced use cases
 
@@ -216,7 +215,7 @@ so you cannot _save_ a model in an existing run.
 So far, `kedro-mlflow` has proven abundantly useful already.
 And yet, you might have the need to track additional metadata in the run.
 
-One possible way of doing it is using the \[`before_pipeline_run`\][kedro.framework.hooks.specs.PipelineSpecs.before_pipeline_run] Hook to log the `run_params` passed to the Hook.
+One possible way of doing it is using the [before_pipeline_run][kedro.framework.hooks.specs.PipelineSpecs.before_pipeline_run] Hook to log the `run_params` passed to the Hook.
 An implementation would look as follows:
 
 ```python

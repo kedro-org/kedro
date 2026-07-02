@@ -23,9 +23,7 @@ It starts with a notebook example which does NOT use Kedro. It then explains how
 
 !!! note
 
-```
-If you want to experiment with the code in a notebook, you can find it in the [`notebook-example` folder on GitHub](https://github.com/kedro-org/kedro/tree/main/docs/source/notebooks_and_ipython/notebook-example). Be sure to download the entire folder, or clone the entire repo, because the `add_kedro_to_spaceflights_notebook.ipynb` notebook relies upon files stored in the `notebook-example` folder.
-```
+    If you want to experiment with the code in a notebook, you can find it in the [`notebook-example` folder on GitHub](https://github.com/kedro-org/kedro/tree/main/docs/source/notebooks_and_ipython/notebook-example). Be sure to download the entire folder, or clone the entire repo, because the `add_kedro_to_spaceflights_notebook.ipynb` notebook relies upon files stored in the `notebook-example` folder.
 
 ## Kedro spaceflights
 

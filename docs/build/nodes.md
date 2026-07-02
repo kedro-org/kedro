@@ -1,6 +1,6 @@
 # Nodes
 
-In this section, we introduce the concept of a node, for which the relevant API documentation is \[`node`\][kedro.pipeline.node].
+In this section, we introduce the concept of a node, for which the relevant API documentation is [node][kedro.pipeline.node].
 
 Nodes are the building blocks of pipelines, and represent tasks. Pipelines are used to combine nodes to build workflows, which range from basic machine learning workflows to end-to-end (E2E) production workflows.
 

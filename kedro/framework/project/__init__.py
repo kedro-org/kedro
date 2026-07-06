@@ -344,13 +344,17 @@ class _ProjectLogging(UserDict):
 
         return cls
 
-    def _validate_logging_class(self, class_path: str) -> None:
+    def _validate_logging_class(self, class_path: str) -> type[Any] | None:
         """Validate that a class referenced in logging configuration is a legitimate
         logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
         logging.Filter)."""
-        self._resolve_logging_class(class_path)
+        return self._resolve_logging_class(class_path)
 
-    def _validate_logging_config(self, config: Any) -> Any:
+    def _validate_logging_config(
+        self,
+        config: Any,
+        resolved_logging_classes: dict[str, type[Any] | None] | None = None,
+    ) -> Any:
         """Recursively check the logging configuration and raise an error if dangerous
         '()' factory keys are encountered or if any 'class' value is not a legitimate
         logging class."""
@@ -360,17 +364,29 @@ class _ProjectLogging(UserDict):
                     "The '()' key is not allowed in logging configuration as it poses a security risk."
                 )
             if "class" in config:
-                self._validate_logging_class(config["class"])
+                class_path = config["class"]
+                resolved_class = self._validate_logging_class(class_path)
+                if resolved_logging_classes is not None:
+                    resolved_logging_classes[class_path] = resolved_class
             validated = {}
             for k, v in config.items():
-                validated[k] = self._validate_logging_config(v)
+                validated[k] = self._validate_logging_config(
+                    v, resolved_logging_classes
+                )
             return validated
         elif isinstance(config, list):
-            return [self._validate_logging_config(item) for item in config]
+            return [
+                self._validate_logging_config(item, resolved_logging_classes)
+                for item in config
+            ]
         else:
             return config
 
-    def _prepare_logging_config(self, logging_config: dict[str, Any]) -> dict[str, Any]:
+    def _prepare_logging_config(
+        self,
+        logging_config: dict[str, Any],
+        resolved_logging_classes: dict[str, type[Any] | None] | None = None,
+    ) -> dict[str, Any]:
         """Prepare a validated logging configuration for ``dictConfig``.
 
         ``logging.config.dictConfig`` only instantiates custom filters through the
@@ -397,7 +413,12 @@ class _ProjectLogging(UserDict):
                 continue
 
             class_path = filter_config["class"]
-            filter_class = self._resolve_logging_class(class_path)
+            filter_class = (
+                resolved_logging_classes[class_path]
+                if resolved_logging_classes is not None
+                and class_path in resolved_logging_classes
+                else self._resolve_logging_class(class_path)
+            )
 
             if filter_class is None:
                 continue
@@ -421,8 +442,13 @@ class _ProjectLogging(UserDict):
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
         """
-        validated_config = self._validate_logging_config(logging_config)
-        logging.config.dictConfig(self._prepare_logging_config(validated_config))
+        resolved_logging_classes: dict[str, type[Any] | None] = {}
+        validated_config = self._validate_logging_config(
+            logging_config, resolved_logging_classes
+        )
+        logging.config.dictConfig(
+            self._prepare_logging_config(validated_config, resolved_logging_classes)
+        )
         self.data = validated_config
 
     def set_project_logging(

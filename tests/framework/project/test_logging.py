@@ -506,6 +506,68 @@ def test_configure_logging_instantiates_custom_filter_class():
     assert logged_messages == "KEEP this message\n"
 
 
+def test_configure_logging_passes_custom_filter_constructor_parameters():
+    from kedro.framework.project import _ProjectLogging
+
+    stream = io.StringIO()
+    filter_class = f"{__name__}.KeepOnlyFilter"
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "filters": {"keep_only": {"class": filter_class, "name": "custom_filter_name"}},
+        "handlers": {
+            "stream": {
+                "class": "logging.StreamHandler",
+                "filters": ["keep_only"],
+                "stream": stream,
+            }
+        },
+        "root": {"handlers": ["stream"], "level": "INFO"},
+    }
+
+    logging_instance = _ProjectLogging()
+    logging_instance.configure(logging_config)
+
+    [handler] = logging.getLogger().handlers
+    custom_filter = handler.filters[0]
+    assert isinstance(custom_filter, KeepOnlyFilter)
+    assert custom_filter.name == "custom_filter_name"
+    assert logging_instance.data["filters"]["keep_only"] == {
+        "class": filter_class,
+        "name": "custom_filter_name",
+    }
+
+
+def test_configure_logging_reuses_validated_filter_class():
+    from kedro.framework.project import _ProjectLogging
+
+    filter_class = f"{__name__}.KeepOnlyFilter"
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "filters": {"keep_only": {"class": filter_class}},
+        "handlers": {
+            "stream": {
+                "class": "logging.StreamHandler",
+                "filters": ["keep_only"],
+            }
+        },
+        "root": {"handlers": ["stream"], "level": "INFO"},
+    }
+
+    logging_instance = _ProjectLogging()
+    with mock.patch.object(
+        logging_instance,
+        "_resolve_logging_class",
+        wraps=logging_instance._resolve_logging_class,
+    ) as resolve_logging_class:
+        logging_instance.configure(logging_config)
+
+    assert resolve_logging_class.call_count == 2
+    resolve_logging_class.assert_any_call(filter_class)
+    resolve_logging_class.assert_any_call("logging.StreamHandler")
+
+
 def test_prepare_logging_config_without_filters_does_not_add_filters_key():
     from kedro.framework.project import _ProjectLogging
 

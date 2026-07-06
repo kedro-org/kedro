@@ -5,10 +5,13 @@ This section contains detailed information about Kedro project configuration, wh
 Kedro makes use of a configuration loader to load any project configuration files, which you can access through [kedro.config.OmegaConfigLoader][].
 
 !!! note
+
     `ConfigLoader` and `TemplatedConfigLoader` have been removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
 
 <!-- vale Kedro.headings = NO -->
+
 ## OmegaConfigLoader
+
 <!-- vale Kedro.headings = YES -->
 
 [OmegaConf](https://omegaconf.readthedocs.io/) is a Python library designed to handle and manage settings. It serves as a YAML-based hierarchical system to organise configurations, which can be structured to accommodate various sources, allowing you to merge settings from multiple locations.
@@ -18,14 +21,16 @@ From Kedro 0.18.5 you can use the [kedro.config.OmegaConfigLoader][] which uses 
 `OmegaConfigLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
 
 ### `OmegaConf` vs. Kedro's `OmegaConfigLoader`
+
 `OmegaConf` is a configuration management library in Python that allows you to manage hierarchical configurations. Kedro's `OmegaConfigLoader` uses `OmegaConf` for handling configurations.
 This means that when you work with `OmegaConfigLoader` in Kedro, you are using the capabilities of `OmegaConf` without directly interacting with it.
 
 `OmegaConfigLoader` in Kedro is designed to handle more complex configuration setups commonly used in Kedro projects. It automates the process of merging configuration files, such as those for catalogs, and accounts for different environments to make it convenient to manage configurations in a structured way.
 
 When you need to load configurations manually, such as for exploration in a notebook, you have two options:
+
 1. Use the `OmegaConfigLoader` class provided by Kedro.
-2. Directly use the `OmegaConf` library.
+1. Directly use the `OmegaConf` library.
 
 Kedro's `OmegaConfigLoader` is designed to handle complex project environments. If your use case involves loading a single configuration file and is straightforward, it may be simpler to use `OmegaConf` directly.
 
@@ -40,29 +45,35 @@ When your configuration files are complex and contain credentials or templating,
 In summary, both `OmegaConf` and Kedro's `OmegaConfigLoader` provide ways to manage configurations. Your choice depends on the complexity of your configuration and whether you are working within the context of the Kedro framework.
 
 ## Configuration source
+
 The configuration source folder is [`conf`](../getting-started/kedro_concepts.md#conf) by default. We recommend that you keep all configuration files in the default `conf` folder of a Kedro project.
 
 ## Configuration environments
+
 A configuration environment is a way of organising your configuration settings for different stages of your data pipeline. For example, you might have different settings for development, testing, and production environments.
 
 By default, Kedro projects have a `base` and a `local` environment.
 
 ### Base
+
 In Kedro, the base configuration environment refers to the default configuration settings that are used as the foundation for all other configuration environments.
 
 The `base` folder contains the default settings that are used across your pipelines, unless they are overridden by a specific environment.
 
 !!! warning
+
     Do not put private access credentials in the base configuration folder or any other configuration environment folder that is stored in version control.
 
 ### Local
+
 The `local` configuration environment folder should be used for configuration that is either user-specific (for example, IDE configuration) or protected (for example, security keys).
 
 !!! warning
+
     Do not add any local configuration to version control.
 
-
 ## Configuration loading
+
 Kedro-specific configuration (for example, [kedro.io.DataCatalog][] configuration for I/O) is loaded using a configuration loader class, by default, this is [kedro.config.OmegaConfigLoader][].
 When you interact with Kedro through the command line, for example, by running `kedro run`, Kedro loads all project configuration in the configuration source through this configuration loader.
 
@@ -70,22 +81,24 @@ The loader recursively scans for configuration files inside the `conf` folder, f
 
 Kedro merges configuration information and returns a configuration dictionary according to the following rules:
 
-* If any two configuration files (exception for parameters) located inside the **same** environment path (such as `conf/base/`) contain the same top-level key, the configuration loader raises a `ValueError` indicating that duplicates are not allowed.
-* If two configuration files contain the same top-level key but are in **different** environment paths (for example, one in `conf/base/`, another in `conf/local/`) then the last loaded path (`conf/local/`) takes precedence as the key value. `OmegaConfigLoader.__getitem__` does not raise any errors but a `DEBUG` level log message is emitted with information on the overridden keys.
-* If any two parameter configuration files contain the same top-level key, the configuration loader checks the sub-keys for duplicates. If there are any, it raises a `ValueError` indicating that duplicates are not allowed.
+- If any two configuration files (exception for parameters) located inside the **same** environment path (such as `conf/base/`) contain the same top-level key, the configuration loader raises a `ValueError` indicating that duplicates are not allowed.
+- If two configuration files contain the same top-level key but are in **different** environment paths (for example, one in `conf/base/`, another in `conf/local/`) then the last loaded path (`conf/local/`) takes precedence as the key value. `OmegaConfigLoader.__getitem__` does not raise any errors but a `DEBUG` level log message is emitted with information on the overridden keys.
+- If any two parameter configuration files contain the same top-level key, the configuration loader checks the sub-keys for duplicates. If there are any, it raises a `ValueError` indicating that duplicates are not allowed.
 
 When using any of the configuration loaders, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. You can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet)
 or [to enable templating in the catalog when using the `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader).
 
 ### Configuration file names
+
 Configuration files will be matched according to file name and type rules. Suppose the config loader needs to fetch the catalog configuration, it will search according to the following rules:
 
-* *Either* of the following is true:
-  * filename starts with `catalog`
-  * file is located in a subdirectory whose name is prefixed with `catalog`
-* *And* file extension is one of the following: `yaml`, `yml`, or `json`
+- *Either* of the following is true:
+    - filename starts with `catalog`
+    - file is located in a subdirectory whose name is prefixed with `catalog`
+- *And* file extension is one of the following: `yaml`, `yml`, or `json`
 
 ### Configuration patterns
+
 Under the hood, the Kedro configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by `config_patterns` in the configuration loader classes.
 
 By default, those patterns are set as follows for the configuration of catalog, parameters, logging, credentials:
@@ -105,17 +118,18 @@ If you want to change the way configuration is loaded, you can either [customise
 
 This section contains a set of guidance for the most common configuration requirements of standard Kedro projects:
 
-* [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
-* [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
-* [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
-* [How to read configuration from remote storage](#how-to-read-configuration-from-remote-storage)
-* [How to access configuration in code](#how-to-access-configuration-in-code)
-* [How to load a data catalog with credentials in code?](#how-to-load-a-data-catalog-with-credentials-in-code)
-* [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
-* [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
-* [How to use a single configuration environment](#how-to-use-a-single-configuration-environment)
+- [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
+- [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
+- [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
+- [How to read configuration from remote storage](#how-to-read-configuration-from-remote-storage)
+- [How to access configuration in code](#how-to-access-configuration-in-code)
+- [How to load a data catalog with credentials in code?](#how-to-load-a-data-catalog-with-credentials-in-code)
+- [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
+- [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
+- [How to use a single configuration environment](#how-to-use-a-single-configuration-environment)
 
 ### How to change the setting for a configuration source folder
+
 To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md) as follows:
 
 ```python
@@ -123,6 +137,7 @@ CONF_SOURCE = "new_conf"
 ```
 
 ### How to change the configuration source folder at runtime
+
 Specify a source folder for the configuration files at runtime using the [`kedro run` CLI command](../getting-started/commands_reference.md#kedro-commands) with the `--conf-source` flag as follows:
 
 ```bash
@@ -130,6 +145,7 @@ kedro run --conf-source=<path-to-new-conf-folder>
 ```
 
 ### How to read configuration from a compressed file
+
 You can read configuration from a compressed file in `tar.gz` or `zip` format by using the [kedro.config.OmegaConfigLoader][].
 
 How to reference a `tar.gz` file:
@@ -170,9 +186,11 @@ For both the `tar.gz` and `zip` file, the following structure is expected:
 ```
 
 ### How to read configuration from remote storage
+
 You can read configuration from remote storage locations using cloud storage protocols. This allows you to separate your configuration from your code and securely store different configurations for various environments or tenants.
 
 Supported protocols include:
+
 - Amazon S3 (`s3://`)
 - Azure Blob Storage (`abfs://`, `abfss://`)
 - Google Cloud Storage (`gs://`, `gcs://`)
@@ -193,27 +211,34 @@ kedro run --conf-source=gs://my-bucket/configs/
 ```
 
 #### Authentication for remote configuration
+
 Authentication for remote configuration sources must be set up through environment variables or other credential mechanisms provided by the cloud platform. Unlike datasets in the data catalog, you cannot use credentials from `credentials.yml` for remote configuration sources since those credentials would be part of the configuration you're trying to access.
 
 **Examples of authentication setup:**
 
 Amazon S3:
+
 ```bash
   export AWS_ACCESS_KEY_ID=your_access_key
   export AWS_SECRET_ACCESS_KEY=your_secret_key
   kedro run --conf-source=s3://my-bucket/configs/
 ```
+
 Google Cloud Storage:
+
 ```
 gcloud auth application-default login
 kedro run --conf-source=gs://my-bucket/configs/
 ```
+
 Azure Blob Storage:
+
 ```
 export AZURE_STORAGE_ACCOUNT=your_account_name
 export AZURE_STORAGE_KEY=your_account_key
 kedro run --conf-source=abfs://container@account/configs/
 ```
+
 For more detailed authentication instructions, see the documentation of your cloud provider.
 
 The remote storage should maintain the same configuration structure as local configuration, with appropriate `base` and environment folders:
@@ -228,9 +253,11 @@ s3://my-bucket/configs/
 ```
 
 !!! note
+
     Kedro supports reading configuration from compressed files (.tar.gz, .zip) and from cloud storage separately. It does not support reading compressed files directly from cloud storage (for example, s3://my-bucket/configs.tar.gz).
 
 ### How to access configuration in code
+
 To directly access configuration in code, for example to debug, you can do so as follows:
 
 ```python
@@ -246,10 +273,13 @@ conf_catalog = conf_loader["catalog"]
 ```
 
 ### How to load a data catalog with credentials in code?
+
 !!! note
+
     We do not recommend that you load and manipulate a data catalog directly in a Kedro node. Nodes are designed to be pure functions and thus should remain agnostic of I/O.
 
 Assuming your project contains a catalog and credentials file, each located in `base` and `local` environments respectively, you can use the `OmegaConfigLoader` to load these configurations. Pass them to a `DataCatalog` object to access the catalog entries with resolved credentials.
+
 ```python
 from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
@@ -270,6 +300,7 @@ catalog = DataCatalog.from_config(catalog=conf_catalog, credentials=conf_credent
 ```
 
 ### How to specify additional configuration environments
+
 Besides the two built-in `local` and `base` configuration environments, you can create your own. Your project loads `conf/base/` as the bottom-level configuration environment but allows you to overwrite it with any other environments that you create, such as `conf/server/` or `conf/test/`. To use additional configuration environments, run the following command:
 
 ```bash
@@ -285,9 +316,11 @@ export KEDRO_ENV=<your-environment>
 ```
 
 !!! note
+
     If you both specify the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
 
 ### How to change the default overriding environment
+
 By default, `local` is the overriding environment for `base`. To change the folder, customise the configuration loader argument settings in `src/<package_name>/settings.py` and set the `CONFIG_LOADER_ARGS` key to have a new `default_run_env` value.
 
 For example, if you want to override `base` with configuration in a custom environment called `prod`, you change the configuration loader arguments in `settings.py` as follows:
@@ -297,6 +330,7 @@ CONFIG_LOADER_ARGS = {"default_run_env": "prod"}
 ```
 
 ### How to use a single configuration environment
+
 Customise the configuration loader arguments in `settings.py` as follows if your project does not have any other environments apart from `base` (that is, no `local` environment to default to):
 
 ```python

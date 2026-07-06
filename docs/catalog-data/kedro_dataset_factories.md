@@ -1,14 +1,16 @@
 # Kedro dataset factories
+
 You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro `0.18.12`.
 
 !!! warning
+
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
-
 
 Dataset factories introduce a syntax that lets you generalise your configuration and reduce the number of similar catalog entries. They match datasets used in your project's pipelines to dataset factory patterns.
 
 For example:
+
 ```yaml
 factory_data:
   type: pandas.CSVDataset
@@ -20,6 +22,7 @@ process_data:
 ```
 
 With dataset factory, it can be re-written as:
+
 ```yaml
 "{name}_data":
   type: pandas.CSVDataset
@@ -27,6 +30,7 @@ With dataset factory, it can be re-written as:
 ```
 
 In runtime, the pattern will be matched against the name of the datasets defined in `inputs` or `outputs`.
+
 ```python
 Node(
     func=process_factory,
@@ -38,6 +42,7 @@ Node(
 ```
 
 !!! note
+
     The factory pattern must always be enclosed in quotes to avoid YAML parsing errors.
 
 Dataset factories behave like a **regular expression** and you can think of the syntax as a reversed `f-string`. In this case, the name of the input dataset `factory_data` matches the pattern `{name}_data` with the `_data` suffix, so it resolves `name` to `factory`. Likewise, it resolves `name` to `process` for the output dataset `process_data`.
@@ -49,22 +54,25 @@ This allows you to use one dataset factory pattern to replace multiple dataset e
 The catalog supports three types of factory patterns:
 
 1. Dataset patterns
-2. User catch-all pattern
-3. Default runtime patterns
+1. User catch-all pattern
+1. Default runtime patterns
 
 **Dataset patterns**
 
 Dataset patterns are defined explicitly in the `catalog.yml` using placeholders such as `{name}_data`.
+
 ```yaml
 "{name}_data":
   type: pandas.CSVDataset
   filepath: data/01_raw/{name}_data.csv
 ```
+
 This allows any dataset named `something_data` to be dynamically resolved using the pattern.
 
 **User catch-all pattern**
 
 A user catch-all pattern acts as a fallback when no dataset patterns match. It also uses a placeholder like `{default_dataset}`.
+
 ```yaml
 "{default_dataset}":
   type: pandas.CSVDataset
@@ -72,12 +80,14 @@ A user catch-all pattern acts as a fallback when no dataset patterns match. It a
 ```
 
 !!! note
+
     A single user catch-all pattern is allowed per catalog. If more are specified, Kedro raises a `DatasetError`.
 
 **Default runtime patterns**
 
 Default runtime patterns are built-in patterns used by Kedro when datasets are not defined in the catalog, often for intermediate datasets generated during a pipeline run.
 They are defined per catalog type:
+
 ```python
 # For DataCatalog
 default_runtime_patterns: ClassVar = {
@@ -89,21 +99,23 @@ default_runtime_patterns: ClassVar = {
     "{default}": {"type": "kedro.io.SharedMemoryDataset"}
 }
 ```
+
 These patterns enable automatic creation of in-memory or shared-memory datasets during execution.
 
 ## Patterns resolution order
+
 When the `DataCatalog` is initialised, it scans the configuration to extract and validate any dataset patterns and the user catch-all pattern.
 
 When resolving a dataset name, Kedro uses the following order of precedence:
 
 1. **Dataset patterns:**
-Specific patterns defined in the `catalog.yml`. These are the most explicit and are matched first.
+    Specific patterns defined in the `catalog.yml`. These are the most explicit and are matched first.
 
-2. **User catch-all pattern:**
-A general fallback pattern (for example, `{default_dataset}`) that is matched if no dataset patterns apply. A single user catch-all pattern is allowed. Multiple patterns raise a `DatasetError`.
+1. **User catch-all pattern:**
+    A general fallback pattern (for example, `{default_dataset}`) that is matched if no dataset patterns apply. A single user catch-all pattern is allowed. Multiple patterns raise a `DatasetError`.
 
-3. **Default runtime patterns:**
-Internal fallback behaviour provided by Kedro. These patterns are built into the catalog and automatically used at runtime to create datasets (for example, `MemoryDataset` or `SharedMemoryDataset`) when none of the above match.
+1. **Default runtime patterns:**
+    Internal fallback behaviour provided by Kedro. These patterns are built into the catalog and automatically used at runtime to create datasets (for example, `MemoryDataset` or `SharedMemoryDataset`) when none of the above match.
 
 ## How resolution works in practice
 
@@ -126,6 +138,7 @@ DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog
 ```
 
 Enable fallback to use runtime defaults:
+
 ```bash
 In [3]: catalog.get("nonexistent", fallback_to_runtime_pattern=True)
 Out[3]: kedro.io.memory_dataset.MemoryDataset()
@@ -158,6 +171,7 @@ Out[2]: CSVDataset(filepath=.../data/nonexistent.csv)
 - Runtime behaviour (for example, during `kedro run`): Default runtime patterns are automatically enabled to resolve intermediate datasets not defined in `catalog.yml`.
 
 !!! note
+
     Enabling `fallback_to_runtime_pattern=True` is recommended for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
 
 ## How to generalise datasets of the same type
@@ -229,6 +243,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         ]
     )
 ```
+
 ## How to generalise datasets using namespaces
 
 You can also generalise the catalog entries for datasets belonging to namespaced modular pipelines. Consider the
@@ -271,6 +286,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 
     return ds_pipeline_1 + ds_pipeline_2
 ```
+
 You can now have one dataset factory pattern in your catalog instead of two separate entries for `active_modelling_pipeline.regressor`
 and `candidate_modelling_pipeline.regressor` as below:
 
@@ -319,9 +335,11 @@ This could be generalised to the following pattern:
   save_args:
     mode: overwrite
 ```
+
 All the placeholders used in the catalog entry body must exist in the factory pattern name.
 
 ## How to generalise datasets using multiple dataset factories
+
 You can have multiple dataset factories in your catalog. For example:
 
 ```yaml
@@ -340,8 +358,8 @@ match multiple patterns. To overcome this, Kedro sorts all the potential matches
 The matches are ranked according to the following criteria:
 
 1. Number of exact character matches between the dataset name and the factory pattern. For example, a dataset named `factory_data$csv` would match `{dataset}_data$csv` over `{dataset_name}$csv`.
-2. Number of placeholders. For example, the dataset `preprocessing.shuttles+csv` would match `{namespace}.{dataset}+csv` over `{dataset}+csv`.
-3. Alphabetical order
+1. Number of placeholders. For example, the dataset `preprocessing.shuttles+csv` would match `{namespace}.{dataset}+csv` over `{dataset}+csv`.
+1. Alphabetical order
 
 ## How to override the default dataset creation with dataset factories
 
@@ -353,6 +371,7 @@ You can use dataset factories to define a catch-all pattern which will overwrite
   filepath: data/{default_dataset}.csv
 
 ```
+
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
 as `pandas.CSVDataset`.
 
@@ -365,7 +384,7 @@ Here are several APIs that might be useful for custom use cases:
 - `catalog_config_resolver.match_dataset_pattern()` - checks if the dataset name matches any dataset pattern
 - `catalog_config_resolver.match_user_catch_all_pattern()` - checks if dataset name matches the user defined catch all pattern
 - `catalog_config_resolver.match_runtime_pattern()` - checks if dataset name matches the default runtime pattern
-- `catalog_config_resolver.resolve_pattern()` -  resolves a dataset name to its configuration based on patterns in the order explained above
+- `catalog_config_resolver.resolve_pattern()` - resolves a dataset name to its configuration based on patterns in the order explained above
 - `catalog_config_resolver.list_patterns()` - lists all patterns available in the catalog
 - `catalog_config_resolver.is_pattern()` - checks if a given string is a pattern
 
@@ -384,16 +403,19 @@ Describes datasets used in the specified pipeline(s), grouped by how they are de
 - defaults: Handled by user catch-all or default runtime patterns
 
 CLI:
+
 ```bash
 kedro catalog describe-datasets -p data_processing
 ```
 
 Interactive environment:
+
 ```bash
 In [1]: catalog.describe_datasets(pipelines=["data_processing", "data_science"])
 ```
 
 Example output:
+
 ```yaml
 data_processing:
   datasets:
@@ -412,6 +434,7 @@ data_processing:
 ```
 
 !!! note
+
     If no pipelines are specified, the `__default__` pipeline is used.
 
 **List patterns**
@@ -419,16 +442,19 @@ data_processing:
 Lists all dataset factory patterns defined in the catalog, ordered by priority.
 
 CLI:
+
 ```bash
 kedro catalog list-patterns
 ```
 
 Interactive environment:
+
 ```bash
 In [1]: catalog.list_patterns()
 ```
 
 Example output:
+
 ```yaml
 - '{name}-{folder}#csv'
 - '{name}_data'
@@ -443,16 +469,19 @@ Example output:
 Resolves datasets used in the pipeline against all dataset patterns, returning their full catalog configuration. It includes datasets explicitly defined in the catalog as well as those resolved from dataset factory patterns.
 
 CLI command:
+
 ```bash
 kedro catalog resolve-patterns -p data_processing
 ```
 
 Interactive environment:
+
 ```bash
 In [1]: catalog.resolve_patterns(pipelines=["data_processing"])
 ```
 
 Example output:
+
 ```yaml
 companies#csv:
   type: pandas.CSVDataset
@@ -464,6 +493,7 @@ companies#csv:
 ```
 
 !!! note
+
     If no pipelines are specified, the `__default__` pipeline is used.
 
 ### Implementation details and Python API usage

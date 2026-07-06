@@ -2,8 +2,8 @@
 
 There are several ways to customise your new project with the tools and example code:
 
-* [Specify tools using inputs to `kedro new`](#specify-tools-as-inputs-to-kedro-new)
-* [Specify tools using YAML configuration](#specify-tools-using-yaml-configuration)
+- [Specify tools using inputs to `kedro new`](#specify-tools-as-inputs-to-kedro-new)
+- [Specify tools using YAML configuration](#specify-tools-using-yaml-configuration)
 
 There is a [flowchart to illustrate the choices available](#flowchart-illustration) at the bottom of the page.
 
@@ -18,12 +18,15 @@ uvx kedro new
 This will start the new project creation workflow.
 
 !!! note
+
     Using `uvx` lets you run Kedro without installing it into your system or virtual environment. It downloads and runs Kedro in a clean temporary environment each time. If you prefer a standard installation (for example pip + virtual environment), see the [installation guide](../getting-started/install.md#alternative-methods).
 
 !!! note
+
     You can also add flags to `kedro new` to skip parts of the project creation workflow. This avoids the queries about how you want to customise the project. The flags are described below.
 
 ### Project name
+
 The first prompt asks you to input a project name.
 
 To skip this step and name the project directly, add it to `kedro new` as follows:
@@ -33,10 +36,10 @@ uvx kedro new --name=spaceflights
 ```
 
 ### Tools
+
 You are then asked to select which tools to include. Choose from the list using comma separated values `(1,2,4)`, ranges of values `(1-3,5-7)`, a combination of the two `(1,3-5,7)`, or the key words `all` or `none`. Skipping the prompt by entering no value will result in the default selection of `none`.
 
 [Further information about each of the tools is described below](#kedro-tools).
-
 
 ```
 Project Tools
@@ -90,6 +93,7 @@ A list of available tools can also be accessed by running `kedro new --help`
                       kedro new --tools=none
 ...
 ```
+
 ### Shortcut
 
 To skip this step and select tools directly, add the tools selection to `kedro new` as follows:
@@ -101,10 +105,11 @@ uvx kedro new --tools=<your tool selection>
 To specify your desired tools you must provide them by name as a comma separated list, for example `--tools=lint,test`. The following tools are available for selection: `lint`, `test`, `log`, `docs`, `data`, and `pyspark`.
 
 ### Example code
+
 In the final step you are asked whether you want to populate the project with an example spaceflights starter pipeline. If you select `yes`, the example code included depends upon your previous choice of tools, as follows:
 
-* [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark
-* [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools.
+- [Default spaceflights starter (`spaceflights-pandas`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): Added if you selected any combination of linting, testing, custom logging, documentation, and data structure, unless you also selected PySpark
+- [PySpark spaceflights starter (`spaceflights-pyspark`)](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): Added if you selected PySpark with any other tools.
 
 Each starter example is tailored to show the capabilities and integrations of the selected tools, offering a practical insight into how they can be utilised in your project.
 
@@ -146,9 +151,11 @@ uvx kedro new --config=<path/to/config.yml>
 ```
 
 !!! note
+
     Note: When using a configuration file to create a new project, you must provide values for the project name, repository name, and package names. Specifying your tools selection is optional, omitting them results in the default selection of `none`.
 
 !!! note
+
     When the `--config` flag is used together with `--name`, `--tools`, or `--example`, the values provided directly on the CLI will overwrite those specified in the configuration file.
 
 ## Kedro tools
@@ -166,6 +173,7 @@ uv pip install -r requirements.txt
 ```
 
 The linting tool will configure `ruff` with the following settings by default:
+
 ```toml
 #pyproject.toml
 
@@ -215,6 +223,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 ```
 
 To run your tests, use the following command:
+
 ```bash
 pytest path/to/your/project/root/tests
 ```

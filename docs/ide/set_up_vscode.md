@@ -11,9 +11,11 @@ At this stage, you should be able to see the `conda` environment that you have c
 ![](../meta/images/vscode_setup_interpreter.png)
 
 ## Kedro VS Code extension
+
 [Kedro VS Code extension](https://marketplace.visualstudio.com/items?itemName=kedro.Kedro) supports Kedro 0.19+. It helps you navigate your Kedro project by finding dataset definitions, locating references in your code, and more.
 
 !!! note
+
     The extension also works in [Cursor](https://cursor.com). Cursor is built on VS Code and supports VS Code extensions, so every feature on this page works there too. Install it from Cursor's Extensions panel, powered by the [Open VSX Registry](https://open-vsx.org/extension/kedro/Kedro).
 
 ![Kedro VS Code gif](https://github.com/kedro-org/vscode-kedro/blob/main/assets/lsp-go-to-definition.gif?raw=true)
@@ -27,7 +29,6 @@ To ensure your virtual environments appear in the Python interpreter list, open 
 ```
 
 If you create a `venv` or `virtualenv` in your project directory named `venv`, VS Code automatically loads it as the Python interpreter (much like PyCharm). This is the default unless you manually define a different interpreter as described above.
-
 
 ## Set up tasks
 
@@ -102,7 +103,6 @@ To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift +
 
 ![](../meta/images/vscode_run.png)
 
-
 ## Set a custom Kedro project path
 
 Starting with Kedro VS Code extension version 0.3.0, you can now specify a custom path to your Kedro project. This is useful when:
@@ -111,21 +111,20 @@ Starting with Kedro VS Code extension version 0.3.0, you can now specify a custo
 - You want to work with a Kedro project that is outside your current workspace
 - You have multiple Kedro projects and want to switch between them
 
-
 ### Set a custom path using the command palette
 
 1. Open the Command Palette by pressing `Cmd + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux)
-2. Type `Kedro: Set Project Path` and select it
-3. Enter the absolute path to your Kedro project (for example, `/Users/username/projects/my-kedro-project`)
+1. Type `Kedro: Set Project Path` and select it
+1. Enter the absolute path to your Kedro project (for example, `/Users/username/projects/my-kedro-project`)
 
 ![Setting Kedro project path through Command Palette](../meta/images/vscode_set_custom_path_using_command_palette.gif)
 
 ### Set a custom path using the VS Code settings UI
 
 1. Open VS Code settings by pressing `Cmd + ,` (macOS) or `Ctrl + ,` (Windows/Linux)
-2. Search for `kedro` in the settings search bar
-3. Find the `Kedro: Project Path` setting
-4. Enter the absolute path to your Kedro project in the field
+1. Search for `kedro` in the settings search bar
+1. Find the `Kedro: Project Path` setting
+1. Enter the absolute path to your Kedro project in the field
 
 ![Setting Kedro project path through Settings](../meta/images/vscode_set_custom_path_using_settings_ui.gif)
 
@@ -170,9 +169,8 @@ If you work with multiple Kedro projects, you can switch between them by updatin
 If the extension doesn't recognise your Kedro project after setting a custom path:
 
 1. Ensure the path points to a valid Kedro project (containing `pyproject.toml` with Kedro dependencies)
-2. Check that the path is an absolute path, not a relative one
-3. Reload VS Code if the changes don’t take effect.
-
+1. Check that the path is an absolute path, not a relative one
+1. Reload VS Code if the changes don’t take effect.
 
 ## Enable real-time catalog validation with Kedro LSP
 
@@ -189,8 +187,8 @@ With the latest **Kedro VS Code extension**, you can automatically check your `c
 VS Code’s **Problems** panel provides a convenient overview of all catalog issues:
 
 1. Go to **View > Problems** or press `Ctrl+Shift+M` (or `Cmd+Shift+M` on macOS).
-2. Expand any reported errors to see details about what’s wrong (for example, “Class not found.”).
-3. **Click** an error to jump directly to the problematic line in the catalog file.
+1. Expand any reported errors to see details about what’s wrong (for example, “Class not found.”).
+1. **Click** an error to jump directly to the problematic line in the catalog file.
 
 ![](../meta/images/vscode_problems_panel.png)
 
@@ -201,40 +199,42 @@ This simplifies fixing dataset errors caused by things such as typos in your dat
 To visualise your Kedro project using Kedro-Viz in Visual Studio Code, follow these steps:
 
 1. **Open the Command Palette**:
-Press `Cmd` + `Shift` + `P` (on macOS) or `Ctrl` + `Shift` + `P` (on Windows/Linux).
+    Press `Cmd` + `Shift` + `P` (on macOS) or `Ctrl` + `Shift` + `P` (on Windows/Linux).
 
-2. **Run Kedro-Viz**:
-Type `kedro: Run Kedro Viz` and select the command.
-This will launch Kedro-Viz and display your pipeline visually within the extension.
+1. **Run Kedro-Viz**:
+    Type `kedro: Run Kedro Viz` and select the command.
+    This will launch Kedro-Viz and display your pipeline visually within the extension.
 
 !!! note
+
     To update the Kedro-Viz flowchart after making changes to your Kedro project, press `Cmd` + `Shift` + `P` to open the VS Code command palette and run `kedro: restart server`.
 
 - **Navigate to Node Functions**:
-Click on a node in the Kedro-Viz flowchart, and it will automatically navigate to the corresponding node function in your code.
+    Click on a node in the Kedro-Viz flowchart, and it will automatically navigate to the corresponding node function in your code.
 
 ![navigation to node function](../meta/images/viz-vsc-nav-function-node.gif)
 
 - **Navigate to DataCatalog**:
-Clicking on a data node in the flowchart will open the corresponding dataset in the Data Catalog.
+    Clicking on a data node in the flowchart will open the corresponding dataset in the Data Catalog.
 
 ![navigation to dataset](../meta/images/viz-vsc-nav-data-node.gif)
 
 - **Auto reload**: The extension can automatically refresh Kedro-Viz when you make changes to configuration files, pipeline files, or catalog files. To enable:
 
     1. Open Settings: `Cmd` + `,` (macOS) or `Ctrl` + `,` (Windows/Linux)
-    2. Search for "Kedro Auto Reload"
-    3. Check the box for `Kedro: Auto Reload Kedro Viz`
+    1. Search for "Kedro Auto Reload"
+    1. Check the box for `Kedro: Auto Reload Kedro Viz`
 
 ![Auto reload Kedro-Viz](../meta/images/vscode_autoreload_viz.gif)
 
 !!! note
+
     Since auto reload restarts the LSP server, the current state in Kedro-Viz (like expanded pipelines or zoom level) will be reset.
 
 - **Theme toggle**: Switch between light and dark themes for Kedro-Viz. To toggle:
 
     1. Open Command Palette: `Cmd` + `Shift` + `P` (macOS) or `Ctrl` + `Shift` + `P` (Windows/Linux)
-    2. Type `Kedro: Toggle Kedro Viz Theme` and select it
+    1. Type `Kedro: Toggle Kedro Viz Theme` and select it
 
 ![Toggle kedro-viz theme](../meta/images/vscode_toggle_viz_theme.gif)
 
@@ -256,6 +256,7 @@ Click on the **Run and Debug** icon on the left activity bar (press `Cmd + Shift
 ![](../meta/images/vscode_add_configuration.png)
 
 !!! note
+
     If you encounter the following error: `Cannot read property 'openConfigFile' of undefined`, you can manually create a `launch.json` file in the `.vscode` directory and paste the configuration from below.
 
 Edit the `launch.json` that opens in the editor with:
@@ -356,9 +357,8 @@ scp -r <project_root> <your_username>@<remote_server>:projects/
 }
 ```
 
-
-
 !!! note
+
     [There is also a third-party plugin for VS Code that supports remote workspaces.](https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace)
 
 Start executing the pipeline on your remote computer:

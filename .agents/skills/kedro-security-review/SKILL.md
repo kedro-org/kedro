@@ -13,23 +13,24 @@ description: >-
 Before scanning, decide three things:
 
 1. **Target source** — full codebase or PR (see `## Mode selection`)
-2. **Scan scope** — Kedro framework code or a Kedro project (see `## Scan scope`)
-3. **Delivery** — chat (default) or post to GitHub (see `## Delivery modes`)
+1. **Scan scope** — Kedro framework code or a Kedro project (see `## Scan scope`)
+1. **Delivery** — chat (default) or post to GitHub (see `## Delivery modes`)
 
 Then run the numbered Workflow below:
 
 1. detect which Semgrep binary is available (see Defaults)
-2. create a temporary working directory with `mktemp -d`
-3. determine what to scan — full repo or changed files from the PR
-4. run Semgrep in parallel across all rulesets
-5. read and deduplicate findings
-6. triage and classify findings against the Kedro security model
-7. run manual review checks from `reference.md`
-8. emit one final report
+1. create a temporary working directory with `mktemp -d`
+1. determine what to scan — full repo or changed files from the PR
+1. run Semgrep in parallel across all rulesets
+1. read and deduplicate findings
+1. triage and classify findings against the Kedro security model
+1. run manual review checks from `reference.md`
+1. emit one final report
 
 ## References
 
 Read these before triaging findings:
+
 - [../../../docs/about/security_model.md](../../../docs/about/security_model.md)
 - [reference.md](reference.md)
 
@@ -49,22 +50,22 @@ If the user already stated the scope, do not ask again.
 ## Defaults
 
 - Runtime:
-  - `semgrep`
-  - otherwise `uvx --from semgrep semgrep`
-  - otherwise `uv tool run --from semgrep semgrep`
+    - `semgrep`
+    - otherwise `uvx --from semgrep semgrep`
+    - otherwise `uv tool run --from semgrep semgrep`
 - Rulesets:
-  - `p/security-audit`
-  - `p/secrets`
-  - `p/python`
-  - `.agents/skills/kedro-security-review/rules/kedro-security-patterns.yml`
+    - `p/security-audit`
+    - `p/secrets`
+    - `p/python`
+    - `.agents/skills/kedro-security-review/rules/kedro-security-patterns.yml`
 - Path exclusions (every Semgrep invocation):
-  - `--exclude tests/`
-  - `--exclude docs/`
-  - `--exclude features/`
-  - `--exclude .agents/`
+    - `--exclude tests/`
+    - `--exclude docs/`
+    - `--exclude features/`
+    - `--exclude .agents/`
 - Temporary working directory:
-  - create with `mktemp -d`
-  - delete at the end unless the user explicitly asks to keep artifacts
+    - create with `mktemp -d`
+    - delete at the end unless the user explicitly asks to keep artifacts
 
 Always use `--metrics=off`.
 
@@ -95,6 +96,7 @@ and there is no PR to attach it to in full-codebase mode. If a user asks to
 post a full-codebase scan, fall back to chat mode and tell the user why.
 
 In post mode:
+
 - still do all scanning and triage locally first
 - construct one final GitHub review payload
 - post it after the review is complete
@@ -109,6 +111,7 @@ Use when the user asks to scan the repo, codebase, project, or current branch
 without narrowing to a PR.
 
 Target:
+
 - the current repo root
 
 ### PR mode
@@ -117,6 +120,7 @@ Use when the user asks to scan a PR or when the request names a PR number or
 URL.
 
 Resolve the PR from:
+
 - the explicit PR number or URL if provided
 - otherwise the current branch via `gh pr view`
 
@@ -287,13 +291,15 @@ ruleset output, count it once.
 ### 6. Triage against the Kedro security model
 
 For every unique finding:
+
 - open the flagged file and inspect the surrounding code
 - classify it using [reference.md](reference.md)
 - tie the reasoning back to the code-vs-data boundary in
-  [../../../docs/about/security_model.md](../../../docs/about/security_model.md)
+    [../../../docs/about/security_model.md](../../../docs/about/security_model.md)
 - include the **Suggested next step** from the matching bucket in `reference.md`
 
 Use these buckets:
+
 - `candidate_kedro_vulnerability`
 - `project_developer_responsibility`
 - `deployment_or_environment_issue`
@@ -306,9 +312,10 @@ After triaging Semgrep output, run the **Manual review checks** from
 `reference.md` against the scan target.
 
 For each check:
+
 - Search the scanned files for the pattern described
 - If found and unmitigated, add it to the findings list with classification
-  `candidate_kedro_vulnerability` or `needs_manual_review`
+    `candidate_kedro_vulnerability` or `needs_manual_review`
 - If not found, the check was clean — do not itemise it
 
 When all checks are clean, report them as a single line in the final report
@@ -339,6 +346,7 @@ Keep the report short and decisive. The classification summary already carries
 the counts — do not repeat non-actionable findings as prose.
 
 Always include:
+
 - mode used: full codebase or PR
 - scan scope: framework code or Kedro project
 - target scanned
@@ -347,13 +355,15 @@ Always include:
 - highest Semgrep severities present
 
 **Only itemise actionable findings** in the Findings section:
+
 - Always: `candidate_kedro_vulnerability`, `needs_manual_review`
 - When scope is **Kedro project**: also `project_developer_responsibility`
-  (this is the primary actionable bucket for the project owner — include file,
-  line, rule id, and suggested fix for each finding)
+    (this is the primary actionable bucket for the project owner — include file,
+    line, rule id, and suggested fix for each finding)
 
 **Do not itemise** findings in these buckets — they are reflected in the
 classification summary counts and that is sufficient:
+
 - `false_positive_or_informational`
 - `deployment_or_environment_issue`
 - `project_developer_responsibility` when scope is **Kedro framework**
@@ -363,6 +373,7 @@ that names the non-actionable counts (e.g. "None actionable. 2 false positives
 on pre-existing lines.").
 
 For each actionable finding, include:
+
 - file
 - line
 - rule id
@@ -434,6 +445,7 @@ Write one GitHub review payload:
 ```
 
 Use inline comments only for actionable findings tied to changed PR lines:
+
 - Always: `candidate_kedro_vulnerability`, `needs_manual_review`
 - When scope is **Kedro project**: also `project_developer_responsibility`
 

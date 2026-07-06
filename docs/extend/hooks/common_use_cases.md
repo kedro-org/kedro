@@ -32,7 +32,6 @@ class ProjectHooks:
 
 Or add it to a group of nodes based on their tags:
 
-
 ```python
 # src/<package_name>/hooks.py
 
@@ -91,7 +90,9 @@ class ProjectHooks:
         if "flaky" in node.tags:
             node.func = retry(node.func)
 ```
+
 ## Use Hooks to customise the dataset load and save methods
+
 We recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` Hooks to customise the dataset `load` and `save` methods where appropriate.
 
 For example, you can add logging about the dataset load runtime as follows:
@@ -133,6 +134,7 @@ class LoggingHook:
 ```
 
 ## Use Hooks to load external credentials
+
 We recommend using the `after_context_created` Hook to add credentials to the session's config loader instance from any external credentials manager. In this example we show how to load credentials from [Azure KeyVault](https://learn.microsoft.com/en-us/azure/key-vault/general/).
 
 Here is the example KeyVault instance, note the KeyVault and secret names:
@@ -198,6 +200,7 @@ HOOKS = (AzureSecretsHook(),)
 ```
 
 !!! note
+
     `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorise access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
 
 ## Use stateful Hooks to share context between Hook methods
@@ -230,9 +233,11 @@ class RuntimeConfigHook:
 This pattern is useful when migrating older projects that passed `context` through custom integrations, or when coordinating configuration and runtime behaviour across multiple Hook points.
 
 !!! note
+
     Keep stored data small and treat it as `read-only` to avoid surprising side effects across hooks.
 
 ## Use Hooks to read `metadata` from `DataCatalog`
+
 Use the `after_catalog_created` Hook to access `metadata` to extend Kedro.
 
 ```python
@@ -247,6 +252,7 @@ class MetadataHook:
 ```
 
 ## Use Hooks to debug your pipeline
+
 You can use Hooks to launch a [post-mortem debugging session](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Kedro Hooks](./introduction.md) when an error occurs during a pipeline run. [ipdb](https://pypi.org/project/ipdb/) can be integrated in the same manner.
 
 ### Debugging a node

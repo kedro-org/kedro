@@ -1,9 +1,11 @@
 # Advanced configuration
+
 The documentation on [configuration](./configuration_basics.md) describes how to cover most common requirements of standard Kedro project configuration:
 
 By default, Kedro is set up to use the [kedro.config.OmegaConfigLoader][] class.
 
 ## Advanced configuration for Kedro projects
+
 This page also contains a set of guidance for advanced configuration requirements of standard Kedro projects:
 
 - [How to use a custom config loader](#how-to-use-a-custom-configuration-loader)
@@ -17,8 +19,8 @@ This page also contains a set of guidance for advanced configuration requirement
 - [How to load credentials through environment variables with `OmegaConfigLoader`](#how-to-load-credentials-through-environment-variables)
 - [How to change the merge strategy used by `OmegaConfigLoader`](#how-to-change-the-merge-strategy-used-by-omegaconfigloader)
 
-
 ### How to use a custom configuration loader
+
 You can build a custom configuration loader by extending the [kedro.config.AbstractConfigLoader][] class:
 
 ```python
@@ -38,18 +40,22 @@ class CustomConfigLoader(AbstractConfigLoader):
 
         # Custom implementation
 ```
+
 To use this custom configuration loader, set it as the project configuration loader in `src/<package_name>/settings.py` as follows:
+
 ```python
 from package_name.custom_configloader import CustomConfigLoader
 
 CONFIG_LOADER_CLASS = CustomConfigLoader
 ```
+
 Custom configuration loaders that do not subclass `OmegaConfigLoader`
 will not include OmegaConf-specific functionalities such as interpolation,
 globals, runtime parameters or custom resolvers.
 To access these features, your loader must subclass `OmegaConfigLoader.`
 
 ### How to change which configuration files are loaded
+
 If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md).
 For example, if your `parameters` files are using a `params` naming convention instead of `parameters` (for example, `params.yml`) you need to update `CONFIG_LOADER_ARGS` as follows:
 
@@ -64,6 +70,7 @@ CONFIG_LOADER_ARGS = {
 By changing this setting, the default behaviour for loading parameters will be replaced, while the other configuration patterns will remain in their default state.
 
 ### How to ensure non default configuration files get loaded
+
 You can add configuration patterns to match files other than `parameters`, `credentials`, and `catalog` by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../tutorials/settings.md).
 For example, if you want to load Spark configuration files you need to update `CONFIG_LOADER_ARGS` as follows:
 
@@ -76,6 +83,7 @@ CONFIG_LOADER_ARGS = {
 ```
 
 ### How to bypass the configuration loading rules
+
 You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, and credentials) as well as additional configuration.
 
 For example, you can [use hooks to load external credentials](../extend/hooks/common_use_cases.md#use-hooks-to-load-external-credentials).
@@ -97,7 +105,9 @@ conf_loader["catalog"] = {"catalog_config": "something_new"}
 ```
 
 ### How to do templating with the `OmegaConfigLoader`
+
 #### Parameters
+
 Templating, or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation) as `OmegaConf` calls it, works out of the box for parameters. The template values must be within the parameter files, or the name of the file that contains them must follow the same config pattern specified for parameters.
 By default, the config pattern for parameters is: `["parameters*", "parameters*/**", "**/parameters*"]`.
 Suppose you have one parameters file called `parameters.yml` containing parameters with `omegaconf` placeholders like this:
@@ -109,6 +119,7 @@ model_options:
 ```
 
 and a file containing the template values called `parameters_variables.yml`. The file name can be anything as long as it matches the config pattern for parameters:
+
 ```yaml
 data:
   size: 0.2
@@ -117,6 +128,7 @@ data:
 Since both of the file names (`parameters.yml` and `parameters_variables.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders as expected.
 
 #### Catalog
+
 From Kedro `0.18.10` templating also works for catalog files. To enable it, ensure that the template values are within the catalog files. Or, the name of the file that contains them must follow the same config pattern specified for catalogs.
 By default, the config pattern for catalogs is: `["catalog*", "catalog*/**", "**/catalog*"]`.
 
@@ -131,6 +143,7 @@ companies:
 ```
 
 and a file containing the template values called `catalog_variables.yml`:
+
 ```yaml
 _pandas:
   type: pandas.CSVDataset
@@ -139,10 +152,13 @@ _pandas:
 Since both of the file names (`catalog.yml` and `catalog_variables.yml`) match the config pattern for catalogs, the `OmegaConfigLoader` will load the files and resolve the placeholders as expected.
 
 #### Other configuration files
+
 It's also possible to use variable interpolation in configuration files other than parameters and catalog, such as custom Spark or MLflow configuration. This works in the same way as variable interpolation in parameter files. You can still use the underscore for the templated values if you want, but it's not mandatory like it is for catalog files.
 
 ### How to load a data catalog with templating in code?
+
 You can use the `OmegaConfigLoader` to directly load a data catalog that contains templating in code. Internally the `OmegaConfigLoader` resolves any templates, so no further steps are required to load catalog entries properly.
+
 ```yaml
 # Example catalog with templating
 companies:
@@ -166,6 +182,7 @@ conf_catalog = conf_loader["catalog"]
 ```
 
 ### How to use global variables with the `OmegaConfigLoader`
+
 From Kedro `0.18.13`, you can use variable interpolation in your configurations using "globals" with `OmegaConfigLoader`.
 The benefit of using globals over regular variable interpolation is that the global variables are shared across different configuration types, such as catalog and parameters.
 By default, these global variables are assumed to be in files called `globals.yml` in any of your environments. If you want to configure the naming patterns for the files that contain your global variables,
@@ -173,26 +190,34 @@ you can do so [by overwriting the `globals` key in `config_patterns`](#how-to-ch
 to directly set the global variables in `OmegaConfigLoader`.
 
 Suppose you have global variables located in the file `conf/base/globals.yml`:
+
 ```yaml
 my_global_value: 45
 dataset_type:
   csv: pandas.CSVDataset
 ```
+
 You can access these global variables in your catalog or parameters config files with a `globals` resolver like this:
 `conf/base/parameters.yml`:
+
 ```yaml
 my_param : "${globals:my_global_value}"
 ```
+
 `conf/base/catalog.yml`:
+
 ```yaml
 companies:
   filepath: data/01_raw/companies.csv
   type: "${globals:dataset_type.csv}"
 ```
+
 You can also provide a default value to be used in case the global variable does not exist:
+
 ```yaml
 my_param: "${globals: nonexistent_global, 23}"
 ```
+
 If there are duplicate keys in the globals files in your base and runtime environments, the values in the runtime environment
 overwrite the values in your base environment.
 
@@ -204,23 +229,30 @@ are added to the `KedroContext` and merged with parameters from the configuratio
 This resolver can be used across different configuration types, such as parameters, catalog, and more, except for "globals".
 
 Consider this `parameters.yml` file:
+
 ```yaml
 model_options:
   random_state: "${runtime_params:random}"
 ```
+
 This will allow you to pass a runtime parameter named `random` through the CLI to specify the value of `model_options.random_state` in your project's parameters:
+
 ```bash
 kedro run --params random=3
 ```
+
 You can also specify a default value to be used in case the runtime parameter is not specified with the `kedro run` command. Consider this catalog entry:
+
 ```yaml
 companies:
   type: pandas.CSVDataset
   filepath: "${runtime_params:folder, 'data/01_raw'}/companies.csv"
 ```
+
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
 
 !!! note
+
     When manually instantiating `OmegaConfigLoader` in code, runtime parameters passed through the CLI `--params` option will not be available to the resolver. This occurs because the manually created config loader instance doesn't have access to the runtime parameters provided through the CLI.
     If you need to access runtime parameters in code that manually instantiates `OmegaConfigLoader`, you should instead use the Kedro context to access parameters.
 
@@ -231,6 +263,7 @@ As mentioned above, `runtime_params` are not designed to override `globals` conf
 You can still use `globals` and `runtime_params` by specifying `globals` as a default value to be used in case the runtime parameter is not passed.
 
 Consider this `parameters.yml`:
+
 ```yaml
 model_options:
   random_state: "${runtime_params:random, ${globals:my_global_value}}"
@@ -243,6 +276,7 @@ my_global_value: 4
 ```
 
 This will allow you to pass a runtime parameter named `random` through the CLI to specify the value of `model_options.random_state` in your project's parameters:
+
 ```bash
 kedro run --params random=3
 ```
@@ -250,6 +284,7 @@ kedro run --params random=3
 If the `random` parameter is not passed through the CLI `--params` option with `kedro run`, then `my_global_value` from `globals.yml` is used for the `model_options.random_state`.
 
 ### How to use resolvers in the `OmegaConfigLoader`
+
 Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s
 resolvers functionality](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#resolvers). You use resolvers to define custom
 logic to calculate values of parameters or catalog entries, or inject these values from elsewhere. To use this feature with Kedro, pass a
@@ -273,8 +308,10 @@ CONFIG_LOADER_ARGS = {
     }
 }
 ```
+
 These custom resolvers are then registered using `OmegaConf.register_new_resolver()` internally and can be used in any of the
 configuration files in your project. For example, you can use the `add` or the `today` resolver defined above in your `parameters.yml` like this:
+
 ```yaml
 model_options:
   test_size: "${add:1,2,3}"
@@ -282,6 +319,7 @@ model_options:
 
 date: "${today:}"
 ```
+
 The values of these parameters will be computed at access time and will be passed on to your nodes.
 Resolvers can also be used in your `catalog.yml`. In the example below, we use the `polars` resolver defined above to pass non-primitive
 types to the catalog entry.
@@ -296,11 +334,13 @@ my_polars_dataset:
       group_identifier: "${polars:Utf8}"
     try_parse_dates: true
 ```
+
 `OmegaConf` also comes with some [built-in resolvers](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#built-in-resolvers)
 that you can use with the `OmegaConfigLoader` in Kedro. All built-in resolvers except for [`oc.env`](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-env)
 are enabled by default. `oc.env` is enabled solely for loading credentials. You can also turn this on for all configurations through your project's `src/<package_name>/settings.py` in a similar way:
 
 !!! note
+
     This is an advanced feature and should be used with caution. We do not recommend using environment variables for configurations other than credentials.
 
 ```python
@@ -312,7 +352,9 @@ CONFIG_LOADER_ARGS = {
     }
 }
 ```
+
 ### How to load credentials through environment variables
+
 The [kedro.config.OmegaConfigLoader][] enables you to load credentials from environment variables. To achieve this you have to use the [kedro.config.OmegaConfigLoader][] and the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
 You can use the `oc.env` resolver to access credentials from environment variables in your `credentials.yml`:
 
@@ -324,9 +366,11 @@ dev_s3:
 ```
 
 !!! note
+
     You can use this resolver solely in `credentials.yml`, not in catalog or parameter files. This restriction discourages using environment variables for anything other than credentials.
 
 ### How to change the merge strategy used by `OmegaConfigLoader`
+
 By default, `OmegaConfigLoader` merges configuration [in different environments](configuration_basics.md#configuration-environments) as well as runtime parameters in a destructive way. This means that whatever configuration resides in your overriding environment (`local` by default) takes precedence when the same top-level key is present in the base and overriding environment. Any configuration for that key **besides that given in the overriding environment** is discarded.
 The same behaviour applies to runtime parameters overriding any configuration in the `base` environment.
 You can change the merge strategy for each configuration type in your project's `src/<package_name>/settings.py`. The accepted merging strategies are `soft` and `destructive`.
@@ -348,13 +392,15 @@ CONFIG_LOADER_ARGS = {
 If no merge strategy is defined, the default destructive strategy will be applied. **Note**: this merge strategy setting applies when configuration files are located in **different** environments.
 When files are part of the same environment, they are always merged in a soft way. An error is thrown when files in the same environment contain the same top-level keys.
 
-
 ## Advanced configuration without a full Kedro project
+
 In some cases, you may want to use the `OmegaConfigLoader` without a Kedro project. By default, a Kedro project has a `base` and `local` environment.
 When you use the `OmegaConfigLoader` directly, it assumes *no* environment. You may find it useful to [add Kedro to your existing notebooks](../integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md).
 
 ### Read configuration
+
 The config loader can work without a Kedro project structure.
+
 ```bash
 tree .
 .
@@ -387,6 +433,7 @@ If you run it from the same directory where `parameters.yml` placed it gives the
 For the full list of features, see [Configuration basics](./configuration_basics.md) and [Advanced configuration](./advanced_configuration.md).
 
 ### How to use custom resolvers with `OmegaConfigLoader`
+
 You can register custom resolvers to use non-primitive types for parameters.
 
 Consider the following `parameters.yml` file an example of Python script for registering a custom resolver:

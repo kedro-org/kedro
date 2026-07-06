@@ -1,7 +1,7 @@
 # Dagster
 
-
 ## Why would you use Dagster?
+
 Dagster is a modern Python data orchestration platform. For Kedro users, Dagster provides a powerful bridge between local development and production-grade data and machine learning pipelines. Dagster complements Kedro’s effective modular pipeline authoring, configuration management, and data catalog by enabling teams to build, schedule, and track workflows with enhanced observability and scalability. Key benefits of using Dagster with Kedro include:
 
 - **Asset-first philosophy**: Dagster adopts an asset-first approach, treating datasets and models as first-class citizens. This aligns naturally with Kedro’s data catalog and node-based pipeline architecture. By mapping Kedro nodes and datasets to Dagster assets, you gain a clearer view of data lineage, dependencies, and the flow of transformations across your project.
@@ -10,4 +10,5 @@ Dagster is a modern Python data orchestration platform. For Kedro users, Dagster
 - **Integration-friendly**: Dagster integrates readily with modern data stack tools ranging from dbt and Spark and to cloud storage and machine learning frameworks such as MLflow. This makes it a versatile choice for Kedro users looking to build end-to-end data workflows that connect various components of their data ecosystem.
 
 ## The `kedro-dagster` plugin
+
 The `kedro-dagster` plugin by [stateful-y](https://stateful-y.io) enables you to translate your Kedro project to Dagster. Consult the [GitHub repository for `kedro-dagster`](https://github.com/stateful-y/kedro-dagster) for further details, take a look at the [documentation](https://kedro-dagster.readthedocs.io/), or explore the GitHub repository for the associated example repository [`kedro-dagster-example`](https://github.com/stateful-y/kedro-dagster).

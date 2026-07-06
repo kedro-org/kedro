@@ -6,11 +6,12 @@ This page also explains how to use line magic to display a Kedro-Viz visualisati
 
 ## Example project
 
-The example adds a notebook to experiment with the  [`spaceflight-pandas-viz` starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz). As an alternative, you can follow the example using a different starter or add a notebook to your own project.
+The example adds a notebook to experiment with the [`spaceflight-pandas-viz` starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas-viz). As an alternative, you can follow the example using a different starter or add a notebook to your own project.
 
 We will assume the example project is called `spaceflights`, but you can call it whatever you choose.
 
 To create a project, you can run this command:
+
 ```bash
 kedro new -n spaceflights --tools=viz --example=yes
 ```
@@ -45,15 +46,16 @@ The `kedro jupyter notebook` command launches a notebook with a customised kerne
 
 <!-- vale off -->
 
-* `context` (type [kedro.framework.context.KedroContext][]): Kedro project context that provides access to Kedro's library components
-* `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type [kedro.framework.session.session.KedroSession][]): [Kedro session](../extend/session.md) that orchestrates a pipeline run
+- `context` (type [kedro.framework.context.KedroContext][]): Kedro project context that provides access to Kedro's library components
+- `pipelines` (type `dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../build/run_a_pipeline.md#run-a-pipeline-by-name)
+- `session` (type [kedro.framework.session.session.KedroSession][]): [Kedro session](../extend/session.md) that orchestrates a pipeline run
 
 <!-- vale on -->
 
 It also runs `%load_ext kedro.ipython` automatically when you launch the notebook.
 
 !!! note
+
     If the Kedro variables are not available within your Jupyter notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook` or run `%load_ext kedro.ipython` in a notebook cell.
 
 ## Loading the project with the `kedro.ipython` extension
@@ -71,6 +73,7 @@ This is so that Kedro can load the `catalog`, `context`, `pipelines` and `sessio
 ```ipython
 In [2]: %reload_kedro <project_root>
 ```
+
 The Kedro IPython extension remembers the project path so that future calls to `%reload_kedro` do not need to specify it:
 
 ```ipython
@@ -80,6 +83,7 @@ In [3]: %reload_kedro
 ```
 
 ## Exploring the Kedro project in a notebook
+
 Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](../api/index.md) or use the Python `dir` function, for example `dir(catalog)`.
 
 For example, add the following to a cell in your notebook to run `catalog.list`:
@@ -113,7 +117,9 @@ When you run the cell:
 ```
 
 #### Search datasets with regex
+
 If you do not remember the exact name of a dataset, you can provide a regular expression to search datasets.
+
 ```ipython
 catalog.list("pre*")
 ```
@@ -123,6 +129,7 @@ When you run the cell:
 ```ipython
 ['preprocessed_companies', 'preprocessed_shuttles']
 ```
+
 Next try the following for `catalog.load`:
 
 ```ipython
@@ -148,6 +155,7 @@ Now try the following:
 ```ipython
 catalog.load("parameters")
 ```
+
 You should see this:
 
 ```ipython
@@ -172,6 +180,7 @@ INFO     Loading data from 'parameters' (MemoryDataset)...
 ```
 
 !!! note
+
     If you enable [versioning](../catalog-data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, for example, `catalog.load("preprocessed_shuttles", version="2024-06-05T15.08.09.255Z")`.
 
 ### `context`
@@ -181,6 +190,7 @@ INFO     Loading data from 'parameters' (MemoryDataset)...
 ```ipython
 context.project_path
 ```
+
 You should see output like this, according to your username and path:
 
 ```ipython
@@ -212,6 +222,7 @@ You can use this to explore your pipelines and the nodes they contain:
 ```ipython
 pipelines["__default__"].all_outputs()
 ```
+
 Should give the output:
 
 ```ipython
@@ -244,9 +255,9 @@ You can also specify the following optional arguments for `session.run`:
 
 | Argument name   | Accepted types   | Description                                                                                                                                          |
 | --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tags`          | `Iterable[str]`  | Construct the pipeline using nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags  |
-| `runner`        | `AbstractRunner` | An instance of Kedro [kedro.runner.AbstractRunner][]. Can be an instance of a [kedro.runner.ParallelRunner][]          |
-| `node_names`    | `Iterable[str]`  | Run nodes with specified names                                                                                                                  |
+| `tags`          | `Iterable[str]`  | Construct the pipeline using nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags       |
+| `runner`        | `AbstractRunner` | An instance of Kedro [kedro.runner.AbstractRunner][]. Can be an instance of a [kedro.runner.ParallelRunner][]                                        |
+| `node_names`    | `Iterable[str]`  | Run nodes with specified names                                                                                                                       |
 | `from_nodes`    | `Iterable[str]`  | A list of node names which should be used as a starting point                                                                                        |
 | `to_nodes`      | `Iterable[str]`  | A list of node names which should be used as an end point                                                                                            |
 | `from_inputs`   | `Iterable[str]`  | A list of dataset names which should be used as a starting point                                                                                     |
@@ -277,21 +288,25 @@ For more details, run `%reload_kedro?`.
 ### `%load_node` line magic
 
 !!! note
+
     This is still an experimental feature and is available for Jupyter Notebook (>7.0), Jupyter Lab, IPython, and VS Code Notebook. If you encounter unexpected behaviour or would like to suggest feature enhancements, add it under [this GitHub issue](https://github.com/kedro-org/kedro/issues/3580).
 
 When using this feature in Jupyter Notebook you will need to have the following requirements and minimum versions installed:
+
 ```yaml
 ipylab>=1.0.0
 notebook>=7.0.0
 ```
 
 You can load the contents of a node in your project into a series of cells using the `%load_node` line magic. To use `%load_node`, the node you want to load needs to fulfil two requirements:
+
 - The node needs to have a name
 - The node's inputs need to be persisted
 
 The [section about creating nodes with names](../build/nodes.md#how-to-create-a-node) explains how to ensure your node has a name. By default, Kedro saves data in memory. To persist the data, you need to [declare the dataset in the Data Catalog](../tutorials/create_a_pipeline.md#preprocessed-data-registration).
 
 !!! note
+
     The node name needs to be unique within the pipeline. In the absence of a user-defined name, Kedro generates one using a combination of the function name, inputs, and outputs.
 
 The line magic will load your node's inputs, imports, and body:
@@ -301,20 +316,21 @@ The line magic will load your node's inputs, imports, and body:
 ```
 
 <!-- vale off -->
+
 ??? example "Click to see an example."
+
     ![jupyter_ipython_load_node](../meta/images/jupyter_ipython_load_node.gif)
-
-
 
 To be able to access your node's inputs, make sure they are explicitly defined in your project's catalog.
 
 You can then run the generated cells to recreate how the node would run in your pipeline. You can use this to explore your node's inputs, behaviour, and outputs in isolation, or for [debugging](#debugging-a-kedro-project-within-a-notebook).
-<!-- vale on -->
 
+<!-- vale on -->
 
 ### `%run_viz` line magic
 
 !!! note
+
     If you have not yet installed [Kedro-Viz](https://github.com/kedro-org/kedro-viz) for the project, run `pip install kedro-viz` in your terminal from within the project directory.
 
 You can display an interactive visualisation of your pipeline directly in your notebook using the `%run_viz` line magic from within a cell:
@@ -328,6 +344,7 @@ You can display an interactive visualisation of your pipeline directly in your n
 ## Debugging a Kedro project within a notebook
 
 <!-- vale off -->
+
 You can use the built-in [`%debug` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-debug) to launch an interactive debugger in your Jupyter notebook. Declare it before a single-line statement to step through the execution in debug mode. You can use the argument `--breakpoint` or `-b` to provide a breakpoint. You can also run the command with no arguments after an error occurs to load the stack trace and begin debugging.
 
 The following sequence occurs when `%debug` runs after an error occurs:
@@ -337,63 +354,70 @@ The following sequence occurs when `%debug` runs after an error occurs:
 - An interactive shell where the user can navigate through the stack trace opens.
 
 You can then inspect the value of expressions and arguments, or add breakpoints to the code.
+
 <!-- vale on -->
 
 Here is example debugging workflow after discovering a node in your pipeline is failing:
+
 1. Inspect the logs to find the name of the failing node. We can see below the problematic node is `split_data_node`.
 
-<!-- vale off -->
-??? example "Click to the pipeline failure logs"
-    ![pipeline_error_logs](../meta/images/pipeline_error_logs.png)
+    <!-- vale off -->
 
+    ??? example "Click to the pipeline failure logs"
 
-2. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#kedro-line-magics).
-3. Run the populated cells to examine the node's behaviour in isolation.
-4. If the node fails in error, use `%debug` to launch an interactive debugging session in your notebook.
+        ![pipeline_error_logs](../meta/images/pipeline_error_logs.png)
+
+1. In your notebook, run `%load_node <name-of-failing-node>` to load the contents of the problematic node with the [`%load_node` line magic](#kedro-line-magics).
+
+1. Run the populated cells to examine the node's behaviour in isolation.
+
+1. If the node fails in error, use `%debug` to launch an interactive debugging session in your notebook.
 
 ??? example "Click to see this workflow in action."
+
     ![jupyter_ipython_debug_command](../meta/images/jupyter_ipython_debug_command.gif)
 
-
 !!! note
+
     The `%load_node` line magic is available for Jupyter Notebook (>7.0) and Jupyter Lab. If you are working within a different interactive environment, manually copy over the contents from your project files instead of using `%load_node` to automatically populate your node's contents, and continue from step 2.
 
----
+______________________________________________________________________
 
 You can also set up the debugger to run automatically when an exception occurs by using the [`%pdb` line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-pdb). This automatic behaviour can be enabled with `%pdb 1` or `%pdb on` before executing a program, and disabled with `%pdb 0` or `%pdb off`.
 
 ??? example "Click to see an example."
+
     ![jupyter_ipython_pdb_command](../meta/images/jupyter_ipython_pdb_command.gif)
+
 <!-- vale on -->
 
-
----
+______________________________________________________________________
 
 Some examples of the possible commands that can be used to interact with the ipdb shell are as follows:
 
-| Command           | Description                                           |
-| ----------------- | ----------------------------------------------------- |
-| `list`            | Show the current location in the file                 |
-| `h(elp)`          | Show a list of commands, or find help on a specific command |
-| `q(uit)`          | Quit the debugger and the program                     |
-| `c(ontinue)`      | Quit the debugger, continue in the program             |
-| `n(ext)`          | Go to the next step of the program                     |
-| `<enter>`         | Repeat the previous command                            |
-| `p(rint)`         | Print variables                                       |
-| `s(tep)`          | Step into a subroutine                                |
-| `r(eturn)`        | Return out of a subroutine                            |
-| `b(reak)`         | Insert a break point                                   |
-| `a(rgs)`          | Print the argument list of the current function        |
+| Command      | Description                                                 |
+| ------------ | ----------------------------------------------------------- |
+| `list`       | Show the current location in the file                       |
+| `h(elp)`     | Show a list of commands, or find help on a specific command |
+| `q(uit)`     | Quit the debugger and the program                           |
+| `c(ontinue)` | Quit the debugger, continue in the program                  |
+| `n(ext)`     | Go to the next step of the program                          |
+| `<enter>`    | Repeat the previous command                                 |
+| `p(rint)`    | Print variables                                             |
+| `s(tep)`     | Step into a subroutine                                      |
+| `r(eturn)`   | Return out of a subroutine                                  |
+| `b(reak)`    | Insert a break point                                        |
+| `a(rgs)`     | Print the argument list of the current function             |
 
 For more information, use the `help` command in the debugger, or take at the [ipdb repository](https://github.com/gotcha/ipdb) for guidance.
 
 ## Useful to know (for advanced users)
+
 Each Kedro project has its own Jupyter kernel so you can switch between Kedro projects from a single Jupyter instance by selecting the appropriate kernel.
 
 To ensure that a Jupyter kernel always points to the correct Python executable, if one already exists with the same name `kedro_<package_name>`, then it is replaced.
 
 You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove a kernel, run `jupyter kernelspec remove <kernel_name>`.
-
 
 ### IPython, JupyterLab and other Jupyter clients
 
@@ -403,8 +427,7 @@ You can also connect an IPython shell to a Kedro project kernel as follows:
 kedro ipython
 ```
 
-The command launches an IPython shell with the extension already loaded and is the same command as  `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../tutorials/set_up_data.md#test-that-kedro-can-load-the-data).
-
+The command launches an IPython shell with the extension already loaded and is the same command as `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../tutorials/set_up_data.md#test-that-kedro-can-load-the-data).
 
 Similarly, the following creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected:
 

@@ -4,11 +4,11 @@
 
 This guide explains the **three supported ways to run Kedro on Databricks**, what actually happens in each setup, and when you should choose one over another:
 
-| Option | Where your code runs | Where Spark runs | Best for |
-|-------|----------------------|------------------|----------|
-| [Run within Databricks (Git folders)](#run-kedro-within-databricks-git-folders) | Databricks workspace | Databricks cluster | Notebook-first workflows, analysts and platform teams |
+| Option                                                                                                            | Where your code runs                   | Where Spark runs   | Best for                                                                    |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------ | --------------------------------------------------------------------------- |
+| [Run within Databricks (Git folders)](#run-kedro-within-databricks-git-folders)                                   | Databricks workspace                   | Databricks cluster | Notebook-first workflows, analysts and platform teams                       |
 | [Local + remote Databricks (Databricks Connect)](#local-development-remote-databricks-cluster-databricks-connect) | Your local machine or Docker container | Databricks cluster | Local-first development, tight IDE integration, or cloud-agnostic execution |
-| [Production with `kedro-databricks`](#production-grade-deployments-through-kedro-databricks) | CI/CD pipeline | Databricks Jobs | Repeatable production deployments |
+| [Production with `kedro-databricks`](#production-grade-deployments-through-kedro-databricks)                      | CI/CD pipeline                         | Databricks Jobs    | Repeatable production deployments                                           |
 
 ## Prerequisites
 
@@ -21,11 +21,12 @@ Before starting, make sure you have:
 - A **Databricks personal access token** (required for Databricks Connect and production deployments).
 
 !!! note
+
     Databricks Free tier does not support DBFS. Use Unity Catalog tables instead.
 
 To follow any of the approaches below, you first need a Spark-enabled Kedro project. Create one using:
 
-``` bash
+```bash
 uvx kedro new --name=spaceflights-databricks --tools=pyspark --example=y
 ```
 
@@ -41,25 +42,25 @@ This option is suitable if you primarily work **within the Databricks workspace*
 
 1. Push your Kedro project to a Git repository (GitHub, GitLab, Azure DevOps, Bitbucket, and more).
 
-2. Clone the repository into Databricks using **[Git folders](https://docs.databricks.com/aws/en/repos/repos-setup)**.
+1. Clone the repository into Databricks using **[Git folders](https://docs.databricks.com/aws/en/repos/repos-setup)**.
 
-3. Open the cloned repository in Databricks and update your Kedro Data Catalog (`conf/base/catalog.yml`):
+1. Open the cloned repository in Databricks and update your Kedro Data Catalog (`conf/base/catalog.yml`):
 
-   - For all `spark.SparkDatasetV2` datasets, update file paths to point to **Databricks Volumes**, for example:
-     ```diff
-     preprocessed_companies:
-     -  filepath: data/02_intermediate/preprocessed_companies.csv
-     +  filepath: /Volumes/<catalog_name>/<schema_name>/<volume_name>/data/02_intermediate/preprocessed_companies.csv
-     type: spark.SparkDatasetV2
-     ```
-   - Make sure the volume exists in Unity Catalog before running the pipeline. You can find instructions on how to create a volume in the [Databricks docs.](https://docs.databricks.com/aws/en/volumes/utility-commands)
-   - Non-Spark datasets (for example, pandas-based datasets) can read from and write to the cloned Git folder without changing their file paths.
+    - For all `spark.SparkDatasetV2` datasets, update file paths to point to **Databricks Volumes**, for example:
+        ```diff
+        preprocessed_companies:
+        -  filepath: data/02_intermediate/preprocessed_companies.csv
+        +  filepath: /Volumes/<catalog_name>/<schema_name>/<volume_name>/data/02_intermediate/preprocessed_companies.csv
+        type: spark.SparkDatasetV2
+        ```
+    - Make sure the volume exists in Unity Catalog before running the pipeline. You can find instructions on how to create a volume in the [Databricks docs.](https://docs.databricks.com/aws/en/volumes/utility-commands)
+    - Non-Spark datasets (for example, pandas-based datasets) can read from and write to the cloned Git folder without changing their file paths.
 
-4. Open the `notebooks/` folder in the cloned repository and create a new notebook.
+1. Open the `notebooks/` folder in the cloned repository and create a new notebook.
 
-5. [Attach the notebook to a Databricks cluster](https://docs.databricks.com/aws/en/notebooks/notebook-compute#attach) (for example, a [serverless cluster](https://docs.databricks.com/aws/en/compute/serverless/notebooks#attach-a-notebook-to-serverless-compute)).
+1. [Attach the notebook to a Databricks cluster](https://docs.databricks.com/aws/en/notebooks/notebook-compute#attach) (for example, a [serverless cluster](https://docs.databricks.com/aws/en/compute/serverless/notebooks#attach-a-notebook-to-serverless-compute)).
 
-6. Run Kedro from a notebook. First, install the project dependencies:
+1. Run Kedro from a notebook. First, install the project dependencies:
 
 ```python
 %pip install -r ../requirements.txt
@@ -67,7 +68,7 @@ This option is suitable if you primarily work **within the Databricks workspace*
 
 Then load Kedro's IPython extension and initialise the project:
 
-``` ipython
+```ipython
 %load_ext kedro.ipython
 %reload_kedro
 ```
@@ -76,7 +77,7 @@ Then load Kedro's IPython extension and initialise the project:
 
 This makes the project objects available in the notebook (`catalog`, `context`, `pipelines`, and `session`). You can find more information about [notebook line magics here](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks/#kedro-line-magics). You can now run the pipeline:
 
-``` python
+```python
 session.run()
 ```
 
@@ -84,7 +85,7 @@ session.run()
 
 If you launched the notebook from **outside** the Kedro project directory, pass the project root explicitly:
 
-``` python
+```python
 %reload_kedro /Workspace/Users/<databricks_user_name>/<cloned_repo_name>
 ```
 
@@ -96,7 +97,7 @@ To schedule execution:
 
 - Create a **[Databricks Job](https://docs.databricks.com/aws/en/jobs/configure-job#create-a-new-job)** that runs the notebook which calls `session.run()`.
 
----
+______________________________________________________________________
 
 ## Local development, remote Databricks cluster (Databricks Connect)
 
@@ -117,6 +118,7 @@ pip install databricks-connect
 ```
 
 !!! note
+
     Ensure that the installed `databricks-connect` version matches your Databricks Runtime version. You can check [the requirements here](https://docs.databricks.com/aws/en/dev-tools/databricks-connect/requirements#databricks-connect-versions).
 
 Databricks Connect requires two environment variables:
@@ -146,7 +148,7 @@ You can view your intermediate `SparkDatasetV2` datasets in the Databricks Catal
 
 ![](../../meta/images/databricks_volumes_data.png)
 
----
+______________________________________________________________________
 
 ## Production-grade deployments through `kedro-databricks`
 
@@ -167,6 +169,7 @@ This option is suitable when you need:
 - Deploys it as a **Databricks Job**
 
 !!! note
+
     This is a **community-maintained plugin**.
     Databricks permissions, workspace layouts, and runtime versions vary between organisations, so some configuration steps may require updates.
 
@@ -176,14 +179,14 @@ For full setup instructions, see the [plugin documentation.](https://kedro-datab
 
 [Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/en/stable/) is a visualisation tool for exploring Kedro pipelines and (optionally) run metadata. In Databricks, you can use it in two ways:
 
--   **Visualise a pipeline directly in the notebook** with `NotebookVisualizer` (lightweight and suitable for inspecting a single pipeline)
--   **Launch the full Kedro-Viz web app** (opens in a new browser tab, best for full project exploration)
+- **Visualise a pipeline directly in the notebook** with `NotebookVisualizer` (lightweight and suitable for inspecting a single pipeline)
+- **Launch the full Kedro-Viz web app** (opens in a new browser tab, best for full project exploration)
 
 ### Prerequisites
 
 Make sure Kedro and Kedro-Viz are installed in the same scope (notebook-scoped or cluster-scoped). For notebook-scoped installs:
 
-``` ipython
+```ipython
 %pip install -r ../requirements.txt
 %pip install kedro-viz
 ```
@@ -192,14 +195,14 @@ If Kedro is already installed as a cluster library, add Kedro-Viz as a cluster l
 
 Load the Kedro IPython extension:
 
-``` ipython
+```ipython
 %load_ext kedro.ipython
 %reload_kedro
 ```
 
 If you launched the notebook from **outside** the Kedro project directory, pass the project root explicitly:
 
-``` ipython
+```ipython
     %reload_kedro /Workspace/Users/<databricks_user_name>/<cloned_repo_name>
 ```
 
@@ -207,7 +210,7 @@ If you launched the notebook from **outside** the Kedro project directory, pass 
 
 If you want to inspect a single pipeline without opening the full web application, use [`NotebookVisualizer`](https://docs.kedro.org/projects/kedro-viz/en/stable/kedro-viz_visualisation/#notebookvisualizer):
 
-``` python
+```python
 from kedro_viz.integrations.notebook import NotebookVisualizer
 
 NotebookVisualizer(pipelines["data_science"]).show()
@@ -222,6 +225,7 @@ Kedro-Viz can be launched in a new browser tab with the `%run_viz` line magic:
 ```
 
 !!! note
+
     You may encounter issues running this command on the Databricks Free tier. If that happens, we recommend using the `NotebookVisualizer` instead.
 
 This command presents a link to the Kedro-Viz web application.

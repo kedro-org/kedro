@@ -6,13 +6,13 @@
       members: false
       show_source: false
 
-| Name | Type | Description |
-|------|------|-------------|
-| [`RunRequest`](#kedro.server.models.RunRequest) | Class | Request model for pipeline execution via `POST /run`. |
-| [`RunResponse`](#kedro.server.models.RunResponse) | Class | Response model returned by `POST /run`. |
-| [`ErrorDetail`](#kedro.server.models.ErrorDetail) | Class | Structured error information included in a failed `RunResponse`. |
-| [`HealthResponse`](#kedro.server.models.HealthResponse) | Class | Response model returned by `GET /health`. |
-| [`SnapshotResponse`](#kedro.server.models.SnapshotResponse) | Class | Response model returned by `GET /snapshot`. |
+| Name                                                        | Type  | Description                                                      |
+| ----------------------------------------------------------- | ----- | ---------------------------------------------------------------- |
+| [`RunRequest`](#kedro.server.models.RunRequest)             | Class | Request model for pipeline execution via `POST /run`.            |
+| [`RunResponse`](#kedro.server.models.RunResponse)           | Class | Response model returned by `POST /run`.                          |
+| [`ErrorDetail`](#kedro.server.models.ErrorDetail)           | Class | Structured error information included in a failed `RunResponse`. |
+| [`HealthResponse`](#kedro.server.models.HealthResponse)     | Class | Response model returned by `GET /health`.                        |
+| [`SnapshotResponse`](#kedro.server.models.SnapshotResponse) | Class | Response model returned by `GET /snapshot`.                      |
 
 ::: kedro.server.models.RunRequest
     options:

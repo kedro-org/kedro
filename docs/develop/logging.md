@@ -144,6 +144,41 @@ Besides the `rich` handler defined in Kedro's framework, we provide two addition
 
 The following section illustrates some common examples of how to change your project's logging configuration.
 
+## How to add a custom logging filter
+
+Add a custom [`logging.Filter`](https://docs.python.org/3/library/logging.html#filter-objects) subclass to your project logging configuration. Define the filter in your project code:
+
+```python
+import logging
+
+
+class KeepOnlyFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "KEEP" in record.getMessage()
+```
+
+Then reference the filter with the `class` key in `conf/logging.yml` and attach it to the relevant handler:
+
+```yaml
+filters:
+  keep_only:
+    class: your_project.logging.KeepOnlyFilter
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    filters: [keep_only]
+    stream: ext://sys.stdout
+
+root:
+  handlers: [console]
+  level: INFO
+```
+
+!!! note
+    Standard Python logging configuration also supports the `()` factory key for custom objects. Kedro does not allow `()` in `logging.yml` because it can execute arbitrary code.
+    Use `class` for custom `logging.Filter` subclasses instead.
+
 ## How to customise the `rich` handler
 
 Kedro's `kedro.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. You can disable it by setting `rich_tracebacks: False`.

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 from IPython.core.error import UsageError
+from IPython.utils._process_common import arg_split
 
 import kedro.ipython
 from kedro.framework.project import pipelines
@@ -13,12 +14,14 @@ from kedro.ipython import (
     _format_node_inputs_text,
     _get_node_bound_arguments,
     _load_node,
+    _normalise_reload_kedro_params,
     _prepare_function_body,
     _prepare_imports,
     _prepare_node_inputs,
     _resolve_function_node,
     _resolve_project_path,
     _resolve_symbol_dependencies,
+    _split_reload_kedro_params,
     load_ipython_extension,
     magic_load_node,
     reload_kedro,
@@ -254,6 +257,23 @@ class TestLoadIPythonExtension:
         assert env == expected_env
         assert runtime_params == {"foo": "bar baz"}
         assert conf_source == expected_conf_source
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            "--params foo='bar baz'",
+            "--params 'foo=bar baz'",
+            ". --env=base --params foo='bar baz' --conf-source=new_conf",
+        ],
+    )
+    def test_normalise_reload_kedro_params_with_single_quoted_spaces(self, args):
+        normalised_args = _normalise_reload_kedro_params(args)
+        split_args = arg_split(normalised_args)
+        params_index = split_args.index("--params") + 1
+
+        assert _split_reload_kedro_params(split_args[params_index]) == {
+            "foo": "bar baz"
+        }
 
     def test_line_magic_with_invalid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython.find_kedro_project")
@@ -582,9 +602,7 @@ ERROR,
             _resolve_function_node(module_tree, dummy_function)
 
     def test_resolve_symbol_dependencies_handles_cycles(self):
-        module_tree = ast.parse(
-            "def a():\n" "    return b()\n" "def b():\n" "    return a()\n"
-        )
+        module_tree = ast.parse("def a():\n    return b()\ndef b():\n    return a()\n")
         symbols = _build_module_symbol_table(module_tree)
 
         resolved_nodes = _resolve_symbol_dependencies(symbols, "a")

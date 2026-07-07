@@ -14,6 +14,7 @@ import re
 import sys
 import typing
 import warnings
+from collections import OrderedDict
 from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
@@ -21,7 +22,6 @@ from typing import TYPE_CHECKING, Any, Final
 from kedro.framework.session.session import KedroSession
 
 if TYPE_CHECKING:
-    from collections import OrderedDict
     from collections.abc import Callable
 
     from IPython.core.interactiveshell import InteractiveShell
@@ -57,7 +57,8 @@ FunctionParameters = MappingProxyType
 RICH_INSTALLED: Final = importlib.util.find_spec("rich") is not None
 
 _PARAM_VALUE_SINGLE_QUOTED = re.compile(
-    r"(?P<prefix>(?:^|\s)--params(?:=|\s+)[^=\s]+)='(?P<value>[^']*)'"
+    r"(?P<option>(?:^|\s)--params)(?P<separator>=|\s+)"
+    r"(?P<key>[^=\s]+)='(?P<value>[^']*)'"
 )
 _PARAM_ITEM_SINGLE_QUOTED = re.compile(
     r"(?P<prefix>(?:^|\s)--params(?:=|\s+))'(?P<value>[^']*)'"
@@ -89,12 +90,24 @@ def load_ipython_extension(ipython: InteractiveShell) -> None:
 def _normalise_reload_kedro_params(line: str) -> str:
     """Normalise single-quoted ``--params`` values before IPython splits them."""
     line = _PARAM_VALUE_SINGLE_QUOTED.sub(
-        lambda match: f'{match.group("prefix")}="{match.group("value")}"',
+        lambda match: (
+            f'{match.group("option")}{match.group("separator")}"'
+            f'{match.group("key")}={match.group("value")}"'
+        ),
         line,
     )
     return _PARAM_ITEM_SINGLE_QUOTED.sub(
         lambda match: f'{match.group("prefix")}"{match.group("value")}"',
         line,
+    )
+
+
+def _split_reload_kedro_params(value: str) -> dict[str, Any]:
+    """Split ``%reload_kedro --params`` values after IPython argument parsing."""
+    if len(value) >= len("''") and value[0] == value[-1] and value[0] in {"'", '"'}:
+        value = value[1:-1]
+    return typing.cast(
+        "dict[str, Any]", _split_params(typing.cast("Any", None), None, value)
     )
 
 
@@ -114,7 +127,7 @@ def _normalise_reload_kedro_params(line: str) -> str:
 @argument("-e", "--env", type=str, default=None, help=ENV_HELP)
 @argument(
     "--params",
-    type=lambda value: _split_params(None, None, value),
+    type=_split_reload_kedro_params,
     default=None,
     help=PARAMS_ARG_HELP,
 )
@@ -426,7 +439,9 @@ def _get_node_bound_arguments(node: Node) -> _NodeBoundArguments:
     args, kwargs = Node._process_inputs_for_bind(node_inputs)
     signature = inspect.signature(node_func)
     bound_arguments = signature.bind(*args, **kwargs)
-    return _NodeBoundArguments(bound_arguments.signature, bound_arguments.arguments)
+    return _NodeBoundArguments(
+        bound_arguments.signature, OrderedDict(bound_arguments.arguments)
+    )
 
 
 def _prepare_node_inputs(

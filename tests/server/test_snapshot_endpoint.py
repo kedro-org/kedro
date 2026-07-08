@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from kedro.inspection.models import (
     DatasetSnapshot,
     NodeSnapshot,
+    NodeSourceSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
     ProjectSnapshot,
@@ -149,3 +150,74 @@ class TestSnapshotEndpoint:
             mock_get.call_args[1]["metadata"]
             is make_http_server.mock_bootstrap.return_value
         )
+
+    def test_node_source_endpoint_returns_source_snapshot(
+        self, mocker, make_http_server
+    ):
+        source = NodeSourceSnapshot(
+            name="my_node",
+            func_name="my_func",
+            source_filepath="src/test_pkg/nodes.py",
+            source_line_start=10,
+            source_line_end=12,
+            code="def my_func(x):\n    return x\n",
+        )
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_node_source", return_value=source
+        )
+        app = make_http_server()
+        with TestClient(app) as client:
+            payload = client.get("/snapshot/nodes/my_node/source").json()
+        assert payload["status"] == "success"
+        assert payload["source"]["name"] == "my_node"
+        assert payload["source"]["code"] == "def my_func(x):\n    return x\n"
+        mock_get.assert_called_once_with(
+            node_name="my_node",
+            env=None,
+            conf_source=None,
+            metadata=make_http_server.mock_bootstrap.return_value,
+            include_code=True,
+        )
+
+    def test_node_source_endpoint_forwards_include_code_false(
+        self, mocker, make_http_server
+    ):
+        source = NodeSourceSnapshot(
+            name="my_node",
+            func_name="my_func",
+            source_filepath="src/test_pkg/nodes.py",
+        )
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_node_source", return_value=source
+        )
+        app = make_http_server()
+        with TestClient(app) as client:
+            client.get("/snapshot/nodes/my_node/source?include_code=false")
+        assert mock_get.call_args[1]["include_code"] is False
+
+    def test_node_source_endpoint_uses_server_env_and_conf_source(
+        self, mocker, make_http_server
+    ):
+        source = NodeSourceSnapshot(name="my_node")
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_node_source", return_value=source
+        )
+        app = make_http_server(env="staging", conf_source="conf/custom")
+        with TestClient(app) as client:
+            client.get("/snapshot/nodes/my_node/source")
+        assert mock_get.call_args[1]["env"] == "staging"
+        assert mock_get.call_args[1]["conf_source"] == "conf/custom"
+
+    def test_node_source_endpoint_returns_failure_on_exception(
+        self, mocker, make_http_server
+    ):
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_node_source",
+            side_effect=KeyError("my_node"),
+        )
+        app = make_http_server()
+        with TestClient(app) as client:
+            payload = client.get("/snapshot/nodes/my_node/source").json()
+        assert payload["status"] == "failure"
+        assert payload["error"]["type"] == "KeyError"
+        assert "my_node" in payload["error"]["message"]

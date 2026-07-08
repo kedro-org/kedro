@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from kedro.inspection.models import (  # noqa: TCH001
     DatasetSnapshot,
+    NodeSourceSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
 )
@@ -157,4 +158,23 @@ class SnapshotFailure(BaseModel):
 
 SnapshotResponse = Annotated[
     SnapshotSuccess | SnapshotFailure, Field(discriminator="status")
+]
+
+
+class NodeSourceSuccess(BaseModel):
+    """Response model for successful node source inspection."""
+
+    status: Literal["success"] = Field(description="Node source status.")
+    source: NodeSourceSnapshot = Field(description="Node source snapshot.")
+
+
+class NodeSourceFailure(BaseModel):
+    """Response model for failed node source inspection."""
+
+    status: Literal["failure"] = Field(description="Node source status.")
+    error: ErrorDetail = Field(description="Error details.")
+
+
+NodeSourceResponse = Annotated[
+    NodeSourceSuccess | NodeSourceFailure, Field(discriminator="status")
 ]

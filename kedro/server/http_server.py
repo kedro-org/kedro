@@ -15,12 +15,15 @@ from kedro import __version__ as kedro_version
 from kedro.framework.project import settings
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
-from kedro.inspection import get_project_snapshot
+from kedro.inspection import get_node_source, get_project_snapshot
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner
 from kedro.server.models import (
     ErrorDetail,
     HealthResponse,
+    NodeSourceFailure,
+    NodeSourceResponse,
+    NodeSourceSuccess,
     RunFailure,
     RunRequest,
     RunResponse,
@@ -142,6 +145,35 @@ def create_http_server(
         except Exception as exc:
             logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
             return SnapshotFailure(
+                status="failure",
+                error=ErrorDetail(
+                    type=type(exc).__qualname__,
+                    message=str(exc),
+                ),
+            )
+
+    @app.get(
+        "/snapshot/nodes/{node_name}/source",
+        response_model=NodeSourceResponse,
+        tags=["inspection"],
+    )
+    def get_snapshot_node_source(
+        node_name: str,
+        include_code: bool = True,
+    ) -> NodeSourceResponse:
+        """Return source information for a single pipeline node."""
+        try:
+            source = get_node_source(
+                node_name=node_name,
+                env=app.state.default_env,
+                conf_source=app.state.default_conf_source,
+                metadata=app.state.metadata,
+                include_code=include_code,
+            )
+            return NodeSourceSuccess(status="success", source=source)
+        except Exception as exc:
+            logger.error("Node source request failed: %s", str(exc), exc_info=True)
+            return NodeSourceFailure(
                 status="failure",
                 error=ErrorDetail(
                     type=type(exc).__qualname__,

@@ -66,15 +66,12 @@ class NodeSourceSnapshot:
             definition.
         line_end: 1-based line number of the last line of the function
             definition.
-        code: Full source text of the function. Only populated when
-            ``include_source="full"`` is requested; ``None`` for ``"refs"``.
     """
 
     func_name: str | None = None
     filepath: str | None = None
     line_start: int | None = None
     line_end: int | None = None
-    code: str | None = None
 
 
 @dataclass
@@ -91,8 +88,7 @@ class NodeSnapshot:
         tags: Sorted list of tags assigned to the node.
         inputs: Ordered list of input dataset names.
         outputs: Ordered list of output dataset names.
-        source: Source location metadata for the node's underlying function, or
-            ``None`` when ``include_source=False`` (the default).
+        source: Source location metadata for the node's underlying function.
     """
 
     name: str

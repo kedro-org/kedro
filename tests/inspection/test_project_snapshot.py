@@ -314,21 +314,11 @@ class TestBuildProjectSnapshot:
             project_metadata.project_path, env=None, conf_source=None
         )
 
-    @pytest.mark.parametrize("bad_value", ["true", "code", 1, True, None])
-    def test_invalid_include_source_raises_value_error(self, bad_value):
-        with pytest.raises(ValueError, match="include_source must be False"):
-            _build_project_snapshot(self.project_path, include_source=bad_value)
-
-    @pytest.mark.parametrize("value", [False, "refs", "full"])
-    def test_valid_include_source_does_not_raise(self, value):
-        _build_project_snapshot(self.project_path, include_source=value)
-
-    def test_include_source_forwarded_to_pipeline_builder(self, mocker):
+    def test_project_path_forwarded_to_pipeline_builder(self, mocker):
         mock_pipe_builder = mocker.patch(
             "kedro.inspection.snapshot._build_pipeline_snapshots",
             return_value=self.pipeline_snapshots,
         )
-        _build_project_snapshot(self.project_path, include_source="refs")
+        _build_project_snapshot(self.project_path)
         _, kwargs = mock_pipe_builder.call_args
-        assert kwargs["include_source"] == "refs"
         assert kwargs["project_path"] == self.project_path

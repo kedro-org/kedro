@@ -9,7 +9,7 @@ from collections.abc import Callable
 from functools import partial
 from pathlib import Path
 from types import FunctionType
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from kedro.config import MissingConfigException
 from kedro.framework.project import pipelines
@@ -73,9 +73,6 @@ def _build_dataset_snapshots(
     }
 
 
-_VALID_INCLUDE_SOURCE = frozenset({False, "refs", "full"})
-
-
 def _extract_node_func(func: Callable) -> Callable:
     """Return the callable to use for source inspection."""
     if inspect.ismethod(func):
@@ -105,20 +102,13 @@ def _extract_node_func(func: Callable) -> Callable:
 def _extract_node_source(
     node: Node,
     project_path: Path,
-    include_source: Literal["refs", "full"],
 ) -> NodeSourceSnapshot:
     """Extract source location metadata from a live ``Node``.
-
-    Unwraps partials, bound methods, ``__wrapped__`` decorators, and simple
-    closure decorators before calling ``inspect`` so that line numbers refer to
-    the function definition rather than a generated wrapper.
 
     Args:
         node: A live Kedro pipeline node.
         project_path: Absolute path to the project root. Source file paths are
             project-relative when possible and omitted for external files.
-        include_source: ``"refs"`` populates location fields only;
-            ``"full"`` additionally populates ``code``.
 
     Returns:
         A ``NodeSourceSnapshot`` with all available source metadata.
@@ -129,23 +119,16 @@ def _extract_node_source(
     filepath: str | None = None
     line_start: int | None = None
     line_end: int | None = None
-    code: str | None = None
 
     try:
-        raw_filepath = inspect.getfile(func)
-        try:
-            filepath = str(Path(raw_filepath).relative_to(project_path))
-        except ValueError:
-            filepath = None
-    except (TypeError, OSError):
+        filepath = str(Path(inspect.getfile(func)).relative_to(project_path))
+    except (TypeError, OSError, ValueError):
         pass
 
     try:
         lines, start = inspect.getsourcelines(func)
         line_start = start
         line_end = start + len(lines) - 1
-        if include_source == "full":
-            code = "".join(lines)
     except (OSError, TypeError):
         pass
 
@@ -154,34 +137,26 @@ def _extract_node_source(
         filepath=filepath,
         line_start=line_start,
         line_end=line_end,
-        code=code,
     )
 
 
 def _node_to_snapshot(
     node: Node,
     project_path: Path | None = None,
-    include_source: Literal[False, "refs", "full"] = False,
 ) -> NodeSnapshot:
     """Convert a live ``Node`` object to a ``NodeSnapshot``.
 
     Args:
         node: A Kedro pipeline node.
-        project_path: Absolute path to the project root. Required when
-            *include_source* is not ``False`` to produce project-relative
-            file paths.
-        include_source: Controls source metadata population.
-            ``False`` (default) omits all source fields.
-            ``"refs"`` populates ``source.func_name``, ``source.filepath``,
-            ``source.line_start``, and ``source.line_end``.
-            ``"full"`` additionally populates ``source.code``.
+        project_path: Absolute path to the project root, used to produce
+            project-relative source file paths.
 
     Returns:
         Read-only snapshot of the node's structural metadata.
     """
     source: NodeSourceSnapshot | None = None
-    if include_source and project_path is not None:
-        source = _extract_node_source(node, project_path, include_source)  # type: ignore[arg-type]
+    if project_path is not None:
+        source = _extract_node_source(node, project_path)
     return NodeSnapshot(
         name=node.name,
         func_name=node._func_name,
@@ -196,17 +171,14 @@ def _node_to_snapshot(
 def _build_pipeline_snapshots(
     pipeline_dict: dict[str, Any],
     project_path: Path | None = None,
-    include_source: Literal[False, "refs", "full"] = False,
 ) -> list[PipelineSnapshot]:
     """Build a ``PipelineSnapshot`` for every registered pipeline.
 
     Args:
         pipeline_dict: Dictionary of pipeline name to ``Pipeline`` object,
             as returned by ``dict(kedro.framework.project.pipelines)``.
-        project_path: Absolute path to the project root, forwarded to
-            ``_node_to_snapshot`` when *include_source* is not ``False``.
-        include_source: Source metadata mode forwarded to each
-            ``_node_to_snapshot`` call. See ``_node_to_snapshot`` for details.
+        project_path: Absolute path to the project root, used to produce
+            project-relative source file paths.
 
     Returns:
         List of pipeline snapshots in registry iteration order.
@@ -219,11 +191,7 @@ def _build_pipeline_snapshots(
             PipelineSnapshot(
                 name=pipeline_id,
                 nodes=[
-                    _node_to_snapshot(
-                        _node,
-                        project_path=project_path,
-                        include_source=include_source,
-                    )
+                    _node_to_snapshot(_node, project_path=project_path)
                     for _node in pipeline.nodes
                 ],
                 inputs=sorted(pipeline.inputs()),
@@ -238,7 +206,6 @@ def _build_project_snapshot(
     env: str | None = None,
     conf_source: str | None = None,
     metadata: ProjectMetadata | None = None,
-    include_source: Literal[False, "refs", "full"] = False,
 ) -> ProjectSnapshot:
     """Build a ``ProjectSnapshot`` for the Kedro project at project_path.
 
@@ -258,16 +225,7 @@ def _build_project_snapshot(
 
     Returns:
         A fully populated ``ProjectSnapshot``.
-
-    Raises:
-        ValueError: If *include_source* is not one of ``False``, ``"refs"``,
-            or ``"full"``.
     """
-    if include_source not in _VALID_INCLUDE_SOURCE:
-        raise ValueError(
-            f"include_source must be False, 'refs', or 'full'; got {include_source!r}."
-        )
-
     resolved_project_path = (
         Path(project_path).expanduser().resolve() if project_path is not None else None
     )
@@ -309,7 +267,6 @@ def _build_project_snapshot(
     pipeline_snapshots = _build_pipeline_snapshots(
         dict(pipelines),
         project_path=effective_project_path,
-        include_source=include_source,
     )
     dataset_snapshots = _build_dataset_snapshots(conf_catalog)
 

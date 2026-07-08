@@ -15,7 +15,9 @@ class TestGetProjectSnapshot:
         )
         result = get_project_snapshot(tmp_path)
         mock_build.assert_called_once_with(
-            project_path=tmp_path, env=None, conf_source=None, metadata=None,
-            include_source=False,
+            project_path=tmp_path,
+            env=None,
+            conf_source=None,
+            metadata=None,
         )
         assert result is mock_snapshot

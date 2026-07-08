@@ -16,9 +16,10 @@
 ## Bug fixes and other changes
 * Fixed Rich logging integration so node input/output brackets render correctly in console logs and dataset colour markup does not leak into plain log handlers.
 * Improved the `AbstractDataset.from_config()` error message for custom dataset classes that are still abstract, so it no longer suggests invalid constructor arguments when required dataset methods are missing.
+* Improved the `pipeline()` error message when a mapped dataset or parameter does not exist in the pipeline.
 * Fixed `kedro new` accepting project names whose derived package name shadows a Python standard library module or is a Python keyword (e.g. `email`, `json`, `import`), which silently produced a broken, unimportable project. Such names are now rejected at creation time with a clear message.
 * Fixed `kedro pipeline create` accepting Python keywords (e.g. `for`, `import`, `return`) as pipeline names. Such names are now rejected at creation time with a clear error message.
-* Added ASV benchmarks for the parameter validation framework.
+* Fixed custom `logging.Filter` subclasses configured with `class:` in `logging.yml`, so they are instantiated and applied.
 
 ## Documentation changes
 * Documented hooks limitation when using `ParallelRunner`.
@@ -30,6 +31,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Feng Jikui](https://github.com/fengjikui)
 * [Rudra Dudhat](https://github.com/RudraDudhat2509)
+* [samiat4911](https://github.com/samiat4911)
 * [Jean-Baptiste Braun](https://github.com/jbbqqf)
 * [Gargi](https://github.com/Kaliagargi)
 * [Simon](https://github.com/simon-b)

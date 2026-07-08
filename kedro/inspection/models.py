@@ -61,7 +61,7 @@ class NodeSourceSnapshot:
     Attributes:
         func_name: Readable name of the function (from ``Node._func_name``).
         filepath: Path to the source file. Project-relative when the file is
-            within the project root, absolute otherwise.
+            within the project root; ``None`` for external files.
         line_start: 1-based line number of the first line of the function
             definition.
         line_end: 1-based line number of the last line of the function

@@ -5,9 +5,11 @@ from __future__ import annotations
 import inspect
 import re
 import warnings
+from collections.abc import Callable
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from types import FunctionType
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from kedro.config import MissingConfigException
 from kedro.framework.project import pipelines
@@ -74,6 +76,32 @@ def _build_dataset_snapshots(
 _VALID_INCLUDE_SOURCE = frozenset({False, "refs", "full"})
 
 
+def _extract_node_func(func: Callable) -> Callable:
+    """Return the callable to use for source inspection."""
+    if inspect.ismethod(func):
+        func = func.__func__  # type: ignore[union-attr]
+    while isinstance(func, partial):
+        func = func.func
+
+    unwrapped_func = cast(Callable, inspect.unwrap(func))
+    if unwrapped_func is not func:
+        return unwrapped_func
+
+    if isinstance(func, FunctionType) and func.__closure__:
+        wrapped_func = next(
+            (
+                cell.cell_contents
+                for cell in func.__closure__
+                if isinstance(cell.cell_contents, FunctionType)
+            ),
+            None,
+        )
+        if wrapped_func is not None and wrapped_func is not func:
+            return _extract_node_func(wrapped_func)
+
+    return func
+
+
 def _extract_node_source(
     node: Node,
     project_path: Path,
@@ -81,14 +109,14 @@ def _extract_node_source(
 ) -> NodeSourceSnapshot:
     """Extract source location metadata from a live ``Node``.
 
-    Unwraps partials, bound methods, and ``__wrapped__`` decorators before
-    calling ``inspect`` so that line numbers refer to the function definition
-    rather than a generated wrapper.
+    Unwraps partials, bound methods, ``__wrapped__`` decorators, and simple
+    closure decorators before calling ``inspect`` so that line numbers refer to
+    the function definition rather than a generated wrapper.
 
     Args:
         node: A live Kedro pipeline node.
-        project_path: Absolute path to the project root, used to produce
-            project-relative file paths.
+        project_path: Absolute path to the project root. Source file paths are
+            project-relative when possible and omitted for external files.
         include_source: ``"refs"`` populates location fields only;
             ``"full"`` additionally populates ``code``.
 
@@ -96,19 +124,7 @@ def _extract_node_source(
         A ``NodeSourceSnapshot`` with all available source metadata.
     """
     func_name: str | None = node._func_name
-
-    func = node.func
-    # Unwrap partial to reach the underlying callable
-    while isinstance(func, partial):
-        func = func.func
-    # Unwrap bound methods
-    if inspect.ismethod(func):
-        func = func.__func__
-    # Follow __wrapped__ chains left by functools.wraps
-    try:
-        func = inspect.unwrap(func)
-    except Exception:  # noqa: BLE001
-        pass
+    func = _extract_node_func(node.func)
 
     filepath: str | None = None
     line_start: int | None = None
@@ -120,7 +136,7 @@ def _extract_node_source(
         try:
             filepath = str(Path(raw_filepath).relative_to(project_path))
         except ValueError:
-            filepath = raw_filepath
+            filepath = None
     except (TypeError, OSError):
         pass
 
@@ -156,9 +172,9 @@ def _node_to_snapshot(
             file paths.
         include_source: Controls source metadata population.
             ``False`` (default) omits all source fields.
-            ``"refs"`` populates ``func_name``, ``source_filepath``,
-            ``source_line_start``, and ``source_line_end``.
-            ``"full"`` additionally populates ``source_code``.
+            ``"refs"`` populates ``source.func_name``, ``source.filepath``,
+            ``source.line_start``, and ``source.line_end``.
+            ``"full"`` additionally populates ``source.code``.
 
     Returns:
         Read-only snapshot of the node's structural metadata.

@@ -71,11 +71,12 @@ def get_project_snapshot(
             * ``False`` (default) — no source fields are populated. This is the
               fastest option and is appropriate for CI, graph rendering, and any
               consumer that does not need source location.
-            * ``"refs"`` — populates ``func_name``, ``source_filepath``,
-              ``source_line_start``, and ``source_line_end`` for each node.
-              File paths are project-relative where possible. Useful for
-              "open in editor" and code-panel link use-cases.
-            * ``"full"`` — same as ``"refs"`` plus ``source_code`` which
+            * ``"refs"`` — populates ``source.func_name``,
+              ``source.filepath``, ``source.line_start``, and
+              ``source.line_end`` for each node. File paths are
+              project-relative when possible and omitted for external files.
+              Useful for "open in editor" and code-panel link use-cases.
+            * ``"full"`` — same as ``"refs"`` plus ``source.code`` which
               contains the full source text of the function. Suitable for
               displaying source inline without a separate file read.
 

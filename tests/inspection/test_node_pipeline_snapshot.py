@@ -1,4 +1,4 @@
-"""Tests for NodeSnapshot, PipelineSnapshot models and their builders."""
+"""Tests for node and pipeline inspection snapshots."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import pytest
 from kedro.inspection.models import NodeSnapshot, NodeSourceSnapshot, PipelineSnapshot
 from kedro.inspection.snapshot import (
     _build_pipeline_snapshots,
+    _extract_node_func,
     _extract_node_source,
     _node_to_snapshot,
 )
@@ -18,6 +19,34 @@ from kedro.pipeline import Pipeline, node
 
 def _identity(x):
     return x
+
+
+def _wraps_decorator(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def _closure_decorator(func):
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@_wraps_decorator
+def _decorated_with_wraps(x):
+    return x
+
+
+@_closure_decorator
+def _decorated_without_wraps(x):
+    return x
+
+
+_MODULE_DIR = Path(__file__).parent
 
 
 @pytest.fixture
@@ -69,9 +98,13 @@ class TestNodeToSnapshot:
         snapshot = _node_to_snapshot(simple_node)
         assert snapshot.func_name == "_identity"
 
-    def test_func_name_populated_regardless_of_include_source(self, simple_node, tmp_path):
+    def test_func_name_populated_regardless_of_include_source(
+        self, simple_node, tmp_path
+    ):
         for mode in (False, "refs", "full"):
-            snap = _node_to_snapshot(simple_node, project_path=tmp_path, include_source=mode)
+            snap = _node_to_snapshot(
+                simple_node, project_path=tmp_path, include_source=mode
+            )
             assert snap.func_name == "_identity"
 
     def test_tags_are_sorted(self, simple_node):
@@ -132,34 +165,55 @@ class TestBuildPipelineSnapshots:
 # ---------------------------------------------------------------------------
 
 
-def _decorated_func(x):
-    return x
+class TestExtractNodeFunc:
+    def test_wrapped_decorator_unwrapped(self):
+        result = _extract_node_func(_decorated_with_wraps)
+        assert result is _decorated_with_wraps.__wrapped__
 
-
-def _make_partial_node(tmp_path):
-    from functools import partial
-
-    p = partial(_identity, 1)
-    return node(p, inputs=None, outputs="out", name="partial_node")
+    def test_closure_decorator_unwrapped(self):
+        result = _extract_node_func(_decorated_without_wraps)
+        assert result.__name__ == "_decorated_without_wraps"
 
 
 class TestExtractNodeSource:
-    def test_refs_populates_location_fields(self, simple_node, tmp_path):
-        src = _extract_node_source(simple_node, tmp_path, "refs")
+    def test_refs_populates_location_fields(self, simple_node):
+        src = _extract_node_source(simple_node, _MODULE_DIR, "refs")
         assert isinstance(src, NodeSourceSnapshot)
         assert src.func_name == "_identity"
-        # _identity is defined in this test file, which lives outside tmp_path
-        assert src.filepath is not None
-        assert src.filepath.endswith("test_node_pipeline_snapshot.py")
+        assert src.filepath == "test_node_pipeline_snapshot.py"
         assert isinstance(src.line_start, int)
         assert isinstance(src.line_end, int)
         assert src.line_end >= src.line_start
         assert src.code is None  # "refs" must NOT populate code
 
-    def test_full_populates_source_code(self, simple_node, tmp_path):
-        src = _extract_node_source(simple_node, tmp_path, "full")
+    def test_full_populates_source_code(self, simple_node):
+        src = _extract_node_source(simple_node, _MODULE_DIR, "full")
         assert src.code is not None
         assert "def _identity" in src.code
+
+    @pytest.mark.parametrize(
+        "decorated_func,node_name,expected_source",
+        [
+            (_decorated_with_wraps, "wraps_decorated_node", "_decorated_with_wraps"),
+            (
+                _decorated_without_wraps,
+                "closure_decorated_node",
+                "_decorated_without_wraps",
+            ),
+        ],
+    )
+    def test_decorated_node_code_uses_wrapped_function_source(
+        self, decorated_func, node_name, expected_source, tmp_path
+    ):
+        decorated_node = node(
+            decorated_func, inputs="raw", outputs="processed", name=node_name
+        )
+
+        src = _extract_node_source(decorated_node, tmp_path, "full")
+
+        assert src.code is not None
+        assert f"def {expected_source}" in src.code
+        assert "def wrapper" not in src.code
 
     def test_filepath_is_relative_when_inside_project(self, tmp_path):
         """When the function file lives under project_path the path is relative."""
@@ -188,13 +242,12 @@ class TestExtractNodeSource:
         finally:
             del sys.modules["my_module"]
 
-    def test_filepath_is_absolute_when_outside_project(self, simple_node, tmp_path):
-        """When the function file is outside project_path the path stays absolute."""
+    def test_filepath_is_none_when_outside_project(self, simple_node, tmp_path):
+        """When the function file is outside project_path the path is omitted."""
         unrelated_path = tmp_path / "other_project"
         unrelated_path.mkdir()
         src = _extract_node_source(simple_node, unrelated_path, "refs")
-        assert src.filepath is not None
-        assert Path(src.filepath).is_absolute()
+        assert src.filepath is None
 
     def test_partial_unwrapped_to_underlying_func(self, tmp_path):
         from functools import partial
@@ -219,12 +272,16 @@ class TestExtractNodeSource:
 
 class TestNodeToSnapshotWithSource:
     def test_include_source_false_does_not_populate_source(self, simple_node, tmp_path):
-        snap = _node_to_snapshot(simple_node, project_path=tmp_path, include_source=False)
+        snap = _node_to_snapshot(
+            simple_node, project_path=tmp_path, include_source=False
+        )
         assert snap.func_name == "_identity"  # always present
-        assert snap.source is None             # source block absent
+        assert snap.source is None  # source block absent
 
-    def test_include_source_refs_populates_location_not_code(self, simple_node, tmp_path):
-        snap = _node_to_snapshot(simple_node, project_path=tmp_path, include_source="refs")
+    def test_include_source_refs_populates_location_not_code(self, simple_node):
+        snap = _node_to_snapshot(
+            simple_node, project_path=_MODULE_DIR, include_source="refs"
+        )
         assert snap.source is not None
         assert snap.source.func_name == "_identity"
         assert snap.source.filepath is not None
@@ -232,8 +289,10 @@ class TestNodeToSnapshotWithSource:
         assert snap.source.line_end is not None
         assert snap.source.code is None
 
-    def test_include_source_full_populates_all_fields(self, simple_node, tmp_path):
-        snap = _node_to_snapshot(simple_node, project_path=tmp_path, include_source="full")
+    def test_include_source_full_populates_all_fields(self, simple_node):
+        snap = _node_to_snapshot(
+            simple_node, project_path=_MODULE_DIR, include_source="full"
+        )
         assert snap.source is not None
         assert snap.source.func_name == "_identity"
         assert snap.source.code is not None
@@ -245,7 +304,9 @@ class TestNodeToSnapshotWithSource:
         assert snap.source is None
 
     def test_structural_fields_still_populated(self, simple_node, tmp_path):
-        snap = _node_to_snapshot(simple_node, project_path=tmp_path, include_source="refs")
+        snap = _node_to_snapshot(
+            simple_node, project_path=tmp_path, include_source="refs"
+        )
         assert snap.name == simple_node.name
         assert snap.inputs == simple_node.inputs
         assert snap.outputs == simple_node.outputs
@@ -253,10 +314,10 @@ class TestNodeToSnapshotWithSource:
 
 
 class TestBuildPipelineSnapshotsWithSource:
-    def test_include_source_refs_propagated_to_nodes(self, simple_pipeline, tmp_path):
+    def test_include_source_refs_propagated_to_nodes(self, simple_pipeline):
         snapshots = _build_pipeline_snapshots(
             {"__default__": simple_pipeline},
-            project_path=tmp_path,
+            project_path=_MODULE_DIR,
             include_source="refs",
         )
         for n in snapshots[0].nodes:
@@ -265,10 +326,10 @@ class TestBuildPipelineSnapshotsWithSource:
             assert n.source.filepath is not None
             assert n.source.code is None
 
-    def test_include_source_full_propagated_to_nodes(self, simple_pipeline, tmp_path):
+    def test_include_source_full_propagated_to_nodes(self, simple_pipeline):
         snapshots = _build_pipeline_snapshots(
             {"__default__": simple_pipeline},
-            project_path=tmp_path,
+            project_path=_MODULE_DIR,
             include_source="full",
         )
         for n in snapshots[0].nodes:

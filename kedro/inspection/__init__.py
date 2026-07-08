@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from kedro.inspection.snapshot import _build_project_snapshot
 
@@ -22,6 +22,7 @@ def get_project_snapshot(
     env: str | None = None,
     conf_source: str | None = None,
     metadata: ProjectMetadata | None = None,
+    include_source: Literal[False, "refs", "full"] = False,
 ) -> ProjectSnapshot:
     """Return a read-only snapshot of the Kedro project.
 
@@ -64,12 +65,31 @@ def get_project_snapshot(
                 snapshot_default = get_project_snapshot(metadata=metadata)
                 snapshot_staging = get_project_snapshot(env="staging", metadata=metadata)
 
+        include_source: Controls whether source location metadata is populated
+            on each :class:`~kedro.inspection.models.NodeSnapshot`.
+
+            * ``False`` (default) — no source fields are populated. This is the
+              fastest option and is appropriate for CI, graph rendering, and any
+              consumer that does not need source location.
+            * ``"refs"`` — populates ``func_name``, ``source_filepath``,
+              ``source_line_start``, and ``source_line_end`` for each node.
+              File paths are project-relative where possible. Useful for
+              "open in editor" and code-panel link use-cases.
+            * ``"full"`` — same as ``"refs"`` plus ``source_code`` which
+              contains the full source text of the function. Suitable for
+              displaying source inline without a separate file read.
+
     Returns:
         A fully populated ``ProjectSnapshot``.
+
+    Raises:
+        ValueError: If *include_source* is not one of ``False``, ``"refs"``,
+            or ``"full"``.
     """
     return _build_project_snapshot(
         project_path=project_path,
         env=env,
         conf_source=conf_source,
         metadata=metadata,
+        include_source=include_source,
     )

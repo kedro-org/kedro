@@ -4,15 +4,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from kedro.inspection.snapshot import _build_project_snapshot
+from kedro.inspection.snapshot import (
+    _build_node_source_snapshot,
+    _build_project_snapshot,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from kedro.framework.startup import ProjectMetadata
-    from kedro.inspection.models import ProjectSnapshot
+    from kedro.inspection.models import NodeSourceSnapshot, ProjectSnapshot
 
 __all__ = [
+    "get_node_source",
     "get_project_snapshot",
 ]
 
@@ -72,4 +76,52 @@ def get_project_snapshot(
         env=env,
         conf_source=conf_source,
         metadata=metadata,
+    )
+
+
+def get_node_source(
+    node_name: str,
+    project_path: str | Path | None = None,
+    env: str | None = None,
+    conf_source: str | None = None,
+    metadata: ProjectMetadata | None = None,
+    *,
+    include_code: bool = True,
+) -> NodeSourceSnapshot:
+    """Return source information for a single pipeline node on demand.
+
+    At least one of *project_path* or *metadata* must be supplied.  When both
+    are given and point to different directories, *metadata.project_path* takes
+    precedence and a ``UserWarning`` is emitted.
+
+    Args:
+        node_name: Fully-qualified name of the node to inspect, as returned by
+            :attr:`kedro.pipeline.node.Node.name` or listed in
+            ``get_project_snapshot().pipelines[i].nodes[j].name``.
+        project_path: Path to the project root directory (the directory that
+            contains ``pyproject.toml``). Optional when *metadata* is provided.
+        env: Optional run environment override (e.g. ``"staging"``).
+        conf_source: Optional path to the configuration directory.
+        metadata: Optional pre-computed ``ProjectMetadata`` returned by a prior
+            ``bootstrap_project`` call.
+        include_code: When ``True`` (default) the ``code`` field of the returned
+            snapshot contains the source text. Pass ``False`` to retrieve only
+            file-path and line-range metadata.
+
+    Returns:
+        A :class:`~kedro.inspection.models.NodeSourceSnapshot` for the node.
+
+    Raises:
+        KeyError: When no node named *node_name* exists in any registered
+            pipeline.
+        ValueError: When neither *project_path* nor *metadata* is provided,
+            or *env* contains invalid characters.
+    """
+    return _build_node_source_snapshot(
+        node_name=node_name,
+        project_path=project_path,
+        env=env,
+        conf_source=conf_source,
+        metadata=metadata,
+        include_code=include_code,
     )

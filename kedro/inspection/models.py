@@ -61,6 +61,8 @@ class NodeSnapshot:
         tags: Sorted list of tags assigned to the node.
         inputs: Ordered list of input dataset names.
         outputs: Ordered list of output dataset names.
+        func_name: Human-readable name of the node's underlying function
+            (e.g. ``"split_data"``). Populated when built from a live ``Node``.
     """
 
     name: str
@@ -68,6 +70,33 @@ class NodeSnapshot:
     tags: list[str] = field(default_factory=list)
     inputs: list[str] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
+    func_name: str | None = None
+
+
+@dataclass
+class NodeSourceSnapshot:
+    """Read-only snapshot of a pipeline node's source information.
+
+    Attributes:
+        name: Fully-qualified node name (includes namespace prefix if present).
+        func_name: Human-readable function name as reported by the node.
+        source_filepath: Path to the source file, relative to the project root
+            when possible, or absolute when the file is outside the project.
+            ``None`` when the source file cannot be determined.
+        source_line_start: 1-based line number of the first line of the source
+            block, or ``None`` when unavailable.
+        source_line_end: 1-based line number of the last line of the source
+            block, or ``None`` when unavailable.
+        code: Full source text of the function, or ``None`` when
+            ``include_code=False`` or the source cannot be retrieved.
+    """
+
+    name: str
+    func_name: str | None = None
+    source_filepath: str | None = None
+    source_line_start: int | None = None
+    source_line_end: int | None = None
+    code: str | None = None
 
 
 @dataclass

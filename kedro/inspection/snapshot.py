@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import inspect
 import re
 import warnings
+from collections.abc import Callable
+from functools import partial as _partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from types import FunctionType
+from typing import TYPE_CHECKING, Any, cast
 
 from kedro.config import MissingConfigException
 from kedro.framework.project import pipelines
@@ -18,6 +22,7 @@ from kedro.inspection.helper import (
 from kedro.inspection.models import (
     DatasetSnapshot,
     NodeSnapshot,
+    NodeSourceSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
     ProjectSnapshot,
@@ -29,6 +34,145 @@ if TYPE_CHECKING:
 
 
 _ENV_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
+def _resolve_project_path(
+    project_path: str | Path | None,
+    metadata: ProjectMetadata | None,
+) -> tuple[Path, ProjectMetadata | None]:
+    """Resolve the effective project path."""
+    resolved = (
+        Path(project_path).expanduser().resolve() if project_path is not None else None
+    )
+    if metadata is not None:
+        if resolved is not None and resolved != metadata.project_path:
+            warnings.warn(
+                f"Both project_path and metadata were provided but point to different "
+                f"directories ({resolved!r} vs "
+                f"{metadata.project_path!r}). project_path will be ignored.",
+                UserWarning,
+                stacklevel=4,
+            )
+        return metadata.project_path, metadata
+    if resolved is not None:
+        return resolved, None
+    raise ValueError("Either project_path or metadata must be provided.")
+
+
+def _extract_node_func(func: Callable) -> Callable:
+    """Return the callable to use for source inspection."""
+    if inspect.ismethod(func):
+        func = func.__func__  # type: ignore[union-attr]
+    while isinstance(func, _partial):
+        func = func.func
+
+    unwrapped_func = cast(Callable, inspect.unwrap(func))
+    if unwrapped_func is not func:
+        return unwrapped_func
+
+    if isinstance(func, FunctionType) and func.__closure__:
+        wrapped_func = next(
+            (
+                cell.cell_contents
+                for cell in func.__closure__
+                if isinstance(cell.cell_contents, FunctionType)
+            ),
+            None,
+        )
+        if wrapped_func is not None and wrapped_func is not func:
+            return _extract_node_func(wrapped_func)
+
+    return func
+
+
+def _get_node_source_snapshot(
+    node_name: str,
+    pipeline_dict: dict[str, Any],
+    project_path: Path,
+    *,
+    include_code: bool = True,
+) -> NodeSourceSnapshot:
+    """Resolve source information for a single pipeline node."""
+    found_node: Node | None = None
+    for pipeline in pipeline_dict.values():
+        if pipeline is None:
+            continue
+        for n in pipeline.nodes:
+            if n.name == node_name:
+                found_node = n
+                break
+        if found_node is not None:
+            break
+
+    if found_node is None:
+        raise KeyError(
+            f"No node named {node_name!r} found in any registered pipeline. "
+            "Use get_project_snapshot() to list available node names."
+        )
+
+    func_name: str | None = found_node._func_name
+    source_filepath: str | None = None
+    source_line_start: int | None = None
+    source_line_end: int | None = None
+    code: str | None = None
+
+    resolved_func = _extract_node_func(found_node.func)
+
+    try:
+        raw_filepath = Path(inspect.getfile(resolved_func))
+        try:
+            source_filepath = str(raw_filepath.relative_to(project_path))
+        except ValueError:
+            # File lives outside the project root (e.g. installed library)
+            source_filepath = str(raw_filepath)
+    except TypeError:
+        pass  # built-in or C-extension: no file available
+
+    try:
+        lines, start = inspect.getsourcelines(resolved_func)
+        source_line_start = start
+        source_line_end = start + len(lines) - 1
+        if include_code:
+            code = "".join(lines)
+    except (OSError, TypeError):
+        pass  # dynamically generated, built-in, or otherwise unreadable source
+
+    return NodeSourceSnapshot(
+        name=node_name,
+        func_name=func_name,
+        source_filepath=source_filepath,
+        source_line_start=source_line_start,
+        source_line_end=source_line_end,
+        code=code,
+    )
+
+
+def _build_node_source_snapshot(
+    node_name: str,
+    project_path: str | Path | None = None,
+    env: str | None = None,
+    conf_source: str | None = None,
+    metadata: ProjectMetadata | None = None,
+    *,
+    include_code: bool = True,
+) -> NodeSourceSnapshot:
+    """Bootstrap the project and return source information for a single node."""
+    effective_project_path, metadata = _resolve_project_path(project_path, metadata)
+
+    if env is not None and not _ENV_RE.match(env):
+        raise ValueError(
+            f"Invalid env value {env!r}: must contain only letters, digits, hyphens, and underscores."
+        )
+
+    if metadata is None:
+        metadata = bootstrap_project(effective_project_path)
+
+    return _get_node_source_snapshot(
+        node_name=node_name,
+        pipeline_dict=dict(pipelines),
+        project_path=effective_project_path,
+        include_code=include_code,
+    )
 
 
 def _build_project_metadata_snapshot(
@@ -83,6 +227,7 @@ def _node_to_snapshot(node: Node) -> NodeSnapshot:
         tags=sorted(node.tags),
         inputs=node.inputs,
         outputs=node.outputs,
+        func_name=node._func_name,
     )
 
 
@@ -138,26 +283,7 @@ def _build_project_snapshot(
     Returns:
         A fully populated ``ProjectSnapshot``.
     """
-    resolved_project_path = (
-        Path(project_path).expanduser().resolve() if project_path is not None else None
-    )
-    if metadata is not None:
-        if (
-            resolved_project_path is not None
-            and resolved_project_path != metadata.project_path
-        ):
-            warnings.warn(
-                f"Both project_path and metadata were provided but point to different "
-                f"directories ({resolved_project_path!r} vs "
-                f"{metadata.project_path!r}). project_path will be ignored.",
-                UserWarning,
-                stacklevel=3,
-            )
-        effective_project_path = metadata.project_path
-    elif resolved_project_path is not None:
-        effective_project_path = resolved_project_path
-    else:
-        raise ValueError("Either project_path or metadata must be provided.")
+    effective_project_path, metadata = _resolve_project_path(project_path, metadata)
 
     if env is not None and not _ENV_RE.match(env):
         raise ValueError(

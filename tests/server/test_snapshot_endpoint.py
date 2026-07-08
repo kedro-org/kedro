@@ -23,6 +23,7 @@ def _make_snapshot() -> ProjectSnapshot:
                 nodes=[
                     NodeSnapshot(
                         name="my_node",
+                        func_name="my_func",
                         namespace="ns",
                         tags=["tag1"],
                         inputs=["raw_data"],

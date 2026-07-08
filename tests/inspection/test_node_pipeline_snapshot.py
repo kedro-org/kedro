@@ -81,8 +81,9 @@ def simple_pipeline(simple_node):
 
 class TestNodeSnapshot:
     def test_instantiation_defaults(self):
-        snapshot = NodeSnapshot(name="my_node")
+        snapshot = NodeSnapshot(name="my_node", func_name="my_func")
         assert snapshot.name == "my_node"
+        assert snapshot.func_name == "my_func"
         assert snapshot.namespace is None
         assert snapshot.tags == []
         assert snapshot.inputs == []
@@ -115,7 +116,9 @@ class TestNodeToSnapshot:
 
 class TestPipelineSnapshot:
     def test_instantiation(self):
-        node_snap = NodeSnapshot(name="n", inputs=["a"], outputs=["b"])
+        node_snap = NodeSnapshot(
+            name="n", func_name="_identity", inputs=["a"], outputs=["b"]
+        )
         snapshot = PipelineSnapshot(name="my_pipe", nodes=[node_snap])
         assert snapshot.name == "my_pipe"
         assert snapshot.nodes == [node_snap]
@@ -168,7 +171,6 @@ class TestExtractNodeSource:
     def test_populates_location_fields(self, simple_node):
         src = _extract_node_source(simple_node, _MODULE_DIR)
         assert isinstance(src, NodeSourceSnapshot)
-        assert src.func_name == "_identity"
         assert src.filepath == "test_node_pipeline_snapshot.py"
         assert isinstance(src.line_start, int)
         assert isinstance(src.line_end, int)
@@ -200,28 +202,26 @@ class TestExtractNodeSource:
         unrelated_path = tmp_path / "other_project"
         unrelated_path.mkdir()
         src = _extract_node_source(simple_node, unrelated_path)
-        assert src.filepath is None
+        assert src is None
 
     def test_partial_unwrapped_to_underlying_func(self, tmp_path):
         p = partial(_identity, 1)
         n = node(p, inputs=None, outputs="out", name="partial_node")
-        src = _extract_node_source(n, tmp_path)
-        assert src.func_name is not None
+        src = _extract_node_source(n, _MODULE_DIR)
+        assert src is not None
         assert src.line_start is not None
 
     def test_builtin_returns_none_fields(self, tmp_path):
         n = node(len, inputs="x", outputs="y", name="len_node")
         src = _extract_node_source(n, tmp_path)
-        assert src.filepath is None
-        assert src.line_start is None
-        assert src.line_end is None
+        assert src is None
 
 
 class TestNodeToSnapshotWithSource:
     def test_populates_source_by_default(self, simple_node):
         snap = _node_to_snapshot(simple_node, project_path=_MODULE_DIR)
+        assert snap.func_name == "_identity"
         assert snap.source is not None
-        assert snap.source.func_name == "_identity"
         assert snap.source.filepath is not None
         assert snap.source.line_start is not None
         assert snap.source.line_end is not None
@@ -238,6 +238,6 @@ class TestBuildPipelineSnapshotsWithSource:
             project_path=_MODULE_DIR,
         )
         for n in snapshots[0].nodes:
+            assert n.func_name == "_identity"
             assert n.source is not None
-            assert n.source.func_name is not None
             assert n.source.filepath is not None

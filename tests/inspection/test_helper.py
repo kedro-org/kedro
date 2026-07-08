@@ -12,7 +12,7 @@ from kedro.inspection.models import DatasetSnapshot, NodeSnapshot, PipelineSnaps
 
 
 def _make_node_snapshot(inputs: list[str], outputs: list[str]) -> NodeSnapshot:
-    return NodeSnapshot(name="n", inputs=inputs, outputs=outputs)
+    return NodeSnapshot(name="n", func_name="node_func", inputs=inputs, outputs=outputs)
 
 
 def _make_pipeline_snapshot(nodes: list[NodeSnapshot]) -> PipelineSnapshot:

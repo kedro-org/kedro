@@ -102,7 +102,7 @@ def _extract_node_func(func: Callable) -> Callable:
 def _extract_node_source(
     node: Node,
     project_path: Path,
-) -> NodeSourceSnapshot:
+) -> NodeSourceSnapshot | None:
     """Extract source location metadata from a live ``Node``.
 
     Args:
@@ -111,32 +111,20 @@ def _extract_node_source(
             project-relative when possible and omitted for external files.
 
     Returns:
-        A ``NodeSourceSnapshot`` with all available source metadata.
+        Source location metadata, or ``None`` when it cannot be determined.
     """
-    func_name: str | None = node._func_name
     func = _extract_node_func(node.func)
-
-    filepath: str | None = None
-    line_start: int | None = None
-    line_end: int | None = None
 
     try:
         filepath = str(Path(inspect.getfile(func)).relative_to(project_path))
-    except (TypeError, OSError, ValueError):
-        pass
-
-    try:
         lines, start = inspect.getsourcelines(func)
-        line_start = start
-        line_end = start + len(lines) - 1
-    except (OSError, TypeError):
-        pass
+    except (TypeError, OSError, ValueError):
+        return None
 
     return NodeSourceSnapshot(
-        func_name=func_name,
         filepath=filepath,
-        line_start=line_start,
-        line_end=line_end,
+        line_start=start,
+        line_end=start + len(lines) - 1,
     )
 
 

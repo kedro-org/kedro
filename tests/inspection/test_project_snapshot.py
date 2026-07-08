@@ -43,6 +43,7 @@ def metadata_snapshot():
 def node_snapshot():
     return NodeSnapshot(
         name="node_a",
+        func_name="node_func",
         inputs=["companies"],
         outputs=["processed_companies"],
     )

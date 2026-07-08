@@ -55,23 +55,18 @@ class DatasetSnapshot:
 class NodeSourceSnapshot:
     """Source location metadata for a pipeline node's underlying function.
 
-    All fields may be ``None`` when the information cannot be determined (e.g.
-    built-in functions, dynamically created callables).
-
     Attributes:
-        func_name: Readable name of the function (from ``Node._func_name``).
         filepath: Path to the source file. Project-relative when the file is
-            within the project root; ``None`` for external files.
+            within the project root.
         line_start: 1-based line number of the first line of the function
             definition.
         line_end: 1-based line number of the last line of the function
             definition.
     """
 
-    func_name: str | None = None
-    filepath: str | None = None
-    line_start: int | None = None
-    line_end: int | None = None
+    filepath: str
+    line_start: int
+    line_end: int
 
 
 @dataclass
@@ -92,7 +87,7 @@ class NodeSnapshot:
     """
 
     name: str
-    func_name: str | None = None
+    func_name: str
     namespace: str | None = None
     tags: list[str] = field(default_factory=list)
     inputs: list[str] = field(default_factory=list)

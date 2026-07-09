@@ -35,6 +35,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Jean-Baptiste Braun](https://github.com/jbbqqf)
 * [Gargi](https://github.com/Kaliagargi)
 * [Simon](https://github.com/simon-b)
+* [samiat4911](https://github.com/samiat4911)
 
 
 # Release 1.4.0

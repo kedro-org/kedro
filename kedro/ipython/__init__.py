@@ -13,6 +13,7 @@ import os
 import sys
 import typing
 import warnings
+from collections import OrderedDict
 from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
@@ -20,7 +21,6 @@ from typing import TYPE_CHECKING, Any, Final
 from kedro.framework.session.session import KedroSession
 
 if TYPE_CHECKING:
-    from collections import OrderedDict
     from collections.abc import Callable
 
     from IPython.core.interactiveshell import InteractiveShell
@@ -405,7 +405,9 @@ def _get_node_bound_arguments(node: Node) -> _NodeBoundArguments:
     args, kwargs = Node._process_inputs_for_bind(node_inputs)
     signature = inspect.signature(node_func)
     bound_arguments = signature.bind(*args, **kwargs)
-    return _NodeBoundArguments(bound_arguments.signature, bound_arguments.arguments)
+    return _NodeBoundArguments(
+        bound_arguments.signature, OrderedDict(bound_arguments.arguments)
+    )
 
 
 def _prepare_node_inputs(

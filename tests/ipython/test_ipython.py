@@ -229,16 +229,24 @@ class TestLoadIPythonExtension:
         ("args", "expected_path", "expected_env", "expected_conf_source"),
         [
             ("--params foo='bar baz'", None, None, None),
+            ('--params foo="bar baz"', None, None, None),
             ("--params 'foo=bar baz'", None, None, None),
+            ('--params "foo=bar baz"', None, None, None),
             (
                 ". --env=base --params foo='bar baz' --conf-source=new_conf",
                 ".",
                 "base",
                 "new_conf",
             ),
+            (
+                '. --env=base --params foo="bar baz" --conf-source=new_conf',
+                ".",
+                "base",
+                "new_conf",
+            ),
         ],
     )
-    def test_line_magic_params_with_single_quoted_spaces(
+    def test_line_magic_params_with_quoted_spaces(
         self,
         mocker,
         args,
@@ -262,11 +270,14 @@ class TestLoadIPythonExtension:
         "args",
         [
             "--params foo='bar baz'",
+            '--params foo="bar baz"',
             "--params 'foo=bar baz'",
+            '--params "foo=bar baz"',
             ". --env=base --params foo='bar baz' --conf-source=new_conf",
+            '. --env=base --params foo="bar baz" --conf-source=new_conf',
         ],
     )
-    def test_normalise_reload_kedro_params_with_single_quoted_spaces(self, args):
+    def test_normalise_reload_kedro_params_with_quoted_spaces(self, args):
         normalised_args = _normalise_reload_kedro_params(args)
         split_args = arg_split(normalised_args)
         params_index = split_args.index("--params") + 1

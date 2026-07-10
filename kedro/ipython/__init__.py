@@ -56,12 +56,12 @@ FunctionParameters = MappingProxyType
 
 RICH_INSTALLED: Final = importlib.util.find_spec("rich") is not None
 
-_PARAM_VALUE_SINGLE_QUOTED = re.compile(
+_PARAM_VALUE_QUOTED = re.compile(
     r"(?P<option>(?:^|\s)--params)(?P<separator>=|\s+)"
-    r"(?P<key>[^=\s]+)='(?P<value>[^']*)'"
+    r"(?P<key>[^=\s]+)=(?P<quote>['\"])(?P<value>.*?)(?P=quote)"
 )
-_PARAM_ITEM_SINGLE_QUOTED = re.compile(
-    r"(?P<prefix>(?:^|\s)--params(?:=|\s+))'(?P<value>[^']*)'"
+_PARAM_ITEM_QUOTED = re.compile(
+    r"(?P<prefix>(?:^|\s)--params(?:=|\s+))(?P<quote>['\"])(?P<value>.*?)(?P=quote)"
 )
 
 
@@ -88,15 +88,15 @@ def load_ipython_extension(ipython: InteractiveShell) -> None:
 
 
 def _normalise_reload_kedro_params(line: str) -> str:
-    """Normalise single-quoted ``--params`` values before IPython splits them."""
-    line = _PARAM_VALUE_SINGLE_QUOTED.sub(
+    """Normalise quoted ``--params`` values before IPython splits them."""
+    line = _PARAM_VALUE_QUOTED.sub(
         lambda match: (
             f'{match.group("option")}{match.group("separator")}"'
             f'{match.group("key")}={match.group("value")}"'
         ),
         line,
     )
-    return _PARAM_ITEM_SINGLE_QUOTED.sub(
+    return _PARAM_ITEM_QUOTED.sub(
         lambda match: f'{match.group("prefix")}"{match.group("value")}"',
         line,
     )

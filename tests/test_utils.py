@@ -35,6 +35,19 @@ class TestGetCloseMatches:
         print(result)
         assert result == ["data_science", "data_engineering"]
 
+    def test_list_input_deduplicates_shared_matches(self):
+        # Two misspellings that both resolve to the same target should suggest
+        # that target only once, not repeat it.
+        result = get_close_matches(["pipelin", "pipeine"], ["pipeline", "catalog"])
+        assert result == ["pipeline"]
+
+    def test_list_input_accepts_one_shot_iterator_targets(self):
+        # `targets` is typed as an Iterable; a generator must not be exhausted
+        # after matching the first input string.
+        targets = (name for name in ["data_science", "data_engineering"])
+        result = get_close_matches(["data_scnce", "data_enginering"], targets)
+        assert result == ["data_science", "data_engineering"]
+
 
 class TestExtractObject:
     def test_load_obj(self):

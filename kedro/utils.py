@@ -279,19 +279,21 @@ def get_close_matches(
     Returns:
         List of close matches or empty list if no matches are found.
     """
-    _init_matches = []
-    if isinstance(input, str):
-        matches = difflib.get_close_matches(
-            input, list(targets), n=max_suggestions, cutoff=cutoff
-        )
-        _init_matches.extend(matches)
-    else:
-        for source_str in input:
-            _matches = difflib.get_close_matches(
-                source_str, list(targets), n=max_suggestions, cutoff=cutoff
-            )
-            _init_matches.extend(_matches)
-    return _init_matches[:max_suggestions]
+    # Materialize once: `targets` may be a one-shot iterable, and it is reused
+    # for every input string below.
+    targets = list(targets)
+    inputs = [input] if isinstance(input, str) else input
+
+    matches: list[str] = []
+    for source_str in inputs:
+        for match in difflib.get_close_matches(
+            source_str, targets, n=max_suggestions, cutoff=cutoff
+        ):
+            # Deduplicate while preserving order: different inputs can match the
+            # same target, which would otherwise repeat it in the suggestions.
+            if match not in matches:
+                matches.append(match)
+    return matches[:max_suggestions]
 
 
 def find_config_file(

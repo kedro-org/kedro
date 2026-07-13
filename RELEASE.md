@@ -1,6 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
 ## Bug fixes and other changes
+* Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
 ## Documentation changes
 ## Community contributions
 

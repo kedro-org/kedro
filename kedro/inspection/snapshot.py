@@ -79,6 +79,7 @@ def _node_to_snapshot(node: Node) -> NodeSnapshot:
     """
     return NodeSnapshot(
         name=node.name,
+        func_name=node._func_name,
         namespace=node.namespace,
         tags=sorted(node.tags),
         inputs=node.inputs,

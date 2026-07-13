@@ -42,8 +42,9 @@ def simple_pipeline(simple_node):
 
 class TestNodeSnapshot:
     def test_instantiation_defaults(self):
-        snapshot = NodeSnapshot(name="my_node")
+        snapshot = NodeSnapshot(name="my_node", func_name="my_func")
         assert snapshot.name == "my_node"
+        assert snapshot.func_name == "my_func"
         assert snapshot.namespace is None
         assert snapshot.tags == []
         assert snapshot.inputs == []
@@ -54,6 +55,7 @@ class TestNodeToSnapshot:
     def test_populates_all_fields(self, simple_node):
         snapshot = _node_to_snapshot(simple_node)
         assert snapshot.name == simple_node.name
+        assert snapshot.func_name == "_identity"
         assert snapshot.namespace == simple_node.namespace
         assert snapshot.inputs == simple_node.inputs
         assert snapshot.outputs == simple_node.outputs
@@ -72,7 +74,9 @@ class TestNodeToSnapshot:
 
 class TestPipelineSnapshot:
     def test_instantiation(self):
-        node_snap = NodeSnapshot(name="n", inputs=["a"], outputs=["b"])
+        node_snap = NodeSnapshot(
+            name="n", func_name="identity", inputs=["a"], outputs=["b"]
+        )
         snapshot = PipelineSnapshot(name="my_pipe", nodes=[node_snap])
         assert snapshot.name == "my_pipe"
         assert snapshot.nodes == [node_snap]

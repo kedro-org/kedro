@@ -540,6 +540,9 @@ def _get_available_tags(template_path: str) -> list:
     try:
         tags = git.cmd.Git().ls_remote("--tags", template_path.replace("git+", ""))
 
+        if not isinstance(tags, str):
+            return []
+        
         unique_tags = {
             tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n")
         }

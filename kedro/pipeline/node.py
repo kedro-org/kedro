@@ -630,7 +630,7 @@ class Node:
                     f"do not match with the returned output's keys {set(keys)}."
                 )
             if iterator:
-                exploded = map(lambda x: tuple(x[k] for k in keys), iterator)
+                exploded = map(lambda x: tuple(x[k] for k in keys), iterator)  # type: ignore[index]
                 result = unzip(exploded)
             else:
                 # evaluate this eagerly so we can reuse variable name
@@ -659,7 +659,7 @@ class Node:
                 )
 
             if iterator:
-                result = unzip(iterator)
+                result = unzip(iterator)  # type: ignore[arg-type]
             return dict(zip(self._outputs, result))
 
         if self._outputs is None:

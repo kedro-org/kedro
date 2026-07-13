@@ -539,20 +539,15 @@ def _get_available_tags(template_path: str) -> list:
 
     try:
         tags = git.cmd.Git().ls_remote("--tags", template_path.replace("git+", ""))
-
-        if not isinstance(tags, str):
-            return []
-        
-        unique_tags = {
-            tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n")
-        }
-        # Remove git ref "^{}" and duplicates. For example,
-        # tags: ['/tags/version', '/tags/version^{}']
-        # unique_tags: {'version'}
-
     except git.GitCommandError:  # pragma: no cover
         return []
-    return sorted(unique_tags)
+
+    if not isinstance(tags, str):
+        return []
+    # Remove git ref "^{}" and duplicates. For example,
+    # tags: ['/tags/version', '/tags/version^{}']
+    # unique_tags: {'version'}
+    return sorted({tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n")})
 
 
 def _get_starters_dict() -> dict[str, KedroStarterSpec]:

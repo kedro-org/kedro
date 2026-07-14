@@ -14,6 +14,8 @@ There are several ways to contribute to Kedro, such as answering questions about
 
 Take a look at [our curated open source ticket board](https://github.com/orgs/kedro-org/projects/16) and more [contribution suggestions on the Kedro GitHub Wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro)!
 
+Only issues on the open source ticket board or labelled [`good first issue`](https://github.com/kedro-org/kedro/issues?q=label%3A%22good+first+issue%22) or [`help wanted`](https://github.com/kedro-org/kedro/issues?q=label%3A%22help+wanted%22) are open for community contributions. Other issues are not ready yet — the core team needs to groom them before they can be picked up.
+
 If you want to work on a new idea, reach out via [Slack](https://slack.kedro.org/) or by opening a GitHub issue before opening a PR. That helps us align on the approach and gives your contribution the highest chance of being accepted.
 
 Before opening a PR, read the relevant guidelines:

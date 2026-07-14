@@ -215,6 +215,7 @@ DataValidationError: Validation failed for dataset 'companies' on load
 1. **Live demo errors** → don't debug on camera: *"here's last night's run"* → screenshots / `/tmp/demo_backup.txt`.
 2. **Wrong kedro** (the likely gremlin): the project must use `./.venv/bin/kedro`, NOT the conda env's `kedro` (that's stock 1.4.0, no validation — it will silently not validate).
 3. **Data left corrupted** from a previous rehearsal → `./demo_restore.sh`.
+4. **Branch check:** keep `~/GitHub/kedro` checked out on **`prototype/kep7-v2-catalog-validation`** for the whole session. The spaceflights venv's kedro is *editable* — it runs whatever the repo working tree holds (both branches carry identical implementation, but `main` would silently lose validation), and the Part-2 encore script (`examples/`) now exists **only** on the prototype branch (removed from `feat/kep10-dataset-validation` to keep it code-only).
 4. **Someone wants to reproduce** → *"spaceflights-pandas starter + `pip install -e <branch> pandera[pandas]`, add the schema file and one catalog line."* (Which is itself the adoption pitch.)
 
 ## Module 6 — The Q&A drill bank (from the simulated panel)

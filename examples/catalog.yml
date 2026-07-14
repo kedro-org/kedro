@@ -1,0 +1,64 @@
+# Example catalog showing the KEP-7 v2 `validator:` key.
+#
+# `validator:` is a reserved top-level dataset-config key, a peer of
+# `type:` / `versioned:` / `credentials:` / `metadata:`. It is captured by the
+# DataCatalog (never passed to the dataset constructor) and applied as a
+# single funnel on every `catalog.load()` / `catalog.save()`. Save validation
+# runs BEFORE the write, so invalid data never lands on disk.
+#
+# See KEP-7-dataset-validation-v2.md (repo root) for the full design and
+# examples/demo_catalog_validation.py for a runnable walkthrough.
+
+# 1. Shorthand: dotted import path to a pandera schema (or any Validator).
+companies:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/companies.csv
+  validator: examples.schemas.CompaniesSchema
+
+# 2. Long form: full control over modes, severity and adapter options.
+reviews:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/reviews.parquet
+  validator:
+    class: examples.schemas.ReviewsSchema
+    on: [save]            # subset of [load, save]; default: both.
+                          # (bare `on` is a YAML 1.1 boolean — Kedro
+                          # normalises the True key back to "on" for you)
+    severity: warn        # error (default) | warn — warn logs and continues
+    options:              # forwarded to the adapter (PanderaValidator here)
+      lazy: true          # collect all failures before reporting (default)
+      sample: 1000        # validate a random sample — large-frame cost knob
+      random_state: 42
+
+# 3. One schema across many datasets: per-file YAML anchor recipe.
+#    Keys with a leading "_" are dropped by OmegaConfigLoader after merge,
+#    so `_model_input` never becomes a dataset.
+_model_input: &model_input
+  class: examples.schemas.CompaniesSchema
+
+X_train:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_train.parquet
+  validator: *model_input
+
+X_test:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_test.parquet
+  validator: *model_input
+
+# 4. Dataset factory: one validator covers every matching dataset, and
+#    {placeholder} interpolation works inside validator strings.
+"{partner}_shuttles":
+  type: pandas.ExcelDataset
+  filepath: data/01_raw/{partner}_shuttles.xlsx
+  validator: examples.schemas.ShuttlesSchema
+
+# 5. Non-tabular: any class exposing validate(data) -> data satisfies the
+#    Validator protocol; `options` are passed to its constructor.
+model_metrics:
+  type: json.JSONDataset
+  filepath: data/08_reporting/metrics.json
+  validator:
+    class: examples.schemas.MetricsValidator
+    options:
+      required_keys: [accuracy, f1]

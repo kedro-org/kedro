@@ -252,6 +252,58 @@ class TestKedroContext:
         reloaded_df = dummy_context.catalog.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
+    def test_get_catalog_sets_validation_enabled_from_settings(self, dummy_context):
+        catalog = dummy_context._get_catalog()
+        assert catalog.validation_enabled is True
+
+    def test_get_catalog_validation_disabled_via_settings(
+        self, dummy_context, mock_settings
+    ):
+        mock_settings.set("DATASET_VALIDATION", False)
+        catalog = dummy_context._get_catalog()
+        assert catalog.validation_enabled is False
+
+    def test_configure_dataset_validation_warns_for_unsupported_catalog(
+        self, dummy_context, caplog
+    ):
+        class PlainCatalog:
+            """Catalog without the validation funnel (no validation_enabled)."""
+
+        conf_catalog = {
+            "cars": {
+                "type": "pandas.CSVDataset",
+                "filepath": "cars.csv",
+                "validator": "my_pkg.CarsSchema",
+            },
+            "boats": {"type": "pandas.CSVDataset", "filepath": "boats.csv"},
+        }
+        with caplog.at_level(logging.WARNING, logger="kedro.framework.context.context"):
+            dummy_context._configure_dataset_validation(PlainCatalog(), conf_catalog)
+
+        assert "cars" in caplog.text
+        assert "boats" not in caplog.text
+        assert "PlainCatalog" in caplog.text
+        assert "ignored" in caplog.text
+
+    def test_configure_dataset_validation_no_warning_when_disabled(
+        self, dummy_context, mock_settings, caplog
+    ):
+        class PlainCatalog:
+            """Catalog without the validation funnel (no validation_enabled)."""
+
+        mock_settings.set("DATASET_VALIDATION", False)
+        conf_catalog = {
+            "cars": {
+                "type": "pandas.CSVDataset",
+                "filepath": "cars.csv",
+                "validator": "my_pkg.CarsSchema",
+            }
+        }
+        with caplog.at_level(logging.WARNING, logger="kedro.framework.context.context"):
+            dummy_context._configure_dataset_validation(PlainCatalog(), conf_catalog)
+
+        assert caplog.text == ""
+
     def test_wrong_catalog_type(self, mock_settings_file_bad_data_catalog_class):
         pattern = (
             "Invalid value 'tests.framework.context.test_context.BadCatalog' received "

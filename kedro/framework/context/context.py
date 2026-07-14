@@ -290,7 +290,7 @@ class KedroContext:
         for param_name, param_value in parameters.items():
             catalog[param_name] = param_value
 
-        self._apply_dataset_validation(catalog)
+        self._configure_dataset_validation(catalog, conf_catalog)
 
         _validate_transcoded_datasets(catalog)
 
@@ -340,49 +340,44 @@ class KedroContext:
             conf_creds = {}
         return conf_creds
 
-    def _apply_dataset_validation(self, catalog: CatalogProtocol) -> None:
-        """Discover Pandera dataset schemas from pipeline node signatures
-        and wrap matching catalog datasets with validation on ``load()``.
+    def _configure_dataset_validation(
+        self, catalog: CatalogProtocol, conf_catalog: dict[str, Any]
+    ) -> None:
+        """Propagate the ``DATASET_VALIDATION`` project setting to the catalog.
+
+        If the catalog class implements the validation funnel (exposes a
+        ``validation_enabled`` attribute), the setting is applied to it.
+        Otherwise, a warning is emitted when datasets declare validators
+        that this catalog class will ignore.
 
         Args:
-            catalog: The catalog to apply dataset validation to.
+            catalog: The catalog to configure dataset validation for.
+            conf_catalog: The raw catalog configuration, used to detect
+                declared ``validator`` keys on datasets.
         """
-        try:
-            from kedro.framework.project import pipelines as project_pipelines
-            from kedro.validation.dataset_validator import _ValidatingDataset
-            from kedro.validation.type_extractor import TypeExtractor
+        from kedro.framework.project import settings
 
-            pipeline_dict = dict(project_pipelines)
-        except ImportError:
-            logging.getLogger(__name__).debug(
-                "Could not import pipelines or validation modules, "
-                "skipping dataset validation"
+        enabled = bool(getattr(settings, "DATASET_VALIDATION", True))
+
+        if hasattr(catalog, "validation_enabled"):
+            catalog.validation_enabled = enabled
+        elif enabled:
+            from kedro.io.core import VALIDATOR_KEY
+
+            declared = sorted(
+                ds_name
+                for ds_name, ds_config in conf_catalog.items()
+                if isinstance(ds_config, dict) and VALIDATOR_KEY in ds_config
             )
-            return
-
-        extractor = TypeExtractor(pipeline_dict)
-        dataset_schemas = extractor.extract_dataset_schemas()
-
-        if not dataset_schemas:
-            return
-
-        for dataset_name, schema_class in dataset_schemas.items():
-            if dataset_name in catalog._datasets:
-                original = catalog._datasets[dataset_name]
-                catalog._datasets[dataset_name] = _ValidatingDataset(
-                    wrapped_dataset=original,
-                    schema_class=schema_class,
-                    dataset_name=dataset_name,
+            if declared:
+                logging.getLogger(__name__).warning(
+                    "Datasets %s declare a '%s' key, but catalog class '%s' "
+                    "does not support dataset validation. Declared validators "
+                    "will be ignored.",
+                    declared,
+                    VALIDATOR_KEY,
+                    type(catalog).__name__,
                 )
-                logging.getLogger(__name__).debug(
-                    "Wrapped dataset '%s' with validation against %s",
-                    dataset_name,
-                    schema_class.__name__,
-                )
-
-        logging.getLogger(__name__).info(
-            "Applied dataset validation to %d dataset(s)", len(dataset_schemas)
-        )
 
 
 class KedroContextError(Exception):

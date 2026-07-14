@@ -97,6 +97,9 @@ jupyter = [
 benchmark = [
     "asv"
 ]
+validation = [
+    "pandera[pandas]>=0.24"
+]
 all = [ "kedro[test,docs,jupyter,benchmark]" ]
 
 [project.urls]

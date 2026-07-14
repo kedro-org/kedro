@@ -50,6 +50,7 @@ VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
 PROTOCOL_DELIMITER = "://"
 TYPE_KEY = "type"
+VALIDATOR_KEY = "validator"
 
 # Type alias for copy modes
 TCopyMode = Literal["deepcopy", "copy", "assign"]
@@ -535,6 +536,19 @@ def parse_dataset_definition(
     save_version = save_version or generate_timestamp()
     config = copy.deepcopy(config)
     dataset_type = config.pop(TYPE_KEY)
+
+    if VALIDATOR_KEY in config:
+        # The validator key is catalog-level configuration handled by the
+        # DataCatalog and must never reach the dataset constructor. It is
+        # popped defensively here so that direct AbstractDataset.from_config
+        # calls do not fail with a TypeError.
+        logging.getLogger(__name__).warning(
+            "'%s' attribute removed from dataset configuration since it is "
+            "handled by the DataCatalog and cannot be passed to the dataset "
+            "constructor.",
+            VALIDATOR_KEY,
+        )
+        del config[VALIDATOR_KEY]
 
     # This check prevents the use of dataset types with uppercase 'S' in 'Dataset',
     # which is no longer supported as of kedro-datasets 2.0

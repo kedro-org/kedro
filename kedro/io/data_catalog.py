@@ -8,6 +8,7 @@ save functions to the underlying datasets.
 from __future__ import annotations
 
 import logging
+import os
 import re
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
@@ -17,6 +18,7 @@ from kedro.io.cached_dataset import CachedDataset
 from kedro.io.catalog_config_resolver import CatalogConfigResolver
 from kedro.io.core import (
     TYPE_KEY,
+    VALIDATOR_KEY,
     AbstractDataset,
     AbstractVersionedDataset,
     CatalogProtocol,
@@ -33,6 +35,8 @@ from kedro.utils import _format_rich, _has_rich_handler
 
 if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager
+
+    from kedro.validation import ValidatorSpec
 
 
 class _LazyDataset:
@@ -214,6 +218,7 @@ class DataCatalog(CatalogProtocol):
         config_resolver: CatalogConfigResolver | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
+        validation_enabled: bool = True,
     ) -> None:
         """Initializes a ``DataCatalog`` to manage datasets with loading, saving, and versioning capabilities.
 
@@ -234,6 +239,10 @@ class DataCatalog(CatalogProtocol):
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
+            validation_enabled: Whether dataset validation (declared via the
+                ``validator`` key in catalog entries) is applied on load and
+                save. The ``KEDRO_DATASET_VALIDATION`` environment variable,
+                when set, takes precedence over this flag.
 
         Example:
         ``` python
@@ -265,6 +274,11 @@ class DataCatalog(CatalogProtocol):
         self._load_versions, self._save_version = self._validate_versions(
             datasets, load_versions or {}, save_version
         )
+
+        self.validation_enabled = validation_enabled
+        self._validator_specs: dict[str, ValidatorSpec] = {}
+        self._validators: dict[str, Any] = {}
+        self._save_validated: set[str] = set()
 
         self._use_rich_markup = _has_rich_handler()
 
@@ -298,6 +312,20 @@ class DataCatalog(CatalogProtocol):
         ```
         """
         return self._config_resolver
+
+    @property
+    def validators(self) -> dict[str, Any]:
+        """Validator declarations captured from the catalog configuration.
+
+        Returns:
+            A mapping of dataset names to their validator configuration in the
+            same shape it can be declared in the catalog: a plain class-path
+            string for shorthand declarations or a dictionary for the long
+            form.
+        """
+        return {
+            ds_name: spec.to_config() for ds_name, spec in self._validator_specs.items()
+        }
 
     def __repr__(self) -> str:
         """
@@ -381,6 +409,26 @@ class DataCatalog(CatalogProtocol):
             other._lazy_datasets,
             other.config_resolver.list_patterns(),
         )
+
+    def __getstate__(self) -> dict[str, Any]:
+        """Prepare the catalog state for pickling.
+
+        Resolved validator instances (``_validators``) may hold unpicklable
+        objects (e.g. schema instances), so the cache is dropped and lazily
+        rebuilt from ``_validator_specs`` in the target process. The
+        ``_save_validated`` bookkeeping is per-process state and is reset.
+        """
+        state = self.__dict__.copy()
+        state["_validators"] = {}
+        state["_save_validated"] = set()
+        return state
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        """Restore the catalog state after unpickling with fresh per-process
+        validator caches."""
+        self.__dict__.update(state)
+        self._validators = {}
+        self._save_validated = set()
 
     def keys(self) -> List[str]:  # noqa: UP006
         """
@@ -527,6 +575,9 @@ class DataCatalog(CatalogProtocol):
             self._lazy_datasets.pop(key, None)
             self._config_resolver.config.pop(key, None)
             self._load_versions.pop(key, None)
+            self._validator_specs.pop(key, None)
+            self._validators.pop(key, None)
+            self._save_validated.discard(key)
         if isinstance(value, AbstractDataset):
             self._load_versions, self._save_version = self._validate_versions(
                 {key: value}, self._load_versions, self._save_version
@@ -781,6 +832,13 @@ class DataCatalog(CatalogProtocol):
             credentials.update(unresolved_credentials)
             load_versions[ds_name] = self._load_versions.get(ds_name, None)
 
+        # Re-inject validator declarations: the validator key is stripped from
+        # dataset configs before they reach _LazyDataset or the dataset
+        # constructor, so it must be restored here for round-tripping.
+        for ds_name, spec in self._validator_specs.items():
+            if ds_name in catalog:
+                catalog[ds_name][VALIDATOR_KEY] = spec.to_config()
+
         return catalog, credentials, load_versions, self._save_version
 
     @staticmethod
@@ -856,6 +914,18 @@ class DataCatalog(CatalogProtocol):
             # True
         ```
         """
+        validator_spec = None
+        if isinstance(ds_config, dict) and VALIDATOR_KEY in ds_config:
+            from kedro.validation import ValidatorSpec
+
+            validator_spec = ValidatorSpec.from_config(
+                ds_name, ds_config[VALIDATOR_KEY]
+            )
+            # Build a cleaned copy so the validator key never reaches the
+            # dataset constructor. The original dict must not be mutated as it
+            # may be the config resolver's own store.
+            ds_config = {k: v for k, v in ds_config.items() if k != VALIDATOR_KEY}
+
         self._validate_dataset_config(ds_name, ds_config)
         ds = _LazyDataset(
             ds_name,
@@ -865,6 +935,11 @@ class DataCatalog(CatalogProtocol):
         )
 
         self.__setitem__(ds_name, ds)
+
+        # Assigned after __setitem__ so the replacement branch clearing stale
+        # validator state cannot wipe the spec captured for this entry.
+        if validator_spec is not None:
+            self._validator_specs[ds_name] = validator_spec
 
     def filter(
         self,
@@ -1012,7 +1087,7 @@ class DataCatalog(CatalogProtocol):
             extra={"markup": True},
         )
 
-        dataset.save(data)
+        dataset.save(self._maybe_validate(ds_name, data, mode="save"))
 
     def load(self, ds_name: str, version: str | None = None) -> Any:
         """Loads a registered dataset.
@@ -1052,7 +1127,100 @@ class DataCatalog(CatalogProtocol):
             extra={"markup": True},
         )
 
-        return dataset.load()
+        return self._maybe_validate(ds_name, dataset.load(), mode="load")
+
+    def _validation_enabled_effective(self) -> bool:
+        """Resolve whether dataset validation is currently enabled.
+
+        The ``KEDRO_DATASET_VALIDATION`` environment variable, when set to a
+        recognised value, wins over the catalog-level ``validation_enabled``
+        flag. Recognised values are ``0``/``false``/``off`` (disabled) and
+        ``1``/``true``/``on`` (enabled). Unset or unrecognised values fall
+        back to ``self.validation_enabled``.
+
+        Returns:
+            True if validation should be applied, False otherwise.
+        """
+        env_value = os.environ.get("KEDRO_DATASET_VALIDATION")
+        if env_value is not None:
+            normalised = env_value.strip().lower()
+            if normalised in ("0", "false", "off"):
+                return False
+            if normalised in ("1", "true", "on"):
+                return True
+        return self.validation_enabled
+
+    def _maybe_validate(self, ds_name: str, data: Any, mode: str) -> Any:
+        """Apply the dataset's declared validator to ``data`` if applicable.
+
+        This is the single validation funnel for catalog ``load`` and ``save``
+        operations. It is a no-op when validation is disabled (catalog flag or
+        ``KEDRO_DATASET_VALIDATION`` environment variable), when no validator
+        is declared for the dataset, when the validator is disabled or not
+        declared for ``mode``, or when ``skip_load_after_save`` applies.
+
+        Args:
+            ds_name: The name of the dataset being loaded or saved.
+            data: The data to validate.
+            mode: Either ``"load"`` or ``"save"``.
+
+        Returns:
+            The validated (possibly transformed/coerced) data, or ``data``
+            unchanged when validation does not apply or the validator's
+            severity is ``"warn"`` and validation failed.
+
+        Raises:
+            DataValidationError: If validation fails and the validator's
+                severity is ``"error"``.
+            ValidationConfigurationError: If the declared validator cannot be
+                resolved.
+        """
+        if not self._validation_enabled_effective():
+            return data
+
+        spec = self._validator_specs.get(ds_name)
+        if spec is None or mode not in spec.on or not spec.enabled:
+            return data
+
+        if (
+            mode == "load"
+            and spec.skip_load_after_save
+            and ds_name in self._save_validated
+        ):
+            return data
+
+        from kedro.validation import DataValidationError, resolve_validator
+
+        validator = self._validators.get(ds_name) or self._validators.setdefault(
+            ds_name, resolve_validator(spec)
+        )
+
+        try:
+            validated = validator.validate(data)
+        except DataValidationError as exc:
+            exc.dataset_name = ds_name
+            exc.mode = mode
+            if spec.severity == "warn":
+                self._logger.warning(str(exc))
+                return data
+            raise
+        except Exception as exc:
+            wrapped = DataValidationError(
+                str(exc),
+                dataset_name=ds_name,
+                mode=mode,
+                validator=spec.class_path,
+            )
+            wrapped.__cause__ = exc
+            if spec.severity == "warn":
+                self._logger.warning(str(wrapped))
+                return data
+            raise wrapped from exc
+
+        if mode == "save":
+            self._save_validated.add(ds_name)
+
+        return validated
 
     def release(self, ds_name: str) -> None:
         """Release any cached data associated with a dataset
@@ -1071,6 +1239,7 @@ class DataCatalog(CatalogProtocol):
         dataset = self[ds_name]
 
         dataset.release()
+        self._save_validated.discard(ds_name)
 
     def confirm(self, ds_name: str) -> None:
         """Confirm a dataset by its name.

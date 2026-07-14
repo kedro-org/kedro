@@ -1,39 +1,17 @@
-# Kedro Validation Framework
+# Kedro Validation
 
-The `kedro.validation` package provides type-hint-driven validation for Kedro pipelines. It currently supports two paths:
+`kedro.validation` contains two validation features:
 
-1. **Parameter Validation** — validates `params:` inputs against Pydantic models or dataclasses (existing, shipped via [KEP-1](https://github.com/kedro-org/kedro/discussions/5234)).
-2. **Dataset Validation** — validates DataFrames against Pandera `DataFrameModel` schemas (prototype, this branch).
+1. **Dataset validation (KEP-7 v2, this branch)** — declare a validator on a catalog
+   entry with the `validator:` key; the `DataCatalog` applies it on every load and save.
+2. **Parameter validation (KEP-1)** — validates `params:` inputs against Pydantic
+   models or dataclasses (`TypeExtractor`, `ParameterValidator`, `instantiate_model`).
 
-Both paths share the same discovery mechanism (`TypeExtractor`) and follow the same pattern: **type hints on node function signatures drive validation.**
-
----
-
-## Status
-
-This branch (`prototype/validation-dataset-pandera`) contains the **dataset validation prototype**.
-
-| Component | Status |
-|---|---|
-| Type-hint discovery for Pandera schemas | ✅ Implemented |
-| `_ValidatingDataset` wrapper (load-side) | ✅ Implemented |
-| `KedroContext._get_catalog()` integration | ✅ Implemented |
-| Unit tests (30 validation + 44 context, all passing) | ✅ Implemented |
-| End-to-end smoke test with real DataCatalog | ✅ Passing |
-| Save-side (output) validation | ⏳ Planned for production |
-| Backend dispatch (Polars, IBIS, Spark, Dask) | ⏳ Planned for production |
-| Schema discovery caching | ⏳ Planned for production |
-| Optional dependency packaging (`kedro[validation]`) | ⏳ Planned for production |
-
-See [`FINDINGS.md`](../../FINDINGS.md) for the full architectural write-up and tech design notes.
-
----
-
-## Quick Example
+## Quick start: the `validator:` key
 
 ```python
-# schemas.py
-import pandera as pa
+# src/<package>/schemas/companies.py
+import pandera.pandas as pa
 
 class CompaniesSchema(pa.DataFrameModel):
     id: int = pa.Field(nullable=False, unique=True)
@@ -41,103 +19,68 @@ class CompaniesSchema(pa.DataFrameModel):
 
     class Config:
         strict = False
+        coerce = True
 ```
+
+```yaml
+# conf/base/catalog.yml
+companies:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/companies.csv
+  validator: my_package.schemas.companies.CompaniesSchema
+```
+
+Every `catalog.load("companies")` now validates (and dtype-coerces) the DataFrame;
+every `catalog.save(...)` validates **before** writing, so invalid data never lands on
+disk. Failures raise `DataValidationError` with a bounded, grouped report:
+
+```
+Validation failed for dataset 'companies' on load
+(validator: my_package.schemas.companies.CompaniesSchema)
+2 check(s) failed — 3 failure case(s):
+  - company_rating: greater_than_or_equal_to(0) — 2 cases (e.g. -0.5, -1.2)
+  - id: field_uniqueness — 1 case (e.g. 10542)
+```
+
+The long form gives full control — see `examples/catalog.yml` for all recipes
+(long form, YAML-anchor shared schemas, factory patterns, non-tabular validators):
+
+```yaml
+validator:
+  class: my_package.schemas.reviews.ReviewsSchema
+  on: [save]          # subset of [load, save]; default both
+  severity: warn      # error (default) | warn
+  options: {lazy: true, sample: 1000}   # forwarded to the adapter
+```
+
+Any object with a `validate(data) -> data` method (raising on failure) satisfies the
+`Validator` protocol — pandera is just the built-in adapter, kept lazily imported and
+optional. Opt out per catalog (`DataCatalog(..., validation_enabled=False)`) or
+globally (`KEDRO_DATASET_VALIDATION=0`, which wins over the flag).
 
 ```python
-# nodes.py
-def preprocess_companies(companies: CompaniesSchema) -> pd.DataFrame:
-    # CompaniesSchema is validated automatically at load time.
-    # No hooks, no catalog config, no decorators.
-    return companies
+from kedro.validation import validate_catalog_dataset
+
+result = validate_catalog_dataset(catalog, "companies")   # never raises
+result.status        # "passed" | "failed" | "skipped" | "errored"
+result.to_dict()     # JSON-safe report; result.raise_if_failed() to escalate
 ```
 
-Running `kedro run` triggers validation when `companies` is loaded. Failures raise `DataValidationError` listing every problem (Pandera `lazy=True`).
-
----
-
-## Architecture
-
-### Files
+## Package layout
 
 | File | Role |
 |---|---|
-| [`type_extractor.py`](type_extractor.py) | Shared discovery — walks pipeline nodes, reads type hints. `extract_types_from_pipelines()` finds Pydantic/dataclass params; `extract_dataset_schemas()` (NEW) finds Pandera datasets. |
-| [`parameter_validator.py`](parameter_validator.py) | Parameter validation orchestrator. Existing. |
-| [`model_factory.py`](model_factory.py) | Instantiates Pydantic models and dataclasses from raw config. Existing. |
-| [`dataset_validator.py`](dataset_validator.py) | Dataset validation — `validate_dataframe()`, `_is_pandera_model()`, `_ValidatingDataset` proxy wrapper, `DataValidationError`. NEW. |
-| [`exceptions.py`](exceptions.py) | `ParameterValidationError`, `ModelInstantiationError`. (`DataValidationError` currently lives in `dataset_validator.py` — to be moved.) |
-| [`utils.py`](utils.py) | Helpers (`is_pydantic_class`, `get_typed_fields`). |
+| `core.py` | `Validator` protocol, `ValidatorSpec`, `resolve_validator`, `CheckFailure`, `DataValidationError`, `ValidationConfigurationError`, `preflight_check` |
+| `pandera_validator.py` | Pandera adapter (`pandera.pandas`/`polars`/`pyspark`, lazy error grouping) |
+| `api.py` | `ValidationResult`, `validate_catalog_dataset`, `validate_catalog` |
+| `type_extractor.py`, `parameter_validator.py`, `model_factory.py`, `exceptions.py`, `utils.py` | KEP-1 parameter validation (unchanged) |
+| `dataset_validator.py` | Deprecated import shim (v1 wrapper removed) |
 
-### Integration point
+The catalog-side funnel lives in `kedro/io/data_catalog.py` (`_maybe_validate`,
+`catalog.validators`); the reserved key constant is `VALIDATOR_KEY` in `kedro/io/core.py`.
 
-Dataset validation is wired into `KedroContext._get_catalog()` via the new method [`_apply_dataset_validation()`](../framework/context/context.py). This runs after the catalog is built and parameters are added, but before `after_catalog_created` hooks fire.
+## Learn more
 
-```python
-def _get_catalog(self, ...) -> CatalogProtocol:
-    catalog = catalog_class.from_config(...)              # existing
-    parameters = self._get_parameters()                    # existing
-    for param_name, param_value in parameters.items():
-        catalog[param_name] = param_value                  # existing
-    self._apply_dataset_validation(catalog)                # NEW
-    _validate_transcoded_datasets(catalog)                 # existing
-    self._hook_manager.hook.after_catalog_created(...)     # existing
-    return catalog
-```
-
-Matching catalog datasets are replaced with `_ValidatingDataset` wrappers. The runner is unaware of this — `catalog.load()` works exactly as it does today.
-
----
-
-## How parameter and dataset validation coexist
-
-```
-                        TypeExtractor (shared)
-                       /                      \
-                      /                        \
-    extract_types_from_pipelines()     extract_dataset_schemas()
-    filters FOR  params: prefix        filters OUT params: prefix
-    (Pydantic/dataclass)               (Pandera DataFrameModel)
-                |                                   |
-                v                                   v
-    ParameterValidator                 _ValidatingDataset
-    instantiate_model()                validate_dataframe()
-    runs at context init               runs at catalog.load() time
-```
-
-Both paths walk the same nodes and reuse the same `_build_dataset_to_arg_mapping()` helper. Same machinery, opposite filter. A single node can have both annotations without conflict:
-
-```python
-def train(companies: CompaniesSchema, params: TrainingParams) -> pd.DataFrame:
-    #       ^ dataset validation            ^ parameter validation
-    ...
-```
-
----
-
-## Running the tests
-
-```bash
-pytest tests/validation/test_dataset_validation.py -v
-pytest tests/framework/context/test_context.py -v
-```
-
-All 30 validation tests and 44 context tests should pass.
-
----
-
-## End-to-end smoke test
-
-A standalone script that exercises the full chain (DataCatalog, MemoryDataset, real Pipeline, real DataFrame) with valid and invalid data is documented in the tech design notes. See [`FINDINGS.md`](../../FINDINGS.md) and the [tech design comment](https://github.com/kedro-org/kedro/issues/5391).
-
----
-
-## Related links
-
-- **KEP:** [KEP-7] Dataset Validation Using Pandera (link TBD)
-- **Tech design notes:** [kedro#5391 comment](https://github.com/kedro-org/kedro/issues/5391)
-- **Parent issue:** [Explore a Kedro-First Approach to Data Validation (#5390)](https://github.com/kedro-org/kedro/issues/5390)
-- **Prototype issue:** [Prototype Dataset Validation Using Pandera (#5391)](https://github.com/kedro-org/kedro/issues/5391)
-- **KEP-1 (precedent):** [Parameter Validation](https://github.com/kedro-org/kedro/discussions/5234)
-- **Related PRs:**
-  - [#5443](https://github.com/kedro-org/kedro/pull/5443) — scope `TypeExtractor` to target pipeline
-  - [#5404](https://github.com/kedro-org/kedro/pull/5404) — `SourceFilter` abstraction (closed, to be revisited)
+- **Design:** [`KEP-7-dataset-validation-v2.md`](../../KEP-7-dataset-validation-v2.md) (repo root)
+- **Runnable demo:** `python examples/demo_catalog_validation.py` (from repo root)
+- **Example config:** [`examples/catalog.yml`](../../examples/catalog.yml)

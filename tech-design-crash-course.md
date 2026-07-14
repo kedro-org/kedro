@@ -194,7 +194,7 @@ DataValidationError: Validation failed for dataset 'companies' on load
 
 **Beat 4 — the before/after punchline (60s).** `KEDRO_DATASET_VALIDATION=0 ./.venv/bin/kedro run --pipeline data_processing` → it gets past loading and dies **inside the node**: `ValueError: could not convert string to float: 'not-a-rating'`. *"Same bad file, validation off — this is what today's Kedro gives you: a mystery ValueError deep in node code. That contrast is the whole KEP."* (Also just demoed the env kill switch.) Then `./demo_restore.sh`.
 
-**Beat 5 — notebook + API (60s).** In the project: `./.venv/bin/kedro ipython` (or the prepared snippet) → `catalog.load("companies")` → *"validates outside `kedro run` — id came back int64, coerced by the contract"* → `validate_catalog_dataset(catalog, "companies")` → `passed`; on `reviews` → `skipped, "no validator declared"`. *"Never raises — Nok's IDE contract."*
+**Beat 5 — notebook + API (60s).** In the project: `./.venv/bin/kedro ipython` (or the prepared snippet) → `catalog.load("companies")` → *"validates outside `kedro run` — id came back int64, coerced by the contract"* → `validate_catalog_dataset(catalog, "companies")` → `passed`; on `reviews` → `skipped, "no validator declared"`. *"Never raises — Nok's IDE contract."* And when the load returns: *"note the node gets a plain DataFrame back — annotations stay documentation, per Ravi's thread question."*
 
 ### Part 2 — script encore (~2 min, from the kedro repo)
 
@@ -230,6 +230,27 @@ Six personas modelled on tomorrow's attendees, grounded in their real review his
 5. **Citation precision:** dataset hooks fire only in `kedro/runner/task.py` — but NOT only at lines 151–188: the async path fires save-hooks at 222–233 and loads at 247–251. Say "only in Task", never "only lines 151-188". Also: the spec-miss/mode/enabled guards are ONE combined `if` (data_catalog.py:1181–1183), not three separate rungs.
 6. **LOC numbers:** don't cite `git diff main...HEAD` (shows only the old prototype). Honest number: worktree vs HEAD = 27 files, +4643/−857. Tests: 208 validation + 282 io, green.
 7. **The `all` extra excludes `validation`** (pyproject.toml:103) — useful ammunition when discussing decision 1.
+
+### ⭐ Real thread questions (merelcht + ravi-kumar-pilla — these WILL come up)
+
+Unlike the simulated panel below, these were actually asked on the KEP-10 thread by two of your three +1 voters. Drill these first.
+
+**Merel: "Do we need to enforce the schema location? Could we auto-detect schemas wherever they are? Do we have a strict convention for parameter validation?"**
+
+- ✅ **Answer:** Convention, not enforcement. The catalog accepts **any importable dotted path** — `schemas/` is the documented convention plus starter scaffold (the `parameters.yml` analogue), never a requirement. Auto-detection isn't needed because the explicit path *is* the discovery: nothing to scan, nothing ambiguous, grep-able — Adeikalam's discoverability ask. Auto-detection would reintroduce the magic this KEP deliberately kills (scan ambiguity is last-wins with extra steps). And parameter validation has *no* location convention at all — Pydantic models live wherever node modules import them — so datasets are already the better-documented of the two.
+- ⚠️ *Trap:* implying the folder is enforced, or entertaining auto-detection as a maybe — name the ambiguity cost instead.
+
+**Ravi: "I hope users can still do `def preprocess(companies: CompaniesSchema) -> CompaniesSchema` and use dot notation like parameter validation."**
+
+- ✅ **Answer:** Half yes, half a deliberate no. Annotations stay welcome as documentation and IDE support — recommended form `pd.DataFrame[CompaniesSchema]` (a bare `CompaniesSchema` annotation lies to type checkers; the runtime value is a DataFrame — settled in the KEP-7 thread with the Pandera maintainer). But unlike params, **no model instance is injected**: the node receives the (possibly coerced) DataFrame itself. Column dot-access works anyway (`companies.company_rating` — plain pandas). The asymmetry is principled: params are *config shaped like objects* (instantiation adds typed access); datasets are *data* (wrapping 10M rows in a model object adds nothing). One line: *"declare validation where the thing is declared; the runtime object stays what it naturally is."*
+- ⚠️ *Trap:* promising typed schema-instance access on datasets, or dismissing annotations entirely — they're recommended documentation, just not load-bearing.
+
+**Ravi: "Params were pushed to eager validation — do datasets get an eager option, or params a lazy one?"**
+
+- ✅ **Answer:** Split *config* from *data*. Validator **resolution** can be eager: `DATASET_VALIDATION="strict"` resolves every declared validator at catalog build (fails at minute zero), the `find_spec` pre-flight warns by default, and `kedro catalog validate --resolve-only` gates CI. **Data** validation can't be eager at build in general: outputs don't exist yet, and eagerly loading every input doubles I/O on big data. Datasets validate the moment data actually enters the process — the earliest point that doesn't force extra loads. Want eager-data-before-run? That's `kedro catalog validate <datasets>` as a pre-run step. Same principle both sides: *validate at the boundary where the thing materialises* — params materialise at build (tiny, in memory), data materialises at I/O.
+- ⚠️ *Trap:* conceding "we should add eager data validation at build" — that's loading the whole catalog at startup; steer to strict mode + the CLI instead.
+
+**Ravi also +1'd named-backend extras** (`kedro[pandera]`, "similar to pydantic") — supports decision 1, with two nuances to hold: per-backend (`pandera-pandas`) still beats a single `kedro[pandera]` because base pandera ships no backend and *someone* must pick one; and there is factually no pydantic extra (test-only dep, soft-imported) — the anchor is pandera's own extras + the kedro-datasets ibis convention.
 
 ### deepyaman
 

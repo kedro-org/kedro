@@ -10,16 +10,23 @@ We also curate a [GitHub repo that lists content created by the Kedro community]
 
 ## Contribute to the project
 
-There are several ways to contribute to Kedro, such as answering questions about Kedro to help others, fixing a typo on the documentation, reporting a bug, reviewing pull requests or adding a feature.
+There are several ways to contribute to Kedro, such as answering questions to help others, fixing a typo in the documentation, reporting a bug, reviewing pull requests, or adding a feature.
 
-Take a look at some of our [contribution suggestions on the Kedro GitHub Wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro)!
+Take a look at [our curated open source ticket board](https://github.com/orgs/kedro-org/projects/16) and more [contribution suggestions on the Kedro GitHub Wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro)!
+
+If you want to work on a new idea, reach out via [Slack](https://slack.kedro.org/) or by opening a GitHub issue before opening a PR. That helps us align on the approach and gives your contribution the highest chance of being accepted.
+
+Before opening a PR, read the relevant guidelines:
+- [Kedro contribution guidelines for developers](https://github.com/kedro-org/kedro/wiki/Guidelines-for-contributing-developers) — for code changes
+- [Documentation contribution guidelines](https://github.com/kedro-org/kedro/wiki/Contribute-to-the-Kedro-documentation) — for docs changes
 
 ## Join the Technical Steering Committee
-Kedro is an incubating project in [LF AI & Data](https://lfaidata.foundation/), a sub-organisation within the Linux Foundation that focuses on open innovation within the data and AI space.
+
+Kedro is a graduate-stage project in [LF AI & Data](https://lfaidata.foundation/), a sub-organisation within the Linux Foundation that focuses on open innovation within the data and AI space.
 
 The project is governed by a group of maintainers, known as the Technical Steering Committee (TSC); read more about the structure of our TSC in our [Technical Charter](./kedro_technical_charter.pdf).
 
-We invite community members to join the TSC and help define the future of the Kedro project. Read the [guidance on becoming a Kedro maintainer](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html) to understand the process of joining the TSC.
+We invite community members to join the TSC and help define the future of the Kedro project. Read the [guidance on becoming a Kedro maintainer](https://docs.kedro.org/en/stable/about/technical_steering_committee/#process-to-become-a-maintainer) to understand the process of joining the TSC.
 
 ## Code of conduct
 

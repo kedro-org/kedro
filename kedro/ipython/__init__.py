@@ -56,13 +56,7 @@ FunctionParameters = MappingProxyType
 
 RICH_INSTALLED: Final = importlib.util.find_spec("rich") is not None
 
-_PARAM_VALUE_QUOTED = re.compile(
-    r"(?P<option>(?:^|\s)--params)(?P<separator>=|\s+)"
-    r"(?P<key>[^=\s]+)=(?P<quote>['\"])(?P<value>.*?)(?P=quote)"
-)
-_PARAM_ITEM_QUOTED = re.compile(
-    r"(?P<prefix>(?:^|\s)--params(?:=|\s+))(?P<quote>['\"])(?P<value>.*?)(?P=quote)"
-)
+_PARAMS_OPTION = re.compile(r"(?P<option>(?:^|\s)--params)(?P<separator>=|\s+)")
 
 
 def load_ipython_extension(ipython: InteractiveShell) -> None:
@@ -89,17 +83,57 @@ def load_ipython_extension(ipython: InteractiveShell) -> None:
 
 def _normalise_reload_kedro_params(line: str) -> str:
     """Normalise quoted ``--params`` values before IPython splits them."""
-    line = _PARAM_VALUE_QUOTED.sub(
-        lambda match: (
-            f'{match.group("option")}{match.group("separator")}"'
-            f'{match.group("key")}={match.group("value")}"'
-        ),
-        line,
-    )
-    return _PARAM_ITEM_QUOTED.sub(
-        lambda match: f'{match.group("prefix")}"{match.group("value")}"',
-        line,
-    )
+    match = _PARAMS_OPTION.search(line)
+    if not match:
+        return line
+
+    value_start = match.end()
+    value_end = _find_reload_kedro_params_end(line, value_start)
+    value = line[value_start:value_end]
+    value = _quote_reload_kedro_params(_remove_reload_kedro_param_quotes(value))
+    prefix = line[:value_start]
+    if match.group("separator") == "=":
+        separator_start = match.start("separator")
+        prefix = f"{line[:separator_start]} "
+
+    return f"{prefix}{value}{line[value_end:]}"
+
+
+def _find_reload_kedro_params_end(line: str, value_start: int) -> int:
+    quote: str | None = None
+    for index, char in enumerate(line[value_start:], start=value_start):
+        if quote:
+            if char == quote:
+                quote = None
+        elif char in {"'", '"'}:
+            quote = char
+        elif char.isspace():
+            return index
+    return len(line)
+
+
+def _remove_reload_kedro_param_quotes(value: str) -> str:
+    quote: str | None = None
+    unquoted_value: list[str] = []
+    for char in value:
+        if quote:
+            if char == quote:
+                quote = None
+            else:
+                unquoted_value.append(char)
+        elif char in {"'", '"'}:
+            quote = char
+        else:
+            unquoted_value.append(char)
+    return "".join(unquoted_value)
+
+
+def _quote_reload_kedro_params(value: str) -> str:
+    if '"' in value and "'" not in value:
+        return f"'{value}'"
+
+    escaped_value = value.replace('"', '\\"')
+    return f'"{escaped_value}"'
 
 
 def _split_reload_kedro_params(value: str) -> dict[str, Any]:

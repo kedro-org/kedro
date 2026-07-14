@@ -226,22 +226,45 @@ class TestLoadIPythonExtension:
         ipython.run_line_magic("reload_kedro", args)
 
     @pytest.mark.parametrize(
-        ("args", "expected_path", "expected_env", "expected_conf_source"),
+        (
+            "args",
+            "expected_path",
+            "expected_env",
+            "expected_runtime_params",
+            "expected_conf_source",
+        ),
         [
-            ("--params foo='bar baz'", None, None, None),
-            ('--params foo="bar baz"', None, None, None),
-            ("--params 'foo=bar baz'", None, None, None),
-            ('--params "foo=bar baz"', None, None, None),
+            ("--params foo='bar baz'", None, None, {"foo": "bar baz"}, None),
+            ('--params foo="bar baz"', None, None, {"foo": "bar baz"}, None),
+            ("--params 'foo=bar baz'", None, None, {"foo": "bar baz"}, None),
+            ('--params "foo=bar baz"', None, None, {"foo": "bar baz"}, None),
+            (
+                "--params foo='bar baz',key2='hello world'",
+                None,
+                None,
+                {"foo": "bar baz", "key2": "hello world"},
+                None,
+            ),
+            (
+                '--params k1=v1,k2="a b"',
+                None,
+                None,
+                {"k1": "v1", "k2": "a b"},
+                None,
+            ),
+            ("--params=foo='bar baz'", None, None, {"foo": "bar baz"}, None),
             (
                 ". --env=base --params foo='bar baz' --conf-source=new_conf",
                 ".",
                 "base",
+                {"foo": "bar baz"},
                 "new_conf",
             ),
             (
                 '. --env=base --params foo="bar baz" --conf-source=new_conf',
                 ".",
                 "base",
+                {"foo": "bar baz"},
                 "new_conf",
             ),
         ],
@@ -252,6 +275,7 @@ class TestLoadIPythonExtension:
         args,
         expected_path,
         expected_env,
+        expected_runtime_params,
         expected_conf_source,
         ipython,
     ):
@@ -263,28 +287,42 @@ class TestLoadIPythonExtension:
         path, env, runtime_params, _, conf_source = mock_reload_kedro.call_args.args
         assert path == expected_path
         assert env == expected_env
-        assert runtime_params == {"foo": "bar baz"}
+        assert runtime_params == expected_runtime_params
         assert conf_source == expected_conf_source
 
     @pytest.mark.parametrize(
-        "args",
+        ("args", "expected_runtime_params"),
         [
-            "--params foo='bar baz'",
-            '--params foo="bar baz"',
-            "--params 'foo=bar baz'",
-            '--params "foo=bar baz"',
-            ". --env=base --params foo='bar baz' --conf-source=new_conf",
-            '. --env=base --params foo="bar baz" --conf-source=new_conf',
+            ("--params foo='bar baz'", {"foo": "bar baz"}),
+            ('--params foo="bar baz"', {"foo": "bar baz"}),
+            ("--params 'foo=bar baz'", {"foo": "bar baz"}),
+            ('--params "foo=bar baz"', {"foo": "bar baz"}),
+            (
+                "--params foo='bar baz',key2='hello world'",
+                {"foo": "bar baz", "key2": "hello world"},
+            ),
+            ('--params first="a b",second="c d"', {"first": "a b", "second": "c d"}),
+            ('--params k1=v1,k2="a b"', {"k1": "v1", "k2": "a b"}),
+            ("""--params foo='he said "hi"'""", {"foo": 'he said "hi"'}),
+            ("--params=foo='bar baz'", {"foo": "bar baz"}),
+            (
+                ". --env=base --params foo='bar baz' --conf-source=new_conf",
+                {"foo": "bar baz"},
+            ),
+            (
+                '. --env=base --params foo="bar baz" --conf-source=new_conf',
+                {"foo": "bar baz"},
+            ),
         ],
     )
-    def test_normalise_reload_kedro_params_with_quoted_spaces(self, args):
+    def test_normalise_reload_kedro_params_with_quoted_spaces(
+        self, args, expected_runtime_params
+    ):
         normalised_args = _normalise_reload_kedro_params(args)
         split_args = arg_split(normalised_args)
-        params_index = split_args.index("--params") + 1
+        params_value = split_args[split_args.index("--params") + 1]
 
-        assert _split_reload_kedro_params(split_args[params_index]) == {
-            "foo": "bar baz"
-        }
+        assert _split_reload_kedro_params(params_value) == expected_runtime_params
 
     def test_line_magic_with_invalid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython.find_kedro_project")

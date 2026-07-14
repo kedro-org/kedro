@@ -65,7 +65,7 @@ class NodeSnapshot:
     """
 
     name: str
-    func_name: str
+    func_name: str = field(kw_only=True)
     namespace: str | None = None
     tags: list[str] = field(default_factory=list)
     inputs: list[str] = field(default_factory=list)

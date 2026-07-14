@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import partial
+
 import pytest
 
 from kedro.inspection.models import NodeSnapshot, PipelineSnapshot
@@ -50,6 +52,11 @@ class TestNodeSnapshot:
         assert snapshot.inputs == []
         assert snapshot.outputs == []
 
+    def test_func_name_is_keyword_only(self):
+        snapshot = NodeSnapshot("my_node", "my_namespace", func_name="my_func")
+        assert snapshot.func_name == "my_func"
+        assert snapshot.namespace == "my_namespace"
+
 
 class TestNodeToSnapshot:
     def test_populates_all_fields(self, simple_node):
@@ -70,6 +77,20 @@ class TestNodeToSnapshot:
 
     def test_returns_node_snapshot_instance(self, simple_node):
         assert isinstance(_node_to_snapshot(simple_node), NodeSnapshot)
+
+    def test_named_partial_func_name_warns(self):
+        partial_node = node(
+            partial(_identity),
+            inputs="raw",
+            outputs="processed",
+            name="partial_node",
+        )
+
+        with pytest.warns(UserWarning, match="made from a 'partial' function"):
+            snapshot = _node_to_snapshot(partial_node)
+
+        assert snapshot.name == "partial_node"
+        assert snapshot.func_name == "<partial>"
 
 
 class TestPipelineSnapshot:

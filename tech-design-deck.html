@@ -1,0 +1,477 @@
+<title>Dataset Validation — Tech Design Board</title>
+<style>
+  :root {
+    --canvas: #f5f6f8;
+    --frame: #ffffff;
+    --border: #e2e4e9;
+    --ink: #262626;
+    --muted: #6b7280;
+    --blue-t: #eaf3fb;   --blue: #2f6fa7;
+    --green-t: #edf7ee;  --green: #2e7d4f;
+    --amber-t: #fdf3e3;  --amber: #b26a00;
+    --red-t: #fdeef0;    --red: #c2434f;
+    --sticky: #fff9b1;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  html, body { margin: 0; padding: 0; background: var(--canvas); color: var(--ink); font-family: var(--sans); }
+  * { box-sizing: border-box; }
+  .sheet { max-width: 1150px; margin: 0 auto; padding: 36px 24px 80px; }
+
+  .howto { font-size: 13.5px; color: var(--muted); background: var(--frame); border: 1px dashed var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 28px; line-height: 1.5; }
+
+  .frame { background: var(--frame); border: 1px solid var(--border); border-radius: 8px; padding: 30px 36px 32px; margin-bottom: 40px; box-shadow: 0 1px 3px rgba(20,20,40,.06); }
+  .fhead { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; }
+  .fhead .fnum { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  .fhead .ftime { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  h1 { font-size: 34px; font-weight: 750; letter-spacing: -.015em; margin: 0 0 8px; line-height: 1.12; }
+  h2 { font-size: 25px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 14px; line-height: 1.15; }
+  h3 { font-size: 15.5px; font-weight: 700; margin: 0 0 6px; }
+  p { line-height: 1.55; margin: 0 0 12px; font-size: 14.5px; }
+  p.lead { font-size: 16.5px; color: #3a3f47; max-width: 74ch; }
+  .muted { color: var(--muted); }
+  b { font-weight: 650; }
+
+  .say { background: var(--sticky); border-radius: 4px; padding: 12px 16px; font-size: 13.5px; line-height: 1.55; margin-top: 18px; box-shadow: 0 1px 2px rgba(20,20,40,.10); }
+  .say .lbl { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #8a7a1e; display: block; margin-bottom: 5px; }
+
+  .grid { display: grid; gap: 14px; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 860px) { .cols-2, .cols-3, .cols-4 { grid-template-columns: 1fr; } }
+
+  .card { border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-size: 13.5px; line-height: 1.5; background: #fff; }
+  .card p { font-size: 13.5px; margin: 0; }
+  .card.tint-blue  { background: var(--blue-t);  border-color: #cfe2f1; }
+  .card.tint-green { background: var(--green-t); border-color: #d3e8d8; }
+  .card.tint-amber { background: var(--amber-t); border-color: #f0dfc0; }
+  .card.tint-red   { background: var(--red-t);   border-color: #f2d2d6; }
+
+  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-right: 6px; }
+  .tag.blue  { background: var(--blue-t);  color: var(--blue); }
+  .tag.green { background: var(--green-t); color: var(--green); }
+  .tag.amber { background: var(--amber-t); color: var(--amber); }
+  .tag.red   { background: var(--red-t);   color: var(--red); }
+  .tag.plain { background: #f0f1f4; color: var(--muted); }
+
+  pre.code { font-family: var(--mono); font-size: 12.5px; line-height: 1.55; background: #f6f7f9; border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; overflow-x: auto; margin: 0; color: #24292f; }
+  pre.code .k { color: #0550ae; } pre.code .s { color: #0a7a4b; } pre.code .c { color: #90959d; } pre.code .hl { background: #dcf2e2; padding: 1px 3px; border-radius: 3px; }
+  pre.term { font-family: var(--mono); font-size: 12.5px; line-height: 1.6; background: #1e2227; color: #d7dde4; border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 0; }
+  pre.term .r { color: #ff8896; } pre.term .y { color: #ffd166; } pre.term .g { color: #7ed9a7; } pre.term .m { color: #8b95a1; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 12px; border: 1px solid var(--border); vertical-align: top; line-height: 1.45; }
+  th { background: #f6f7f9; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  td.ok { color: var(--green); font-weight: 600; } td.no { color: var(--red); font-weight: 600; }
+
+  .flow { display: flex; flex-direction: column; max-width: 760px; margin: 0 auto; }
+  .fbox { border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; padding: 12px 16px; font-size: 13.5px; line-height: 1.5; background: #fff; }
+  .fbox .t { font-family: var(--mono); font-weight: 700; font-size: 13px; display: block; margin-bottom: 3px; }
+  .fbox.bl { border-left-color: var(--blue); } .fbox.gr { border-left-color: var(--green); } .fbox.rd { border-left-color: var(--red); }
+  .farrow { text-align: center; color: #b3b9c2; font-size: 14px; padding: 3px 0; }
+  .ladder { margin: 8px 0 0; padding: 0; list-style: none; font-family: var(--mono); font-size: 12px; }
+  .ladder li { padding: 2.5px 0; color: #4b5563; }
+  .ladder .ret { color: var(--green); }
+
+  ul.pts { margin: 0; padding-left: 20px; line-height: 1.55; font-size: 14px; }
+  ul.pts li { margin-bottom: 8px; }
+
+  .quote { background: var(--sticky); border-radius: 4px; padding: 14px 16px; font-size: 13.5px; line-height: 1.5; box-shadow: 0 1px 2px rgba(20,20,40,.10); }
+  .quote footer { font-family: var(--mono); font-size: 11.5px; color: #8a7a1e; margin-top: 8px; }
+
+  .tl { display: flex; margin: 20px 0 24px; }
+  .tl .it { flex: 1; padding: 18px 12px 0 0; position: relative; }
+  .tl .it::before { content: ""; position: absolute; top: 4px; left: 0; right: 0; height: 2px; background: var(--border); }
+  .tl .it::after { content: ""; position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-radius: 50%; background: #c3c9d2; }
+  .tl .it.hot::after { background: var(--red); }
+  .tl .d { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); display: block; }
+  .tl .e { font-size: 12.5px; line-height: 1.4; margin-top: 3px; padding-right: 8px; }
+  @media (max-width: 860px) { .tl { flex-wrap: wrap; } .tl .it { min-width: 46%; margin-bottom: 14px; } }
+
+  .lane { display: flex; gap: 10px; align-items: stretch; }
+  .lane .step { flex: 1; border: 1px solid var(--border); border-top: 3px solid var(--green); border-radius: 6px; padding: 12px 14px; font-size: 13px; line-height: 1.45; background: #fff; }
+  .lane .step .t { font-family: var(--mono); font-weight: 700; font-size: 12px; display: block; margin-bottom: 4px; }
+  .lane .sep { align-self: center; color: #b3b9c2; font-size: 16px; }
+  @media (max-width: 860px) { .lane { flex-direction: column; } .lane .sep { display: none; } }
+
+  .decide { border: 1px solid #f2d2d6; border-radius: 6px; background: #fff; }
+  .decide .dh { background: var(--red-t); padding: 10px 16px; border-bottom: 1px solid #f2d2d6; font-weight: 700; font-size: 14.5px; border-radius: 6px 6px 0 0; }
+  .decide .db { padding: 13px 16px; font-size: 13.5px; line-height: 1.55; }
+  .decide .db p { font-size: 13.5px; }
+  .decide .rec { display: inline-block; background: var(--red); color: #fff; font-family: var(--mono); font-size: 10.5px; letter-spacing: .07em; padding: 2px 8px; border-radius: 3px; text-transform: uppercase; }
+  .decide .decided { margin-top: 10px; border: 1.5px dashed #d8b3b8; border-radius: 4px; padding: 8px 12px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+</style>
+
+<div class="sheet">
+
+<div class="howto">
+  <b>How to use this sheet:</b> each white frame below maps 1:1 to a Miro frame, in session order. Screenshot a frame and paste it into Miro as an image, or select and copy the text into native Miro elements. The yellow strips are presenter notes — keep them on the board as stickies, or crop them out. Colour code used throughout: <span class="tag blue">existing kedro</span> <span class="tag green">new in this feature</span> <span class="tag amber">lazy / first use</span> <span class="tag red">decision needed today</span>
+</div>
+
+<!-- ================= FRAME 1 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 1 · Title &amp; agenda</span><span class="ftime">2 min</span></div>
+  <h1>Dataset Validation — implementation tech design</h1>
+  <p class="lead"><b>KEP-10 is accepted (+3 TSC votes).</b> This session is not about whether to build it. It is an architecture walkthrough of the working prototype, followed by locking the seven implementation decisions that PRs depend on, and agreeing the PR plan.</p>
+  <div class="grid cols-2" style="margin-top:18px">
+    <div class="card">
+      <h3>Agenda</h3>
+      <ul class="pts" style="font-size:13.5px">
+        <li>The journey since April — 3 min</li>
+        <li>The proposal in one screen — 5 min</li>
+        <li>Architecture: follow one <code style="font-family:var(--mono)">catalog.load()</code> — 10 min</li>
+        <li>Design decisions and why not hooks — 8 min</li>
+        <li>Live demo on a real spaceflights project — 6 min</li>
+        <li><b style="color:var(--red)">Decisions to lock today — 18 min (the point of the session)</b></li>
+        <li>Rollout plan and actions — 4 min</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Links &amp; state</h3>
+      <ul class="pts" style="font-size:13.5px">
+        <li>KEP discussion: <b>kedro #5602</b> · parent initiative <b>#5390</b> · spike <b>#5391</b></li>
+        <li>Prototype branch: <b>prototype/kep7-v2-catalog-validation</b></li>
+        <li>Test state: <b>208 validation tests + 282 io tests, green</b></li>
+        <li>Working demo: real spaceflights project with validators wired</li>
+      </ul>
+      <h3 style="margin-top:14px">Ground rules</h3>
+      <p style="font-size:13.5px">Mechanics questions belong on the architecture frame. Questions that map to one of the seven decisions get held — and locked — in the decisions block. Everything else goes to the parking lot with an owner, so nothing is lost.</p>
+    </div>
+  </div>
+  <div class="say"><span class="lbl">Say</span>"The KEP is accepted, so today is not a re-litigation. I want to walk you through how the accepted design actually works in the prototype, show it running, and then spend the biggest block locking seven implementation decisions so PRs can start this week. If your question is one of those decisions, I'll ask to hold it for that section — that's me taking it seriously, not dodging it."</div>
+</section>
+
+<!-- ================= FRAME 2 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 2 · The journey</span><span class="ftime">3 min</span></div>
+  <h2>How we got here — the feedback shaped the design</h2>
+  <p class="lead">The path matters because it is the design rationale. The first proposal put schemas on node type hints. Review found real problems with that, we pivoted to declaring validation on the catalog entry, and that redesign is what passed the vote.</p>
+  <div class="tl">
+    <div class="it"><span class="d">Feb</span><span class="e">#5390 opened: "one cohesive validation strategy" (parameters + datasets)</span></div>
+    <div class="it"><span class="d">Apr 22</span><span class="e">Tech design v1: type-hint approach, Pandera prototype, wrapper dataset</span></div>
+    <div class="it"><span class="d">May</span><span class="e">KEP-7 posted — type hints drive validation</span></div>
+    <div class="it hot"><span class="d">May–Jun</span><span class="e">Community review pauses the vote (quotes below)</span></div>
+    <div class="it"><span class="d">Jun</span><span class="e">Pivot announced: schema-on-dataset + pluggable protocol</span></div>
+    <div class="it"><span class="d">Jun</span><span class="e">KEP-10 posted (restructured)</span></div>
+    <div class="it hot"><span class="d">Jun</span><span class="e"><b>TSC vote passes +3</b> — deepyaman: "much improved, no blockers"</span></div>
+    <div class="it"><span class="d">Today</span><span class="e">Implementation tech design</span></div>
+  </div>
+  <div class="grid cols-3">
+    <div class="quote">"If validation is tied to datasets, define the schema <b>on the dataset</b>. Two pipelines annotating the same dataset where the last one silently wins is concerning."<footer>deepyaman — drove the pivot</footer></div>
+    <div class="quote">"Schemas next to nodes bloat pipelines and create <b>cross-pipeline dependencies</b>. Our team already keeps schemas in a src/&lt;project&gt;/schemas folder with a validate method."<footer>Adeikalam — production experience</footer></div>
+    <div class="quote">"I need a way to <b>disable this globally</b>, and an API that lets the IDE extension validate datasets and report diagnostics."<footer>noklam — VSCode extension</footer></div>
+  </div>
+  <div class="say"><span class="lbl">Say</span>"Everyone in this room has a fingerprint on this design. deepyaman's conflict concern is why one dataset now has exactly one validator. Adeikalam's team had already built this pattern in production — the schemas folder convention is theirs. Nok's two asks became the kill switch and the programmatic API. What I'm showing today is your feedback, built."</div>
+</section>
+
+<!-- ================= FRAME 3 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 3 · The proposal in one screen</span><span class="ftime">5 min</span></div>
+  <h2>One line in the catalog. Nodes stay plain Python.</h2>
+  <p class="lead">The entire user experience is: write a schema in a conventional place, point one new catalog key at it. From then on, every load of that dataset is validated before the data reaches a node, and every save is validated before anything is written to disk.</p>
+  <div class="grid cols-3" style="margin-bottom:14px">
+    <div>
+      <p style="margin-bottom:6px"><span class="tag green">new</span><b>conf/base/catalog.yml</b> — the one thing users learn</p>
+<pre class="code">companies:
+  <span class="k">type</span>: pandas.CSVDataset
+  <span class="k">filepath</span>: data/01_raw/companies.csv
+  <span class="hl"><span class="k">validator</span>: spaceflights.schemas.
+      companies.CompaniesSchema</span></pre>
+    </div>
+    <div>
+      <p style="margin-bottom:6px"><span class="tag plain">convention</span><b>src/spaceflights/schemas/companies.py</b></p>
+<pre class="code"><span class="k">import</span> pandera.pandas <span class="k">as</span> pa
+
+<span class="k">class</span> CompaniesSchema(pa.DataFrameModel):
+    id: int = pa.Field(nullable=<span class="k">False</span>,
+                       unique=<span class="k">True</span>)
+    company_rating: float = pa.Field(
+                       ge=0, le=1)</pre>
+    </div>
+    <div>
+      <p style="margin-bottom:6px"><span class="tag blue">unchanged</span><b>nodes.py</b> — zero validation machinery</p>
+<pre class="code"><span class="k">def</span> preprocess_companies(
+    companies: pd.DataFrame
+) -&gt; pd.DataFrame:
+    <span class="c"># plain python, plain DataFrame</span>
+    ...</pre>
+    </div>
+  </div>
+  <div class="grid cols-2">
+    <div>
+      <div class="grid cols-2" style="gap:10px">
+        <div class="card tint-green"><p><b>Load and save.</b> Save-side validation runs before the write, so invalid data never lands on disk.</p></div>
+        <div class="card tint-green"><p><b>Everywhere, not just kedro run.</b> Notebooks, the IDE extension, CI — anything going through the catalog.</p></div>
+        <div class="card tint-green"><p><b>One dataset, one validator, by construction.</b> The v1 "last schema silently wins" bug is structurally impossible, not just mitigated.</p></div>
+        <div class="card tint-green"><p><b>Pluggable.</b> The backend contract is validate(data) in, data out, raise on failure. Pandera is the reference; GX, Pydantic, custom and non-tabular checks all fit.</p></div>
+      </div>
+    </div>
+    <div>
+      <p style="margin-bottom:6px"><b>What failure looks like</b> — grouped, bounded at any frame size, full Pandera report attached underneath:</p>
+<pre class="term">DataValidationError: Validation failed for dataset <span class="y">'companies'</span> on <span class="y">load</span>
+<span class="r">3 check(s) failed — 4 failure case(s):</span>
+  - id: field_uniqueness           — 2 cases (e.g. 3888, 3888)
+  - company_rating: str_matches    — 1 case  (e.g. not-a-rating)
+  - iata_approved: isin(['t','f']) — 1 case  (e.g. x)
+<span class="m"># names the dataset, the mode, every failed check with examples</span></pre>
+    </div>
+  </div>
+  <div class="say"><span class="lbl">Say</span>"Note what the node looks like: completely unchanged. Validation is declared where the dataset is declared, and the error message is the pitch — every failed check at once, grouped with examples, at the I/O boundary, before any node ran. On a ten-million-row frame this error is still three readable lines; the full Pandera report stays attached underneath for debugging."</div>
+</section>
+
+<!-- ================= FRAME 4 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 4 · What changed since April</span><span class="ftime">1 min — point and move on</span></div>
+  <h2>Three things changed, each driven by that review</h2>
+  <p class="lead">For anyone whose mental model is still the April session: the discovery mechanism, the enforcement mechanism and the backend story all changed between KEP-7 and the accepted KEP-10.</p>
+  <table>
+    <tr><th style="width:30%">April tech design (KEP-7)</th><th style="width:30%">Accepted (KEP-10)</th><th>Why it changed</th></tr>
+    <tr><td>Type hints on node signatures drive validation</td><td><b>validator: key on the catalog entry</b></td><td>Last-wins conflicts across pipelines; a bare Schema annotation lies to type checkers; schemas next to nodes couple pipelines together.</td></tr>
+    <tr><td>_ValidatingDataset proxy wrapper</td><td><b>Validation inside catalog load()/save()</b></td><td>The wrapper broke isinstance checks, had to fake runner flags, broke pickling under ParallelRunner, and polluted the repr.</td></tr>
+    <tr><td>Pandera-only</td><td><b>Pluggable Validator protocol</b></td><td>Great Expectations, Pydantic, custom and non-tabular validators (validating matplotlib plots is a real production use case) all fit one small protocol.</td></tr>
+  </table>
+</section>
+
+<!-- ================= FRAME 5 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 5 · Architecture — follow one load</span><span class="ftime">8 min + questions</span></div>
+  <h2>From YAML to validated DataFrame</h2>
+  <p class="lead">One diagram carries the whole design. Follow a single <code style="font-family:var(--mono)">catalog.load("companies")</code> from config to node, and notice two properties: build time costs nothing (strings only), and the dataset object itself is never touched — there is no wrapper anywhere.</p>
+  <div class="grid cols-2" style="grid-template-columns: 1fr 380px; align-items:start">
+    <div class="flow">
+      <div class="fbox bl"><span class="t">conf/base/catalog.yml</span> companies: <b style="color:var(--green)">validator: pkg.Schema</b> — shorthand string, or a long form with on/severity/options.</div>
+      <div class="farrow">▼</div>
+      <div class="fbox bl"><span class="t">DataCatalog._add_from_config</span> Captures the key into a <b style="color:var(--green)">ValidatorSpec</b> — strings only, <b>no imports, zero build cost</b>. This is the single funnel every entry passes through, explicit <b>and</b> factory patterns, so patterns just work. The resolver's config store is never mutated (a cleaned copy goes to the dataset).</div>
+      <div class="farrow">▼</div>
+      <div class="fbox bl"><span class="t">catalog.load("companies") → dataset.load()</span> The dataset is untouched: real class, real repr, picklable as-is. <b>No wrapper.</b></div>
+      <div class="farrow">▼</div>
+      <div class="fbox gr"><span class="t" style="color:var(--green)">_maybe_validate(data, "load") — the funnel, a guard ladder ordered cheapest-first</span>
+        <ul class="ladder">
+          <li>1 · kill switch (env var / flag) off? <span class="ret">→ return data — zero cost</span></li>
+          <li>2 · no spec for this name (dict miss)? <span class="ret">→ return data — the 99% path</span></li>
+          <li>3 · wrong mode, or per-dataset disabled? <span class="ret">→ return data</span></li>
+          <li>4 · skip_load_after_save applies? <span class="ret">→ return data</span></li>
+          <li style="color:var(--amber)">5 · resolve_validator(spec) — first use only: import, adapt, cache</li>
+        </ul>
+      </div>
+      <div class="farrow">▼</div>
+      <div class="fbox gr"><span class="t">validator.validate(data)</span> The Pandera adapter, or any object satisfying the protocol.</div>
+      <div class="farrow">▼</div>
+      <div class="grid cols-2" style="gap:10px">
+        <div class="fbox gr"><span class="t" style="color:var(--green)">valid</span> The node receives the frame — possibly dtype-coerced, which is a documented contract.</div>
+        <div class="fbox rd"><span class="t" style="color:var(--red)">invalid</span> DataValidationError, <b>enriched by the funnel</b> with dataset name + mode (the schema itself is dataset-agnostic), failures grouped per check. With severity: warn it logs and passes the original data through.</div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <h3>Save is symmetric</h3>
+        <p>dataset.save(_maybe_validate(data, "save")) — validation runs <b>before</b> the write, so invalid data never lands on disk.</p>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <h3>Evidence for "why not hooks", if asked</h3>
+        <ul class="pts" style="font-size:13px">
+          <li>Dataset I/O hooks fire <b>only in kedro/runner/task.py</b> — a notebook catalog.load() fires none. The funnel covers both.</li>
+          <li><b>pluggy discards hook return values</b> — a hook can raise, but can never hand the node coerced data, so the protocol is unimplementable as a hook.</li>
+          <li>_add_from_config being the single config funnel is what makes factory patterns work with no extra machinery.</li>
+        </ul>
+      </div>
+      <div class="card tint-amber">
+        <h3>Timing, for the April question</h3>
+        <p>Nothing heavier than string parsing happens at catalog build. Imports and validation happen at first use of the dataset — so building a 500-entry catalog costs the same as before, and datasets a run never touches never pay anything.</p>
+      </div>
+    </div>
+  </div>
+  <div class="say"><span class="lbl">Say</span>"Two things to take from this diagram. First, the cost story is structural: a dataset without a validator pays one dictionary miss per load, and build time is strings only. Second, the enrichment step: the schema is deliberately dataset-agnostic so one schema can guard X_train and X_test — it's the funnel that stamps the dataset name and mode onto the error. This is the right frame for mechanics questions."</div>
+</section>
+
+<!-- ================= FRAME 6 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 6 · Design decisions already made</span><span class="ftime">4 min</span></div>
+  <h2>Seven decisions locked in the accepted KEP — one flagged openly</h2>
+  <p class="lead">These are settled by the vote; they're here so the reasoning is visible. The one to be upfront about is the first — it deviates from what I announced in the pivot message.</p>
+  <div class="grid cols-4">
+    <div class="card tint-amber"><h3>1 · Funnel, not wrapper</h3><p><b>Deviation, flagged:</b> I announced the wrapper would carry over. Building it proved otherwise — it breaks isinstance in version handling, fakes runner flags, breaks pickling under ParallelRunner, and pollutes the repr (the original review complaint). The funnel is ~25 lines at the chokepoint, benchmarked.</p></div>
+    <div class="card"><h3>2 · Schema-on-dataset</h3><p>One YAML key per dataset makes conflicts impossible and puts the declaration in the file teams already read to discover datasets. The schemas/ folder is <b>convention, not enforcement</b> — any importable dotted path works; no auto-detection because the explicit path is the discovery.</p></div>
+    <div class="card"><h3>3 · A protocol, not Pandera coupling</h3><p>validate(data) in, data out, any raise counts as failure. Pandera fits in ~200 adapter lines against public API only. GX, Pydantic, plain functions and non-tabular checks satisfy the same shape.</p></div>
+    <div class="card"><h3>4 · Lazy resolution + cheap pre-flight</h3><p>Specs are strings at build; imports happen at first use. A find_spec pre-flight warns about missing packages at build (same pattern kedro already uses for optional rich), and kedro catalog validate --resolve-only is the CI gate.</p></div>
+    <div class="card"><h3>5 · Both directions, no silent skip</h3><p>Save validation runs pre-write. Auto-skipping load-after-save would certify data the schema never saw (CSV round-trips drop dtypes). The opt-in skip_load_after_save is scoped to "this process wrote it", which stays safe under partial runs.</p></div>
+    <div class="card"><h3>6 · A kill switch that reaches everything</h3><p>DATASET_VALIDATION setting for policy; KEDRO_DATASET_VALIDATION env var for emergencies, read inside kedro.io so it governs every catalog instance — including ones plugins rebuild (the telemetry case). Explicit API calls always validate.</p></div>
+    <div class="card"><h3>7 · Nothing added to CatalogProtocol</h3><p>Adding members to a runtime-checkable protocol instantly fails settings-load for every existing custom catalog. Instead, the context warns loudly when a custom catalog would silently ignore declared validators.</p></div>
+    <div class="card tint-blue"><h3>The through-line</h3><p><b>Declare validation where the thing itself is declared.</b> Parameters on node signatures (KEP-1), datasets on catalog entries (this KEP). And the runtime object stays what it naturally is — nodes get DataFrames, not model instances.</p></div>
+  </div>
+</section>
+
+<!-- ================= FRAME 7 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 7 · Why not hooks / why not the wrapper</span><span class="ftime">3 min</span></div>
+  <h2>The comparison in one table</h2>
+  <table style="margin-bottom:14px">
+    <tr><th></th><th>Hooks</th><th>Wrapper (v1 prototype)</th><th style="color:var(--green)">Funnel (chosen)</th></tr>
+    <tr><td>Covers notebooks / IDE / CI</td><td class="no">No — dataset hooks fire only inside the runner's Task</td><td class="ok">Yes</td><td class="ok">Yes</td></tr>
+    <tr><td>Can coerce — validate(data) returns data</td><td class="no">No — pluggy discards hook return values</td><td class="ok">Yes</td><td class="ok">Yes</td></tr>
+    <tr><td>Dataset repr and isinstance stay honest</td><td class="ok">Yes</td><td class="no">No</td><td class="ok">Yes</td></tr>
+    <tr><td>ParallelRunner pickling</td><td class="ok">Yes</td><td class="no">Fragile</td><td class="ok">Yes</td></tr>
+    <tr><td>after_dataset_loaded sees validated data deterministically</td><td class="no">No — depends on plugin registration order</td><td class="ok">Yes</td><td class="ok">Yes</td></tr>
+    <tr><td>Core surface</td><td>None</td><td>Medium</td><td>~25 LOC in kedro/io; no-op benchmark ships with PR 1</td></tr>
+  </table>
+  <div class="card tint-amber"><p><b>The one honest hooks advantage:</b> Task fires hooks regardless of the catalog class, while the funnel exists only in DataCatalog. A fully custom DATA_CATALOG_CLASS loses declared validation — which is exactly why decision 7's loud warning exists. And hook users lose nothing: hooks keep firing in the same places, now with a stronger guarantee (they always observe validated data on load).</p></div>
+  <div class="say"><span class="lbl">Say</span>"The hooks column isn't opinion — both failures are mechanical. Dataset hooks are invoked only by the runner's Task, so a notebook load fires none. And pluggy throws hook return values away, so a hook can never replace the data a node receives — which makes coercion, and the whole protocol, unimplementable as a hook. I'd rather concede the one real hooks advantage openly: it's the custom-catalog case, and we warn loudly there."</div>
+</section>
+
+<!-- ================= FRAME 8 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 8 · Live demo</span><span class="ftime">6 min — switch to terminal</span></div>
+  <h2>A real spaceflights project, running this branch</h2>
+  <p class="lead">Not a synthetic script — a spaceflights project with two contracts wired: a load contract on the raw supplier file, and a save contract on the preprocessed output. Five beats, then back to the board.</p>
+  <div class="grid cols-2">
+    <div class="card tint-green">
+      <h3>Part 1 — the user journey (~/GitHub/spaceflights-validation-demo)</h3>
+      <ul class="pts" style="font-size:13.5px; margin-top:8px">
+        <li><b>Show the diff.</b> One validator: line on companies in catalog.yml; long form with on: [save] on preprocessed_companies; the schema file in src/&lt;pkg&gt;/schemas/.</li>
+        <li><b>Green run.</b> kedro run --pipeline data_processing — both contracts active, about six seconds.</li>
+        <li><b>Break the supplier file</b> (./demo_break.sh) and rerun — the grouped error at the I/O boundary, before any node ran. Nothing was written.</li>
+        <li><b>The punchline:</b> KEDRO_DATASET_VALIDATION=0 and rerun — the same bad file now dies inside the node with "ValueError: could not convert string to float". That contrast is the whole KEP, and it demos the kill switch at the same time.</li>
+        <li><b>Notebook + API:</b> catalog.load validates outside kedro run (the id column comes back int64 — coerced by the contract, and the node still receives a plain DataFrame); validate_catalog_dataset returns a result instead of raising — the IDE contract.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <h3>Part 2 — script encore (~/GitHub/kedro)</h3>
+        <p>Only what the project doesn't show: a <b>non-tabular validator</b> on a JSON metrics dict with no pandera anywhere, the opt-out matrix, and the clean catalog repr — real dataset classes, no wrapper.</p>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <h3>If the demo misbehaves</h3>
+        <p>Screenshots of both outputs are pinned next to this frame — narrate the screenshot, never debug on camera.</p>
+      </div>
+      <div class="card tint-blue">
+        <h3>What's behind it</h3>
+        <p>208 validation tests + 282 io tests, green, on branch prototype/kep7-v2-catalog-validation. PRs 1–2 are productionise-and-review, not greenfield.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FRAME 9 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 9a · Decisions to lock today (1–4)</span><span class="ftime">10 min — the point of the session</span></div>
+  <h2>Decisions 1–4</h2>
+  <p class="lead">For each: the question, the options, my recommendation, and space to record what we lock. If one stalls past four minutes: both positions on the card, an owner and a 48-hour async deadline, and we move on.</p>
+  <div class="grid cols-2">
+    <div class="decide">
+      <div class="dh">1 · Extras naming</div>
+      <div class="db">
+        <p><b>A:</b> kedro[validation] = pandera[pandas] &nbsp;·&nbsp; <b>B:</b> per-backend kedro[pandera-pandas] / [pandera-polars] / [pandera-pyspark], thin 1:1 forwarders to pandera's own extras.</p>
+        <p><span class="rec">Recommend B</span> &nbsp;Since pandera 0.24 the base package ships <b>no dataframe backend</b>, so a generic extra silently picks one for the user. B mirrors the kedro-datasets ibis convention. deepyaman and Ravi are both on record for named-backend extras. Owning the gap: the branch still ships kedro[validation] plus two install-hint strings — the sweep is a named PR-1 item.</p>
+        <div class="decided">DECIDED:</div>
+      </div>
+    </div>
+    <div class="decide">
+      <div class="dh">2 · Public API name</div>
+      <div class="db">
+        <p><b>A:</b> validate_catalog_dataset &nbsp;·&nbsp; <b>B:</b> validate_dataset.</p>
+        <p><span class="rec">Recommend B</span> &nbsp;The catalog is already the first argument, so the prefix is redundant; it pairs cleanly with the batch validate_catalog; and the primary consumer (the VSCode extension) prefers it. Nothing has shipped — the rename is free today and a deprecation cycle later.</p>
+        <div class="decided">DECIDED:</div>
+      </div>
+    </div>
+    <div class="decide">
+      <div class="dh">3 · pyspark support</div>
+      <div class="db">
+        <p><b>A:</b> ship the pyspark branch as experimental &nbsp;·&nbsp; <b>B:</b> keep it out of the advertised support matrix until the Narwhals-backed pandera backend ships (0.32.x, not yet on PyPI).</p>
+        <p><span class="rec">Recommend: keep the code, advertise B</span> &nbsp;Pandera's pyspark backend never raises — errors accumulate on an accessor — and it lacks element-wise checks and sampling. Our adapter reads the accessor so invalid Spark data cannot silently pass, but the marketed matrix is pandas + Polars.</p>
+        <div class="decided">DECIDED:</div>
+      </div>
+    </div>
+    <div class="decide">
+      <div class="dh">4 · Pandera version floor</div>
+      <div class="db">
+        <p><b>Proposal:</b> pandera &gt;= 0.24 — the first release with the pandera.pandas namespace and per-backend extras.</p>
+        <p><span class="rec">Action attached</span> &nbsp;Verify the SchemaErrors.failure_cases shape (which our grouped error reporting reads) is stable from 0.24 to current, per backend — folds into the planned Pandera-maintainer review.</p>
+        <div class="decided">DECIDED:</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FRAME 10 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 9b · Decisions to lock today (5–7)</span><span class="ftime">8 min</span></div>
+  <h2>Decisions 5–7</h2>
+  <div class="grid cols-3">
+    <div class="decide">
+      <div class="dh">5 · ContextAwareValidator</div>
+      <div class="db">
+        <p><b>A:</b> ship a richer validate(data, context) protocol variant in v1 &nbsp;·&nbsp; <b>B:</b> reserve the name, ship later.</p>
+        <p><span class="rec">Recommend B</span> &nbsp;The funnel already stamps dataset name and mode onto every error, so the main use case is covered. Widening a protocol before a single third party has implemented it is premature.</p>
+        <div class="decided">DECIDED:</div>
+      </div>
+    </div>
+    <div class="decide">
+      <div class="dh">6 · CLI default mode</div>
+      <div class="db">
+        <p><b>A:</b> kedro catalog validate runs full data validation by default &nbsp;·&nbsp; <b>B:</b> resolve-only by default; --all-data is explicit.</p>
+        <p><span class="rec">Recommend B</span> &nbsp;Unbounded data loads should never be a CI default. Resolve-only catches typo'd paths and missing dependencies in milliseconds — which is also the fail-fast answer for lazy resolution. Sub-decision: severity: warn findings exit 0 by default; --strict-warnings flips that.</p>
+        <div class="decided">DECIDED:</div>
+      </div>
+    </div>
+    <div class="decide">
+      <div class="dh">7 · Entry-point group</div>
+      <div class="db">
+        <p><b>A:</b> a kedro.validators entry-point group for pip-installable adapters in v1 &nbsp;·&nbsp; <b>B:</b> v1.x, once a second backend actually exists.</p>
+        <p><span class="rec">Recommend B</span> &nbsp;Custom validators already work today via the class path; the entry-point group only changes distribution. Reserve the group name in v1 docs so nothing squats it.</p>
+        <div class="decided">DECIDED:</div>
+      </div>
+    </div>
+  </div>
+  <div class="say" style="margin-top:16px"><span class="lbl">Facilitation</span>"Locked beats perfect — six locked and one owned beats seven rushed. Whatever we lock here, I post to the KEP thread and the parent initiative tomorrow, and the PR-1 checklist gets updated in the same commit as the decisions."</div>
+</section>
+
+<!-- ================= FRAME 11 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 10 · Risk register</span><span class="ftime">reference — walk only if asked</span></div>
+  <h2>Known, documented, owned</h2>
+  <p class="lead">Top six of the twelve in the KEP. None are blockers; each has a documented mitigation. The theme: where the design has a boundary, we state it loudly rather than let users discover it.</p>
+  <div class="grid cols-2">
+    <div class="card"><p><b>Raw access bypasses validation, by design.</b> catalog.get(name).load() and Viz's preview() skip the funnel — that raw path is exactly what the programmatic API needs to avoid double-validation. Documented contract.</p></div>
+    <div class="card"><p><b>Coercion changes the data.</b> With coerce=True the node and the disk get the coerced frame — a behaviour change when adding a validator to an existing pipeline. Prominent docs and release-notes callout.</p></div>
+    <div class="card"><p><b>Save hooks observe pre-coercion data.</b> The runner holds its own reference, so what's persisted can differ from what after_dataset_saved saw. Documented asymmetry; lineage plugins needing persisted truth read back.</p></div>
+    <div class="card"><p><b>Environment overlays can drop validators.</b> A local override that redeclares an entry without validator: loses it under destructive merge. The CLI reports which validator resolved and from where; docs recommend declaring in base and disabling per-env rather than redeclaring.</p></div>
+    <div class="card"><p><b>Lazy and distributed backends.</b> Load-side validation triggers Spark actions / forces evaluation. Guidance: prefer on: [save] or sampling options for Spark and Dask; per-backend cost table ships in docs.</p></div>
+    <div class="card"><p><b>Generator nodes validate per chunk.</b> Cross-chunk invariants (like unique) are not enforced across the whole output; use on: [load] for appended outputs so the persisted whole is validated on next read.</p></div>
+  </div>
+</section>
+
+<!-- ================= FRAME 12 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 11 · Rollout plan</span><span class="ftime">4 min</span></div>
+  <h2>Prototype is green — this is productionise, not greenfield</h2>
+  <div class="lane" style="margin:18px 0">
+    <div class="step"><span class="t">PR 1 — core</span>kedro.validation package, Pandera adapter, catalog funnel, settings — with today's decisions swept through (extras, hint strings, rename).<br><span class="muted">~1.5 weeks</span></div>
+    <div class="sep">→</div>
+    <div class="step"><span class="t">PR 2 — surfaces</span>validate_dataset / validate_catalog, kedro catalog validate CLI, factory-pattern enumeration, custom-catalog warning.<br><span class="muted">~1 week</span></div>
+    <div class="sep">→</div>
+    <div class="step"><span class="t">PR 3 — docs</span>New data-validation page, pandera.md rewritten to lead with validator:, coercion release-notes callout, reserved-key docs.<br><span class="muted">~0.5 week</span></div>
+    <div class="sep">→</div>
+    <div class="step"><span class="t">starters PR</span>schemas/ scaffold in spaceflights (one example schema, one commented-out catalog line). Release-coupled.<br><span class="muted">~2 days</span></div>
+    <div class="sep">→</div>
+    <div class="step"><span class="t">outreach</span>deepyaman named on the Pandera review (he asked); Niels/Neeraj contacted on the adapter contract; kedro-pandera credited as the inspiration in the launch write-up.<br><span class="muted">during PR 1–2</span></div>
+  </div>
+  <div class="grid cols-3">
+    <div class="card tint-blue"><h3>Ask 1</h3><p>A catalog-side reviewer for PR 1 — it touches the hottest path in kedro/io and deserves that scrutiny.</p></div>
+    <div class="card tint-blue"><h3>Ask 2</h3><p>Nok on PR 2 — the ValidationResult payload is the extension's integration contract and should be reviewed by its consumer.</p></div>
+    <div class="card tint-blue"><h3>Ask 3</h3><p>Today's decisions posted to #5602 and #5390 tomorrow; the implementation parent issue plus seven sub-issues filed right after this session.</p></div>
+  </div>
+</section>
+
+<!-- ================= FRAME 13 ================= -->
+<section class="frame">
+  <div class="fhead"><span class="fnum">Frame 12 · Close &amp; parking lot</span><span class="ftime">1 min</span></div>
+  <h2>Read the seven decisions aloud — that's the artifact of this session</h2>
+  <p class="lead">Close by reading each DECIDED sticky in one breath. Then: "This design is genuinely better because of the review it got — thank you. PRs start this week."</p>
+  <div class="grid cols-2" style="margin-top:8px">
+    <div class="card"><h3>Parking lot</h3><p class="muted">Off-track topics land here alive, with an owner — not dismissed.</p></div>
+    <div class="card"><h3>Actions</h3><p class="muted">Pre-seeded: post decisions summary to #5602 + #5390 — Sajid, tomorrow. Verify failure_cases stability (decision 4) — owner TBD in session.</p></div>
+  </div>
+</section>
+
+</div>

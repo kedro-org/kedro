@@ -60,6 +60,10 @@ Directional script, not verbatim. Times are cumulative from session start. Targe
 
 [This is the deep frame — slow down. Walk the diagram top to bottom. This is where Elena's questions will land; that's by design.]
 
+> One transparency note before we dive into the internals, since we're about to read code: **I leaned on Claude heavily building this** — the prototype implementation, the test suite, and a lot of the design exploration were AI-assisted. The design decisions themselves came out of the KEP review process — your feedback drove the pivot, and I own every call in here. And everything you're about to see I've reviewed, run, and verified: the test suite pins the behaviour, and the demo is a real project I've broken and fixed myself. Same deal as any code with my name on it — the PRs get full review rigour, and I'd ask you to judge it exactly that way.
+
+[Deliver matter-of-fact, one breath, then straight into the diagram — no lingering, no apology. Anyone wanting to discuss AI tooling itself: parking lot.]
+
 > Let's follow one `catalog.load("companies")` through the system.
 >
 > **Catalog build.** Every entry — explicit or dataset-factory pattern — passes through one method, `_add_from_config`. That's where the `validator:` key is captured into a spec. Key property: **at build time this is strings only. No imports, no pandera, zero cost.** A 500-entry catalog builds exactly as fast as before. And because factory patterns resolve through the same funnel at materialisation, patterns just work — which, Elena, is the answer to your April concern about wrapping datasets a run never touches: nothing heavier than string parsing happens until a dataset is actually used.
@@ -159,4 +163,5 @@ Directional script, not verbatim. Times are cumulative from session start. Targe
 - **A decision deadlocks:** capture both positions, name an owner and a 48h async deadline in the thread, move on. Locked > perfect, but six locked + one owned beats seven rushed.
 - **Demo gremlin:** screenshots, keep narrating. Never debug live.
 - **Three things NOT to say** (fact-checked traps): don't cite "hooks fire only at lines 151–188" (async paths fire them too — say "only in Task"); don't quote a benchmark number (none exists yet — "ships with PR 1"); don't claim the pre-flight runs at catalog build (it exists but isn't wired — "wiring is PR-1 scope").
+- **If pressed on the AI point:** honesty wins — "the KEP document discloses the same thing, and deepyaman spotted it and +1'd anyway. What matters is verification: the test suite, a real demo project, and normal PR review. Happy to talk tooling afterwards — parking lot."
 - **Deep technical challenge you can't place:** "Good catch — let me take that as a PR-1 review item rather than improvise an answer now." (Concede fast; the Q&A bank shows this wins with this room.)

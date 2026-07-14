@@ -10,7 +10,7 @@ We also curate a [GitHub repo that lists content created by the Kedro community]
 
 ## Contribute to the project
 
-There are several ways to contribute to Kedro, such as answering questions to help others, fixing a typo in the documentation, reporting a bug, reviewing pull requests, or adding a feature.
+There are several ways to contribute to Kedro, such as answering questions about Kedro to help others, fixing a typo in the documentation, reporting a bug, reviewing pull requests, or adding a feature.
 
 Take a look at [our curated open source ticket board](https://github.com/orgs/kedro-org/projects/16) and more [contribution suggestions on the Kedro GitHub Wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro)!
 

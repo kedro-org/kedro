@@ -57,6 +57,9 @@ class TestNodeSnapshot:
         assert snapshot.func_name == "my_func"
         assert snapshot.namespace == "my_namespace"
 
+        with pytest.raises(TypeError, match="func_name"):
+            NodeSnapshot("my_node", "my_namespace")
+
 
 class TestNodeToSnapshot:
     def test_populates_all_fields(self, simple_node):

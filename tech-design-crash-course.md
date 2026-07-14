@@ -151,6 +151,71 @@ Run `python examples/demo_catalog_validation.py` and narrate each section out lo
 
 ---
 
+## Module 5b — Demo run book (step by step, on `feat/kep10-dataset-validation`)
+
+Run the demo from the **implementation branch** — its `git status` is completely clean (no prep docs visible on a screen-share), and the demo is verified green there (exit 0).
+
+### Tonight (10 min, do once)
+
+```bash
+cd /Users/Sajid_Alam/GitHub/kedro
+git checkout feat/kep10-dataset-validation
+conda activate parameter-validation
+
+# dress rehearsal + capture the backup in one go:
+python examples/demo_catalog_validation.py | tee /tmp/demo_backup.txt
+```
+
+Screenshot the full output (or keep `/tmp/demo_backup.txt` open in a tab) and pin it to Miro Frame 8. Optional confidence check: `python -m pytest tests/validation/ -q --no-cov` → expect **208 passed**.
+
+### 5 minutes before the session
+
+- Terminal at repo root, on `feat/kep10-dataset-validation`, env activated
+- **Font size up** (the error report is the star — it must be readable from a laptop)
+- Pre-type the command so it's one Enter: `python examples/demo_catalog_validation.py`
+- `examples/catalog.yml` open in a second tab (someone will ask to see the YAML)
+
+### The live run (~5 min) — narration per section
+
+**a) Fixture data** — "Two CSVs: one valid, one with duplicate ids and out-of-range ratings." (5 seconds, move on.)
+
+**b) Build the catalog** — "Plain config dicts with one new key — `validator:` — shorthand string or long form with options. Note `catalog.validators`: bindings are inspectable, and this is what Kedro-Viz reads statically."
+
+**c) Valid load → coercion** — "The `id` column: float64 raw, **int64 after** — the validator returned transformed data. Validators may coerce; documented contract."
+
+**d) Invalid load → the error** ⭐ *the money shot — slow down* — "Three checks, five failure cases, three readable lines — **bounded no matter the frame size**. Dataset name, mode, validator all named — the funnel enriches the error, since the schema itself is dataset-agnostic. Full Pandera report on `__cause__`."
+
+**e) Save-side blocking** — "Invalid save raises **before** the write — `file written? False`. Bad data never lands on disk. Then the valid save goes through."
+
+**Bonus) MetricsValidator** — "No pandera anywhere in this one — a JSON metrics dict validated by a 15-line custom class. The protocol doing its job — Adeikalam's non-tabular case."
+
+**f) The programmatic API** — "`validate_catalog_dataset` **never raises** — status, structured failures, JSON-safe `to_dict`. This is the contract Nok's VSCode extension consumes." (Look at Nok.)
+
+**g) Opt-out** — "`validation_enabled=False`, then the `KEDRO_DATASET_VALIDATION` env var — read inside `kedro.io`, so it reaches **every** catalog instance, including ones plugins rebuild. The 3am kill switch."
+
+**h) Clean repr** — "Real dataset classes, no wrapper anywhere — deepyaman's inspection concern resolved by deletion, not decoration. Bindings live on the `validators` property instead."
+
+Close: *"That's the whole feature — 208 validation tests plus 282 io tests green behind it. Now let's lock the seven decisions."* → Miro Frame 9.
+
+### If someone says "show me the code"
+
+| Ask | Open |
+|---|---|
+| "Where's the funnel?" | `kedro/io/data_catalog.py:1153` (`_maybe_validate`) — walk the guard ladder |
+| "Where's the key captured?" | `data_catalog.py:918–942` (cleaned copy; assigned-after-`__setitem__` comment at 939) |
+| "The resolution order?" | `kedro/validation/core.py:342–433` — footgun comment at 394–397 |
+| "The pyspark branch?" | `kedro/validation/pandera_validator.py:256–270` |
+| "The YAML?" | `examples/catalog.yml` — shorthand, long form, anchor recipe, factory pattern |
+
+### Fallbacks
+
+1. **Demo errors live** → don't debug on camera. "I have the output from last night's run" → backup screenshot / `/tmp/demo_backup.txt`, keep narrating.
+2. **Wrong env** (most likely gremlin) → `conda activate parameter-validation && cd ~/GitHub/kedro && git checkout feat/kep10-dataset-validation`.
+3. **Someone wants to run it themselves** → "Branch `feat/kep10-dataset-validation`, `python examples/demo_catalog_validation.py`, needs `pandera[pandas]`."
+
+
+---
+
 ## Module 6 — The Q&A drill bank (from the simulated panel)
 
 Six personas modelled on tomorrow's attendees, grounded in their real review history AND in the current branch (the simulation read the code — several questions exploit real inconsistencies it found; see the ⚡ gotchas below). **Drill method:** read the question, answer OUT LOUD, then compare with the model answer. Prioritise deepyaman + Elena if short on time.

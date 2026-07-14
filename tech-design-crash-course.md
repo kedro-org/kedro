@@ -151,51 +151,54 @@ Run `python examples/demo_catalog_validation.py` and narrate each section out lo
 
 ---
 
-## Module 5b — Demo run book (step by step, on `feat/kep10-dataset-validation`)
+## Module 5b — Demo run book (spaceflights headline + script encore)
 
-Run the demo from the **implementation branch** — its `git status` is completely clean (no prep docs visible on a screen-share), and the demo is verified green there (exit 0).
+Two-part demo, ~6 min total. **Part 1 is the headline**: a real spaceflights project at `~/GitHub/spaceflights-validation-demo` (already built and verified end-to-end — own venv with the branch kedro installed editable, validators wired, break/restore scripts ready). **Part 2** is the mechanics encore using the standalone script for what the project shows less crisply (non-tabular, opt-out matrix, repr).
 
-### Tonight (10 min, do once)
+### Already done (the setup that exists)
+
+- Project scaffolded from `spaceflights-pandas`; `.venv` inside it runs **the branch kedro editable** (`kedro 1.2.0.dev` from `~/GitHub/kedro` — either branch works, identical impl commit). ⚠️ The conda env's kedro is stock 1.4.0 — always use the project's `./.venv/bin/kedro`.
+- `src/spaceflights_validation_demo/schemas/companies.py` — two contracts: `RawCompaniesSchema` (raw shape: `id` unique, `company_rating` matches `^\d+%$`, `iata_approved` in t/f) and `PreprocessedCompaniesSchema` (floats in [0,1], bools) — the schemas/ convention from Design decision 3, live.
+- `conf/base/catalog.yml`: shorthand `validator:` on `companies` (load contract) and long form with **unquoted** `on: [save]` on `preprocessed_companies` (the Norway normalisation working in the wild — flex if asked).
+- `demo_break.sh` / `demo_restore.sh` — one keystroke each; pristine backup at `data/01_raw/companies.csv.clean`.
+
+### Tonight (5 min dress rehearsal)
 
 ```bash
-cd /Users/Sajid_Alam/GitHub/kedro
-git checkout feat/kep10-dataset-validation
-conda activate parameter-validation
-
-# dress rehearsal + capture the backup in one go:
-python examples/demo_catalog_validation.py | tee /tmp/demo_backup.txt
+cd ~/GitHub/spaceflights-validation-demo
+KEDRO_DISABLE_TELEMETRY=1 ./.venv/bin/kedro run --pipeline data_processing   # green, ~6s
+./demo_break.sh
+KEDRO_DISABLE_TELEMETRY=1 ./.venv/bin/kedro run --pipeline data_processing 2>&1 | tail -8   # the money shot
+./demo_restore.sh
 ```
 
-Screenshot the full output (or keep `/tmp/demo_backup.txt` open in a tab) and pin it to Miro Frame 8. Optional confidence check: `python -m pytest tests/validation/ -q --no-cov` → expect **208 passed**.
+Screenshot the failure output for Miro Frame 8.
 
-### 5 minutes before the session
+### Part 1 — spaceflights, the user journey (~4 min)
 
-- Terminal at repo root, on `feat/kep10-dataset-validation`, env activated
-- **Font size up** (the error report is the star — it must be readable from a laptop)
-- Pre-type the command so it's one Enter: `python examples/demo_catalog_validation.py`
-- `examples/catalog.yml` open in a second tab (someone will ask to see the YAML)
+**Beat 1 — show the diff (30s).** Open `conf/base/catalog.yml` at the `companies` entry: *"One line — `validator:` pointing at a schema in `src/<pkg>/schemas/`. That folder convention is design decision 3; note `preprocessed_companies` uses the long form with `on: [save]`."* Flash the schema file: *"Contract on the RAW supplier shape — percentage strings, t/f flags."*
 
-### The live run (~5 min) — narration per section
+**Beat 2 — green run (30s).** `./.venv/bin/kedro run --pipeline data_processing` → *"Both validators active: load contract on the raw file, save contract on the node output. 6 seconds, pipeline green."*
 
-**a) Fixture data** — "Two CSVs: one valid, one with duplicate ids and out-of-range ratings." (5 seconds, move on.)
+**Beat 3 — the supplier breaks the file (90s).** `./demo_break.sh` → rerun → scroll to the bottom of the output (rich traceback is long; **the summary is the last thing printed**):
 
-**b) Build the catalog** — "Plain config dicts with one new key — `validator:` — shorthand string or long form with options. Note `catalog.validators`: bindings are inspectable, and this is what Kedro-Viz reads statically."
+```
+DataValidationError: Validation failed for dataset 'companies' on load
+3 check(s) failed — 4 failure case(s):
+  - id: field_uniqueness — 2 cases (e.g. 3888, 3888)
+  - company_rating: str_matches('^\d+%$') — 1 case (e.g. not-a-rating)
+  - iata_approved: isin(['t', 'f']) — 1 case (e.g. x)
+```
 
-**c) Valid load → coercion** — "The `id` column: float64 raw, **int64 after** — the validator returned transformed data. Validators may coerce; documented contract."
+*"Named dataset, named mode, every failed check grouped with examples — at the I/O boundary, **before any node ran**. Nothing was written."*
 
-**d) Invalid load → the error** ⭐ *the money shot — slow down* — "Three checks, five failure cases, three readable lines — **bounded no matter the frame size**. Dataset name, mode, validator all named — the funnel enriches the error, since the schema itself is dataset-agnostic. Full Pandera report on `__cause__`."
+**Beat 4 — the before/after punchline (60s).** `KEDRO_DATASET_VALIDATION=0 ./.venv/bin/kedro run --pipeline data_processing` → it gets past loading and dies **inside the node**: `ValueError: could not convert string to float: 'not-a-rating'`. *"Same bad file, validation off — this is what today's Kedro gives you: a mystery ValueError deep in node code. That contrast is the whole KEP."* (Also just demoed the env kill switch.) Then `./demo_restore.sh`.
 
-**e) Save-side blocking** — "Invalid save raises **before** the write — `file written? False`. Bad data never lands on disk. Then the valid save goes through."
+**Beat 5 — notebook + API (60s).** In the project: `./.venv/bin/kedro ipython` (or the prepared snippet) → `catalog.load("companies")` → *"validates outside `kedro run` — id came back int64, coerced by the contract"* → `validate_catalog_dataset(catalog, "companies")` → `passed`; on `reviews` → `skipped, "no validator declared"`. *"Never raises — Nok's IDE contract."*
 
-**Bonus) MetricsValidator** — "No pandera anywhere in this one — a JSON metrics dict validated by a 15-line custom class. The protocol doing its job — Adeikalam's non-tabular case."
+### Part 2 — script encore (~2 min, from the kedro repo)
 
-**f) The programmatic API** — "`validate_catalog_dataset` **never raises** — status, structured failures, JSON-safe `to_dict`. This is the contract Nok's VSCode extension consumes." (Look at Nok.)
-
-**g) Opt-out** — "`validation_enabled=False`, then the `KEDRO_DATASET_VALIDATION` env var — read inside `kedro.io`, so it reaches **every** catalog instance, including ones plugins rebuild. The 3am kill switch."
-
-**h) Clean repr** — "Real dataset classes, no wrapper anywhere — deepyaman's inspection concern resolved by deletion, not decoration. Bindings live on the `validators` property instead."
-
-Close: *"That's the whole feature — 208 validation tests plus 282 io tests green behind it. Now let's lock the seven decisions."* → Miro Frame 9.
+`cd ~/GitHub/kedro && python examples/demo_catalog_validation.py` (conda env `parameter-validation`, runs via repo-root shadowing). Point only at what spaceflights didn't show: **the non-tabular MetricsValidator** (protocol without pandera — Adeikalam's case), **the opt-out matrix** (flag + env var precedence), **the clean repr** (no wrapper). Backup output: `/tmp/demo_backup.txt`.
 
 ### If someone says "show me the code"
 
@@ -205,16 +208,14 @@ Close: *"That's the whole feature — 208 validation tests plus 282 io tests gre
 | "Where's the key captured?" | `data_catalog.py:918–942` (cleaned copy; assigned-after-`__setitem__` comment at 939) |
 | "The resolution order?" | `kedro/validation/core.py:342–433` — footgun comment at 394–397 |
 | "The pyspark branch?" | `kedro/validation/pandera_validator.py:256–270` |
-| "The YAML?" | `examples/catalog.yml` — shorthand, long form, anchor recipe, factory pattern |
+| "The project YAML?" | `~/GitHub/spaceflights-validation-demo/conf/base/catalog.yml` |
 
 ### Fallbacks
 
-1. **Demo errors live** → don't debug on camera. "I have the output from last night's run" → backup screenshot / `/tmp/demo_backup.txt`, keep narrating.
-2. **Wrong env** (most likely gremlin) → `conda activate parameter-validation && cd ~/GitHub/kedro && git checkout feat/kep10-dataset-validation`.
-3. **Someone wants to run it themselves** → "Branch `feat/kep10-dataset-validation`, `python examples/demo_catalog_validation.py`, needs `pandera[pandas]`."
-
-
----
+1. **Live demo errors** → don't debug on camera: *"here's last night's run"* → screenshots / `/tmp/demo_backup.txt`.
+2. **Wrong kedro** (the likely gremlin): the project must use `./.venv/bin/kedro`, NOT the conda env's `kedro` (that's stock 1.4.0, no validation — it will silently not validate).
+3. **Data left corrupted** from a previous rehearsal → `./demo_restore.sh`.
+4. **Someone wants to reproduce** → *"spaceflights-pandas starter + `pip install -e <branch> pandera[pandas]`, add the schema file and one catalog line."* (Which is itself the adoption pitch.)
 
 ## Module 6 — The Q&A drill bank (from the simulated panel)
 

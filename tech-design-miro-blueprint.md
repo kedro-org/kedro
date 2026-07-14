@@ -200,15 +200,16 @@ One honesty sticky (pre-empts Elena): *"The one real hooks advantage: Task fires
 
 ## Frame 8 — Live demo (5 min)
 
-Sticky: `python examples/demo_catalog_validation.py` (run in terminal, screen-share).
-Checklist of the 5 money shots (tick live as you show them):
-- [ ] Coerced dtypes on load (float64 id → int64)
-- [ ] The grouped error report on invalid data
-- [ ] Failed save → `file written? False`
-- [ ] Non-tabular MetricsValidator (no pandera involved)
-- [ ] `validate_catalog_dataset` → JSON-safe result + opt-out via env var
+Sticky: **Part 1 — real spaceflights project** (`~/GitHub/spaceflights-validation-demo`, branch kedro in its venv). Beats to tick live:
+- [ ] `catalog.yml` + `schemas/` folder — the one-line UX (decision 3 visible)
+- [ ] Green `kedro run` with both contracts active
+- [ ] `./demo_break.sh` → run fails: the grouped error at the I/O boundary ⭐
+- [ ] `KEDRO_DATASET_VALIDATION=0` → same file dies in the node with a cryptic ValueError — the before/after punchline + kill switch in one
+- [ ] Notebook `catalog.load` validates + `validate_catalog_dataset` never raises
 
-Backup sticky (in case of demo gremlins): screenshot of the demo output pasted on the frame beforehand. **Do this — take the screenshot tonight.**
+Sticky: **Part 2 — script encore** (`python examples/demo_catalog_validation.py` from the kedro repo): non-tabular MetricsValidator · opt-out matrix · clean repr.
+
+Backup sticky (in case of demo gremlins): screenshots of BOTH outputs pasted on the frame beforehand. **Do this — take them tonight.**
 Stats sticky: *"Prototype: 208 validation + 282 io tests green, ruff clean, 27 files +4643/−857, branch `prototype/kep7-v2-catalog-validation`."*
 
 ---

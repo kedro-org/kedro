@@ -47,6 +47,9 @@ RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 Available runners: 'SequentialRunner', 'ParallelRunner' and 'ThreadRunner'."""
 ASYNC_ARG_HELP = """Load and save node inputs and outputs asynchronously
 with threads. If not specified, load and save datasets synchronously."""
+RUNNER_PARAMS_HELP = """Specify extra keyword arguments for the runner.
+Items must be separated by comma, keys - by equals sign, example:
+max_workers=4,is_async=True."""
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
 attached. Option can be used multiple times, what results in a
 pipeline constructed from nodes having any of those tags."""
@@ -188,6 +191,13 @@ def package(metadata: ProjectMetadata) -> None:
 )
 @click.option("--runner", "-r", type=str, default=None, help=RUNNER_ARG_HELP)
 @click.option("--async", "is_async", is_flag=True, help=ASYNC_ARG_HELP)
+@click.option(
+    "--runner-params",
+    type=click.UNPROCESSED,
+    default="",
+    help=RUNNER_PARAMS_HELP,
+    callback=_split_params,
+)
 @env_option
 @click.option(
     "--tags",
@@ -246,6 +256,7 @@ def run(  # noqa: PLR0913
     env: str,
     runner: str,
     is_async: bool,
+    runner_params: dict[str, Any],
     node_names: str,
     to_nodes: str,
     from_nodes: str,
@@ -278,12 +289,13 @@ def run(  # noqa: PLR0913
         pipelines_to_run = list(set(pipelines)) if pipelines else []
 
     runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
+    runner_kwargs = _resolve_runner_kwargs(is_async, runner_params)
     tuple_tags = tuple(tags)
     tuple_node_names = tuple(node_names)
     create_kwargs: dict[str, Any] = {"env": env, "conf_source": conf_source}
     run_kwargs: dict[str, Any] = {
         "tags": tuple_tags,
-        "runner": runner_obj(is_async=is_async),
+        "runner": runner_obj(**runner_kwargs),
         "node_names": tuple_node_names,
         "from_nodes": from_nodes,
         "to_nodes": to_nodes,
@@ -305,3 +317,27 @@ def run(  # noqa: PLR0913
     with settings.SESSION_CLASS.create(**create_kwargs) as session:
         result: dict[str, Any] = session.run(**run_kwargs)
     return result
+
+
+def _resolve_runner_kwargs(
+    is_async: bool, runner_params: dict[str, Any]
+) -> dict[str, Any]:
+    """Merge runner params with the legacy --async flag."""
+    runner_kwargs = dict(runner_params)
+
+    if is_async:
+        warnings.warn(
+            "Option '--async' is deprecated and will be removed in a future release. "
+            "Please use '--runner-params=is_async=True' instead.",
+            KedroDeprecationWarning,
+        )
+        if "is_async" in runner_kwargs and not runner_kwargs["is_async"]:
+            raise KedroCliError(
+                "Options '--async' and '--runner-params=is_async=False' "
+                "cannot be used together."
+            )
+        runner_kwargs["is_async"] = True
+    else:
+        runner_kwargs.setdefault("is_async", False)
+
+    return runner_kwargs

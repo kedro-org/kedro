@@ -33,6 +33,12 @@ You can also run the nodes within the pipeline concurrently, using a `ParallelRu
 kedro run --runner=ParallelRunner
 ```
 
+To limit the number of worker processes, pass `max_workers` through `--runner-params`:
+
+```bash
+kedro run --runner=ParallelRunner --runner-params=max_workers=4
+```
+
 For the `ParallelRunner`, it is possible to manually select which multiprocessing start method is going to be used.
 
 - `fork`: The child process is created as a copy of the parent process. This is fast but can cause issues with libraries that use threads or manage internal state. Default on Linux up to Python 3.13.
@@ -57,6 +63,12 @@ While `ParallelRunner` uses multiprocessing, you can also run the pipeline with 
 
 ```bash
 kedro run --runner=ThreadRunner
+```
+
+To limit the number of worker threads, pass `max_workers` through `--runner-params`:
+
+```bash
+kedro run --runner=ThreadRunner --runner-params=max_workers=4
 ```
 
 ## Custom runners
@@ -137,6 +149,12 @@ And use it with `kedro run` through the `--runner` flag:
 $ kedro run --runner=<package_name>.runner.DryRunner
 ```
 
+You can pass keyword arguments to custom runner constructors with `--runner-params`:
+
+```console
+$ kedro run --runner=<package_name>.runner.DryRunner --runner-params=foo=bar
+```
+
 ## Load and save asynchronously
 
 !!! note
@@ -148,14 +166,16 @@ When processing a node, both `SequentialRunner` and `ParallelRunner` perform the
 2. Execute node function with the input(s)
 3. Save the output(s)
 
-If a node has multiple inputs or outputs (for example, `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
+If a node has multiple inputs or outputs (for example, `Node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing `is_async` through `--runner-params` as follows:
 
 ```bash
-$ kedro run --async
+$ kedro run --runner-params=is_async=True
 ...
 2020-03-24 09:20:01,482 - kedro.runner.sequential_runner - INFO - Asynchronous mode is enabled for loading and saving data
 ...
 ```
+
+The `--async` flag is still supported for compatibility, but it is deprecated and will be removed in a future release.
 
 !!! note
     All the datasets used in the run have to be [thread-safe](https://www.quora.com/What-is-thread-safety-in-Python) in order for asynchronous loading/saving to work properly.
@@ -279,6 +299,8 @@ run:
   tags: tag1, tag2, tag3
   pipelines: pipeline1
   runner: ParallelRunner
+  runner_params:
+    max_workers: 4
   node_names: node1, node2
   env: env1
 ```

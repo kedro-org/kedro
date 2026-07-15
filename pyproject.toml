@@ -96,7 +96,8 @@ jupyter = [
     "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
 ]
 benchmark = [
-    "asv"
+    "asv",
+    "kedro[pydantic]",
 ]
 
 pydantic = ["pydantic>=2.13"]

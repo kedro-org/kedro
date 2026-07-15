@@ -203,6 +203,7 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module: str | None = None
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
+        self._requested_pipelines: list[str] | None = None
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
@@ -226,6 +227,23 @@ class _ProjectPipelines(MutableMapping):
         self._content = project_pipelines
         self._is_data_loaded = True
 
+    def set_requested(self, pipeline_names: list[str] | None) -> None:
+        """Store which pipelines should be loaded on the next dict access.
+
+        Invalidates the cache when the filter changes so that a subsequent
+        access with a different (or absent) filter re-runs ``_load_data``.
+
+        Args:
+            pipeline_names: Names of the pipelines to load selectively, or
+                ``None`` to load all registered pipelines.
+        """
+        if set(self._requested_pipelines or []) != set(pipeline_names or []):
+            self._is_data_loaded = False
+            self._content = {}
+        self._requested_pipelines = (
+            list(pipeline_names) if pipeline_names is not None else None
+        )
+
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every ``configure`` call,
@@ -234,6 +252,7 @@ class _ProjectPipelines(MutableMapping):
         self._pipelines_module = pipelines_module
         self._is_data_loaded = False
         self._content = {}
+        self._requested_pipelines = None
 
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)
@@ -282,13 +301,16 @@ class _ProjectLogging(UserDict):
         self.configure(yaml.safe_load(logging_config))
         logger.info(msg)
 
-    def _validate_logging_class(self, class_path: str) -> None:
-        """Validate that a class referenced in logging configuration is a legitimate
-        logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
-        logging.Filter).
+    def _resolve_logging_class(self, class_path: str) -> type[Any] | None:
+        """Resolve and validate that a class referenced in logging configuration is
+        a legitimate logging class (i.e. a subclass of logging.Handler,
+        logging.Formatter, or logging.Filter).
 
         Args:
             class_path: Dotted import path to the class, e.g. ``logging.StreamHandler``.
+
+        Returns:
+            Resolved class, or ``None`` for bare names resolved internally by logging.
 
         Raises:
             ValueError: If the class cannot be imported or is not a logging base class.
@@ -297,7 +319,7 @@ class _ProjectLogging(UserDict):
         module_path, _, class_name = class_path.rpartition(".")
         if not module_path:
             # Bare name (e.g. "StreamHandler") resolved internally by logging machinery.
-            return
+            return None
 
         try:
             module = importlib.import_module(module_path)
@@ -320,7 +342,19 @@ class _ProjectLogging(UserDict):
                 f"Got {type(cls).__name__!r}."
             )
 
-    def _validate_logging_config(self, config: Any) -> Any:
+        return cls
+
+    def _validate_logging_class(self, class_path: str) -> type[Any] | None:
+        """Validate that a class referenced in logging configuration is a legitimate
+        logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
+        logging.Filter)."""
+        return self._resolve_logging_class(class_path)
+
+    def _validate_logging_config(
+        self,
+        config: Any,
+        resolved_logging_classes: dict[str, type[Any] | None] | None = None,
+    ) -> Any:
         """Recursively check the logging configuration and raise an error if dangerous
         '()' factory keys are encountered or if any 'class' value is not a legitimate
         logging class."""
@@ -330,23 +364,91 @@ class _ProjectLogging(UserDict):
                     "The '()' key is not allowed in logging configuration as it poses a security risk."
                 )
             if "class" in config:
-                self._validate_logging_class(config["class"])
+                class_path = config["class"]
+                resolved_class = self._validate_logging_class(class_path)
+                if resolved_logging_classes is not None:
+                    resolved_logging_classes[class_path] = resolved_class
             validated = {}
             for k, v in config.items():
-                validated[k] = self._validate_logging_config(v)
+                validated[k] = self._validate_logging_config(
+                    v, resolved_logging_classes
+                )
             return validated
         elif isinstance(config, list):
-            return [self._validate_logging_config(item) for item in config]
+            return [
+                self._validate_logging_config(item, resolved_logging_classes)
+                for item in config
+            ]
         else:
             return config
+
+    def _prepare_logging_config(
+        self,
+        logging_config: dict[str, Any],
+        resolved_logging_classes: dict[str, type[Any] | None] | None = None,
+    ) -> dict[str, Any]:
+        """Prepare a validated logging configuration for ``dictConfig``.
+
+        ``logging.config.dictConfig`` only instantiates custom filters through the
+        ``()`` factory key, which Kedro rejects in user configuration for security
+        reasons. For validated top-level filter definitions, convert ``class`` to an
+        internal callable so custom ``logging.Filter`` subclasses are instantiated
+        without allowing user-provided factories.
+        """
+        prepared_config = logging_config.copy()
+
+        if "filters" not in logging_config:
+            return prepared_config
+
+        filters = logging_config["filters"]
+
+        if not isinstance(filters, dict):
+            return prepared_config
+
+        prepared_filters = filters.copy()
+        prepared_config["filters"] = prepared_filters
+
+        for filter_name, filter_config in prepared_filters.items():
+            if not isinstance(filter_config, dict) or "class" not in filter_config:
+                continue
+
+            class_path = filter_config["class"]
+            filter_class = (
+                resolved_logging_classes[class_path]
+                if resolved_logging_classes is not None
+                and class_path in resolved_logging_classes
+                else self._resolve_logging_class(class_path)
+            )
+
+            if filter_class is None:
+                continue
+
+            if not issubclass(filter_class, logging.Filter):
+                raise ValueError(
+                    f"Invalid logging filter class '{class_path}' for filter "
+                    f"'{filter_name}'. Must be a subclass of logging.Filter."
+                )
+
+            prepared_filter_config = {
+                key: value for key, value in filter_config.items() if key != "class"
+            }
+            prepared_filter_config["()"] = filter_class
+            prepared_filters[filter_name] = prepared_filter_config
+
+        return prepared_config
 
     def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
         """
-        validated_config = self._validate_logging_config(logging_config)
-        logging.config.dictConfig(validated_config)
+        resolved_logging_classes: dict[str, type[Any] | None] = {}
+        validated_config = self._validate_logging_config(
+            logging_config, resolved_logging_classes
+        )
+        logging.config.dictConfig(
+            self._prepare_logging_config(validated_config, resolved_logging_classes)
+        )
         self.data = validated_config
 
     def set_project_logging(
@@ -501,9 +603,14 @@ def find_pipelines(  # noqa: PLR0912, PLR0915
             "Call 'configure_project' first."
         )
 
-    # Determine if specific pipelines were requested
-    load_all = pipelines_to_find is None or "__default__" in pipelines_to_find
-    requested_pipelines: set[str] | None = None if load_all else set(pipelines_to_find)  # type: ignore[arg-type]
+    # CLI-set filter takes precedence; falls back to the explicit kwarg.
+    pipeline_filter = (
+        pipelines._requested_pipelines
+        if pipelines._requested_pipelines is not None
+        else pipelines_to_find
+    )
+    load_all = pipeline_filter is None or "__default__" in pipeline_filter
+    requested_pipelines: set[str] | None = None if load_all else set(pipeline_filter)  # type: ignore[arg-type]
 
     pipelines_dict: dict[str, Pipeline] = {}
 

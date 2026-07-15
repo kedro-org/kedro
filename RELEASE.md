@@ -1,16 +1,26 @@
 # Upcoming Release
-
 ## Major features and improvements
-* Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests.
-* Added a new CLI command `kedro server start` to run the server.
-* Added an HTTP endpoint `/snapshot` for accessing project snapshot.
+## Bug fixes and other changes
+## Documentation changes
+## Community contributions
 
+# Release 1.5.0
+## Major features and improvements
+* Added a new HTTP Server layer which uses the `KedroServiceSession` to execute pipelines from HTTP requests. It offers the following endpoints:
+  * `/run` to run pipelines with optional runtime parameters.
+  * `/health` to check the server's health status.
+  * `/snapshot` to retrieve the current project snapshot.
+* Added a new CLI command `kedro server start` to run the server.
+* Added selective pipeline loading: when `--pipelines` is specified, only the requested pipeline modules are imported.
 
 ## Bug fixes and other changes
 * Fixed Rich logging integration so node input/output brackets render correctly in console logs and dataset colour markup does not leak into plain log handlers.
 * Improved the `AbstractDataset.from_config()` error message for custom dataset classes that are still abstract, so it no longer suggests invalid constructor arguments when required dataset methods are missing.
+* Improved the `pipeline()` error message when a mapped dataset or parameter does not exist in the pipeline.
 * Fixed `kedro new` accepting project names whose derived package name shadows a Python standard library module or is a Python keyword (e.g. `email`, `json`, `import`), which silently produced a broken, unimportable project. Such names are now rejected at creation time with a clear message.
 * Fixed `kedro pipeline create` accepting Python keywords (e.g. `for`, `import`, `return`) as pipeline names. Such names are now rejected at creation time with a clear error message.
+* Fixed `%reload_kedro --params` parsing for quoted runtime parameter values that contain spaces.
+* Fixed custom `logging.Filter` subclasses configured with `class:` in `logging.yml`, so they are instantiated and applied.
 
 ## Documentation changes
 * Documented hooks limitation when using `ParallelRunner`.
@@ -19,12 +29,15 @@
 * Updated the AWS Batch deployment guide with a strategy-first layout, custom `AWSBatchRunner` usage, namespace-based job submission, and S3-backed catalog configuration.
 
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
 * [Feng Jikui](https://github.com/fengjikui)
 * [Rudra Dudhat](https://github.com/RudraDudhat2509)
+* [samiat4911](https://github.com/samiat4911)
+* [Jean-Baptiste Braun](https://github.com/jbbqqf)
+* [Gargi](https://github.com/Kaliagargi)
+* [Simon](https://github.com/simon-b)
+* [samiat4911](https://github.com/samiat4911)
 
-Many thanks to the following Kedroids for contributing PRs to this release:
-
-* [Simon Bull](https://github.com/simon-b)
 
 # Release 1.4.0
 

@@ -10,9 +10,11 @@ import importlib
 import inspect
 import logging
 import os
+import re
 import sys
 import typing
 import warnings
+from collections import OrderedDict
 from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
@@ -20,7 +22,6 @@ from typing import TYPE_CHECKING, Any, Final
 from kedro.framework.session.session import KedroSession
 
 if TYPE_CHECKING:
-    from collections import OrderedDict
     from collections.abc import Callable
 
     from IPython.core.interactiveshell import InteractiveShell
@@ -55,6 +56,8 @@ FunctionParameters = MappingProxyType
 
 RICH_INSTALLED: Final = importlib.util.find_spec("rich") is not None
 
+_PARAMS_OPTION = re.compile(r"(?P<option>(?:^|\s)--params)(?P<separator>=|\s+)")
+
 
 def load_ipython_extension(ipython: InteractiveShell) -> None:
     """
@@ -78,6 +81,70 @@ def load_ipython_extension(ipython: InteractiveShell) -> None:
     reload_kedro()
 
 
+def _normalise_reload_kedro_params(line: str) -> str:
+    """Normalise quoted ``--params`` values before IPython splits them."""
+    match = _PARAMS_OPTION.search(line)
+    if not match:
+        return line
+
+    value_start = match.end()
+    value_end = _find_reload_kedro_params_end(line, value_start)
+    value = line[value_start:value_end]
+    value = _quote_reload_kedro_params(_remove_reload_kedro_param_quotes(value))
+    prefix = line[:value_start]
+    if match.group("separator") == "=":
+        separator_start = match.start("separator")
+        prefix = f"{line[:separator_start]} "
+
+    return f"{prefix}{value}{line[value_end:]}"
+
+
+def _find_reload_kedro_params_end(line: str, value_start: int) -> int:
+    quote: str | None = None
+    for index, char in enumerate(line[value_start:], start=value_start):
+        if quote:
+            if char == quote:
+                quote = None
+        elif char in {"'", '"'}:
+            quote = char
+        elif char.isspace():
+            return index
+    return len(line)
+
+
+def _remove_reload_kedro_param_quotes(value: str) -> str:
+    quote: str | None = None
+    unquoted_value: list[str] = []
+    for char in value:
+        if quote:
+            if char == quote:
+                quote = None
+            else:
+                unquoted_value.append(char)
+        elif char in {"'", '"'}:
+            quote = char
+        else:
+            unquoted_value.append(char)
+    return "".join(unquoted_value)
+
+
+def _quote_reload_kedro_params(value: str) -> str:
+    if '"' in value and "'" not in value:
+        return f"'{value}'"
+
+    escaped_value = value.replace('"', '\\"')
+    return f'"{escaped_value}"'
+
+
+def _split_reload_kedro_params(value: str) -> dict[str, Any]:
+    """Split ``%reload_kedro --params`` values after IPython argument parsing."""
+    if len(value) >= len("''") and value[0] == value[-1] and value[0] in {"'", '"'}:
+        value = value[1:-1]
+    return typing.cast(
+        "dict[str, Any]", _split_params(typing.cast("Any", None), None, value)
+    )
+
+
 @typing.no_type_check
 @needs_local_scope
 @magic_arguments()
@@ -94,7 +161,7 @@ def load_ipython_extension(ipython: InteractiveShell) -> None:
 @argument("-e", "--env", type=str, default=None, help=ENV_HELP)
 @argument(
     "--params",
-    type=lambda value: _split_params(None, None, value),
+    type=_split_reload_kedro_params,
     default=None,
     help=PARAMS_ARG_HELP,
 )
@@ -109,6 +176,7 @@ def magic_reload_kedro(
     See https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks/#reload_kedro-line-magic
     for more.
     """
+    line = _normalise_reload_kedro_params(line)
     args = parse_argstring(magic_reload_kedro, line)
     reload_kedro(args.path, args.env, args.params, local_ns, args.conf_source)
 
@@ -405,7 +473,9 @@ def _get_node_bound_arguments(node: Node) -> _NodeBoundArguments:
     args, kwargs = Node._process_inputs_for_bind(node_inputs)
     signature = inspect.signature(node_func)
     bound_arguments = signature.bind(*args, **kwargs)
-    return _NodeBoundArguments(bound_arguments.signature, bound_arguments.arguments)
+    return _NodeBoundArguments(
+        bound_arguments.signature, OrderedDict(bound_arguments.arguments)
+    )
 
 
 def _prepare_node_inputs(

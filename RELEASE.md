@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Added opt-in dataset validation: a `validator:` key on catalog entries is enforced on every `load` and `save` through a pluggable `Validator` protocol, with Pandera as the reference backend. Datasets without a validator are unaffected.
 ## Bug fixes and other changes
 ## Documentation changes
 ## Community contributions

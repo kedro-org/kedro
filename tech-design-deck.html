@@ -313,7 +313,6 @@
     <tr><td>Dataset repr and isinstance stay honest</td><td class="ok">Yes</td><td class="no">No</td><td class="ok">Yes</td></tr>
     <tr><td>ParallelRunner pickling</td><td class="ok">Yes</td><td class="no">Fragile</td><td class="ok">Yes</td></tr>
     <tr><td>after_dataset_loaded sees validated data deterministically</td><td class="no">No — depends on plugin registration order</td><td class="ok">Yes</td><td class="ok">Yes</td></tr>
-    <tr><td>Core surface</td><td>None</td><td>Medium</td><td>~25 LOC in kedro/io; no-op benchmark ships with PR 1</td></tr>
   </table>
   <div class="card tint-amber"><p><b>The one honest hooks advantage:</b> Task fires hooks regardless of the catalog class, while the funnel exists only in DataCatalog. A fully custom DATA_CATALOG_CLASS loses declared validation — which is exactly why decision 7's loud warning exists. And hook users lose nothing: hooks keep firing in the same places, now with a stronger guarantee (they always observe validated data on load).</p></div>
   <div class="say"><span class="lbl">Say</span>"The hooks column isn't opinion — both failures are mechanical. Dataset hooks are invoked only by the runner's Task, so a notebook load fires none. And pluggy throws hook return values away, so a hook can never replace the data a node receives — which makes coercion, and the whole protocol, unimplementable as a hook. I'd rather concede the one real hooks advantage openly: it's the custom-catalog case, and we warn loudly there."</div>

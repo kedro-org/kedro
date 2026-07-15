@@ -311,9 +311,9 @@ extra_javascript:
 nav:
   - Welcome: index.md
   - Kedro:
-      - Get Started:
+      - Get started:
           - Installation: getting-started/install.md
-          - Concepts: getting-started/kedro_concepts.md
+          - Kedro concepts: getting-started/kedro_concepts.md
           - FAQs: getting-started/faq.md
           - Kedro's video course: getting-started/course.md
       - Tutorials:
@@ -327,13 +327,13 @@ nav:
             - Test a project: tutorials/test_a_project.md
             - FAQs: tutorials/spaceflights_tutorial_faqs.md
           - Kedro for Notebook tutorial: tutorials/notebooks_tutorial.md
-      - Create:
+      - Create projects:
           - Create a Kedro project: create/new_project.md
           - Create a minimal Kedro project: create/minimal_kedro_project.md
           - Customise a new project: create/customise_project.md
           - Kedro tools: create/new_project_tools.md
           - Kedro starters: create/starters.md
-      - Configure:
+      - Configuration:
           - Concepts:
               - Configuration: configure/configuration_basics.md
               - Parameters and credentials: configure/parameters_and_credentials.md
@@ -343,7 +343,7 @@ nav:
               - Parameters and credentials: configure/how_to_use_parameters_and_credentials.md
               - Templating: configure/how_to_use_templating.md
               - Config loader migration: configure/config_loader_migration.md
-      - Catalog Data:
+      - Data Catalog:
           - Introduction: catalog-data/introduction.md
           - Concepts:
               - Data Catalog: catalog-data/data_catalog.md
@@ -362,11 +362,11 @@ nav:
           - Pipeline object: build/pipeline_introduction.md
           - Run a pipeline: build/run_a_pipeline.md
           - Modular pipelines: build/modular_pipelines.md
-          - Reusing pipelines (namespaces): build/namespaces.md
+          - Namespaces: build/namespaces.md
           - Pipeline registry: build/pipeline_registry.md
           - Slice a pipeline: build/slice_a_pipeline.md
           - LLM context node (experimental): build/llm_context_node.md
-      - Develop:
+      - Development:
           - Dependency management: develop/dependencies.md
           - Logging: develop/logging.md
           - Automated testing: develop/automated_testing.md
@@ -375,7 +375,7 @@ nav:
           - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
       - Inspect:
           - Inspect a project: inspect/inspect-project.md
-      - Deploy:
+      - Deployment:
           - Overview: deploy/index.md
           - How to package your project: deploy/package_a_project.md
           - How to group your nodes effectively: deploy/nodes_grouping.md
@@ -395,14 +395,14 @@ nav:
               - VertexAI: deploy/supported-platforms/vertexai.md
               - Argo Workflows: deploy/supported-platforms/argo.md
               - AWS Batch: deploy/supported-platforms/aws_batch.md
-      - Extend:
-          - Use Cases: extend/common_use_cases.md
+      - Extend a project:
+          - Use cases: extend/common_use_cases.md
           - Custom datasets: extend/how_to_create_a_custom_dataset.md
           - Hooks:
               - Introduction to Hooks: extend/hooks/introduction.md
               - Common use cases: extend/hooks/common_use_cases.md
               - Hooks examples: extend/hooks/examples.md
-          - Programmatic usage: extend/session.md
+          - Kedro sessions: extend/session.md
           - Serving over HTTP: extend/serving.md
           - Custom plugins: extend/plugins.md
           - Custom starters: extend/create_a_starter.md
@@ -469,7 +469,7 @@ nav:
       - Integration & Plugins:
           - IPython and Jupyter:
               - Introduction: integrations-and-plugins/notebooks_and_ipython/index.md
-              - Kedro and Jupyter Notebook: integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md
+              - Kedro and Jupyter notebooks: integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md
               - How to add Kedro to Jupyter Notebook: integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md
           - PySpark: integrations-and-plugins/pyspark_integration.md
           - MLflow: integrations-and-plugins/mlflow.md

@@ -150,6 +150,8 @@ class _ProjectSettings(LazySettings):
         "DATA_CATALOG_CLASS",
         default=_get_default_class("kedro.io.DataCatalog"),
     )
+    # Boolean for now; "warn"/"strict" modes are planned as a follow-up.
+    _DATASET_VALIDATION = Validator("DATASET_VALIDATION", default=True)
 
     def __init__(self, *args: Any, **kwargs: Any):
         kwargs.update(
@@ -165,6 +167,7 @@ class _ProjectSettings(LazySettings):
                 self._CONFIG_LOADER_CLASS,
                 self._CONFIG_LOADER_ARGS,
                 self._DATA_CATALOG_CLASS,
+                self._DATASET_VALIDATION,
             ]
         )
         super().__init__(*args, **kwargs)

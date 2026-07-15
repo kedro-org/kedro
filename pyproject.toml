@@ -99,6 +99,9 @@ benchmark = [
     "asv",
     "kedro[pydantic]",
 ]
+validation = [
+    "pandera[pandas]>=0.24"
+]
 
 pydantic = ["pydantic>=2.13"]
 server = [

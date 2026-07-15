@@ -146,7 +146,7 @@ plugins:
           - catalog-data/how_to_access_the_data_catalog_in_code.md: How to use the DataCatalog programmatically
           - catalog-data/data_catalog_yaml_examples.md: YAML configuration examples
 
-        Building Pipelines:
+        Nodes and Pipelines:
           - build/nodes.md: Creating and using nodes - the building blocks of pipelines
           - build/pipeline_introduction.md: Understanding the pipeline object
           - build/run_a_pipeline.md: Running pipelines with different options
@@ -357,7 +357,7 @@ nav:
               - Access the Data Catalog in code: catalog-data/how_to_access_the_data_catalog_in_code.md
           - Examples:
               - Data Catalog YAML examples: catalog-data/data_catalog_yaml_examples.md
-      - Build:
+      - Nodes & Pipelines:
           - Nodes: build/nodes.md
           - Pipeline object: build/pipeline_introduction.md
           - Run a pipeline: build/run_a_pipeline.md

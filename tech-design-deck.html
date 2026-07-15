@@ -444,22 +444,22 @@
 <!-- ================= FRAME 12 ================= -->
 <section class="frame">
   <div class="fhead"><span class="fnum">Frame 11 · Rollout plan</span><span class="ftime">4 min</span></div>
-  <h2>Prototype is green — this is productionise, not greenfield</h2>
+  <h2>The prototype already works. These PRs productionise it.</h2>
   <div class="lane" style="margin:18px 0">
-    <div class="step"><span class="t">PR 1 — core</span>kedro.validation package, Pandera adapter, catalog funnel, settings — with today's decisions swept through (extras, hint strings, rename).<br><span class="muted">~1.5 weeks</span></div>
+    <div class="step"><span class="t">PR 1: core</span>kedro.validation package, Pandera adapter, catalog funnel, settings. Includes the sweeps from today's decisions (extras, hint strings, rename).</div>
     <div class="sep">→</div>
-    <div class="step"><span class="t">PR 2 — surfaces</span>validate_dataset / validate_catalog, kedro catalog validate CLI, factory-pattern enumeration, custom-catalog warning.<br><span class="muted">~1 week</span></div>
+    <div class="step"><span class="t">PR 2: API and CLI</span>validate_dataset / validate_catalog, the kedro catalog validate command, factory pattern support, custom catalog warning.</div>
     <div class="sep">→</div>
-    <div class="step"><span class="t">PR 3 — docs</span>New data-validation page, pandera.md rewritten to lead with validator:, coercion release-notes callout, reserved-key docs.<br><span class="muted">~0.5 week</span></div>
+    <div class="step"><span class="t">Tests</span>Bring back the prototype test suite alongside the implementation PRs and extend coverage: runners, factories, lifecycle, CLI.</div>
     <div class="sep">→</div>
-    <div class="step"><span class="t">starters PR</span>schemas/ scaffold in spaceflights (one example schema, one commented-out catalog line). Release-coupled.<br><span class="muted">~2 days</span></div>
+    <div class="step"><span class="t">Docs</span>New data validation page, pandera.md rewritten to lead with the validator key, release notes covering coercion and the reserved key.</div>
     <div class="sep">→</div>
-    <div class="step"><span class="t">outreach</span>deepyaman named on the Pandera review (he asked); Niels/Neeraj contacted on the adapter contract; kedro-pandera credited as the inspiration in the launch write-up.<br><span class="muted">during PR 1–2</span></div>
+    <div class="step"><span class="t">Starter</span>New starter example showing the validator key.</div>
   </div>
   <div class="grid cols-3">
-    <div class="card tint-blue"><h3>Ask 1</h3><p>A catalog-side reviewer for PR 1 — it touches the hottest path in kedro/io and deserves that scrutiny.</p></div>
-    <div class="card tint-blue"><h3>Ask 2</h3><p>Nok on PR 2 — the ValidationResult payload is the extension's integration contract and should be reviewed by its consumer.</p></div>
-    <div class="card tint-blue"><h3>Ask 3</h3><p>Today's decisions posted to #5602 and #5390 tomorrow; the implementation parent issue plus seven sub-issues filed right after this session.</p></div>
+    <div class="card tint-blue"><h3>Ask 1</h3><p>A catalog-side reviewer for PR 1. It touches the hottest path in kedro/io and deserves that scrutiny.</p></div>
+    <div class="card tint-blue"><h3>Ask 2</h3><p>Nok on PR 2, since the ValidationResult payload is the extension's integration contract and should be reviewed by its consumer.</p></div>
+    <div class="card tint-blue"><h3>Ask 3</h3><p>I will post today's decisions to #5602 and #5390, and file the implementation parent issue plus sub-issues after this session.</p></div>
   </div>
 </section>
 

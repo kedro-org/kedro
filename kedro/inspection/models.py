@@ -57,6 +57,7 @@ class NodeSnapshot:
 
     Attributes:
         name: Fully-qualified node name (includes namespace prefix if present).
+        func_name: Readable name of the node's underlying function.
         namespace: Node namespace, or ``None`` if the node has no namespace.
         tags: Sorted list of tags assigned to the node.
         inputs: Ordered list of input dataset names.
@@ -64,6 +65,7 @@ class NodeSnapshot:
     """
 
     name: str
+    func_name: str = field(kw_only=True)
     namespace: str | None = None
     tags: list[str] = field(default_factory=list)
     inputs: list[str] = field(default_factory=list)

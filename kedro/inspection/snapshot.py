@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import functools
+import inspect
 import re
 import warnings
 from pathlib import Path
@@ -18,6 +20,7 @@ from kedro.inspection.helper import (
 from kedro.inspection.models import (
     DatasetSnapshot,
     NodeSnapshot,
+    NodeSourceSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
     ProjectSnapshot,
@@ -29,6 +32,47 @@ if TYPE_CHECKING:
 
 
 _ENV_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
+def _get_source_callable(func: Any) -> Any:
+    """Return the callable whose source best represents a node function."""
+    source_func = inspect.unwrap(func)
+    while isinstance(source_func, functools.partial):
+        source_func = inspect.unwrap(source_func.func)
+    return source_func
+
+
+def _format_source_filepath(source_file: str, project_path: Path | None) -> str:
+    source_path = Path(source_file).resolve()
+    if project_path is None:
+        return str(source_path)
+
+    try:
+        return str(source_path.relative_to(project_path.resolve()))
+    except ValueError:
+        return str(source_path)
+
+
+def _get_node_source_snapshot(
+    node: Node, project_path: Path | None = None
+) -> NodeSourceSnapshot | None:
+    """Build a source-location snapshot for a node function when inspectable."""
+    try:
+        source_func = _get_source_callable(node.func)
+        if getattr(source_func, "__name__", None) == "<lambda>":
+            return None
+        source_file = inspect.getsourcefile(source_func)
+        if source_file is None:
+            return None
+        source_lines, line_start = inspect.getsourcelines(source_func)
+    except (OSError, TypeError, ValueError):
+        return None
+
+    return NodeSourceSnapshot(
+        filepath=_format_source_filepath(source_file, project_path),
+        line_start=line_start,
+        line_end=line_start + len(source_lines) - 1,
+    )
 
 
 def _build_project_metadata_snapshot(
@@ -68,11 +112,12 @@ def _build_dataset_snapshots(
     }
 
 
-def _node_to_snapshot(node: Node) -> NodeSnapshot:
+def _node_to_snapshot(node: Node, project_path: Path | None = None) -> NodeSnapshot:
     """Convert a live ``Node`` object to a ``NodeSnapshot``.
 
     Args:
         node: A Kedro pipeline node.
+        project_path: Project root path used to relativise source file paths.
 
     Returns:
         Read-only snapshot of the node's structural metadata.
@@ -84,17 +129,19 @@ def _node_to_snapshot(node: Node) -> NodeSnapshot:
         tags=sorted(node.tags),
         inputs=node.inputs,
         outputs=node.outputs,
+        source=_get_node_source_snapshot(node, project_path),
     )
 
 
 def _build_pipeline_snapshots(
-    pipeline_dict: dict[str, Any],
+    pipeline_dict: dict[str, Any], project_path: Path | None = None
 ) -> list[PipelineSnapshot]:
     """Build a ``PipelineSnapshot`` for every registered pipeline.
 
     Args:
         pipeline_dict: Dictionary of pipeline name to ``Pipeline`` object,
             as returned by ``dict(kedro.framework.project.pipelines)``.
+        project_path: Project root path used to relativise source file paths.
 
     Returns:
         List of pipeline snapshots in registry iteration order.
@@ -106,7 +153,9 @@ def _build_pipeline_snapshots(
         snapshots.append(
             PipelineSnapshot(
                 name=pipeline_id,
-                nodes=[_node_to_snapshot(_node) for _node in pipeline.nodes],
+                nodes=[
+                    _node_to_snapshot(_node, project_path) for _node in pipeline.nodes
+                ],
                 inputs=sorted(pipeline.inputs()),
                 outputs=sorted(pipeline.outputs()),
             )
@@ -177,7 +226,9 @@ def _build_project_snapshot(
         conf_catalog = {}
 
     metadata_snapshot = _build_project_metadata_snapshot(metadata)
-    pipeline_snapshots = _build_pipeline_snapshots(dict(pipelines))
+    pipeline_snapshots = _build_pipeline_snapshots(
+        dict(pipelines), effective_project_path
+    )
     dataset_snapshots = _build_dataset_snapshots(conf_catalog)
 
     # resolve factory patterns

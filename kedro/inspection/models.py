@@ -52,6 +52,21 @@ class DatasetSnapshot:
 
 
 @dataclass
+class NodeSourceSnapshot:
+    """Read-only snapshot of a pipeline node's function source location.
+
+    Attributes:
+        filepath: Source file containing the node function definition.
+        line_start: First line of the node function definition.
+        line_end: Last line of the node function definition.
+    """
+
+    filepath: str
+    line_start: int
+    line_end: int
+
+
+@dataclass
 class NodeSnapshot:
     """Read-only snapshot of a single pipeline node.
 
@@ -62,6 +77,7 @@ class NodeSnapshot:
         tags: Sorted list of tags assigned to the node.
         inputs: Ordered list of input dataset names.
         outputs: Ordered list of output dataset names.
+        source: Source location of the node function, or ``None`` when unavailable.
     """
 
     name: str
@@ -70,6 +86,7 @@ class NodeSnapshot:
     tags: list[str] = field(default_factory=list)
     inputs: list[str] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
+    source: NodeSourceSnapshot | None = None
 
 
 @dataclass

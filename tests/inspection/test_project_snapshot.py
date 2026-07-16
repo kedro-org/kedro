@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import warnings
+
 import pytest
 
 from kedro.config import MissingConfigException
@@ -138,7 +140,7 @@ class TestBuildProjectSnapshot:
             "kedro.inspection.snapshot.pipelines",
             new={},
         )
-        mocker.patch(
+        self.mock_build_pipeline_snapshots = mocker.patch(
             "kedro.inspection.snapshot._build_pipeline_snapshots",
             return_value=self.pipeline_snapshots,
         )
@@ -171,6 +173,12 @@ class TestBuildProjectSnapshot:
     def test_pipelines_populated(self):
         result = _build_project_snapshot(self.project_path)
         assert result.pipelines is self.pipeline_snapshots
+
+    def test_pipeline_snapshots_built_with_project_path(self):
+        _build_project_snapshot(self.project_path)
+        self.mock_build_pipeline_snapshots.assert_called_once_with(
+            {}, self.project_path
+        )
 
     def test_datasets_populated(self):
         result = _build_project_snapshot(self.project_path)
@@ -298,8 +306,6 @@ class TestBuildProjectSnapshot:
             _build_project_snapshot(different_path, metadata=project_metadata)
 
     def test_no_warning_when_project_path_matches_metadata(self, project_metadata):
-        import warnings
-
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             _build_project_snapshot(

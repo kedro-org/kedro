@@ -1,8 +1,11 @@
 import logging
 import re
+import time
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
+from threading import Barrier
 
 import pandas as pd
 import pytest
@@ -26,6 +29,7 @@ from kedro.io.core import (
     generate_timestamp,
     parse_dataset_definition,
 )
+from kedro.io.data_catalog import _LazyDataset
 
 
 @pytest.fixture
@@ -382,6 +386,57 @@ class TestDataCatalog:
 
         data_catalog_copy = deepcopy(data_catalog_from_config)
         assert not data_catalog_copy == expected_catalog
+
+    def test_catalog_deepcopy_preserves_lock(self, data_catalog_from_config):
+        data_catalog_copy = deepcopy(data_catalog_from_config)
+
+        assert data_catalog_copy.keys() == data_catalog_from_config.keys()
+
+    def test_concurrent_get_materializes_lazy_dataset_once(self, monkeypatch):
+        materialized_datasets = []
+
+        def slow_materialize(self):
+            time.sleep(0.05)
+            dataset = MemoryDataset(data=len(materialized_datasets))
+            materialized_datasets.append(dataset)
+            return dataset
+
+        monkeypatch.setattr(_LazyDataset, "materialize", slow_materialize)
+        catalog = DataCatalog.from_config({"dataset": {"type": "MemoryDataset"}})
+        barrier = Barrier(2)
+
+        def get_dataset(_):
+            barrier.wait()
+            return catalog.get("dataset")
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            datasets = list(executor.map(get_dataset, range(2)))
+
+        assert datasets[0] is datasets[1]
+        assert len(materialized_datasets) == 1
+
+    def test_concurrent_get_resolves_pattern_once(self, monkeypatch):
+        materialized_datasets = []
+
+        def slow_materialize(self):
+            time.sleep(0.05)
+            dataset = MemoryDataset(data=len(materialized_datasets))
+            materialized_datasets.append(dataset)
+            return dataset
+
+        monkeypatch.setattr(_LazyDataset, "materialize", slow_materialize)
+        catalog = DataCatalog.from_config({"dataset_{name}": {"type": "MemoryDataset"}})
+        barrier = Barrier(2)
+
+        def get_dataset(_):
+            barrier.wait()
+            return catalog.get("dataset_a")
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            datasets = list(executor.map(get_dataset, range(2)))
+
+        assert datasets[0] is datasets[1]
+        assert len(materialized_datasets) == 1
 
     def test_get_returns_none_dataset(self):
         catalog = DataCatalog(datasets={})

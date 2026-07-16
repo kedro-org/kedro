@@ -1,5 +1,6 @@
 import re
 import sys
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -30,6 +31,18 @@ def _check_equals(data1, data2):
     if isinstance(data1, np.ndarray) and isinstance(data2, np.ndarray):
         return np.array_equal(data1, data2)
     return False  # pragma: no cover
+
+
+class TrackingLock:
+    def __init__(self):
+        self.enter_count = 0
+        self.exit_count = 0
+
+    def __enter__(self):
+        self.enter_count += 1
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.exit_count += 1
 
 
 @pytest.fixture
@@ -155,6 +168,28 @@ class TestMemoryDataset:
 
         dataset.save(new_data)
         assert dataset.exists()
+
+    def test_dataset_operations_are_locked(self):
+        dataset = MemoryDataset("initial")
+        tracking_lock = TrackingLock()
+        dataset._lock = tracking_lock
+
+        dataset.save("new")
+        dataset.load()
+        dataset.exists()
+        dataset._describe()
+        dataset.release()
+
+        assert tracking_lock.enter_count >= 5
+        assert tracking_lock.exit_count == tracking_lock.enter_count
+
+    def test_deepcopy_preserves_lock(self):
+        dataset = MemoryDataset("data")
+
+        copied_dataset = deepcopy(dataset)
+
+        copied_dataset.save("new data")
+        assert copied_dataset.load() == "new data"
 
 
 @pytest.mark.parametrize("data", [["a", "b"], [{"a": "b"}, {"c": "d"}]])

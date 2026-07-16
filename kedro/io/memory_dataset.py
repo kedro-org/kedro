@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from threading import RLock
 from typing import Any
 
 from kedro.io.core import AbstractDataset, DatasetError, TCopyMode
@@ -50,6 +51,7 @@ class MemoryDataset(AbstractDataset):
             metadata: Any arbitrary metadata.
                 This is ignored by Kedro, but may be consumed by users or external plugins.
         """
+        self._lock = RLock()
         self._data = _EMPTY
         self._copy_mode = copy_mode
         self.metadata = metadata
@@ -58,29 +60,43 @@ class MemoryDataset(AbstractDataset):
             self.save.__wrapped__(self, data)  # type: ignore[attr-defined]
 
     def load(self) -> Any:
-        if self._data is _EMPTY:
-            raise DatasetError("Data for MemoryDataset has not been saved yet.")
+        with self._lock:
+            if self._data is _EMPTY:
+                raise DatasetError("Data for MemoryDataset has not been saved yet.")
 
-        copy_mode = self._copy_mode or _infer_copy_mode(self._data)
-        data = _copy_with_mode(self._data, copy_mode=copy_mode)
-        return data
+            copy_mode = self._copy_mode or _infer_copy_mode(self._data)
+            data = _copy_with_mode(self._data, copy_mode=copy_mode)
+            return data
 
     def save(self, data: Any) -> None:
-        copy_mode = self._copy_mode or _infer_copy_mode(data)
-        self._data = _copy_with_mode(data, copy_mode=copy_mode)
+        with self._lock:
+            copy_mode = self._copy_mode or _infer_copy_mode(data)
+            self._data = _copy_with_mode(data, copy_mode=copy_mode)
 
     def _exists(self) -> bool:
-        return self._data is not _EMPTY
+        with self._lock:
+            return self._data is not _EMPTY
 
     def _release(self) -> None:
-        self._data = _EMPTY
+        with self._lock:
+            self._data = _EMPTY
 
     def _describe(self) -> dict[str, Any]:
-        if self._data is not _EMPTY:
-            return {"data": f"<{type(self._data).__name__}>"}
-        # the string representation of datasets leaves out __init__
-        # arguments that are empty/None, equivalent here is _EMPTY
-        return {"data": None}  # pragma: no cover
+        with self._lock:
+            if self._data is not _EMPTY:
+                return {"data": f"<{type(self._data).__name__}>"}
+            # the string representation of datasets leaves out __init__
+            # arguments that are empty/None, equivalent here is _EMPTY
+            return {"data": None}  # pragma: no cover
+
+    def __getstate__(self) -> dict[str, Any]:
+        state = self.__dict__.copy()
+        state.pop("_lock", None)
+        return state
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self._lock = RLock()
 
 
 def _infer_copy_mode(data: Any) -> TCopyMode:

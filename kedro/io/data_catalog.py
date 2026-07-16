@@ -11,6 +11,7 @@ import logging
 import re
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
+from threading import RLock
 from typing import TYPE_CHECKING, Any, ClassVar, Iterator, List  # noqa: UP035
 
 from kedro.io.cached_dataset import CachedDataset
@@ -256,6 +257,7 @@ class DataCatalog(CatalogProtocol):
             print(catalog)
         ```
         """
+        self._lock = RLock()
         self._config_resolver = config_resolver or CatalogConfigResolver(
             default_runtime_patterns=self.default_runtime_patterns
         )
@@ -314,11 +316,12 @@ class DataCatalog(CatalogProtocol):
             # "example: kedro.io.memory_dataset.MemoryDataset()"
         ```
         """
-        combined = self._lazy_datasets | self._datasets
-        lines = []
-        for key, dataset in combined.items():
-            lines.append(f"'{key}': {dataset!r}")
-        return "\n".join(lines)
+        with self._lock:
+            combined = self._lazy_datasets | self._datasets
+            lines = []
+            for key, dataset in combined.items():
+                lines.append(f"'{key}': {dataset!r}")
+            return "\n".join(lines)
 
     def __contains__(self, dataset_name: str) -> bool:
         """
@@ -341,13 +344,14 @@ class DataCatalog(CatalogProtocol):
             # False
         ```
         """
-        return (
-            dataset_name in self._datasets
-            or dataset_name in self._lazy_datasets
-            or self._config_resolver.match_dataset_pattern(dataset_name) is not None
-            or self._config_resolver.match_user_catch_all_pattern(dataset_name)
-            is not None
-        )
+        with self._lock:
+            return (
+                dataset_name in self._datasets
+                or dataset_name in self._lazy_datasets
+                or self._config_resolver.match_dataset_pattern(dataset_name) is not None
+                or self._config_resolver.match_user_catch_all_pattern(dataset_name)
+                is not None
+            )
 
     def __eq__(
         self, other: Any
@@ -369,15 +373,16 @@ class DataCatalog(CatalogProtocol):
             # False
         ```
         """
-        return (
-            self._datasets,
-            self._lazy_datasets,
-            self._config_resolver.list_patterns(),
-        ) == (
-            other._datasets,
-            other._lazy_datasets,
-            other.config_resolver.list_patterns(),
-        )
+        with self._lock:
+            return (
+                self._datasets,
+                self._lazy_datasets,
+                self._config_resolver.list_patterns(),
+            ) == (
+                other._datasets,
+                other._lazy_datasets,
+                other.config_resolver.list_patterns(),
+            )
 
     def keys(self) -> List[str]:  # noqa: UP006
         """
@@ -393,7 +398,8 @@ class DataCatalog(CatalogProtocol):
             # ['example']
         ```
         """
-        return list(self._lazy_datasets.keys()) + list(self._datasets.keys())
+        with self._lock:
+            return list(self._lazy_datasets.keys()) + list(self._datasets.keys())
 
     def values(self) -> List[AbstractDataset]:  # noqa: UP006
         """
@@ -518,22 +524,25 @@ class DataCatalog(CatalogProtocol):
             assert catalog.load("data_csv_dataset").equals(df)
         ```
         """
-        if key in self._datasets or key in self._lazy_datasets:
-            self._logger.warning("Replacing dataset '%s'", key)
-            self._datasets.pop(key, None)
-            self._lazy_datasets.pop(key, None)
-            self._config_resolver.config.pop(key, None)
-            self._load_versions.pop(key, None)
-        if isinstance(value, AbstractDataset):
-            self._load_versions, self._save_version = self._validate_versions(
-                {key: value}, self._load_versions, self._save_version
-            )
-            self._datasets[key] = value
-        elif isinstance(value, _LazyDataset):
-            self._lazy_datasets[key] = value
-        else:
-            self._logger.debug(f"Adding input data {key} as a default MemoryDataset")
-            self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
+        with self._lock:
+            if key in self._datasets or key in self._lazy_datasets:
+                self._logger.warning("Replacing dataset '%s'", key)
+                self._datasets.pop(key, None)
+                self._lazy_datasets.pop(key, None)
+                self._config_resolver.config.pop(key, None)
+                self._load_versions.pop(key, None)
+            if isinstance(value, AbstractDataset):
+                self._load_versions, self._save_version = self._validate_versions(
+                    {key: value}, self._load_versions, self._save_version
+                )
+                self._datasets[key] = value
+            elif isinstance(value, _LazyDataset):
+                self._lazy_datasets[key] = value
+            else:
+                self._logger.debug(
+                    f"Adding input data {key} as a default MemoryDataset"
+                )
+                self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
 
     def __len__(self) -> int:
         """
@@ -583,26 +592,27 @@ class DataCatalog(CatalogProtocol):
             # None
         ```
         """
-        if key not in self and not fallback_to_runtime_pattern:
-            return None
+        with self._lock:
+            if key not in self and not fallback_to_runtime_pattern:
+                return None
 
-        if not (key in self._datasets or key in self._lazy_datasets):
-            ds_config = self._config_resolver.resolve_pattern(key)
-            if ds_config:
-                self._add_from_config(key, ds_config)
+            if not (key in self._datasets or key in self._lazy_datasets):
+                ds_config = self._config_resolver.resolve_pattern(key)
+                if ds_config:
+                    self._add_from_config(key, ds_config)
 
-        lazy_dataset = self._lazy_datasets.pop(key, None)
-        if lazy_dataset:
-            self[key] = lazy_dataset.materialize()
+            lazy_dataset = self._lazy_datasets.pop(key, None)
+            if lazy_dataset:
+                self[key] = lazy_dataset.materialize()
 
-        dataset = self._datasets[key]
+            dataset = self._datasets[key]
 
-        if version and isinstance(dataset, AbstractVersionedDataset):
-            # we only want to return a similar-looking dataset,
-            # not modify the one stored in the current catalog
-            dataset = dataset._copy(_version=version)
+            if version and isinstance(dataset, AbstractVersionedDataset):
+                # we only want to return a similar-looking dataset,
+                # not modify the one stored in the current catalog
+                dataset = dataset._copy(_version=version)
 
-        return dataset
+            return dataset
 
     def _ipython_key_completions_(self) -> list[str]:
         return self.keys()
@@ -757,26 +767,29 @@ class DataCatalog(CatalogProtocol):
         credentials: dict[str, dict[str, Any]] = {}
         load_versions: dict[str, str | None] = {}
 
-        for ds_name, ds in self._lazy_datasets.items():
-            if _is_memory_dataset(ds.config.get(TYPE_KEY, "")):
-                continue
-            unresolved_config, unresolved_credentials = (
-                self._config_resolver._unresolve_credentials(ds_name, ds.config)
-            )
-            catalog[ds_name] = unresolved_config
-            credentials.update(unresolved_credentials)
-            load_versions[ds_name] = self._load_versions.get(ds_name, None)
+        with self._lock:
+            for ds_name, ds in self._lazy_datasets.items():
+                if _is_memory_dataset(ds.config.get(TYPE_KEY, "")):
+                    continue
+                unresolved_config, unresolved_credentials = (
+                    self._config_resolver._unresolve_credentials(ds_name, ds.config)
+                )
+                catalog[ds_name] = unresolved_config
+                credentials.update(unresolved_credentials)
+                load_versions[ds_name] = self._load_versions.get(ds_name, None)
 
-        for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
-            if _is_memory_dataset(ds):  # type: ignore[arg-type]
-                continue
-            resolved_config = ds._init_config()  # type: ignore[attr-defined]
-            unresolved_config, unresolved_credentials = (
-                self._config_resolver._unresolve_credentials(ds_name, resolved_config)
-            )
-            catalog[ds_name] = unresolved_config
-            credentials.update(unresolved_credentials)
-            load_versions[ds_name] = self._load_versions.get(ds_name, None)
+            for ds_name, ds in self._datasets.items():  # type: ignore[assignment]
+                if _is_memory_dataset(ds):  # type: ignore[arg-type]
+                    continue
+                resolved_config = ds._init_config()  # type: ignore[attr-defined]
+                unresolved_config, unresolved_credentials = (
+                    self._config_resolver._unresolve_credentials(
+                        ds_name, resolved_config
+                    )
+                )
+                catalog[ds_name] = unresolved_config
+                credentials.update(unresolved_credentials)
+                load_versions[ds_name] = self._load_versions.get(ds_name, None)
 
         return catalog, credentials, load_versions, self._save_version
 
@@ -853,15 +866,16 @@ class DataCatalog(CatalogProtocol):
             # True
         ```
         """
-        self._validate_dataset_config(ds_name, ds_config)
-        ds = _LazyDataset(
-            ds_name,
-            ds_config,
-            self._load_versions.get(ds_name),
-            self._save_version,
-        )
+        with self._lock:
+            self._validate_dataset_config(ds_name, ds_config)
+            ds = _LazyDataset(
+                ds_name,
+                ds_config,
+                self._load_versions.get(ds_name),
+                self._save_version,
+            )
 
-        self.__setitem__(ds_name, ds)
+            self.__setitem__(ds_name, ds)
 
     def filter(
         self,
@@ -962,18 +976,28 @@ class DataCatalog(CatalogProtocol):
             # None
         ```
         """
-        if ds_name not in self:
-            return None
+        with self._lock:
+            if ds_name not in self:
+                return None
 
-        if ds_name not in self._datasets and ds_name not in self._lazy_datasets:
-            ds_config = self._config_resolver.resolve_pattern(ds_name)
-            return str(_LazyDataset(ds_name, ds_config))
+            if ds_name not in self._datasets and ds_name not in self._lazy_datasets:
+                ds_config = self._config_resolver.resolve_pattern(ds_name)
+                return str(_LazyDataset(ds_name, ds_config))
 
-        if ds_name in self._lazy_datasets:
-            return str(self._lazy_datasets[ds_name])
+            if ds_name in self._lazy_datasets:
+                return str(self._lazy_datasets[ds_name])
 
-        class_type = type(self._datasets[ds_name])
-        return f"{class_type.__module__}.{class_type.__qualname__}"
+            class_type = type(self._datasets[ds_name])
+            return f"{class_type.__module__}.{class_type.__qualname__}"
+
+    def __getstate__(self) -> dict[str, Any]:
+        state = self.__dict__.copy()
+        state.pop("_lock", None)
+        return state
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self._lock = RLock()
 
     def save(self, ds_name: str, data: Any) -> None:
         """Save data to a registered dataset.
@@ -1231,9 +1255,10 @@ class SharedMemoryDataCatalog(DataCatalog):
             # {'shared_data': kedro.io.memory_dataset.MemoryDataset(data='<list>')}
         ```
         """
-        for _, ds in self._datasets.items():
-            if isinstance(ds, SharedMemoryDataset):
-                ds.set_manager(manager)
+        with self._lock:
+            for _, ds in self._datasets.items():
+                if isinstance(ds, SharedMemoryDataset):
+                    ds.set_manager(manager)
 
     def validate_catalog(self) -> None:
         """
@@ -1261,7 +1286,9 @@ class SharedMemoryDataCatalog(DataCatalog):
         ```
         """
         unserialisable = []
-        for name, dataset in self._datasets.items():
+        with self._lock:
+            datasets = self._datasets.copy()
+        for name, dataset in datasets.items():
             if getattr(dataset, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
                 unserialisable.append(name)
                 continue

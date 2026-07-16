@@ -1,5 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
+* Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
+
 ## Bug fixes and other changes
 ## Documentation changes
 ## Community contributions

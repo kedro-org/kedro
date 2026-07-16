@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import partial
+
 import pytest
 
 from kedro.inspection.models import NodeSnapshot, PipelineSnapshot
@@ -42,18 +44,28 @@ def simple_pipeline(simple_node):
 
 class TestNodeSnapshot:
     def test_instantiation_defaults(self):
-        snapshot = NodeSnapshot(name="my_node")
+        snapshot = NodeSnapshot(name="my_node", func_name="my_func")
         assert snapshot.name == "my_node"
+        assert snapshot.func_name == "my_func"
         assert snapshot.namespace is None
         assert snapshot.tags == []
         assert snapshot.inputs == []
         assert snapshot.outputs == []
+
+    def test_func_name_is_keyword_only(self):
+        snapshot = NodeSnapshot("my_node", "my_namespace", func_name="my_func")
+        assert snapshot.func_name == "my_func"
+        assert snapshot.namespace == "my_namespace"
+
+        with pytest.raises(TypeError, match="func_name"):
+            NodeSnapshot("my_node", "my_namespace")
 
 
 class TestNodeToSnapshot:
     def test_populates_all_fields(self, simple_node):
         snapshot = _node_to_snapshot(simple_node)
         assert snapshot.name == simple_node.name
+        assert snapshot.func_name == "_identity"
         assert snapshot.namespace == simple_node.namespace
         assert snapshot.inputs == simple_node.inputs
         assert snapshot.outputs == simple_node.outputs
@@ -69,10 +81,26 @@ class TestNodeToSnapshot:
     def test_returns_node_snapshot_instance(self, simple_node):
         assert isinstance(_node_to_snapshot(simple_node), NodeSnapshot)
 
+    def test_named_partial_func_name_warns(self):
+        partial_node = node(
+            partial(_identity),
+            inputs="raw",
+            outputs="processed",
+            name="partial_node",
+        )
+
+        with pytest.warns(UserWarning, match="made from a 'partial' function"):
+            snapshot = _node_to_snapshot(partial_node)
+
+        assert snapshot.name == "partial_node"
+        assert snapshot.func_name == "<partial>"
+
 
 class TestPipelineSnapshot:
     def test_instantiation(self):
-        node_snap = NodeSnapshot(name="n", inputs=["a"], outputs=["b"])
+        node_snap = NodeSnapshot(
+            name="n", func_name="identity", inputs=["a"], outputs=["b"]
+        )
         snapshot = PipelineSnapshot(name="my_pipe", nodes=[node_snap])
         assert snapshot.name == "my_pipe"
         assert snapshot.nodes == [node_snap]

@@ -81,6 +81,7 @@ curl http://127.0.0.1:8000/snapshot
       "nodes": [
         {
           "name": "split_data_node",
+          "func_name": "split_data",
           "inputs": ["example_iris_data"],
           "outputs": ["X_train", "X_test"],
           "tags": [],

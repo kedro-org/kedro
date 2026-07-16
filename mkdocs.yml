@@ -315,7 +315,7 @@ nav:
           - Installation: getting-started/install.md
           - Kedro concepts: getting-started/kedro_concepts.md
           - FAQs: getting-started/faq.md
-          - Kedro's video course: getting-started/course.md
+          - Video course: getting-started/course.md
       - Tutorials:
           - Kedro Spaceflights tutorial:
             - Spaceflight tutorial: tutorials/spaceflights_tutorial.md
@@ -326,12 +326,12 @@ nav:
             - Settings: tutorials/settings.md
             - Test a project: tutorials/test_a_project.md
             - FAQs: tutorials/spaceflights_tutorial_faqs.md
-          - Kedro for Notebook tutorial: tutorials/notebooks_tutorial.md
+          - Notebook tutorial: tutorials/notebooks_tutorial.md
       - Create projects:
           - Create a Kedro project: create/new_project.md
           - Create a minimal Kedro project: create/minimal_kedro_project.md
           - Customise a new project: create/customise_project.md
-          - Kedro tools: create/new_project_tools.md
+          - Project tools: create/new_project_tools.md
           - Kedro starters: create/starters.md
       - Configuration:
           - Concepts:
@@ -370,7 +370,7 @@ nav:
           - Dependency management: develop/dependencies.md
           - Logging: develop/logging.md
           - Automated testing: develop/automated_testing.md
-          - Code formatting and linting: develop/linting.md
+          - Formatting and linting: develop/linting.md
           - Debugging: develop/debugging.md
           - Inspect a project: inspect/inspect-project.md
           - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
@@ -398,9 +398,9 @@ nav:
           - Use cases: extend/common_use_cases.md
           - Custom datasets: extend/how_to_create_a_custom_dataset.md
           - Hooks:
-              - Introduction to Hooks: extend/hooks/introduction.md
+              - Introduction: extend/hooks/introduction.md
               - Common use cases: extend/hooks/common_use_cases.md
-              - Hooks examples: extend/hooks/examples.md
+              - Examples: extend/hooks/examples.md
           - Kedro sessions: extend/session.md
           - Serving over HTTP: extend/serving.md
           - Custom plugins: extend/plugins.md
@@ -489,7 +489,7 @@ nav:
             #   - Kedro Wizard: about/community/wizard.md
           - Contributing:
               - Kedro's Technical Steering Committee: about/technical_steering_committee.md
-          - Experimental APIs in Kedro: about/experimental.md
+          - Experimental APIs: about/experimental.md
             #   - Kedro Maintainer: about/contributing/maintainer.md
             #   - Contributing on GitHub: about/contributing/github.md
             #   - Contributing documentation: about/contributing/documentation.md

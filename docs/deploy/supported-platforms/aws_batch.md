@@ -249,7 +249,7 @@ The compute environment does not launch instances until jobs are submitted, so c
 
 ### Create an `aws_batch` config environment
 
-Add `conf/aws_batch/` with `globals.yml`, `catalog.yml`, and `parameters.yml`. Set `s3_bucket` in `conf/aws_batch/globals.yml` to the same value as `S3_BUCKET` from Step 2. [Learn how to use catalog globals in Kedro configuration](../../configure/advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader).
+Add `conf/aws_batch/` with `globals.yml`, `catalog.yml`, and `parameters.yml`. Set `s3_bucket` in `conf/aws_batch/globals.yml` to the same value as `S3_BUCKET` from Step 2. [Learn how to use catalog globals in Kedro configuration](../../configure/how_to_use_templating.md#how-to-use-global-variables-with-the-omegaconfigloader).
 
 `conf/aws_batch/globals.yml`:
 
@@ -740,7 +740,7 @@ If jobs failed, see [Troubleshooting](#troubleshooting).
 - [Learn how to group nodes with namespaces in Kedro](../../build/namespaces.md#group-nodes-with-namespaces)
 - [Learn how to package a Kedro project](../package_a_project.md)
 - [Learn how to customise project-specific Kedro commands](../../getting-started/commands_reference.md#customise-or-override-project-specific-kedro-commands)
-- [Learn how to use catalog globals in Kedro configuration](../../configure/advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader)
+- [Learn how to use catalog globals in Kedro configuration](../../configure/how_to_use_templating.md#how-to-use-global-variables-with-the-omegaconfigloader)
 
 ### AWS
 

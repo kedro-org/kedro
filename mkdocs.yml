@@ -55,7 +55,7 @@ plugins:
   - redirects:
       redirect_maps:
         'configuration/telemetry.md': 'about/telemetry.md'
-        'configure/advanced_configuration.md': 'configure/how_to_configure_project.md'
+        'configure/advanced_configuration.md': 'configure/how_to_use_templating.md'
         'configure/parameters.md': 'configure/parameters_and_credentials.md'
         'configure/credentials.md': 'configure/parameters_and_credentials.md'
         'configure/parameter_validation.md': 'configure/how_to_use_parameters_and_credentials.md'

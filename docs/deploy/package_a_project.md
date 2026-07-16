@@ -9,6 +9,83 @@ Kedro also has an advanced feature which supports packaging on a pipeline level 
 !!! note
     These steps are for projects without the `docs` tool option. You can verify this by looking to see if you don't have a `docs` directory in your project.
 
+Kedro's generated `docs` tool scaffold uses Sphinx. Follow these steps to add a MkDocs site instead, including API documentation generated from your project's Python package.
+
+1. Add the documentation dependencies to `pyproject.toml`.
+
+    ```toml
+    [project.optional-dependencies]
+    docs = [
+        "mkdocs>=1.6.1,<2.0",
+        "mkdocstrings[python]>=0.29.1",
+    ]
+    ```
+
+    If your project already has a `[project.optional-dependencies]` section, add only the `docs = [...]` entry to that section.
+
+2. Install the documentation dependencies from the project root.
+
+    ```bash
+    uv pip install -e ".[docs]"
+    ```
+
+    If you manage your project environment with `pip`, run `python -m pip install -e ".[docs]"` instead.
+
+3. Create a `docs` directory.
+
+    ```bash
+    mkdir docs
+    ```
+
+4. Create `docs/index.md` with a short landing page.
+
+    ```markdown
+    # Project documentation
+
+    Use this site to document your Kedro project.
+    ```
+
+5. Create `docs/api.md` and replace `<python_package>` with the package name from `[tool.kedro].package_name` in `pyproject.toml`.
+
+    ```markdown
+    # API reference
+
+    ::: <python_package>.pipeline_registry
+    ```
+
+    Add more `:::` blocks for any other modules that you want to include in the API reference.
+
+6. Create `mkdocs.yml` in the project root and replace `<project_name>` with your project name.
+
+    ```yaml
+    site_name: <project_name>
+    theme:
+      name: mkdocs
+    plugins:
+      - search
+      - mkdocstrings:
+          handlers:
+            python:
+              paths: [src]
+    nav:
+      - Home: index.md
+      - API reference: api.md
+    ```
+
+    The `paths: [src]` setting lets `mkdocstrings` import your project package from the `src` directory.
+
+7. Build the documentation site.
+
+    ```bash
+    mkdocs build
+    ```
+
+    MkDocs writes the built site to the `site` directory. To preview the site locally while you edit it, run:
+
+    ```bash
+    mkdocs serve
+    ```
+
 
 ## Package a Kedro project
 

@@ -299,3 +299,25 @@ Niels/Neeraj). Feedback on CLI demand feeds the CLI decision sub-issue.
       severity warn the right adoption path, is there real CLI demand
 - [ ] Pandera-side review of the adapter contract; the surface is three public
       APIs: `DataFrameModel`, `validate(lazy=)`, `SchemaErrors.failure_cases`
+
+---
+
+## Estimates for grooming (1/2/3/5/8 scale)
+
+Framing: Subs 1 to 3 are productionise-from-prototype (PR #5666 is green), so points
+reflect tests and review cycles, not design risk. Sub 4 is greenfield.
+
+| # | Ticket | Points | Why |
+|---|---|---|---|
+| 1 | Core package + Pandera adapter | 5 | Large additive surface; points are in unit tests, the pandera failure_cases stability check, and review rounds |
+| 2 | Catalog funnel + settings | 5 | Small diff, highest risk (kedro/io hot path); net-new pre-flight wiring + micro-benchmark; deepest review, calendar stretches |
+| 3 | Programmatic API | 3 | Rename sweep + factory-pattern enumeration (real new work) + status tests |
+| 4 | Test coverage: integration matrix | 8 | Greenfield; six integration surfaces incl. multiprocessing/concurrency tests, which are fiddly; picker must learn the feature first |
+| 5 | CLI decision spike | 2 | Timebox, not delivery: options + recommendation comment; ideally waits for outreach signal on CLI demand |
+| 6 | Documentation | 3 | New page, pandera.md rewrite, signature note, release notes; blocked until names are final (after Sub 3) |
+| 7 | Starter example | 2 | Trivial change, points are cross-repo + release coupling + new-vs-modify decision with starters owners |
+| 8 | User outreach | 3 | Pointable setup (users, demo, feedback questions); ongoing conversations tracked by checkpoint, not points |
+
+Dependency order: 1 -> 2 -> 3 in sequence; 4 after 1-3; 6 after 3; 7 near release;
+5 and 8 start immediately in parallel, 8 feeds 5. Total ~31 points; if that spans
+multiple sprints, the release cut is 1-2-3, then 4 and 6, with 5, 7, 8 flexing.

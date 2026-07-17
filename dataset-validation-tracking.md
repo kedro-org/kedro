@@ -1,142 +1,184 @@
-# Dataset Validation — issue tracking plan (paste-ready)
+# Dataset Validation — issue tracking plan (post tech design, 15 Jul)
 
-How to set this up on `kedro-org/kedro`:
+Updated to reflect the tech design outcomes: extras and API name locked, CLI split out
+as its own decision issue, tests folded alongside the implementation PRs plus one
+integration matrix issue, outreach added (Merel), docs signature note added (Ravi).
+PR 1 split in two per Merel's smaller-PRs ask.
 
-1. Create the **parent** issue below → set its issue **type = Parent**.
-2. Create each **sub-issue** → set type **Task** (or **Spike** for the tech design one).
-3. On the parent, use the **Sub-issues** panel to link all of them (GitHub tracks completion automatically).
-4. Add parent + children to the **Kedro 🔶** project board, the **Validation of data & parameters** milestone, and the **H2 2026** roadmap — same as #5390.
-5. Link back to the accepted KEP (#5562) and the parent initiative (#5390) from the parent.
+How to set up on kedro-org/kedro:
 
-A working prototype already exists on branch `prototype/kep7-v2-catalog-validation` (green tests, runnable demo in `examples/demo_catalog_validation.py`). Most core sub-issues are "productionise + review + test-coverage," not greenfield — noted per issue.
+1. Create the PARENT below, type Parent. Do NOT reuse #5390 (it is the exploration
+   spike and Elena retyped it deliberately); link back to it instead.
+2. Create each sub-issue (type Task, except the CLI one which suits a discussion or
+   spike type) and link them via the Sub-issues panel on the parent.
+3. Add everything to the Kedro board backlog + the Validation of data & parameters
+   milestone. Bring to next grooming for sizing and assignment only.
+4. After the parent exists, comment on #5390 linking it (its closing chapter).
+
+Shared context block to paste at the top of EVERY sub-issue:
+
+> Part of [Implementation] Dataset Validation (KEP-10) — see parent issue.
+> Design: kedro-org/kedro discussion #5602 · Tech design summary: [link to the
+> 15 Jul comment] · Prototype: PR [#XXXX] / branch `feat/kep10-dataset-validation`
+> (working implementation, reviewed and green) · Runnable demo:
+> https://github.com/SajidAlamQB/spaceflights-validation-demo
+> The prototype is the base to work from, not a reference to rewrite.
 
 ---
 
-## PARENT — [Implementation] Dataset Validation (KEP accepted)
+## PARENT — [Implementation] Dataset Validation (KEP-10)
 
-**Type:** Parent · **Milestone:** Validation of data & parameters · **Roadmap:** H2 2026
+**Type:** Parent · **Milestone:** Validation of data & parameters
 
 ### Goal
-Implement native, catalog-declared dataset validation in Kedro, per the accepted KEP (#5562). A dataset entry may declare a `validator:` pointing at a schema/validator; the catalog enforces it on `load` and `save` through a pluggable `Validator` protocol, with Pandera as the reference backend.
+Implement catalog-native dataset validation per the accepted KEP-10 (#5602): a
+`validator:` key on catalog entries enforced in the DataCatalog load/save path,
+with a pluggable Validator protocol and Pandera as the reference backend.
 
-### Design (accepted)
-- Schema-on-dataset via a first-class `validator:` catalog key — one dataset, one validator.
-- Enforcement in the `DataCatalog` load/save path (no wrapper dataset).
-- Pluggable `Validator` protocol (`validate(data) -> data`); Pandera is the reference implementation.
-- Validate on load **and** save; opt-out via `DATASET_VALIDATION` setting + `KEDRO_DATASET_VALIDATION` env var.
-- Public `validate_dataset()` / `validate_catalog()` API + `kedro catalog validate` CLI for IDEs/CI.
+### State
+Working prototype on `feat/kep10-dataset-validation` (PR #XXXX): full implementation,
+reviewed, demo project public. Tech design held 15 Jul — summary comment: [link].
 
-Full design: KEP discussion #5562. Prototype: branch `prototype/kep7-v2-catalog-validation`.
+### Decisions locked at tech design
+- Per-backend extras: `kedro[pandera-pandas]`, `kedro[pandera-polars]`, `kedro[pandera-pyspark]`
+- Public API name: `validate_dataset`
+- Entry-point group deferred until a second backend exists (name reserved in docs)
+- CLI split out into its own decision issue (naming/semantics/existence open)
 
 ### Sub-issues
-- [ ] Tech design session & lock open decisions
-- [ ] Core: `kedro.validation` package + Pandera adapter
-- [ ] Core: `DataCatalog` validator funnel + framework wiring
-- [ ] Public API + `kedro catalog validate` CLI
-- [ ] Documentation
-- [ ] kedro-starters: `schemas/` scaffold (sibling repo)
-- [ ] Community / Pandera outreach
-
-### Out of scope for v1
-Automatic YAML-schema loader, GX/Pydantic reference adapters (protocol only), pyspark promotion to supported, `ContextAwareValidator` (unless decided at tech design).
+- [ ] 1. `kedro.validation` core package + Pandera adapter
+- [ ] 2. DataCatalog validation funnel + settings wiring
+- [ ] 3. Programmatic API (`validate_dataset` / `validate_catalog`)
+- [ ] 4. Test coverage: integration matrix
+- [ ] 5. CLI: decide naming, semantics, and whether it ships
+- [ ] 6. Documentation
+- [ ] 7. Starter example
+- [ ] 8. User-validation outreach
 
 ---
 
-## SUB-ISSUE 1 — Tech design session & lock open decisions
+## SUB 1 — `kedro.validation` core package + Pandera adapter
 
-**Type:** Spike · **Blocks:** all core sub-issues
+**Type:** Task · [shared context block]
 
-Run the (updated) tech design for the accepted KEP and lock the decisions the implementation depends on. The architecture pivoted since the April session (type-hints → `validator:` key, wrapper → catalog funnel, Pandera-only → pluggable protocol), so walk the team through the current design + demo.
+Purely additive PR, no existing kedro modules touched — split from the funnel PR so
+the risky `kedro/io` diff reviews separately (smaller-PRs ask from tech design).
 
-**Agenda / decisions to lock:**
-- [ ] Extras naming — single `kedro[validation]` vs per-backend `kedro[pandera-pandas]` / `kedro[pandera-polars]` (recommend per-backend, mirrors kedro-datasets’ Ibis extras).
-- [ ] Public API name — `validate_dataset` vs `validate_catalog_dataset`.
-- [ ] pyspark — ship experimental or leave out of the advertised matrix.
-- [ ] Pandera version floor (`>=0.24`) and `SchemaErrors.failure_cases` stability.
-- [ ] `ContextAwareValidator` — reserve the name now or defer.
-- [ ] `kedro catalog validate` — resolve-only by default vs full-data.
-- [ ] `kedro.validators` entry-point group — v1 or v1.x.
+Scope (productionise from the prototype):
+- [ ] `Validator` protocol, `ValidatorSpec` (shorthand + long form, strict key
+      validation, YAML 1.1 `on:` normalisation), `CheckFailure`,
+      `DataValidationError` (bounded grouped rendering), `ValidationConfigurationError`
+- [ ] `resolve_validator` (adapters -> class instantiation -> instance -> callable;
+      never protocol-check a class object) + `CallableValidator` + `preflight_check`
+- [ ] Pandera adapter: modern namespace detection (`pandera.pandas/polars/pyspark`),
+      grouped `failure_cases` -> `CheckFailure` (capped examples), coercion,
+      options forwarding; pyspark accessor branch kept but NOT advertised
+- [ ] Decision sweep: per-backend extras in pyproject; install-hint strings updated
+- [ ] Unit tests: spec parsing, resolution ordering, adapter behaviour
+- [ ] Action item from tech design: verify `SchemaErrors.failure_cases` shape
+      stability pandera 0.24 -> current
 
-**Deliverable:** updated tech-design notes + a "decisions locked / still open" summary posted to #5390.
+## SUB 2 — DataCatalog validation funnel + settings wiring
 
----
+**Type:** Task · Depends on Sub 1 · [shared context block]
 
-## SUB-ISSUE 2 — Core: `kedro.validation` package + Pandera adapter
+The `kedro/io` + `kedro/framework` diff (~25 lines on the load/save path plus
+lifecycle). Flagged at tech design as the PR needing the most eyes — request a
+catalog-side reviewer (Elena).
 
-**Type:** Task · **Depends on:** Sub-issue 1
+Scope:
+- [ ] `VALIDATOR_KEY` reservation + defensive strip in `parse_dataset_definition`
+- [ ] Spec capture in `_add_from_config` (cleaned copy; resolver store not mutated)
+- [ ] `_maybe_validate` guard ladder in `load`/`save`; error enrichment
+      (dataset name + mode); `severity: warn`; `skip_load_after_save`
+- [ ] Lifecycle: `__setitem__` replacement clears specs, materialisation keeps them;
+      `release()`; `to_config()` re-injection; pickling drops resolved cache
+- [ ] `DATASET_VALIDATION` setting + `KEDRO_DATASET_VALIDATION` env var (env wins,
+      read inside kedro.io); context propagation + custom-catalog warning
+- [ ] Wire `preflight_check` at catalog build (exists in prototype, unwired)
+- [ ] No-op-path micro-benchmark in kedro_benchmarks (defends the hot-path cost)
+- [ ] Funnel + lifecycle + kill-switch tests
 
-The backend-agnostic core plus the Pandera reference adapter. *(Prototype exists — productionise, review, harden.)*
+## SUB 3 — Programmatic API
 
-**Scope:**
-- [ ] `Validator` protocol (`validate(data) -> data`; any raise == failure), `CheckFailure`, `DataValidationError`, `ValidationConfigurationError`.
-- [ ] `ValidatorSpec` (`from_config`/`to_config`; shorthand + long form; strict key validation; YAML 1.1 `on:` normalisation).
-- [ ] `resolve_validator` (adapters → class-instantiate → instance → callable; the `runtime_checkable` ordering guard) + `CallableValidator`.
-- [ ] `preflight_check` (`find_spec`, top-level package only).
-- [ ] Pandera adapter: multi-namespace detection (`pandera.pandas/polars/pyspark`), grouped `failure_cases` → `CheckFailure` (capped examples), `coerce`, options forwarding; pyspark accessor-error branch behind an experimental flag.
-- [ ] No module-level pandera import; graceful degradation when pandera absent.
+**Type:** Task · Depends on Sub 2 · [shared context block]
 
-**Acceptance:** unit tests for spec parsing, resolution ordering (incl. the footgun), and Pandera failure grouping/coercion; `pandera` optional.
+`validate_dataset(catalog, name, ...)` (renamed per tech design) and
+`validate_catalog(...)` returning `ValidationResult`. Machine consumers only
+(VSCode extension, CI scripts) — never raises for outcomes, explicit calls always
+validate. NO CLI in this issue (see Sub 5).
 
----
+Scope:
+- [ ] Rename `validate_catalog_dataset` -> `validate_dataset` across code and docs
+- [ ] `ValidationResult` statuses + `error_type` discriminator; JSON-safe `to_dict`
+- [ ] Factory-pattern enumeration for `validate_catalog` (prototype TODO)
+- [ ] API status-taxonomy tests
 
-## SUB-ISSUE 3 — Core: `DataCatalog` validator funnel + framework wiring
+## SUB 4 — Test coverage: integration matrix
 
-**Type:** Task · **Depends on:** Sub-issue 2
+**Type:** Task · Depends on Subs 1–3 · [shared context block]
 
-Wire validation into the catalog load/save path and the framework. *(Prototype exists — productionise, review, harden.)*
+The prototype's ~750-line suite lives on the prototype branch and was deliberately
+kept out of the implementation PR; reintroduce it incrementally with Subs 1–3, then
+extend to the matrix the KEP commits to:
+- [ ] ParallelRunner (specs survive pickling, workers re-resolve and raise)
+- [ ] ThreadRunner concurrent first-use resolution
+- [ ] Factory patterns incl. `{placeholder}` interpolation in validator strings
+- [ ] Generator nodes (per-chunk save semantics pinned as contract)
+- [ ] Transcoded entries, versioned loads, CachedDataset top-level entries
+- [ ] Plugin-rebuilt catalog idempotence (kedro-telemetry pattern)
 
-**Scope:**
-- [ ] Reserve `VALIDATOR_KEY`; capture the spec in `_add_from_config` (cleaned config copy, resolver store not mutated); defensive pop in `parse_dataset_definition`.
-- [ ] `_maybe_validate` on `load`/`save` (fast-path dict miss; lazy import; cached resolution; enrichment with dataset name + mode; `severity: warn`; `skip_load_after_save`).
-- [ ] Lifecycle: `__setitem__` replacement clears spec; `release()`; `to_config()` re-injection; `__getstate__` drops resolved cache (ParallelRunner).
-- [ ] `validators` property; `validation_enabled` default True on `DataCatalog`.
-- [ ] `DATASET_VALIDATION` project setting + `KEDRO_DATASET_VALIDATION` env var (env wins both ways, read in `kedro.io`); context integration; custom-`DATA_CATALOG_CLASS` `hasattr` warning.
+## SUB 5 — CLI: decide naming, semantics, and whether it ships
 
-**Acceptance:** integration tests for load/save, factories, versioning/transcoding, ParallelRunner pickling, telemetry-shaped rebuild idempotence, kill-switch precedence; no regression in `tests/io/`.
+**Type:** Spike / needs-discussion · [shared context block]
 
----
+Reopened at tech design (deliberately unresolved — do not implement until decided):
+- `kedro catalog validate` reads as validating catalog STRUCTURE, not data
+  (deepyaman); resolve-only-as-default then feels like a mislabelled dry run
+- Is bulk validate-everything a real workflow? Needs evidence, not a default
+- Merel: CLI is a nice-to-have; the primary flow is `kedro run`; if it exists it is
+  a deliberate separate step (e.g. pre-merge data-quality gate), and it must be a
+  separate PR from the API
+- Interactive single-dataset validation may just be documented pandera usage
+  (`Schema.validate(catalog.load(...))`)
 
-## SUB-ISSUE 4 — Public API + `kedro catalog validate` CLI
+Deliverable: a decision comment (options + recommendation) on this issue, then
+either an implementation issue or a wontfix-for-now close.
 
-**Type:** Task · **Depends on:** Sub-issue 3
+## SUB 6 — Documentation
 
-The programmatic surface for IDEs/notebooks/CI. *(Prototype has the API; CLI is new.)*
+**Type:** Task · Depends on Subs 1–3 · [shared context block]
 
-**Scope:**
-- [ ] `validate_dataset(catalog, name, ...)` and `validate_catalog(catalog, ...)` → `ValidationResult` (never raises for outcomes; explicit calls always validate; `error_type` discriminator; `raise_if_failed`; JSON-safe `to_dict`).
-- [ ] `kedro catalog validate [--resolve-only] [--pipeline] [dataset ...]` (non-zero exit on failed/errored; pattern entries resolved against pipelines).
+- [ ] New data validation page: quick start, `validator:` long form, `schemas/`
+      convention (convention NOT enforcement), per-backend install matrix
+      (pandas + Polars advertised; pyspark experimental)
+- [ ] Rewrite `docs/integrations-and-plugins/pandera.md` to lead with `validator:`;
+      demote the hook recipe; credit kedro-pandera as inspiration
+- [ ] Signature note (Ravi, tech design): node signatures stay `pd.DataFrame`;
+      annotations are documentation; `pd.DataFrame[Schema]` is the recommended
+      visible form; unlike parameter validation no model instance is injected —
+      explain why (datasets are data, not config)
+- [ ] Release notes: coercion changes data identity; `validator` reserved key
+- [ ] Interactive validation recipe (the documented pandera path from tech design)
 
-**Acceptance:** status-taxonomy tests (passed/failed/skipped/errored), factory-pattern coverage, CLI exit codes; `to_dict` round-trips through `json.dumps`.
+## SUB 7 — Starter example
 
----
+**Type:** Task · Repo: kedro-starters · Release-coupled · [shared context block]
 
-## SUB-ISSUE 5 — Documentation
+New starter example (or modify an existing spaceflights starter — decide with the
+starters owners) showing the `validator:` key: one example schema in
+`src/<pkg>/schemas/`, one commented-out catalog line. Public demo repo is the
+reference: https://github.com/SajidAlamQB/spaceflights-validation-demo
 
-**Type:** Task · **Depends on:** Sub-issues 3–4
+## SUB 8 — User-validation outreach
 
-**Scope:**
-- [ ] New "Data validation" page (quick-start, long form, `schemas/` convention, per-backend eager/lazy notes).
-- [ ] Rewrite `docs/integrations-and-plugins/pandera.md` to lead with `validator:`; demote the hook recipe.
-- [ ] Catalog reference: reserve `validator:` alongside `versioned`/`credentials`.
-- [ ] Coercion-changes-data callout + release notes; raw-access bypass contract.
+**Type:** Task · Runs in parallel with Subs 1–3 (Merel: start now, not after)
 
----
-
-## SUB-ISSUE 6 — kedro-starters: `schemas/` scaffold (sibling repo)
-
-**Type:** Task · **Repo:** `kedro-org/kedro-starters` · **Release-coupled**
-
-**Scope:**
-- [ ] Add `src/<pkg>/schemas/` with one example schema to spaceflights-pandas (+ viz variant); a commented-out `validator:` line in `catalog.yml`.
-- [ ] Coordinate release timing with the core PRs.
-
----
-
-## SUB-ISSUE 7 — Community / Pandera outreach
-
-**Type:** Task
-
-**Scope:**
-- [ ] Loop in @deepyaman on the implementation PRs (he asked to be included).
-- [ ] Reach out to Niels/Neeraj (Pandera) for a review of the adapter contract (public API only: `DataFrameModel`, `validate(lazy=)`, `SchemaErrors.failure_cases`).
-- [ ] Credit kedro-pandera as inspiration in the launch announcement; capture any design lessons.
+- [ ] Identify parameter-validation early users + Adeikalam's team (they run the
+      schemas-folder pattern in production and asked for this feature)
+- [ ] Share the demo repo + branch install instructions; collect structured feedback
+      (does `validator:` fit their workflow? severity/warn adoption path? CLI demand
+      — feeds Sub 5)
+- [ ] Pandera-side review of the adapter contract (deepyaman asked to be included;
+      Niels/Neeraj) — surface is three public APIs: `DataFrameModel`,
+      `validate(lazy=)`, `SchemaErrors.failure_cases`

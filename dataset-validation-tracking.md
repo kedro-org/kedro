@@ -161,14 +161,14 @@ without exception handling; `raise_if_failed()` restores raising behaviour on de
 ## SUB 4 — Test coverage: integration matrix
 
 ## Description
-Extend test coverage beyond the unit and funnel tests that land with the
-implementation sub-issues, covering the integration surfaces the KEP commits to.
+Build out the test suite for dataset validation, covering both the core behaviour
+and the integration surfaces the KEP commits to. This is greenfield work: tests are
+written from scratch against the implemented behaviour by whoever picks this up,
+using the KEP's testing strategy section as the specification.
 
 ## Context
 Part of [Implementation] Dataset Validation (KEP-10), parent issue #5677. Depends on
-sub-issues 1 to 3. A ~750-line prototype suite exists on branch
-`prototype/kep7-v2-catalog-validation` and was deliberately kept out of the
-implementation PR to isolate the code diff; reintroduce it incrementally, then extend.
+sub-issues 1 to 3.
 Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477
 
 ## Possible Implementation
@@ -180,7 +180,7 @@ Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/
 - [ ] Plugin-rebuilt catalog idempotence (kedro-telemetry pattern)
 
 ## Possible Alternatives
-N/A, coverage work.
+N/A, test work.
 
 ---
 

@@ -4,9 +4,8 @@ Each sub-issue below is pre-formatted for the kedro-org feature request template
 (Description / Context / Possible Implementation / Possible Alternatives).
 Copy everything under a sub-issue heading straight into the GitHub form.
 
-Before pasting, do one search and replace across this file:
-- `[TECH-DESIGN-LINK]` -> URL of the 15 Jul tech design summary comment
-- `[PR-XXXX]` -> the prototype PR number
+All links are filled in: prototype PR #5666, parent issue #5677, tech design
+summary, recording and Miro board (in the parent's Context).
 
 Setup reminders:
 1. Parent issue type: Parent. Sub-issues: Task (Sub 5 suits Spike/discussion).
@@ -26,8 +25,11 @@ with a pluggable Validator protocol and Pandera as the reference backend.
 
 ## Context
 Follows the exploration initiative #5390 and spike #5391. KEP-10 accepted with +3
-TSC votes. Tech design held 15 Jul ([TECH-DESIGN-LINK]) with a working prototype:
-PR [PR-XXXX] / branch `feat/kep10-dataset-validation`, plus a public runnable demo
+TSC votes. Tech design held 15 Jul: [summary](https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477) ·
+[recording](https://zoom.us/rec/play/mTxLoJQNvMHAj2BfBhKYlwI-i_xxY2vyo9GMsopYMH2id6AZqH2sEO3U7zUeHCLgj0pZDLlHVFnNkVwz.4H1PpBBHxCjs_IrH?accessLevel=meeting&canPlayFromShare=true&from=share_recording_detail&continueMode=true&oldStyle=true&componentName=rec-play&originRequestUrl=https%3A%2F%2Fzoom.us%2Frec%2Fshare%2F7IQpcMkcoVSHNLM8rdkDXc6mX-iGPCSJlIRZgrRcBKSSdZr4QahVNi8P7HX9BWt-.YIxNpBXPdmOxtYTv) ·
+[Miro board](https://miro.com/app/board/uXjVH7zKmY4=/)
+Working prototype:
+PR #5666 / branch `feat/kep10-dataset-validation`, plus a public runnable demo
 at https://github.com/SajidAlamQB/spaceflights-validation-demo
 
 Decisions locked at tech design:
@@ -63,8 +65,8 @@ is deliberately split from the catalog funnel work so the `kedro/io` diff can be
 reviewed separately (smaller-PRs ask from tech design).
 
 ## Context
-Part of [Implementation] Dataset Validation (KEP-10), see parent issue.
-Design: #5602 · Tech design summary: [TECH-DESIGN-LINK] · Prototype: PR [PR-XXXX] /
+Part of [Implementation] Dataset Validation (KEP-10), parent issue #5677.
+Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477 · Prototype: PR #5666 /
 branch `feat/kep10-dataset-validation` (working implementation, reviewed and green) ·
 Runnable demo: https://github.com/SajidAlamQB/spaceflights-validation-demo
 Implements the locked decisions on per-backend extras and install-hint strings.
@@ -98,9 +100,9 @@ hot path plus lifecycle handling) and add the framework opt-out. This is the PR 
 touches `kedro/io`, flagged at tech design as needing the most review scrutiny.
 
 ## Context
-Part of [Implementation] Dataset Validation (KEP-10), see parent issue. Depends on
+Part of [Implementation] Dataset Validation (KEP-10), parent issue #5677. Depends on
 the core package sub-issue.
-Design: #5602 · Tech design summary: [TECH-DESIGN-LINK] · Prototype: PR [PR-XXXX] /
+Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477 · Prototype: PR #5666 /
 branch `feat/kep10-dataset-validation` · Demo:
 https://github.com/SajidAlamQB/spaceflights-validation-demo
 A catalog-side reviewer is explicitly requested for this one.
@@ -134,9 +136,9 @@ rather than raising. Built for machine consumers (the VSCode extension, CI scrip
 No CLI in this issue; that is a separate decision issue.
 
 ## Context
-Part of [Implementation] Dataset Validation (KEP-10), see parent issue. Depends on
+Part of [Implementation] Dataset Validation (KEP-10), parent issue #5677. Depends on
 the funnel sub-issue.
-Design: #5602 · Tech design summary: [TECH-DESIGN-LINK] · Prototype: PR [PR-XXXX] /
+Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477 · Prototype: PR #5666 /
 branch `feat/kep10-dataset-validation` · Demo:
 https://github.com/SajidAlamQB/spaceflights-validation-demo
 Implements the locked rename to `validate_dataset`. Requested reviewer: @noklam,
@@ -163,11 +165,11 @@ Extend test coverage beyond the unit and funnel tests that land with the
 implementation sub-issues, covering the integration surfaces the KEP commits to.
 
 ## Context
-Part of [Implementation] Dataset Validation (KEP-10), see parent issue. Depends on
+Part of [Implementation] Dataset Validation (KEP-10), parent issue #5677. Depends on
 sub-issues 1 to 3. A ~750-line prototype suite exists on branch
 `prototype/kep7-v2-catalog-validation` and was deliberately kept out of the
 implementation PR to isolate the code diff; reintroduce it incrementally, then extend.
-Design: #5602 · Tech design summary: [TECH-DESIGN-LINK]
+Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477
 
 ## Possible Implementation
 - [ ] ParallelRunner: specs survive pickling, workers re-resolve and raise
@@ -192,8 +194,8 @@ not established that bulk validate-everything is a real user workflow. Decide wh
 if anything, ships.
 
 ## Context
-Part of [Implementation] Dataset Validation (KEP-10), see parent issue.
-Design: #5602 · Tech design summary: [TECH-DESIGN-LINK]
+Part of [Implementation] Dataset Validation (KEP-10), parent issue #5677.
+Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477
 Session positions: the command name is ambiguous (deepyaman); the CLI is a
 nice-to-have since the primary flow is `kedro run`, and if it exists it should be a
 deliberate separate step such as a pre-merge data quality gate, in its own PR
@@ -224,9 +226,9 @@ User-facing documentation for dataset validation: a new docs page, a rewrite of 
 pandera integration page, and release notes.
 
 ## Context
-Part of [Implementation] Dataset Validation (KEP-10), see parent issue. Depends on
+Part of [Implementation] Dataset Validation (KEP-10), parent issue #5677. Depends on
 sub-issues 1 to 3.
-Design: #5602 · Tech design summary: [TECH-DESIGN-LINK] · Demo:
+Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477 · Demo:
 https://github.com/SajidAlamQB/spaceflights-validation-demo
 Includes the explicit ask from tech design (ravi-kumar-pilla) to document how node
 signatures differ from parameter validation.
@@ -257,10 +259,10 @@ Add a starter example showing the `validator:` key, either as a small new starte
 a modification to an existing spaceflights starter (decide with the starters owners).
 
 ## Context
-Part of [Implementation] Dataset Validation (KEP-10), see parent issue. Lives in the
+Part of [Implementation] Dataset Validation (KEP-10), parent issue #5677. Lives in the
 kedro-starters repo and is release-coupled with the kedro release that ships
 validation.
-Design: #5602 · Tech design summary: [TECH-DESIGN-LINK] · Reference implementation:
+Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477 · Reference implementation:
 https://github.com/SajidAlamQB/spaceflights-validation-demo
 
 ## Possible Implementation
@@ -281,9 +283,9 @@ Validate the feature with real users during implementation rather than after
 release (explicit ask from tech design).
 
 ## Context
-Part of [Implementation] Dataset Validation (KEP-10), see parent issue. Runs in
+Part of [Implementation] Dataset Validation (KEP-10), parent issue #5677. Runs in
 parallel with sub-issues 1 to 3.
-Design: #5602 · Tech design summary: [TECH-DESIGN-LINK] · Demo to share:
+Design: #5602 · Tech design summary: https://github.com/kedro-org/kedro/issues/5390#issuecomment-5001293477 · Demo to share:
 https://github.com/SajidAlamQB/spaceflights-validation-demo
 Candidates: parameter-validation early users; Adeikalam's team (they run the
 schemas-folder pattern in production and asked for this feature); Pandera

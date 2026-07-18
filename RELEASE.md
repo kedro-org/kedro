@@ -3,6 +3,8 @@
 * Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 
 ## Bug fixes and other changes
+* Excluded `kedro_benchmarks` from the built wheel so benchmark tests are no longer shipped with the package.
+
 ## Documentation changes
 ## Community contributions
 

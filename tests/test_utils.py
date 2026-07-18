@@ -8,6 +8,7 @@ import pytest
 from kedro.utils import (
     KedroExperimentalWarning,
     _is_unsafe_version,
+    _parse_filepath,
     experimental,
     find_config_file,
     get_close_matches,
@@ -19,6 +20,33 @@ T = TypeVar("T")
 
 class DummyClass:
     pass
+
+
+class TestParseFilepath:
+    @pytest.mark.parametrize(
+        "filepath, expected",
+        [
+            ("s3://bucket/key", {"protocol": "s3", "path": "bucket/key"}),
+            ("gcs://bucket/key", {"protocol": "gcs", "path": "bucket/key"}),
+            (
+                "s3://host:9000/bucket/key",
+                {"protocol": "s3", "path": "host/bucket/key"},
+            ),
+            ("/local/path", {"protocol": "file", "path": "/local/path"}),
+            # An IPv6 host must not be cut at its own colons when the port is
+            # stripped; with a bare rsplit(":", 1) these lost the address.
+            (
+                "s3://[2001:db8::1]/bucket/key",
+                {"protocol": "s3", "path": "[2001:db8::1]/bucket/key"},
+            ),
+            (
+                "s3://[2001:db8::1]:9000/bucket/key",
+                {"protocol": "s3", "path": "[2001:db8::1]/bucket/key"},
+            ),
+        ],
+    )
+    def test_parse_filepath(self, filepath, expected):
+        assert _parse_filepath(filepath) == expected
 
 
 class TestGetCloseMatches:

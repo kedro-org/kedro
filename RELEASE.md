@@ -3,8 +3,11 @@
 * Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 
 ## Bug fixes and other changes
+* Fixed `_parse_filepath` truncating IPv6 host addresses (e.g. `s3://[2001:db8::1]:9000/bucket`) when stripping the port.
 ## Documentation changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [eeshsaxena](https://github.com/eeshsaxena)
 
 # Release 1.5.0
 ## Major features and improvements

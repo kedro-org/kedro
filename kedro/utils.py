@@ -73,7 +73,9 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
 
     if parsed_path.netloc and protocol in CLOUD_PROTOCOLS:
         host_with_port = parsed_path.netloc.rsplit("@", 1)[-1]
-        host = host_with_port.rsplit(":", 1)[0]
+        # Strip a trailing ``:port`` only; a bare ``rsplit(":", 1)`` also cuts an
+        # IPv6 host such as ``[2001:db8::1]`` at its own colons.
+        host = re.sub(r":\d+$", "", host_with_port)
         options["path"] = host + options["path"]
         # - Azure Data Lake Storage Gen2 URIs can store the container name in the
         #   'username' field of a URL (@ syntax), so we need to add it to the path

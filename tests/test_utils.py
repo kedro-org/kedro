@@ -42,9 +42,9 @@ class TestGetCloseMatches:
         assert result == ["pipeline"]
 
     def test_list_input_accepts_one_shot_iterator_targets(self):
-        # `targets` is typed as an Iterable; a generator must not be exhausted
-        # after matching the first input string.
-        targets = (name for name in ["data_science", "data_engineering"])
+        # `targets` is typed as an Iterable; a one-shot iterator must not be
+        # exhausted after matching the first input string.
+        targets = iter(["data_science", "data_engineering"])
         result = get_close_matches(["data_scnce", "data_enginering"], targets)
         assert result == ["data_science", "data_engineering"]
 

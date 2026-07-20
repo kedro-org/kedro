@@ -285,13 +285,16 @@ def get_close_matches(
     inputs = [input] if isinstance(input, str) else input
 
     matches: list[str] = []
+    seen: set[str] = set()
     for source_str in inputs:
         for match in difflib.get_close_matches(
             source_str, targets, n=max_suggestions, cutoff=cutoff
         ):
             # Deduplicate while preserving order: different inputs can match the
             # same target, which would otherwise repeat it in the suggestions.
-            if match not in matches:
+            # A `seen` set keeps the membership check O(1).
+            if match not in seen:
+                seen.add(match)
                 matches.append(match)
     return matches[:max_suggestions]
 

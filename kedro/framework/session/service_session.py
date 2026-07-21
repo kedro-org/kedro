@@ -78,6 +78,7 @@ class KedroServiceSession(AbstractSession):
         self._conf_source = conf_source or str(
             self._project_path / settings.CONF_SOURCE
         )
+        self._serving_mode = False
 
     @classmethod
     def create(
@@ -86,8 +87,22 @@ class KedroServiceSession(AbstractSession):
         project_path: Path | str | None = None,
         env: str | None = None,
         conf_source: Path | str | None = None,
+        serving_mode: bool = False,
     ) -> KedroServiceSession:
-        """Create a new instance of the session."""
+        """Create a new instance of the session.
+
+        Args:
+            session_id: Optional ID for this session; defaults to a UUID.
+            project_path: Optional path to the Kedro project root.
+            env: Optional Kedro environment name.
+            conf_source: Optional path to the configuration source directory.
+            serving_mode: When ``True``, all pipelines are preloaded eagerly at
+                session creation time. This ensures that the shared
+                ``pipelines`` singleton is fully populated before any concurrent
+                ``run()`` calls begin, making pipeline lookups safe across
+                threads. Leave ``False`` (the default) for CLI use, where
+                selective pipeline loading is preferred for startup performance.
+        """
         validate_settings()
         env = env or os.getenv("KEDRO_ENV")
         session = cls(
@@ -96,7 +111,34 @@ class KedroServiceSession(AbstractSession):
             conf_source=conf_source,
             env=env,
         )
+        if serving_mode:
+            session._enable_serving_mode()
         return session
+
+    def _enable_serving_mode(self) -> None:
+        """Switch the session into serving mode.
+
+        Sets ``_serving_mode`` and eagerly loads all pipelines. Intended to be
+        called by ``create()`` before the session is handed to request threads,
+        but exposed as a method so the argument count on ``__init__`` stays
+        within the lint threshold.
+        """
+        self._serving_mode = True
+        self._preload_pipelines()
+
+    def _preload_pipelines(self) -> None:
+        """Eagerly load all registered pipelines into the shared singleton.
+
+        Called once during session creation in serving mode, before any request
+        threads are started. After this returns, ``pipelines._content`` is
+        fully populated and ``_is_data_loaded`` is ``True``, so subsequent
+        concurrent ``run()`` calls read the dict without mutating shared state.
+        """
+        self._logger.info(
+            "Serving mode: preloading all pipelines for session %s", self.session_id
+        )
+        pipelines.set_requested(None)
+        _ = dict(pipelines.items())
 
     @property
     def _logger(self) -> logging.Logger:
@@ -159,8 +201,12 @@ class KedroServiceSession(AbstractSession):
         self._logger.info("Run ID: %s", run_id)
         save_version = run_id
 
-        # Must be called before load_context(), which triggers the first pipelines dict access.
-        pipelines.set_requested(pipeline_names or None)
+        # In CLI mode, set_requested() tells the lazy loader which pipelines to
+        # import, keeping startup fast when only one pipeline is needed.
+        # In serving mode all pipelines are already loaded, so skip the write
+        # to avoid mutating shared singleton state across concurrent requests.
+        if not self._serving_mode:
+            pipelines.set_requested(pipeline_names or None)
         context = self.load_context(runtime_params)
         pipeline_names = pipeline_names or ["__default__"]
         combined_pipeline = Pipeline([])
@@ -168,8 +214,9 @@ class KedroServiceSession(AbstractSession):
             try:
                 combined_pipeline += pipelines[name]
             except KeyError as exc:
-                # Reset to None so keys() loads all pipelines for suggestions.
-                pipelines.set_requested(None)
+                if not self._serving_mode:
+                    # Reset to None so keys() loads all pipelines for suggestions.
+                    pipelines.set_requested(None)
                 matches = get_close_matches(name, pipelines.keys())
                 if matches:
                     suggestion = (

@@ -3,8 +3,11 @@
 * Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 
 ## Bug fixes and other changes
+* Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
 ## Documentation changes
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [eeshsaxena](https://github.com/eeshsaxena)
 
 # Release 1.5.0
 ## Major features and improvements

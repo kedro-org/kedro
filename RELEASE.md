@@ -4,7 +4,9 @@
 
 ## Bug fixes and other changes
 * Fixed a thread-safety issue in `_ProjectPipelines` where concurrent access could trigger duplicate pipeline loading or operate on a cleared cache; all shared state mutations are now protected by a reentrant lock.
+* Excluded `kedro_benchmarks` from the built wheel so benchmark tests are no longer shipped with the package.
 * Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
+
 ## Documentation changes
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

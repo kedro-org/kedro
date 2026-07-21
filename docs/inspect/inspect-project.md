@@ -90,13 +90,14 @@ default_pipeline = next(p for p in snapshot.pipelines if p.name == "__default__"
 
 for node in default_pipeline.nodes:
     print(node.name)
+    print("  func_name:", node.func_name)
     print("  namespace:", node.namespace)
     print("  inputs:   ", node.inputs)
     print("  outputs:  ", node.outputs)
     print("  tags:     ", node.tags)
 ```
 
-Each node is represented as a [`NodeSnapshot`][kedro.inspection.models.NodeSnapshot] with `name`, `namespace`, `inputs`, `outputs`, and `tags` fields.
+Each node is represented as a [`NodeSnapshot`][kedro.inspection.models.NodeSnapshot] with `name`, `func_name`, `namespace`, `inputs`, `outputs`, and `tags` fields.
 
 ## How to inspect catalog datasets
 

@@ -23,6 +23,7 @@ def _make_snapshot() -> ProjectSnapshot:
                 nodes=[
                     NodeSnapshot(
                         name="my_node",
+                        func_name="process_data",
                         namespace="ns",
                         tags=["tag1"],
                         inputs=["raw_data"],
@@ -76,6 +77,7 @@ class TestSnapshotEndpoint:
         assert len(pipelines) == 1
         assert pipelines[0]["name"] == "__default__"
         assert pipelines[0]["nodes"][0]["name"] == "my_node"
+        assert pipelines[0]["nodes"][0]["func_name"] == "process_data"
 
         assert "raw_data" in payload["datasets"]
         assert payload["datasets"]["raw_data"]["type"] == "pandas.CSVDataset"

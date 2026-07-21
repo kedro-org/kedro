@@ -1,5 +1,7 @@
 # Upcoming Release
 ## Major features and improvements
+* Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
+
 ## Bug fixes and other changes
 * Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
 ## Documentation changes
@@ -22,6 +24,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Improved the `pipeline()` error message when a mapped dataset or parameter does not exist in the pipeline.
 * Fixed `kedro new` accepting project names whose derived package name shadows a Python standard library module or is a Python keyword (e.g. `email`, `json`, `import`), which silently produced a broken, unimportable project. Such names are now rejected at creation time with a clear message.
 * Fixed `kedro pipeline create` accepting Python keywords (e.g. `for`, `import`, `return`) as pipeline names. Such names are now rejected at creation time with a clear error message.
+* Fixed `%reload_kedro --params` parsing for quoted runtime parameter values that contain spaces.
 * Fixed custom `logging.Filter` subclasses configured with `class:` in `logging.yml`, so they are instantiated and applied.
 
 ## Documentation changes

@@ -48,6 +48,23 @@ def process_data(params: dict):
 
 This is not a Kedro vulnerability. The project developer explicitly wrote the code and must validate any inputs it uses.
 
+## Extensibility features and user responsibility
+
+Kedro is designed to be extensible. Project developers provide custom runners, datasets, Hooks, config loaders, plugins, and OmegaConf resolvers, and Kedro runs them as normal Python. That is the intended behaviour.
+
+Kedro's extensibility points include:
+
+- **Custom runners** — invoked with `kedro run --runner my.CustomRunner` or specified in `settings.py`
+- **Custom datasets** — registered in the data catalog and instantiated at runtime
+- **Hooks** — auto-discovered from installed plugins or explicitly registered in `settings.py`
+- **Config loaders** — specified in `settings.py`
+- **Plugins** — installed into the Python environment and discovered through entry points
+
+If a custom runner, dataset, Hook, config loader, plugin, or resolver contains malicious code, that is not a Kedro vulnerability. The project developer or the person who installed the package owns the code they introduce through these points.
+
+!!! warning "Hook auto-discovery"
+    Kedro auto-discovers Hooks from installed plugins through Python entry points. A plugin installed into your environment can register Hooks that run automatically. Review installed packages and their entry points if you need to audit what Hooks are active in your project.
+
 ## What counts as a security vulnerability in Kedro
 
 The following are examples of issues that should be treated as security vulnerabilities in Kedro itself and reported through [SECURITY.md](https://github.com/kedro-org/kedro/blob/main/SECURITY.md):
@@ -89,6 +106,8 @@ Project developers are responsible for the safety of the code they add to a Kedr
     - Which input is treated as code, or can unintentionally become code
     - The impact of the issue
     - A minimal proof of concept
+
+    Reports that describe a Kedro extensibility feature running user-provided code — such as a custom runner, dataset, Hook, or plugin — without demonstrating an exploitation path beyond the developer's own code are unlikely to be treated as vulnerabilities. See [Extensibility features and user responsibility](#extensibility-features-and-user-responsibility) for details.
 
 ## Summary
 

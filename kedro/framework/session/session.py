@@ -192,7 +192,9 @@ class KedroSession(AbstractSession):
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS
         classpath = f"{store_class.__module__}.{store_class.__qualname__}"
-        store_args = deepcopy(dict(settings.SESSION_STORE_ARGS))
+        store_args = deepcopy(
+            dict(settings.SESSION_STORE_ARGS)
+        )  # dynaconf runs into a recursion error when trying to deepcopy the settings object, so we convert it to a dict first
         store_args.setdefault("path", (self._project_path / "sessions").as_posix())
         store_args["session_id"] = self.session_id
 

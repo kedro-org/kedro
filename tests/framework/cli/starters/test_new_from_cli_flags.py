@@ -47,6 +47,30 @@ class TestToolsAndExampleFromCLI:
             in result.output
         )
 
+    def test_docs_tool_generates_sphinx_build_files(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--tools", "docs", "--example", "no"],
+            input=_make_cli_prompt_input_without_tools(),
+        )
+
+        _assert_template_ok(result, tools="4", example_pipeline="no")
+
+        docs_path = Path("new-kedro-project") / "docs"
+        makefile = docs_path / "Makefile"
+        make_bat = docs_path / "make.bat"
+        conf_py = docs_path / "source" / "conf.py"
+        index_rst = docs_path / "source" / "index.rst"
+
+        assert makefile.is_file()
+        assert make_bat.is_file()
+        assert "SPHINXAPIDOC  ?= sphinx-apidoc" in makefile.read_text()
+        assert "html: apidoc" in makefile.read_text()
+        assert "sphinx-apidoc" in make_bat.read_text()
+        assert "new_kedro_project" in make_bat.read_text()
+        assert "sys.path.insert" in conf_py.read_text()
+        assert "   modules" in index_rst.read_text()
+
     def test_invalid_tools_flag(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,

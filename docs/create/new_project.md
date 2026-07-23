@@ -47,7 +47,9 @@ Which tools would you like to include in your project? [1-6/1,3/all/none]:
 
 The options are described in more detail in the [documentation about the new project tools](./new_project_tools.md).
 
-Select the tools by number, or `all` or follow the default to add `none`.
+Select the tools by number, or `all`, or follow the default to add `none`.
+When using the `--tools` CLI flag instead of the interactive prompt, specify tools by
+name, for example `--tools=lint,test`, or use `--tools=all` or `--tools=none`.
 
 ### Project examples
 

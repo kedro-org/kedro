@@ -256,7 +256,10 @@ class TestToolsAndExampleFromUserPrompts:
         else:
             assert "You have selected no project tools" in result.output
         assert (
-            "To skip the interactive flow you can run `kedro new` with\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>"
+            "To skip the interactive flow you can run `kedro new` with\n"
+            "tool names for `--tools`, or `all`/`none`:\n"
+            "kedro new --name=<your-project-name> "
+            "--tools=lint,test,log,docs,data,pyspark --example=<yes/no>"
             in result.output
         )
 

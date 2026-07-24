@@ -122,6 +122,9 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/build/
+docs/source/modules.rst
+docs/source/{{ cookiecutter.python_package }}*.rst
 
 # PyBuilder
 target/

@@ -57,6 +57,7 @@ class TestToolsAndExampleFromCLI:
         _assert_template_ok(result, tools="4", example_pipeline="no")
 
         docs_path = Path("new-kedro-project") / "docs"
+        gitignore = Path("new-kedro-project") / ".gitignore"
         makefile = docs_path / "Makefile"
         make_bat = docs_path / "make.bat"
         conf_py = docs_path / "source" / "conf.py"
@@ -70,6 +71,9 @@ class TestToolsAndExampleFromCLI:
         assert "new_kedro_project" in make_bat.read_text()
         assert "sys.path.insert" in conf_py.read_text()
         assert "   modules" in index_rst.read_text()
+        assert "docs/build/" in gitignore.read_text()
+        assert "docs/source/modules.rst" in gitignore.read_text()
+        assert "docs/source/new_kedro_project*.rst" in gitignore.read_text()
 
     def test_invalid_tools_flag(self, fake_kedro_cli):
         result = CliRunner().invoke(

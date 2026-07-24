@@ -21,7 +21,7 @@ Kedro's generated `docs` tool scaffold uses Sphinx. Follow these steps to add a 
     ]
     ```
 
-    If your project already has a `[project.optional-dependencies]` section, add only the `docs = [...]` entry to that section.
+    If your project already has a `[project.optional-dependencies]` section, add the `docs = [...]` entry to that section.
 
 2. Install the documentation dependencies from the project root.
 

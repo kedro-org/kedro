@@ -17,7 +17,7 @@ By default, all code in `settings.py` is commented out. When settings are not su
 | `SESSION_STORE_CLASS`       | `kedro.framework.session.session.BaseSessionStore`| Customise how [session data](../extend/session.md) is stored.                                                                |
 | `SESSION_STORE_ARGS`        | `dict()`                                          | Keyword arguments for the `SESSION_STORE_CLASS` constructor.                                                       |
 | `CONTEXT_CLASS`             | `kedro.framework.context.KedroContext`            | Customise how Kedro library components are managed.                                                                |
-| `CONF_SOURCE`               | `"conf"`                                          | Directory that holds [configuration](../configure/configuration_basics.md).                                    |
+| `CONF_SOURCE`               | `"conf"`                                          | Directory that holds [configuration](../configure/configuration_basics.md).                               |
 | `CONFIG_LOADER_CLASS`       | `kedro.config.ConfigLoader`                       | Customise how project configuration is handled.                                                                    |
 | `CONFIG_LOADER_ARGS`        | `dict()`                                          | Keyword arguments for the `CONFIG_LOADER_CLASS` constructor.                                                       |
 | `DATA_CATALOG_CLASS`        | `kedro.io.DataCatalog`                            | Customise how the [Data Catalog](../catalog-data/data_catalog.md) is handled.                                              |

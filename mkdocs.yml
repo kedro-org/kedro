@@ -55,6 +55,11 @@ plugins:
   - redirects:
       redirect_maps:
         'configuration/telemetry.md': 'about/telemetry.md'
+        'configure/advanced_configuration.md': 'configure/how_to_use_templating.md'
+        'configure/parameters.md': 'configure/parameters_and_credentials.md'
+        'configure/credentials.md': 'configure/parameters_and_credentials.md'
+        'configure/parameter_validation.md': 'configure/how_to_use_parameters_and_credentials.md'
+        'catalog-data/advanced_data_catalog_usage.md': 'catalog-data/how_to_access_the_data_catalog_in_code.md'
   - mkdocstrings:
       handlers:
         python:
@@ -122,22 +127,26 @@ plugins:
 
         Configuration:
           - configure/configuration_basics.md: Configuration management fundamentals
+          - configure/parameters_and_credentials.md: Understanding pipeline parameters and credentials
+          - configure/templating.md: Understanding templating with OmegaConfigLoader
+          - configure/how_to_configure_project.md: How to configure your Kedro project
+          - configure/how_to_use_parameters_and_credentials.md: How to work with parameters and credentials
+          - configure/how_to_use_templating.md: How to work with templating
           - configure/config_loader_migration.md: Migrating between config loaders
-          - configure/advanced_configuration.md: Advanced configuration patterns
-          - configure/parameters.md: Managing pipeline parameters
-          - configure/parameter_validation.md: Validating parameters with Pydantic models and dataclasses
-          - configure/credentials.md: Handling sensitive credentials securely
 
         Data Management:
           - catalog-data/introduction.md: Introduction to the Data Catalog
-          - catalog-data/data_catalog.md: Complete guide to Kedro Data Catalog
-          - catalog-data/data_catalog_yaml_examples.md: YAML configuration examples
-          - catalog-data/kedro_dataset_factories.md: Using dataset factories for dynamic catalogs
-          - catalog-data/partitioned_and_incremental_datasets.md: Working with partitioned and incremental data
-          - catalog-data/advanced_data_catalog_usage.md: Programmatic catalog usage
+          - catalog-data/data_catalog.md: Data Catalog concepts and structure
+          - catalog-data/kedro_dataset_factories.md: How dataset factories generalise catalog entries
+          - catalog-data/partitioned_and_incremental_datasets.md: Partitioned and incremental dataset concepts
           - catalog-data/lazy_loading.md: Lazy loading for performance optimization
+          - catalog-data/how_to_configure_the_data_catalog.md: How to configure load/save arguments, credentials, versioning, and environments
+          - catalog-data/how_to_use_dataset_factories.md: How to apply dataset factory patterns
+          - catalog-data/how_to_use_partitioned_and_incremental_datasets.md: How to configure and use partitioned and incremental datasets
+          - catalog-data/how_to_access_the_data_catalog_in_code.md: How to use the DataCatalog programmatically
+          - catalog-data/data_catalog_yaml_examples.md: YAML configuration examples
 
-        Building Pipelines:
+        Nodes and Pipelines:
           - build/nodes.md: Creating and using nodes - the building blocks of pipelines
           - build/pipeline_introduction.md: Understanding the pipeline object
           - build/run_a_pipeline.md: Running pipelines with different options
@@ -302,11 +311,11 @@ extra_javascript:
 nav:
   - Welcome: index.md
   - Kedro:
-      - Get Started:
+      - Get started:
           - Installation: getting-started/install.md
-          - Concepts: getting-started/kedro_concepts.md
+          - Kedro concepts: getting-started/kedro_concepts.md
           - FAQs: getting-started/faq.md
-          - Kedro's video course: getting-started/course.md
+          - Video course: getting-started/course.md
       - Tutorials:
           - Kedro Spaceflights tutorial:
             - Spaceflight tutorial: tutorials/spaceflights_tutorial.md
@@ -317,48 +326,55 @@ nav:
             - Settings: tutorials/settings.md
             - Test a project: tutorials/test_a_project.md
             - FAQs: tutorials/spaceflights_tutorial_faqs.md
-          - Kedro for Notebook tutorial: tutorials/notebooks_tutorial.md
-      - Create:
+          - Notebook tutorial: tutorials/notebooks_tutorial.md
+      - Create projects:
           - Create a Kedro project: create/new_project.md
           - Create a minimal Kedro project: create/minimal_kedro_project.md
           - Customise a new project: create/customise_project.md
-          - Kedro tools: create/new_project_tools.md
+          - Project tools: create/new_project_tools.md
           - Kedro starters: create/starters.md
-      - Configure:
-          - Project configuration and settings:
-              - Configuration basics: configure/configuration_basics.md
-              - Migration guide for config loaders: configure/config_loader_migration.md
-              - Advanced configuration: configure/advanced_configuration.md
-          - Parameters: configure/parameters.md
-          - Parameter validation: configure/parameter_validation.md
-          - Credentials: configure/credentials.md
-      - Catalog Data:
+      - Configuration:
+          - Concepts:
+              - Configuration: configure/configuration_basics.md
+              - Parameters and credentials: configure/parameters_and_credentials.md
+              - Templating: configure/templating.md
+          - How-to Guides:
+              - Configuration: configure/how_to_configure_project.md
+              - Parameters and credentials: configure/how_to_use_parameters_and_credentials.md
+              - Templating: configure/how_to_use_templating.md
+              - Config loader migration: configure/config_loader_migration.md
+      - Data Catalog:
           - Introduction: catalog-data/introduction.md
-          - Kedro data catalog: catalog-data/data_catalog.md
-          - Data Catalog YAML examples: catalog-data/data_catalog_yaml_examples.md
-          - Dataset factories: catalog-data/kedro_dataset_factories.md
-          - Partitioned and incremental datasets: catalog-data/partitioned_and_incremental_datasets.md
-          - Programmatic usage: catalog-data/advanced_data_catalog_usage.md
-          - Lazy loading: catalog-data/lazy_loading.md
-      - Build:
+          - Concepts:
+              - Data Catalog: catalog-data/data_catalog.md
+              - Dataset factories: catalog-data/kedro_dataset_factories.md
+              - Partitioned and incremental datasets: catalog-data/partitioned_and_incremental_datasets.md
+              - Lazy loading: catalog-data/lazy_loading.md
+          - How-to Guides:
+              - Configure the Data Catalog: catalog-data/how_to_configure_the_data_catalog.md
+              - Use dataset factories: catalog-data/how_to_use_dataset_factories.md
+              - Use partitioned and incremental datasets: catalog-data/how_to_use_partitioned_and_incremental_datasets.md
+              - Access the Data Catalog in code: catalog-data/how_to_access_the_data_catalog_in_code.md
+          - Examples:
+              - Data Catalog YAML examples: catalog-data/data_catalog_yaml_examples.md
+      - Nodes & Pipelines:
           - Nodes: build/nodes.md
           - Pipeline object: build/pipeline_introduction.md
           - Run a pipeline: build/run_a_pipeline.md
           - Modular pipelines: build/modular_pipelines.md
-          - Reusing pipelines (namespaces): build/namespaces.md
+          - Namespaces: build/namespaces.md
           - Pipeline registry: build/pipeline_registry.md
           - Slice a pipeline: build/slice_a_pipeline.md
           - LLM context node (experimental): build/llm_context_node.md
-      - Develop:
+      - Development:
           - Dependency management: develop/dependencies.md
           - Logging: develop/logging.md
           - Automated testing: develop/automated_testing.md
-          - Code formatting and linting: develop/linting.md
+          - Formatting and linting: develop/linting.md
           - Debugging: develop/debugging.md
-          - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
-      - Inspect:
           - Inspect a project: inspect/inspect-project.md
-      - Deploy:
+          - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
+      - Deployment:
           - Overview: deploy/index.md
           - How to package your project: deploy/package_a_project.md
           - How to group your nodes effectively: deploy/nodes_grouping.md
@@ -378,14 +394,14 @@ nav:
               - VertexAI: deploy/supported-platforms/vertexai.md
               - Argo Workflows: deploy/supported-platforms/argo.md
               - AWS Batch: deploy/supported-platforms/aws_batch.md
-      - Extend:
-          - Use Cases: extend/common_use_cases.md
+      - Extend a project:
+          - Use cases: extend/common_use_cases.md
           - Custom datasets: extend/how_to_create_a_custom_dataset.md
           - Hooks:
-              - Introduction to Hooks: extend/hooks/introduction.md
+              - Introduction: extend/hooks/introduction.md
               - Common use cases: extend/hooks/common_use_cases.md
-              - Hooks examples: extend/hooks/examples.md
-          - Programmatic usage: extend/session.md
+              - Examples: extend/hooks/examples.md
+          - Kedro sessions: extend/session.md
           - Serving over HTTP: extend/serving.md
           - Custom plugins: extend/plugins.md
           - Custom starters: extend/create_a_starter.md
@@ -452,7 +468,7 @@ nav:
       - Integration & Plugins:
           - IPython and Jupyter:
               - Introduction: integrations-and-plugins/notebooks_and_ipython/index.md
-              - Kedro and Jupyter Notebook: integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md
+              - Kedro and Jupyter notebooks: integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md
               - How to add Kedro to Jupyter Notebook: integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md
           - PySpark: integrations-and-plugins/pyspark_integration.md
           - MLflow: integrations-and-plugins/mlflow.md
@@ -473,7 +489,7 @@ nav:
             #   - Kedro Wizard: about/community/wizard.md
           - Contributing:
               - Kedro's Technical Steering Committee: about/technical_steering_committee.md
-          - Experimental APIs in Kedro: about/experimental.md
+          - Experimental APIs: about/experimental.md
             #   - Kedro Maintainer: about/contributing/maintainer.md
             #   - Contributing on GitHub: about/contributing/github.md
             #   - Contributing documentation: about/contributing/documentation.md

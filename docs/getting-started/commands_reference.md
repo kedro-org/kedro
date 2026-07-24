@@ -82,6 +82,8 @@ The commands a project supports are specified on the framework side. If you want
     ```python
     """Command line tools for manipulating a Kedro project.
     Intended to be invoked via `kedro`."""
+    from typing import Any
+
     import click
     from kedro.framework.cli.project import (
         ASYNC_ARG_HELP,
@@ -90,13 +92,17 @@ The commands a project supports are specified on the framework side. If you want
         FROM_INPUTS_HELP,
         FROM_NODES_HELP,
         LOAD_VERSION_HELP,
+        NAMESPACES_ARG_HELP,
         NODE_ARG_HELP,
+        ONLY_MISSING_OUTPUTS_HELP,
         PARAMS_ARG_HELP,
         PIPELINE_ARG_HELP,
         RUNNER_ARG_HELP,
+        RUNNER_PARAMS_HELP,
         TAG_ARG_HELP,
         TO_NODES_HELP,
         TO_OUTPUTS_HELP,
+        _resolve_runner_kwargs,
     )
     from kedro.framework.cli.utils import (
         CONTEXT_SETTINGS,
@@ -106,6 +112,7 @@ The commands a project supports are specified on the framework side. If you want
         env_option,
         split_string,
         split_node_names,
+        validate_conf_source,
     )
     from kedro.framework.session import KedroSession
     from kedro.utils import load_obj
@@ -151,6 +158,13 @@ The commands a project supports are specified on the framework side. If you want
     )
     @click.option("--runner", "-r", type=str, default=None, help=RUNNER_ARG_HELP)
     @click.option("--async", "is_async", is_flag=True, help=ASYNC_ARG_HELP)
+    @click.option(
+        "--runner-params",
+        type=click.UNPROCESSED,
+        default="",
+        help=RUNNER_PARAMS_HELP,
+        callback=_split_params,
+    )
     @env_option
     @click.option(
         "--tags",
@@ -206,6 +220,7 @@ The commands a project supports are specified on the framework side. If you want
         env: str,
         runner: str,
         is_async: bool,
+        runner_params: dict[str, Any],
         node_names: str,
         to_nodes: str,
         from_nodes: str,
@@ -222,6 +237,7 @@ The commands a project supports are specified on the framework side. If you want
         """Run the pipeline."""
 
         runner_obj = load_obj(runner or "SequentialRunner", "kedro.runner")
+        runner_kwargs = _resolve_runner_kwargs(is_async, runner_params)
         tuple_tags = tuple(tags)
         tuple_node_names = tuple(node_names)
 
@@ -230,7 +246,7 @@ The commands a project supports are specified on the framework side. If you want
         ) as session:
             return session.run(
                 tags=tuple_tags,
-                runner=runner_obj(is_async=is_async),
+                runner=runner_obj(**runner_kwargs),
                 node_names=tuple_node_names,
                 from_nodes=from_nodes,
                 to_nodes=to_nodes,

@@ -1,5 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
+* Added `kedro.validation` core: a pluggable `Validator` protocol with a Pandera reference adapter and structured validation errors, as groundwork for catalog-level dataset validation.
 * Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 
 ## Bug fixes and other changes

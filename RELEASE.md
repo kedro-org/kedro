@@ -3,6 +3,7 @@
 * Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 
 ## Bug fixes and other changes
+* Fixed a `RecursionError` when initialising a session with dynaconf-backed settings by converting `settings.SESSION_STORE_ARGS` to a plain `dict` before deepcopying it.
 * Excluded `kedro_benchmarks` from the built wheel so benchmark tests are no longer shipped with the package.
 * Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
 

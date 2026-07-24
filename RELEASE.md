@@ -2,6 +2,7 @@
 ## Major features and improvements
 * Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
 ## Bug fixes and other changes
+* Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 ## Documentation changes
 ## Community contributions
 

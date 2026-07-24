@@ -175,7 +175,7 @@ $ kedro run --runner-params=is_async=True
 ...
 ```
 
-The `--async` flag is still supported for compatibility, but it is deprecated and will be removed in a future release.
+The `--async` flag is still supported for compatibility, but it is deprecated and will be removed in Kedro 2.0.
 
 !!! note
     All the datasets used in the run have to be [thread-safe](https://www.quora.com/What-is-thread-safety-in-Python) in order for asynchronous loading/saving to work properly.

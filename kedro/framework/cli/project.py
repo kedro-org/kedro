@@ -327,7 +327,7 @@ def _resolve_runner_kwargs(
 
     if is_async:
         warnings.warn(
-            "Option '--async' is deprecated and will be removed in a future release. "
+            "Option '--async' is deprecated and will be removed in Kedro 2.0. "
             "Please use '--runner-params=is_async=True' instead.",
             KedroDeprecationWarning,
         )

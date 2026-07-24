@@ -772,6 +772,19 @@ class TestRunCommand:
         assert runner._max_workers == 2
         assert not runner._is_async
 
+    def test_run_with_invalid_runner_params(self, fake_project_cli, fake_metadata):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--runner-params=max_workers"],
+            obj=fake_metadata,
+        )
+
+        assert result.exit_code
+        assert (
+            "Invalid format of `runner_params` option: Item `max_workers` must "
+            "contain a key and a value separated by `=`."
+        ) in result.output
+
     def test_run_async_conflicts_with_runner_params(
         self, fake_project_cli, fake_metadata
     ):

@@ -7,6 +7,7 @@ import importlib.resources
 import logging.config
 import operator
 import os
+import threading
 import traceback
 import warnings
 from collections import UserDict
@@ -204,6 +205,10 @@ class _ProjectPipelines(MutableMapping):
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
         self._requested_pipelines: list[str] | None = None
+        # RLock rather than Lock: register_pipelines() is user code and may
+        # re-enter the pipelines dict (e.g. pipelines["x"]) while _load_data()
+        # holds the lock. RLock lets the same thread re-acquire safely.
+        self._lock = threading.RLock()
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
@@ -213,19 +218,22 @@ class _ProjectPipelines(MutableMapping):
 
     def _load_data(self) -> None:
         """Lazily read pipelines defined in the pipelines registry module."""
-
-        # If the pipelines dictionary has not been configured with a pipelines module
-        # or if data has been loaded
+        # Fast path: no lock needed. _is_data_loaded only transitions False→True
+        # (under the lock below), so a True read here is always safe to trust.
         if self._pipelines_module is None or self._is_data_loaded:
             return
 
-        register_pipelines = self._get_pipelines_registry_callable(
-            self._pipelines_module
-        )
-        project_pipelines = register_pipelines()
+        with self._lock:
+            # Recheck after acquiring the lock: another thread may have loaded
+            # between our fast-path check and here.
+            if self._is_data_loaded:
+                return
 
-        self._content = project_pipelines
-        self._is_data_loaded = True
+            register_pipelines = self._get_pipelines_registry_callable(
+                self._pipelines_module
+            )
+            self._content = register_pipelines()
+            self._is_data_loaded = True
 
     def set_requested(self, pipeline_names: list[str] | None) -> None:
         """Store which pipelines should be loaded on the next dict access.
@@ -237,12 +245,13 @@ class _ProjectPipelines(MutableMapping):
             pipeline_names: Names of the pipelines to load selectively, or
                 ``None`` to load all registered pipelines.
         """
-        if set(self._requested_pipelines or []) != set(pipeline_names or []):
-            self._is_data_loaded = False
-            self._content = {}
-        self._requested_pipelines = (
-            list(pipeline_names) if pipeline_names is not None else None
-        )
+        with self._lock:
+            if set(self._requested_pipelines or []) != set(pipeline_names or []):
+                self._is_data_loaded = False
+                self._content = {}
+            self._requested_pipelines = (
+                list(pipeline_names) if pipeline_names is not None else None
+            )
 
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.

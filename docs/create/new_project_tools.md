@@ -102,8 +102,8 @@ uvx kedro new --tools=<your tool selection>
 To specify your desired tools you must provide them by name as a comma separated list,
 for example `--tools=lint,test`. The following tools are available for selection:
 `lint`, `test`, `log`, `docs`, `data`, and `pyspark`. You can also use `--tools=all`
-or `--tools=none`. The numeric selections shown in the interactive prompt only apply
-when answering that prompt.
+or `--tools=none`. The numeric selections shown in the interactive prompt apply
+when answering the prompt.
 
 ### Example code
 In the final step you are asked whether you want to populate the project with an example spaceflights starter pipeline. If you select `yes`, the example code included depends upon your previous choice of tools, as follows:

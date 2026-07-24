@@ -13,7 +13,8 @@ tools:
   title: "Project Tools"
   text: |
     These optional tools can help you apply software engineering best practices.
-    To skip this step in future use --tools
+    To skip this step in future use --tools with tool names, for example
+    --tools=lint,test, or use --tools=all or --tools=none
     To find out more: https://docs.kedro.org/en/stable/create/new_project_tools/#tools-to-customise-a-new-kedro-project
 
     Tools

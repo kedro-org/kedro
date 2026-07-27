@@ -109,7 +109,7 @@ def test_load_data_fires_exactly_once_under_concurrent_first_load():
 
     def reader():
         try:
-            barrier.wait()
+            barrier.wait(timeout=5)
             _ = p["pipe_a"]
         except Exception as e:
             errors.append(e)
@@ -118,8 +118,11 @@ def test_load_data_fires_exactly_once_under_concurrent_first_load():
     for t in threads:
         t.start()
     for t in threads:
-        t.join()
+        t.join(timeout=5)
 
+    assert all(
+        not t.is_alive() for t in threads
+    ), "threads did not finish — possible deadlock"
     assert not errors, errors
     assert len(counter) == 1
 
@@ -149,8 +152,11 @@ def test_set_requested_concurrent_with_reads_does_not_raise():
     for t in threads:
         t.start()
     for t in threads:
-        t.join()
+        t.join(timeout=5)
 
+    assert all(
+        not t.is_alive() for t in threads
+    ), "threads did not finish — possible deadlock"
     assert not errors, errors
 
 
@@ -178,6 +184,9 @@ def test_configure_concurrent_with_reads_does_not_raise():
     for t in threads:
         t.start()
     for t in threads:
-        t.join()
+        t.join(timeout=5)
 
+    assert all(
+        not t.is_alive() for t in threads
+    ), "threads did not finish — possible deadlock"
     assert not errors, errors

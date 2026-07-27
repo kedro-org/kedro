@@ -98,7 +98,7 @@ kedro run --conf-source=gs://my-bucket/configs/
 ```
 
 ### Authentication for remote configuration
-Authentication for remote configuration sources must be set up through environment variables or other credential mechanisms provided by the cloud platform. Unlike datasets in the data catalog, you cannot use credentials from `credentials.yml` for remote configuration sources since those credentials would be part of the configuration you're trying to access.
+Authentication for remote configuration sources must be set up through environment variables or other credential mechanisms provided by the cloud platform. Unlike datasets in the Data Catalog, you cannot use credentials from `credentials.yml` for remote configuration sources since those credentials would be part of the configuration you're trying to access.
 
 **Examples of authentication setup:**
 

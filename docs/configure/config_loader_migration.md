@@ -42,7 +42,7 @@ Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoa
 
 ### 5. Load configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `ConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
-When you migrate to use `OmegaConfigLoader` it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](how_to_configure_project.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
+When you migrate to use `OmegaConfigLoader`, it requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](how_to_configure_project.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
 
 ```diff
 - conf_path = str(project_path / settings.CONF_SOURCE)
@@ -101,7 +101,7 @@ Replace the import statement for `TemplatedConfigLoader` with the one for `Omega
 
 ### 5. Load configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `TemplatedConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
-When you migrate to use `OmegaConfigLoader` it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](how_to_configure_project.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
+When you migrate to use `OmegaConfigLoader`, it requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](how_to_configure_project.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
 
 ```diff
 - conf_path = str(project_path / settings.CONF_SOURCE)

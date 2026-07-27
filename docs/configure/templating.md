@@ -8,6 +8,16 @@ Templating, or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_
 
 When you use templating, you can define a value in one place and reference it multiple times across your configuration files. If you need to change that value, you update it in a single location.
 
+## Why use templating?
+
+A Kedro project typically maintains parameters, catalog entries, and other configuration across several environments — `base`, `local`, and possibly one per deployment target. Without templating, the same value (for example, a dataset type, an S3 bucket name, or a model random seed) often ends up copied and pasted into multiple places. As the project grows, those copies drift out of sync.
+
+Templating in `OmegaConfigLoader` addresses three related problems:
+
+- **Duplication.** Values used in more than one place — dataset types, cloud storage locations, model hyperparameters — live in a single location.
+- **Environment differences.** A single templated catalog or parameter file can adapt to different environments by resolving to different values at load time.
+- **Runtime overrides.** Values that change per run (for example, a date or an experiment name) can be injected from the CLI without editing configuration files.
+
 ## How templating works with the OmegaConfigLoader
 
 ### Parameters

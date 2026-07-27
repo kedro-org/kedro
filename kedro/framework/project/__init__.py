@@ -205,9 +205,8 @@ class _ProjectPipelines(MutableMapping):
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
         self._requested_pipelines: list[str] | None = None
-        # RLock rather than Lock: register_pipelines() is user code and may
-        # re-enter the pipelines dict (e.g. pipelines["x"]) while _load_data()
-        # holds the lock. RLock lets the same thread re-acquire safely.
+        # RLock: allows configure()/set_requested() re-entry from the same thread.
+        # register_pipelines() must not access pipelines[...] during loading.
         self._lock = threading.RLock()
 
     @staticmethod
@@ -216,19 +215,11 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def _load_data(self) -> dict:
+    def _load_data(self) -> dict[str, Pipeline]:
         """Lazily read pipelines defined in the pipelines registry module."""
-        # Fast path: no lock needed. _is_data_loaded only transitions False→True
-        # (under the lock below), so a True read here is always safe to trust.
-        if self._pipelines_module is None or self._is_data_loaded:
-            return self._content
-
         with self._lock:
-            # Recheck after acquiring the lock: another thread may have loaded
-            # between our fast-path check and here.
-            if self._is_data_loaded:
+            if self._pipelines_module is None or self._is_data_loaded:
                 return self._content
-
             register_pipelines = self._get_pipelines_registry_callable(
                 self._pipelines_module
             )

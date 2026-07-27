@@ -7,6 +7,7 @@ import importlib.resources
 import logging.config
 import operator
 import os
+import threading
 import traceback
 import warnings
 from collections import UserDict
@@ -176,8 +177,8 @@ def _load_data_wrapper(func: Any) -> Any:
     """
 
     def inner(self: Any, *args: Any, **kwargs: Any) -> Any:
-        self._load_data()
-        return func(self._content, *args, **kwargs)
+        content = self._load_data()
+        return func(content, *args, **kwargs)
 
     return inner
 
@@ -204,6 +205,9 @@ class _ProjectPipelines(MutableMapping):
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
         self._requested_pipelines: list[str] | None = None
+        # RLock: allows configure()/set_requested() re-entry from the same thread.
+        # register_pipelines() must not access pipelines[...] during loading.
+        self._lock = threading.RLock()
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
@@ -211,21 +215,17 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def _load_data(self) -> None:
+    def _load_data(self) -> dict[str, Pipeline]:
         """Lazily read pipelines defined in the pipelines registry module."""
-
-        # If the pipelines dictionary has not been configured with a pipelines module
-        # or if data has been loaded
-        if self._pipelines_module is None or self._is_data_loaded:
-            return
-
-        register_pipelines = self._get_pipelines_registry_callable(
-            self._pipelines_module
-        )
-        project_pipelines = register_pipelines()
-
-        self._content = project_pipelines
-        self._is_data_loaded = True
+        with self._lock:
+            if self._pipelines_module is None or self._is_data_loaded:
+                return self._content
+            register_pipelines = self._get_pipelines_registry_callable(
+                self._pipelines_module
+            )
+            self._content = register_pipelines()
+            self._is_data_loaded = True
+            return self._content
 
     def set_requested(self, pipeline_names: list[str] | None) -> None:
         """Store which pipelines should be loaded on the next dict access.
@@ -237,22 +237,24 @@ class _ProjectPipelines(MutableMapping):
             pipeline_names: Names of the pipelines to load selectively, or
                 ``None`` to load all registered pipelines.
         """
-        if set(self._requested_pipelines or []) != set(pipeline_names or []):
-            self._is_data_loaded = False
-            self._content = {}
-        self._requested_pipelines = (
-            list(pipeline_names) if pipeline_names is not None else None
-        )
+        with self._lock:
+            if set(self._requested_pipelines or []) != set(pipeline_names or []):
+                self._is_data_loaded = False
+                self._content = {}
+            self._requested_pipelines = (
+                list(pipeline_names) if pipeline_names is not None else None
+            )
 
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every ``configure`` call,
         data are reloaded.
         """
-        self._pipelines_module = pipelines_module
-        self._is_data_loaded = False
-        self._content = {}
-        self._requested_pipelines = None
+        with self._lock:
+            self._pipelines_module = pipelines_module
+            self._is_data_loaded = False
+            self._content = {}
+            self._requested_pipelines = None
 
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)

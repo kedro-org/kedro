@@ -177,8 +177,9 @@ def _load_data_wrapper(func: Any) -> Any:
     """
 
     def inner(self: Any, *args: Any, **kwargs: Any) -> Any:
-        content = self._load_data()
-        return func(content, *args, **kwargs)
+        with self._lock:
+            content = self._load_data()
+            return func(content, *args, **kwargs)
 
     return inner
 

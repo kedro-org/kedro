@@ -114,7 +114,7 @@ def test_load_data_fires_exactly_once_under_concurrent_first_load():
         except Exception as e:
             errors.append(e)
 
-    threads = [threading.Thread(target=reader) for _ in range(n_threads)]
+    threads = [threading.Thread(target=reader, daemon=True) for _ in range(n_threads)]
     for t in threads:
         t.start()
     for t in threads:
@@ -147,8 +147,10 @@ def test_set_requested_concurrent_with_reads_does_not_raise():
             p.set_requested(None)
             p.set_requested(["pipe_a"])
 
-    threads = [threading.Thread(target=reader) for _ in range(n_reader_threads)]
-    threads += [threading.Thread(target=invalidator) for _ in range(2)]
+    threads = [
+        threading.Thread(target=reader, daemon=True) for _ in range(n_reader_threads)
+    ]
+    threads += [threading.Thread(target=invalidator, daemon=True) for _ in range(2)]
     for t in threads:
         t.start()
     for t in threads:
@@ -179,8 +181,10 @@ def test_configure_concurrent_with_reads_does_not_raise():
         for _ in range(n_iterations):
             p.configure("fake_module")
 
-    threads = [threading.Thread(target=reader) for _ in range(n_reader_threads)]
-    threads += [threading.Thread(target=reconfigurer)]
+    threads = [
+        threading.Thread(target=reader, daemon=True) for _ in range(n_reader_threads)
+    ]
+    threads += [threading.Thread(target=reconfigurer, daemon=True)]
     for t in threads:
         t.start()
     for t in threads:

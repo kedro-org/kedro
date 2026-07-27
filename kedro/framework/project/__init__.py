@@ -177,8 +177,8 @@ def _load_data_wrapper(func: Any) -> Any:
     """
 
     def inner(self: Any, *args: Any, **kwargs: Any) -> Any:
-        self._load_data()
-        return func(self._content, *args, **kwargs)
+        content = self._load_data()
+        return func(content, *args, **kwargs)
 
     return inner
 
@@ -216,24 +216,25 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def _load_data(self) -> None:
+    def _load_data(self) -> dict:
         """Lazily read pipelines defined in the pipelines registry module."""
         # Fast path: no lock needed. _is_data_loaded only transitions False→True
         # (under the lock below), so a True read here is always safe to trust.
         if self._pipelines_module is None or self._is_data_loaded:
-            return
+            return self._content
 
         with self._lock:
             # Recheck after acquiring the lock: another thread may have loaded
             # between our fast-path check and here.
             if self._is_data_loaded:
-                return
+                return self._content
 
             register_pipelines = self._get_pipelines_registry_callable(
                 self._pipelines_module
             )
             self._content = register_pipelines()
             self._is_data_loaded = True
+            return self._content
 
     def set_requested(self, pipeline_names: list[str] | None) -> None:
         """Store which pipelines should be loaded on the next dict access.
@@ -258,10 +259,11 @@ class _ProjectPipelines(MutableMapping):
         Reset the data loading state so that after every ``configure`` call,
         data are reloaded.
         """
-        self._pipelines_module = pipelines_module
-        self._is_data_loaded = False
-        self._content = {}
-        self._requested_pipelines = None
+        with self._lock:
+            self._pipelines_module = pipelines_module
+            self._is_data_loaded = False
+            self._content = {}
+            self._requested_pipelines = None
 
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)

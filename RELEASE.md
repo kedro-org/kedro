@@ -3,6 +3,8 @@
 * Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 
 ## Bug fixes and other changes
+* Fixed a thread-safety issue in `_ProjectPipelines` where concurrent access could trigger duplicate pipeline loading or operate on a cleared cache; all shared state mutations are now protected by a reentrant lock.
+
 ## Documentation changes
 ## Community contributions
 

@@ -84,6 +84,17 @@ session.run(runtime_params={"param1": "value2"})
 session.close()
 ```
 
+### Keep hooks isolated between service runs
+
+`KedroServiceSession` creates its hook manager once and reuses the same
+registered hook instances for every call to `run()`. Mutable state stored on a
+hook therefore persists into later runs. Concurrent calls to `run()` can also
+invoke the same hook instance from different threads.
+
+Prefer stateless hooks. If a hook must collect per-run state, isolate that state
+by `run_params["run_id"]`, protect shared mutable data from concurrent access,
+and clean up state in both `after_pipeline_run` and `on_pipeline_error`.
+
 You can provide the following optional arguments in `KedroServiceSession.create()`:
 
 - `session_id`: Identifier for the session; if not provided, a unique session ID will be generated automatically

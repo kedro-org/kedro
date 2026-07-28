@@ -185,7 +185,7 @@ On failure the response also contains an `error` object with the exception type 
 !!! note
     `RunRequest` model uses strict validation, unknown fields return an error rather than being ignored.
 
-The first `/run` request creates a `KedroServiceSession` which the following requests reuse. The endpoint runs in a thread pool, so concurrent `/run` requests share the same session and pipeline runs are not isolated from each other.
+The first `/run` request creates a `KedroServiceSession` which the following requests reuse. The endpoint runs in a thread pool, so concurrent `/run` requests share the same session and pipeline runs are not isolated from each other. Hooks are also reused across requests; see [how to keep hooks isolated between service runs](./session.md#keep-hooks-isolated-between-service-runs).
 
 !!! note
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the `--env` and `--conf-source` options instead.

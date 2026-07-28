@@ -8,6 +8,7 @@
 * Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
 
 ## Documentation changes
+* Updated Slack links in the documentation welcome page and footer to use the static redirect `slack.kedro.org`.
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [eeshsaxena](https://github.com/eeshsaxena)

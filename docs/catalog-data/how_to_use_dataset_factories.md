@@ -16,7 +16,7 @@ By default, runtime patterns are not used when calling `catalog.get()` unless ex
 
 ```bash
 In [1]: catalog.get("reviews#csv")
-Out[1]: kedro_datasets.pandas.csv_dataset.CSVDataset(filepath=.../data/01_raw/reviews.csv'), protocol='file', load_args={}, save_args={'index': False})
+Out[1]: kedro_datasets.pandas.csv_dataset.CSVDataset(filepath=.../data/01_raw/reviews.csv, protocol='file', load_args={}, save_args={'index': False})
 
 In [2]: catalog.get("nonexistent")
 DatasetNotFoundError: Dataset 'nonexistent' not found in the catalog

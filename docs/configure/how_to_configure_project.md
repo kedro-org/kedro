@@ -213,6 +213,8 @@ CONFIG_LOADER_ARGS = {"default_run_env": "base"}
 You can build a custom configuration loader by extending the [kedro.config.AbstractConfigLoader][] class:
 
 ```python
+from typing import Any, Dict
+
 from kedro.config import AbstractConfigLoader
 
 

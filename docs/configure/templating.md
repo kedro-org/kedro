@@ -81,7 +81,7 @@ dataset_type:
 You can access these global variables in your catalog or parameters config files with a `globals` resolver like this:
 `conf/base/parameters.yml`:
 ```yaml
-my_param : "${globals:my_global_value}"
+my_param: "${globals:my_global_value}"
 ```
 `conf/base/catalog.yml`:
 ```yaml

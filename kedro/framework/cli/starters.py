@@ -275,7 +275,9 @@ def _print_selection_and_prompt_info(
     if interactive:
         click.secho(
             "\nTo skip the interactive flow you can run `kedro new` with"
-            "\nkedro new --name=<your-project-name> --tools=<your-project-tools> --example=<yes/no>",
+            "\ntool names for `--tools`, or `all`/`none`:"
+            "\nkedro new --name=<your-project-name> "
+            "--tools=lint,test,log,docs,data,pyspark --example=<yes/no>",
             fg="green",
         )
 

@@ -99,6 +99,7 @@ plugins:
           - index.md: Welcome to Kedro documentation
           - getting-started/install.md: Installation guide for pip, conda, and development setup
           - getting-started/kedro_concepts.md: Core concepts - nodes, pipelines, catalog, and more
+          - getting-started/cli_cheatsheet.md: Quick reference for common Kedro CLI commands
           - getting-started/faq.md: Frequently asked questions
           - getting-started/course.md: Learn about Kedro from our video course
 

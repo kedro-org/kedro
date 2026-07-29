@@ -197,6 +197,10 @@ Parameter validation supports two kinds of typed objects:
 
 Raw values (`int`, `str`, `float`, and others) are passed through unchanged with no validation applied.
 
+### Pydantic vs. dataclasses
+
+Pydantic models provide richer validation: field constraints (`ge`, `le`, `gt`, `lt`), custom validators, nested model support, and detailed error messages. Dataclasses check that required fields are present and can be instantiated from the dictionary, but do not enforce value constraints. Use Pydantic models if you need validation beyond basic type checking.
+
 ### How validation works
 
 1. When you execute a Kedro run or access `context.params` directly, Kedro loads your `parameters.yml` as a dictionary.
@@ -208,10 +212,6 @@ Raw values (`int`, `str`, `float`, and others) are passed through unchanged with
 ### Fail-fast behaviour
 
 Validation runs before any node executes. This **fail-fast** behaviour means configuration errors are caught early, not halfway through a long pipeline run.
-
-### Pydantic vs. dataclasses
-
-Pydantic models provide richer validation: field constraints (`ge`, `le`, `gt`, `lt`), custom validators, nested model support, and detailed error messages. Dataclasses check that required fields are present and can be instantiated from the dictionary, but do not enforce value constraints. Use Pydantic models if you need validation beyond basic type checking.
 
 ### Conflicting types across pipelines
 

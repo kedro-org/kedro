@@ -16,6 +16,8 @@ If you have a group of parameters that determine the hyperparameters of your mod
 
 Parameters are added to the Data Catalog by Kedro as `MemoryDataset`s, which makes them accessible to your pipeline nodes like any other dataset.
 
+Kedro can also validate parameters against type hints on your node functions using Pydantic models or dataclasses. See [how to validate parameters](how_to_use_parameters_and_credentials.md#how-to-validate-parameters) for details.
+
 To learn how to use parameters in practice, see the [how-to guide on working with parameters and credentials](how_to_use_parameters_and_credentials.md).
 
 ## Credentials

@@ -240,7 +240,8 @@ To learn more about using logging in your project, or modifying the logging conf
 
 ### Documentation
 
-Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, `conf.py` and `index.rst`, with some added features such as auto generation of HTML documentation.
+Including the Documentation tool adds a `docs` directory to your project structure and includes the Sphinx setup files, `conf.py` and `index.rst`, along with a `Makefile` (and `make.bat` on Windows) that builds the HTML documentation.
+Run `make html` in the `docs` directory (or `docs\make.bat html` on Windows) to generate the API docs with `sphinx-apidoc` and then build the site with `sphinx-build`.
 The aim of this tool reflects Kedro's commitment to best practices in understanding code and facilitating collaboration by helping you create and maintain guides and API docs.
 
 If you did not initially select `docs` and want to add it later, follow the [official documentation](https://docs.kedro.org/en/stable/deploy/package_a_project/#add-documentation-to-a-kedro-project-if-you-have-not-selected-docs-tool) for guidance on adding documentation to a Kedro project.

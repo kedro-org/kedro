@@ -9,6 +9,79 @@ Kedro also has an advanced feature which supports packaging on a pipeline level 
 !!! note
     These steps are for projects without the `docs` tool option. You can verify this by looking to see if you don't have a `docs` directory in your project.
 
+If you selected the `docs` tool when running `kedro new`, your project already contains a Sphinx-based documentation setup in the `docs` directory. The steps below use [MkDocs](https://www.mkdocs.org/) instead, which is the documentation tool used for Kedro's own documentation site.
+
+### Install dependencies
+
+Run the following from your project root:
+
+```bash
+pip install mkdocs mkdocs-material mkdocstrings[python] mkdocs-autorefs
+```
+
+### Configure MkDocs
+
+Create an `mkdocs.yml` file in your project root:
+
+```yaml
+site_name: My Project
+site_url: https://example.com/
+repo_name: my-project
+repo_url: https://github.com/my-org/my-project
+
+theme:
+  name: material
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+
+nav:
+  - Home: index.md
+  - API reference: api.md
+```
+
+### Add documentation pages
+
+Create a `docs` directory and add two files. Replace `my_project` with the name of your Python package (the value of `python_package` in `pyproject.toml`).
+
+`docs/index.md`:
+
+```markdown
+# My Project
+
+Welcome to the documentation for My Project.
+```
+
+`docs/api.md`:
+
+```markdown
+# API reference
+
+::: my_project
+```
+
+### Build and preview
+
+Run the following from your project root to preview the site:
+
+```bash
+mkdocs serve
+```
+
+Then open `http://127.0.0.1:8000/` in your browser. To build the static site, run:
+
+```bash
+mkdocs build
+```
+
+The built site is written to the `site/` directory.
 
 ## Package a Kedro project
 

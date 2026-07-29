@@ -8,6 +8,7 @@
 * Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
 
 ## Documentation changes
+* Added MkDocs setup steps to `docs/deploy/package_a_project.md` for projects created without the `docs` tool.
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [eeshsaxena](https://github.com/eeshsaxena)

@@ -102,6 +102,9 @@ class KedroServiceSession(AbstractSession):
                 ``run()`` calls begin, making pipeline lookups safe across
                 threads. Leave ``False`` (the default) for CLI use, where
                 selective pipeline loading is preferred for startup performance.
+
+        Returns:
+            A new ``KedroServiceSession`` instance ready for use.
         """
         validate_settings()
         env = env or os.getenv("KEDRO_ENV")
@@ -116,29 +119,30 @@ class KedroServiceSession(AbstractSession):
         return session
 
     def _enable_serving_mode(self) -> None:
-        """Switch the session into serving mode.
+        """Preload all pipelines, then switch the session into serving mode.
 
-        Sets ``_serving_mode`` and eagerly loads all pipelines. Intended to be
-        called by ``create()`` before the session is handed to request threads,
-        but exposed as a method so the argument count on ``__init__`` stays
-        within the lint threshold.
+        The flag is set *after* a successful preload so that a failure during
+        loading leaves the session in normal CLI mode rather than in an
+        inconsistent state where ``run()`` would skip ``set_requested()``
+        against an empty pipeline registry.
         """
-        self._serving_mode = True
         self._preload_pipelines()
+        self._serving_mode = True
 
     def _preload_pipelines(self) -> None:
         """Eagerly load all registered pipelines into the shared singleton.
 
         Called once during session creation in serving mode, before any request
         threads are started. After this returns, ``pipelines._content`` is
-        fully populated and ``_is_data_loaded`` is ``True``, so subsequent
-        concurrent ``run()`` calls read the dict without mutating shared state.
+        fully populated and ``pipelines._is_data_loaded`` is ``True``, so
+        subsequent concurrent ``run()`` calls read the dict without mutating
+        shared state.
         """
         self._logger.info(
             "Serving mode: preloading all pipelines for session %s", self.session_id
         )
         pipelines.set_requested(None)
-        _ = dict(pipelines.items())
+        list(pipelines)
 
     @property
     def _logger(self) -> logging.Logger:

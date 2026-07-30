@@ -169,6 +169,7 @@ def create_http_server(
                     project_path=app.state.project_path,
                     env=app.state.default_env,
                     conf_source=app.state.default_conf_source,
+                    serving_mode=True,
                 )
 
         return _execute_pipeline(session=app.state.session, request=request)

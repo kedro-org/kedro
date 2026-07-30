@@ -668,3 +668,57 @@ class TestKedroServiceSession:
         assert first_run_id != second_run_id
         assert first_runtime_params == {"param1": "value1"}
         assert second_runtime_params == {"param2": "value2"}
+
+    def test_create_serving_mode_preloads_all_pipelines(self, fake_project, mocker):
+        """create(serving_mode=True) calls set_requested(None) to clear any filter and
+        then iterates the singleton so _load_data() is triggered before requests start."""
+        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.service_session.pipelines"
+        )
+
+        KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id", serving_mode=True
+        )
+
+        mock_pipelines.set_requested.assert_called_once_with(None)
+        mock_pipelines.__iter__.assert_called()
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_in_serving_mode_skips_set_requested(
+        self, fake_project, mock_runner, mocker
+    ):
+        """run() must not call set_requested() when serving mode is active; all pipelines
+        are already loaded and mutating the shared singleton would break concurrent requests."""
+        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.service_session.pipelines"
+        )
+        mock_runner.__name__ = "SequentialRunner"
+
+        with KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id", serving_mode=True
+        ) as session:
+            session.run(runner=mock_runner, pipeline_names=[_FAKE_PIPELINE_NAME])
+
+        # set_requested must only have been called once — during preload in create(),
+        # never during run().
+        mock_pipelines.set_requested.assert_called_once_with(None)
+
+    def test_serving_mode_flag_stays_false_when_preload_fails(
+        self, fake_project, mocker
+    ):
+        """If pipeline preloading raises, _serving_mode must remain False so that
+        subsequent run() calls still use set_requested() rather than operating
+        against an empty pipeline registry."""
+        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        mocker.patch("kedro.framework.session.service_session.pipelines")
+        session = KedroServiceSession.create(project_path=fake_project)
+        mocker.patch.object(
+            session, "_preload_pipelines", side_effect=RuntimeError("broken pipelines")
+        )
+
+        with pytest.raises(RuntimeError, match="broken pipelines"):
+            session._enable_serving_mode()
+
+        assert session._serving_mode is False

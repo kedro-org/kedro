@@ -169,7 +169,7 @@ CONF_SOURCE = "."
 CONFIG_LOADER_ARGS = {"base_env": ".", "default_run_env": "."}
 ```
 
-These lines override the default settings so that Kedro knows to look for configurations in the current directory instead of the expected `conf` folder. For more details, see [How to change the setting for a configuration source folder](../configure/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advance Configuration without a full Kedro project](../configure/advanced_configuration.md#advanced-configuration-without-a-full-kedro-project)
+These lines override the default settings so that Kedro knows to look for configurations in the current directory instead of the expected `conf` folder. For more details, see [How to change the setting for a configuration source folder](../configure/how_to_configure_project.md#how-to-change-the-setting-for-a-configuration-source-folder) and [Advanced configuration without a full Kedro project](../configure/how_to_configure_project.md#advanced-configuration-without-a-full-kedro-project)
 
 Now, run the pipeline again:
 ```bash

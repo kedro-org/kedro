@@ -154,6 +154,7 @@ plugins:
           - develop/linting.md: Code formatting and linting setup
           - develop/debugging.md: Debugging Kedro pipelines
           - develop/vibe_coding_with_mcp.md: Vibe coding with MCP
+          - develop/vibe_coding_with_skills.md: Vibe coding with skills
 
         Deployment:
           - deploy/index.md: Deployment overview and strategies
@@ -356,6 +357,7 @@ nav:
           - Code formatting and linting: develop/linting.md
           - Debugging: develop/debugging.md
           - Vibe coding with MCP: develop/vibe_coding_with_mcp.md
+          - Vibe coding with skills: develop/vibe_coding_with_skills.md
       - Inspect:
           - Inspect a project: inspect/inspect-project.md
       - Deploy:

@@ -1,0 +1,96 @@
+# Vibe coding with skills
+
+If you want your AI coding assistant to understand Kedro conventions out of the box —
+correct dataset naming, catalog patterns, layer structure — install `kedro-skills`.
+It writes contextual guidance files into your project that activate automatically
+when you edit matching files. No server, no configuration, works in any IDE.
+
+---
+
+## Quick install
+
+```bash
+pip install kedro-skills
+```
+
+## Quick start
+
+```bash
+# Inside a Kedro project:
+kedro skills list                      # see what's available
+kedro skills install catalog-config    # install the catalog guidance skill
+```
+
+After running this, your AI assistant will give better answers when you edit catalog files in `conf/`.
+
+---
+
+## How it works
+
+`kedro-skills` writes managed files into your project (committed to git).
+When you edit a file matching the skill's patterns (e.g. `conf/**/*.yml`), your IDE loads the relevant guidance into the AI assistant's context.
+The assistant then responds using current Kedro conventions instead of outdated training data.
+No MCP server is needed — skills work offline, in any IDE.
+
+---
+
+## Supported IDEs
+
+| IDE | How it activates | Setup needed |
+|-----|-----------------|--------------|
+| Cursor | `.cursor/rules/*.mdc` — fires on matching `globs:` | None after install |
+| GitHub Copilot | `.github/instructions/*.instructions.md` — fires on matching `applyTo:` | None after install |
+| Claude Code | `.claude/skills/<id>/SKILL.md` — always discoverable | None after install |
+| Codex CLI | `AGENTS.md` block — always active | None after install |
+| Windsurf, Amp, Devin | `AGENTS.md` block — always active | None after install |
+
+---
+
+## Available skills
+
+| Skill | Description | Activates on |
+|-------|-------------|-------------|
+| `catalog-config` | Correct dataset naming, docs lookup, factory patterns, credentials, layers | `conf/**/*.yml`, `conf/**/*.yaml` |
+
+More skills are planned — run `kedro skills list` to see what's available in your installed version.
+
+---
+
+## Skills vs MCP — when to use what
+
+> **Tell the agent something → `kedro-skills`.**
+> **Let the agent do something → `kedro-mcp`.**
+
+| | Skills (`kedro-skills`) | MCP (`kedro-mcp`) |
+|---|---|---|
+| What it provides | Ambient knowledge (conventions, patterns, best practices) | Active tools (project migration, notebook conversion) |
+| Runtime | None — static files on disk | Long-running MCP server |
+| Activation | Automatic on file globs | Explicit (user invokes `/mcp.Kedro.…`) |
+| IDE reach | All assistants (Cursor, Copilot, Claude, Codex, Windsurf, Amp, Devin…) | MCP-capable clients only |
+| Failure mode | Slightly worse suggestion | Server crash / tool error |
+| When on the line | Default to skills — cheaper, broader reach | Use when the agent needs to *execute* something |
+
+Install both. They're complementary — skills provide passive knowledge (what a catalog entry should look like), MCP provides active capabilities (migrating your project to Kedro 1.0). You can use one without the other, but together they give your assistant the best Kedro experience.
+
+See [Vibe coding with Kedro-MCP](vibe_coding_with_mcp.md) for MCP setup and usage.
+
+---
+
+## Managing skills
+
+```bash
+kedro skills update          # re-render after upgrading the package
+kedro skills uninstall <id>  # clean removal of all managed files
+```
+
+- If you hand-edit a managed file, `update` will warn you and suggest `--force`.
+- All managed files should be committed to git so the whole team benefits.
+- Run `kedro skills update` after `pip install --upgrade kedro-skills` to pick up new skill content.
+
+---
+
+## Learn more
+
+- [Full CLI reference and authoring guide](https://github.com/kedro-org/kedro-skills)
+- [Agent Skills standard](https://agentskills.io/)
+- [Design proposal](https://github.com/kedro-org/kedro/issues/5525)

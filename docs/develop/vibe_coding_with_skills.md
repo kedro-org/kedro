@@ -55,6 +55,45 @@ More skills are planned — run `kedro skills list` to see what's available in y
 
 ---
 
+## Usage
+
+After installing a skill, open any matching file and ask your AI assistant a question. The skill guidance loads automatically — no special commands needed.
+
+**Example: adding a catalog entry**
+
+Open `conf/base/catalog.yml` and ask your assistant:
+
+```text
+Add a parquet dataset for my preprocessed_companies table stored in S3.
+```
+
+With `catalog-config` installed, the assistant will follow current Kedro conventions for dataset type, filepath pattern, layer assignment, and credentials handling — instead of guessing from outdated training data.
+
+**Example: reviewing an existing catalog**
+
+```text
+Review my catalog.yml and flag anything that doesn't follow Kedro best practices.
+```
+
+The assistant will check naming, layers, factory patterns, and credential usage against the guidance provided by the skill.
+
+For the full CLI reference and authoring guide, see the [`kedro-skills` documentation](https://github.com/kedro-org/kedro-skills).
+
+---
+
+## Managing skills
+
+```bash
+kedro skills update          # re-render after upgrading the package
+kedro skills uninstall <id>  # clean removal of all managed files
+```
+
+- If you hand-edit a managed file, `update` will warn you and suggest `--force`.
+- All managed files should be committed to git so the whole team benefits.
+- Run `kedro skills update` after `pip install --upgrade kedro-skills` to pick up new skill content.
+
+---
+
 ## Skills vs MCP — when to use what
 
 > **Tell the agent something → `kedro-skills`.**
@@ -72,24 +111,3 @@ More skills are planned — run `kedro skills list` to see what's available in y
 Install both. They're complementary — skills provide passive knowledge (what a catalog entry should look like), MCP provides active capabilities (migrating your project to Kedro 1.0). You can use one without the other, but together they give your assistant the best Kedro experience.
 
 See [Vibe coding with Kedro-MCP](vibe_coding_with_mcp.md) for MCP setup and usage.
-
----
-
-## Managing skills
-
-```bash
-kedro skills update          # re-render after upgrading the package
-kedro skills uninstall <id>  # clean removal of all managed files
-```
-
-- If you hand-edit a managed file, `update` will warn you and suggest `--force`.
-- All managed files should be committed to git so the whole team benefits.
-- Run `kedro skills update` after `pip install --upgrade kedro-skills` to pick up new skill content.
-
----
-
-## Learn more
-
-- [Full CLI reference and authoring guide](https://github.com/kedro-org/kedro-skills)
-- [Agent Skills standard](https://agentskills.io/)
-- [Design proposal](https://github.com/kedro-org/kedro/issues/5525)

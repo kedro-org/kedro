@@ -132,5 +132,5 @@ With Kedro MCP, Copilot, and Cursor become much smarter about Kedro — so you c
 
 ---
 
-!!! tip "Looking for ambient knowledge instead of active tools?"
+!!! tip "Want your assistant to know Kedro conventions automatically?"
     See [Vibe coding with skills](vibe_coding_with_skills.md) — file-based guidance that works in any IDE without a server.

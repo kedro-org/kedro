@@ -36,14 +36,14 @@ test_dataset:
 
 The `open_args_load` and `open_args_save` keys nested inside `fs_args` are passed to the filesystem's `open` method to configure how a dataset file is opened during a load or save operation.
 
-To load data from a local binary file using `utf-8` encoding:
+To load data from a local text file using `utf-8` encoding:
 
 ```yaml
 test_dataset:
   type: ...
   fs_args:
     open_args_load:
-      mode: "rb"
+      mode: "r"
       encoding: "utf-8"
 ```
 

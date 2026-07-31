@@ -129,3 +129,8 @@ The MCP server will then provide the assistant with the latest Kedro guidance an
 
 
 With Kedro MCP, Copilot, and Cursor become much smarter about Kedro — so you can focus on building pipelines, not fixing AI mistakes.
+
+---
+
+!!! tip "Want your assistant to know Kedro conventions automatically?"
+    See [Vibe coding with skills](vibe_coding_with_skills.md) — file-based guidance that works in any IDE without a server.

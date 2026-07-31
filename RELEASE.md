@@ -10,6 +10,8 @@
 * Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 
 ## Documentation changes
+* Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [eeshsaxena](https://github.com/eeshsaxena)

@@ -1,7 +1,7 @@
 # Vibe coding with skills
 
 If you want your AI coding assistant to understand Kedro conventions out of the box —
-correct dataset naming, catalog patterns, layer structure — install `kedro-skills`.
+correct dataset naming, catalog patterns, layer structure — install [`kedro-skills`](https://github.com/kedro-org/kedro-skills).
 It writes contextual guidance files into your project that activate automatically
 when you edit matching files. No server, no configuration, works in any IDE.
 
@@ -28,21 +28,20 @@ After running this, your AI assistant will give better answers when you edit cat
 ## How it works
 
 `kedro-skills` writes managed files into your project (committed to git).
-When you edit a file matching the skill's patterns (e.g. `conf/**/*.yml`), your IDE loads the relevant guidance into the AI assistant's context.
+When you edit a file matching the skill's patterns (for example, `conf/**/*.yml`), your IDE loads the relevant guidance into the AI assistant's context.
 The assistant then responds using current Kedro conventions instead of outdated training data.
 No MCP server is needed — skills work offline, in any IDE.
 
 ---
 
-## Supported IDEs
+## Supported editors
 
-| IDE | How it activates | Setup needed |
-|-----|-----------------|--------------|
-| Cursor | `.cursor/rules/*.mdc` — fires on matching `globs:` | None after install |
-| GitHub Copilot | `.github/instructions/*.instructions.md` — fires on matching `applyTo:` | None after install |
-| Claude Code | `.claude/skills/<id>/SKILL.md` — always discoverable | None after install |
-| Codex CLI | `AGENTS.md` block — always active | None after install |
-| Windsurf, Amp, Devin | `AGENTS.md` block — always active | None after install |
+| IDE | How it activates |
+|-----|-----------------|
+| Cursor | `.cursor/rules/*.mdc` — fires on matching `globs:` |
+| GitHub Copilot | `.github/instructions/*.instructions.md` — fires on matching `applyTo:` |
+| Claude Code | `.claude/skills/<id>/SKILL.md` — always discoverable |
+| Codex CLI | `AGENTS.md` block — always active |
 
 ---
 
@@ -66,7 +65,7 @@ More skills are planned — run `kedro skills list` to see what's available in y
 | What it provides | Ambient knowledge (conventions, patterns, best practices) | Active tools (project migration, notebook conversion) |
 | Runtime | None — static files on disk | Long-running MCP server |
 | Activation | Automatic on file globs | Explicit (user invokes `/mcp.Kedro.…`) |
-| IDE reach | All assistants (Cursor, Copilot, Claude, Codex, Windsurf, Amp, Devin…) | MCP-capable clients only |
+| IDE reach | All assistants (Cursor, Copilot, Claude Code, Codex CLI) | MCP-capable clients |
 | Failure mode | Slightly worse suggestion | Server crash / tool error |
 | When on the line | Default to skills — cheaper, broader reach | Use when the agent needs to *execute* something |
 

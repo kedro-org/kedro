@@ -215,7 +215,7 @@ def reload_kedro(
         context = session.load_context(runtime_params=runtime_params)
     catalog = context.catalog
 
-    get_ipython().push(  # type: ignore[no-untyped-call]
+    get_ipython().push(  # type: ignore[union-attr]
         variables={
             "context": context,
             "catalog": catalog,
@@ -363,7 +363,7 @@ class _NodeBoundArguments(inspect.BoundArguments):
 
 def _create_cell_with_text(text: str) -> None:
     """Create a new cell with the provided text content."""
-    get_ipython().set_next_input(text)  # type: ignore[no-untyped-call]
+    get_ipython().set_next_input(text)  # type: ignore[union-attr]
 
 
 def _print_cells(cells: list[str]) -> None:

@@ -353,17 +353,17 @@ class KedroContext:
     def _configure_dataset_validation(
         self, catalog: CatalogProtocol, conf_catalog: dict[str, Any]
     ) -> None:
-        """Propagate the ``DATASET_VALIDATION`` project setting to the catalog.
+        """Propagate the `DATASET_VALIDATION` project setting to the catalog.
 
         If the catalog class implements the validation funnel (exposes a
-        ``validation_enabled`` attribute), the setting is applied to it.
+        `validation_enabled` attribute), the setting is applied to it.
         Otherwise, a warning is emitted when datasets declare validators
         that this catalog class will ignore.
 
         Args:
             catalog: The catalog to configure dataset validation for.
             conf_catalog: The raw catalog configuration, used to detect
-                declared ``validator`` keys on datasets.
+                declared `validator` keys on datasets.
         """
         from kedro.framework.project import settings
 

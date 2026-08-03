@@ -239,8 +239,8 @@ class DataCatalog(CatalogProtocol):
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
             validation_enabled: Whether dataset validation (declared via the
-                ``validator`` key in catalog entries) is applied on load and
-                save. The ``KEDRO_DATASET_VALIDATION`` environment variable,
+                `validator` key in catalog entries) is applied on load and
+                save. The `KEDRO_DATASET_VALIDATION` environment variable,
                 when set, takes precedence over this flag.
 
         Example:
@@ -410,10 +410,10 @@ class DataCatalog(CatalogProtocol):
     def __getstate__(self) -> dict[str, Any]:
         """Prepare the catalog state for pickling.
 
-        Resolved validator instances (``_validators``) may hold unpicklable
+        Resolved validator instances (`_validators`) may hold unpicklable
         objects (e.g. schema instances), so the cache is dropped and lazily
-        rebuilt from ``_validator_specs`` in the target process. The
-        ``_save_validated`` bookkeeping is per-process state and is reset.
+        rebuilt from `_validator_specs` in the target process. The
+        `_save_validated` bookkeeping is per-process state and is reset.
         """
         state = self.__dict__.copy()
         state["_validators"] = {}
@@ -1139,11 +1139,11 @@ class DataCatalog(CatalogProtocol):
     def _validation_enabled_effective(self) -> bool:
         """Resolve whether dataset validation is currently enabled.
 
-        The ``KEDRO_DATASET_VALIDATION`` environment variable, when set to a
-        recognised value, wins over the catalog-level ``validation_enabled``
-        flag. Recognised values are ``0``/``false``/``off`` (disabled) and
-        ``1``/``true``/``on`` (enabled). Unset or unrecognised values fall
-        back to ``self.validation_enabled``.
+        The `KEDRO_DATASET_VALIDATION` environment variable, when set to a
+        recognised value, wins over the catalog-level `validation_enabled`
+        flag. Recognised values are `0`/`false`/`off` (disabled) and
+        `1`/`true`/`on` (enabled). Unset or unrecognised values fall
+        back to `self.validation_enabled`.
 
         Returns:
             True if validation should be applied, False otherwise.
@@ -1158,27 +1158,27 @@ class DataCatalog(CatalogProtocol):
         return self.validation_enabled
 
     def _maybe_validate(self, ds_name: str, data: Any, mode: str) -> Any:
-        """Apply the dataset's declared validator to ``data`` if applicable.
+        """Apply the dataset's declared validator to `data` if applicable.
 
-        This is the single validation funnel for catalog ``load`` and ``save``
+        This is the single validation funnel for catalog `load` and `save`
         operations. It is a no-op when validation is disabled (catalog flag or
-        ``KEDRO_DATASET_VALIDATION`` environment variable), when no validator
+        `KEDRO_DATASET_VALIDATION` environment variable), when no validator
         is declared for the dataset, when the validator is disabled or not
-        declared for ``mode``, or when ``skip_load_after_save`` applies.
+        declared for `mode`, or when `skip_load_after_save` applies.
 
         Args:
             ds_name: The name of the dataset being loaded or saved.
             data: The data to validate.
-            mode: Either ``"load"`` or ``"save"``.
+            mode: Either `"load"` or `"save"`.
 
         Returns:
-            The validated (possibly transformed/coerced) data, or ``data``
+            The validated (possibly transformed/coerced) data, or `data`
             unchanged when validation does not apply or the validator's
-            severity is ``"warn"`` and validation failed.
+            severity is `"warn"` and validation failed.
 
         Raises:
             DataValidationError: If validation fails and the validator's
-                severity is ``"error"``.
+                severity is `"error"`.
             ValidationConfigurationError: If the declared validator cannot be
                 resolved.
         """

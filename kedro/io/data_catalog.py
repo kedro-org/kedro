@@ -35,7 +35,7 @@ from kedro.io.shared_memory_dataset import SharedMemoryDataset
 if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager
 
-    from kedro.validation import ValidatorSpec
+    from kedro.validation.core import ValidatorSpec
 
 
 class _LazyDataset:
@@ -913,7 +913,7 @@ class DataCatalog(CatalogProtocol):
         """
         validator_spec = None
         if isinstance(ds_config, dict) and VALIDATOR_KEY in ds_config:
-            from kedro.validation import ValidatorSpec
+            from kedro.validation.core import ValidatorSpec
 
             validator_spec = ValidatorSpec.from_config(
                 ds_name, ds_config[VALIDATOR_KEY]
@@ -1196,7 +1196,7 @@ class DataCatalog(CatalogProtocol):
         ):
             return data
 
-        from kedro.validation import DataValidationError, resolve_validator
+        from kedro.validation.core import DataValidationError, resolve_validator
 
         validator = self._validators.get(ds_name) or self._validators.setdefault(
             ds_name, resolve_validator(spec)

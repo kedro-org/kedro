@@ -225,12 +225,30 @@ class TestImportErrors:
         assert "Check that the class path is correct" in message
         assert isinstance(exc_info.value.__cause__, ModuleNotFoundError)
 
-    def test_missing_pandera_submodule_mentions_pandera_extra(self):
+    def test_missing_pandera_submodule_hints_class_path(self):
         spec = ValidatorSpec(class_path="pandera.no_such_submodule.Schema")
         with pytest.raises(
-            ValidationConfigurationError, match=r"pip install 'kedro\[pandera-pandas\]'"
+            ValidationConfigurationError,
+            match="pandera is installed but .* check the class path",
         ):
             resolve_validator(spec)
+
+    def test_import_hint_when_pandera_missing_entirely(self, monkeypatch):
+        import importlib.util
+
+        from kedro.validation.core import _import_error_hint
+
+        monkeypatch.setattr(importlib.util, "find_spec", lambda name: None)
+        assert "pip install 'kedro[pandera-pandas]'" in _import_error_hint("pandera")
+        assert "pip install 'kedro[pandera-pandas]'" in _import_error_hint(
+            "pandera.pandas"
+        )
+
+    def test_import_hint_generic_for_unknown_names(self):
+        from kedro.validation.core import _import_error_hint
+
+        assert "Check that the class path" in _import_error_hint("")
+        assert "Check that the class path" in _import_error_hint("some_pkg")
 
     def test_missing_attribute_is_config_error(self):
         spec = ValidatorSpec(class_path=f"{_MODULE}.NoSuchAttribute")
@@ -276,10 +294,22 @@ class TestResolutionEdgeCases:
 
 
 class TestPreflightEdgeCases:
-    def test_find_spec_error_counts_as_missing(self):
+    def test_find_spec_raising_counts_as_missing(self, monkeypatch):
+        import importlib.util
+
+        def boom(name):
+            raise ImportError("boom")
+
+        monkeypatch.setattr(importlib.util, "find_spec", boom)
+        specs = {"ds": ValidatorSpec(class_path="weird_pkg.Schema")}
+        warnings = preflight_check(specs)
+        assert len(warnings) == 1
+
+    def test_invalid_class_path_gets_clear_warning(self):
         specs = {"ds": ValidatorSpec(class_path=".weird.Schema")}
         warnings = preflight_check(specs)
         assert len(warnings) == 1
+        assert "invalid class path" in warnings[0]
 
     def test_missing_pandera_mentions_backend_extras(self, monkeypatch):
         import importlib.util

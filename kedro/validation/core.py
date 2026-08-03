@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import importlib.util
 import inspect
-import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
@@ -22,8 +21,6 @@ from kedro.utils import load_obj
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-logger = logging.getLogger(__name__)
 
 _ALLOWED_SPEC_KEYS = (
     "class",
@@ -61,7 +58,6 @@ class Validator(Protocol):
         failure. Implementations may be called concurrently and must therefore
         be thread-safe or stateless.
         """
-        ...
 
 
 @dataclass(frozen=True)
@@ -81,7 +77,7 @@ class CheckFailure:
     check: str | None = None
     column: str | None = None
     failure_count: int = 1
-    failure_examples: list = field(default_factory=list)
+    failure_examples: list[Any] = field(default_factory=list)
     index: Any | None = None
 
 
@@ -352,6 +348,31 @@ class CallableValidator:
         return data if result is None else result
 
 
+def _import_error_hint(missing: str) -> str:
+    """Build a hint for a failed validator import.
+
+    `missing` is the module or attribute name the import machinery reported
+    as unresolvable (empty when unavailable).
+    """
+    if missing == "pandera" or (
+        missing.startswith("pandera.") and importlib.util.find_spec("pandera") is None
+    ):
+        return (
+            "The 'pandera' package is not installed. "
+            "Install it with: pip install 'kedro[pandera-pandas]' "
+            "(or the pandera-polars / pandera-pyspark extra for your backend)"
+        )
+    if missing.startswith("pandera."):
+        return (
+            f"pandera is installed but '{missing}' could not be imported; "
+            f"check the class path."
+        )
+    return (
+        "Check that the class path is correct and the package is "
+        "installed in the current environment."
+    )
+
+
 def resolve_validator(spec: ValidatorSpec) -> Validator:
     """Resolve a `ValidatorSpec` into a usable validator instance.
 
@@ -380,17 +401,7 @@ def resolve_validator(spec: ValidatorSpec) -> Validator:
     try:
         obj = load_obj(spec.class_path)
     except (ImportError, AttributeError, ValueError) as exc:
-        hint = (
-            "Check that the class path is correct and the package is "
-            "installed in the current environment."
-        )
-        missing = getattr(exc, "name", "") or ""
-        if missing.split(".")[0] == "pandera":
-            hint = (
-                "The 'pandera' package is not installed. "
-                "Install it with: pip install 'kedro[pandera-pandas]' "
-                "(or the pandera-polars / pandera-pyspark extra for your backend)"
-            )
+        hint = _import_error_hint(getattr(exc, "name", "") or "")
         raise ValidationConfigurationError(
             f"Could not import validator '{spec.class_path}': {exc}. {hint}"
         ) from exc
@@ -463,6 +474,12 @@ def preflight_check(specs: dict[str, ValidatorSpec]) -> list[str]:
     warnings: list[str] = []
     for ds_name, spec in specs.items():
         top_level = spec.class_path.split(".")[0]
+        if not top_level:
+            warnings.append(
+                f"Validator for dataset '{ds_name}' has an invalid class "
+                f"path {spec.class_path!r}."
+            )
+            continue
         try:
             found = importlib.util.find_spec(top_level)
         except (ImportError, ValueError):

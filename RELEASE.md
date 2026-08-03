@@ -7,6 +7,7 @@
 * Fixed a `RecursionError` when initialising a session with dynaconf-backed settings by converting `settings.SESSION_STORE_ARGS` to a plain `dict` before deepcopying it.
 * Excluded `kedro_benchmarks` from the built wheel so benchmark tests are no longer shipped with the package.
 * Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
+* Fixed docs generated with `kedro new --tools=docs` so the Sphinx HTML build runs `sphinx-apidoc` and creates API docs.
 * Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 
 ## Documentation changes
@@ -15,6 +16,7 @@
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [eeshsaxena](https://github.com/eeshsaxena)
+* [Shizoqua](https://github.com/Shizoqua)
 * [BALOGUN DAVID TAIWO](https://github.com/BALOGUN-DAVID)
 
 # Release 1.5.0

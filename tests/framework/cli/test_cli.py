@@ -134,6 +134,7 @@ class TestCliCommands:
         assert result.exit_code == 0
         assert "--only-missing-outputs" in result.output
         assert "Run only nodes with missing outputs" in result.output
+        assert "--runner-params" in result.output
 
 
 class TestCommandCollection:
@@ -728,13 +729,77 @@ class TestRunCommand:
         assert not runner._is_async
 
     def test_run_async(self, fake_project_cli, fake_metadata, fake_session):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "--async"], obj=fake_metadata
-        )
+        with pytest.warns(KedroDeprecationWarning, match="--async"):
+            result = CliRunner().invoke(
+                fake_project_cli, ["run", "--async"], obj=fake_metadata
+            )
         assert not result.exit_code
         runner = fake_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, SequentialRunner)
         assert runner._is_async
+
+    def test_run_with_runner_params(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            [
+                "run",
+                "--runner=ParallelRunner",
+                "--runner-params=max_workers=2,is_async=True",
+            ],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, ParallelRunner)
+        assert runner._max_workers == 2
+        assert runner._is_async
+
+    def test_run_with_runner_params_keeps_default_async(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--runner=ParallelRunner", "--runner-params=max_workers=2"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, ParallelRunner)
+        assert runner._max_workers == 2
+        assert not runner._is_async
+
+    def test_run_with_invalid_runner_params(self, fake_project_cli, fake_metadata):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--runner-params=max_workers"],
+            obj=fake_metadata,
+        )
+
+        assert result.exit_code
+        assert (
+            "Invalid format of `runner_params` option: Item `max_workers` must "
+            "contain a key and a value separated by `=`."
+        ) in result.output
+
+    def test_run_async_conflicts_with_runner_params(
+        self, fake_project_cli, fake_metadata
+    ):
+        with pytest.warns(KedroDeprecationWarning, match="--async"):
+            result = CliRunner().invoke(
+                fake_project_cli,
+                ["run", "--async", "--runner-params=is_async=False"],
+                obj=fake_metadata,
+            )
+
+        assert result.exit_code
+        assert (
+            "Options '--async' and '--runner-params=is_async=False' "
+            "cannot be used together."
+        ) in result.output
 
     @mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_config(
@@ -763,6 +828,28 @@ class TestRunCommand:
             namespaces=[],
             only_missing_outputs=False,
         )
+
+    def test_run_with_runner_params_in_config(
+        self, fake_project_cli, fake_metadata, fake_session, fake_run_config
+    ):
+        config = OmegaConf.to_container(OmegaConf.load(fake_run_config))
+        config["run"].update(
+            {
+                "runner": "ParallelRunner",
+                "runner_params": {"max_workers": 2, "is_async": True},
+            }
+        )
+        OmegaConf.save(config, fake_run_config)
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--config", fake_run_config], obj=fake_metadata
+        )
+
+        assert not result.exit_code
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, ParallelRunner)
+        assert runner._max_workers == 2
+        assert runner._is_async
 
     def test_run_multiple_pipelines(
         self, fake_project_cli, fake_metadata, fake_session

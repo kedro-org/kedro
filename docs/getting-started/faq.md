@@ -28,39 +28,39 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Configuration
 
-* [How to change the setting for a configuration source folder](../configure/configuration_basics.md#how-to-change-the-setting-for-a-configuration-source-folder)?
-* [How to change the configuration source folder at runtime](../configure/configuration_basics.md#how-to-change-the-configuration-source-folder-at-runtime)?
-* [How to specify parameters at runtime](../configure/parameters.md#how-to-specify-parameters-at-runtime)?
-* [How to read configuration from a compressed file](../configure/configuration_basics.md#how-to-read-configuration-from-a-compressed-file)?
-* [How to access configuration in code](../configure/configuration_basics.md#how-to-access-configuration-in-code)?
-* [How to load credentials in code](../configure/credentials.md#how-to-load-credentials-in-code)?
-* [How to load parameters in code](../configure/parameters.md#how-to-load-parameters-in-code)?
-* [How to specify additional configuration environments](../configure/configuration_basics.md#how-to-specify-additional-configuration-environments)?
-* [How to change the default overriding configuration environment](../configure/configuration_basics.md#how-to-change-the-default-overriding-environment)?
-* [How to use a single configuration environment](../configure/configuration_basics.md#how-to-use-a-single-configuration-environment)?
+* [How to change the setting for a configuration source folder](../configure/how_to_configure_project.md#how-to-change-the-setting-for-a-configuration-source-folder)?
+* [How to change the configuration source folder at runtime](../configure/how_to_configure_project.md#how-to-change-the-configuration-source-folder-at-runtime)?
+* [How to specify parameters at runtime](../configure/how_to_use_parameters_and_credentials.md#how-to-specify-parameters-at-runtime)?
+* [How to read configuration from a compressed file](../configure/how_to_configure_project.md#how-to-read-configuration-from-a-compressed-file)?
+* [How to access configuration in code](../configure/how_to_configure_project.md#how-to-access-configuration-in-code)?
+* [How to load credentials in code](../configure/how_to_use_parameters_and_credentials.md#how-to-load-credentials-in-code)?
+* [How to load parameters in code](../configure/how_to_use_parameters_and_credentials.md#how-to-load-parameters-in-code)?
+* [How to specify additional configuration environments](../configure/how_to_configure_project.md#how-to-specify-additional-configuration-environments)?
+* [How to change the default overriding configuration environment](../configure/how_to_configure_project.md#how-to-change-the-default-overriding-environment)?
+* [How to use a single configuration environment](../configure/how_to_configure_project.md#how-to-use-a-single-configuration-environment)?
 * [How to use Kedro logging without the Rich library](../develop/logging.md#how-to-use-logging-without-the-rich-library)
 
 ### Advanced topics
 
-* [How to change which configuration files are loaded](../configure/advanced_configuration.md#how-to-change-which-configuration-files-are-loaded)?
-* [How to use a custom configuration loader](../configure/advanced_configuration.md#how-to-use-a-custom-configuration-loader)?
-* [How to ensure non default configuration files get loaded](../configure/advanced_configuration.md#how-to-ensure-non-default-configuration-files-get-loaded)?
-* [How to bypass the configuration loading rules](../configure/advanced_configuration.md#how-to-bypass-the-configuration-loading-rules)?
-* [How to do templating with the `OmegaConfigLoader`](../configure/advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader)?
-* [How to use global variables with the `OmegaConfigLoader`](../configure/advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader)?
-* [How to use resolvers in the `OmegaConfigLoader`](../configure/advanced_configuration.md#how-to-use-resolvers-in-the-omegaconfigloader)?
-* [How to load credentials through environment variables](../configure/advanced_configuration.md#how-to-load-credentials-through-environment-variables)?
+* [How to change which configuration files are loaded](../configure/how_to_configure_project.md#how-to-change-which-configuration-files-are-loaded)?
+* [How to use a custom configuration loader](../configure/how_to_configure_project.md#how-to-use-a-custom-configuration-loader)?
+* [How to ensure non default configuration files get loaded](../configure/how_to_configure_project.md#how-to-ensure-non-default-configuration-files-get-loaded)?
+* [How to bypass the configuration loading rules](../configure/how_to_configure_project.md#how-to-bypass-the-configuration-loading-rules)?
+* [How to do templating with the `OmegaConfigLoader`](../configure/how_to_use_templating.md)?
+* [How to use global variables with the `OmegaConfigLoader`](../configure/how_to_use_templating.md#how-to-use-global-variables-with-the-omegaconfigloader)?
+* [How to use resolvers in the `OmegaConfigLoader`](../configure/how_to_use_templating.md#how-to-use-resolvers-in-the-omegaconfigloader)?
+* [How to load credentials through environment variables](../configure/how_to_use_parameters_and_credentials.md#how-to-load-credentials-through-environment-variables)?
 * [How to use Kedro with different project structure?](../tutorials/settings.md#use-kedro-without-the-src-folder)
 
 ## Data Catalog
 * [How to create dataset entries in catalog.yml?](../catalog-data/data_catalog.md)
 * [How to use the same file with different formats using transcoding?](../catalog-data/data_catalog_yaml_examples.md#read-the-same-file-using-different-datasets-with-transcoding)
-* [How to use dataset factories?](../catalog-data/kedro_dataset_factories.md)
-* [How to override the default dataset creation with a default dataset factory pattern?](../catalog-data/kedro_dataset_factories.md#how-to-override-the-default-dataset-creation-with-dataset-factories)
-* [How to load and save incremental or partitioned datasets?](../catalog-data/partitioned_and_incremental_datasets.md)
+* [How to use dataset factories?](../catalog-data/how_to_use_dataset_factories.md)
+* [How to override the default dataset creation with a default dataset factory pattern?](../catalog-data/how_to_use_dataset_factories.md#how-to-override-the-default-dataset-creation-with-dataset-factories)
+* [How to load and save incremental or partitioned datasets?](../catalog-data/how_to_use_partitioned_and_incremental_datasets.md)
 
 ## Advanced topics
-* [How to use the `DataCatalog` programmatically in code?](../catalog-data/advanced_data_catalog_usage.md)
+* [How to use the `DataCatalog` programmatically in code?](../catalog-data/how_to_access_the_data_catalog_in_code.md)
 
 ## Nodes and pipelines
 

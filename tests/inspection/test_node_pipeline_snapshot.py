@@ -199,6 +199,7 @@ class TestResolveNodeSource:
         assert "def my_func" in "".join(source_lines)
 
     def test_returns_none_when_outside_project(self, project_path):
+        """Out-of-project functions return None rather than an absolute filepath."""
         assert _resolve_node_source(_identity, project_path) is None
 
 

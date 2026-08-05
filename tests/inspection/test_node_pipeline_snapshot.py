@@ -20,7 +20,7 @@ from kedro.pipeline import Pipeline, node
 
 @pytest.fixture
 def project_path(tmp_path):
-    return tmp_path
+    return tmp_path.resolve()
 
 
 @pytest.fixture

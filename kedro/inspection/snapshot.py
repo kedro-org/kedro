@@ -73,9 +73,13 @@ def _build_dataset_snapshots(
 
 def _resolve_node_source(
     func: Any,
-    project_path: Path,
+    resolved_project_path: Path,
 ) -> NodeSourceSnapshot | None:
     """Resolve source location metadata for a node's underlying function.
+
+    Args:
+        func: The node's underlying callable.
+        resolved_project_path: Absolute, resolved path to the project root.
 
     Returns ``None`` when the location cannot be determined (for example,
     lambdas, ``functools.partial``, built-ins, unreadable source files, or
@@ -97,7 +101,6 @@ def _resolve_node_source(
         return None
 
     resolved_path = Path(source_file).resolve()
-    resolved_project_path = project_path.resolve()
     if not resolved_path.is_relative_to(resolved_project_path):
         return None
 
@@ -117,12 +120,12 @@ def _resolve_node_source(
     )
 
 
-def _node_to_snapshot(node: Node, project_path: Path) -> NodeSnapshot:
+def _node_to_snapshot(node: Node, resolved_project_path: Path) -> NodeSnapshot:
     """Convert a live ``Node`` object to a ``NodeSnapshot``.
 
     Args:
         node: A Kedro pipeline node.
-        project_path: Absolute path to the project root directory.
+        resolved_project_path: Absolute, resolved path to the project root.
 
     Returns:
         Read-only snapshot of the node's structural metadata.
@@ -134,7 +137,7 @@ def _node_to_snapshot(node: Node, project_path: Path) -> NodeSnapshot:
         tags=sorted(node.tags),
         inputs=node.inputs,
         outputs=node.outputs,
-        source=_resolve_node_source(node.func, project_path),
+        source=_resolve_node_source(node.func, resolved_project_path),
     )
 
 
@@ -152,6 +155,7 @@ def _build_pipeline_snapshots(
     Returns:
         List of pipeline snapshots in registry iteration order.
     """
+    resolved_project_path = project_path.resolve()
     snapshots = []
     for pipeline_id, pipeline in pipeline_dict.items():
         if pipeline is None:
@@ -160,7 +164,8 @@ def _build_pipeline_snapshots(
             PipelineSnapshot(
                 name=pipeline_id,
                 nodes=[
-                    _node_to_snapshot(_node, project_path) for _node in pipeline.nodes
+                    _node_to_snapshot(_node, resolved_project_path)
+                    for _node in pipeline.nodes
                 ],
                 inputs=sorted(pipeline.inputs()),
                 outputs=sorted(pipeline.outputs()),

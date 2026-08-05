@@ -166,6 +166,38 @@ class TestResolveNodeSource:
         )
         assert "".join(source_lines) == expected_source
 
+    def test_source_location_uses_unwrapped_function(self, project_path):
+        module_source = (
+            "import functools\n\n"
+            "def my_func(x):\n"
+            "    return x\n\n"
+            "def decorator(fn):\n"
+            "    @functools.wraps(fn)\n"
+            "    def wrapper(*args, **kwargs):\n"
+            "        return fn(*args, **kwargs)\n"
+            "    return wrapper\n\n"
+            "wrapped_my_func = decorator(my_func)\n"
+        )
+        nodes_file = project_path / "src" / "pkg" / "nodes.py"
+        nodes_file.parent.mkdir(parents=True)
+        nodes_file.write_text(module_source)
+
+        spec = importlib.util.spec_from_file_location("nodes", nodes_file)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        wrapped_func = module.wrapped_my_func
+
+        source = _resolve_node_source(wrapped_func, project_path)
+        unwrapped_func = inspect.unwrap(wrapped_func)
+        source_lines, line_start = inspect.getsourcelines(unwrapped_func)
+
+        assert source == NodeSourceSnapshot(
+            filepath="src/pkg/nodes.py",
+            line_start=line_start,
+            line_end=line_start + len(source_lines) - 1,
+        )
+        assert "def my_func" in "".join(source_lines)
+
     def test_returns_none_when_outside_project(self, project_path):
         assert _resolve_node_source(_identity, project_path) is None
 

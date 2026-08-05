@@ -92,6 +92,8 @@ def _resolve_node_source(
     ):
         return None
 
+    func = inspect.unwrap(func)
+
     try:
         source_file = inspect.getsourcefile(func)
     except (OSError, TypeError):

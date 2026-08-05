@@ -88,7 +88,11 @@ def _resolve_node_source(
     ):
         return None
 
-    source_file = inspect.getsourcefile(func)
+    try:
+        source_file = inspect.getsourcefile(func)
+    except (OSError, TypeError):
+        return None
+
     if source_file is None:
         return None
 

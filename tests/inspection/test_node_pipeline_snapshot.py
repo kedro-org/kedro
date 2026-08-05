@@ -131,6 +131,13 @@ class TestResolveNodeSource:
         )
         assert _resolve_node_source(_identity, project_path) is None
 
+    def test_returns_none_when_getsourcefile_raises(self, mocker, project_path):
+        mocker.patch(
+            "kedro.inspection.snapshot.inspect.getsourcefile",
+            side_effect=OSError("no file"),
+        )
+        assert _resolve_node_source(_identity, project_path) is None
+
     def test_returns_none_when_source_is_unreadable(self, mocker, project_path):
         func = _load_func_from_project(
             project_path,

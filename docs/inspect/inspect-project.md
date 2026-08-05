@@ -117,7 +117,7 @@ if node.source:
     )
 ```
 
-`source` is `None` when the location cannot be resolved — for example, for `functools.partial`, lambdas, built-ins, or functions defined outside the project root.
+`source` is `None` when the location cannot be resolved. For example, `functools.partial`, lambdas, built-ins, or functions defined outside the project root.
 
 ## How to inspect catalog datasets
 

@@ -123,6 +123,20 @@ class TestResolveNodeSource:
         )
         assert _resolve_node_source(func, project_path) is None
 
+    def test_returns_none_when_getsourcelines_raises_type_error(
+        self, mocker, project_path
+    ):
+        func = _load_func_from_project(
+            project_path,
+            "def my_func(x):\n    return x\n",
+            "my_func",
+        )
+        mocker.patch(
+            "kedro.inspection.snapshot.inspect.getsourcelines",
+            side_effect=TypeError("source code not available"),
+        )
+        assert _resolve_node_source(func, project_path) is None
+
     def test_returns_none_when_source_file_cannot_be_resolved(
         self, mocker, project_path
     ):
@@ -137,18 +151,6 @@ class TestResolveNodeSource:
             side_effect=OSError("no file"),
         )
         assert _resolve_node_source(_identity, project_path) is None
-
-    def test_returns_none_when_source_is_unreadable(self, mocker, project_path):
-        func = _load_func_from_project(
-            project_path,
-            "def my_func(x):\n    return x\n",
-            "my_func",
-        )
-        mocker.patch(
-            "kedro.inspection.snapshot.inspect.getsourcelines",
-            side_effect=OSError("permission denied"),
-        )
-        assert _resolve_node_source(func, project_path) is None
 
     def test_filepath_is_project_relative_when_inside_project(self, project_path):
         expected_source = "def my_func(x):\n    return x\n"

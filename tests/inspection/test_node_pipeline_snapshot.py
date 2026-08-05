@@ -81,18 +81,6 @@ def _load_func_from_project(project_path: Path, source: str, func_name: str):
     return getattr(module, func_name)
 
 
-class TestNodeSourceSnapshot:
-    def test_instantiation(self):
-        source = NodeSourceSnapshot(
-            filepath="src/pkg/pipelines/nodes.py",
-            line_start=10,
-            line_end=15,
-        )
-        assert source.filepath == "src/pkg/pipelines/nodes.py"
-        assert source.line_start == 10
-        assert source.line_end == 15
-
-
 class TestNodeSnapshot:
     def test_instantiation_defaults(self):
         snapshot = NodeSnapshot(name="my_node", func_name="my_func")

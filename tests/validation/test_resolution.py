@@ -211,8 +211,13 @@ class TestCallableResolution:
 
     def test_function_with_options_is_config_error(self):
         spec = ValidatorSpec(class_path=f"{_MODULE}.assert_non_empty", options={"x": 1})
-        with pytest.raises(ValidationConfigurationError, match="callable"):
+        with pytest.raises(ValidationConfigurationError, match="callable") as exc_info:
             resolve_validator(spec)
+        assert "drop the options" in str(exc_info.value)
+
+    def test_callable_validator_repr_names_the_function(self):
+        spec = ValidatorSpec(class_path=f"{_MODULE}.assert_non_empty")
+        assert "assert_non_empty" in repr(resolve_validator(spec))
 
 
 class TestImportErrors:

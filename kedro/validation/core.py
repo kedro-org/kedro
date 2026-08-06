@@ -33,12 +33,18 @@ _ALLOWED_SPEC_KEYS = (
 _VALID_MODES = ("load", "save")
 _VALID_SEVERITIES = ("error", "warn")
 
+# Bounds that keep a rendered validation error readable no matter how large the
+# validated data is; the full backend report stays available on `__cause__`.
 #: Maximum number of failure examples captured per check.
-MAX_FAILURE_EXAMPLES = 5
+_MAX_FAILURE_EXAMPLES = 5
 #: Maximum number of failed checks rendered by `DataValidationError.__str__`.
 _MAX_RENDERED_FAILURES = 10
 #: Maximum length of a rendered failure example.
 _MAX_EXAMPLE_REPR_LEN = 40
+#: Maximum length of a rendered check name or fallback message.
+_MAX_LABEL_LEN = 200
+#: Maximum length of a rendered column name.
+_MAX_COLUMN_LEN = 60
 #: Maximum length of a rendered fallback message.
 _MAX_MESSAGE_LEN = 500
 
@@ -81,11 +87,11 @@ class CheckFailure:
     index: Any | None = None
 
 
-def _render_example(value: Any) -> str:
-    """Render a failure example value, bounded in length."""
+def _truncate(value: Any, limit: int) -> str:
+    """Render `value` as a string of at most `limit` characters."""
     text = str(value)
-    if len(text) > _MAX_EXAMPLE_REPR_LEN:
-        text = text[: _MAX_EXAMPLE_REPR_LEN - 3] + "..."
+    if len(text) > limit:
+        text = text[: limit - 3] + "..."
     return text
 
 
@@ -123,21 +129,22 @@ class DataValidationError(Exception):
 
     @staticmethod
     def _render_failure(failure: CheckFailure) -> str:
-        """Render one grouped check failure as a single bounded line."""
-        if failure.column and failure.check:
-            label = f"{failure.column}: {failure.check}"
-        elif failure.check:
-            label = failure.check
-        elif failure.column:
-            label = f"{failure.column}: {failure.message}"
+        """Render one grouped check failure as a single bounded line.
+
+        Each part is capped separately so that a long column name still leaves
+        room for the check that failed.
+        """
+        detail = _truncate(failure.check or failure.message, _MAX_LABEL_LEN)
+        if failure.column:
+            label = f"{_truncate(failure.column, _MAX_COLUMN_LEN)}: {detail}"
         else:
-            label = failure.message
+            label = detail
         cases = "case" if failure.failure_count == 1 else "cases"
         line = f"{label} — {failure.failure_count} {cases}"
         if failure.failure_examples:
             examples = ", ".join(
-                _render_example(example)
-                for example in failure.failure_examples[:MAX_FAILURE_EXAMPLES]
+                _truncate(example, _MAX_EXAMPLE_REPR_LEN)
+                for example in failure.failure_examples[:_MAX_FAILURE_EXAMPLES]
             )
             line += f" (e.g. {examples})"
         return line
@@ -149,9 +156,7 @@ class DataValidationError(Exception):
                 header += f" on {self.mode}"
         else:
             header = self.message or "Validation failed"
-        if len(header) > _MAX_MESSAGE_LEN:
-            header = header[: _MAX_MESSAGE_LEN - 3] + "..."
-        lines = [header]
+        lines = [_truncate(header, _MAX_MESSAGE_LEN)]
         if self.validator:
             lines.append(f"(validator: {self.validator})")
         if self.failures:
@@ -166,10 +171,7 @@ class DataValidationError(Exception):
             if hidden > 0:
                 lines.append(f"  ... and {hidden} more check(s)")
         elif self.dataset_name and self.message:
-            message = self.message
-            if len(message) > _MAX_MESSAGE_LEN:
-                message = message[: _MAX_MESSAGE_LEN - 3] + "..."
-            lines.append(message)
+            lines.append(_truncate(self.message, _MAX_MESSAGE_LEN))
         return "\n".join(lines)
 
 
@@ -211,14 +213,14 @@ class ValidatorSpec:
     """
 
     class_path: str
-    on: tuple = ("load", "save")
+    on: tuple[str, ...] = ("load", "save")
     severity: str = "error"
     enabled: bool = True
     skip_load_after_save: bool = False
-    options: dict = field(default_factory=dict)
+    options: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_config(cls, ds_name: str, config: Any) -> ValidatorSpec:
+    def from_dataset_config(cls, ds_name: str, config: Any) -> ValidatorSpec:
         """Build a spec from a catalog `validator:` value.
 
         Accepts a plain string (shorthand class path) or a dictionary
@@ -253,13 +255,25 @@ class ValidatorSpec:
                 f"{type(config).__name__} ({config!r})."
             )
 
-        if True in config:
-            # YAML 1.1 parses an unquoted `on` key as boolean True
-            # (the "Norway problem"). Normalise it back so users can write
-            # `on: [load, save]` without quoting the key.
-            config = {("on" if k is True else k): v for k, v in config.items()}
+        # YAML 1.1 reads an unquoted `on` key as the boolean True, not the
+        # string "on" (https://yaml.org/type/bool.html), so `on: [load, save]`
+        # arrives here as `{True: [...]}`. Map it back so the unquoted form
+        # works. The identity test matters: `True in config` is also satisfied
+        # by an integer key `1`, since `True == 1` and `hash(True) == hash(1)`.
+        if any(key is True for key in config):
+            if "on" in config:
+                raise ValidationConfigurationError(
+                    f"Invalid validator declaration for dataset '{ds_name}': "
+                    f"both an unquoted 'on' key (which YAML reads as the "
+                    f'boolean True) and a quoted "on" key are present, and '
+                    f"only one of them can take effect. Keep a single 'on' key."
+                )
+            config = {("on" if key is True else key): v for key, v in config.items()}
 
-        unknown_keys = sorted(set(config) - set(_ALLOWED_SPEC_KEYS))
+        # Sort by `repr` so the comparison stays total: YAML can supply
+        # non-string keys (e.g. `1:`, or an unquoted `off:` which reads as the
+        # boolean False), which are not orderable against string keys.
+        unknown_keys = sorted(set(config) - set(_ALLOWED_SPEC_KEYS), key=repr)
         if unknown_keys:
             raise ValidationConfigurationError(
                 f"Invalid validator declaration for dataset '{ds_name}': "
@@ -299,12 +313,17 @@ class ValidatorSpec:
                     f"got {type(config[flag_name]).__name__}."
                 )
 
+        enabled = config.get("enabled", True)
+        skip_load_after_save = config.get("skip_load_after_save", False)
+
         return cls(
             class_path=class_path,
             on=on,
             severity=severity,
-            enabled=config.get("enabled", True),
-            skip_load_after_save=config.get("skip_load_after_save", False),
+            enabled=enabled,
+            skip_load_after_save=skip_load_after_save,
+            # Copy so the spec never aliases the catalog configuration it was
+            # parsed from, and cannot mutate it later through `options`.
             options=dict(options),
         )
 
@@ -347,12 +366,15 @@ class CallableValidator:
         result = self._func(data)
         return data if result is None else result
 
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({self._func!r})"
+
 
 def _import_error_hint(missing: str) -> str:
     """Build a hint for a failed validator import.
 
-    `missing` is the module or attribute name the import machinery reported
-    as unresolvable (empty when unavailable).
+    `missing` is the module or attribute name that Python reported as
+    unresolvable when the import failed (empty when it reported none).
     """
     if missing == "pandera" or (
         missing.startswith("pandera.") and importlib.util.find_spec("pandera") is None
@@ -438,8 +460,8 @@ def resolve_validator(spec: ValidatorSpec) -> Validator:
         if spec.options:
             raise ValidationConfigurationError(
                 f"Validator '{spec.class_path}' is an instance and cannot "
-                f"accept options {sorted(spec.options)}; declare a class "
-                f"path instead or drop the options."
+                f"accept options {sorted(spec.options, key=repr)}; declare a "
+                f"class path instead or drop the options."
             )
         return obj
 
@@ -447,7 +469,9 @@ def resolve_validator(spec: ValidatorSpec) -> Validator:
         if spec.options:
             raise ValidationConfigurationError(
                 f"Validator '{spec.class_path}' is a plain callable and "
-                f"cannot accept options {sorted(spec.options)}."
+                f"cannot accept options {sorted(spec.options, key=repr)}; "
+                f"declare a validator class that takes them as constructor "
+                f"arguments, or drop the options."
             )
         return CallableValidator(obj)
 

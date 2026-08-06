@@ -51,6 +51,21 @@ class UppercasingValidator:
         return data
 
 
+class FalsyValidator:
+    """Pass-through validator that is falsy, and counts how often it is built."""
+
+    instances = 0
+
+    def __init__(self):
+        type(self).instances += 1
+
+    def __bool__(self):
+        return False
+
+    def validate(self, data):
+        return data
+
+
 @pytest.fixture
 def valid_df():
     return pd.DataFrame({"id": [1, 2, 3], "company_rating": [0.5, 2.0, 10.0]})
@@ -302,6 +317,19 @@ class TestSkipLoadAfterSave:
         catalog.load("companies")
 
         assert catalog._validators["companies"].calls == 2
+
+
+class TestValidatorCaching:
+    def test_validator_is_resolved_once_per_dataset(self, csv_path, valid_df):
+        valid_df.to_csv(csv_path, index=False)
+        FalsyValidator.instances = 0
+        catalog = make_catalog(csv_path, validator=f"{_MODULE}.FalsyValidator")
+
+        for _ in range(3):
+            catalog.load("companies")
+
+        # A validator is free to define __bool__; caching must not depend on it.
+        assert FalsyValidator.instances == 1
 
 
 class TestSpecLifecycle:

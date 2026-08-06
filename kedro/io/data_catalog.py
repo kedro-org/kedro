@@ -1198,9 +1198,11 @@ class DataCatalog(CatalogProtocol):
 
         from kedro.validation.core import DataValidationError, resolve_validator
 
-        validator = self._validators.get(ds_name) or self._validators.setdefault(
-            ds_name, resolve_validator(spec)
-        )
+        validator = self._validators.get(ds_name)
+        if validator is None:
+            # `setdefault` so that callers racing on the first use of a dataset
+            # all end up with the same validator instance.
+            validator = self._validators.setdefault(ds_name, resolve_validator(spec))
 
         try:
             validated = validator.validate(data)

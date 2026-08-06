@@ -915,7 +915,7 @@ class DataCatalog(CatalogProtocol):
         if isinstance(ds_config, dict) and VALIDATOR_KEY in ds_config:
             from kedro.validation.core import ValidatorSpec
 
-            validator_spec = ValidatorSpec.from_config(
+            validator_spec = ValidatorSpec.from_dataset_config(
                 ds_name, ds_config[VALIDATOR_KEY]
             )
             # Build a cleaned copy so the validator key never reaches the

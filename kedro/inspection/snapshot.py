@@ -81,9 +81,10 @@ def _resolve_node_source(
         func: The node's underlying callable.
         resolved_project_path: Absolute, resolved path to the project root.
 
-    Returns ``None`` when the location cannot be determined (for example,
-    lambdas, ``functools.partial``, built-ins, unreadable source files, or
-    files outside the project root).
+    Returns:
+        Source location metadata, or ``None`` when the location cannot be
+        determined (for example, lambdas, ``functools.partial``, built-ins,
+        unreadable source files, or files outside the project root).
     """
     if (
         isinstance(func, partial)

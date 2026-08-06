@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import logging
+import types
+
 import pandas as pd
 import pandera.errors as pa_errors
 import pandera.pandas as pa
@@ -283,6 +286,69 @@ class TestErrorRenderingEdgeCases:
         assert text.startswith("Validation failed for dataset 'ds'")
         assert text.endswith("...")
 
+    @pytest.mark.parametrize(
+        "failure",
+        [
+            CheckFailure(message="m", check="c" * 5000, column="col"),
+            CheckFailure(message="m", check="c" * 5000),
+            CheckFailure(message="m" * 5000, column="col"),
+            CheckFailure(message="m" * 5000),
+            CheckFailure(message="m", check="c", column="col" * 5000),
+        ],
+        ids=["column+check", "check", "column+message", "message", "long-column"],
+    )
+    def test_every_rendered_line_is_bounded(self, failure):
+        # A check name can carry a whole allowed-value list (e.g. isin([...]))
+        # and a message can carry a backend report.
+        text = str(DataValidationError("boom", dataset_name="ds", failures=[failure]))
+        assert all(len(line) < 300 for line in text.splitlines())
+
+    def test_long_column_does_not_crowd_out_the_check(self):
+        failure = CheckFailure(message="m", check="the_check", column="c" * 5000)
+        text = str(DataValidationError("boom", dataset_name="ds", failures=[failure]))
+        assert "the_check" in text
+
+
+class TestFailuresWithoutCheckName:
+    """Not every pandera failure names a check (e.g. a mismatched index)."""
+
+    @staticmethod
+    def _failures(records):
+        from kedro.validation.pandera_validator import _failures_from_schema_errors
+
+        return _failures_from_schema_errors(
+            types.SimpleNamespace(failure_cases=records)
+        )
+
+    @pytest.mark.parametrize("check", [None, float("nan")], ids=["none", "nan"])
+    def test_column_failure_without_check_uses_fallback_wording(self, check):
+        record = {"column": "a", "failure_case": 1}
+        if check is not None:
+            record["check"] = check
+        (failure,) = self._failures([record])
+        assert failure.check is None
+        assert failure.message == "Schema validation failed for column 'a'"
+        assert "None" not in failure.message and "nan" not in failure.message
+
+    def test_dataframe_failure_without_check_uses_fallback_wording(self):
+        (failure,) = self._failures([{"failure_case": 1}])
+        assert failure.message == "Schema validation failed for dataframe"
+
+    def test_named_check_still_reported_normally(self):
+        (failure,) = self._failures([{"column": "a", "check": "gt(0)"}])
+        assert failure.message == "Check 'gt(0)' failed for column 'a'"
+
+
+class TestReprs:
+    def test_pandera_validator_repr_names_the_schema(self):
+        assert repr(PanderaValidator(CompaniesSchema)) == (
+            f"PanderaValidator({CompaniesSchema.__module__}.CompaniesSchema)"
+        )
+
+    def test_pandera_validator_repr_for_schema_instance(self):
+        text = repr(PanderaValidator(pa.DataFrameSchema({})))
+        assert text.startswith("PanderaValidator(") and "DataFrameSchema" in text
+
 
 class TestFailureCaseRecords:
     def test_none_returns_empty(self):
@@ -327,14 +393,14 @@ class TestFailureCaseRecords:
         assert _failure_cases_records(object()) == []
 
 
-class TestCleanColumn:
+class TestCleanCell:
     def test_variants(self):
-        from kedro.validation.pandera_validator import _clean_column
+        from kedro.validation.pandera_validator import _clean_cell
 
-        assert _clean_column(None) is None
-        assert _clean_column(float("nan")) is None
-        assert _clean_column("col") == "col"
-        assert _clean_column(5) == "5"
+        assert _clean_cell(None) is None
+        assert _clean_cell(float("nan")) is None
+        assert _clean_cell("col") == "col"
+        assert _clean_cell(5) == "5"
 
 
 def test_failures_from_error_without_failure_cases():
@@ -440,7 +506,7 @@ class TestPysparkAndLazyframePaths:
         with pytest.raises(DataValidationError, match="SCHEMA"):
             validator.validate(object())
 
-    def test_validate_pyspark_returns_output_when_no_errors(self, monkeypatch):
+    def test_validate_pyspark_returns_output_when_no_errors(self, monkeypatch, caplog):
         import types
 
         validator = PanderaValidator(CompaniesSchema)
@@ -449,7 +515,48 @@ class TestPysparkAndLazyframePaths:
             validator, "_schema", types.SimpleNamespace(validate=lambda data: out)
         )
 
-        assert validator._validate_pyspark(object()) is out
+        with caplog.at_level(logging.WARNING):
+            assert validator._validate_pyspark(object()) is out
+        assert not caplog.records
+
+    @pytest.mark.parametrize(
+        "out_factory",
+        [
+            lambda types_: types_.SimpleNamespace(),
+            lambda types_: types_.SimpleNamespace(pandera=types_.SimpleNamespace()),
+        ],
+        ids=["no-accessor", "accessor-without-errors"],
+    )
+    def test_validate_pyspark_raises_when_report_cannot_be_read(
+        self, monkeypatch, out_factory
+    ):
+        # Without a report, the data cannot be claimed valid.
+        import types
+
+        validator = PanderaValidator(CompaniesSchema)
+        out = out_factory(types)
+        monkeypatch.setattr(
+            validator, "_schema", types.SimpleNamespace(validate=lambda data: out)
+        )
+
+        with pytest.raises(ValidationConfigurationError, match="pandera.errors"):
+            validator._validate_pyspark(object())
+
+    def test_validate_pyspark_warns_when_validation_is_disabled(
+        self, monkeypatch, caplog
+    ):
+        # pandera returns a report of None when validation is switched off.
+        import types
+
+        validator = PanderaValidator(CompaniesSchema)
+        out = types.SimpleNamespace(pandera=types.SimpleNamespace(errors=None))
+        monkeypatch.setattr(
+            validator, "_schema", types.SimpleNamespace(validate=lambda data: out)
+        )
+
+        with caplog.at_level(logging.WARNING):
+            assert validator._validate_pyspark(object()) is out
+        assert "not validated" in caplog.text
 
 
 def test_header_includes_mode_when_set():

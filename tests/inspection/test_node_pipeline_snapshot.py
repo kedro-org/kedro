@@ -152,6 +152,22 @@ class TestResolveNodeSource:
         )
         assert _resolve_node_source(_identity, project_path) is None
 
+    def test_returns_none_for_callable_class_instance(self, project_path):
+        """Callable class instances are valid Node funcs but have no resolvable source."""
+        source = (
+            "class Processor:\n" "    def __call__(self, x):\n" "        return x\n"
+        )
+        nodes_file = project_path / "src" / "pkg" / "nodes.py"
+        nodes_file.parent.mkdir(parents=True)
+        nodes_file.write_text(source)
+
+        spec = importlib.util.spec_from_file_location("nodes", nodes_file)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        processor = module.Processor()
+
+        assert _resolve_node_source(processor, project_path) is None
+
     def test_filepath_is_project_relative_when_inside_project(self, project_path):
         expected_source = "def my_func(x):\n    return x\n"
         func = _load_func_from_project(project_path, expected_source, "my_func")

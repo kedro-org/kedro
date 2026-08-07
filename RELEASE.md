@@ -16,6 +16,7 @@
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [eeshsaxena](https://github.com/eeshsaxena)
+* [Versus-DEV](https://github.com/Versus-DEV)
 * [Shizoqua](https://github.com/Shizoqua)
 * [BALOGUN DAVID TAIWO](https://github.com/BALOGUN-DAVID)
 

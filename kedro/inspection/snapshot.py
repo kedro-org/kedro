@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import inspect
 import re
 import warnings
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -18,6 +20,7 @@ from kedro.inspection.helper import (
 from kedro.inspection.models import (
     DatasetSnapshot,
     NodeSnapshot,
+    NodeSourceSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
     ProjectSnapshot,
@@ -68,11 +71,64 @@ def _build_dataset_snapshots(
     }
 
 
-def _node_to_snapshot(node: Node) -> NodeSnapshot:
+def _resolve_node_source(
+    func: Any,
+    resolved_project_path: Path,
+) -> NodeSourceSnapshot | None:
+    """Resolve source location metadata for a node's underlying function.
+
+    Args:
+        func: The node's underlying callable.
+        resolved_project_path: Absolute, resolved path to the project root.
+
+    Returns:
+        Source location metadata, or ``None`` when the location cannot be
+        determined (for example, lambdas, ``functools.partial``, built-ins,
+        unreadable source files, or files outside the project root).
+    """
+    if (
+        isinstance(func, partial)
+        or inspect.isbuiltin(func)
+        or getattr(func, "__name__", None) == "<lambda>"
+    ):
+        return None
+
+    func = inspect.unwrap(func)
+
+    try:
+        source_file = inspect.getsourcefile(func)
+    except (OSError, TypeError):
+        return None
+
+    if source_file is None:
+        return None
+
+    resolved_path = Path(source_file).resolve()
+    if not resolved_path.is_relative_to(resolved_project_path):
+        return None
+
+    filepath = resolved_path.relative_to(resolved_project_path).as_posix()
+
+    try:
+        source_lines, line_start = inspect.getsourcelines(func)
+    except (OSError, TypeError):
+        return None
+
+    line_end = line_start + len(source_lines) - 1
+
+    return NodeSourceSnapshot(
+        filepath=filepath,
+        line_start=line_start,
+        line_end=line_end,
+    )
+
+
+def _node_to_snapshot(node: Node, resolved_project_path: Path) -> NodeSnapshot:
     """Convert a live ``Node`` object to a ``NodeSnapshot``.
 
     Args:
         node: A Kedro pipeline node.
+        resolved_project_path: Absolute, resolved path to the project root.
 
     Returns:
         Read-only snapshot of the node's structural metadata.
@@ -84,21 +140,25 @@ def _node_to_snapshot(node: Node) -> NodeSnapshot:
         tags=sorted(node.tags),
         inputs=node.inputs,
         outputs=node.outputs,
+        source=_resolve_node_source(node.func, resolved_project_path),
     )
 
 
 def _build_pipeline_snapshots(
     pipeline_dict: dict[str, Any],
+    project_path: Path,
 ) -> list[PipelineSnapshot]:
     """Build a ``PipelineSnapshot`` for every registered pipeline.
 
     Args:
         pipeline_dict: Dictionary of pipeline name to ``Pipeline`` object,
             as returned by ``dict(kedro.framework.project.pipelines)``.
+        project_path: Absolute path to the project root directory.
 
     Returns:
         List of pipeline snapshots in registry iteration order.
     """
+    resolved_project_path = project_path.resolve()
     snapshots = []
     for pipeline_id, pipeline in pipeline_dict.items():
         if pipeline is None:
@@ -106,7 +166,10 @@ def _build_pipeline_snapshots(
         snapshots.append(
             PipelineSnapshot(
                 name=pipeline_id,
-                nodes=[_node_to_snapshot(_node) for _node in pipeline.nodes],
+                nodes=[
+                    _node_to_snapshot(_node, resolved_project_path)
+                    for _node in pipeline.nodes
+                ],
                 inputs=sorted(pipeline.inputs()),
                 outputs=sorted(pipeline.outputs()),
             )
@@ -177,7 +240,9 @@ def _build_project_snapshot(
         conf_catalog = {}
 
     metadata_snapshot = _build_project_metadata_snapshot(metadata)
-    pipeline_snapshots = _build_pipeline_snapshots(dict(pipelines))
+    pipeline_snapshots = _build_pipeline_snapshots(
+        dict(pipelines), effective_project_path
+    )
     dataset_snapshots = _build_dataset_snapshots(conf_catalog)
 
     # resolve factory patterns

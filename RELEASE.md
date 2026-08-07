@@ -2,6 +2,7 @@
 ## Major features and improvements
 * Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
 * Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
+* Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
 
 ## Bug fixes and other changes
 * Fixed a `RecursionError` when initialising a session with dynaconf-backed settings by converting `settings.SESSION_STORE_ARGS` to a plain `dict` before deepcopying it.

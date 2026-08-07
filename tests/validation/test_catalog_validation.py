@@ -15,6 +15,7 @@ import pandera.pandas as pa
 import pytest
 
 from kedro.io import AbstractDataset, DataCatalog
+from kedro.io.core import DatasetError
 from kedro.validation import (
     DataValidationError,
     ValidationConfigurationError,
@@ -318,6 +319,28 @@ class TestSkipLoadAfterSave:
 
         assert catalog._validators["companies"].calls == 2
 
+    def test_failed_write_does_not_skip_next_load_validation(
+        self, csv_path, valid_df, monkeypatch
+    ):
+        # the file on disk is one a later load will actually read
+        valid_df.to_csv(csv_path, index=False)
+        catalog = self._counting_catalog(csv_path, skip_load_after_save=True)
+
+        dataset = catalog["companies"]
+        monkeypatch.setattr(
+            dataset,
+            "save",
+            lambda data: (_ for _ in ()).throw(DatasetError("disk full")),
+        )
+        with pytest.raises(DatasetError, match="disk full"):
+            catalog.save("companies", valid_df)
+
+        assert "companies" not in catalog._save_validated
+        catalog.load("companies")
+        # save validated once, then the load validated again because the
+        # validated data never reached storage
+        assert catalog._validators["companies"].calls == 2
+
 
 class TestValidatorCaching:
     def test_validator_is_resolved_once_per_dataset(self, csv_path, valid_df):
@@ -457,6 +480,10 @@ class TestPickling:
             restored.save("companies", invalid)
 
 
+def _raise_bare_validation_error(data):
+    raise DataValidationError("business rule failed")
+
+
 def _raise_value_error(data):
     """Module-level validator callable that raises a plain exception."""
     raise ValueError("plain failure from a custom validator")
@@ -480,3 +507,17 @@ class TestGenericExceptionWrapping:
         with pytest.raises(DataValidationError, match="cars") as exc_info:
             catalog.load("cars")
         assert isinstance(exc_info.value.__cause__, ValueError)
+
+
+class TestValidatorAttribution:
+    def test_bare_validation_error_gets_validator_path(self, csv_path, valid_df):
+        valid_df.to_csv(csv_path, index=False)
+        catalog = make_catalog(
+            csv_path, validator=f"{_MODULE}._raise_bare_validation_error"
+        )
+
+        with pytest.raises(DataValidationError) as exc_info:
+            catalog.load("companies")
+
+        assert exc_info.value.validator == f"{_MODULE}._raise_bare_validation_error"
+        assert "(validator:" in str(exc_info.value)

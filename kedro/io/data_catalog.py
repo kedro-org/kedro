@@ -1089,6 +1089,9 @@ class DataCatalog(CatalogProtocol):
         try:
             dataset.save(validated)
         except DatasetError as e:
+            # The validated data never reached storage, so the on-disk state
+            # is unknown; the next load must validate again.
+            self._save_validated.discard(ds_name)
             raise DatasetError(f"{ds_name}: {e}") from e
 
     def load(self, ds_name: str, version: str | None = None) -> Any:
@@ -1209,6 +1212,8 @@ class DataCatalog(CatalogProtocol):
         except DataValidationError as exc:
             exc.dataset_name = ds_name
             exc.mode = mode
+            if exc.validator is None:
+                exc.validator = spec.class_path
             if spec.severity == "warn":
                 self._logger.warning(str(exc))
                 return data

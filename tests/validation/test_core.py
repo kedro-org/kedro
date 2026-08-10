@@ -89,6 +89,12 @@ class RejectingValidator:
         return data
 
 
+class NonCallableValidate:
+    """`validate` exists but is not callable."""
+
+    validate = None
+
+
 class NotItsOwnInstance:
     """Defines `validate` on the class but constructs something else."""
 
@@ -180,6 +186,11 @@ class TestCustomClassResolution:
 
     def test_class_without_validate_method_rejected_before_construction(self):
         spec = ValidatorSpec(class_path=f"{_MODULE}.NoValidateMethod")
+        with pytest.raises(ValidationConfigurationError, match="validate"):
+            resolve_validator(spec)
+
+    def test_non_callable_validate_attribute_rejected(self):
+        spec = ValidatorSpec(class_path=f"{_MODULE}.NonCallableValidate")
         with pytest.raises(ValidationConfigurationError, match="validate"):
             resolve_validator(spec)
 

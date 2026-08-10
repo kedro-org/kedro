@@ -320,7 +320,7 @@ def resolve_validator(spec: ValidatorSpec) -> Validator:
     if inspect.isclass(obj):
         # Reject before constructing anything: instantiating an arbitrary
         # class just to discover it is not a validator can have side effects.
-        if not hasattr(obj, "validate"):
+        if not callable(getattr(obj, "validate", None)):
             raise ValidationConfigurationError(
                 f"Validator '{spec.class_path}' resolved to class "
                 f"{obj.__name__}, which does not provide a 'validate(data)' "

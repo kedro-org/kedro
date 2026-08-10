@@ -13,6 +13,7 @@ is deliberately not referenced.
 
 from __future__ import annotations
 
+import functools
 import inspect
 import logging
 import math
@@ -30,6 +31,43 @@ logger = logging.getLogger(__name__)
 #: Sentinel separating "pandera reported no errors" from "there is no pandera
 #: report to read".
 _NO_REPORT = object()
+
+
+@functools.lru_cache(maxsize=1)
+def _pyspark_dataframe_type() -> type | None:
+    """Resolve the pyspark DataFrame class once.
+
+    Returns `None` when pyspark or pandera's pyspark backend is not
+    installed. Memoised because this sits on the catalog load/save path.
+    """
+    try:
+        import pandera.pyspark  # noqa: F401
+        from pyspark.sql import DataFrame as _SparkDataFrame
+    except ImportError:  # pragma: no cover (depends on installed backends)
+        return None
+    return cast("type", _SparkDataFrame)
+
+
+@functools.lru_cache(maxsize=1)
+def _polars_lazyframe_type() -> type | None:
+    """Resolve the polars LazyFrame class once.
+
+    Returns `None` when polars is not installed. Memoised because this sits
+    on the catalog load/save path.
+    """
+    try:
+        import polars as pl
+    except ImportError:  # pragma: no cover (depends on installed backends)
+        return None
+    return cast("type", pl.LazyFrame)
+
+
+@functools.lru_cache(maxsize=1)
+def _pandera_errors() -> Any:
+    """Import `pandera.errors` once instead of on every validation call."""
+    import pandera.errors
+
+    return pandera.errors
 
 
 def _is_pandera_model(cls: Any) -> bool:
@@ -260,13 +298,9 @@ class PanderaValidator:
         return f"{target.__module__}.{target.__qualname__}"
 
     def _is_pyspark_dataframe(self, data: Any) -> bool:
-        """Check whether `data` is a pyspark DataFrame (guarded imports)."""
-        try:
-            import pandera.pyspark  # noqa: F401
-            from pyspark.sql import DataFrame as _SparkDataFrame
-        except ImportError:  # pragma: no cover (depends on installed backends)
-            return False
-        return isinstance(data, _SparkDataFrame)
+        """Check whether `data` is a pyspark DataFrame."""
+        spark_frame_type = _pyspark_dataframe_type()
+        return spark_frame_type is not None and isinstance(data, spark_frame_type)
 
     def _maybe_warn_lazyframe(self, data: Any) -> None:
         """Log a one-time warning when validating a polars `LazyFrame`.
@@ -277,11 +311,10 @@ class PanderaValidator:
         """
         if self._lazyframe_warned:
             return
-        try:
-            import polars as pl
-        except ImportError:  # pragma: no cover (depends on installed backends)
+        lazyframe_type = _polars_lazyframe_type()
+        if lazyframe_type is None:
             return
-        if isinstance(data, pl.LazyFrame):
+        if isinstance(data, lazyframe_type):
             self._lazyframe_warned = True
             logger.warning(
                 "Validating a polars LazyFrame with pandera: validation depth "
@@ -346,7 +379,7 @@ class PanderaValidator:
 
         self._maybe_warn_lazyframe(data)
 
-        import pandera.errors as pa_errors
+        pa_errors = _pandera_errors()
 
         kwargs: dict[str, Any] = {"lazy": self._lazy}
         for name, value in (

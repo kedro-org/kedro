@@ -363,6 +363,18 @@ class TestOptionalBackendDetection:
 
 
 class TestPysparkAndLazyframePaths:
+    @pytest.fixture(autouse=True)
+    def _reset_optional_type_caches(self):
+        # the memoised type lookups must re-run under this class's fake modules,
+        # and must not leak the fakes into other tests
+        from kedro.validation import pandera_validator as pv
+
+        pv._pyspark_dataframe_type.cache_clear()
+        pv._polars_lazyframe_type.cache_clear()
+        yield
+        pv._pyspark_dataframe_type.cache_clear()
+        pv._polars_lazyframe_type.cache_clear()
+
     def test_is_pyspark_dataframe_with_fake_modules(self, monkeypatch):
         import sys
         import types

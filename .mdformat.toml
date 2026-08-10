@@ -1,0 +1,8 @@
+# Numbered steps in tutorials/deployment guides use sequential numbering
+# (1, 2, 3...) rather than mdformat's default lazy "1." for every item --
+# easier to scan, review in diffs, and edit. See:
+# https://mdformat.readthedocs.io/en/stable/users/style.html#ordered-lists
+number = true
+
+# Don't reflow prose; only normalise Markdown syntax.
+wrap = "keep"

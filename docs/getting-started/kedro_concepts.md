@@ -6,11 +6,10 @@ You may prefer to skip to the next section to [create a Kedro project for hands-
 
 ## Summary
 
-* Kedro nodes are the building blocks of pipelines. A node is a wrapper for a Python function that names the inputs and outputs of that function.
-* A pipeline organises the dependencies and execution order of a collection of nodes.
-* Kedro has a registry of all data sources the project can use called the Data Catalog. There is inbuilt support for various file types and file systems.
-* Kedro projects follow a default template that uses specific folders to store datasets, notebooks, configuration and source code.
-
+- Kedro nodes are the building blocks of pipelines. A node is a wrapper for a Python function that names the inputs and outputs of that function.
+- A pipeline organises the dependencies and execution order of a collection of nodes.
+- Kedro has a registry of all data sources the project can use called the Data Catalog. There is inbuilt support for various file types and file systems.
+- Kedro projects follow a default template that uses specific folders to store datasets, notebooks, configuration and source code.
 
 ## Node
 
@@ -119,9 +118,9 @@ Use the `base` subfolder for project-specific settings to share across different
 
 The folder contains three files for the example, but you can add others as you require:
 
--   `catalog.yml` - [Configures the Data Catalog](../catalog-data/data_catalog.md#use-the-data-catalog-within-kedro-configuration) with the file paths and load/save configuration needed for different datasets
--   `logging.yml` - Uses Python's default [`logging`](https://docs.python.org/3/library/logging.html) library to set up logging. Kedro adds this file when the Log tool is selected.
--   `parameters.yml` - Allows you to define parameters for machine learning experiments, for example, train/test split and the number of iterations
+- `catalog.yml` - [Configures the Data Catalog](../catalog-data/data_catalog.md#use-the-data-catalog-within-kedro-configuration) with the file paths and load/save configuration needed for different datasets
+- `logging.yml` - Uses Python's default [`logging`](https://docs.python.org/3/library/logging.html) library to set up logging. Kedro adds this file when the Log tool is selected.
+- `parameters.yml` - Allows you to define parameters for machine learning experiments, for example, train/test split and the number of iterations
 
 #### `conf/local`
 

@@ -18,7 +18,7 @@ import logging
 import math
 from typing import Any, cast
 
-from kedro.validation.core import (
+from kedro.validation.exceptions import (
     _MAX_FAILURE_EXAMPLES,
     CheckFailure,
     DataValidationError,
@@ -101,14 +101,20 @@ def pandera_adapter(obj: Any, options: dict) -> PanderaValidator | None:
     """
     if not (_is_pandera_model(obj) or _is_pandera_schema_instance(obj)):
         return None
-    try:
-        return PanderaValidator(obj, **options)
-    except TypeError as exc:
+    # Derived from the signature so the message cannot drift from the code.
+    supported = [
+        name
+        for name in inspect.signature(PanderaValidator.__init__).parameters
+        if name not in ("self", "schema")
+    ]
+    unknown = sorted(set(options) - set(supported), key=repr)
+    if unknown:
         name = getattr(obj, "__name__", type(obj).__name__)
         raise ValidationConfigurationError(
-            f"Unsupported option(s) for pandera validator '{name}': {exc}. "
-            f"Supported options: lazy, head, tail, sample, random_state."
-        ) from exc
+            f"Unsupported option(s) {unknown} for pandera validator '{name}'. "
+            f"Supported options: {', '.join(supported)}."
+        )
+    return PanderaValidator(obj, **options)
 
 
 def _failure_cases_records(failure_cases: Any) -> list[dict]:
@@ -167,14 +173,10 @@ def _failures_from_schema_errors(exc: Exception) -> list[CheckFailure]:
     for record in records:
         column = _clean_cell(record.get("column"))
         check = _clean_cell(record.get("check"))
-        group = grouped.setdefault(
-            (column, check), {"count": 0, "examples": [], "index": None}
-        )
+        group = grouped.setdefault((column, check), {"count": 0, "examples": []})
         group["count"] += 1
         if len(group["examples"]) < _MAX_FAILURE_EXAMPLES:
             group["examples"].append(record.get("failure_case"))
-        if group["index"] is None:
-            group["index"] = record.get("index")
 
     failures = []
     for (column, check), group in grouped.items():
@@ -193,7 +195,6 @@ def _failures_from_schema_errors(exc: Exception) -> list[CheckFailure]:
                 column=column,
                 failure_count=group["count"],
                 failure_examples=group["examples"],
-                index=group["index"],
             )
         )
     return failures
@@ -211,7 +212,6 @@ def _failure_from_schema_error(exc: Exception) -> CheckFailure:
         failure_examples=[
             record.get("failure_case") for record in records[:_MAX_FAILURE_EXAMPLES]
         ],
-        index=records[0].get("index") if records else None,
     )
 
 
@@ -264,7 +264,7 @@ class PanderaValidator:
         try:
             import pandera.pyspark  # noqa: F401
             from pyspark.sql import DataFrame as _SparkDataFrame
-        except ImportError:
+        except ImportError:  # pragma: no cover (depends on installed backends)
             return False
         return isinstance(data, _SparkDataFrame)
 
@@ -279,7 +279,7 @@ class PanderaValidator:
             return
         try:
             import polars as pl
-        except ImportError:
+        except ImportError:  # pragma: no cover (depends on installed backends)
             return
         if isinstance(data, pl.LazyFrame):
             self._lazyframe_warned = True

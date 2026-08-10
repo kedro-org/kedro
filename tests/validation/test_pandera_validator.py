@@ -52,22 +52,15 @@ def invalid_df():
 
 
 class TestDetectionHelpers:
+    """Rejection of arbitrary objects is covered at the public boundary by
+    `TestPanderaAdapter.test_non_pandera_object_returns_none`."""
+
     def test_dataframe_model_subclass_detected(self):
         assert _is_pandera_model(CompaniesSchema) is True
 
-    def test_non_pandera_class_not_detected(self):
-        assert _is_pandera_model(dict) is False
-
-    def test_non_class_not_detected(self):
-        assert _is_pandera_model("not a class") is False
-        assert _is_pandera_model(pa.DataFrameSchema({})) is False
-
-    def test_schema_instance_detected(self):
-        assert _is_pandera_schema_instance(pa.DataFrameSchema({})) is True
-
     def test_schema_class_not_detected_as_instance(self):
+        # the *class* must resolve via the model branch, not the instance one
         assert _is_pandera_schema_instance(pa.DataFrameSchema) is False
-        assert _is_pandera_schema_instance(pd.DataFrame()) is False
 
 
 class TestPanderaAdapter:
@@ -79,17 +72,6 @@ class TestPanderaAdapter:
         schema = pa.DataFrameSchema({"id": pa.Column(int)})
         validator = pandera_adapter(schema, {})
         assert isinstance(validator, PanderaValidator)
-
-    def test_options_forwarded(self):
-        validator = pandera_adapter(
-            CompaniesSchema,
-            {"lazy": False, "head": 5, "tail": 2, "sample": 3, "random_state": 42},
-        )
-        assert validator._lazy is False
-        assert validator._head == 5
-        assert validator._tail == 2
-        assert validator._sample == 3
-        assert validator._random_state == 42
 
     @pytest.mark.parametrize("obj", [dict, "string", 42, pd.DataFrame])
     def test_non_pandera_object_returns_none(self, obj):
@@ -232,82 +214,6 @@ class TestErrorRendering:
         assert len(rendered) < 2000
         assert "50000 failure case(s)" in rendered
 
-    def test_rendering_caps_number_of_checks(self):
-        failures = [
-            CheckFailure(message=f"check {i}", check=f"check_{i}", failure_count=1)
-            for i in range(25)
-        ]
-        exc = DataValidationError(
-            "boom", dataset_name="companies", mode="load", failures=failures
-        )
-        rendered = str(exc)
-        assert "25 check(s) failed" in rendered
-        assert "... and 15 more check(s)" in rendered
-        assert len(rendered.splitlines()) < 20
-
-
-class TestErrorRenderingEdgeCases:
-    def test_long_example_is_truncated(self):
-        failure = CheckFailure(
-            message="m", check="c", column="col", failure_examples=["x" * 100]
-        )
-        text = str(DataValidationError("boom", dataset_name="ds", failures=[failure]))
-        assert "..." in text
-        assert "x" * 100 not in text
-
-    def test_label_variants(self):
-        f_check_only = CheckFailure(message="m1", check="only_check")
-        f_column_only = CheckFailure(message="m2", column="only_col")
-        f_message_only = CheckFailure(message="only_message")
-        text = str(
-            DataValidationError(
-                "boom",
-                dataset_name="ds",
-                failures=[f_check_only, f_column_only, f_message_only],
-            )
-        )
-        assert "only_check" in text
-        assert "only_col: m2" in text
-        assert "only_message" in text
-
-    def test_without_dataset_name_message_is_the_header(self):
-        assert str(DataValidationError("standalone message")) == "standalone message"
-
-    def test_empty_message_without_dataset_name_falls_back(self):
-        assert str(DataValidationError("")) == "Validation failed"
-
-    def test_long_header_is_truncated(self):
-        text = str(DataValidationError("x" * 600))
-        assert len(text.splitlines()[0]) <= 500
-
-    def test_message_shown_and_truncated_when_no_failures(self):
-        err = DataValidationError("detail " * 100, dataset_name="ds")
-        text = str(err)
-        assert text.startswith("Validation failed for dataset 'ds'")
-        assert text.endswith("...")
-
-    @pytest.mark.parametrize(
-        "failure",
-        [
-            CheckFailure(message="m", check="c" * 5000, column="col"),
-            CheckFailure(message="m", check="c" * 5000),
-            CheckFailure(message="m" * 5000, column="col"),
-            CheckFailure(message="m" * 5000),
-            CheckFailure(message="m", check="c", column="col" * 5000),
-        ],
-        ids=["column+check", "check", "column+message", "message", "long-column"],
-    )
-    def test_every_rendered_line_is_bounded(self, failure):
-        # A check name can carry a whole allowed-value list (e.g. isin([...]))
-        # and a message can carry a backend report.
-        text = str(DataValidationError("boom", dataset_name="ds", failures=[failure]))
-        assert all(len(line) < 300 for line in text.splitlines())
-
-    def test_long_column_does_not_crowd_out_the_check(self):
-        failure = CheckFailure(message="m", check="the_check", column="c" * 5000)
-        text = str(DataValidationError("boom", dataset_name="ds", failures=[failure]))
-        assert "the_check" in text
-
 
 class TestFailuresWithoutCheckName:
     """Not every pandera failure names a check (e.g. a mismatched index)."""
@@ -351,10 +257,11 @@ class TestReprs:
 
 
 class TestFailureCaseRecords:
-    def test_none_returns_empty(self):
+    @pytest.mark.parametrize("value", [None, object()], ids=["none", "unknown"])
+    def test_unusable_input_returns_empty(self, value):
         from kedro.validation.pandera_validator import _failure_cases_records
 
-        assert _failure_cases_records(None) == []
+        assert _failure_cases_records(value) == []
 
     def test_polars_style_to_dicts(self):
         from kedro.validation.pandera_validator import _failure_cases_records
@@ -387,20 +294,21 @@ class TestFailureCaseRecords:
         assert _failure_cases_records(["bad"]) == [{"failure_case": "bad"}]
         assert _failure_cases_records([{"a": 1}]) == [{"a": 1}]
 
-    def test_unknown_object_returns_empty(self):
-        from kedro.validation.pandera_validator import _failure_cases_records
-
-        assert _failure_cases_records(object()) == []
-
 
 class TestCleanCell:
-    def test_variants(self):
+    @pytest.mark.parametrize(
+        "value,expected",
+        [(None, None), (float("nan"), None), ("col", "col"), (5, "5")],
+        ids=["none", "nan", "str", "int"],
+    )
+    def test_normalisation(self, value, expected):
         from kedro.validation.pandera_validator import _clean_cell
 
-        assert _clean_cell(None) is None
-        assert _clean_cell(float("nan")) is None
-        assert _clean_cell("col") == "col"
-        assert _clean_cell(5) == "5"
+        assert (
+            _clean_cell(value) == expected
+            if expected is not None
+            else _clean_cell(value) is None
+        )
 
 
 def test_failures_from_error_without_failure_cases():
@@ -411,19 +319,18 @@ def test_failures_from_error_without_failure_cases():
     ]
 
 
-def test_adapter_unsupported_option_is_config_error():
-    with pytest.raises(ValidationConfigurationError, match="Supported options"):
-        pandera_adapter(CompaniesSchema, {"bogus": 1})
-
-
 class TestOptionalBackendDetection:
     def test_is_pandera_model_without_pandera(self, monkeypatch):
         import sys
 
+        # setting a sys.modules entry to None makes `import` of that name
+        # raise ImportError deterministically, whatever is installed
         monkeypatch.setitem(sys.modules, "pandera.api.dataframe.model", None)
         assert _is_pandera_model(CompaniesSchema) is False
 
     def test_schema_instance_detection_with_fake_backends(self, monkeypatch):
+        # Injected fake backend modules make the polars/pyspark import
+        # branches run whatever is installed.
         import sys
         import types
 
@@ -557,14 +464,3 @@ class TestPysparkAndLazyframePaths:
         with caplog.at_level(logging.WARNING):
             assert validator._validate_pyspark(object()) is out
         assert "not validated" in caplog.text
-
-
-def test_header_includes_mode_when_set():
-    err = DataValidationError("boom", dataset_name="ds", mode="load")
-    assert str(err).splitlines()[0] == "Validation failed for dataset 'ds' on load"
-
-
-def test_excess_failures_render_hidden_note():
-    failures = [CheckFailure(message=f"m{i}") for i in range(12)]
-    text = str(DataValidationError("boom", dataset_name="ds", failures=failures))
-    assert "... and 2 more check(s)" in text

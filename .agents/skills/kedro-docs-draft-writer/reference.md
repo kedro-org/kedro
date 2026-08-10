@@ -4,30 +4,30 @@ Detailed reference for the `kedro-docs-draft-writer` skill. Use section headers 
 
 The full style guide is in [style-guide.md](style-guide.md). The sections below are quick-lookup summaries used during drafting and Vale triage.
 
----
+______________________________________________________________________
 
 ## Directory map
 
 Use this to pick the right `docs/` subdirectory.
 
-| Topic area | Directory |
-|---|---|
-| First steps, installation, project concepts | `docs/getting-started/` |
-| Creating projects, starters, project structure | `docs/create/` |
-| Configuration, environments, credentials, parameters | `docs/configure/` |
-| Data Catalog, datasets, factories | `docs/catalog-data/` |
-| Nodes, pipelines, pipeline registry | `docs/build/` |
-| Development: logging, debugging, testing, linting | `docs/develop/` |
-| Deployment: packaging, Docker, cloud platforms | `docs/deploy/` |
-| Extending Kedro: custom datasets, plugins, Hooks, sessions | `docs/extend/` |
-| Inspecting pipelines, Kedro-Viz | `docs/inspect/` |
-| IDE setup | `docs/ide/` |
-| Third-party integrations | `docs/integrations-and-plugins/` |
-| Step-by-step tutorials (learning-oriented) | `docs/tutorials/` |
+| Topic area                                                 | Directory                        |
+| ---------------------------------------------------------- | -------------------------------- |
+| First steps, installation, project concepts                | `docs/getting-started/`          |
+| Creating projects, starters, project structure             | `docs/create/`                   |
+| Configuration, environments, credentials, parameters       | `docs/configure/`                |
+| Data Catalog, datasets, factories                          | `docs/catalog-data/`             |
+| Nodes, pipelines, pipeline registry                        | `docs/build/`                    |
+| Development: logging, debugging, testing, linting          | `docs/develop/`                  |
+| Deployment: packaging, Docker, cloud platforms             | `docs/deploy/`                   |
+| Extending Kedro: custom datasets, plugins, Hooks, sessions | `docs/extend/`                   |
+| Inspecting pipelines, Kedro-Viz                            | `docs/inspect/`                  |
+| IDE setup                                                  | `docs/ide/`                      |
+| Third-party integrations                                   | `docs/integrations-and-plugins/` |
+| Step-by-step tutorials (learning-oriented)                 | `docs/tutorials/`                |
 
 When the topic spans two areas, prefer the more specific one. If in doubt, check the existing MkDocs nav in `docs/meta/` or `mkdocs.yml`.
 
----
+______________________________________________________________________
 
 ## Style rules (quick reference)
 
@@ -43,40 +43,40 @@ Full rules are in [style-guide.md](style-guide.md). These are the most commonly 
 - **Links**: descriptive anchor text. MkDocs autorefs (`[kedro.io.AbstractDataset][]`) for API links.
 - **Admonitions**: `!!! note`, `!!! warning`, `!!! important` — not plain bold.
 
----
+______________________________________________________________________
 
 ## Kedro-specific terms (quick reference)
 
-| Write | Not |
-|---|---|
-| `dataset` | `data set` |
-| data catalog | Data Catalog (concept); `DataCatalog` in code |
-| `Hooks` | `hooks` (Kedro Hooks system) |
-| `pipeline` | `Pipeline` (concept; `Pipeline` only for the class in code) |
-| backend | back end |
-| runtime | run time |
-| Kedro | kedro |
+| Write        | Not                                                         |
+| ------------ | ----------------------------------------------------------- |
+| `dataset`    | `data set`                                                  |
+| data catalog | Data Catalog (concept); `DataCatalog` in code               |
+| `Hooks`      | `hooks` (Kedro Hooks system)                                |
+| `pipeline`   | `Pipeline` (concept; `Pipeline` only for the class in code) |
+| backend      | back end                                                    |
+| runtime      | run time                                                    |
+| Kedro        | kedro                                                       |
 
----
+______________________________________________________________________
 
 ## Common Vale fixes
 
-| Rule | Finding | Fix |
-|---|---|---|
-| `Kedro.words` | "data set" | "dataset" |
-| `Kedro.words` | "in order to" | "to" |
-| `Kedro.words` | "utilize", "leverage" | "use" |
-| `Kedro.words` | "simply", "easily", "quickly", "just", "please" | delete |
-| `Kedro.words` | "via" | "with" or "through" |
-| `Kedro.words` | "Note that" | `!!! note` or rephrase |
-| `Kedro.words` | "once" (meaning "after") | "after" |
-| `Kedro.headings` | Title case heading | Convert to sentence case |
-| `Kedro.sentencelength` | Sentence > 30 words | Split into two sentences |
-| `Kedro.weaselwords` | "absolutely", "basically", etc. | delete or rewrite |
-| `Kedro.ukspelling` | "customize", "initialize", etc. | add a `u`: "customise", "initialise" |
-| `Vale.Passive` | Passive construction | Rewrite in active voice |
+| Rule                   | Finding                                         | Fix                                  |
+| ---------------------- | ----------------------------------------------- | ------------------------------------ |
+| `Kedro.words`          | "data set"                                      | "dataset"                            |
+| `Kedro.words`          | "in order to"                                   | "to"                                 |
+| `Kedro.words`          | "utilize", "leverage"                           | "use"                                |
+| `Kedro.words`          | "simply", "easily", "quickly", "just", "please" | delete                               |
+| `Kedro.words`          | "via"                                           | "with" or "through"                  |
+| `Kedro.words`          | "Note that"                                     | `!!! note` or rephrase               |
+| `Kedro.words`          | "once" (meaning "after")                        | "after"                              |
+| `Kedro.headings`       | Title case heading                              | Convert to sentence case             |
+| `Kedro.sentencelength` | Sentence > 30 words                             | Split into two sentences             |
+| `Kedro.weaselwords`    | "absolutely", "basically", etc.                 | delete or rewrite                    |
+| `Kedro.ukspelling`     | "customize", "initialize", etc.                 | add a `u`: "customise", "initialise" |
+| `Vale.Passive`         | Passive construction                            | Rewrite in active voice              |
 
----
+______________________________________________________________________
 
 ## Manual style checklist
 

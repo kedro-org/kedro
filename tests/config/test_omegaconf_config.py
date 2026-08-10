@@ -1101,8 +1101,75 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["my_runtime_param"] == runtime_params["x"]
         # The default value is used if the key does not exist
         assert conf["parameters"]["my_param_default"] == 34
-        # runtime params are resolved correctly in catalog
+        # runtime params are NOT allowed to select a catalog dataset's 'type' by
+        # default -- see kedro-org/kedro#5706. Only dataset_modules_whitelist-listed
+        # modules may be selected this way.
+        with pytest.raises(
+            InterpolationResolutionError,
+            match="not permitted",
+        ):
+            _ = conf["catalog"]
+
+    def test_runtime_params_resolution_in_catalog_type_with_whitelist(self, tmp_path):
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        runtime_params = {"dataset": {"type": "pandas.CSVDataset"}}
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:dataset.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params=runtime_params,
+            dataset_modules_whitelist=["pandas"],
+        )
+        # Allowed because "pandas" is explicitly whitelisted.
         assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]
+
+    def test_runtime_params_resolution_in_catalog_type_whitelist_does_not_cover_module(
+        self, tmp_path
+    ):
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        runtime_params = {"dataset": {"type": "kedro_datasets.pickle.PickleDataset"}}
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:dataset.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params=runtime_params,
+            dataset_modules_whitelist=["pandas"],
+        )
+        # "kedro_datasets.pickle" is not covered by the "pandas" whitelist entry.
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
+
+    def test_runtime_params_do_not_affect_catalog_type_without_resolver(self, tmp_path):
+        """A catalog `type` that isn't driven by `runtime_params:` is unaffected."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={"dataset": {"type": "kedro_datasets.pickle.PickleDataset"}},
+        )
+        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
     def test_runtime_params_resolution_with_soft_merge_base_env(self, tmp_path):
         """Test that runtime_params get softly merged with the base environment when soft merge is set
@@ -1587,8 +1654,10 @@ class TestOmegaConfigLoaderStandalone:
         assert conf["parameters"]["my_runtime_param"] == runtime_params["x"]
         # The default value is used if the key does not exist
         assert conf["parameters"]["my_param_default"] == 34
-        # runtime params are resolved correctly in catalog
-        assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]
+        # runtime params are NOT allowed to select a catalog dataset's 'type' by
+        # default.
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
 
     def test_runtime_params_in_globals_not_allowed(self, tmp_path):
         base_globals = tmp_path / "globals.yml"

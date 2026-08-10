@@ -7,6 +7,7 @@ from __future__ import annotations
 import io
 import logging
 import mimetypes
+import re
 import typing
 from collections.abc import Callable, Iterable, KeysView
 from enum import Enum, auto
@@ -26,6 +27,35 @@ from kedro.utils import CLOUD_PROTOCOLS, HTTP_PROTOCOLS, _parse_filepath
 _config_logger = logging.getLogger(__name__)
 
 _NO_VALUE = object()
+
+# Marks a dataset's `type` field as resolved through the `runtime_params:`
+# resolver, e.g. `type: "${runtime_params:dataset.type}"`.
+_RUNTIME_PARAMS_MARKER = "runtime_params:"
+# Extracts the variable path passed to the `runtime_params:` resolver, e.g.
+# "dataset.type" from `${runtime_params:dataset.type}` or
+# `${runtime_params:dataset.type, 'MemoryDataset'}`.
+_RUNTIME_PARAMS_VARIABLE_RE = re.compile(r"\$\{runtime_params:\s*([^,}]+)")
+
+
+def _dataset_module_prefix(dataset_type: str) -> str:
+    """Return the module part of a dotted dataset type path, or ``""`` for a
+    bare class name (e.g. ``"MemoryDataset"``, resolved against Kedro's default
+    dataset packages).
+    """
+    return dataset_type.rsplit(".", 1)[0] if "." in dataset_type else ""
+
+
+def _is_dataset_module_allowed(
+    dataset_type: str, allowed_prefixes: Iterable[str]
+) -> bool:
+    """Return True when ``dataset_type``'s module is covered by ``allowed_prefixes``."""
+    if not isinstance(dataset_type, str):
+        return False
+    module = _dataset_module_prefix(dataset_type)
+    return any(
+        module == prefix or (prefix and module.startswith(prefix + "."))
+        for prefix in allowed_prefixes
+    )
 
 
 class MergeStrategies(Enum):
@@ -100,6 +130,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         custom_resolvers: dict[str, Callable] | None = None,
         merge_strategy: dict[str, str] | None = None,
         ignore_hidden: bool = True,
+        dataset_modules_whitelist: Iterable[str] | None = None,
     ):
         if isinstance(conf_source, Path):
             conf_source = str(conf_source)
@@ -129,13 +160,25 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
             ignore_hidden: A boolean flag that determines whether hidden files and directories should be
                 ignored when loading configuration files. If True, ignore hidden files and files in hidden directories.
+            dataset_modules_whitelist: Module prefixes that a catalog dataset's `type` is allowed to
+                resolve to when driven by the `runtime_params:` resolver (e.g. `type:
+                "${runtime_params:dataset.type}"`). Defaults to empty, meaning `runtime_params` may
+                not select a dataset's `type` at all -- request/CLI-supplied params must not be able
+                to choose which class gets dynamically imported and instantiated. Can be set via
+                `CONFIG_LOADER_ARGS` in `settings.py`, alongside `base_env`/`default_run_env`/etc.
         """
         self.ignore_hidden = ignore_hidden
+        self.dataset_modules_whitelist = tuple(dataset_modules_whitelist or ())
         self.base_env = base_env or ""
         self.default_run_env = default_run_env or ""
         self.merge_strategy = merge_strategy or {}
         self._globals_oc: DictConfig | None = None
         self._runtime_params_oc: DictConfig | None = None
+        # Variable paths (e.g. "dataset.type") that an actual runtime_params
+        # value was found for during the most recent resolution pass -- as
+        # opposed to falling back to a resolver default. Used to guard against
+        # runtime_params selecting a catalog dataset's 'type'.
+        self._runtime_params_hits: set[str] = set()
         self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
@@ -377,12 +420,83 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 resolve=True,
             )
 
-        merged_config_container = OmegaConf.to_container(
-            OmegaConf.unsafe_merge(*aggregate_config), resolve=True
+        merged_config_container = (
+            self._resolve_catalog_config(aggregate_config)
+            if key == "catalog"
+            else OmegaConf.to_container(
+                OmegaConf.unsafe_merge(*aggregate_config), resolve=True
+            )
         )
+
         return {
             k: v for k, v in merged_config_container.items() if not k.startswith("_")
         }
+
+    def _resolve_catalog_config(
+        self, aggregate_config: Iterable[DictConfig]
+    ) -> dict[str, Any]:
+        """Resolve the catalog config, then guard against `runtime_params:`
+        selecting a dataset's `type` -- see `_guard_runtime_params_in_catalog_type`.
+        """
+        # Scope hit-tracking to this resolution pass only.
+        self._runtime_params_hits = set()
+
+        merged_config_container = OmegaConf.to_container(
+            OmegaConf.unsafe_merge(*aggregate_config), resolve=True
+        )
+        self._guard_runtime_params_in_catalog_type(
+            aggregate_config, merged_config_container
+        )
+        return merged_config_container
+
+    def _guard_runtime_params_in_catalog_type(
+        self,
+        aggregate_config: Iterable[DictConfig],
+        merged_config_container: dict[str, Any],
+    ) -> None:
+        """Block dataset ``type`` values that resolve through the
+        ``runtime_params:`` resolver, unless their module is explicitly
+        allowed via ``self.dataset_modules_whitelist``.
+
+        ``type`` selects which class Kedro dynamically imports and
+        instantiates. Letting untrusted runtime params (e.g. from an HTTP
+        request) choose that class allows callers to pick arbitrary
+        importable ``AbstractDataset`` subclasses -- including ones like
+        ``kedro_datasets.pickle.PickleDataset`` that execute code on load.
+        Default-deny keeps this closed unless a project opts in.
+        """
+        raw_container = OmegaConf.to_container(
+            OmegaConf.unsafe_merge(*aggregate_config), resolve=False
+        )
+
+        allowed_prefixes = self.dataset_modules_whitelist
+
+        for dataset_name, raw_entry in raw_container.items():
+            if not isinstance(raw_entry, dict):
+                continue
+            raw_type = raw_entry.get("type")
+            if not isinstance(raw_type, str) or _RUNTIME_PARAMS_MARKER not in raw_type:
+                continue
+
+            match = _RUNTIME_PARAMS_VARIABLE_RE.search(raw_type)
+            variable = match.group(1).strip() if match else None
+            if variable is None or variable not in self._runtime_params_hits:
+                # `runtime_params:` appears in the raw string, but no actual
+                # runtime_params value was used for it -- it fell back to a
+                # resolver default (e.g. a `globals:` value), so it isn't
+                # attacker-influenced.
+                continue
+
+            resolved_type = merged_config_container.get(dataset_name, {}).get("type")
+            if not _is_dataset_module_allowed(resolved_type, allowed_prefixes):
+                raise InterpolationResolutionError(
+                    f"Dataset '{dataset_name}' resolves its 'type' via the "
+                    f"'runtime_params:' resolver to '{resolved_type}', which is not "
+                    "permitted. Runtime parameters must not select which dataset "
+                    "class is instantiated unless its module is explicitly listed "
+                    "in 'dataset_modules_whitelist' (settable via 'CONFIG_LOADER_ARGS' "
+                    "in settings.py)."
+                )
 
     @staticmethod
     def _initialise_filesystem_and_protocol(
@@ -496,15 +610,24 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if not self._runtime_params_oc:
             self._runtime_params_oc = OmegaConf.create(self.runtime_params)
 
-        interpolated_value = OmegaConf.select(
-            self._runtime_params_oc, variable, default=default_value
+        # Resolved separately from the `default=` lookup below so we can tell
+        # a real runtime_params value apart from a resolver default/fallback
+        # (e.g. `${runtime_params:type, ${globals:...}}`) -- only the former
+        # is attacker-influenced when runtime_params comes from an untrusted
+        # caller, and only the former is tracked in `_runtime_params_hits`.
+        found_value = OmegaConf.select(
+            self._runtime_params_oc, variable, default=_NO_VALUE
         )
-        if interpolated_value != _NO_VALUE:
-            return interpolated_value
-        else:
-            raise InterpolationResolutionError(
-                f"Runtime parameter '{variable}' not found and no default value provided."
-            )
+        if found_value is not _NO_VALUE:
+            self._runtime_params_hits.add(variable)
+            return found_value
+
+        if default_value is not _NO_VALUE:
+            return default_value
+
+        raise InterpolationResolutionError(
+            f"Runtime parameter '{variable}' not found and no default value provided."
+        )
 
     @staticmethod
     def _register_new_resolvers(resolvers: dict[str, Callable]) -> None:

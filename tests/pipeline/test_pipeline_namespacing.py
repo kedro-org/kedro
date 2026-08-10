@@ -464,13 +464,68 @@ class TestPipelineHelper:
             ]
         )
 
-        pattern = r"Failed to map datasets and/or parameters onto the nodes provided: params:beta"
+        pattern = (
+            r"Failed to map datasets and/or parameters onto the nodes provided: "
+            r"params:beta does not exist in the pipeline\."
+        )
         with pytest.raises(PipelineError, match=pattern):
             pipeline(raw_pipeline, parameters={"beta": "gamma"})
 
-        pattern = r"Failed to map datasets and/or parameters onto the nodes provided: parameters"
+        pattern = (
+            r"Failed to map datasets and/or parameters onto the nodes provided: "
+            r"parameters does not exist in the pipeline\."
+        )
         with pytest.raises(PipelineError, match=pattern):
             pipeline(raw_pipeline, parameters={"parameters": "some_yaml_dataset"})
+
+    def test_non_existent_parameter_mapping_does_not_report_intermediate_datasets(self):
+        def split_data(model_input_table, model_options):
+            return None
+
+        def train_model(X_train, y_train):
+            return None
+
+        def evaluate_model(regressor, X_test, y_test):
+            return None
+
+        raw_pipeline = pipeline(
+            [
+                node(
+                    split_data,
+                    ["model_input_table", "params:model_options"],
+                    ["X_train", "X_test", "y_train", "y_test"],
+                    name="split_data_node",
+                ),
+                node(
+                    train_model,
+                    ["X_train", "y_train"],
+                    "regressor",
+                    name="train_model_node",
+                ),
+                node(
+                    evaluate_model,
+                    ["regressor", "X_test", "y_test"],
+                    "metrics",
+                    name="evaluate_model_node",
+                ),
+            ]
+        )
+
+        with pytest.raises(PipelineError) as exc:
+            pipeline(
+                raw_pipeline,
+                parameters={"params:model_options_1": "params:model_options"},
+            )
+
+        error_message = str(exc.value)
+        assert "params:model_options_1 does not exist in the pipeline" in error_message
+        assert (
+            "did you mean one of these instead: params:model_options" in error_message
+        )
+        assert "X_train" not in error_message
+        assert "X_test" not in error_message
+        assert "regressor" not in error_message
+        assert "metrics" not in error_message
 
     def test_bad_inputs_mapping(self):
         raw_pipeline = pipeline(

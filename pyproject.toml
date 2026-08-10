@@ -71,7 +71,7 @@ test = [
     "pytest-xdist[psutil]>=2.2.1,<4.0",
     "pytest>=7.2,<10.0",
     "requests_mock",
-    "s3fs>=2021.4,<2026.7",
+    "s3fs>=2021.4,<2026.8",
     # mypy related dependencies
     "pandas-stubs",
     "types-PyYAML",
@@ -96,7 +96,8 @@ jupyter = [
     "notebook>=7.0.0"  # requires the new share backend of notebook and labs"
 ]
 benchmark = [
-    "asv"
+    "asv",
+    "kedro[pydantic]",
 ]
 
 pydantic = ["pydantic>=2.13"]
@@ -121,6 +122,7 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 include = ["kedro*"]
+exclude = ["kedro_benchmarks*"]
 
 [tool.setuptools.package-data]
 kedro = ["py.typed"]

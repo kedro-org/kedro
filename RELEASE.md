@@ -1,8 +1,25 @@
 # Upcoming Release
 ## Major features and improvements
+* Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
+* Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
+* Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
+
 ## Bug fixes and other changes
+* Fixed a `RecursionError` when initialising a session with dynaconf-backed settings by converting `settings.SESSION_STORE_ARGS` to a plain `dict` before deepcopying it.
+* Excluded `kedro_benchmarks` from the built wheel so benchmark tests are no longer shipped with the package.
+* Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
+* Fixed docs generated with `kedro new --tools=docs` so the Sphinx HTML build runs `sphinx-apidoc` and creates API docs.
+* Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
+
 ## Documentation changes
+* Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
+
 ## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [eeshsaxena](https://github.com/eeshsaxena)
+* [Versus-DEV](https://github.com/Versus-DEV)
+* [Shizoqua](https://github.com/Shizoqua)
+* [BALOGUN DAVID TAIWO](https://github.com/BALOGUN-DAVID)
 
 # Release 1.5.0
 ## Major features and improvements
@@ -16,8 +33,11 @@
 ## Bug fixes and other changes
 * Fixed Rich logging integration so node input/output brackets render correctly in console logs and dataset colour markup does not leak into plain log handlers.
 * Improved the `AbstractDataset.from_config()` error message for custom dataset classes that are still abstract, so it no longer suggests invalid constructor arguments when required dataset methods are missing.
+* Improved the `pipeline()` error message when a mapped dataset or parameter does not exist in the pipeline.
 * Fixed `kedro new` accepting project names whose derived package name shadows a Python standard library module or is a Python keyword (e.g. `email`, `json`, `import`), which silently produced a broken, unimportable project. Such names are now rejected at creation time with a clear message.
 * Fixed `kedro pipeline create` accepting Python keywords (e.g. `for`, `import`, `return`) as pipeline names. Such names are now rejected at creation time with a clear error message.
+* Fixed `%reload_kedro --params` parsing for quoted runtime parameter values that contain spaces.
+* Fixed custom `logging.Filter` subclasses configured with `class:` in `logging.yml`, so they are instantiated and applied.
 
 ## Documentation changes
 * Documented hooks limitation when using `ParallelRunner`.
@@ -29,9 +49,11 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 * [Feng Jikui](https://github.com/fengjikui)
 * [Rudra Dudhat](https://github.com/RudraDudhat2509)
+* [samiat4911](https://github.com/samiat4911)
 * [Jean-Baptiste Braun](https://github.com/jbbqqf)
 * [Gargi](https://github.com/Kaliagargi)
 * [Simon](https://github.com/simon-b)
+* [samiat4911](https://github.com/samiat4911)
 
 
 # Release 1.4.0

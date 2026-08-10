@@ -81,10 +81,16 @@ curl http://127.0.0.1:8000/snapshot
       "nodes": [
         {
           "name": "split_data_node",
+          "func_name": "split_data",
           "inputs": ["example_iris_data"],
           "outputs": ["X_train", "X_test"],
           "tags": [],
-          "namespace": null
+          "namespace": null,
+          "source": {
+            "filepath": "src/my_project/pipelines/data_science/nodes.py",
+            "line_start": 12,
+            "line_end": 25
+          }
         }
       ],
       "inputs": ["example_iris_data"],

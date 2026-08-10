@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 from IPython.core.error import UsageError
+from IPython.utils._process_common import arg_split
 
 import kedro.ipython
 from kedro.framework.project import pipelines
@@ -13,12 +14,14 @@ from kedro.ipython import (
     _format_node_inputs_text,
     _get_node_bound_arguments,
     _load_node,
+    _normalise_reload_kedro_params,
     _prepare_function_body,
     _prepare_imports,
     _prepare_node_inputs,
     _resolve_function_node,
     _resolve_project_path,
     _resolve_symbol_dependencies,
+    _split_reload_kedro_params,
     load_ipython_extension,
     magic_load_node,
     reload_kedro,
@@ -221,6 +224,105 @@ class TestLoadIPythonExtension:
         mocker.patch("kedro.ipython.reload_kedro")
 
         ipython.run_line_magic("reload_kedro", args)
+
+    @pytest.mark.parametrize(
+        (
+            "args",
+            "expected_path",
+            "expected_env",
+            "expected_runtime_params",
+            "expected_conf_source",
+        ),
+        [
+            ("--params foo='bar baz'", None, None, {"foo": "bar baz"}, None),
+            ('--params foo="bar baz"', None, None, {"foo": "bar baz"}, None),
+            ("--params 'foo=bar baz'", None, None, {"foo": "bar baz"}, None),
+            ('--params "foo=bar baz"', None, None, {"foo": "bar baz"}, None),
+            (
+                "--params foo='bar baz',key2='hello world'",
+                None,
+                None,
+                {"foo": "bar baz", "key2": "hello world"},
+                None,
+            ),
+            (
+                '--params k1=v1,k2="a b"',
+                None,
+                None,
+                {"k1": "v1", "k2": "a b"},
+                None,
+            ),
+            ("--params=foo='bar baz'", None, None, {"foo": "bar baz"}, None),
+            (
+                ". --env=base --params foo='bar baz' --conf-source=new_conf",
+                ".",
+                "base",
+                {"foo": "bar baz"},
+                "new_conf",
+            ),
+            (
+                '. --env=base --params foo="bar baz" --conf-source=new_conf',
+                ".",
+                "base",
+                {"foo": "bar baz"},
+                "new_conf",
+            ),
+        ],
+    )
+    def test_line_magic_params_with_quoted_spaces(
+        self,
+        mocker,
+        args,
+        expected_path,
+        expected_env,
+        expected_runtime_params,
+        expected_conf_source,
+        ipython,
+    ):
+        mocker.patch("kedro.ipython.find_kedro_project")
+        mock_reload_kedro = mocker.patch("kedro.ipython.reload_kedro")
+
+        ipython.run_line_magic("reload_kedro", args)
+
+        path, env, runtime_params, _, conf_source = mock_reload_kedro.call_args.args
+        assert path == expected_path
+        assert env == expected_env
+        assert runtime_params == expected_runtime_params
+        assert conf_source == expected_conf_source
+
+    @pytest.mark.parametrize(
+        ("args", "expected_runtime_params"),
+        [
+            ("--params foo='bar baz'", {"foo": "bar baz"}),
+            ('--params foo="bar baz"', {"foo": "bar baz"}),
+            ("--params 'foo=bar baz'", {"foo": "bar baz"}),
+            ('--params "foo=bar baz"', {"foo": "bar baz"}),
+            (
+                "--params foo='bar baz',key2='hello world'",
+                {"foo": "bar baz", "key2": "hello world"},
+            ),
+            ('--params first="a b",second="c d"', {"first": "a b", "second": "c d"}),
+            ('--params k1=v1,k2="a b"', {"k1": "v1", "k2": "a b"}),
+            ("""--params foo='he said "hi"'""", {"foo": 'he said "hi"'}),
+            ("--params=foo='bar baz'", {"foo": "bar baz"}),
+            (
+                ". --env=base --params foo='bar baz' --conf-source=new_conf",
+                {"foo": "bar baz"},
+            ),
+            (
+                '. --env=base --params foo="bar baz" --conf-source=new_conf',
+                {"foo": "bar baz"},
+            ),
+        ],
+    )
+    def test_normalise_reload_kedro_params_with_quoted_spaces(
+        self, args, expected_runtime_params
+    ):
+        normalised_args = _normalise_reload_kedro_params(args)
+        split_args = arg_split(normalised_args)
+        params_value = split_args[split_args.index("--params") + 1]
+
+        assert _split_reload_kedro_params(params_value) == expected_runtime_params
 
     def test_line_magic_with_invalid_arguments(self, mocker, ipython):
         mocker.patch("kedro.ipython.find_kedro_project")
@@ -549,9 +651,7 @@ ERROR,
             _resolve_function_node(module_tree, dummy_function)
 
     def test_resolve_symbol_dependencies_handles_cycles(self):
-        module_tree = ast.parse(
-            "def a():\n" "    return b()\n" "def b():\n" "    return a()\n"
-        )
+        module_tree = ast.parse("def a():\n    return b()\ndef b():\n    return a()\n")
         symbols = _build_module_symbol_table(module_tree)
 
         resolved_nodes = _resolve_symbol_dependencies(symbols, "a")

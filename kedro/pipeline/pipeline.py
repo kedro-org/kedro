@@ -19,7 +19,7 @@ import kedro
 from kedro.pipeline.node import GroupedNodes, Node, _to_list
 from kedro.utils import get_close_matches
 
-from .transcoding import _strip_transcoding, _transcode_split
+from .transcoding import TRANSCODING_SEPARATOR, _strip_transcoding, _transcode_split
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Set
@@ -90,7 +90,16 @@ def _validate_datasets_exist(
         sorted_non_existent = sorted(non_existent)
         possible_matches = get_close_matches(sorted_non_existent, existing)
 
-        error_msg = f"Failed to map datasets and/or parameters onto the nodes provided: {', '.join(sorted_non_existent)}"
+        missing_message = (
+            f"{sorted_non_existent[0]} does not exist in the pipeline."
+            if len(sorted_non_existent) == 1
+            else "The following datasets and/or parameters do not exist in the "
+            f"pipeline: {', '.join(sorted_non_existent)}."
+        )
+        error_msg = (
+            "Failed to map datasets and/or parameters onto the nodes provided: "
+            f"{missing_message}"
+        )
         suggestions = (
             f" - did you mean one of these instead: {', '.join(possible_matches)}"
             if possible_matches
@@ -1086,8 +1095,6 @@ class Pipeline:
             return base_name in mapping
 
         def _map_transcode_base(name: str) -> str:
-            from kedro.pipeline.transcoding import TRANSCODING_SEPARATOR
-
             base_name, transcode_suffix = _transcode_split(name)
             return TRANSCODING_SEPARATOR.join((mapping[base_name], transcode_suffix))
 

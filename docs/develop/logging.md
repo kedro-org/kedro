@@ -58,7 +58,7 @@ logging.getLogger("kedro.io.data_catalog").setLevel(logging.WARNING)
 
 ## Custom `CONF_SOURCE` with logging
 
-When you customise the [`CONF_SOURCE`](../configure/configuration_basics.md#how-to-change-the-configuration-source-folder-at-runtime) setting in your Kedro project, it determines where Kedro looks for configuration files, including the logging configuration file. Changing `CONF_SOURCE` does not automatically update the path to `logging.yml`. To use a custom location or filename for the logging configuration, you must explicitly set the `KEDRO_LOGGING_CONFIG` environment variable.
+When you customise the [`CONF_SOURCE`](../configure/how_to_configure_project.md#how-to-change-the-configuration-source-folder-at-runtime) setting in your Kedro project, it determines where Kedro looks for configuration files, including the logging configuration file. Changing `CONF_SOURCE` does not automatically update the path to `logging.yml`. To use a custom location or filename for the logging configuration, you must explicitly set the `KEDRO_LOGGING_CONFIG` environment variable.
 
 By default, Kedro looks for a file named `logging.yml` in the `conf` directory. If you move or rename your logging configuration file after changing `CONF_SOURCE`, specify the new path using the `KEDRO_LOGGING_CONFIG` environment variable:
 ```bash
@@ -143,6 +143,41 @@ Besides the `rich` handler defined in Kedro's framework, we provide two addition
 * `info_file_handler`: write logs of level `INFO` and above to `info.log`
 
 The following section illustrates some common examples of how to change your project's logging configuration.
+
+## How to add a custom logging filter
+
+Add a custom [`logging.Filter`](https://docs.python.org/3/library/logging.html#filter-objects) subclass to your project logging configuration. Define the filter in your project code:
+
+```python
+import logging
+
+
+class KeepOnlyFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "KEEP" in record.getMessage()
+```
+
+Then reference the filter with the `class` key in `conf/logging.yml` and attach it to the relevant handler:
+
+```yaml
+filters:
+  keep_only:
+    class: your_project.logging.KeepOnlyFilter
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    filters: [keep_only]
+    stream: ext://sys.stdout
+
+root:
+  handlers: [console]
+  level: INFO
+```
+
+!!! note
+    Standard Python logging configuration also supports the `()` factory key for custom objects. Kedro does not allow `()` in `logging.yml` because it can execute arbitrary code.
+    Use `class` for custom `logging.Filter` subclasses instead.
 
 ## How to customise the `rich` handler
 

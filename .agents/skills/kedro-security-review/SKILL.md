@@ -406,7 +406,7 @@ None actionable. <count> false positives on pre-existing lines.
 
 ### Manual review checks
 <If all clean, one line:>
-All clean (config-dict consumers, env-var paths, path construction, subprocess/eval/exec/pickle/yaml/dynamic import).
+All clean (config-dict consumers, env-var paths, path construction, security suppression comments, subprocess/eval/exec/pickle/yaml/dynamic import).
 
 <Otherwise, only list the checks that flagged something, with reasoning.>
 

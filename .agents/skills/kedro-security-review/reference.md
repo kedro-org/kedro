@@ -104,6 +104,40 @@ outside Kedro's own defaults (CLI arg, env var, catalog config, API param):
 - Check whether `..` or absolute path segments are rejected before use
 - If not: `needs_manual_review` at minimum
 
+### 4. Security suppression comments
+
+Search scanned files for comments that suppress security scanner findings:
+- `# nosec` (Bandit)
+- `# nosemgrep` (Semgrep)
+- `# type: ignore[` used alongside a `nosec` or `nosemgrep` on the same line
+  (occasionally combined to silence both type-checker and security scanner)
+
+A suppression comment makes the flagged code invisible to the scanner. If the
+suppression is unjustified or outdated, it silently masks a real vulnerability.
+
+For every match, classify as `needs_manual_review` and ask the reviewer to
+verify:
+1. The suppression is still necessary — the underlying issue has not been
+   refactored away.
+2. The risk is documented — there is an adjacent comment explaining **why** the
+   suppression is safe.
+3. There is no code-level fix that would remove the need for suppression
+   entirely.
+
+**PR mode — new vs. pre-existing suppressions:**
+
+In PR mode, compare each hit against the PR diff (`gh pr diff <number>`).
+- A suppression whose line appears in the diff (added or modified) is a **new
+  suppression** — flag it with higher priority. New suppressions in a PR are
+  the primary concern: they indicate that a contributor is actively silencing a
+  scanner finding on code that is about to be merged.
+- A suppression on a line not in the diff is **pre-existing** — still flag it
+  as `needs_manual_review`, but note that it predates this PR so it may be
+  tracked separately (e.g. in a follow-up cleanup issue).
+
+In full-codebase mode, all suppressions are treated equally (there is no diff
+to distinguish new from old).
+
 ## General ruleset guidance
 
 ### `p/security-audit`

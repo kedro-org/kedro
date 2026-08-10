@@ -52,6 +52,21 @@ class DatasetSnapshot:
 
 
 @dataclass
+class NodeSourceSnapshot:
+    """Source location metadata for a pipeline node's underlying function.
+
+    Attributes:
+        filepath: Project-relative path to the source file.
+        line_start: 1-based line number of the first line of the definition.
+        line_end: 1-based line number of the last line of the definition.
+    """
+
+    filepath: str
+    line_start: int
+    line_end: int
+
+
+@dataclass
 class NodeSnapshot:
     """Read-only snapshot of a single pipeline node.
 
@@ -62,6 +77,8 @@ class NodeSnapshot:
         tags: Sorted list of tags assigned to the node.
         inputs: Ordered list of input dataset names.
         outputs: Ordered list of output dataset names.
+        source: Source location of the node's underlying function, or ``None``
+            when the location cannot be resolved or lies outside the project.
     """
 
     name: str
@@ -70,6 +87,7 @@ class NodeSnapshot:
     tags: list[str] = field(default_factory=list)
     inputs: list[str] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
+    source: NodeSourceSnapshot | None = None
 
 
 @dataclass

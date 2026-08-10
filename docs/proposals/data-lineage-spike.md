@@ -1,19 +1,18 @@
 # Data Lineage for Kedro: Spike and Tech Design
 
-> **Context:** [Kedro #5311: Data quality management for Kedro pipelines](https://github.com/kedro-org/kedro/issues/5311)
-> **Focus:** Data lineage (one of four areas in that issue)
+**Context:** [Kedro #5311: Data quality management for Kedro pipelines](https://github.com/kedro-org/kedro/issues/5311). This issue covers validation, profiling, monitoring, and lineage. **This doc focuses on lineage.**
 
 ---
 
 ## Introduction
 
-This doc supports a **three session tech design series** on data lineage for Kedro ([#5311](https://github.com/kedro-org/kedro/issues/5311)). Session 1 is written below. Sessions 2 and 3 will be added to this same doc once the team aligns on direction.
+This doc supports a **three session tech design series** on data lineage for Kedro. Session 1 is written below. Sessions 2 and 3 will be added to this same doc once the team aligns on direction.
 
 | Session | Goal | Status |
 |---------|------|--------|
-| **1: Vision and direction** | Why lineage, where we're headed, roadmap at a high level | **Below** |
-| **2: Phases 0 to 2** | Metadata schema, inspection API, OpenLineage emitter, Workflow view | To be added |
-| **3: Phases 3 to 4** | Column lineage, enterprise catalog integration | To be added |
+| **1. Vision and direction** | Why lineage, where we're headed, roadmap at a high level | **Below** |
+| **2. Phases 0 to 2** | Metadata schema, inspection API, OpenLineage emitter, Workflow view | To be added |
+| **3. Phases 3 to 4** | Column lineage, enterprise catalog integration | To be added |
 
 **Terms that may be new:**
 
@@ -98,13 +97,13 @@ For Kedro, the goal is not to build a full enterprise data catalog. We want to g
 
 ## 1.2 Why now?
 
-Issue #5311 covers validation, profiling, monitoring, and lineage. Kedro's catalog already lists dataset names in `catalog.yml`. That part we have.
+The current issue covers validation, profiling, monitoring, and lineage. Kedro's catalog already lists dataset names in `catalog.yml`. That part we have.
 
 What's missing is the **context around those datasets**:
 
 For example, validation might fail on `model_input_table`. The catalog tells you the dataset exists. Lineage tells you it was built by `create_model_input_node` from `preprocessed_companies` and `shuttles`, and that `train_model_node` depends on it downstream.
 
-That context is what ties the #5311 features together. They share the same dependency graph and the same runtime events, not just the same dataset names.
+That context is what ties these features together. They share the same dependency graph and the same runtime events, not just the same dataset names.
 
 **Why Kedro is in a good place to do this:**
 
@@ -120,7 +119,7 @@ That context is what ties the #5311 features together. They share the same depen
 1. A developer opens Kedro-Viz and immediately sees how data flows (this mostly works today).
 2. After a run, they can see what succeeded, failed, and how long things took (Workflow view).
 3. In production, lineage flows to an **enterprise data catalog** like Marquez or DataHub.
-4. Validation and quality results attach to the same lineage events (#5311).
+4. Validation and quality results attach to the same lineage events.
 
 ---
 
@@ -163,7 +162,7 @@ The Flowchart and Workflow view are useful for local debugging. Together they co
 | Connect Kedro to the rest of the data stack | No |
 | Column level lineage | No |
 | Owners, consumers, impact analysis | No |
-| Attach validation results to datasets (#5311) | No |
+| Attach validation results to datasets | No |
 
 Three gaps in particular:
 
@@ -182,7 +181,7 @@ We should have an official plugin extending it filling the gaps above.
 
 ---
 
-## 1.5 Direction: what we're proposing
+## 1.5 Direction: what are we proposing
 
 ### The big picture: four pieces, four roles
 
@@ -269,7 +268,7 @@ model_input_table:
 
 ### Decision 6: Validation results attach to the same lineage events
 
-**The question:** Does validation (#5311) get its own event stream?
+**The question:** Does validation get its own event stream?
 
 **Our proposal:** No. Validation hooks attach results to the same OpenLineage RunEvents via the `dataQualityAssertions` facet. One event stream for lineage and quality.
 

@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from kedro.inspection.models import (
     DatasetSnapshot,
     NodeSnapshot,
+    NodeSourceSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
     ProjectSnapshot,
@@ -45,6 +46,39 @@ def _make_snapshot() -> ProjectSnapshot:
     )
 
 
+def _make_snapshot_with_node_source() -> ProjectSnapshot:
+    """Return a project snapshot whose node includes source location metadata."""
+    return ProjectSnapshot(
+        metadata=ProjectMetadataSnapshot(
+            project_name="test_project",
+            package_name="test_pkg",
+            kedro_version="1.0.0",
+        ),
+        pipelines=[
+            PipelineSnapshot(
+                name="__default__",
+                nodes=[
+                    NodeSnapshot(
+                        name="my_node",
+                        func_name="process_data",
+                        inputs=["raw_data"],
+                        outputs=["processed"],
+                        source=NodeSourceSnapshot(
+                            filepath="src/pkg/pipelines/nodes.py",
+                            line_start=10,
+                            line_end=25,
+                        ),
+                    )
+                ],
+                inputs=["raw_data"],
+                outputs=["processed"],
+            )
+        ],
+        datasets={},
+        parameters=[],
+    )
+
+
 class TestSnapshotEndpoint:
     """Test GET /snapshot via TestClient."""
 
@@ -83,6 +117,21 @@ class TestSnapshotEndpoint:
         assert payload["datasets"]["raw_data"]["type"] == "pandas.CSVDataset"
 
         assert payload["parameters"] == ["learning_rate", "epochs"]
+
+    def test_snapshot_serializes_node_source_metadata(self, mocker, make_http_server):
+        app = make_http_server()
+        mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot_with_node_source(),
+        )
+        with TestClient(app) as client:
+            node = client.get("/snapshot").json()["pipelines"][0]["nodes"][0]
+
+        assert node["source"] == {
+            "filepath": "src/pkg/pipelines/nodes.py",
+            "line_start": 10,
+            "line_end": 25,
+        }
 
     def test_snapshot_uses_server_env(self, mocker, make_http_server):
         app = make_http_server(env="staging")

@@ -95,9 +95,29 @@ for node in default_pipeline.nodes:
     print("  inputs:   ", node.inputs)
     print("  outputs:  ", node.outputs)
     print("  tags:     ", node.tags)
+    if node.source:
+        print("  source:   ", node.source.filepath)
+        print("  lines:    ", node.source.line_start, "-", node.source.line_end)
 ```
 
-Each node is represented as a [`NodeSnapshot`][kedro.inspection.models.NodeSnapshot] with `name`, `func_name`, `namespace`, `inputs`, `outputs`, and `tags` fields.
+Each node is represented as a [`NodeSnapshot`][kedro.inspection.models.NodeSnapshot] with `name`, `func_name`, `namespace`, `inputs`, `outputs`, `tags`, and `source` fields.
+
+When present, `source` is a [`NodeSourceSnapshot`][kedro.inspection.models.NodeSourceSnapshot] with the project-relative path to the node's function and a 1-based inclusive line range. Use it to read the function definition from disk without importing the project package:
+
+```python
+from pathlib import Path
+
+project_path = Path("/path/to/my_project")
+
+if node.source:
+    source_file = project_path / node.source.filepath
+    lines = source_file.read_text().splitlines()
+    function_source = "\n".join(
+        lines[node.source.line_start - 1 : node.source.line_end]
+    )
+```
+
+`source` is `None` when the location cannot be resolved. For example, `functools.partial`, lambdas, built-ins, or functions defined outside the project root.
 
 ## How to inspect catalog datasets
 
@@ -156,7 +176,7 @@ By default, `get_project_snapshot` uses the project's default run environment (`
 snapshot = get_project_snapshot("/path/to/my_project", env="staging")
 ```
 
-This follows the same environment resolution rules as `kedro run --env staging`. See [Configuration basics](../configure/configuration_basics.md) for details on how environments work.
+This follows the same environment resolution rules as `kedro run --env staging`. See [Configuration](../configure/configuration_basics.md#configuration-environments) for details on how environments work.
 
 To load configuration from a non-default directory, pass `conf_source`:
 

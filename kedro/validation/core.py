@@ -18,10 +18,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from kedro.utils import load_obj
-from kedro.validation.exceptions import (
-    DataValidationError,  # noqa: F401  (re-exported for backwards-compatible imports)
-    ValidationConfigurationError,
-)
+from kedro.validation.exceptions import ValidationConfigurationError
 
 if TYPE_CHECKING:
     from collections.abc import Callable

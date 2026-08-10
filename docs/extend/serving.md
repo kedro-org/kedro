@@ -204,6 +204,17 @@ Short names (for example, `SequentialRunner`) always resolve against `kedro.runn
 RUNNER_MODULES_WHITELIST = ["external_lib.runners"]
 ```
 
+#### Dataset type security
+
+A catalog entry's `type` field selects which dataset class Kedro imports and instantiates, so `params` must never be able to choose it. By default, Kedro rejects a catalog `type` that resolves through the [`runtime_params` resolver](../configure/how_to_use_templating.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader) to an actual request-supplied value. Enable it for modules you trust by setting `dataset_modules_whitelist` in `CONFIG_LOADER_ARGS`, in `settings.py`:
+
+```python
+# settings.py
+CONFIG_LOADER_ARGS = {
+    "dataset_modules_whitelist": ["kedro_datasets.pandas"],
+}
+```
+
 ### Interactive API reference
 
 When the server is running, [FastAPI](https://fastapi.tiangolo.com/) automatically generates interactive API documentation at `http://127.0.0.1:8000/docs`. This page lists all available endpoints, their request and response schemas, and lets you try them out directly in the browser.

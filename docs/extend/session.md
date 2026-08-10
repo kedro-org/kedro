@@ -90,6 +90,7 @@ You can provide the following optional arguments in `KedroServiceSession.create(
 - `project_path`: Path to the project root directory
 - `env`: Environment for the `KedroContext`
 - `conf_source`: Optional argument to specify the configuration source for the `KedroContext`
+- `serving_mode`: A Boolean value, `False` by default. Set to `True` when the session will handle concurrent `run()` calls from multiple threads, such as behind a web server. When enabled, all registered pipelines are loaded eagerly during `create()`, and `run()` no longer mutates the shared pipeline registry to select which pipelines to load. This avoids race conditions that could otherwise occur when multiple threads call `run()` at the same time. Leave this `False` for single-threaded or CLI use, where loading only the requested pipelines keeps startup faster.
 
 
 The main differences in the `create()` method between `KedroSession` and `KedroServiceSession` are:

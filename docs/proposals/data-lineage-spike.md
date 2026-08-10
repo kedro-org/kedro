@@ -183,6 +183,10 @@ We should have an official plugin extending it filling the gaps above.
 
 ## 1.5 Direction: what are we proposing
 
+### Architecture vision
+
+![Kedro Data Lineage architecture vision](images/data-lineage-architecture.svg)
+
 ### The big picture: four pieces, four roles
 
 | Piece | Role | Who uses it |
@@ -302,6 +306,29 @@ Five phases. Sessions 2 and 3 will go into the detail for each.
 
 Session 2 will cover the implementation design for the first thing we can ship.
 
+### How run history persists across multiple runs
+
+Kedro does not store run history. Once events leave the HTTP sink, **Marquez or DataHub** owns persistence.
+
+Each `kedro run` gets a new `runId` (UUID). All node events in that run share it. The plugin sends them over HTTP and moves on. It does not keep history locally.
+
+| Sink | What happens on the next run |
+|------|------------------------------|
+| **File** (`.viz/lineage_events.json`) | Overwritten. Kedro-Viz Workflow view shows last run only |
+| **HTTP** (Marquez / DataHub) | Appended. Server stores every run |
+
+Marquez and DataHub are servers with their own databases (Marquez typically uses PostgreSQL; DataHub uses Kafka plus a metadata store). Each OpenLineage event is ingested and stored. A new run adds a new record, it does not replace the previous one.
+
+```
+Run 1 (Monday)   runId = aaa-111  →  Marquez stores run aaa-111
+Run 2 (Tuesday)  runId = bbb-222  →  Marquez stores run bbb-222
+Run 3 (Wednesday) runId = ccc-333  →  Marquez stores run ccc-333
+```
+
+In the Marquez or DataHub UI you can browse all runs for a job, compare success/fail over time, and trace which run wrote which dataset version.
+
+**Design note for Session 2:** The community [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage) PoC generates a new `runId` per node. The official plugin should use Kedro's `run_id` from hooks so all events in one `kedro run` share one ID.
+
 **Topics we plan to cover:**
 
 | Topic | Phase | What we will design |
@@ -311,6 +338,7 @@ Session 2 will cover the implementation design for the first thing we can ship.
 | Extend `DatasetSnapshot` | 1 | Add metadata to snapshot once schema is defined |
 | Document existing lineage | 1 | Flowchart is table level lineage. User facing docs |
 | OpenLineage emitter | 2 | Single hook. Kedro to OpenLineage mapping (Job, Run, Dataset, facets) |
+| Run ID per kedro run | 2 | One `runId` for all node events in a run (fix kedro-openlineage PoC gap) |
 | Multiple outputs | 2 | File output for Workflow view. HTTP output for Marquez |
 | Workflow view migration | 2 | Read from OpenLineage file output. Replace custom `.viz/` event format |
 | Validation integration | 2 | `dataQualityAssertions` extension hook for the validation workstream |
@@ -344,7 +372,7 @@ Session 3 will cover column lineage and enterprise catalog publishing.
 
 | # | Experiment | Expected outcome |
 |---|-----------|------------------|
-| 1 | Run [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage) on spaceflights, send to Marquez | OpenLineage events work. Overlap with Workflow view |
+| 1 | Run [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage) on spaceflights, send to Marquez. See [local setup guide](kedro-openlineage-marquez-local-setup.md) | OpenLineage events work. Overlap with Workflow view |
 | 2 | Export Kedro-Viz graph JSON alongside a dbt `manifest.json` | Kedro is richer for Python. dbt is richer for SQL columns |
 | 3 | Wire Kedro-Viz to `get_project_snapshot()` | Viz works from inspection API (ongoing) |
 | 4 | Pandas schema diff on 2 to 3 nodes | Passthrough columns detected. Derived columns flagged as unknown |

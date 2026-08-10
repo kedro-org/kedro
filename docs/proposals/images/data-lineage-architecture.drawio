@@ -1,0 +1,84 @@
+<mxfile host="app.diagrams.net" modified="2026-03-26T00:00:00.000Z" agent="manual" version="22.0.0">
+  <diagram name="Kedro Data Lineage" id="lineage-arch">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="720" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="Kedro Data Lineage - Architecture Vision" style="text;html=1;fontSize=18;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="600" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="zone1" value="Kedro Project" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#455A64;fontStyle=1;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="30" y="70" width="220" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="cat" value="catalog.yml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="115" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="pipe" value="Pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="185" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="run" value="kedro run" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="255" width="180" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="zone2" value="Kedro Platform" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#455A64;fontStyle=1;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="290" y="70" width="380" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="core" value="Kedro Core" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="310" y="115" width="155" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="snap" value="get_project_snapshot()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="485" y="115" width="165" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="plugin" value="kedro-lineage plugin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="310" y="195" width="340" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="file" value="File sink" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="310" y="280" width="155" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="http" value="HTTP sink" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="495" y="280" width="155" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="val" value="Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#455A64;" vertex="1" parent="1">
+          <mxGeometry x="310" y="340" width="155" height="28" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="zone3" value="Local Dev (Kedro-Viz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#455A64;fontStyle=1;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="710" y="70" width="200" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="flow" value="Flowchart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="730" y="115" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="wf" value="Workflow view" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="730" y="175" width="160" height="45" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="zone4" value="Enterprise Catalog" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#455A64;fontStyle=1;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="710" y="270" width="460" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="marq" value="Marquez" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="730" y="310" width="130" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="dh" value="DataHub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="880" y="310" width="130" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- static: blue -->
+        <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#1565C0;strokeWidth=2;endArrow=classic;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="cat" target="core"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#1565C0;strokeWidth=2;endArrow=classic;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="core" target="snap"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#1565C0;strokeWidth=2;endArrow=classic;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="snap" target="flow"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- runtime: orange -->
+        <mxCell id="a4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#E65100;strokeWidth=2;endArrow=classic;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="run" target="plugin"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="270" y="280"/><mxPoint x="270" y="222"/></Array></mxGeometry></mxCell>
+        <mxCell id="a5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#E65100;strokeWidth=2;endArrow=classic;exitX=0.25;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="plugin" target="file"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#E65100;strokeWidth=2;endArrow=classic;exitX=0.75;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="plugin" target="http"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="a7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#E65100;strokeWidth=2;endArrow=classic;exitX=1;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="file" target="wf"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="387" y="338"/><mxPoint x="690" y="338"/><mxPoint x="690" y="197"/></Array></mxGeometry></mxCell>
+        <mxCell id="a8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#E65100;strokeWidth=2;endArrow=classic;exitX=1;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="http" target="marq"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="572" y="338"/><mxPoint x="690" y="338"/><mxPoint x="690" y="355"/></Array></mxGeometry></mxCell>
+
+        <!-- validation: purple dashed, routes below boxes via x=280 -->
+        <mxCell id="a9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#6A1B9A;strokeWidth=1;dashed=1;endArrow=classic;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="val" target="plugin"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="387" y="385"/><mxPoint x="280" y="385"/><mxPoint x="280" y="222"/></Array></mxGeometry></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

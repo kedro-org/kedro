@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow-static" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#1565C0"/>
+    </marker>
+    <marker id="arrow-runtime" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E65100"/>
+    </marker>
+    <marker id="arrow-val" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#6A1B9A"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="720" fill="#FFFFFF"/>
+
+  <text x="600" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#263238">Kedro Data Lineage - Architecture Vision</text>
+
+  <!-- Kedro Project -->
+  <rect x="30" y="70" width="220" height="300" rx="6" fill="#E8F5E9" stroke="#455A64" stroke-width="1.5"/>
+  <text x="45" y="95" font-size="13" font-weight="bold" fill="#263238">Kedro Project</text>
+
+  <rect x="50" y="115" width="180" height="50" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="140" y="137" text-anchor="middle" font-size="12" font-weight="bold" fill="#263238">catalog.yml</text>
+  <text x="140" y="153" text-anchor="middle" font-size="9" fill="#546E7A">metadata.kedro, metadata.kedro-viz</text>
+
+  <rect x="50" y="185" width="180" height="50" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="140" y="207" text-anchor="middle" font-size="12" font-weight="bold" fill="#263238">Pipeline</text>
+  <text x="140" y="223" text-anchor="middle" font-size="9" fill="#546E7A">nodes, inputs, outputs</text>
+
+  <rect x="50" y="255" width="180" height="50" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="140" y="277" text-anchor="middle" font-size="12" font-weight="bold" fill="#263238">kedro run</text>
+  <text x="140" y="293" text-anchor="middle" font-size="9" fill="#546E7A">hooks on each step</text>
+
+  <!-- Kedro Platform -->
+  <rect x="290" y="70" width="380" height="300" rx="6" fill="#E3F2FD" stroke="#455A64" stroke-width="1.5"/>
+  <text x="305" y="95" font-size="13" font-weight="bold" fill="#263238">Kedro Platform</text>
+
+  <rect x="310" y="115" width="155" height="50" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="387" y="137" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">Kedro Core</text>
+  <text x="387" y="153" text-anchor="middle" font-size="9" fill="#546E7A">kedro.inspection</text>
+
+  <rect x="485" y="115" width="165" height="50" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="567" y="133" text-anchor="middle" font-size="10" font-weight="bold" fill="#263238">get_project_snapshot()</text>
+  <text x="567" y="150" text-anchor="middle" font-size="9" fill="#546E7A">static graph, Phase 0-1</text>
+
+  <rect x="310" y="195" width="340" height="55" rx="4" fill="#FFFFFF" stroke="#455A64" stroke-width="1.5"/>
+  <text x="480" y="218" text-anchor="middle" font-size="12" font-weight="bold" fill="#263238">kedro-lineage plugin</text>
+  <text x="480" y="235" text-anchor="middle" font-size="9" fill="#546E7A">OpenLineage emitter, built on kedro-openlineage</text>
+
+  <rect x="310" y="280" width="155" height="45" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="387" y="300" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">File sink</text>
+  <text x="387" y="315" text-anchor="middle" font-size="8" fill="#546E7A">.viz/lineage_events.json</text>
+
+  <rect x="495" y="280" width="155" height="45" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="572" y="300" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">HTTP sink</text>
+  <text x="572" y="315" text-anchor="middle" font-size="9" fill="#546E7A">Marquez / DataHub</text>
+
+  <rect x="310" y="340" width="155" height="28" rx="4" fill="#FFF9C4" stroke="#455A64"/>
+  <text x="387" y="358" text-anchor="middle" font-size="8" fill="#263238">Validation: dataQualityAssertions</text>
+
+  <!-- Local Dev -->
+  <rect x="710" y="70" width="200" height="170" rx="6" fill="#FFF3E0" stroke="#455A64" stroke-width="1.5"/>
+  <text x="725" y="95" font-size="13" font-weight="bold" fill="#263238">Local Dev (Kedro-Viz)</text>
+
+  <rect x="730" y="115" width="160" height="45" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="810" y="135" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">Flowchart</text>
+  <text x="810" y="150" text-anchor="middle" font-size="9" fill="#546E7A">static lineage</text>
+
+  <rect x="730" y="175" width="160" height="45" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="810" y="195" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">Workflow view</text>
+  <text x="810" y="210" text-anchor="middle" font-size="9" fill="#546E7A">last run status</text>
+
+  <!-- Enterprise -->
+  <rect x="710" y="270" width="460" height="100" rx="6" fill="#EDE7F6" stroke="#455A64" stroke-width="1.5"/>
+  <text x="725" y="295" font-size="13" font-weight="bold" fill="#263238">Enterprise Catalog</text>
+
+  <rect x="730" y="310" width="130" height="45" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="795" y="338" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">Marquez</text>
+
+  <rect x="880" y="310" width="130" height="45" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="945" y="338" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">DataHub</text>
+
+  <rect x="1030" y="310" width="120" height="45" rx="4" fill="#FFFFFF" stroke="#455A64"/>
+  <text x="1090" y="330" text-anchor="middle" font-size="9" font-weight="bold" fill="#263238">Phase 4 publish</text>
+  <text x="1090" y="345" text-anchor="middle" font-size="8" fill="#546E7A">metadata, columns</text>
+
+  <!-- STATIC LANE (blue, top row y=140) -->
+  <path d="M 230 140 L 310 140" fill="none" stroke="#1565C0" stroke-width="2" marker-end="url(#arrow-static)"/>
+  <path d="M 465 140 L 485 140" fill="none" stroke="#1565C0" stroke-width="2" marker-end="url(#arrow-static)"/>
+  <path d="M 650 140 L 730 140" fill="none" stroke="#1565C0" stroke-width="2" marker-end="url(#arrow-static)"/>
+  <text x="270" y="130" font-size="8" fill="#1565C0">static</text>
+
+  <!-- RUNTIME LANE (orange) -->
+  <!-- kedro run -> plugin via left margin x=270 -->
+  <path d="M 230 280 L 270 280 L 270 222 L 310 222" fill="none" stroke="#E65100" stroke-width="2" marker-end="url(#arrow-runtime)"/>
+  <text x="255" y="268" font-size="8" fill="#E65100">hooks</text>
+
+  <!-- plugin -> sinks (straight down) -->
+  <path d="M 387 250 L 387 280" fill="none" stroke="#E65100" stroke-width="2" marker-end="url(#arrow-runtime)"/>
+  <path d="M 572 250 L 572 280" fill="none" stroke="#E65100" stroke-width="2" marker-end="url(#arrow-runtime)"/>
+
+  <!-- sinks -> shared trunk in gap x=690 (below boxes at y=338) -->
+  <path d="M 387 325 L 387 338 L 690 338" fill="none" stroke="#E65100" stroke-width="2"/>
+  <path d="M 572 325 L 572 338 L 690 338" fill="none" stroke="#E65100" stroke-width="2"/>
+
+  <!-- trunk -> workflow (up in gap, never crosses platform boxes) -->
+  <path d="M 690 338 L 690 197 L 730 197" fill="none" stroke="#E65100" stroke-width="2" marker-end="url(#arrow-runtime)"/>
+  <text x="700" y="270" font-size="8" fill="#E65100">runtime</text>
+
+  <!-- trunk -> marquez (down then right into enterprise) -->
+  <path d="M 690 338 L 690 355 L 730 355" fill="none" stroke="#E65100" stroke-width="2" marker-end="url(#arrow-runtime)"/>
+
+  <!-- VALIDATION (purple dashed, routes left margin x=280, avoids HTTP sink) -->
+  <path d="M 387 368 L 387 385 L 280 385 L 280 222 L 310 222" fill="none" stroke="#6A1B9A" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow-val)"/>
+
+  <!-- ROADMAP -->
+  <text x="30" y="430" font-size="12" font-weight="bold" fill="#263238">Roadmap</text>
+
+  <rect x="30" y="445" width="200" height="55" rx="4" fill="#BBDEFB" stroke="#455A64"/>
+  <text x="130" y="468" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">Phase 0</text>
+  <text x="130" y="486" text-anchor="middle" font-size="10" fill="#546E7A">Inspection API</text>
+
+  <rect x="250" y="445" width="200" height="55" rx="4" fill="#C8E6C9" stroke="#455A64"/>
+  <text x="350" y="468" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">Phase 1</text>
+  <text x="350" y="486" text-anchor="middle" font-size="10" fill="#546E7A">Metadata schema</text>
+
+  <rect x="470" y="445" width="200" height="55" rx="4" fill="#FFE0B2" stroke="#455A64"/>
+  <text x="570" y="468" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">Phase 2</text>
+  <text x="570" y="486" text-anchor="middle" font-size="10" fill="#546E7A">OpenLineage</text>
+
+  <rect x="690" y="445" width="200" height="55" rx="4" fill="#E1BEE7" stroke="#455A64"/>
+  <text x="790" y="468" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">Phase 3</text>
+  <text x="790" y="486" text-anchor="middle" font-size="10" fill="#546E7A">Column lineage</text>
+
+  <rect x="910" y="445" width="200" height="55" rx="4" fill="#FFCCBC" stroke="#455A64"/>
+  <text x="1010" y="468" text-anchor="middle" font-size="11" font-weight="bold" fill="#263238">Phase 4</text>
+  <text x="1010" y="486" text-anchor="middle" font-size="10" fill="#546E7A">Enterprise publish</text>
+
+  <path d="M 230 472 L 250 472" fill="none" stroke="#546E7A" stroke-width="1.2" marker-end="url(#arrow-static)"/>
+  <path d="M 450 472 L 470 472" fill="none" stroke="#546E7A" stroke-width="1.2" marker-end="url(#arrow-static)"/>
+  <path d="M 670 472 L 690 472" fill="none" stroke="#546E7A" stroke-width="1.2" marker-end="url(#arrow-static)"/>
+  <path d="M 890 472 L 910 472" fill="none" stroke="#546E7A" stroke-width="1.2" marker-end="url(#arrow-static)"/>
+
+  <!-- Legend -->
+  <text x="30" y="540" font-size="11" font-weight="bold" fill="#263238">Flow lanes</text>
+  <line x1="30" y1="558" x2="70" y2="558" stroke="#1565C0" stroke-width="2"/>
+  <text x="80" y="562" font-size="10" fill="#1565C0">Static lineage (inspection API)</text>
+  <line x1="30" y1="578" x2="70" y2="578" stroke="#E65100" stroke-width="2"/>
+  <text x="80" y="582" font-size="10" fill="#E65100">Runtime lineage (OpenLineage on kedro run)</text>
+  <line x1="30" y1="598" x2="70" y2="598" stroke="#6A1B9A" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <text x="80" y="602" font-size="10" fill="#6A1B9A">Validation attaches to same events</text>
+</svg>

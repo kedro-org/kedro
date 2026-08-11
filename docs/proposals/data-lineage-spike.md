@@ -379,7 +379,14 @@ Session 3 will cover column lineage and enterprise catalog publishing.
 
 ---
 
-## Appendix B: References
+## Appendix B: Related reading
+
+- [Core vs plugin: why the split is good](data-lineage-core-vs-plugin.md) — comparison with dbt, Dagster, and Airflow; summary of why static lineage lives in core and OpenLineage emission in a plugin
+- [Local setup: kedro-openlineage → Marquez](kedro-openlineage-marquez-local-setup.md) — step-by-step guide for Spike experiment 1
+
+---
+
+## Appendix C: References
 
 - [Kedro #5311: Data quality management](https://github.com/kedro-org/kedro/issues/5311)
 - [Kedro Discussion #4054: OpenLineage exploration](https://github.com/kedro-org/kedro/discussions/4054)

@@ -466,6 +466,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
         importable ``AbstractDataset`` subclasses -- including ones like
         ``kedro_datasets.pickle.PickleDataset`` that execute code on load.
         Default-deny keeps this closed unless a project opts in.
+
+        Checked at every nesting depth, not just each top-level catalog entry:
+        wrapper datasets such as ``CachedDataset`` and ``PartitionedDataset``
+        accept a nested dataset config (e.g. a ``dataset:`` key) with its own
+        ``type``, which reaches the same ``AbstractDataset.from_config`` /
+        ``load_obj`` path as a top-level entry.
         """
         raw_container = OmegaConf.to_container(
             OmegaConf.unsafe_merge(*aggregate_config), resolve=False
@@ -474,36 +480,62 @@ class OmegaConfigLoader(AbstractConfigLoader):
         allowed_prefixes = self.dataset_modules_whitelist
 
         for dataset_name, raw_entry in raw_container.items():
-            if not isinstance(raw_entry, dict):
-                continue
-            raw_type = raw_entry.get("type")
-            if not isinstance(raw_type, str) or _RUNTIME_PARAMS_MARKER not in raw_type:
-                continue
-
-            # A `type` string can reference `runtime_params:` more than once
-            # (e.g. concatenated resolver calls); treat it as attacker-influenced
-            # if *any* of them actually hit a runtime_params value.
-            variables = [
-                v.strip() for v in _RUNTIME_PARAMS_VARIABLE_RE.findall(raw_type)
-            ]
-            if not variables or not any(
-                v in self._runtime_params_hits for v in variables
+            resolved_entry = merged_config_container.get(dataset_name)
+            for raw_node, resolved_node in self._iter_nested_dicts(
+                raw_entry, resolved_entry
             ):
-                # `runtime_params:` appears in the raw string, but no actual
-                # runtime_params value was used for it -- it fell back to a
-                # resolver default (e.g. a `globals:` value), so it isn't
-                # attacker-influenced.
-                continue
+                raw_type = raw_node.get("type")
+                if (
+                    not isinstance(raw_type, str)
+                    or _RUNTIME_PARAMS_MARKER not in raw_type
+                ):
+                    continue
 
-            resolved_type = merged_config_container.get(dataset_name, {}).get("type")
-            if not _is_dataset_module_allowed(resolved_type, allowed_prefixes):
-                raise InterpolationResolutionError(
-                    f"Dataset '{dataset_name}' resolves its 'type' via the "
-                    f"'runtime_params:' resolver to '{resolved_type}', which is not "
-                    "permitted. Runtime parameters must not select which dataset "
-                    "class is instantiated unless its module is explicitly listed "
-                    "in 'dataset_modules_whitelist' (settable via 'CONFIG_LOADER_ARGS' "
-                    "in settings.py)."
+                # A `type` string can reference `runtime_params:` more than
+                # once (e.g. concatenated resolver calls); treat it as
+                # attacker-influenced if *any* of them actually hit a
+                # runtime_params value.
+                variables = [
+                    v.strip() for v in _RUNTIME_PARAMS_VARIABLE_RE.findall(raw_type)
+                ]
+                if not variables or not any(
+                    v in self._runtime_params_hits for v in variables
+                ):
+                    # `runtime_params:` appears in the raw string, but no
+                    # actual runtime_params value was used for it -- it fell
+                    # back to a resolver default (e.g. a `globals:` value), so
+                    # it isn't attacker-influenced.
+                    continue
+
+                resolved_type = resolved_node.get("type")
+                if not _is_dataset_module_allowed(resolved_type, allowed_prefixes):
+                    raise InterpolationResolutionError(
+                        f"Dataset '{dataset_name}' resolves a 'type' field via "
+                        f"the 'runtime_params:' resolver to '{resolved_type}', "
+                        "which is not permitted. Runtime parameters must not "
+                        "select which dataset class is instantiated -- at any "
+                        "nesting depth -- unless its module is explicitly "
+                        "listed in 'dataset_modules_whitelist' (settable via "
+                        "'CONFIG_LOADER_ARGS' in settings.py)."
+                    )
+
+    @staticmethod
+    def _iter_nested_dicts(
+        raw_node: Any, resolved_node: Any
+    ) -> typing.Generator[tuple[dict, dict], None, None]:
+        """Yield ``(raw_node, resolved_node)`` for ``raw_node`` and every dict
+        nested within it, pairing each with the corresponding resolved
+        sub-tree by key so callers can compare a field's raw (unresolved) and
+        resolved values at any depth.
+        """
+        if not isinstance(raw_node, dict):
+            return
+        resolved_node = resolved_node if isinstance(resolved_node, dict) else {}
+        yield raw_node, resolved_node
+        for key, raw_value in raw_node.items():
+            if isinstance(raw_value, dict):
+                yield from OmegaConfigLoader._iter_nested_dicts(
+                    raw_value, resolved_node.get(key)
                 )
 
     @staticmethod

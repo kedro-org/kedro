@@ -1244,6 +1244,58 @@ class TestOmegaConfigLoader:
         with pytest.raises(InterpolationResolutionError, match="not permitted"):
             _ = conf["catalog"]
 
+    def test_runtime_params_resolution_in_nested_dataset_type(self, tmp_path):
+        """A `type` resolved via `runtime_params:` inside a nested dataset config
+        (e.g. `CachedDataset`'s `dataset:` sub-config) is guarded, not just the
+        top-level catalog entry's own `type`."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "CachedDataset",
+                "dataset": {
+                    "type": "${runtime_params:dataset.type}",
+                    "filepath": "${runtime_params:dataset.path}",
+                },
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={
+                "dataset": {
+                    "type": "kedro_datasets.pickle.PickleDataset",
+                    "path": "/tmp/evil.pkl",
+                }
+            },
+        )
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
+
+    def test_runtime_params_resolution_in_nested_dataset_type_with_whitelist(
+        self, tmp_path
+    ):
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "CachedDataset",
+                "dataset": {
+                    "type": "${runtime_params:dataset.type}",
+                    "filepath": "data/01_raw/companies.csv",
+                },
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={"dataset": {"type": "pandas.CSVDataset"}},
+            dataset_modules_whitelist=["pandas"],
+        )
+        assert conf["catalog"]["companies"]["dataset"]["type"] == "pandas.CSVDataset"
+
     def test_runtime_params_resolution_with_soft_merge_base_env(self, tmp_path):
         """Test that runtime_params get softly merged with the base environment when soft merge is set
         for parameter merge"""

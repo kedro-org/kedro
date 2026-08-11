@@ -1,6 +1,7 @@
 import logging
 import re
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pytest
 
@@ -722,3 +723,39 @@ class TestKedroServiceSession:
             session._enable_serving_mode()
 
         assert session._serving_mode is False
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_serving_mode_concurrent_runs_do_not_raise(
+        self, fake_project, mock_runner, mocker
+    ):
+        """Stress test: many threads calling run() concurrently on a serving_mode=True
+        session must not raise. Pipelines are preloaded once during create() and never
+        mutated per-request, so concurrent run() calls should only read shared state."""
+        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        mocker.patch(
+            "kedro.framework.session.service_session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_runner.__name__ = "SequentialRunner"
+
+        session = KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id", serving_mode=True
+        )
+
+        num_threads = 20
+        with ThreadPoolExecutor(max_workers=num_threads) as executor:
+            futures = [
+                executor.submit(
+                    session.run,
+                    runner=mock_runner,
+                    pipeline_names=[_FAKE_PIPELINE_NAME],
+                )
+                for _ in range(num_threads)
+            ]
+            # future.result() re-raises any exception that occurred in the thread.
+            results = [future.result() for future in as_completed(futures)]
+
+        assert len(results) == num_threads

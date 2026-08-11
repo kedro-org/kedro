@@ -1,4 +1,4 @@
-# Data Lineage for Kedro: Spike and Tech Design
+# Data Lineage for Kedro: Tech Design
 
 **Context:** [Kedro #5311: Data quality management for Kedro pipelines](https://github.com/kedro-org/kedro/issues/5311). This issue covers validation, profiling, monitoring, and lineage. **This doc focuses on lineage.**
 
@@ -23,6 +23,108 @@ This doc supports a **three session tech design series** on data lineage for Ked
 | [DataHub](https://datahubproject.io/) | Full enterprise data catalog: search, ownership, documentation, governance, and lineage. Broader than Marquez, but also ingests OpenLineage events |
 
 Both Marquez and DataHub can receive the same OpenLineage events from Kedro. Marquez is lineage-first. DataHub is for teams that want lineage as part of a wider org-wide catalog.
+
+---
+
+# Session 1: Vision and direction
+
+## 1.1 What are we trying to solve?
+
+When a pipeline grows, people start asking questions that are hard to answer without lineage:
+
+- Where did this dataset come from?
+- If I change this table, what breaks downstream?
+- Which step introduced the bad data?
+- Can we prove to compliance where this number came from?
+
+**Data lineage** is the map that answers those questions. It tracks data from its source, through every transformation, to wherever it ends up (e.g. raw CSV → clean data → feature table → model input or dashboard).
+
+Lineage comes in a few flavours :
+
+| Type | What it shows |
+|------|---------------|
+| **Table level** | Which dataset feeds which |
+| **Column level** | Which field came from which field |
+| **Static** | Dependencies from code, no run needed |
+| **Runtime** | What happened in a specific run |
+| **Business** | Owners, definitions, downstream consumers |
+
+For Kedro, the goal is not to build a full enterprise data catalog like DataHub or Marquez. We want to give developers a static view inside Kedro-Viz, and connect to DataHub or Marquez when teams need more.
+
+---
+
+## 1.2 What others do (and where we plug in)
+
+Kedro is closest to **dbt** (dependencies declared in code), but our transforms are Python, not SQL.
+
+**Frameworks we can learn from**:
+
+| Tool | How they do lineage | Takeaway for Kedro |
+|------|----------------------|-------------------|
+| **dbt** | Each model declares parents with `ref()`. dbt exports a dependency map (`parent_map`) in `manifest.json` | Kedro nodes already declare `inputs`/`outputs`. Kedro-Viz builds the same dependency graph. We need to export it in a standard format |
+| **Dagster** | Each dataset is an `@asset` with declared deps (e.g. `deps=["raw_orders"]`). Dagster auto-builds the dependency graph in its UI. When an asset runs, `MaterializeResult(metadata={...})` attaches row counts, schemas, or column lineage to that run | Kedro nodes already declare `inputs`/`outputs` (static graph). Use hooks at execution time (`after_node_run`) to attach the same kind of runtime metadata to OpenLineage events |
+| **Airflow** | OpenLineage plugin sends events on each task run | Same pattern. A community [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage) proof of concept already exists |
+
+---
+
+## 1.3 What Kedro already has
+
+### Why Kedro is in a good place to do this:
+
+| Reason | Detail |
+|--------|--------|
+| We already have the graph | Nodes declare inputs and outputs. The dependency map is already there |
+| Inspection API exists | `get_project_snapshot()` exports structure without running the pipeline |
+| Workflow view exists | Kedro-Viz 12+ tracks run events |
+| The industry uses OpenLineage | DataHub and Marquez expect a standard format. We should plug in rather than invent our own |
+
+### Why the Workflow view is not enough
+
+The Flowchart and Workflow view are useful for local debugging. Together they cover static dependencies and the status of your last run. That is not the same as full lineage.
+
+| Need | Flowchart + Workflow enough? |
+|------|------------------------------|
+| Debug my pipeline locally | Yes, mostly |
+| See last run status and timings | Yes |
+| Run history over time | No |
+| Share lineage with platform or compliance teams | No |
+| Connect Kedro to the rest of the data stack | No |
+| Column level lineage | No |
+| Owners, consumers, impact analysis | No |
+| Attach validation results to datasets | No |
+
+Three gaps in particular:
+
+1. **Local and single run.** The Workflow view only shows the most recent run on your machine. There is no history, no audit trail, no "what ran in prod last Tuesday?"
+2. **Custom format.** Events live in `.viz/kedro_pipeline_events.json`. DataHub and Marquez cannot read that. Other tools in the stack use [OpenLineage](https://openlineage.io/).
+3. **Kedro boundary.** The graph stops at your pipeline. It cannot show upstream sources, downstream dashboards, or column level dependencies.
+
+We are not replacing the Workflow view. We are extending what it starts: keep Kedro-Viz for local dev.
+
+### Community plugin: [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage)
+
+This is a good starting point for Phase 2. Juan Luis Cano built it as part of [Discussion #4054](https://github.com/kedro-org/kedro/discussions/4054). The repo is archived now and was never published to PyPI (`0.1.dev0`, install from GitHub only), but it already proves the core idea: Kedro hooks → OpenLineage events → Marquez. It listens to `before_node_run` and `after_node_run`, emits START/COMPLETE events over HTTP, and was demo'd on spaceflights.
+
+What's still missing: a file sink for Kedro-Viz, FAIL events, one run ID per `kedro run`, dataset load/save events, validation facets, and column lineage.
+We should have an official plugin extending it filling the gaps above.
+
+---
+
+## 1.4 Direction: what are we proposing
+
+### Architecture vision
+
+![Kedro Data Lineage architecture vision](images/data-lineage-architecture.svg)
+
+### The big picture: four pieces, four roles
+
+| Piece | Role | Who uses it |
+|-------|------|-------------|
+| **Kedro core** (`kedro.inspection`) | Export the pipeline graph without running it | Kedro-Viz, CI, tooling (In progress) |
+| **kedro-openlineageplugin** | Listen to Kedro hooks during `kedro run`, write OpenLineage events | Runs automatically on every pipeline run |
+| **Kedro-Viz** | Show the graph and last run status for local development | Developers at their laptop |
+| **DataHub / Marquez** | Store and search lineage across the whole org | Platform teams, compliance, downstream consumers |
+
 
 **Kedro hooks → OpenLineage events**
 
@@ -66,135 +168,12 @@ OpenLineage (Phase 2 target):
 }
 ```
 
----
-
-# Session 1: Vision and direction
-
-## 1.1 What are we trying to solve?
-
-When a pipeline grows, people start asking questions that are hard to answer without lineage:
-
-- Where did this dataset come from?
-- If I change this table, what breaks downstream?
-- Which step introduced the bad data?
-- Can we prove to compliance where this number came from?
-
-**Data lineage** is the map that answers those questions. It tracks data from its source, through every transformation, to wherever it ends up (e.g. raw CSV → clean data → feature table → model input or dashboard).
-
-Lineage comes in a few flavours. Most teams need more than one:
-
-| Type | What it shows |
-|------|---------------|
-| **Table level** | Which dataset feeds which |
-| **Column level** | Which field came from which field |
-| **Static** | Dependencies from code, no run needed |
-| **Runtime** | What happened in a specific run |
-| **Business** | Owners, definitions, downstream consumers |
-
-For Kedro, the goal is not to build a full enterprise data catalog. We want to give developers a clear picture inside Kedro-Viz, and connect to DataHub or Marquez when teams need more.
-
----
-
-## 1.2 Why now?
-
-The current issue covers validation, profiling, monitoring, and lineage. Kedro's catalog already lists dataset names in `catalog.yml`. That part we have.
-
-What's missing is the **context around those datasets**:
-
-For example, validation might fail on `model_input_table`. The catalog tells you the dataset exists. Lineage tells you it was built by `create_model_input_node` from `preprocessed_companies` and `shuttles`, and that `train_model_node` depends on it downstream.
-
-That context is what ties these features together. They share the same dependency graph and the same runtime events, not just the same dataset names.
-
-**Why Kedro is in a good place to do this:**
-
-| Reason | Detail |
-|--------|--------|
-| We already have the graph | Nodes declare inputs and outputs. The dependency map is already there |
-| Inspection API exists | `get_project_snapshot()` exports structure without running the pipeline |
-| Workflow view exists | Kedro-Viz 12+ tracks run events |
-| The industry uses OpenLineage | DataHub and Marquez expect a standard format. We should plug in rather than invent our own |
-
 **What success looks like:**
 
 1. A developer opens Kedro-Viz and immediately sees how data flows (this mostly works today).
 2. After a run, they can see what succeeded, failed, and how long things took (Workflow view).
-3. In production, lineage flows to an **enterprise data catalog** like Marquez or DataHub.
-4. Validation and quality results attach to the same lineage events.
-
----
-
-## 1.3 What others do (and where we plug in)
-
-Kedro is closest to **dbt** (dependencies declared in code), but our transforms are Python, not SQL.
-
-**Frameworks we can learn from**:
-
-| Tool | How they do lineage | Takeaway for Kedro |
-|------|----------------------|-------------------|
-| **dbt** | Each model declares parents with `ref()`. dbt exports a dependency map (`parent_map`) in `manifest.json` | Kedro nodes already declare `inputs`/`outputs`. Kedro-Viz builds the same dependency graph. We need to export it in a standard format |
-| **Dagster** | Each dataset is an `@asset` with declared deps (e.g. `deps=["raw_orders"]`). Dagster auto-builds the dependency graph in its UI. When an asset runs, `MaterializeResult(metadata={...})` attaches row counts, schemas, or column lineage to that run | Kedro nodes already declare `inputs`/`outputs` (static graph). Use hooks at execution time (`after_node_run`) to attach the same kind of runtime metadata to OpenLineage events |
-| **Airflow** | OpenLineage plugin sends events on each task run | Same pattern. A community [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage) proof of concept already exists |
-
----
-
-## 1.4 What Kedro already has
-
-| Feature | Status | Lineage type |
-|---------|--------|--------------|
-| Pipeline flowchart | Works | Static, table level |
-| Workflow view | Works (v12+) | Runtime, single run |
-| Inspection API | In Kedro core. Kedro-Viz adoption in progress (Phase 0) | Static export (`ProjectSnapshot`) |
-| Dataset stats and previews | Works | Basic profiling |
-| OpenLineage integration | Community PoC exists (see below) | Runtime to enterprise catalog |
-| Column level lineage | Missing | |
-| Run history | Missing (last run only) | |
-
-### Why the Workflow view is not enough
-
-The Flowchart and Workflow view are useful for local debugging. Together they cover static dependencies and the status of your last run. That is not the same as full lineage.
-
-| Need | Flowchart + Workflow enough? |
-|------|------------------------------|
-| Debug my pipeline locally | Yes, mostly |
-| See last run status and timings | Yes |
-| Run history over time | No |
-| Share lineage with platform or compliance teams | No |
-| Connect Kedro to the rest of the data stack | No |
-| Column level lineage | No |
-| Owners, consumers, impact analysis | No |
-| Attach validation results to datasets | No |
-
-Three gaps in particular:
-
-1. **Local and single run.** The Workflow view only shows the most recent run on your machine. There is no history, no audit trail, no "what ran in prod last Tuesday?"
-2. **Custom format.** Events live in `.viz/kedro_pipeline_events.json`. DataHub and Marquez cannot read that. Other tools in the stack use [OpenLineage](https://openlineage.io/).
-3. **Kedro boundary.** The graph stops at your pipeline. It cannot show upstream sources, downstream dashboards, or column level dependencies.
-
-We are not replacing the Workflow view. We are extending what it starts: keep Kedro-Viz for local dev.
-
-### Community plugin: [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage)
-
-This is a good starting point for Phase 2. Juan Luis Cano built it as part of [Discussion #4054](https://github.com/kedro-org/kedro/discussions/4054). The repo is archived now and was never published to PyPI (`0.1.dev0`, install from GitHub only), but it already proves the core idea: Kedro hooks → OpenLineage events → Marquez. It listens to `before_node_run` and `after_node_run`, emits START/COMPLETE events over HTTP, and was demo'd on spaceflights.
-
-What's still missing: a file sink for Kedro-Viz, FAIL events, one run ID per `kedro run`, dataset load/save events, validation facets, and column lineage.
-We should have an official plugin extending it filling the gaps above.
-
----
-
-## 1.5 Direction: what are we proposing
-
-### Architecture vision
-
-![Kedro Data Lineage architecture vision](images/data-lineage-architecture.svg)
-
-### The big picture: four pieces, four roles
-
-| Piece | Role | Who uses it |
-|-------|------|-------------|
-| **Kedro core** (`kedro.inspection`) | Export the pipeline graph without running it | Kedro-Viz, CI, tooling (In progress) |
-| **kedro-lineage plugin** | Listen to Kedro hooks during `kedro run`, write OpenLineage events | Runs automatically on every pipeline run |
-| **Kedro-Viz** | Show the graph and last run status for local development | Developers at their laptop |
-| **DataHub / Marquez** | Store and search lineage across the whole org | Platform teams, compliance, downstream consumers |
+3. In production, lineage flows to an **enterprise data catalog** like Marquez or DataHub. (Current spike work target)
+4. Validation and quality results attach to the same lineage events. (Sajid's validation work + Current spike work target)
 
 ---
 
@@ -294,13 +273,13 @@ Five phases. Sessions 2 and 3 will go into the detail for each.
 |-------|------|---------------|
 | **0** | Kedro-Viz uses `get_project_snapshot()` (**in progress**). Structure only: pipelines, nodes, datasets (name, type, filepath) | Kedro core and Kedro-Viz |
 | **1** | Define the `metadata.kedro` schema. Extend snapshot to include metadata. Document that the flowchart is table level lineage | Kedro docs, Kedro core, and Kedro-Viz |
-| **2** | Single OpenLineage emitter with file output (Workflow view) and HTTP output (Marquez). Validation attaches via `dataQualityAssertions` | kedro-lineage plugin |
-| **3** | Column lineage via runtime discovery (pandas passthrough, Spark OpenLineage). Column tab in viz | kedro-lineage plugin and Kedro-Viz |
-| **4** | Publish structure, columns, and metadata from Phases 0 to 3 to enterprise catalog. Impact maps and consumers | kedro-lineage plugin |
+| **2** | Single OpenLineage emitter with file output (Workflow view) and HTTP output (Marquez). Validation attaches via `dataQualityAssertions` | kedro-openlineage plugin |
+| **3** | Column lineage via runtime discovery (pandas passthrough, Spark OpenLineage). Column tab in viz | kedro-openlineage plugin and Kedro-Viz |
+| **4** | Publish structure, columns, and metadata from Phases 0 to 3 to enterprise catalog. Impact maps and consumers | kedro-openlineage plugin |
 
 ---
 
-# Session 2: Phases 0 to 2 in depth
+# Session 2: Phases 0 to 2 in depth (Optional)
 
 > **Status:** To be filled in after Session 1 alignment.
 
@@ -346,7 +325,7 @@ In the Marquez or DataHub UI you can browse all runs for a job, compare success/
 
 ---
 
-# Session 3: Phases 3 to 4 in depth
+# Session 3: Phases 3 to 4 in depth (Optional)
 
 > **Status:** To be filled in after Session 2.
 

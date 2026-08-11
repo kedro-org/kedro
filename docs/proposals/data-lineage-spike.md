@@ -103,10 +103,16 @@ We are not replacing the Workflow view. We are extending what it starts: keep Ke
 
 ### Community plugin: [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage)
 
-This is a good starting point for Phase 2. Juan Luis Cano built it as part of [Discussion #4054](https://github.com/kedro-org/kedro/discussions/4054). The repo is archived now and was never published to PyPI (`0.1.dev0`, install from GitHub only), but it already proves the core idea: Kedro hooks → OpenLineage events → Marquez. It listens to `before_node_run` and `after_node_run`, emits START/COMPLETE events over HTTP, and was demo'd on spaceflights.
+This is a good starting point. Juan Luis, built it as part of [Discussion #4054](https://github.com/kedro-org/kedro/discussions/4054). The repo is archived now and was never published to PyPI (`0.1.dev0`, install from GitHub only), but it already proves the core idea: Kedro hooks → OpenLineage events → Marquez. It listens to `before_node_run` and `after_node_run`, emits START/COMPLETE events over HTTP.
 
-What's still missing: a file sink for Kedro-Viz, FAIL events, one run ID per `kedro run`, dataset load/save events, validation facets, and column lineage.
-We should have an official plugin extending it filling the gaps above.
+**What is still missing:**
+
+- A file sink for Kedro-Viz workflow view
+- FAIL events
+- One run ID per `kedro run`
+- Dataset load/save events
+- Validation facets
+- Column lineage
 
 ---
 
@@ -121,10 +127,13 @@ We should have an official plugin extending it filling the gaps above.
 | Piece | Role | Who uses it |
 |-------|------|-------------|
 | **Kedro core** (`kedro.inspection`) | Export the pipeline graph without running it | Kedro-Viz, CI, tooling (In progress) |
-| **kedro-openlineageplugin** | Listen to Kedro hooks during `kedro run`, write OpenLineage events | Runs automatically on every pipeline run |
+| **kedro-openlineage plugin** | Listen to Kedro hooks during `kedro run`, write OpenLineage events | Runs automatically on every pipeline run |
 | **Kedro-Viz** | Show the graph and last run status for local development | Developers at their laptop |
 | **DataHub / Marquez** | Store and search lineage across the whole org | Platform teams, compliance, downstream consumers |
 
+---
+
+**Example:**
 
 **Kedro hooks → OpenLineage events**
 
@@ -150,23 +159,25 @@ OpenLineage (Phase 2 target):
     "runId": "f0e82968-10d8-4a3a-b2c0-db7e2b8b48f7"
   },
   "job": {
-    "namespace": "spaceflights",
-    "name": "preprocess_companies_node"
+    "namespace": "ingestion",
+    "name": "apply_types_to_companies"
   },
   "inputs": [
     {
-      "namespace": "spaceflights",
+      "namespace": "ingestion",
       "name": "companies"
     }
   ],
   "outputs": [
     {
-      "namespace": "spaceflights",
-      "name": "preprocessed_companies"
+      "namespace": "ingestion",
+      "name": "int_typed_companies"
     }
   ]
 }
 ```
+
+---
 
 **What success looks like:**
 
@@ -253,7 +264,7 @@ model_input_table:
 
 **The question:** Does validation get its own event stream?
 
-**Our proposal:** No. Validation hooks attach results to the same OpenLineage RunEvents via the `dataQualityAssertions` facet. One event stream for lineage and quality.
+**Our proposal:** No. Validation hooks attach results to the same OpenLineage RunEvents via the [dataQualityAssertions](https://openlineage.io/docs/next/spec/facets/dataset-facets/data_quality_assertions/) facet. One event stream for lineage and quality.
 
 **Why:** When a check fails on `model_input_table`, you want to see that failure on the lineage graph next to the dataset, not in a separate system. OpenLineage already supports this facet.
 

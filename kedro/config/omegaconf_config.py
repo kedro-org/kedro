@@ -480,9 +480,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
             if not isinstance(raw_type, str) or _RUNTIME_PARAMS_MARKER not in raw_type:
                 continue
 
-            match = _RUNTIME_PARAMS_VARIABLE_RE.search(raw_type)
-            variable = match.group(1).strip() if match else None
-            if variable is None or variable not in self._runtime_params_hits:
+            # A `type` string can reference `runtime_params:` more than once
+            # (e.g. concatenated resolver calls); treat it as attacker-influenced
+            # if *any* of them actually hit a runtime_params value.
+            variables = [
+                v.strip() for v in _RUNTIME_PARAMS_VARIABLE_RE.findall(raw_type)
+            ]
+            if not variables or not any(
+                v in self._runtime_params_hits for v in variables
+            ):
                 # `runtime_params:` appears in the raw string, but no actual
                 # runtime_params value was used for it -- it fell back to a
                 # resolver default (e.g. a `globals:` value), so it isn't

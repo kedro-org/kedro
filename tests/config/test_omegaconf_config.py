@@ -1191,6 +1191,59 @@ class TestOmegaConfigLoader:
         with pytest.raises(InterpolationResolutionError, match="not permitted"):
             _ = conf["catalog"]
 
+    def test_runtime_params_resolution_in_catalog_type_bare_name(self, tmp_path):
+        """A bare (non-dotted) class name resolved via `runtime_params:` is rejected
+        unless "" is explicitly whitelisted, since its module can't be verified."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:dataset.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={"dataset": {"type": "MemoryDataset"}},
+        )
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
+
+        conf_allowed = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={"dataset": {"type": "MemoryDataset"}},
+            dataset_modules_whitelist=[""],
+        )
+        assert conf_allowed["catalog"]["companies"]["type"] == "MemoryDataset"
+
+    def test_runtime_params_resolution_in_catalog_type_multiple_references(
+        self, tmp_path
+    ):
+        """A `type` field concatenating two `runtime_params:` resolver calls is
+        guarded even when only the second one is an actual runtime_params hit."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:prefix, 'kedro_datasets.pickle.'}${runtime_params:cls}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            # "prefix" is not supplied (falls back to its default), but "cls" is
+            # a real runtime_params hit -- the guard must still catch it.
+            runtime_params={"cls": "PickleDataset"},
+        )
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
+
     def test_runtime_params_resolution_with_soft_merge_base_env(self, tmp_path):
         """Test that runtime_params get softly merged with the base environment when soft merge is set
         for parameter merge"""

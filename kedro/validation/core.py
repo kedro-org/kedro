@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from kedro.utils import load_obj
+from kedro.validation.exceptions import ValidationConfigurationError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -33,20 +34,10 @@ _ALLOWED_SPEC_KEYS = (
 _VALID_MODES = ("load", "save")
 _VALID_SEVERITIES = ("error", "warn")
 
-# Bounds that keep a rendered validation error readable no matter how large the
-# validated data is; the full backend report stays available on `__cause__`.
-#: Maximum number of failure examples captured per check.
-_MAX_FAILURE_EXAMPLES = 5
-#: Maximum number of failed checks rendered by `DataValidationError.__str__`.
-_MAX_RENDERED_FAILURES = 10
-#: Maximum length of a rendered failure example.
-_MAX_EXAMPLE_REPR_LEN = 40
-#: Maximum length of a rendered check name or fallback message.
-_MAX_LABEL_LEN = 200
-#: Maximum length of a rendered column name.
-_MAX_COLUMN_LEN = 60
-#: Maximum length of a rendered fallback message.
-_MAX_MESSAGE_LEN = 500
+_PANDERA_INSTALL_HINT = (
+    "Install it with: pip install 'kedro[pandera-pandas]' "
+    "(or the pandera-polars extra for the polars backend)."
+)
 
 
 @runtime_checkable
@@ -66,121 +57,6 @@ class Validator(Protocol):
         """
 
 
-@dataclass(frozen=True)
-class CheckFailure:
-    """A single failed check, optionally grouped over multiple failure cases.
-
-    Attributes:
-        message: Human-readable description of the failure.
-        check: Name of the failed check (e.g. `greater_than_or_equal_to(0)`).
-        column: Column the check applies to, if column-scoped.
-        failure_count: Number of failure cases grouped under this check.
-        failure_examples: Sample of failing values (capped, default cap 5).
-        index: Index/location of the first failure case, if available.
-    """
-
-    message: str
-    check: str | None = None
-    column: str | None = None
-    failure_count: int = 1
-    failure_examples: list[Any] = field(default_factory=list)
-    index: Any | None = None
-
-
-def _truncate(value: Any, limit: int) -> str:
-    """Render `value` as a string of at most `limit` characters."""
-    text = str(value)
-    if len(text) > limit:
-        text = text[: limit - 3] + "..."
-    return text
-
-
-class DataValidationError(Exception):
-    """Raised when dataset validation fails.
-
-    Attributes:
-        message: The base error message.
-        dataset_name: Name of the dataset that failed validation.
-        mode: The operation during which validation failed
-            (`"load"`, `"save"` or `"api"`).
-        validator: Class path of the validator that raised the failure.
-        failures: Structured list of :class:`CheckFailure` objects.
-
-    The rendered message (`str(exc)`) is bounded regardless of the size of
-    the validated data; the full backend report remains available on
-    `__cause__`.
-    """
-
-    def __init__(
-        self,
-        message: str,
-        *,
-        dataset_name: str | None = None,
-        mode: str | None = None,
-        validator: str | None = None,
-        failures: list[CheckFailure] | None = None,
-    ) -> None:
-        super().__init__(message)
-        self.message = message
-        self.dataset_name = dataset_name
-        self.mode = mode
-        self.validator = validator
-        self.failures: list[CheckFailure] = list(failures) if failures else []
-
-    @staticmethod
-    def _render_failure(failure: CheckFailure) -> str:
-        """Render one grouped check failure as a single bounded line.
-
-        Each part is capped separately so that a long column name still leaves
-        room for the check that failed.
-        """
-        detail = _truncate(failure.check or failure.message, _MAX_LABEL_LEN)
-        if failure.column:
-            label = f"{_truncate(failure.column, _MAX_COLUMN_LEN)}: {detail}"
-        else:
-            label = detail
-        cases = "case" if failure.failure_count == 1 else "cases"
-        line = f"{label} — {failure.failure_count} {cases}"
-        if failure.failure_examples:
-            examples = ", ".join(
-                _truncate(example, _MAX_EXAMPLE_REPR_LEN)
-                for example in failure.failure_examples[:_MAX_FAILURE_EXAMPLES]
-            )
-            line += f" (e.g. {examples})"
-        return line
-
-    def __str__(self) -> str:
-        if self.dataset_name:
-            header = f"Validation failed for dataset '{self.dataset_name}'"
-            if self.mode:
-                header += f" on {self.mode}"
-        else:
-            header = self.message or "Validation failed"
-        lines = [_truncate(header, _MAX_MESSAGE_LEN)]
-        if self.validator:
-            lines.append(f"(validator: {self.validator})")
-        if self.failures:
-            total_cases = sum(failure.failure_count for failure in self.failures)
-            lines.append(
-                f"{len(self.failures)} check(s) failed — "
-                f"{total_cases} failure case(s):"
-            )
-            for failure in self.failures[:_MAX_RENDERED_FAILURES]:
-                lines.append(f"  - {self._render_failure(failure)}")
-            hidden = len(self.failures) - _MAX_RENDERED_FAILURES
-            if hidden > 0:
-                lines.append(f"  ... and {hidden} more check(s)")
-        elif self.dataset_name and self.message:
-            lines.append(_truncate(self.message, _MAX_MESSAGE_LEN))
-        return "\n".join(lines)
-
-
-class ValidationConfigurationError(Exception):
-    """Raised when a `validator:` declaration is invalid or unresolvable."""
-
-    pass
-
-
 def _parse_on_modes(value: Any, ds_name: str) -> tuple[str, ...]:
     """Normalise and validate the `on` field of a validator declaration."""
     if isinstance(value, str):
@@ -195,7 +71,9 @@ def _parse_on_modes(value: Any, ds_name: str) -> tuple[str, ...]:
             f"'on' must be a non-empty subset of {list(_VALID_MODES)}, "
             f"got {value!r}."
         )
-    return on
+    # Canonicalise so every declaration has one representation: deduplicated,
+    # in ("load", "save") order.
+    return tuple(mode for mode in _VALID_MODES if mode in on)
 
 
 @dataclass(frozen=True)
@@ -210,6 +88,9 @@ class ValidatorSpec:
         skip_load_after_save: Skip load-validation when the same catalog
             instance already validated the dataset on save in this process.
         options: Keyword options forwarded to the validator/adapter.
+
+    Attributes are read-only after construction. Instances are not hashable,
+    and `options` is a plain dict, copied at parse time.
     """
 
     class_path: str
@@ -379,11 +260,7 @@ def _import_error_hint(missing: str) -> str:
     if missing == "pandera" or (
         missing.startswith("pandera.") and importlib.util.find_spec("pandera") is None
     ):
-        return (
-            "The 'pandera' package is not installed. "
-            "Install it with: pip install 'kedro[pandera-pandas]' "
-            "(or the pandera-polars / pandera-pyspark extra for your backend)"
-        )
+        return f"The 'pandera' package is not installed. {_PANDERA_INSTALL_HINT}"
     if missing.startswith("pandera."):
         return (
             f"pandera is installed but '{missing}' could not be imported; "
@@ -438,13 +315,23 @@ def resolve_validator(spec: ValidatorSpec) -> Validator:
             return result
 
     if inspect.isclass(obj):
+        # Reject before constructing anything: instantiating an arbitrary
+        # class just to discover it is not a validator can have side effects.
+        if not callable(getattr(obj, "validate", None)):
+            raise ValidationConfigurationError(
+                f"Validator '{spec.class_path}' resolved to class "
+                f"{obj.__name__}, which does not provide a 'validate(data)' "
+                f"method."
+            )
         # NEVER isinstance-check the class object itself against the
         # runtime-checkable Protocol: it matches any class merely defining
         # a `validate` method and would return the uninstantiated class,
         # silently dropping options.
         try:
             instance = obj(**spec.options)
-        except TypeError as exc:
+        except Exception as exc:
+            # Constructors are free to validate their own arguments with any
+            # exception type; all of them are configuration errors here.
             raise ValidationConfigurationError(
                 f"Could not instantiate validator '{spec.class_path}' with "
                 f"options {spec.options!r}: {exc}"
@@ -493,13 +380,14 @@ def preflight_check(specs: dict[str, ValidatorSpec]) -> list[str]:
 
     Returns:
         A list of warning strings, one per dataset whose validator's
-        top-level package cannot be found.
+        top-level package cannot be found. Nothing is logged here; the
+        caller decides how to emit them.
     """
-    warnings: list[str] = []
+    messages: list[str] = []
     for ds_name, spec in specs.items():
         top_level = spec.class_path.split(".")[0]
         if not top_level:
-            warnings.append(
+            messages.append(
                 f"Validator for dataset '{ds_name}' has an invalid class "
                 f"path {spec.class_path!r}."
             )
@@ -509,16 +397,10 @@ def preflight_check(specs: dict[str, ValidatorSpec]) -> list[str]:
         except (ImportError, ValueError):
             found = None
         if found is None:
-            hint = ""
-            if top_level == "pandera":
-                hint = (
-                    " Install it with: pip install 'kedro[pandera-pandas]' "
-                    "(or the pandera-polars / pandera-pyspark extra "
-                    "for your backend)."
-                )
-            warnings.append(
+            hint = f" {_PANDERA_INSTALL_HINT}" if top_level == "pandera" else ""
+            messages.append(
                 f"Validator for dataset '{ds_name}' requires package "
                 f"'{top_level}' which is not installed "
                 f"(declared: {spec.class_path}).{hint}"
             )
-    return warnings
+    return messages

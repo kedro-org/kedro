@@ -13,12 +13,13 @@ is deliberately not referenced.
 
 from __future__ import annotations
 
+import functools
 import inspect
 import logging
 import math
 from typing import Any, cast
 
-from kedro.validation.core import (
+from kedro.validation.exceptions import (
     _MAX_FAILURE_EXAMPLES,
     CheckFailure,
     DataValidationError,
@@ -30,6 +31,43 @@ logger = logging.getLogger(__name__)
 #: Sentinel separating "pandera reported no errors" from "there is no pandera
 #: report to read".
 _NO_REPORT = object()
+
+
+@functools.lru_cache(maxsize=1)
+def _pyspark_dataframe_type() -> type | None:
+    """Resolve the pyspark DataFrame class once.
+
+    Returns `None` when pyspark or pandera's pyspark backend is not
+    installed. Memoised because this sits on the catalog load/save path.
+    """
+    try:
+        import pandera.pyspark  # noqa: F401
+        from pyspark.sql import DataFrame as _SparkDataFrame
+    except ImportError:  # pragma: no cover (depends on installed backends)
+        return None
+    return cast("type", _SparkDataFrame)
+
+
+@functools.lru_cache(maxsize=1)
+def _polars_lazyframe_type() -> type | None:
+    """Resolve the polars LazyFrame class once.
+
+    Returns `None` when polars is not installed. Memoised because this sits
+    on the catalog load/save path.
+    """
+    try:
+        import polars as pl
+    except ImportError:  # pragma: no cover (depends on installed backends)
+        return None
+    return cast("type", pl.LazyFrame)
+
+
+@functools.lru_cache(maxsize=1)
+def _pandera_errors() -> Any:
+    """Import `pandera.errors` once instead of on every validation call."""
+    import pandera.errors
+
+    return pandera.errors
 
 
 def _is_pandera_model(cls: Any) -> bool:
@@ -101,14 +139,20 @@ def pandera_adapter(obj: Any, options: dict) -> PanderaValidator | None:
     """
     if not (_is_pandera_model(obj) or _is_pandera_schema_instance(obj)):
         return None
-    try:
-        return PanderaValidator(obj, **options)
-    except TypeError as exc:
+    # Derived from the signature so the message cannot drift from the code.
+    supported = [
+        name
+        for name in inspect.signature(PanderaValidator.__init__).parameters
+        if name not in ("self", "schema")
+    ]
+    unknown = sorted(set(options) - set(supported), key=repr)
+    if unknown:
         name = getattr(obj, "__name__", type(obj).__name__)
         raise ValidationConfigurationError(
-            f"Unsupported option(s) for pandera validator '{name}': {exc}. "
-            f"Supported options: lazy, head, tail, sample, random_state."
-        ) from exc
+            f"Unsupported option(s) {unknown} for pandera validator '{name}'. "
+            f"Supported options: {', '.join(supported)}."
+        )
+    return PanderaValidator(obj, **options)
 
 
 def _failure_cases_records(failure_cases: Any) -> list[dict]:
@@ -167,14 +211,10 @@ def _failures_from_schema_errors(exc: Exception) -> list[CheckFailure]:
     for record in records:
         column = _clean_cell(record.get("column"))
         check = _clean_cell(record.get("check"))
-        group = grouped.setdefault(
-            (column, check), {"count": 0, "examples": [], "index": None}
-        )
+        group = grouped.setdefault((column, check), {"count": 0, "examples": []})
         group["count"] += 1
         if len(group["examples"]) < _MAX_FAILURE_EXAMPLES:
             group["examples"].append(record.get("failure_case"))
-        if group["index"] is None:
-            group["index"] = record.get("index")
 
     failures = []
     for (column, check), group in grouped.items():
@@ -193,7 +233,6 @@ def _failures_from_schema_errors(exc: Exception) -> list[CheckFailure]:
                 column=column,
                 failure_count=group["count"],
                 failure_examples=group["examples"],
-                index=group["index"],
             )
         )
     return failures
@@ -211,7 +250,6 @@ def _failure_from_schema_error(exc: Exception) -> CheckFailure:
         failure_examples=[
             record.get("failure_case") for record in records[:_MAX_FAILURE_EXAMPLES]
         ],
-        index=records[0].get("index") if records else None,
     )
 
 
@@ -260,13 +298,9 @@ class PanderaValidator:
         return f"{target.__module__}.{target.__qualname__}"
 
     def _is_pyspark_dataframe(self, data: Any) -> bool:
-        """Check whether `data` is a pyspark DataFrame (guarded imports)."""
-        try:
-            import pandera.pyspark  # noqa: F401
-            from pyspark.sql import DataFrame as _SparkDataFrame
-        except ImportError:
-            return False
-        return isinstance(data, _SparkDataFrame)
+        """Check whether `data` is a pyspark DataFrame."""
+        spark_frame_type = _pyspark_dataframe_type()
+        return spark_frame_type is not None and isinstance(data, spark_frame_type)
 
     def _maybe_warn_lazyframe(self, data: Any) -> None:
         """Log a one-time warning when validating a polars `LazyFrame`.
@@ -277,11 +311,10 @@ class PanderaValidator:
         """
         if self._lazyframe_warned:
             return
-        try:
-            import polars as pl
-        except ImportError:
+        lazyframe_type = _polars_lazyframe_type()
+        if lazyframe_type is None:
             return
-        if isinstance(data, pl.LazyFrame):
+        if isinstance(data, lazyframe_type):
             self._lazyframe_warned = True
             logger.warning(
                 "Validating a polars LazyFrame with pandera: validation depth "
@@ -346,7 +379,7 @@ class PanderaValidator:
 
         self._maybe_warn_lazyframe(data)
 
-        import pandera.errors as pa_errors
+        pa_errors = _pandera_errors()
 
         kwargs: dict[str, Any] = {"lazy": self._lazy}
         for name, value in (

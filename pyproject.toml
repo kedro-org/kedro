@@ -101,9 +101,10 @@ benchmark = [
     "kedro[pydantic]",
 ]
 
+# pandera >=0.24 is the first release with the per-backend namespaces
+# (pandera.pandas / pandera.polars) that the adapter imports.
 pandera-pandas = ["pandera[pandas]>=0.24"]
 pandera-polars = ["pandera[polars]>=0.24"]
-pandera-pyspark = ["pandera[pyspark]>=0.24"]
 
 pydantic = ["pydantic>=2.13"]
 server = [

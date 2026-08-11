@@ -192,6 +192,8 @@ On failure the response also contains an `error` object with the exception type 
 
 The first `/run` request creates a `KedroServiceSession` which the following requests reuse. The endpoint runs in a thread pool, so concurrent `/run` requests share the same session and pipeline runs are not isolated from each other.
 
+The server creates this session with `serving_mode=True` (see [Create a `KedroServiceSession`](./session.md#create-a-kedroservicesession)), which preloads all registered pipelines upfront so that concurrent requests can safely look up pipelines without mutating shared state.
+
 !!! note
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the `--env` and `--conf-source` options instead.
 

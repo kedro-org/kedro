@@ -171,7 +171,38 @@ OpenLineage (Phase 2 target):
   "outputs": [
     {
       "namespace": "ingestion",
-      "name": "int_typed_companies"
+      "name": "int_typed_companies",
+      "facets": {
+        "dataQualityAssertions": {
+          "_producer": "https://kedro.org/kedro-lineage/0.1",
+          "_schemaURL": "https://openlineage.io/spec/facets/1-0-3/DataQualityAssertionsDatasetFacet.json",
+          "assertions": [
+            {
+              "assertion": "not_null",
+              "name": "company_id_not_null",
+              "success": true,
+              "column": "company_id",
+              "severity": "error"
+            },
+            {
+              "assertion": "unique",
+              "name": "company_id_unique",
+              "success": true,
+              "column": "company_id",
+              "severity": "error"
+            },
+            {
+              "assertion": "row_count",
+              "name": "min_company_rows",
+              "success": false,
+              "severity": "warn",
+              "description": "Expected at least 100 rows after type coercion",
+              "expected": "100",
+              "actual": "87"
+            }
+          ]
+        }
+      }
     }
   ]
 }

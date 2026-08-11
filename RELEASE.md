@@ -5,6 +5,7 @@
 * Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
 
 ## Bug fixes and other changes
+* Fixed a thread-safety issue in the Kedro HTTP server by adding a `serving_mode` argument to `KedroServiceSession.create()` that preloads all pipelines upfront.
 * Fixed a `RecursionError` when initialising a session with dynaconf-backed settings by converting `settings.SESSION_STORE_ARGS` to a plain `dict` before deepcopying it.
 * Excluded `kedro_benchmarks` from the built wheel so benchmark tests are no longer shipped with the package.
 * Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.

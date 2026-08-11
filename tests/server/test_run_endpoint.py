@@ -56,7 +56,7 @@ class TestRunEndpoint:
         assert first.json()["status"] == "success"
         assert second.json()["status"] == "success"
         mock_create_session.assert_called_once_with(
-            project_path=project_path, env=None, conf_source=None
+            project_path=project_path, env=None, conf_source=None, serving_mode=True
         )
         assert mock_execute.call_count == 2
 
@@ -90,6 +90,7 @@ class TestRunEndpoint:
             project_path=project_path,
             env="base",
             conf_source="conf/base",
+            serving_mode=True,
         )
 
     def test_run_endpoint_uses_env_var_defaults(self, mocker, tmp_path, monkeypatch):
@@ -120,6 +121,7 @@ class TestRunEndpoint:
             project_path=project_path,
             env="local",
             conf_source="conf/local",
+            serving_mode=True,
         )
 
     def test_run_endpoint_factory_defaults_override_env_vars(
@@ -156,6 +158,7 @@ class TestRunEndpoint:
             project_path=project_path,
             env="base",
             conf_source="conf/base",
+            serving_mode=True,
         )
 
     def test_run_endpoint_returns_error_detail_on_failure(self, mocker, tmp_path):

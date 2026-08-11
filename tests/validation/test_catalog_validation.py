@@ -319,6 +319,25 @@ class TestSkipLoadAfterSave:
 
         assert catalog._validators["companies"].calls == 2
 
+    def test_non_dataset_error_write_failure_also_clears_the_mark(
+        self, csv_path, valid_df, monkeypatch
+    ):
+        valid_df.to_csv(csv_path, index=False)
+        catalog = self._counting_catalog(csv_path, skip_load_after_save=True)
+
+        dataset = catalog["companies"]
+        monkeypatch.setattr(
+            dataset,
+            "save",
+            lambda data: (_ for _ in ()).throw(RuntimeError("connection reset")),
+        )
+        with pytest.raises(RuntimeError, match="connection reset"):
+            catalog.save("companies", valid_df)
+
+        assert "companies" not in catalog._save_validated
+        catalog.load("companies")
+        assert catalog._validators["companies"].calls == 2
+
     def test_failed_write_does_not_skip_next_load_validation(
         self, csv_path, valid_df, monkeypatch
     ):
@@ -353,6 +372,18 @@ class TestValidatorCaching:
 
         # A validator is free to define __bool__; caching must not depend on it.
         assert FalsyValidator.instances == 1
+
+
+class TestValidatorSpecsProperty:
+    def test_returns_parsed_specs_as_a_copy(self, csv_path):
+        from kedro.validation import ValidatorSpec
+
+        catalog = make_catalog(csv_path)
+        specs = catalog.validator_specs
+
+        assert isinstance(specs["companies"], ValidatorSpec)
+        specs.clear()
+        assert "companies" in catalog.validator_specs
 
 
 class TestSpecLifecycle:

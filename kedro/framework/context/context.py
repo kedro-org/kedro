@@ -321,6 +321,20 @@ class KedroContext:
         params_dict: dict[str, Any] = {"parameters": params}
 
         def _add_param_to_params_dict(param_name: str, param_value: Any) -> None:
+            """This recursively adds parameter paths that are defined in `parameters.yml`
+            with the addition of any extra parameters passed at initialization to the `params_dict`,
+            whenever `param_value` is a dictionary itself, so that users can
+            specify specific nested parameters in their node inputs.
+
+            Example:
+            ``` python
+            param_name = "a"
+            param_value = {"b": 1}
+            _add_param_to_params_dict(param_name, param_value)
+            assert params_dict["params:a"] == {"b": 1}
+            assert params_dict["params:a.b"] == 1
+            ```
+            """
             key = f"params:{param_name}"
             params_dict[key] = param_value
 
@@ -371,7 +385,7 @@ class KedroContext:
 
         if hasattr(catalog, "validation_enabled"):
             catalog.validation_enabled = enabled
-            specs = getattr(catalog, "_validator_specs", None)
+            specs = getattr(catalog, "validator_specs", None)
             if enabled and specs:
                 from kedro.validation import preflight_check
 

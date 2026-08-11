@@ -311,6 +311,17 @@ class DataCatalog(CatalogProtocol):
         return self._config_resolver
 
     @property
+    def validator_specs(self) -> dict[str, ValidatorSpec]:
+        """Parsed validator declarations, keyed by dataset name.
+
+        Returns:
+            A copy of the mapping of dataset names to their parsed
+            `ValidatorSpec` objects. Use `validators` for the serialised
+            catalog-configuration form.
+        """
+        return dict(self._validator_specs)
+
+    @property
     def validators(self) -> dict[str, Any]:
         """Validator declarations captured from the catalog configuration.
 
@@ -1093,6 +1104,11 @@ class DataCatalog(CatalogProtocol):
             # is unknown; the next load must validate again.
             self._save_validated.discard(ds_name)
             raise DatasetError(f"{ds_name}: {e}") from e
+        except BaseException:
+            # Custom datasets are free to raise anything, and even an
+            # interrupt must not leave the dataset marked as save-validated.
+            self._save_validated.discard(ds_name)
+            raise
 
     def load(self, ds_name: str, version: str | None = None) -> Any:
         """Loads a registered dataset.

@@ -1215,7 +1215,8 @@ class DataCatalog(CatalogProtocol):
         ):
             return data
 
-        from kedro.validation.core import DataValidationError, resolve_validator
+        from kedro.validation.core import resolve_validator
+        from kedro.validation.exceptions import DataValidationError
 
         validator = self._validators.get(ds_name)
         if validator is None:

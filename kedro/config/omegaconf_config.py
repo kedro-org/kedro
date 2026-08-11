@@ -432,6 +432,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             k: v for k, v in merged_config_container.items() if not k.startswith("_")
         }
 
+    @typing.no_type_check
     def _resolve_catalog_config(
         self, aggregate_config: Iterable[DictConfig]
     ) -> dict[str, Any]:
@@ -449,6 +450,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         )
         return merged_config_container
 
+    @typing.no_type_check
     def _guard_runtime_params_in_catalog_type(
         self,
         aggregate_config: Iterable[DictConfig],

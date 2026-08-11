@@ -1171,6 +1171,26 @@ class TestOmegaConfigLoader:
         )
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
 
+    def test_runtime_params_resolution_in_catalog_type_non_string(self, tmp_path):
+        """A `type` resolved via `runtime_params:` to a non-string value is rejected,
+        the same as any other disallowed value."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:dataset.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={"dataset": {"type": 123}},
+        )
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
+
     def test_runtime_params_resolution_with_soft_merge_base_env(self, tmp_path):
         """Test that runtime_params get softly merged with the base environment when soft merge is set
         for parameter merge"""

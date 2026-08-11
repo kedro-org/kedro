@@ -143,9 +143,12 @@ def test_set_requested_concurrent_with_reads_does_not_raise():
             errors.append(e)
 
     def invalidator():
-        for _ in range(n_iterations):
-            p.set_requested(None)
-            p.set_requested(["pipe_a"])
+        try:
+            for _ in range(n_iterations):
+                p.set_requested(None)
+                p.set_requested(["pipe_a"])
+        except Exception as e:
+            errors.append(e)
 
     threads = [
         threading.Thread(target=reader, daemon=True) for _ in range(n_reader_threads)
@@ -160,6 +163,34 @@ def test_set_requested_concurrent_with_reads_does_not_raise():
         not t.is_alive() for t in threads
     ), "threads did not finish — possible deadlock"
     assert not errors, errors
+
+
+def test_set_requested_racing_with_load_return_does_not_yield_stale_content():
+    """Pins the actual fix: the wrapper must read the exact dict that
+    ``_load_data()`` returned, not re-read ``self._content`` afterwards.
+
+    A real thread race cannot reliably hit this window — the gap between
+    ``_load_data()`` returning and the caller using its result is only a
+    couple of bytecodes wide. So this forces the interleaving deterministically:
+    the mock loader's return is intercepted to invalidate the cache (as a
+    concurrent ``set_requested()`` would) *before* the value is used.
+
+    Pre-fix, ``inner()`` re-read ``self._content`` after this point and would
+    see the now-empty dict (``len() == 0``) instead of the loaded one.
+    """
+    p, _ = _make_pipelines_with_mock_loader()
+    _ = p["pipe_a"]  # warm the cache: _content has 2 pipelines, _is_data_loaded=True
+
+    original_load_data = p._load_data
+
+    def racing_load_data():
+        result = original_load_data()
+        p.set_requested(["pipe_a"])  # invalidates the cache "concurrently"
+        return result
+
+    p._load_data = racing_load_data
+
+    assert len(p) == 2
 
 
 def test_configure_concurrent_with_reads_does_not_raise():
@@ -178,8 +209,11 @@ def test_configure_concurrent_with_reads_does_not_raise():
             errors.append(e)
 
     def reconfigurer():
-        for _ in range(n_iterations):
-            p.configure("fake_module")
+        try:
+            for _ in range(n_iterations):
+                p.configure("fake_module")
+        except Exception as e:
+            errors.append(e)
 
     threads = [
         threading.Thread(target=reader, daemon=True) for _ in range(n_reader_threads)
@@ -194,3 +228,23 @@ def test_configure_concurrent_with_reads_does_not_raise():
         not t.is_alive() for t in threads
     ), "threads did not finish — possible deadlock"
     assert not errors, errors
+
+
+def test_configure_racing_with_load_return_does_not_yield_stale_content():
+    """Pins the actual fix for ``configure()``, mirroring the ``set_requested()``
+    case above: the wrapper must use the exact dict ``_load_data()`` returned,
+    not re-read ``self._content`` after a concurrent ``configure()`` has reset it.
+    """
+    p, _ = _make_pipelines_with_mock_loader()
+    _ = p["pipe_a"]  # warm the cache: _content has 2 pipelines, _is_data_loaded=True
+
+    original_load_data = p._load_data
+
+    def racing_load_data():
+        result = original_load_data()
+        p.configure("fake_module")  # resets the cache "concurrently"
+        return result
+
+    p._load_data = racing_load_data
+
+    assert len(p) == 2

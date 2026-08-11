@@ -199,6 +199,13 @@ class _ProjectPipelines(MutableMapping):
     3. To ensure Kedro CLI remains functional when pipelines are broken. During development, broken
        pipelines are common, but they shouldn't prevent other parts of Kedro CLI from functioning
        properly (e.g. `kedro -h`).
+
+    Note:
+        `_load_data()` holds the instance lock across `importlib.import_module` and the
+        user-supplied `register_pipelines()` call. A module that accesses `pipelines`
+        at import time (i.e. from within its own module-level code, while it is being
+        imported by another thread) can therefore deadlock against Python's per-module
+        import lock.
     """
 
     def __init__(self) -> None:
@@ -206,8 +213,10 @@ class _ProjectPipelines(MutableMapping):
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
         self._requested_pipelines: list[str] | None = None
-        # RLock: allows configure()/set_requested() re-entry from the same thread.
-        # register_pipelines() must not access pipelines[...] during loading.
+        # RLock because `inner` (in _load_data_wrapper) takes the lock and then calls
+        # _load_data(), which takes it again on the same thread — this happens on every
+        # load. It also lets configure()/set_requested() be re-entered from the same
+        # thread, e.g. if a user's register_pipelines() calls back into either of them.
         self._lock = threading.RLock()
 
     @staticmethod
@@ -217,7 +226,12 @@ class _ProjectPipelines(MutableMapping):
         return register_pipelines
 
     def _load_data(self) -> dict[str, Pipeline]:
-        """Lazily read pipelines defined in the pipelines registry module."""
+        """Lazily read pipelines defined in the pipelines registry module.
+
+        Returns:
+            The loaded pipelines dictionary, or the current (possibly empty)
+            ``_content`` unchanged if not configured or already loaded.
+        """
         with self._lock:
             if self._pipelines_module is None or self._is_data_loaded:
                 return self._content
@@ -261,11 +275,14 @@ class _ProjectPipelines(MutableMapping):
     __getitem__ = _load_data_wrapper(operator.getitem)
     __setitem__ = _load_data_wrapper(operator.setitem)
     __delitem__ = _load_data_wrapper(operator.delitem)
-    __iter__ = _load_data_wrapper(iter)
     __len__ = _load_data_wrapper(len)
-    keys = _load_data_wrapper(operator.methodcaller("keys"))
-    values = _load_data_wrapper(operator.methodcaller("values"))
-    items = _load_data_wrapper(operator.methodcaller("items"))
+    # These return snapshots (not live views over `content`) so that iterating/reading
+    # them after the lock is released is safe even if a concurrent configure()/
+    # set_requested() mutates `self._content` in place in the meantime.
+    __iter__ = _load_data_wrapper(lambda content: iter(dict(content)))
+    keys = _load_data_wrapper(lambda content: dict(content).keys())
+    values = _load_data_wrapper(lambda content: dict(content).values())
+    items = _load_data_wrapper(lambda content: dict(content).items())
 
     # Presentation methods
     __repr__ = _load_data_wrapper(repr)

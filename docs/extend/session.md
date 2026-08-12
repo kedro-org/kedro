@@ -90,6 +90,7 @@ You can provide the following optional arguments in `KedroServiceSession.create(
 - `project_path`: Path to the project root directory
 - `env`: Environment for the `KedroContext`
 - `conf_source`: Optional argument to specify the configuration source for the `KedroContext`
+- `serving_mode`: A Boolean value, `False` by default. Set to `True` when the session will handle concurrent `run()` calls; preloads all pipelines eagerly during `create()` to avoid race conditions.
 
 
 The main differences in the `create()` method between `KedroSession` and `KedroServiceSession` are:

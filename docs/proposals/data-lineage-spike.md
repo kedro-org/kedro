@@ -39,7 +39,7 @@ When a pipeline grows, people start asking questions that are hard to answer wit
 
 **Data lineage** is the map that answers those questions. It tracks data from its source, through every transformation, to wherever it ends up (e.g. raw CSV → clean data → feature table → model input or dashboard).
 
-Lineage comes in a few flavours :
+Lineage comes in a few flavours:
 
 | Type | What it shows |
 |------|---------------|
@@ -69,7 +69,7 @@ Kedro is closest to **dbt** (dependencies declared in code), but our transforms 
 
 ## 1.3 What Kedro already has
 
-### Why Kedro is in a good place to do this:
+### Why Kedro is in a good place to do this
 
 | Reason | Detail |
 |--------|--------|
@@ -103,7 +103,7 @@ We are not replacing the Workflow view. We are extending what it starts: keep Ke
 
 ### Community plugin: [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage)
 
-This is a good starting point. Juan Luis, built it as part of [Discussion #4054](https://github.com/kedro-org/kedro/discussions/4054). The repo is archived now and was never published to PyPI (`0.1.dev0`, install from GitHub only), but it already proves the core idea: Kedro hooks → OpenLineage events → Marquez. It listens to `before_node_run` and `after_node_run`, emits START/COMPLETE events over HTTP.
+This is a good starting point. Juan Luis built it as part of [Discussion #4054](https://github.com/kedro-org/kedro/discussions/4054). The repo is archived now and was never published to PyPI (`0.1.dev0`, install from GitHub only), but it already proves the core idea: Kedro hooks → OpenLineage events → Marquez. It listens to `before_node_run` and `after_node_run`, emits START/COMPLETE events over HTTP.
 
 **What is still missing:**
 
@@ -159,23 +159,23 @@ OpenLineage (Phase 2 target):
     "runId": "f0e82968-10d8-4a3a-b2c0-db7e2b8b48f7"
   },
   "job": {
-    "namespace": "ingestion",
-    "name": "apply_types_to_companies"
+    "namespace": "spaceflights",
+    "name": "ingestion.apply_types_to_companies"
   },
   "inputs": [
     {
-      "namespace": "ingestion",
+      "namespace": "spaceflights",
       "name": "companies"
     }
   ],
   "outputs": [
     {
-      "namespace": "ingestion",
-      "name": "int_typed_companies",
+      "namespace": "spaceflights",
+      "name": "ingestion.int_typed_companies",
       "facets": {
         "dataQualityAssertions": {
-          "_producer": "https://kedro.org/kedro-lineage/0.1",
-          "_schemaURL": "https://openlineage.io/spec/facets/1-0-3/DataQualityAssertionsDatasetFacet.json",
+          "_producer": "https://kedro.org/kedro-openlineage/0.1",
+          "_schemaURL": "https://openlineage.io/spec/facets/1-1-0/DataQualityAssertionsDatasetFacet.json",
           "assertions": [
             {
               "assertion": "not_null",
@@ -207,6 +207,8 @@ OpenLineage (Phase 2 target):
   ]
 }
 ```
+
+> Namespaces above are illustrative. How Kedro names OpenLineage jobs and datasets (project-scoped vs storage-based names per the [OpenLineage naming convention](https://openlineage.io/docs/spec/naming/), and what happens with `MemoryDataset`s, transcoding, dataset factories, and versioned datasets) is a Session 2 design topic.
 
 ---
 
@@ -307,7 +309,7 @@ Column level lineage (which field came from which field) is hard for Python. We 
 
 ---
 
-## 1.6 Roadmap: high level phases
+## 1.5 Roadmap: high level phases
 
 Five phases. Sessions 2 and 3 will go into the detail for each.
 
@@ -348,7 +350,7 @@ Run 3 (Wednesday) runId = ccc-333  →  Marquez stores run ccc-333
 
 In the Marquez or DataHub UI you can browse all runs for a job, compare success/fail over time, and trace which run wrote which dataset version.
 
-**Design note for Session 2:** The community [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage) PoC generates a new `runId` per node. The official plugin should use Kedro's `run_id` from hooks so all events in one `kedro run` share one ID.
+**Design note for Session 2:** The community [kedro-openlineage](https://github.com/astrojuanlu/kedro-openlineage) PoC generates a new `runId` per node. The official plugin should use Kedro's `run_id` from hooks so all events in one `kedro run` share one ID. Note that OpenLineage requires `runId` to be a UUID, while Kedro's `run_id` is the timestamp-style session ID, so the plugin will map one to the other (e.g. a UUID derived deterministically from the session ID).
 
 **Topics we plan to cover:**
 
@@ -359,8 +361,11 @@ In the Marquez or DataHub UI you can browse all runs for a job, compare success/
 | Extend `DatasetSnapshot` | 1 | Add metadata to snapshot once schema is defined |
 | Document existing lineage | 1 | Flowchart is table level lineage. User facing docs |
 | OpenLineage emitter | 2 | Single hook. Kedro to OpenLineage mapping (Job, Run, Dataset, facets) |
+| Job and dataset naming | 2 | Namespace strategy (project scoped vs storage based, per the OpenLineage naming convention). MemoryDatasets, transcoding, dataset factories, versioned datasets |
 | Run ID per kedro run | 2 | One `runId` for all node events in a run (fix kedro-openlineage PoC gap) |
 | Multiple outputs | 2 | File output for Workflow view. HTTP output for Marquez |
+| Failure and resilience | 2 | FAIL and ABORT events from `on_node_error` and `on_pipeline_error`. Best effort emission: a run never fails or hangs because a sink is down |
+| Runner support | 2 | SequentialRunner first. Hook behaviour under ThreadRunner and ParallelRunner (worker processes) |
 | Workflow view migration | 2 | Read from OpenLineage file output. Replace custom `.viz/` event format |
 | Validation integration | 2 | `dataQualityAssertions` extension hook for the validation workstream |
 | Migration | 2 | Path from existing `PipelineRunStatusHook` and `DatasetStatsHook` |

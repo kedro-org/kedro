@@ -286,7 +286,12 @@ class ScopedContextParamsTimeSuite:
 
 
 def _passthrough_validator(data):
-    """Module-level callable used as a benchmark validator."""
+    """Validator that does no work, so the benchmarks measure the funnel's
+    own overhead (spec lookup, resolution, dispatch) rather than validation.
+
+    Module-level because the catalog resolves validators by dotted import
+    path.
+    """
     return data
 
 

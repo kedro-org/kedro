@@ -374,6 +374,15 @@ class TestValidatorCaching:
         assert FalsyValidator.instances == 1
 
 
+class TestFromConfigValidationFlag:
+    def test_validation_disabled_via_from_config(self, csv_path, invalid_df):
+        invalid_df.to_csv(csv_path, index=False)
+        catalog = make_catalog(csv_path, validation_enabled=False)
+
+        loaded = catalog.load("companies")  # must not raise
+        pd.testing.assert_frame_equal(loaded, invalid_df)
+
+
 class TestValidatorSpecsProperty:
     def test_returns_parsed_specs_as_a_copy(self, csv_path):
         from kedro.validation import ValidatorSpec

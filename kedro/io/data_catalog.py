@@ -680,6 +680,7 @@ class DataCatalog(CatalogProtocol):
         credentials: dict[str, dict[str, Any]] | None = None,
         load_versions: dict[str, str] | None = None,
         save_version: str | None = None,
+        validation_enabled: bool = True,
     ) -> DataCatalog:
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -704,6 +705,8 @@ class DataCatalog(CatalogProtocol):
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
+            validation_enabled: Whether declared dataset validators are
+                applied on `load` and `save`. Defaults to True.
 
         Returns:
             An instantiated ``DataCatalog`` containing all specified
@@ -768,6 +771,7 @@ class DataCatalog(CatalogProtocol):
             load_versions=load_versions,
             save_version=save_version,
             config_resolver=config_resolver,
+            validation_enabled=validation_enabled,
         )
 
     def to_config(
@@ -1096,9 +1100,10 @@ class DataCatalog(CatalogProtocol):
             extra={"rich_format": ["dark_orange"]},
         )
 
-        validated = self._maybe_validate(ds_name, data, mode="save")
+        if self._is_validation_enabled():
+            data = self._maybe_validate(ds_name, data, mode="save")
         try:
-            dataset.save(validated)
+            dataset.save(data)
         except DatasetError as e:
             # The validated data never reached storage, so the on-disk state
             # is unknown; the next load must validate again.
@@ -1153,9 +1158,11 @@ class DataCatalog(CatalogProtocol):
             data = dataset.load()
         except DatasetError as e:
             raise DatasetError(f"{ds_name}: {e}") from e
-        return self._maybe_validate(ds_name, data, mode="load")
+        if self._is_validation_enabled():
+            data = self._maybe_validate(ds_name, data, mode="load")
+        return data
 
-    def _validation_enabled_effective(self) -> bool:
+    def _is_validation_enabled(self) -> bool:
         """Resolve whether dataset validation is currently enabled.
 
         The `KEDRO_DATASET_VALIDATION` environment variable, when set to a
@@ -1163,6 +1170,9 @@ class DataCatalog(CatalogProtocol):
         flag. Recognised values are `0`/`false`/`off` (disabled) and
         `1`/`true`/`on` (enabled). Unset or unrecognised values fall
         back to `self.validation_enabled`.
+
+        The environment variable is read on every operation so that the kill
+        switch applies to a live session without rebuilding the catalog.
 
         Returns:
             True if validation should be applied, False otherwise.
@@ -1201,9 +1211,6 @@ class DataCatalog(CatalogProtocol):
             ValidationConfigurationError: If the declared validator cannot be
                 resolved.
         """
-        if not self._validation_enabled_effective():
-            return data
-
         spec = self._validator_specs.get(ds_name)
         if spec is None or mode not in spec.on or not spec.enabled:
             return data

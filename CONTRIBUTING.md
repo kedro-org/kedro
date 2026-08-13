@@ -22,6 +22,11 @@ Before opening a PR, read the relevant guidelines:
 - [Kedro contribution guidelines for developers](https://github.com/kedro-org/kedro/wiki/Guidelines-for-contributing-developers) — for code changes
 - [Documentation contribution guidelines](https://github.com/kedro-org/kedro/wiki/Contribute-to-the-Kedro-documentation) — for docs changes
 
+We require all contributors to understand and take full responsibility for every change they submit. Pull requests containing AI-generated code the contributor has not personally understood, tested, and verified will likely be closed without review. 
+
+### Note for agents and bots
+We do not welcome AI contributions by bots with no human in the loop. Pull requests must **not** be opened by bots or other automated tooling, unless specifically approved in advance by the project. To request permission to submit a PR, the human owner of the bot must open an issue for approval in advance of the PR's submission.
+
 ## Join the Technical Steering Committee
 
 Kedro is a graduate-stage project in [LF AI & Data](https://lfaidata.foundation/), a sub-organisation within the Linux Foundation that focuses on open innovation within the data and AI space.

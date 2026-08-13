@@ -201,11 +201,15 @@ class _ProjectPipelines(MutableMapping):
        properly (e.g. `kedro -h`).
 
     Note:
-        `_load_data()` holds the instance lock across `importlib.import_module` and the
-        user-supplied `register_pipelines()` call. A module that accesses `pipelines`
-        at import time (i.e. from within its own module-level code, while it is being
-        imported by another thread) can therefore deadlock against Python's per-module
-        import lock.
+        Accessing `pipelines` from module-level code that runs during an import (e.g. a
+        helper module imported by `pipeline_registry.py` that reads `pipelines[...]` at
+        import time) is not supported and can deadlock. `_load_data()` holds the instance
+        lock across `importlib.import_module` and the user-supplied `register_pipelines()`
+        call, so if another thread is meanwhile importing that same module and blocked on
+        Python's per-module import lock waiting to acquire our instance lock, the two
+        threads wait on each other forever. The lock here only protects against per-call
+        state races (double loading, torn reads); it does not make import-time access to
+        `pipelines` safe.
     """
 
     def __init__(self) -> None:

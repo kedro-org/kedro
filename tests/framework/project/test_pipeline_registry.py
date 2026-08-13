@@ -80,9 +80,6 @@ def test_configure_project_should_not_raise_for_unimportable_pipelines(
         _ = pipelines["new_pipeline"]
 
 
-# --- Thread-safety tests ---
-
-
 def _make_pipelines_with_mock_loader(call_counter=None, sleep=0.0):
     """Return a _ProjectPipelines whose loader records call count."""
     counter = call_counter if call_counter is not None else []
@@ -99,9 +96,8 @@ def _make_pipelines_with_mock_loader(call_counter=None, sleep=0.0):
     return p, counter
 
 
-def test_load_data_fires_exactly_once_under_concurrent_first_load():
-    """register_pipelines() must be invoked exactly once even when many threads
-    race through the unloaded state at the same time."""
+def test_first_load_runs_once():
+    """register_pipelines() fires exactly once even with many concurrent first reads."""
     n_threads = 20
     barrier = threading.Barrier(n_threads)
     errors = []
@@ -127,9 +123,8 @@ def test_load_data_fires_exactly_once_under_concurrent_first_load():
     assert len(counter) == 1
 
 
-def test_set_requested_concurrent_with_reads_does_not_raise():
-    """Concurrent set_requested() and dict reads must not crash or return
-    torn state — the wrapper snapshot must remain usable for the full call."""
+def test_concurrent_set_requested_and_reads():
+    """Smoke test: concurrent set_requested() and reads must not crash or hang."""
     n_reader_threads = 10
     n_iterations = 100
     errors = []
@@ -165,27 +160,29 @@ def test_set_requested_concurrent_with_reads_does_not_raise():
     assert not errors, errors
 
 
-def test_set_requested_racing_with_load_return_does_not_yield_stale_content():
-    """Pins the actual fix: the wrapper must read the exact dict that
-    ``_load_data()`` returned, not re-read ``self._content`` afterwards.
+@pytest.mark.parametrize(
+    "invalidate",
+    [
+        lambda p: p.set_requested(["pipe_a"]),
+        lambda p: p.configure("fake_module"),
+    ],
+    ids=["set_requested", "configure"],
+)
+def test_invalidation_race_no_stale_read(invalidate):
+    """A concurrent invalidation right as _load_data() returns must not affect
+    the read that's already in flight — it must see the pre-invalidation content.
 
-    A real thread race cannot reliably hit this window — the gap between
-    ``_load_data()`` returning and the caller using its result is only a
-    couple of bytecodes wide. So this forces the interleaving deterministically:
-    the mock loader's return is intercepted to invalidate the cache (as a
-    concurrent ``set_requested()`` would) *before* the value is used.
-
-    Pre-fix, ``inner()`` re-read ``self._content`` after this point and would
-    see the now-empty dict (``len() == 0``) instead of the loaded one.
+    Real threads can't reliably land in this window (it's a couple of
+    bytecodes wide), so the interleaving is forced deterministically instead.
     """
     p, _ = _make_pipelines_with_mock_loader()
-    _ = p["pipe_a"]  # warm the cache: _content has 2 pipelines, _is_data_loaded=True
+    _ = p["pipe_a"]  # warm the cache: 2 pipelines loaded
 
     original_load_data = p._load_data
 
     def racing_load_data():
         result = original_load_data()
-        p.set_requested(["pipe_a"])  # invalidates the cache "concurrently"
+        invalidate(p)  # simulate a concurrent set_requested()/configure()
         return result
 
     p._load_data = racing_load_data
@@ -193,9 +190,8 @@ def test_set_requested_racing_with_load_return_does_not_yield_stale_content():
     assert len(p) == 2
 
 
-def test_configure_concurrent_with_reads_does_not_raise():
-    """configure() resetting all state while readers are active must not
-    produce crashes or inconsistent internal state."""
+def test_concurrent_configure_and_reads():
+    """Smoke test: concurrent configure() and reads must not crash or hang."""
     n_reader_threads = 10
     n_iterations = 100
     errors = []
@@ -228,23 +224,3 @@ def test_configure_concurrent_with_reads_does_not_raise():
         not t.is_alive() for t in threads
     ), "threads did not finish — possible deadlock"
     assert not errors, errors
-
-
-def test_configure_racing_with_load_return_does_not_yield_stale_content():
-    """Pins the actual fix for ``configure()``, mirroring the ``set_requested()``
-    case above: the wrapper must use the exact dict ``_load_data()`` returned,
-    not re-read ``self._content`` after a concurrent ``configure()`` has reset it.
-    """
-    p, _ = _make_pipelines_with_mock_loader()
-    _ = p["pipe_a"]  # warm the cache: _content has 2 pipelines, _is_data_loaded=True
-
-    original_load_data = p._load_data
-
-    def racing_load_data():
-        result = original_load_data()
-        p.configure("fake_module")  # resets the cache "concurrently"
-        return result
-
-    p._load_data = racing_load_data
-
-    assert len(p) == 2

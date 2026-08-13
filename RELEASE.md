@@ -1,6 +1,6 @@
 # Upcoming Release
 ## Major features and improvements
-* Added `kedro.validation` core: a pluggable `Validator` protocol with a Pandera reference adapter and structured validation errors, as groundwork for catalog-level dataset validation.
+* Added `kedro.validation` core: a pluggable `Validator` protocol with a Pandera reference adapter and structured validation errors that subclass `DatasetError`, as groundwork for catalog-level dataset validation.
 * Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
 * Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 

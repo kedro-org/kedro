@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from kedro.io.core import DatasetError
+
 # Bounds that keep a rendered validation error readable no matter how large the
 # validated data is; the full backend report stays available on `__cause__`.
 # Maximum number of failure examples captured per check.
@@ -35,8 +37,13 @@ class ModelInstantiationError(ParameterValidationError):
     pass
 
 
-class ValidationConfigurationError(Exception):
-    """Raised when a `validator:` declaration is invalid or unresolvable."""
+class ValidationConfigurationError(DatasetError):
+    """Raised when a `validator:` declaration is invalid or unresolvable.
+
+    Subclasses `DatasetError`: a bad declaration stops the dataset operation
+    it belongs to, so handlers written against the catalog's documented
+    `DatasetError` contract see it too.
+    """
 
     pass
 
@@ -71,8 +78,13 @@ def _truncate(value: Any, limit: int) -> str:
     return text
 
 
-class DataValidationError(Exception):
+class DataValidationError(DatasetError):
     """Raised when dataset validation fails.
+
+    Subclasses `DatasetError`: a failed validation stops the load or save,
+    so handlers written against the catalog's documented `DatasetError`
+    contract see validation failures as well. Catch `DataValidationError`
+    first to treat schema failures separately from I/O failures.
 
     Attributes:
         message: The base error message.

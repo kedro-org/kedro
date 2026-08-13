@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import pytest
 
+from kedro.io.core import DatasetError
 from kedro.validation.exceptions import (
     CheckFailure,
     DataValidationError,
     ModelInstantiationError,
     ParameterValidationError,
+    ValidationConfigurationError,
 )
 
 
@@ -128,3 +130,15 @@ class TestErrorRenderingEdgeCases:
         assert "25 check(s) failed" in rendered
         assert "... and 15 more check(s)" in rendered
         assert len(rendered.splitlines()) < 20
+
+
+class TestExceptionHierarchy:
+    @pytest.mark.parametrize(
+        "exc_type", [DataValidationError, ValidationConfigurationError]
+    )
+    def test_dataset_validation_errors_are_dataset_errors(self, exc_type):
+        assert issubclass(exc_type, DatasetError)
+
+    def test_generic_dataset_error_handling_sees_validation_failures(self):
+        with pytest.raises(DatasetError):
+            raise DataValidationError("boom", dataset_name="ds", mode="load")

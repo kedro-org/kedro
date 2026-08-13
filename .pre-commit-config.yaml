@@ -16,6 +16,26 @@ repos:
           files: "^kedro/|^features/|^tests/"
           exclude: "^features/test_starter|^kedro/templates/"
 
+    - repo: https://github.com/hukkin/mdformat
+      rev: 1.0.0
+      hooks:
+        - id: mdformat
+          name: "mdformat on Markdown files"
+          additional_dependencies:
+            - mdformat-mkdocs==5.3.0 # MkDocs/Material syntax (admonitions, tabs, snippets)
+            - mdformat-gfm==1.0.0 # GitHub Flavored Markdown (tables, strikethrough, autolinks)
+            - mdformat-frontmatter==2.1.2 # YAML front matter
+          # docs/api/ (mkdocstrings) and commands_reference.md (mkdocs-click) use
+          # ::: directives whose indented options mdformat strips; exclude them
+          # permanently. The rest of the exclude list below is temporary, rolled
+          # out incrementally across a stack of PRs so each lands with a passing
+          # `make lint` -- pre-commit checks the whole tree, not just the diff, so
+          # the hook can't be added ahead of the files it would then flag. Each
+          # PR in the stack reformats one area and removes that area from here.
+          # TODO(after the mdformat rollout stack merges): drop everything below
+          # docs/getting-started/commands_reference.md.
+          exclude: "^kedro/templates/|^features/test_starter/|^docs/api/|^docs/getting-started/commands_reference\\.md$|^\\.agents/|^\\.github/|^docs/|^README\\.md$|^RELEASE\\.md$|^LICENSE\\.md$|^CODE_OF_CONDUCT\\.md$|^CONTRIBUTING\\.md$|^SECURITY\\.md$|^kedro_benchmarks/"
+
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.6.0
       hooks:

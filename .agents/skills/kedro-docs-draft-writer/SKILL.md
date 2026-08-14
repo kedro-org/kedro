@@ -8,6 +8,7 @@ description: >-
   X", "document this feature", "polish my draft", or wants to beat blank-page
   paralysis on any Kedro docs page.
 ---
+
 # Kedro docs draft writer
 
 Write a first draft of a Kedro documentation page, or polish a draft the user already has. The output is always a starting point for human review — not a finished document.
@@ -16,19 +17,19 @@ Write a first draft of a Kedro documentation page, or polish a draft the user al
 
 The user can supply any combination of:
 
-| Input | Example |
-|---|---|
-| Topic only | "draft docs for the new `llm_context_node`" |
-| Topic + doc type | "write a how-to for streaming nodes" |
-| PR / branch context | "draft docs for the changes on this branch" |
-| Nothing (infer from branch) | "draft docs" |
+| Input                        | Example                                                                           |
+| ---------------------------- | --------------------------------------------------------------------------------- |
+| Topic only                   | "draft docs for the new `llm_context_node`"                                       |
+| Topic + doc type             | "write a how-to for streaming nodes"                                              |
+| PR / branch context          | "draft docs for the changes on this branch"                                       |
+| Nothing (infer from branch)  | "draft docs"                                                                      |
 | **Existing draft to polish** | "polish this draft", "clean up my docs", "check my draft against the style guide" |
 
 **If the user provides an existing draft to polish**, skip straight to [Polish mode](#polish-mode) below.
 
 Otherwise, work out what's missing from context. Before generating anything, confirm with the user: **topic**, **doc type**, and **proposed target file path** in a single message. Don't ask three separate questions, and don't ask again in Step 3.
 
----
+______________________________________________________________________
 
 ## Workflow
 
@@ -47,22 +48,22 @@ gh pr view --json title,body 2>/dev/null
 
 Read changed files under `kedro/` to understand what the branch adds or changes. Summarise in one sentence for the user before continuing.
 
----
+______________________________________________________________________
 
 ### 2. Classify the doc type
 
 Use the Diátaxis framework. Pick one:
 
-| Type | Purpose | Signals |
-|---|---|---|
-| **How-to** | Guide a practitioner through a specific task | "How to X", task-oriented, assumes prior knowledge |
-| **Tutorial** | Teach by doing — complete worked example | Sequential learning, beginner-oriented, has a "by the end" goal |
-| **Explanation** | Build understanding of a concept or design decision | "What is X", "Why does Kedro do X this way", no steps |
-| **Reference** | Precise, complete technical information | Config keys, CLI flags, API parameters |
+| Type            | Purpose                                             | Signals                                                         |
+| --------------- | --------------------------------------------------- | --------------------------------------------------------------- |
+| **How-to**      | Guide a practitioner through a specific task        | "How to X", task-oriented, assumes prior knowledge              |
+| **Tutorial**    | Teach by doing — complete worked example            | Sequential learning, beginner-oriented, has a "by the end" goal |
+| **Explanation** | Build understanding of a concept or design decision | "What is X", "Why does Kedro do X this way", no steps           |
+| **Reference**   | Precise, complete technical information             | Config keys, CLI flags, API parameters                          |
 
 If the user specified a doc type, use that. Otherwise infer from the topic. When ambiguous, ask.
 
----
+______________________________________________________________________
 
 ### 3. Map to a docs/ path
 
@@ -75,27 +76,30 @@ Use the directory map in [reference.md](reference.md) section "Directory map" to
 
 Include the proposed path in the single confirmation message from Step 1. Do not ask a second time here.
 
----
+______________________________________________________________________
 
 ### 4. Gather context
 
 Read the following before drafting. This is the most important step — the draft quality depends on accurate source material.
 
 **Always:**
+
 - Any existing doc in the same `docs/` subdirectory that covers a similar topic. Use it as a structural model for heading hierarchy and section order. To find candidates: `ls docs/<subdir>/`.
 - The relevant source files under `kedro/` for accurate class names, method signatures, parameter names, and default values. Read docstrings first — they are the primary source of truth for how a feature behaves.
 
 **For how-tos and tutorials:**
+
 - One existing how-to or tutorial of similar scope. Mirror its step structure and tone.
 
 **For explanations and reference:**
+
 - One existing explanation or reference page in the same directory.
 
 Read multiple files in parallel where possible. Take notes on: key classes/functions, important parameters, any caveats or version constraints, and related docs pages to cross-link.
 
 **Gap rule:** If source material is missing, ambiguous, or contradictory, do not fill the gap with plausible-sounding content. Insert a `<!-- TODO: verify — <what's unclear> -->` comment in the draft and list the gap in Step 8. Gaps are expected in a first draft; invented facts are not.
 
----
+______________________________________________________________________
 
 ### 5. Draft the page
 
@@ -110,6 +114,7 @@ Apply all style rules from [reference.md](reference.md) section "Style rules" as
 Required elements by doc type:
 
 **How-to:**
+
 - Opening sentence: one sentence stating what the reader will achieve and what prerequisite knowledge is assumed.
 - Numbered steps. Each step starts with an imperative verb.
 - Code blocks with language lexers (`python`, `bash`, `yaml`).
@@ -117,6 +122,7 @@ Required elements by doc type:
 - No explanatory tangents — link to explanation pages instead.
 
 **Tutorial:**
+
 - Opening "by the end of this tutorial" sentence.
 - Numbered sections. Each section builds on the last.
 - Complete, runnable code examples.
@@ -124,23 +130,25 @@ Required elements by doc type:
 - Expected output shown where relevant.
 
 **Explanation:**
+
 - Opening paragraph answering "what is this and why does it exist".
 - No numbered steps.
 - Use `##` subsections to group related ideas.
 - Cross-link to the relevant how-to at the end.
 
 **Reference:**
+
 - Table or definition-list format for parameters/options.
 - Every entry: name, type, default, description.
 - No prose padding — just precise facts.
 
----
+______________________________________________________________________
 
 ### 6. Write to file
 
 Write the draft to the confirmed path using the Write tool.
 
----
+______________________________________________________________________
 
 ### 7. Run Vale and fix all findings
 
@@ -160,11 +168,12 @@ Apply the fix rules from [reference.md](reference.md) section "Common Vale fixes
 
 **If Vale is not installed**, apply the manual style checklist from [reference.md](reference.md) section "Manual style checklist" as a substitute pass, then warn the user: _"Vale is not installed — install it with `brew install vale` (macOS) or `snap install vale` (Linux) and run `vale <path>` to verify the draft."_
 
----
+______________________________________________________________________
 
 ### 8. Report to the user
 
 Tell the user:
+
 - The path of the written file.
 - What the draft covers and what it deliberately leaves out (so the user knows the scope).
 - Every `<!-- TODO: verify -->` gap — list them explicitly so the user can resolve them before opening a PR.
@@ -173,9 +182,9 @@ Tell the user:
 
 Be direct about what the draft is: a starting point. The user should read it, fill the gaps, and do a final review before it goes anywhere. Don't present it as ready to ship.
 
----
+______________________________________________________________________
 
----
+______________________________________________________________________
 
 ## Polish mode
 
@@ -194,6 +203,7 @@ Follow the same Vale / manual checklist process as Step 7 in the main workflow. 
 Fix anything that is clearly wrong and has no judgment involved: Vale rule violations, spelling, sentence length, passive voice, banned terms (see [reference.md](reference.md) "Common Vale fixes").
 
 **Do not:**
+
 - Restructure sections without being asked.
 - Add content that isn't already there, implied by the source code, or requested.
 - Remove content because you think it's unnecessary — flag it instead.
@@ -206,11 +216,12 @@ For anything that would require a decision — restructuring, missing informatio
 ### P5. Report changes
 
 Tell the user:
+
 - A short list of mechanical fixes applied.
 - Every `<!-- SUGGESTION: … -->` item, with a one-line explanation of why you flagged it.
 - Any gaps you noticed (things that seem underspecified or unverifiable against the source code).
 
----
+______________________________________________________________________
 
 ## Out of scope
 

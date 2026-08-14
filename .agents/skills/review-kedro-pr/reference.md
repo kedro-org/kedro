@@ -2,7 +2,7 @@
 
 Detailed reference for the `review-kedro-pr` skill. Read sections selectively — use the section headers to find what you need.
 
----
+______________________________________________________________________
 
 ## Kedro public API surface
 
@@ -11,6 +11,7 @@ Detailed reference for the `review-kedro-pr` skill. Read sections selectively �
 Exports (`__all__`): `AbstractDataset`, `AbstractVersionedDataset`, `CachedDataset`, `CatalogProtocol`, `CatalogConfigResolver`, `DatasetAlreadyExistsError`, `DatasetError`, `DatasetNotFoundError`, `DataCatalog`, `MemoryDataset`, `SharedMemoryDataset`, `SharedMemoryDataCatalog`, `SharedMemoryCatalogProtocol`, `Version`.
 
 **`AbstractDataset(ABC, Generic[_DI, _DO])`** — base class for all datasets:
+
 - `load() -> _DO` — abstract, load data
 - `save(data: _DI) -> None` — abstract, save data
 - `_describe() -> dict[str, Any]` — abstract, return dataset description for repr
@@ -19,6 +20,7 @@ Exports (`__all__`): `AbstractDataset`, `AbstractVersionedDataset`, `CachedDatas
 - `from_config(name, config, load_version, save_version) -> AbstractDataset` — class method, creates instance from catalog config dict
 
 **`AbstractVersionedDataset`** — extends `AbstractDataset` with:
+
 - `filepath` property, `Version` namedtuple (load/save), version path resolution helpers
 - `_get_load_path()`, `_get_save_path()`, `_get_versioned_path()` for version-aware file access
 
@@ -27,6 +29,7 @@ Exports (`__all__`): `AbstractDataset`, `AbstractVersionedDataset`, `CachedDatas
 Exports (`__all__`): `AbstractRunner`, `ParallelRunner`, `SequentialRunner`, `Task`, `ThreadRunner`.
 
 **`AbstractRunner(ABC)`** — base class for all runners:
+
 - `__init__(is_async: bool = False)`
 - `run(pipeline, catalog, hook_manager=None, run_id=None, only_missing_outputs=False) -> dict[str, Any]` — validates inputs, calls `_run`
 - `_run(pipeline, catalog, hook_manager=None, run_id=None) -> None` — abstract, actual execution logic
@@ -39,10 +42,12 @@ Concrete runners: `SequentialRunner`, `ParallelRunner`, `ThreadRunner`.
 Exports (`__all__`): `node`, `pipeline`, `Node`, `Pipeline`, `GroupedNodes`, `llm_context_node`, `LLMContext`, `LLMContextNode`, `tool`.
 
 **`Pipeline`** — DAG of nodes:
+
 - `pipeline(*args)` factory function for creating pipelines
 - `Pipeline.filter()`, `Pipeline.inputs()`, `Pipeline.outputs()`, `Pipeline.nodes`, `Pipeline.datasets()`
 
 **`Node`** — single computation unit:
+
 - `node(func, inputs, outputs, name=None, ...)` factory function
 - `Node.run(inputs)`, `Node.name`, `Node.inputs`, `Node.outputs`
 
@@ -64,10 +69,12 @@ Exports (`__all__`): `AbstractConfigLoader`, `BadConfigException`, `MissingConfi
 - **`KedroContextSpecs`**: `after_context_created(context)`
 
 **Markers** (from `kedro/framework/hooks/markers.py`):
+
 - `hook_spec` — marks a method as a hook specification
 - `hook_impl` — marks a method as a hook implementation (this is what plugin/hook authors use)
 
 **CLI hooks** (separate namespace `kedro_cli`):
+
 - `CLICommandSpecs`: `before_command_run(project_metadata, command_args)`, `after_command_run(project_metadata, command_args)`
 - Markers: `cli_hook_spec`, `cli_hook_impl`
 
@@ -77,7 +84,7 @@ Exports (`__all__`): `AbstractConfigLoader`, `BadConfigException`, `MissingConfi
 - **`KedroSession`** — entry point for running pipelines, manages lifecycle.
 - **`KedroServiceSession`** — new session implementation for multiple runs and data injection (under active development).
 
----
+______________________________________________________________________
 
 ## Non-obvious patterns
 
@@ -86,6 +93,7 @@ These patterns look unusual but are intentional. Don't flag them. Read this sect
 ### `AbstractDataset.__init_subclass__` (kedro/io/core.py)
 
 When a class subclasses `AbstractDataset`, `__init_subclass__` automatically:
+
 1. **Wraps `__init__`** to capture `_init_args` (the arguments passed at construction time) for later use by `_init_config()`.
 2. **Aliases `_load`/`_save` to `load`/`save`** if the subclass defines `_load` or `_save` (legacy pattern).
 3. **Wraps `load` and `save`** with `_load_wrapper`/`_save_wrapper` for logging and error handling. Uses `__loadwrapped__`/`__savewrapped__` flags to avoid double-wrapping.
@@ -104,7 +112,7 @@ Returns `self` for any attribute, so hook calls do nothing when there's no real 
 
 Passes attribute access through to the underlying `MemoryDataset`. The `__setstate__` guard prevents infinite recursion when unpickling.
 
----
+______________________________________________________________________
 
 ## RELEASE.md format
 

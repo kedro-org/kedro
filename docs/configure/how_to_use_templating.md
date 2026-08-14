@@ -158,6 +158,7 @@ companies:
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
 
 !!! warning "Restricted for untrusted callers: `type` with `runtime_params`"
+
     A catalog entry's `type` field selects the dataset class Kedro instantiates. Resolving `type` from `runtime_params` (for example, `type: "${runtime_params:dataset.type}"`) lets whoever supplies that parameter choose the class, including ones with side effects during load, such as `kedro_datasets.pickle.PickleDataset`.
 
     This is safe for trusted, non-server use such as `kedro run --params`, since that caller already has as much control over the process as the parameter it's supplying. It is not safe when `runtime_params` comes from an untrusted caller, such as an HTTP request body — the [Kedro HTTP server](../extend/serving.md#dataset-type-security) always rejects a catalog `type` that resolves to an actual `runtime_params` value in that case, with no allowlist or setting to relax it. A `type` that falls back to a default (for example, a `globals` value) instead of an actual `runtime_params` value is unaffected either way.

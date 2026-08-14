@@ -5,6 +5,7 @@ In a Kedro project, the Data Catalog is a registry of all data sources available
 This page introduces the basic sections of `catalog.yml`, the file Kedro uses to register data sources for a project. It also explains the key concepts behind how the catalog organises and loads data.
 
 !!! warning
+
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
@@ -38,15 +39,16 @@ The dataset configuration in `catalog.yml` is defined as follows:
 
 1. The top-level key is the dataset name used as a dataset identifier in the catalog - `shuttles`, `weather` in the example below.
 2. The next level includes multiple keys. The first mandatory key is `type`, which declares the dataset type to use.
-The rest of the keys are dataset parameters and vary depending on the implementation.
-To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/) and navigate to the `__init__` method of the target dataset.
+    The rest of the keys are dataset parameters and vary depending on the implementation.
+    To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/) and navigate to the `__init__` method of the target dataset.
 3. Some dataset parameters can be further configured depending on the libraries underlying the dataset implementation.
-In the example below, a configuration of the `shuttles` dataset includes the `load_args` parameter which is defined by the `pandas` option for loading CSV files.
-While the `save_args` parameter in a configuration of the `weather` dataset is defined by the `snowpark` `saveAsTable` method.
-To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/) and navigate to the target parameter in the `__init__` definition for the dataset.
-For those parameters we provide a reference to the underlying library configuration parameters. For example, under the `load_args` parameter section for [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.ExcelDataset/) you can find a reference to the [pandas.read_excel](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) method defining the full set of the parameters accepted.
+    In the example below, a configuration of the `shuttles` dataset includes the `load_args` parameter which is defined by the `pandas` option for loading CSV files.
+    While the `save_args` parameter in a configuration of the `weather` dataset is defined by the `snowpark` `saveAsTable` method.
+    To get the extensive list of dataset parameters, see the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/) and navigate to the target parameter in the `__init__` definition for the dataset.
+    For those parameters we provide a reference to the underlying library configuration parameters. For example, under the `load_args` parameter section for [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.ExcelDataset/) you can find a reference to the [pandas.read_excel](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) method defining the full set of the parameters accepted.
 
 !!! note
+
     Kedro datasets delegate any of the `load_args` / `save_args` directly to the underlying implementation.
 
 The example below showcases the configuration of two datasets - `shuttles` of type [pandas.ExcelDataset](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.ExcelDataset/) and `weather` of type [snowflake.SnowparkTableDataset](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/snowflake.SnowparkTableDataset/).
@@ -70,7 +72,6 @@ weather: # Dataset name
     table_type: ''
 ```
 
-
 ### Dataset `type`
 
 Kedro supports a range of connectors, for CSV files, Excel spreadsheets, Parquet files, Feather files, HDF5 files, JSON documents, pickled objects, SQL tables, SQL queries, and more. They are supported using libraries such as pandas, PySpark, NetworkX, and Matplotlib.
@@ -79,22 +80,21 @@ Kedro supports a range of connectors, for CSV files, Excel spreadsheets, Parquet
 
 ### Dataset `filepath`
 
-Kedro relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. When specifying a storage location in `filepath:`, you should provide a URL using the general form `protocol://path/to/data`.  If no protocol is provided, the local file system is assumed (which is the same as ``file://``).
+Kedro relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. When specifying a storage location in `filepath:`, you should provide a URL using the general form `protocol://path/to/data`. If no protocol is provided, the local file system is assumed (which is the same as `file://`).
 
 The following protocols are available:
 
 - **Local or Network File System**: `file://` - the local file system is default in the absence of any protocol, it also permits relative paths.
 - **Hadoop File System (HDFS)**: `hdfs://user@server:port/path/to/data` - Hadoop Distributed File System, for resilient, replicated files within a cluster.
 - **Amazon S3**: `s3://my-bucket-name/path/to/data` - Amazon S3 remote binary store, often used with Amazon EC2,
-  using the library s3fs.
+    using the library s3fs.
 - **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - for example, MinIO, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
-  resource using `gcsfs` (in development).
+    resource using `gcsfs` (in development).
 - **Azure Blob Storage / Azure Data Lake Storage Gen2**: `abfs://` - Azure Blob Storage, typically used when working on an Azure environment.
-- **HTTP(s)**: ``http://`` or ``https://`` for reading data directly from HTTP web servers.
+- **HTTP(s)**: `http://` or `https://` for reading data directly from HTTP web servers.
 
 `fsspec` also provides other file systems, such as SSH, FTP, and WebHDFS. [See the fsspec documentation for more information](https://filesystem-spec.readthedocs.io/en/latest/api.html#implementations).
-
 
 ## Additional settings in `catalog.yml`
 
@@ -104,10 +104,11 @@ Beyond `type` and `filepath`, the catalog accepts several other groups of settin
 
 The catalog accepts three groups of `*_args` parameters:
 
-* **`load_args` and `save_args`**: control how the underlying third-party library loads or saves data. For example, `load_args` for a [`pandas.ExcelDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.ExcelDataset/) is passed to [`pandas.read_excel`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) as keyword arguments.
-* **`fs_args`**: control how Kedro interacts with the filesystem itself. Top-level keys are passed to the underlying filesystem class (for example, `GCSFileSystem` for Google Cloud Storage), while `open_args_load` and `open_args_save` are forwarded to the filesystem's `open` method to control how the file is opened during a load or save.
+- **`load_args` and `save_args`**: control how the underlying third-party library loads or saves data. For example, `load_args` for a [`pandas.ExcelDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.ExcelDataset/) is passed to [`pandas.read_excel`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) as keyword arguments.
+- **`fs_args`**: control how Kedro interacts with the filesystem itself. Top-level keys are passed to the underlying filesystem class (for example, `GCSFileSystem` for Google Cloud Storage), while `open_args_load` and `open_args_save` are forwarded to the filesystem's `open` method to control how the file is opened during a load or save.
 
 !!! note
+
     Default load, save and filesystem arguments are defined inside each dataset implementation as `DEFAULT_LOAD_ARGS`, `DEFAULT_SAVE_ARGS`, and `DEFAULT_FS_ARGS`. Check the [kedro-datasets documentation](https://docs.kedro.org/projects/kedro-datasets/en/stable/) for the defaults that apply to a particular dataset.
 
 For examples of each, see [how to specify load, save and filesystem arguments](how_to_configure_the_data_catalog.md#how-to-specify-load-save-and-filesystem-arguments).
@@ -131,12 +132,12 @@ A dataset supports versioning if it extends the [kedro.io.AbstractVersionedDatas
 To verify whether a dataset supports versioning, examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check whether the dataset class inherits from `AbstractVersionedDataset`. For example, a class declared as `CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])` is set up to support versioning.
 
 !!! note
+
     HTTP(S) is a supported file system in the dataset implementations, but it cannot be combined with versioning.
 
 ## Use the Data Catalog within Kedro configuration
 
 Kedro configuration enables you to organise your project for different stages of your data pipeline. For example, you might need different Data Catalog settings for development, testing, and production environments.
-
 
 By default, Kedro has a `base` and a `local` folder for configuration. A configuration loader class scans for configuration files inside the `conf` folder, starting in `conf/base` and then in `conf/local` (the designated overriding environment). Kedro merges the configuration information and returns a configuration dictionary, following the rules set out in the [configuration documentation](../configure/configuration_basics.md).
 

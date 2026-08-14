@@ -14,7 +14,7 @@
 
 ## Documentation changes
 * Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
-* Fixed the `DaskRunner` example on the Dask deployment page, which passed `is_async` and `run_id` as the wrong positional arguments to `runner.run()` and returned its outputs instead of the node, so the documented example failed with `AttributeError: 'dict' object has no attribute 'name'`.
+* Fixed the `DaskRunner` example on the Dask deployment page.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

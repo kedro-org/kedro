@@ -8,7 +8,6 @@ When you create a project, you then introduce additional dependencies for the ta
 
 When you create a new Kedro project, Kedro generates a `requirements.txt` file in the root directory of the project. The file contains the core dependencies and those related to the tools you choose to include in the project. Specifying the project's exact dependencies in a `requirements.txt` file makes it easier to run the project in the future, and avoids version conflicts downstream.
 
-
 ## Install project-specific dependencies
 
 When someone clones your project, they can install the project-specific dependencies by navigating to the root directory of the project and running the following command:
@@ -42,9 +41,11 @@ pip install "kedro-datasets[<group>-<dataset>]"
 For example, your workflow might require the `pandas.ExcelDataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas-exceldataset]"`.
 
 !!! note
+
     From `kedro-datasets` version 3.0.0 and later, the names of the optional dataset-level dependencies have been normalised to follow [PEP 685](https://peps.python.org/pep-0685/). The '.' character has been replaced with a '-' character and the names are in lowercase. For example, if you had `kedro-datasets[pandas.ExcelDataset]` in your requirements file, it would have to be changed to `kedro-datasets[pandas-exceldataset]`.
 
 ## Reproducible environments
+
 To ensure that the project dependencies and the transitive dependencies are pinned to specific versions, use [`pip-tools`](https://pypi.org/project/pip-tools/) to compile `requirements.txt` file into a `requirements.lock` file.
 To install `pip-tools` in your virtual environment, run the following command:
 
@@ -63,4 +64,5 @@ to use `pip`'s Hash Checking Mode or `--upgrade-package` to update specific pack
 [Check out the `pip-tools` documentation](https://pypi.org/project/pip-tools/) for more information.
 
 !!! note
+
     The `requirements.txt` file contains "source" requirements, while `requirements.lock` contains the compiled version of those and requires no manual updates. If you need to update the dependencies, update the `requirements.txt` file and re-run the `pip-compile` command.

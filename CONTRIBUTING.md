@@ -19,6 +19,7 @@ Only issues on the open source ticket board are open for community contributions
 If you want to work on a new idea, reach out via [Slack](https://slack.kedro.org/) or by opening a GitHub issue before opening a PR. That helps us align on the approach and gives your contribution the highest chance of being accepted.
 
 Before opening a PR, read the relevant guidelines:
+
 - [Kedro contribution guidelines for developers](https://github.com/kedro-org/kedro/wiki/Guidelines-for-contributing-developers) — for code changes
 - [Documentation contribution guidelines](https://github.com/kedro-org/kedro/wiki/Contribute-to-the-Kedro-documentation) — for docs changes
 

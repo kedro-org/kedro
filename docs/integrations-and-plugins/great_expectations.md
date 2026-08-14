@@ -7,6 +7,7 @@ It allows you to define expectations—assertions about the structure and conten
 
 In Great Expectations, rules for data validation are called an **expectation**.
 An expectation is a falsifiable, verifiable statement about your data. For example:
+
 - "This column should never be null"
 - "Values in this column should be between 0 and 100"
 - "This column should contain these specific categories"
@@ -20,11 +21,11 @@ All the types of expectations that are available can be found in the [expectatio
 You will need the following:
 
 - A working Kedro project.
+
     - The examples in this document assume the `spaceflights-pandas` starter.
-If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
+        If you're unfamiliar with the Spaceflights project, check out [our tutorial](../tutorials/spaceflights_tutorial.md).
 
 - Great Expectations installed into your project.
-
 
 To set yourself up, create a new Kedro project:
 
@@ -38,7 +39,6 @@ Install the project dependencies:
 
 `uv pip install -r requirements.txt`
 
-
 ## Understanding Great Expectations
 
 Great Expectations version 1.0+ introduced a major API change: **everything is now done in Python code** rather than through CLI commands and YAML configuration files.
@@ -46,38 +46,44 @@ Great Expectations version 1.0+ introduced a major API change: **everything is n
 ### Key components
 
 1. **Context**: Your workspace for validation operations
-   ```python
-   context = gx.get_context()
-   ```
+
+    ```python
+    context = gx.get_context()
+    ```
 
 2. **Data Source**: Connects to your data (in our case, in-memory pandas DataFrames)
-   ```python
-   source = context.data_sources.add_or_update_pandas("my_source")
-   ```
+
+    ```python
+    source = context.data_sources.add_or_update_pandas("my_source")
+    ```
 
 3. **Data Asset**: A specific dataset within a data source
-   ```python
-   asset = source.add_dataframe_asset("companies")
-   ```
+
+    ```python
+    asset = source.add_dataframe_asset("companies")
+    ```
 
 4. **Batch**: A specific instance of data to validate
-   ```python
-   batch_request = asset.build_batch_request(options={"dataframe": df})
-   batch = asset.get_batch(batch_request)
-   ```
+
+    ```python
+    batch_request = asset.build_batch_request(options={"dataframe": df})
+    batch = asset.get_batch(batch_request)
+    ```
 
 5. **Expectation Suite**: A collection of expectations to run
-   ```python
-   suite = gx.ExpectationSuite(name="my_validation")
-   suite.expectations = [...]
-   ```
+
+    ```python
+    suite = gx.ExpectationSuite(name="my_validation")
+    suite.expectations = [...]
+    ```
 
 6. **Validation Result**: The outcome of running expectations against a batch
-   ```python
-   result = batch.validate(suite)
-   if not result.success:
-       # Handle validation failure
-   ```
+
+    ```python
+    result = batch.validate(suite)
+    if not result.success:
+        # Handle validation failure
+    ```
 
 ### The validation workflow
 
@@ -86,6 +92,7 @@ DataFrame → Batch → Apply Expectations → Validation Result
 ```
 
 When you validate data, Great Expectations:
+
 1. Takes a snapshot of your data (the "batch")
 2. Runs each expectation against it
 3. Returns detailed results showing what passed and what failed
@@ -144,6 +151,7 @@ def get_suite(name: str) -> gx.ExpectationSuite:
 [Hooks](../extend/hooks/introduction.md) allow you to automatically validate data as it flows through your pipeline, without modifying your existing pipeline code.
 
 Kedro hooks are functions that run automatically at specific points in your pipeline execution:
+
 - `before_node_run`: Runs before a node executes (useful for validating inputs)
 - `after_node_run`: Runs after a node executes (useful for validating outputs)
 
@@ -334,6 +342,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 
 ```
+
 The pipeline now has an explicit validation gate at the beginning:
 
 ```
@@ -379,6 +388,7 @@ Pipeline([
 ```
 
 This approach:
+
 - Creates explicit data lineage (`companies` → `validated_companies`)
 - Allows parallel validation of different datasets
 - Makes it easier to skip validation for specific datasets
@@ -488,15 +498,16 @@ def validate_companies(companies: pd.DataFrame,) -> None:
 ```
 
 Using a file-based Data Context makes it straightforward to:
+
 - Persist expectation suites and validation history
 - Share suites across environments and team members
 - Integrate with GX UI / GX Cloud (optional) for a richer validation history and collaborative review experience
 
 ## Further reading
 
-  - [Kedro Data Catalog](../catalog-data/data_catalog.md)
-  - [Kedro Hooks](../extend/hooks/introduction.md)
-  - [Kedro Pipelines](../build/pipeline_introduction.md)
-  - [Learn Great Expectations](https://docs.greatexpectations.io/docs/reference/learn/)
-  - [Great Expectations GitHub Repository](https://github.com/great-expectations/great_expectations)
-  - [Expectations Reference Document](https://greatexpectations.io/expectations/)
+- [Kedro Data Catalog](../catalog-data/data_catalog.md)
+- [Kedro Hooks](../extend/hooks/introduction.md)
+- [Kedro Pipelines](../build/pipeline_introduction.md)
+- [Learn Great Expectations](https://docs.greatexpectations.io/docs/reference/learn/)
+- [Great Expectations GitHub Repository](https://github.com/great-expectations/great_expectations)
+- [Expectations Reference Document](https://greatexpectations.io/expectations/)

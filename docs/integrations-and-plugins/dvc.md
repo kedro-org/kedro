@@ -79,16 +79,16 @@ Due to the location of the dataset files in the project template, you must ensur
 
 We want to use DVC to track and version our dataset file, so you remove it from Git and commit the change:
 
- ```bash
- git rm -r --cached 'data/01_raw/companies.csv'
- git commit -m "Stop tracking data/01_raw/companies.csv"
- ```
+```bash
+git rm -r --cached 'data/01_raw/companies.csv'
+git commit -m "Stop tracking data/01_raw/companies.csv"
+```
 
- We can then start tracking it with DVC:
+We can then start tracking it with DVC:
 
- ```bash
- dvc add data/01_raw/companies.csv
- ```
+```bash
+dvc add data/01_raw/companies.csv
+```
 
 This generates the `companies.csv.dvc` file which can be committed to git. This small, human-readable metadata file acts as a placeholder for the original data for Git tracking.
 
@@ -204,7 +204,6 @@ To address these issues, you can define Kedro pipelines as DVC stages in the dvc
 For more information on the configuration of those files, see [the documentation on dvc.yaml](https://dvc.org/doc/user-guide/project-structure/dvcyaml-files#dvcyaml).
 
 ### How to define Kedro pipelines as DVC stages
-
 
 Here is an example configuration for dvc.yaml:
 

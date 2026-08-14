@@ -13,11 +13,11 @@
 * Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 
 ## Documentation changes
-* Documented the `dataset_modules_whitelist` restriction on `runtime_params`-resolved catalog `type` fields, in the templating guide and the HTTP server guide.
+* Documented the HTTP server's restriction on `runtime_params`-resolved catalog `type` fields, in the templating guide and the HTTP server guide.
 * Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
 
 ## Breaking changes to the API
-* **Security fix**: A catalog `type` field resolved with `runtime_params` (for example, from the HTTP server's `POST /run`) no longer accepts an arbitrary `AbstractDataset` class. Allow trusted modules with `dataset_modules_whitelist` in `CONFIG_LOADER_ARGS`, in `settings.py`.
+* **Security fix**: A catalog `type` field resolved with `runtime_params` supplied through the HTTP server's `POST /run` no longer accepts an `AbstractDataset` class chosen by the request. `runtime_params`-driven `type` selection through other, trusted callers (for example, `kedro run --params`) is unaffected.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

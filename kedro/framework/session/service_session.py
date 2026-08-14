@@ -152,22 +152,41 @@ class KedroServiceSession(AbstractSession):
         self._logger.info("Closing session %s", self.session_id)
 
     def _get_config_loader(
-        self, runtime_params: dict[str, Any] | None = None
+        self,
+        runtime_params: dict[str, Any] | None = None,
+        trusted_runtime_params: bool = True,
     ) -> AbstractConfigLoader:
-        """An instance of the config loader."""
+        """An instance of the config loader.
+
+        Args:
+            runtime_params: Extra parameters passed to a Kedro run.
+            trusted_runtime_params: Whether ``runtime_params`` originates from a
+                trusted caller (e.g. `kedro run --params`). Callers that source
+                ``runtime_params`` from an untrusted caller (e.g. an HTTP request
+                body) must pass False -- this forces the config loader to reject
+                a catalog dataset `type` driven by `runtime_params`, regardless of
+                what a project's own `CONFIG_LOADER_ARGS` says, since that
+                restriction must not be weakenable by project config for an
+                untrusted caller.
+        """
         config_loader_class = settings.CONFIG_LOADER_CLASS
+        config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
+        if not trusted_runtime_params:
+            config_loader_args["restrict_runtime_params_type_selection"] = True
         return config_loader_class(  # type: ignore[no-any-return]
             conf_source=self._conf_source,
             env=self.env,
             runtime_params=runtime_params,
-            **settings.CONFIG_LOADER_ARGS,
+            **config_loader_args,
         )
 
     def load_context(
-        self, runtime_params: dict[str, Any] | None = None
+        self,
+        runtime_params: dict[str, Any] | None = None,
+        trusted_runtime_params: bool = True,
     ) -> KedroContext:
         """An instance of the project context with runtime parameters injected."""
-        config_loader = self._get_config_loader(runtime_params)
+        config_loader = self._get_config_loader(runtime_params, trusted_runtime_params)
         context_class = settings.CONTEXT_CLASS
         context = context_class(
             package_name=self._package_name,
@@ -196,8 +215,16 @@ class KedroServiceSession(AbstractSession):
         namespaces: Iterable[str] | None = None,
         only_missing_outputs: bool = False,
         runtime_params: dict[str, Any] | None = None,
+        trusted_runtime_params: bool = True,
     ) -> dict[str, Any]:
-        """Run the pipeline."""
+        """Run the pipeline.
+
+        Args:
+            trusted_runtime_params: Whether ``runtime_params`` originates from a
+                trusted caller. Pass False when ``runtime_params`` is sourced from
+                an untrusted caller (e.g. an HTTP request body) -- see
+                ``_get_config_loader`` for what this changes.
+        """
         run_id = run_id or generate_timestamp()
         project_name = self._package_name or self._project_path.name
         self._logger.info("Kedro project %s", project_name)
@@ -211,7 +238,7 @@ class KedroServiceSession(AbstractSession):
         # to avoid mutating shared singleton state across concurrent requests.
         if not self._serving_mode:
             pipelines.set_requested(pipeline_names or None)
-        context = self.load_context(runtime_params)
+        context = self.load_context(runtime_params, trusted_runtime_params)
         pipeline_names = pipeline_names or ["__default__"]
         combined_pipeline = Pipeline([])
         for name in pipeline_names:

@@ -37,27 +37,6 @@ _RUNTIME_PARAMS_MARKER = "runtime_params:"
 _RUNTIME_PARAMS_VARIABLE_RE = re.compile(r"\$\{runtime_params:\s*([^,}]+)")
 
 
-def _dataset_module_prefix(dataset_type: str) -> str:
-    """Return the module part of a dotted dataset type path, or ``""`` for a
-    bare class name (e.g. ``"MemoryDataset"``, resolved against Kedro's default
-    dataset packages).
-    """
-    return dataset_type.rsplit(".", 1)[0] if "." in dataset_type else ""
-
-
-def _is_dataset_module_allowed(
-    dataset_type: str, allowed_prefixes: Iterable[str]
-) -> bool:
-    """Return True when ``dataset_type``'s module is covered by ``allowed_prefixes``."""
-    if not isinstance(dataset_type, str):
-        return False
-    module = _dataset_module_prefix(dataset_type)
-    return any(
-        module == prefix or (prefix and module.startswith(prefix + "."))
-        for prefix in allowed_prefixes
-    )
-
-
 class MergeStrategies(Enum):
     SOFT = auto()
     DESTRUCTIVE = auto()
@@ -130,7 +109,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         custom_resolvers: dict[str, Callable] | None = None,
         merge_strategy: dict[str, str] | None = None,
         ignore_hidden: bool = True,
-        dataset_modules_whitelist: Iterable[str] | None = None,
+        restrict_runtime_params_type_selection: bool = False,
     ):
         if isinstance(conf_source, Path):
             conf_source = str(conf_source)
@@ -160,15 +139,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
             ignore_hidden: A boolean flag that determines whether hidden files and directories should be
                 ignored when loading configuration files. If True, ignore hidden files and files in hidden directories.
-            dataset_modules_whitelist: Module prefixes that a catalog dataset's `type` is allowed to
-                resolve to when driven by the `runtime_params:` resolver (e.g. `type:
-                "${runtime_params:dataset.type}"`). Defaults to empty, meaning `runtime_params` may
-                not select a dataset's `type` at all -- request/CLI-supplied params must not be able
-                to choose which class gets dynamically imported and instantiated. Can be set via
-                `CONFIG_LOADER_ARGS` in `settings.py`, alongside `base_env`/`default_run_env`/etc.
+            restrict_runtime_params_type_selection: When True, a catalog dataset's `type` is not
+                allowed to resolve through the `runtime_params:` resolver (e.g. `type:
+                "${runtime_params:dataset.type}"`) at all -- `runtime_params` must not be able to
+                choose which class gets dynamically imported and instantiated. Defaults to False,
+                since `runtime_params` is normally supplied by a trusted caller (e.g. `kedro run
+                --params`). Callers that construct this loader with `runtime_params` sourced from
+                an untrusted caller (e.g. an HTTP request body) must pass True.
         """
         self.ignore_hidden = ignore_hidden
-        self.dataset_modules_whitelist = tuple(dataset_modules_whitelist or ())
+        self.restrict_runtime_params_type_selection = (
+            restrict_runtime_params_type_selection
+        )
         self.base_env = base_env or ""
         self.default_run_env = default_run_env or ""
         self.merge_strategy = merge_strategy or {}
@@ -457,15 +439,19 @@ class OmegaConfigLoader(AbstractConfigLoader):
         merged_config_container: dict[str, Any],
     ) -> None:
         """Block dataset ``type`` values that resolve through the
-        ``runtime_params:`` resolver, unless their module is explicitly
-        allowed via ``self.dataset_modules_whitelist``.
+        ``runtime_params:`` resolver, when ``self.restrict_runtime_params_type_selection``
+        is set.
 
         ``type`` selects which class Kedro dynamically imports and
         instantiates. Letting untrusted runtime params (e.g. from an HTTP
         request) choose that class allows callers to pick arbitrary
         importable ``AbstractDataset`` subclasses -- including ones like
         ``kedro_datasets.pickle.PickleDataset`` that execute code on load.
-        Default-deny keeps this closed unless a project opts in.
+        Whether a resolved class would actually be dangerous to instantiate
+        isn't something this can determine from the string alone (a safe
+        and a dangerous dataset type are equally valid-looking dotted
+        paths), so when the flag is set, any real hit is rejected
+        unconditionally rather than checked against a list of safe values.
 
         Checked at every nesting depth, not just each top-level catalog entry:
         wrapper datasets such as ``CachedDataset`` and ``PartitionedDataset``
@@ -473,11 +459,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
         ``type``, which reaches the same ``AbstractDataset.from_config`` /
         ``load_obj`` path as a top-level entry.
         """
+        if not self.restrict_runtime_params_type_selection:
+            return
+
         raw_container = OmegaConf.to_container(
             OmegaConf.unsafe_merge(*aggregate_config), resolve=False
         )
-
-        allowed_prefixes = self.dataset_modules_whitelist
 
         for dataset_name, raw_entry in raw_container.items():
             resolved_entry = merged_config_container.get(dataset_name)
@@ -508,16 +495,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     continue
 
                 resolved_type = resolved_node.get("type")
-                if not _is_dataset_module_allowed(resolved_type, allowed_prefixes):
-                    raise InterpolationResolutionError(
-                        f"Dataset '{dataset_name}' resolves a 'type' field via "
-                        f"the 'runtime_params:' resolver to '{resolved_type}', "
-                        "which is not permitted. Runtime parameters must not "
-                        "select which dataset class is instantiated -- at any "
-                        "nesting depth -- unless its module is explicitly "
-                        "listed in 'dataset_modules_whitelist' (settable via "
-                        "'CONFIG_LOADER_ARGS' in settings.py)."
-                    )
+                raise InterpolationResolutionError(
+                    f"Dataset '{dataset_name}' resolves a 'type' field via "
+                    f"the 'runtime_params:' resolver to '{resolved_type}', "
+                    "which is not permitted. Runtime parameters must not "
+                    "select which dataset class is instantiated, at any "
+                    "nesting depth."
+                )
 
     @staticmethod
     def _iter_nested_dicts(

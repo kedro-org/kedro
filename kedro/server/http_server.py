@@ -254,6 +254,10 @@ def _execute_pipeline(
             namespaces=request.namespaces,
             only_missing_outputs=request.only_missing_outputs,
             runtime_params=request.params,
+            # `request.params` comes straight from the HTTP request body, so it
+            # must never be allowed to select a catalog dataset's `type` --
+            # see kedro-org/kedro#5706.
+            trusted_runtime_params=False,
         )
 
         duration_ms = (time.perf_counter() - start_time) * 1000

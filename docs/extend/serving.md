@@ -208,14 +208,9 @@ RUNNER_MODULES_WHITELIST = ["external_lib.runners"]
 
 #### Dataset type security
 
-A catalog entry's `type` field selects which dataset class Kedro imports and instantiates, so `params` must never be able to choose it. By default, Kedro rejects a catalog `type` that resolves through the [`runtime_params` resolver](../configure/how_to_use_templating.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader) to an actual request-supplied value. Enable it for modules you trust by setting `dataset_modules_whitelist` in `CONFIG_LOADER_ARGS`, in `settings.py`:
+A catalog entry's `type` field selects which dataset class Kedro imports and instantiates, so the HTTP server's `params` must never be able to choose it. The server always rejects a catalog `type` that resolves through the [`runtime_params` resolver](../configure/how_to_use_templating.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader) to an actual request-supplied value, at any nesting depth. There is no allowlist and no setting to relax this: any `POST /run` request whose `params` reach a catalog `type` field, however that value resolves, fails with an `InterpolationResolutionError`.
 
-```python
-# settings.py
-CONFIG_LOADER_ARGS = {
-    "dataset_modules_whitelist": ["kedro_datasets.pandas"],
-}
-```
+This restriction is specific to requests served over HTTP. Using `runtime_params` to select a catalog dataset's `type` remains supported for trusted, non-server use (for example, `kedro run --params`), since that caller already has as much control over the process as the parameter it's supplying.
 
 ### Interactive API reference
 

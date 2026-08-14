@@ -140,18 +140,10 @@ companies:
 ```
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
 
-!!! warning "Restricted: `type` with `runtime_params`"
+!!! warning "Restricted for untrusted callers: `type` with `runtime_params`"
     A catalog entry's `type` field selects the dataset class Kedro instantiates. Resolving `type` from `runtime_params` (for example, `type: "${runtime_params:dataset.type}"`) lets whoever supplies that parameter choose the class, including ones with side effects during load, such as `kedro_datasets.pickle.PickleDataset`.
 
-    By default, Kedro rejects a catalog `type` that resolves to an actual `runtime_params` value. A `type` that falls back to a default (for example, a `globals` value) is unaffected. To allow specific modules, add them to `dataset_modules_whitelist` in `CONFIG_LOADER_ARGS`, in `settings.py`:
-
-    ```python
-    CONFIG_LOADER_ARGS = {
-        "dataset_modules_whitelist": ["kedro_datasets.pandas"],
-    }
-    ```
-
-    See [Dataset type security](../extend/serving.md#dataset-type-security) for the security rationale.
+    This is safe for trusted, non-server use such as `kedro run --params`, since that caller already has as much control over the process as the parameter it's supplying. It is not safe when `runtime_params` comes from an untrusted caller, such as an HTTP request body — the [Kedro HTTP server](../extend/serving.md#dataset-type-security) always rejects a catalog `type` that resolves to an actual `runtime_params` value in that case, with no allowlist or setting to relax it. A `type` that falls back to a default (for example, a `globals` value) instead of an actual `runtime_params` value is unaffected either way.
 
 !!! note
     When manually instantiating `OmegaConfigLoader` in code, runtime parameters passed through the CLI `--params` option will not be available to the resolver. This occurs because the manually created config loader instance doesn't have access to the runtime parameters provided through the CLI.

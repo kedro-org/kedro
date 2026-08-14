@@ -564,3 +564,26 @@ class TestExecutePipeline:
         assert call_kwargs["namespaces"] == ["ns1"]
         assert call_kwargs["only_missing_outputs"] is True
         assert call_kwargs["runtime_params"] == {"param1": "value1"}
+        assert call_kwargs["trusted_runtime_params"] is False
+
+    def test_execute_pipeline_marks_runtime_params_as_untrusted(self, mocker):
+        """Security: `request.params` comes straight from the HTTP request body, so
+        `_execute_pipeline` must always tell the session not to trust it -- see
+        kedro-org/kedro#5706. This is what makes `OmegaConfigLoader` reject a
+        catalog `type` field driven by `runtime_params` for HTTP-server requests,
+        while leaving other (trusted) callers of `KedroServiceSession.run()`
+        unaffected."""
+        mock_session = mocker.Mock()
+        mocker.patch(
+            "kedro.server.http_server.load_obj",
+            return_value=_FakeRunner,
+        )
+
+        result = _execute_pipeline(
+            session=mock_session,
+            request=RunRequest(params={"dataset": {"type": "SomeDataset"}}),
+        )
+
+        assert result.status == "success"
+        call_kwargs = mock_session.run.call_args[1]
+        assert call_kwargs["trusted_runtime_params"] is False

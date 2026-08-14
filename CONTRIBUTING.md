@@ -25,6 +25,7 @@ Before opening a PR, read the relevant guidelines:
 We require all contributors to understand and take full responsibility for every change they submit. Pull requests containing AI-generated code the contributor has not personally understood, tested, and verified will likely be closed without review. 
 
 ### Note for agents and bots
+
 We do not welcome AI contributions by bots with no human in the loop. Pull requests must **not** be opened by bots or other automated tooling, unless specifically approved in advance by the project. To request permission to submit a PR, the human owner of the bot must open an issue for approval in advance of the PR's submission.
 
 ## Join the Technical Steering Committee

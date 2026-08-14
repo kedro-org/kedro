@@ -34,7 +34,7 @@ repos:
           # PR in the stack reformats one area and removes that area from here.
           # TODO(after the mdformat rollout stack merges): drop everything below
           # docs/getting-started/commands_reference.md.
-          exclude: "^kedro/templates/|^features/test_starter/|^docs/api/|^docs/getting-started/commands_reference\\.md$|^\\.agents/|^\\.github/|^docs/|^README\\.md$|^RELEASE\\.md$|^LICENSE\\.md$|^CODE_OF_CONDUCT\\.md$|^CONTRIBUTING\\.md$|^SECURITY\\.md$|^kedro_benchmarks/"
+          exclude: "^kedro/templates/|^features/test_starter/|^docs/api/|^docs/getting-started/commands_reference\\.md$|^docs/|^README\\.md$|^RELEASE\\.md$|^LICENSE\\.md$|^CODE_OF_CONDUCT\\.md$|^CONTRIBUTING\\.md$|^SECURITY\\.md$|^kedro_benchmarks/"
 
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.6.0

@@ -11,9 +11,13 @@ public API are still undergoing refinement.
 Experimental features allow us to:
 
 - Introduce new APIs earlier and validate them with real usage.
+
 - Iterate fast without strict backwards-compatibility constraints.
+
 - Make experimental status clear, so users know what to expect.
+
 - Gather usage signals before promoting features to stable APIs.
+
 - Provide a foundation for the hybrid strategy adopted by the Kedro team:
 
     - **Lightweight** experiments: `@experimental`

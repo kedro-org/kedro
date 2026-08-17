@@ -23,7 +23,7 @@ Before opening a PR, read the relevant guidelines:
 - [Kedro contribution guidelines for developers](https://github.com/kedro-org/kedro/wiki/Guidelines-for-contributing-developers) — for code changes
 - [Documentation contribution guidelines](https://github.com/kedro-org/kedro/wiki/Contribute-to-the-Kedro-documentation) — for docs changes
 
-We require all contributors to understand and take full responsibility for every change they submit. Pull requests containing AI-generated code the contributor has not personally understood, tested, and verified will likely be closed without review. 
+We require all contributors to understand and take full responsibility for every change they submit. Pull requests containing AI-generated code the contributor has not personally understood, tested, and verified will likely be closed without review.
 
 ### Note for agents and bots
 

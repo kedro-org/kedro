@@ -195,6 +195,18 @@ class TestModeAndEnablementGating:
         with pytest.raises(DataValidationError):
             catalog.save("companies", invalid_df)
 
+    def test_on_load_only_skips_save_validation(self, csv_path, invalid_df):
+        catalog = make_catalog(
+            csv_path,
+            validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["load"]},
+        )
+
+        catalog.save("companies", invalid_df)  # must not raise
+        assert csv_path.exists()
+
+        with pytest.raises(DataValidationError):
+            catalog.load("companies")
+
     def test_per_dataset_enabled_false_skips_validation(self, csv_path, invalid_df):
         invalid_df.to_csv(csv_path, index=False)
         catalog = make_catalog(
@@ -219,6 +231,20 @@ class TestModeAndEnablementGating:
 
         pd.testing.assert_frame_equal(loaded, invalid_df)
         assert "Validation failed for dataset 'companies' on load" in caplog.text
+
+    def test_severity_warn_on_save_writes_and_logs(self, csv_path, invalid_df, caplog):
+        catalog = make_catalog(
+            csv_path,
+            validator={"class": f"{_MODULE}.CompaniesSchema", "severity": "warn"},
+        )
+
+        with caplog.at_level(logging.WARNING, logger="kedro.io.data_catalog"):
+            catalog.save("companies", invalid_df)
+
+        # the invalid data reaches storage; the failure is only logged
+        assert csv_path.exists()
+        pd.testing.assert_frame_equal(pd.read_csv(csv_path), invalid_df)
+        assert "Validation failed for dataset 'companies' on save" in caplog.text
 
     def test_severity_warn_wraps_non_validation_errors(self, csv_path, caplog):
         # validator blows up with a KeyError (missing column) -> warn + raw data

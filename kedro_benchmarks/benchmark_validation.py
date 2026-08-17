@@ -353,3 +353,13 @@ class DatasetValidationFunnelTimeSuite:
     def time_load_with_cached_validator(self):
         for _ in range(500):
             self.validated_catalog.load("validated")
+
+    def time_save_with_cached_validator(self):
+        for _ in range(500):
+            self.validated_catalog.save("validated", 42)
+
+    def time_first_load_resolves_validator(self):
+        """Cold path: the validator is imported and built on first use."""
+        for _ in range(100):
+            self.validated_catalog._validators.clear()
+            self.validated_catalog.load("validated")

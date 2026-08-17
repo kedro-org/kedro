@@ -1101,7 +1101,7 @@ class DataCatalog(CatalogProtocol):
         )
 
         if self._is_validation_enabled():
-            data = self._maybe_validate(ds_name, data, mode="save")
+            data = self._validate(ds_name, data, mode="save")
         try:
             dataset.save(data)
         except DatasetError as e:
@@ -1159,7 +1159,7 @@ class DataCatalog(CatalogProtocol):
         except DatasetError as e:
             raise DatasetError(f"{ds_name}: {e}") from e
         if self._is_validation_enabled():
-            data = self._maybe_validate(ds_name, data, mode="load")
+            data = self._validate(ds_name, data, mode="load")
         return data
 
     def _is_validation_enabled(self) -> bool:
@@ -1186,14 +1186,14 @@ class DataCatalog(CatalogProtocol):
                 return True
         return self.validation_enabled
 
-    def _maybe_validate(self, ds_name: str, data: Any, mode: str) -> Any:
+    def _validate(self, ds_name: str, data: Any, mode: str) -> Any:
         """Apply the dataset's declared validator to `data` if applicable.
 
         This is the single validation funnel for catalog `load` and `save`
-        operations. It is a no-op when validation is disabled (catalog flag or
-        `KEDRO_DATASET_VALIDATION` environment variable), when no validator
-        is declared for the dataset, when the validator is disabled or not
-        declared for `mode`, or when `skip_load_after_save` applies.
+        operations. Callers gate on `_is_validation_enabled` first. It is a
+        no-op when no validator is declared for the dataset, when the
+        validator is disabled or not declared for `mode`, or when
+        `skip_load_after_save` applies.
 
         Args:
             ds_name: The name of the dataset being loaded or saved.

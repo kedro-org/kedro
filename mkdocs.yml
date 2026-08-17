@@ -106,6 +106,7 @@ plugins:
           - getting-started/kedro_concepts.md: Core concepts - nodes, pipelines, catalog, and more
           - getting-started/faq.md: Frequently asked questions
           - getting-started/course.md: Learn about Kedro from our video course
+          - getting-started/pipeline_builder.md: Design Kedro pipelines visually in the browser and export a project
 
         Essential Tutorials:
           - tutorials/spaceflights_tutorial.md: Complete tutorial building a spaceflight price prediction project
@@ -317,6 +318,7 @@ nav:
           - Kedro concepts: getting-started/kedro_concepts.md
           - FAQs: getting-started/faq.md
           - Video course: getting-started/course.md
+          - Kedro Pipeline Builder: getting-started/pipeline_builder.md
       - Tutorials:
           - Kedro Spaceflights tutorial:
             - Spaceflight tutorial: tutorials/spaceflights_tutorial.md

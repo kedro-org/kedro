@@ -27,15 +27,12 @@ def mock_package_name_with_pipelines_file(tmpdir):
     sys.path.pop(0)
 
 
-def test_pipelines_without_configure_project_is_empty(
-    mock_package_name_with_pipelines_file,
-):
-    # Reimport `pipelines` from `kedro.framework.project` to ensure that
-    # it was not set by a prior call to the `configure_project` function.
-    del sys.modules["kedro.framework.project"]
-    from kedro.framework.project import pipelines
-
-    assert pipelines == {}
+def test_pipelines_without_configure_project_is_empty():
+    # A freshly created, unconfigured `_ProjectPipelines` is empty. Using a new
+    # instance (rather than the `kedro.framework.project.pipelines` singleton)
+    # avoids depending on whether `configure_project` was already called by
+    # another test
+    assert _ProjectPipelines() == {}
 
 
 @pytest.fixture

@@ -7,6 +7,7 @@
 - Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
 
 ## Bug fixes and other changes
+
 - Fixed a thread-safety issue in `_ProjectPipelines` where concurrent access could trigger duplicate pipeline loading or operate on a cleared cache; all shared state mutations are now protected by a reentrant lock.
 - Fixed a thread-safety issue in the Kedro HTTP server by adding a `serving_mode` argument to `KedroServiceSession.create()` that preloads all pipelines upfront.
 - Fixed a `RecursionError` when initialising a session with dynaconf-backed settings by converting `settings.SESSION_STORE_ARGS` to a plain `dict` before deepcopying it.

@@ -1,8 +1,8 @@
 # Kedro Pipeline Builder
 
-[Kedro Pipeline Builder](https://demo.kedro.org/kedro-builder/) is a browser-based tool for designing a Kedro pipeline visually. It shows how nodes, datasets, and the data catalog fit together before you write the full implementation. You don't need to install Kedro to use the hosted tool.
+[Kedro Pipeline Builder](https://demo.kedro.org/kedro-builder/) is a browser-based, drag-and-drop tool for designing a Kedro pipeline. It shows how nodes, datasets, and the data catalog fit together before you write the full implementation. You don't need to install Kedro to use the hosted tool.
 
-The Pipeline Builder is useful when you are new to Kedro or want to sketch a pipeline before creating its code. Its guided introduction explains core Kedro concepts, and the canvas shows how data moves between function nodes and datasets.
+The Pipeline Builder is useful when you're new to Kedro or want to sketch a pipeline before creating its code. The tool includes a guided introduction to core Kedro concepts, and the canvas shows how data moves between function nodes and datasets.
 
 ![Kedro Pipeline Builder canvas with function nodes connected to datasets](../meta/images/kedro_pipeline_builder_canvas.png)
 

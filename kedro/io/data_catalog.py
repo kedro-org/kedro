@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import re
+import warnings
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import TYPE_CHECKING, Any, ClassVar, Iterator, List  # noqa: UP035
@@ -32,6 +33,25 @@ from kedro.io.shared_memory_dataset import SharedMemoryDataset
 
 if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager
+
+
+# fsspec protocols that indicate a dataset is backed by remote/cloud storage.
+# Filesystem client objects for these protocols (e.g. S3FileSystem) commonly
+# hold non-serialisable state and cannot be pickled for use with
+# ``ParallelRunner``'s multiprocessing.
+_CLOUD_PROTOCOLS = {
+    "s3",
+    "s3a",
+    "s3n",
+    "gcs",
+    "gs",
+    "adl",
+    "abfs",
+    "abfss",
+    "az",
+    "hdfs",
+    "oci",
+}
 
 
 class _LazyDataset:
@@ -1269,6 +1289,16 @@ class SharedMemoryDataCatalog(DataCatalog):
                 ForkingPickler.dumps(dataset)
             except (AttributeError, PicklingError):
                 unserialisable.append(name)
+                protocol = getattr(dataset, "_protocol", None)
+                if protocol in _CLOUD_PROTOCOLS:
+                    warnings.warn(
+                        f"Dataset '{name}' appears to be backed by remote/cloud "
+                        f"storage (protocol: '{protocol}'). Its filesystem client "
+                        f"could not be pickled, which is a common issue with "
+                        f"cloud-based datasets under `ParallelRunner`. Consider "
+                        f"using `ThreadRunner` instead.",
+                        stacklevel=2,
+                    )
 
         if unserialisable:
             raise AttributeError(

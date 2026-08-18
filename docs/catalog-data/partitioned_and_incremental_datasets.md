@@ -8,26 +8,27 @@ Distributed systems play an increasingly important role in ETL data pipelines. T
 
 This is why Kedro provides [PartitionedDataset](https://docs.kedro.org/projects/kedro-datasets/en/feature-8.0/api/kedro_datasets/partitions.PartitionedDataset/) with the following features:
 
-* `PartitionedDataset` can recursively load and save all or specific files from a given location.
-* It is platform agnostic and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/), including local, S3, GCS, and others.
-* It implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach, and does not attempt to load any partition data until a processing node explicitly requests it.
-* It supports lazy saving by using `Callable`s.
+- `PartitionedDataset` can recursively load and save all or specific files from a given location.
+- It is platform agnostic and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/), including local, S3, GCS, and others.
+- It implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach, and does not attempt to load any partition data until a processing node explicitly requests it.
+- It supports lazy saving by using `Callable`s.
 
 !!! note
+
     In this section, each individual file inside a given location is called a partition.
 
 ### `PartitionedDataset` arguments
 
 Here is the full list of arguments supported by `PartitionedDataset`:
 
-| Argument          | Required | Supported types                                  | Description                                                                                                                                                                                                                                   |
-| ----------------- | -------- | ------------------------------------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Argument          | Required | Supported types                                  | Description                                                                                                                                                                                                                                           |
+| ----------------- | -------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `path`            | Yes      | `str`                                            | Path to the folder containing partitioned data. If the path starts with a protocol (for example, `s3://`) the corresponding `fsspec` concrete filesystem implementation will be used. If no protocol is specified, the local filesystem will be used. |
-| `dataset`         | Yes      | `str`, `Type[AbstractDataset]`, `Dict[str, Any]` | Underlying dataset definition. For details, see [Dataset definition](#dataset-definition).                                                                                                                                                    |
-| `credentials`     | No       | `Dict[str, Any]`                                 | Protocol-specific options that will be passed to `fsspec.filesystem`. For details, see [Partitioned dataset credentials](#partitioned-dataset-credentials).                                                                                                              |
-| `load_args`       | No       | `Dict[str, Any]`                                 | Keyword arguments to be passed into the `find()` method of the corresponding filesystem implementation.                                                                                                                                       |
-| `filepath_arg`    | No       | `str` (defaults to `filepath`)                   | Argument name of the underlying dataset initialiser that will contain a path to an individual partition.                                                                                                                                       |
-| `filename_suffix` | No       | `str` (defaults to an empty string)              | If specified, partitions that don't end with this string will be ignored.                                                                                                                                                                      |
+| `dataset`         | Yes      | `str`, `Type[AbstractDataset]`, `Dict[str, Any]` | Underlying dataset definition. For details, see [Dataset definition](#dataset-definition).                                                                                                                                                            |
+| `credentials`     | No       | `Dict[str, Any]`                                 | Protocol-specific options that will be passed to `fsspec.filesystem`. For details, see [Partitioned dataset credentials](#partitioned-dataset-credentials).                                                                                           |
+| `load_args`       | No       | `Dict[str, Any]`                                 | Keyword arguments to be passed into the `find()` method of the corresponding filesystem implementation.                                                                                                                                               |
+| `filepath_arg`    | No       | `str` (defaults to `filepath`)                   | Argument name of the underlying dataset initialiser that will contain a path to an individual partition.                                                                                                                                              |
+| `filename_suffix` | No       | `str` (defaults to an empty string)              | If specified, partitions that don't end with this string will be ignored.                                                                                                                                                                             |
 
 ### Dataset definition
 
@@ -41,13 +42,14 @@ Specify the underlying dataset class either as a string or as a class object. As
 
 The full notation allows you to specify a dictionary with the full underlying dataset definition _except_ the following arguments:
 
-* The argument that receives the partition path (`filepath` by default) — if specified, a `UserWarning` is emitted stating that this value will be overridden by individual partition paths.
-* `credentials` key — specifying it will result in a `DatasetError`. Dataset credentials should be passed into the `credentials` argument of the `PartitionedDataset` rather than the underlying dataset definition. See [Partitioned dataset credentials](#partitioned-dataset-credentials).
-* `versioned` flag — specifying it will result in a `DatasetError`. Versioning cannot be enabled for the underlying datasets.
+- The argument that receives the partition path (`filepath` by default) — if specified, a `UserWarning` is emitted stating that this value will be overridden by individual partition paths.
+- `credentials` key — specifying it will result in a `DatasetError`. Dataset credentials should be passed into the `credentials` argument of the `PartitionedDataset` rather than the underlying dataset definition. See [Partitioned dataset credentials](#partitioned-dataset-credentials).
+- `versioned` flag — specifying it will result in a `DatasetError`. Versioning cannot be enabled for the underlying datasets.
 
 ### Partitioned dataset credentials
 
 !!! note
+
     Support for the `dataset_credentials` key in the credentials for `PartitionedDataset` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 
 Credentials management for `PartitionedDataset` is somewhat special, because it might contain credentials for both `PartitionedDataset` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config, unless that config already has credentials configured. The reverse does not happen — dataset credentials are never propagated to the filesystem.
@@ -60,8 +62,8 @@ On load, `PartitionedDataset` _does not_ automatically load the data from the lo
 
 A partition ID represents the part of the partition path that is unique to a given partition (and filename suffix), not the whole path:
 
-* Example 1: if `path=s3://my-bucket-name/folder` and a partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, its partition ID is `2019-12-04/data.csv`.
-* Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and a partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, its partition ID is `2019-12-04/data`.
+- Example 1: if `path=s3://my-bucket-name/folder` and a partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, its partition ID is `2019-12-04/data.csv`.
+- Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and a partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv`, its partition ID is `2019-12-04/data`.
 
 `PartitionedDataset` caches the load operation. If multiple nodes consume the same `PartitionedDataset`, they all receive the same partition dictionary, even when new partitions were added to the folder after the first load completed. This behaviour guarantees consistent load operations between nodes and avoids race conditions. To reset the cache, call the `release()` method of the partitioned dataset object.
 
@@ -96,14 +98,14 @@ For worked examples covering same-node and deferred confirmation, see [how to co
 
 Important notes about the confirmation operation:
 
-* Confirming a partitioned dataset does not affect any following loads within the same run. All downstream nodes that take the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will not affect later loads and won't appear in the list of loaded partitions until the next run, or until `release()` is called on the dataset object.
-* A pipeline cannot contain more than one node confirming the same dataset.
+- Confirming a partitioned dataset does not affect any following loads within the same run. All downstream nodes that take the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will not affect later loads and won't appear in the list of loaded partitions until the next run, or until `release()` is called on the dataset object.
+- A pipeline cannot contain more than one node confirming the same dataset.
 
 ### Checkpoint configuration
 
 `IncrementalDataset` does not require explicit configuration of the checkpoint unless you need to deviate from the defaults. The `checkpoint` configuration accepts standard dataset attributes (used when the pipeline has read access to the location of partitions but no write access, for example) plus two special optional keys:
 
-* `comparison_func` — a fully qualified import path to the function that compares a partition ID with the checkpoint value, used to determine whether a partition should be processed. Functions must accept two positional string arguments (partition ID and checkpoint value) and return `True` if the partition is considered to be past the checkpoint. The default is `operator.gt`. Customising `comparison_func` is useful when you need a different filtration mechanism (for example, windowed loading of the last calendar month).
-* `force_checkpoint` — if set, the partitioned dataset uses this value as the checkpoint instead of loading the corresponding checkpoint file. This is useful when you need to roll back the processing steps and reprocess some (or all) of the available partitions.
+- `comparison_func` — a fully qualified import path to the function that compares a partition ID with the checkpoint value, used to determine whether a partition should be processed. Functions must accept two positional string arguments (partition ID and checkpoint value) and return `True` if the partition is considered to be past the checkpoint. The default is `operator.gt`. Customising `comparison_func` is useful when you need a different filtration mechanism (for example, windowed loading of the last calendar month).
+- `force_checkpoint` — if set, the partitioned dataset uses this value as the checkpoint instead of loading the corresponding checkpoint file. This is useful when you need to roll back the processing steps and reprocess some (or all) of the available partitions.
 
 For YAML examples of each, see [how to configure incremental dataset checkpoints](how_to_use_partitioned_and_incremental_datasets.md#how-to-configure-incremental-dataset-checkpoints).

@@ -109,6 +109,7 @@ except MissingConfigException:
 ```
 
 !!! note
+
     The `kedro.framework.context.KedroContext` class uses the approach above to load project parameters.
 
 [Parameters can then be used on their own or fed in as function inputs](parameters_and_credentials.md#how-parameters-work).
@@ -122,6 +123,7 @@ Each key-value pair is split on the first equals sign. The following example is 
 ```bash
 kedro run --params=param_key1=value1,param_key2=2.0
 ```
+
 Values provided in the CLI take precedence and overwrite parameters specified in configuration files. By default, runtime parameters merge destructively, meaning that any configuration for that key **besides the runtime value** is discarded.
 [This section describes how to change the merging strategy](how_to_configure_project.md#how-to-change-the-merge-strategy-used-by-omegaconfigloader).
 
@@ -152,6 +154,7 @@ kedro run --params="model_options.model_params.training_date=2011-11-11"
 ```
 
 The final merged result will be:
+
 ```yaml
 model_options:
   model_params:
@@ -164,8 +167,8 @@ features:
     rate: 123
 ```
 
-* Parameter keys are _always_ treated as strings.
-* Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.
+- Parameter keys are _always_ treated as strings.
+- Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.
 
 If any extra parameter key or value contains spaces, wrap the whole option contents in quotes:
 
@@ -175,8 +178,8 @@ kedro run --params="key1=value with spaces,key2=value"
 
 Since key-value pairs are split on the first equals sign, values can contain equals signs, but keys cannot.
 
-
 !!! note
+
     To **override parameters and other configurations**, such as catalog entries or file paths, or to specify upfront that certain parameters must be set at runtime, use `$runtime_params` with the `OmegaConfigLoader`. Introduced in Kedro `0.18.14`, this feature allows dynamic overrides of various configuration types using the `--params` CLI option. Use it when you need to switch data sources or adjust runtime settings. [Learn more about `$runtime_params`.](how_to_use_templating.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
 
 ## How to validate parameters
@@ -193,6 +196,7 @@ Parameter validation supports two kinds of typed objects:
 - **Dataclasses**: Basic type checking using Python's built-in `dataclasses` module. No extra dependencies needed.
 
 !!! note
+
     You can use either Pydantic models or dataclasses. You do not need both.
 
 Raw values (`int`, `str`, `float`, and others) are passed through unchanged with no validation applied.
@@ -404,6 +408,7 @@ eval:
 ```
 
 !!! note
+
     Dataclasses do not have built-in field validation like Pydantic. Kedro instantiates the dataclass from the dictionary and checks that the required fields are present, but it does not enforce constraints like `ge`, `le`, or custom validators. Use Pydantic models if you need richer validation.
 
 ### Use multiple typed parameters in one node
@@ -473,7 +478,6 @@ The error includes the parameter key name and the full Pydantic validation outpu
 
 Credentials configuration can be loaded the same way as any other project configuration using the configuration loader class `OmegaConfigLoader`.
 
-
 ```python
 from pathlib import Path
 
@@ -506,6 +510,7 @@ except MissingConfigException:
 ```
 
 !!! note
+
     The `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
 
 ## How to load credentials through environment variables
@@ -521,6 +526,7 @@ dev_s3:
 ```
 
 !!! note
+
     You can use this resolver solely in `credentials.yml`, not in catalog or parameter files. This restriction discourages using environment variables for anything other than credentials.
 
 ## How to work with AWS credentials

@@ -3,7 +3,7 @@ Kedro is a framework that makes it easy to build robust and scalable data pipeli
 ## Modules
 
 | Name                                                 | Description                                                                                               |
-|------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [`kedro.config`](config/kedro.config.md)             | Provides functionality for loading Kedro configuration from different file formats.                       |
 | [`kedro.framework`](framework/kedro.framework.md)    | Provides Kedro's framework components.                                                                    |
 | [`kedro.inspection`](inspection/kedro.inspection.md) | Provides a read-only inspection API for querying Kedro project structure without running pipelines.       |
@@ -16,13 +16,14 @@ Kedro is a framework that makes it easy to build robust and scalable data pipeli
 | [`kedro.utils`](kedro.utils.md)                      | This module provides a set of helper functions being used across different components of Kedro package.   |
 
 ## Functions
-| Name                                   | Description                                      |
-|----------------------------------------|--------------------------------------------------|
-| [`load_ipython_extension`](kedro.load_ipython_extension.md) |   |
 
+| Name                                                        | Description |
+| ----------------------------------------------------------- | ----------- |
+| [`load_ipython_extension`](kedro.load_ipython_extension.md) |             |
 
 ## Exceptions
-| Name                                   | Description                                      |
-|----------------------------------------|--------------------------------------------------|
-| [`KedroDeprecationWarning`](kedro.KedroDeprecationWarning.md) | Custom class for warnings about deprecated Kedro features.  |
-| [`KedroPythonVersionWarning`](kedro.KedroPythonVersionWarning.md) | Custom class for warnings about incompatibilities with Python versions.  |
+
+| Name                                                              | Description                                                             |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`KedroDeprecationWarning`](kedro.KedroDeprecationWarning.md)     | Custom class for warnings about deprecated Kedro features.              |
+| [`KedroPythonVersionWarning`](kedro.KedroPythonVersionWarning.md) | Custom class for warnings about incompatibilities with Python versions. |

@@ -20,6 +20,7 @@ from kedro.io.core import (
     DatasetError,
     Version,
     VersionNotFoundError,
+    _redact_url_credentials,
     generate_timestamp,
     get_filepath_str,
     get_protocol_and_path,
@@ -943,3 +944,146 @@ def test_no_self_in_init_args_allows_safe_describe():
     assert isinstance(description, dict)
     assert "_init_args" in description
     assert "self" not in description["_init_args"]
+
+
+class TestRedactUrlCredentials:
+    """Unit tests for the shared ``_redact_url_credentials`` utility."""
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "data/01_raw/companies.csv",
+            "/Users/foo/bar.csv",
+            "C:\\Projects\\file.txt",
+            "some/path/without/secrets",
+        ],
+    )
+    def test_plain_paths_are_unchanged(self, value):
+        assert _redact_url_credentials(value) == value
+
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            (
+                "s3://ACCESSKEY:SECRETKEY@my-bucket/data/file.csv",  # pragma: allowlist secret
+                "s3://<redacted>@my-bucket/data/file.csv",
+            ),
+            (
+                "postgresql://user:password@db-host:5432/mydb",  # pragma: allowlist secret
+                "postgresql://<redacted>@db-host:5432/mydb",
+            ),
+            (
+                "https://presigned.s3.amazonaws.com/bucket/key.csv"
+                "?X-Amz-Signature=deadbeef&X-Amz-Expires=3600",
+                "https://presigned.s3.amazonaws.com/bucket/key.csv?<redacted>",
+            ),
+            (
+                "https://user:pass@example.com:8080/path/file.csv?sig=abc#frag",  # pragma: allowlist secret
+                "https://<redacted>@example.com:8080/path/file.csv?<redacted>#<redacted>",
+            ),
+        ],
+    )
+    def test_scheme_based_urls_are_redacted(self, value, expected):
+        assert _redact_url_credentials(value) == expected
+
+    def test_bare_path_with_query_is_redacted(self):
+        # Kedro strips the scheme from cloud-storage filepaths before storing
+        # them, so the query string can appear with no scheme prefix at all.
+        value = "my-bucket/data/file.csv?X-Amz-Signature=deadbeef"
+        assert _redact_url_credentials(value) == "my-bucket/data/file.csv?<redacted>"
+
+    def test_url_embedded_in_larger_text_is_redacted(self):
+        message = (
+            "Failed to fetch https://user:pass@host/file.csv?sig=SECRETVALUE: "  # pragma: allowlist secret
+            "connection refused"
+        )
+        redacted = _redact_url_credentials(message)
+        assert "SECRETVALUE" not in redacted
+        assert "pass" not in redacted
+        assert "connection refused" in redacted
+        assert "https://<redacted>@host/file.csv" in redacted
+
+    def test_does_not_rely_on_known_parameter_names(self):
+        # An arbitrary, non-standard query parameter name must still be redacted.
+        value = "https://example.com/file.csv?some_unusual_param_name=secret"
+        assert (
+            _redact_url_credentials(value) == "https://example.com/file.csv?<redacted>"
+        )
+
+    @pytest.mark.parametrize("value", [None, 123, ["a", "b"], {"k": "v"}])
+    def test_non_string_values_are_unchanged(self, value):
+        assert _redact_url_credentials(value) is value
+
+
+class _CredentialedRepr(AbstractDataset):
+    """Minimal dataset whose ``_describe`` exposes a full URL string,
+    mirroring how a dataset might surface a presigned URL filepath."""
+
+    def __init__(self, filepath: str) -> None:
+        self._filepath = filepath
+
+    def _describe(self) -> dict[str, Any]:
+        return {"filepath": self._filepath}
+
+    def _load(self):
+        raise RuntimeError("boom")
+
+    def _save(self, data) -> None:
+        pass
+
+
+class TestDatasetReprCredentialRedaction:
+    """Regression tests ensuring dataset representations used in ``__repr__``
+    and ``DatasetError`` messages never leak credentials, signed URL
+    parameters, or fragments from a dataset's filepath/URL."""
+
+    def test_repr_redacts_credentials_and_query(self):
+        presigned_url = (
+            "https://AKIA:SECRETKEY@example.com/bucket/file.csv"  # pragma: allowlist secret
+            "?X-Amz-Signature=verysecretsig#frag"
+        )
+        dataset = _CredentialedRepr(filepath=presigned_url)
+
+        representation = repr(dataset)
+
+        assert "SECRETKEY" not in representation
+        assert "verysecretsig" not in representation
+        assert "frag" not in representation
+        assert "<redacted>" in representation
+        # The dataset itself must still hold the original URL for I/O.
+        assert dataset._filepath == presigned_url
+
+    def test_load_failure_error_message_redacts_credentials(self):
+        presigned_url = (
+            "https://AKIA:SECRETKEY@example.com/bucket/file.csv"  # pragma: allowlist secret
+            "?X-Amz-Signature=verysecretsig"
+        )
+        dataset = _CredentialedRepr(filepath=presigned_url)
+
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.load()
+
+        message = str(exc_info.value)
+        assert "SECRETKEY" not in message
+        assert "verysecretsig" not in message
+        assert "<redacted>" in message
+
+
+class TestVersionedDatasetCredentialRedaction:
+    """Regression tests for credential/query redaction in ``AbstractVersionedDataset``
+    error messages that embed filepath components directly."""
+
+    def test_prevent_overwrite_redacts_query_string(self, tmp_path):
+        filepath = f"{tmp_path.as_posix()}/data.csv?X-Amz-Signature=verysecretsig"
+        # Use a fixed save version so both saves target the same versioned
+        # path, deterministically triggering the "must not exist" error.
+        version = Version(load=None, save="2024-01-01T00.00.00.000Z")
+        dataset = MyVersionedDataset(filepath=filepath, version=version)
+
+        dataset.save("some data")
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.save("some data")
+
+        message = str(exc_info.value)
+        assert "verysecretsig" not in message
+        assert "<redacted>" in message

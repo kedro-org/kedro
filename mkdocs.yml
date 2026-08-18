@@ -318,7 +318,7 @@ nav:
           - Kedro concepts: getting-started/kedro_concepts.md
           - FAQs: getting-started/faq.md
           - Video course: getting-started/course.md
-          - Kedro Pipeline Builder: getting-started/pipeline_builder.md
+          - Build a pipeline visually: getting-started/pipeline_builder.md
       - Tutorials:
           - Kedro Spaceflights tutorial:
             - Spaceflight tutorial: tutorials/spaceflights_tutorial.md

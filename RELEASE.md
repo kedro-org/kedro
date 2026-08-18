@@ -16,6 +16,7 @@
 - Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 
 ## Documentation changes
+
 - Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
 - Added `mdformat` as a Markdown autoformatter, run via `make lint` and as a pre-commit hook, and reformatted the existing Markdown. Fixed several step-by-step guides where numbered lists were rendering as repeated "1." instead of counting up, because their content wasn't indented under the right list item.
 - Fixed the `DaskRunner` example on the Dask deployment page.

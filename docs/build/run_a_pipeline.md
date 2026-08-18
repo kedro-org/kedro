@@ -60,6 +60,10 @@ To control which multiprocessing start method is used by `ParallelRunner`, set `
 
 For more information on how to maximise concurrency when using Kedro with PySpark, read our guide on [how to build a Kedro pipeline with PySpark](../integrations-and-plugins/pyspark_integration.md).
 
+!!! note
+
+    Datasets backed by remote or cloud storage, such as S3, GCS or Azure Data Lake through `fsspec`, can fail under `ParallelRunner`. The underlying filesystem client often cannot be pickled for multiprocessing. If a `ParallelRunner` catalog validation error mentions a dataset that reads from or writes to cloud storage, use `ThreadRunner` instead.
+
 ### `ThreadRunner`
 
 While `ParallelRunner` uses multiprocessing, you can also run the pipeline with multithreading for concurrent execution by specifying `ThreadRunner` as follows:

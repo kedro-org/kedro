@@ -19,6 +19,7 @@
 
 - Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
 - Added `mdformat` as a Markdown autoformatter, run via `make lint` and as a pre-commit hook, and reformatted the existing Markdown. Fixed several step-by-step guides where numbered lists were rendering as repeated "1." instead of counting up, because their content wasn't indented under the right list item.
+- Fixed the `DaskRunner` example on the Dask deployment page.
 
 ## Community contributions
 
@@ -28,6 +29,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Versus-DEV](https://github.com/Versus-DEV)
 - [Shizoqua](https://github.com/Shizoqua)
 - [BALOGUN DAVID TAIWO](https://github.com/BALOGUN-DAVID)
+- [kingjaiteh](https://github.com/kingjaiteh)
 
 # Release 1.5.0
 

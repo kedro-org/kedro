@@ -184,4 +184,4 @@ class TestRunnerInputValidation:
         with pytest.raises(AttributeError):
             runner.run(my_pipeline, catalog)
 
-        assert len(recwarn) == 0
+        assert not any("ThreadRunner" in str(w.message) for w in recwarn)

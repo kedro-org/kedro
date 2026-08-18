@@ -1264,6 +1264,11 @@ class SharedMemoryDataCatalog(DataCatalog):
         datasets that rely on single-process memory cannot be used in a multiprocessing
         context. If any such datasets are found, an exception is raised with details.
 
+        If a non-serializable dataset appears to be backed by remote/cloud storage
+        (detected via its `_protocol` attribute), a `UserWarning` is also issued for
+        that dataset suggesting `ThreadRunner` as an alternative, since cloud-based
+        filesystem clients (e.g. via `fsspec`) commonly cannot be pickled.
+
         Raises:
             AttributeError: If any datasets are found to be non-serializable or incompatible
                 with multiprocessing.

@@ -969,8 +969,8 @@ class TestRedactUrlCredentials:
                 "s3://<redacted>@my-bucket/data/file.csv",
             ),
             (
-                "postgresql://user:password@db-host:5432/mydb",  # pragma: allowlist secret
-                "postgresql://<redacted>@db-host:5432/mydb",
+                "https://example.com/file.csv?sig=SECRETVALUE",  # pragma: allowlist secret
+                "https://example.com/file.csv?<redacted>",
             ),
             (
                 "https://presigned.s3.amazonaws.com/bucket/key.csv"
@@ -978,9 +978,20 @@ class TestRedactUrlCredentials:
                 "https://presigned.s3.amazonaws.com/bucket/key.csv?<redacted>",
             ),
             (
+                "https://example.com/file.csv#section",
+                "https://example.com/file.csv#<redacted>",
+            ),
+            (
                 "https://user:pass@example.com:8080/path/file.csv?sig=abc#frag",  # pragma: allowlist secret
                 "https://<redacted>@example.com:8080/path/file.csv?<redacted>#<redacted>",
             ),
+        ],
+        ids=[
+            "userinfo-only",
+            "query-only-common-name",
+            "query-only-multiple-non-standard-names",
+            "fragment-only",
+            "userinfo-query-and-fragment",
         ],
     )
     def test_scheme_based_urls_are_redacted(self, value, expected):
@@ -993,22 +1004,42 @@ class TestRedactUrlCredentials:
         assert _redact_url_credentials(value) == "my-bucket/data/file.csv?<redacted>"
 
     def test_url_embedded_in_larger_text_is_redacted(self):
+        # The regex greedily consumes the trailing ``:`` before the space, so
+        # it lands inside the (redacted) query. The rest of the message is
+        # preserved verbatim.
         message = (
             "Failed to fetch https://user:pass@host/file.csv?sig=SECRETVALUE: "  # pragma: allowlist secret
             "connection refused"
         )
-        redacted = _redact_url_credentials(message)
-        assert "SECRETVALUE" not in redacted
-        assert "pass" not in redacted
-        assert "connection refused" in redacted
-        assert "https://<redacted>@host/file.csv" in redacted
-
-    def test_does_not_rely_on_known_parameter_names(self):
-        # An arbitrary, non-standard query parameter name must still be redacted.
-        value = "https://example.com/file.csv?some_unusual_param_name=secret"
-        assert (
-            _redact_url_credentials(value) == "https://example.com/file.csv?<redacted>"
+        assert _redact_url_credentials(message) == (
+            "Failed to fetch https://<redacted>@host/file.csv?<redacted> "
+            "connection refused"
         )
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "https://example.com/bucket/file.csv",
+            "s3://my-bucket/data/file.csv",
+            "https://example.com:8080/path/to/resource",
+        ],
+    )
+    def test_scheme_based_urls_without_secrets_are_unchanged(self, value):
+        # Exercises the short-circuit that skips URLs with no userinfo, no query
+        # and no fragment.
+        assert _redact_url_credentials(value) == value
+
+    def test_userinfo_containing_at_sign_is_fully_redacted(self):
+        # ``@`` is legal inside a percent-decoded password, so the netloc can
+        # contain more than one ``@``. Only the final one separates userinfo
+        # from host; everything before must still be redacted.
+        value = (
+            "https://user:p@ss@host.example.com/file.csv"  # pragma: allowlist secret
+        )
+        redacted = _redact_url_credentials(value)
+        assert redacted == "https://<redacted>@host.example.com/file.csv"
+        assert "p@ss" not in redacted
+        assert "user" not in redacted
 
     @pytest.mark.parametrize("value", [None, 123, ["a", "b"], {"k": "v"}])
     def test_non_string_values_are_unchanged(self, value):
@@ -1087,3 +1118,27 @@ class TestVersionedDatasetCredentialRedaction:
         message = str(exc_info.value)
         assert "verysecretsig" not in message
         assert "<redacted>" in message
+
+    def test_save_wrapper_redacts_filepath_in_not_a_directory_error(
+        self, tmp_path, mocker
+    ):
+        # The ``FileNotFoundError``/``NotADirectoryError`` branch of
+        # ``AbstractVersionedDataset._save_wrapper`` embeds three filepath
+        # components directly into the error message, all of which must be
+        # redacted.
+        filepath = f"{tmp_path.as_posix()}/data.csv?X-Amz-Signature=verysecretsig"
+        dataset = MyVersionedDataset(
+            filepath=filepath,
+            version=Version(load=None, save="2024-01-01T00.00.00.000Z"),
+        )
+        mocker.patch.object(
+            dataset._fs, "open", side_effect=NotADirectoryError("parent is a file")
+        )
+
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.save("some data")
+
+        message = str(exc_info.value)
+        assert "verysecretsig" not in message
+        assert message.count("<redacted>") >= 2
+        assert "Cannot save versioned dataset" in message

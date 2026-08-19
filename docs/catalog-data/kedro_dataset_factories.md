@@ -3,6 +3,7 @@
 You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro `0.18.12`. This page explains what dataset factories are and how Kedro resolves them. For step-by-step recipes, see [how to use dataset factories](how_to_use_dataset_factories.md).
 
 !!! warning
+
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
@@ -41,6 +42,7 @@ Node(
 ```
 
 !!! note
+
     The factory pattern must always be enclosed in quotes to avoid YAML parsing errors.
 
 Dataset factories behave like a **regular expression** and you can think of the syntax as a reversed `f-string`. In this case, the name of the input dataset `factory_data` matches the pattern `{name}_data` with the `_data` suffix, so it resolves `name` to `factory`. Likewise, it resolves `name` to `process` for the output dataset `process_data`.
@@ -78,6 +80,7 @@ A user catch-all pattern acts as a fallback when no dataset patterns match. It a
 ```
 
 !!! note
+
     A single user catch-all pattern is allowed per catalog. If more are specified, Kedro raises a `DatasetError`.
 
 **Default runtime patterns**
@@ -118,6 +121,7 @@ When resolving a dataset name, Kedro uses the following order of precedence:
 By default, runtime patterns are not used when calling `catalog.get()` unless explicitly enabled using the `fallback_to_runtime_pattern=True` flag.
 
 !!! note
+
     Enabling `fallback_to_runtime_pattern=True` is recommended for advanced users with specific use cases. In most scenarios, Kedro handles it automatically during runtime.
 
 For worked examples of resolution and ranking when multiple patterns could match, see [how dataset factory resolution works in practice](how_to_use_dataset_factories.md#how-dataset-factory-resolution-works-in-practice).

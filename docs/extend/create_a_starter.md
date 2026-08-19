@@ -7,6 +7,7 @@ A team may find it useful to build Kedro starters to create reusable projects th
 Please note that users are expected to have [`Git`](https://git-scm.com/) installed for the `kedro new` flow, which is used in this section.
 
 ## Install the `cookiecutter` package
+
 A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/) template that contains the boilerplate code for a Kedro project. First install `cookiecutter` as follows:
 
 ```bash
@@ -15,8 +16,8 @@ pip install cookiecutter
 
 To create a Kedro starter, you need a base project to convert to a template, which forms the boilerplate for all projects that use it. You then need to decide which are:
 
-* the common, boilerplate parts of the project
-* the configurable elements, which need to be replaced by `cookiecutter` strings
+- the common, boilerplate parts of the project
+- the configurable elements, which need to be replaced by `cookiecutter` strings
 
 ## Custom project creation variables
 
@@ -24,8 +25,8 @@ When you create a new project using a Kedro starter, `kedro new` prompts you for
 
 Kedro automatically generates the following two variables from the entered `project_name`:
 
-* `repo_name` - A name for the directory that holds the project repository
-* `python_package` - A Python package name for the project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
+- `repo_name` - A name for the directory that holds the project repository
+- `python_package` - A Python package name for the project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
 
 As a starter creator, you can customise the prompts triggered by `kedro new` by adding your own prompts into the `prompts.yml` file in the root of your template. This is an example of a custom prompt:
 
@@ -84,7 +85,6 @@ Here is the layout of the project as a Cookiecutter template:
 └── tests
 ```
 
-
 ## Extend starter aliases
 
 You can add an alias by creating a plugin using `kedro.starters` entry point which enables you to call `kedro new --starter=your_starters`. That is, it can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments.
@@ -130,4 +130,5 @@ starter = "plugin:starters"
 After that you can use this starter with `kedro new --starter=test_plugin_starter`.
 
 !!! note
+
     If your starter is stored on a git repository, Kedro defaults to use a tag or branch labelled with your version of Kedro, for example, `0.18.12`. This means that you can host different versions of your starter template on the same repository, and the correct one will be used automatically. If you prefer not to follow this structure, you should override it with the `checkout` flag, for example, `kedro new --starter=test_plugin_starter --checkout=main`.

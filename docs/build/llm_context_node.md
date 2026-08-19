@@ -1,11 +1,14 @@
 <!-- vale Kedro.headings = NO -->
+
 # LLM context nodes
+
 <!-- vale Kedro.headings = YES -->
 
 ## Overview
 
 !!! warning
-    This functionality is experimental and may change or be removed in future releases. Experimental features follow the process described in  [`docs/about/experimental.md`](../about/experimental.md).
+
+    This functionality is experimental and may change or be removed in future releases. Experimental features follow the process described in [`docs/about/experimental.md`](../about/experimental.md).
 
 LLM context nodes provide a structured way to construct an `LLMContext` inside a Kedro pipeline.
 An `LLMContext` bundles together:
@@ -80,7 +83,9 @@ LLMContextNode(
 ```
 
 <!-- vale Kedro.headings = NO -->
+
 ### Using LLM
+
 <!-- vale Kedro.headings = YES -->
 
 The `llm` argument of LLM context node must reference a Kedro dataset that returns an initialised LLM or LLM wrapper object.
@@ -109,6 +114,7 @@ For example, prompts can be backed by experimental prompt datasets such as:
 
 At runtime, all prompt datasets are loaded by Kedro and made available in
 `LLMContext.prompts` as a mapping:
+
 ```python
 {
     "system_prompt": "...",
@@ -126,7 +132,7 @@ A tool builder is a regular Python function that receives datasets loaded by Ked
 (for example database engines, indexes, or documents). It also returns a callable or tool object
 that can be used by an LLM or agent framework.
 
-````python
+```python
 from langchain_core.tools import tool
 
 def build_lookup_docs(docs, max_matches: int):
@@ -137,7 +143,7 @@ def build_lookup_docs(docs, max_matches: int):
         return docs.search(query, limit=max_matches)
 
     return lookup
-````
+```
 
 The arguments passed to the tool’s callable (for example `lookup(query: str)`) are not provided by Kedro. They are dynamically injected by the LLM at execution time based on the model’s tool-calling or function-calling mechanism.
 
@@ -168,6 +174,7 @@ derived from the returned objects (for example function name).
 This example shows how `LLMContext` acts as a boundary object between configuration and execution.
 
 ### 1. Define the LLM context node
+
 ```python
 from kedro.pipeline import LLMContextNode, tool
 

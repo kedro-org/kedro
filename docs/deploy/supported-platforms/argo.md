@@ -1,10 +1,10 @@
 # Argo Workflows (outdated documentation that needs review)
 
 !!! warning
+
     This page contains outdated documentation that has not been tested against recent Kedro releases. If you use Argo Workflows with a recent version of Kedro, consider telling us the steps you took on [Slack](https://slack.kedro.org) or [GitHub](https://github.com/kedro-org/kedro/issues).
 
 This page explains how to convert your Kedro pipeline to use [Argo Workflows](https://github.com/argoproj/argo-workflows), an open-source container-native workflow engine for orchestrating parallel jobs on [Kubernetes](https://kubernetes.io/).
-
 
 ## Reasons to use Argo Workflows
 
@@ -26,6 +26,7 @@ To use Argo Workflows, ensure you have the following prerequisites in place:
 - [All node input/output datasets must be configured in `catalog.yml`](../../catalog-data/data_catalog_yaml_examples.md) and point to an external location (for example, AWS S3); you cannot use the `MemoryDataset` in your workflow
 
 !!! note
+
     Each node will run in its own container.
 
 ## How to run your Kedro pipeline using Argo Workflows
@@ -167,8 +168,8 @@ spec:
       {% endfor %}
 ```
 
-
 !!! note
+
     The Argo Workflows is defined as the dependencies between tasks using a directed-acyclic graph (DAG).
 
 In this walk-through, we use an AWS S3 bucket for datasets. Set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables so the workflow can communicate with S3. Store both values in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/); an example [Kubernetes Secrets spec is given below](#submit-the-argo-workflows-spec-to-kubernetes).
@@ -225,6 +226,7 @@ $ argo submit --watch templates/argo-<package_name>.yml
 ```
 
 !!! note
+
     The Argo Workflows should be submitted to the same namespace as the Kubernetes Secrets. See the Argo CLI help to get more details about the usage.
 
 To clean up your Kubernetes cluster you can use the following commands:
@@ -239,4 +241,5 @@ $ kubectl delete -f secret.yml
 As an alternative, you can use [Kedro-Argo plugin](https://pypi.org/project/kedro-argo/) to convert a Kedro project to Argo Workflows.
 
 !!! warning
+
     The plugin is not supported by the Kedro team and we can't guarantee its workability.

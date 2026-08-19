@@ -11,11 +11,12 @@ uvx kedro new --starter=<path-to-starter>
 ```
 
 !!! note
+
     Using `uvx` lets you run Kedro without installing it into your system or virtual environment. It downloads and runs Kedro in a clean temporary environment each time. If you prefer a standard installation (for example pip + virtual environment), see the [installation guide](../getting-started/install.md#alternative-methods).
 
 !!! note
-    `path-to-starter` could be the path to a local directory, a URL to a remote VCS repository supported by `cookiecutter` or one of the aliases listed in ``kedro starter list``.
 
+    `path-to-starter` could be the path to a local directory, a URL to a remote VCS repository supported by `cookiecutter` or one of the aliases listed in `kedro starter list`.
 
 If you want to use `--starter` as remote VCS repository, run:
 
@@ -30,6 +31,7 @@ We provide aliases for common starters maintained by the Kedro team so that you 
 ```bash
 uvx kedro new --starter=spaceflights-pandas
 ```
+
 To list all the aliases we support:
 
 ```bash
@@ -40,27 +42,26 @@ kedro starter list
 
 The Kedro team maintains the following starters for a range of Kedro projects:
 
-* [`astro-airflow-iris`](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
-* [`databricks-iris`](https://github.com/kedro-org/kedro-starters/tree/main/databricks-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a setup for [Databricks](https://docs.kedro.org/en/stable/deploy/supported-platforms/databricks/) deployment.
-* [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pandas` datasets.
-* [`spaceflights-pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pyspark` datasets.
-* [`support-agent-langgraph`](https://github.com/kedro-org/kedro-starters/tree/main/support-agent-langgraph): An example project demonstrating pipelines that use LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
+- [`astro-airflow-iris`](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
+- [`databricks-iris`](https://github.com/kedro-org/kedro-starters/tree/main/databricks-iris): An example project using the [Iris dataset](https://www.kaggle.com/uciml/iris) with a setup for [Databricks](https://docs.kedro.org/en/stable/deploy/supported-platforms/databricks/) deployment.
+- [`spaceflights-pandas`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pandas` datasets.
+- [`spaceflights-pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pyspark): The [spaceflights tutorial](../tutorials/spaceflights_tutorial.md) example code with `pyspark` datasets.
+- [`support-agent-langgraph`](https://github.com/kedro-org/kedro-starters/tree/main/support-agent-langgraph): An example project demonstrating pipelines that use LangGraph for agentic workflows and Langfuse or Opik for prompt management and tracing.
 
 ### Archived starters
 
 The following Kedro starters have been archived and are unavailable in Kedro version 0.19.0 and beyond.
 
-* [`standalone-datacatalog`](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog)
-* [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris)
-* [`pyspark-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris)
-* [`pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark)
+- [`standalone-datacatalog`](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog)
+- [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris)
+- [`pyspark-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris)
+- [`pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark)
 
 The latest version of Kedro that supports these starters is Kedro 0.18.14.
 
-* To check the version of Kedro you have installed, type `kedro -V` in your terminal window.
-* To install a specific version of Kedro, for example, 0.18.14, type `pip install kedro==0.18.14`.
-* To create a project with one of these starters using `kedro new`,  type the following (assuming Kedro version 0.18.14) `kedro new --starter=pandas-iris --checkout=0.18.14` (for example, to use the `pandas-iris` starter).
-
+- To check the version of Kedro you have installed, type `kedro -V` in your terminal window.
+- To install a specific version of Kedro, for example, 0.18.14, type `pip install kedro==0.18.14`.
+- To create a project with one of these starters using `kedro new`, type the following (assuming Kedro version 0.18.14) `kedro new --starter=pandas-iris --checkout=0.18.14` (for example, to use the `pandas-iris` starter).
 
 ## Starter versioning
 
@@ -73,7 +74,6 @@ uvx kedro new --starter=spaceflights-pandas --checkout=0.1.0
 The `--checkout` value can point to a branch, tag or commit in the starter repository.
 
 Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutter](https://cookiecutter.readthedocs.io/en/stable/usage.html#works-directly-with-git-and-hg-mercurial-repos-too).
-
 
 ## Use a starter with a configuration file
 
@@ -88,6 +88,7 @@ uvx kedro new --config=my_kedro_project.yml --starter=spaceflights-pandas
 This option is useful when the starter requires more configuration than the default mode requires.
 
 ## Create a custom starter
+
 You can build your own starters for reuse within a project or team, as described in the [how to create a Kedro starter](../extend/create_a_starter.md) documentation.
 
 To create a project from a custom starter, run:

@@ -21,12 +21,15 @@ To interact with Iceberg tables, you will also need the `pyiceberg` package inst
 ```bash
 pyiceberg[pyarrow]~=0.8.0
 ```
+
 Depending on your choice of storage, you may also need to install the optional dependencies. Consult [the installation guide for `PyIceberg`](https://py.iceberg.apache.org/#installation) to update the line above with the necessary optional dependencies.
 
 Now you can install the project requirements with the following command:
+
 ```
 pip install -r requirements.txt
 ```
+
 ### Set up the Iceberg catalog
 
 Iceberg tables are managed by a catalog that maintains table metadata. In production, this could be a Hive, Glue, or [other catalog supported by Apache Iceberg](https://py.iceberg.apache.org/configuration/#catalogs). Iceberg also supports various storage options such as S3, HDFS, and more. There are multiple ways you can configure the catalog, credentials, and object storage to suit your needs by referring to the [configuration guide](https://py.iceberg.apache.org/configuration/). For this tutorial, we will use the `SQLCatalog` which stores the metadata in a local `sqlite` database and uses the local filesystem for storage.
@@ -36,6 +39,7 @@ Create a temporary location for Iceberg tables by running the following command:
 ```bash
 mkdir -p /tmp/warehouse
 ```
+
 There are multiple ways to configure the catalog, and for this tutorial, you can use the `~/.pyiceberg.yaml` file. By default, `pyiceberg` looks for the `.pyiceberg.yaml` file in your home directory, that is, it looks for `~/.pyiceberg.yaml`. You can create or update the existing file `.pyiceberg.yaml` in your home directory with the following content:
 
 ```yaml
@@ -45,15 +49,17 @@ catalog:
     uri: sqlite:////tmp/warehouse/pyiceberg_catalog.db
     warehouse: file:///tmp/warehouse/warehouse
 ```
+
 You can check if the configuration is loading by opening a Python shell with `ipython` command and running the following code:
 
 ```python
 from pyiceberg.catalog import load_catalog
 catalog = load_catalog(name="default")
 ```
+
 ## Define a custom dataset to use Iceberg tables
 
-To use the Iceberg tables with Kedro, you will need to define a [custom dataset that uses the `pyiceberg` library](../extend/how_to_create_a_custom_dataset.md). Create a new file  called `pyiceberg_dataset.py` in the `src/kedro_iceberg/` directory of your project and copy the following code:
+To use the Iceberg tables with Kedro, you will need to define a [custom dataset that uses the `pyiceberg` library](../extend/how_to_create_a_custom_dataset.md). Create a new file called `pyiceberg_dataset.py` in the `src/kedro_iceberg/` directory of your project and copy the following code:
 
 ```python
 import pyarrow as pa
@@ -141,12 +147,15 @@ Now run your Kedro project with the following command:
 ```bash
 kedro run
 ```
+
 You can inspect the `model_input_table` dataset created as an Iceberg table by running the following command:
 
 ```bash
 tree /tmp/warehouse
 ```
+
 The output should look something like:
+
 ```bash
 /tmp/warehouse
 ├── pyiceberg_catalog.db
@@ -173,6 +182,7 @@ Suppose the upstream datasets `companies`, `shuttles`, or `reviews` are updated.
 ```bash
 kedro run --to-outputs=model_input_table
 ```
+
 You can use the `find /tmp/warehouse/` command to inspect the updated dataset and logs.
 
 ### Load a specific dataset version
@@ -197,16 +207,19 @@ You can inspect the history, metadata, schema, and more of the Iceberg table in 
 ```bash
 kedro ipython
 ```
+
 Load the instance of the `PyIcebergDataset` using the `catalog.datasets` attribute:
 
 ```python
 In [1]: model_input_table = catalog.datasets['model_input_table']
 ```
+
 You can inspect the history of the Delta table by accessing the `InspectTable` object with the `inspect()` method:
 
 ```python
 In [2]: inspect_table = model_input_table.inspect()
 ```
+
 Now you can call the `history()` method on the `InspectTable` object to get the history of the table:
 
 ```python

@@ -9,6 +9,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from kedro.framework.context import KedroContext
+from kedro.io import DataCatalog
 from kedro.pipeline import node, pipeline
 from kedro.validation.model_factory import instantiate_model
 from kedro.validation.parameter_validator import ParameterValidator
@@ -100,7 +101,9 @@ def _make_pipeline_dict(node_count: int, typed_params_per_node: int = 1):
     return {"data_science": _make_pipeline(node_count, typed_params_per_node)}
 
 
-def _make_scoped_pipeline(pipeline_name: str, node_count: int, typed_params_per_node: int):
+def _make_scoped_pipeline(
+    pipeline_name: str, node_count: int, typed_params_per_node: int
+):
     nodes = []
     for node_index in range(node_count):
         node_func = _make_node_func(
@@ -280,3 +283,83 @@ class ScopedContextParamsTimeSuite:
         self.context._validated_params_cache = None
         self.context._cached_validation_scope = None
         self.context.params
+
+
+def _passthrough_validator(data):
+    """Validator that does no work, so the benchmarks measure the funnel's
+    own overhead (spec lookup, resolution, dispatch) rather than validation.
+
+    Module-level because the catalog resolves validators by dotted import
+    path.
+    """
+    return data
+
+
+class DatasetValidationCatalogBuildTimeSuite:
+    """Benchmark catalog construction when entries declare validators."""
+
+    params = ([100, 500],)
+    param_names = ("entry_count",)
+
+    def setup(self, entry_count):
+        self.plain_config = {
+            f"dataset_{i}": {"type": "kedro.io.MemoryDataset"}
+            for i in range(entry_count)
+        }
+        self.validated_config = {
+            f"dataset_{i}": {
+                "type": "kedro.io.MemoryDataset",
+                "validator": (
+                    "kedro_benchmarks.benchmark_validation._passthrough_validator"
+                ),
+            }
+            for i in range(entry_count)
+        }
+
+    def time_build_without_validators(self, entry_count):
+        DataCatalog.from_config(self.plain_config)
+
+    def time_build_with_validator_specs(self, entry_count):
+        DataCatalog.from_config(self.validated_config)
+
+
+class DatasetValidationFunnelTimeSuite:
+    """Benchmark the load-path overhead of the validation funnel."""
+
+    def setup(self):
+        from kedro.io import MemoryDataset
+
+        self.plain_catalog = DataCatalog(
+            {f"dataset_{i}": MemoryDataset(data=i) for i in range(500)}
+        )
+        self.validated_catalog = DataCatalog.from_config(
+            {
+                "validated": {
+                    "type": "kedro.io.MemoryDataset",
+                    "validator": (
+                        "kedro_benchmarks.benchmark_validation._passthrough_validator"
+                    ),
+                }
+            }
+        )
+        self.validated_catalog.save("validated", 42)
+        self.validated_catalog.load("validated")  # resolve + cache the validator
+
+    def time_load_no_validator_declared(self):
+        """The no-op path: guard ladder exits on a dictionary miss."""
+        for i in range(500):
+            self.plain_catalog.load(f"dataset_{i}")
+
+    def time_load_with_cached_validator(self):
+        for _ in range(500):
+            self.validated_catalog.load("validated")
+
+    def time_save_with_cached_validator(self):
+        for _ in range(500):
+            self.validated_catalog.save("validated", 42)
+
+    def time_first_load_resolves_validator(self):
+        """Cold path: the validator is imported and built on first use."""
+        for _ in range(100):
+            self.validated_catalog._validators.clear()
+            self.validated_catalog.load("validated")

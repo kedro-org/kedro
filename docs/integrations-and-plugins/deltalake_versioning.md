@@ -51,7 +51,9 @@ Suppose the upstream datasets `companies`, `shuttles`, or `reviews` is updated. 
 ```bash
 kedro run --to-outputs=model_input_table
 ```
+
 To inspect the updated dataset and logs:
+
 ```bash
 $ tree data/03_primary
 data/03_primary
@@ -88,7 +90,9 @@ You can load the Delta table dataset using the `catalog.datasets` attribute and 
 ```python
 In [1]: model_input_table = catalog.datasets['model_input_table']
 ```
+
 You can inspect the history of the Delta table by accessing the `history` attribute:
+
 ```python
 In [2]: model_input_table.history
 Out [2]:
@@ -137,8 +141,8 @@ You can also use [`PySpark`](https://spark.apache.org/docs/latest/api/python/ind
 
 We recommend the following workflow, which makes use of the [transcoding feature in Kedro](../catalog-data/data_catalog_yaml_examples.md#read-the-same-file-using-different-datasets-with-transcoding):
 
-* To create a Delta table, use a `spark.SparkDatasetV2` with `file_format="delta"`. You can also use this dataset type to read from a Delta table or overwrite it.
-* To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataset` and perform the write operations within the node function.
+- To create a Delta table, use a `spark.SparkDatasetV2` with `file_format="delta"`. You can also use this dataset type to read from a Delta table or overwrite it.
+- To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataset` and perform the write operations within the node function.
 
 As a result, we end up with a catalog that looks like this:
 
@@ -166,14 +170,13 @@ weather@delta:
   filepath: s3a://my_bucket/03_primary/weather
 ```
 
-
 !!! note
+
     The `DeltaTableDataset` does not support `save()` operation. Instead, pick the operation you want to perform (`DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`) and write it in your node code instead.
 
-
 !!! note
-    If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, through the DeltaTable API.
 
+    If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, through the DeltaTable API.
 
 ```python
 Pipeline(
@@ -211,4 +214,5 @@ The following diagram is the visual representation of the workflow explained abo
 ![Spark and Delta Lake workflow](../meta/images/spark_delta_workflow.png)
 
 !!! note
+
     This pattern of creating "dummy" datasets to preserve the data flow also applies to other "out of DAG" execution operations such as SQL operations within a node.

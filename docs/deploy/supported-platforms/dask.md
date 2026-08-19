@@ -148,8 +148,9 @@ class DaskRunner(AbstractRunner):
         _register_hooks(hook_manager, settings.HOOKS)
         _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 
-        runner = SequentialRunner()
-        return runner.run(Pipeline([node]), catalog, hook_manager, is_async, run_id)
+        runner = SequentialRunner(is_async=is_async)
+        runner.run(Pipeline([node]), catalog, hook_manager, run_id)
+        return node
 
     def _run(
         self,
@@ -331,6 +332,7 @@ $ PYTHONPATH=$PWD/src dask worker 127.0.0.1:8786
 ```
 
 !!! note
+
     The above code snippet assumes each worker is started from the root directory of the Kedro project in a Python environment where all required dependencies are installed.
 
 If you're using `pip`, you might need to install your Kedro project with:

@@ -23,13 +23,11 @@ Navigate to your project directory and add Pandera with pandas support to your `
 pandera[pandas]>=0.18.0
 ```
 
-
 Install the project dependencies:
 
 ```bash
 uv pip install -r requirements.txt
 ```
-
 
 ## Use cases
 
@@ -112,10 +110,10 @@ reviews_schema = DataFrameSchema(
 ```
 
 !!! tip
+
     **Alternative schema style:**
     Instead of defining schemas as `DataFrameSchema` objects, Pandera also supports a Pydantic-like API with `DataFrameModel` classes and type annotations.
     This can give you IDE/type-checking support. See the [Typed Schemas guide](https://pandera.readthedocs.io/en/stable/schema_models.html).
-
 
 Now create a hook to validate datasets. Create `src/spaceflights_pandera/hooks/validation.py`:
 
@@ -241,11 +239,13 @@ def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
 ```
 
 !!! info
+
     - Use `before_node_run` if you want to **guarantee that downstream nodes always receive valid inputs**.
     - Use `before_dataset_saved` if you want to **enforce contracts on the data you persist to the catalog** (for example, preventing invalid data from being stored in S3, a database, or parquet files).
     - You can also combine both hooks to validate at different stages of the pipeline.
 
 !!! tip
+
     **Function-level validation**
     Instead of using Kedro hooks, you can validate directly at function boundaries with decorators:
 
@@ -467,7 +467,6 @@ class PanderaValidationHook:
             self._validated_datasets.add(input_name)
 ```
 
-
 ### Enhanced error reporting for validation failures
 
 By default, Pandera error messages can be verbose. You can improve error reporting by parsing the SchemaError and logging the most relevant information.
@@ -539,6 +538,7 @@ shuttles_schema = DataFrameSchema(
 ```
 
 !!! tip
+
     **Distribution checks and hypothesis testing**
     Beyond basic rules, Pandera supports **statistical hypothesis tests** (for example two-sample tests) to validate whether two datasets come from the same distribution.
     This is useful for detecting **data drift** between training and serving environments.
@@ -613,14 +613,13 @@ Run your tests:
 python -m pytest src/spaceflights_pandera/schemas/test_schemas.py -v
 ```
 
-
 ## Further reading
 
-* [Pandera documentation](https://pandera.readthedocs.io/)
-* [Kedro hooks documentation](https://docs.kedro.org/en/stable/hooks/introduction.html)
-* [Lazy validation](https://pandera.readthedocs.io/en/stable/lazy_validation.html)
-* [Custom checks](https://pandera.readthedocs.io/en/stable/checks.html)
-* [Multi-backend support](https://pandera.readthedocs.io/en/stable/ecosystem.html) - Pandera also validates data in Dask, Polars, Modin, and PySpark
-* [Ibis backend](https://pandera.readthedocs.io/en/stable/ibis.html) - Validate data with Ibis for cross-database compatibility
+- [Pandera documentation](https://pandera.readthedocs.io/)
+- [Kedro hooks documentation](https://docs.kedro.org/en/stable/hooks/introduction.html)
+- [Lazy validation](https://pandera.readthedocs.io/en/stable/lazy_validation.html)
+- [Custom checks](https://pandera.readthedocs.io/en/stable/checks.html)
+- [Multi-backend support](https://pandera.readthedocs.io/en/stable/ecosystem.html) - Pandera also validates data in Dask, Polars, Modin, and PySpark
+- [Ibis backend](https://pandera.readthedocs.io/en/stable/ibis.html) - Validate data with Ibis for cross-database compatibility
 
 For a declarative approach to validation using catalog metadata, see the community-maintained [kedro-pandera plugin](https://github.com/Galileo-Galilei/kedro-pandera) (last updated July 2024).

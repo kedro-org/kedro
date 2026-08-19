@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Datasets can now declare a `validator` in the catalog; the `DataCatalog` enforces it on every `load` and `save`, with a `DATASET_VALIDATION` setting and `KEDRO_DATASET_VALIDATION` environment variable to control it.
+- Added `kedro.validation` core: a pluggable `Validator` protocol with a Pandera reference adapter and structured validation errors that subclass `DatasetError`, as groundwork for catalog-level dataset validation.
 - Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
 - Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 - Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
@@ -20,6 +22,7 @@
 
 - Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
 - Added `mdformat` as a Markdown autoformatter, run via `make lint` and as a pre-commit hook, and reformatted the existing Markdown. Fixed several step-by-step guides where numbered lists were rendering as repeated "1." instead of counting up, because their content wasn't indented under the right list item.
+- Fixed the `DaskRunner` example on the Dask deployment page.
 
 ## Community contributions
 
@@ -29,6 +32,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Versus-DEV](https://github.com/Versus-DEV)
 - [Shizoqua](https://github.com/Shizoqua)
 - [BALOGUN DAVID TAIWO](https://github.com/BALOGUN-DAVID)
+- [kingjaiteh](https://github.com/kingjaiteh)
 
 # Release 1.5.0
 

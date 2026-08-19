@@ -4,13 +4,13 @@
 
 This example illustrates how to track memory consumption using `memory_profiler`.
 
-* Install dependencies:
+- Install dependencies:
 
 ```console
 pip install memory_profiler
 ```
 
-* Define `before_dataset_loaded` and `after_dataset_loaded` hooks:
+- Define `before_dataset_loaded` and `after_dataset_loaded` hooks:
 
 ```python
 # src/<package_name>/hooks.py
@@ -60,7 +60,7 @@ class MemoryProfilingHooks:
         )
 ```
 
-* Register Hooks implementation by updating the `HOOKS` variable in `settings.py` as follows:
+- Register Hooks implementation by updating the `HOOKS` variable in `settings.py` as follows:
 
 ```python
 HOOKS = (MemoryProfilingHooks(),)
@@ -76,15 +76,16 @@ $ kedro run
 
 This example adds data validation to node inputs and outputs using [Great Expectations](https://docs.greatexpectations.io/en/latest/).
 
-* Install dependencies:
+- Install dependencies:
 
 ```console
 pip install great-expectations
 ```
 
-* Add `before_node_run` and `after_node_run` hooks to validate inputs and outputs with `Great Expectations`:
+- Add `before_node_run` and `after_node_run` hooks to validate inputs and outputs with `Great Expectations`:
 
 ### V2 API
+
 ```python
 # src/<package_name>/hooks.py
 from typing import Any, Dict
@@ -143,20 +144,21 @@ class DataValidationHooks:
             )
 ```
 
-* Register Hooks implementation, as described in the [hooks documentation](introduction.md#registering-the-hook-implementation-with-kedro) and run Kedro.
+- Register Hooks implementation, as described in the [hooks documentation](introduction.md#registering-the-hook-implementation-with-kedro) and run Kedro.
 
 `Great Expectations` example report:
 
 ![](../../meta/images/data_validation.png)
 
 ### V3 API
-* Create new checkpoint:
+
+- Create new checkpoint:
 
 ```bash
 great_expectations checkpoint new raw_companies_dataset_checkpoint
 ```
 
-* Remove `data_connector_query` from the `batch_request` in the checkpoint config file:
+- Remove `data_connector_query` from the `batch_request` in the checkpoint config file:
 
 ```python
 yaml_config = f"""
@@ -236,13 +238,13 @@ class DataValidationHooks:
 
 This example adds observability to your pipeline using [statsd](https://statsd.readthedocs.io/en/v3.3/configure.html) and makes it possible to visualise dataset size and node execution time using [Grafana](https://grafana.com/).
 
-* Install dependencies:
+- Install dependencies:
 
 ```console
 pip install statsd
 ```
 
-* Add `before_node_run` and `after_node_run` hooks to collect metrics (dataset size and node execution time):
+- Add `before_node_run` and `after_node_run` hooks to collect metrics (dataset size and node execution time):
 
 ```python
 # src/<package_name>/hooks.py
@@ -276,7 +278,7 @@ class PipelineMonitoringHooks:
         self._client.incr("run")
 ```
 
-* Register the Hook implementation, as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro) and run Kedro.
+- Register the Hook implementation, as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro) and run Kedro.
 
 `Grafana` example page:
 
@@ -286,13 +288,13 @@ class PipelineMonitoringHooks:
 
 This example adds metrics tracking using [MLflow](https://mlflow.org/).
 
-* Install dependencies:
+- Install dependencies:
 
 ```console
 pip install mlflow
 ```
 
-* Add `before_pipeline_run`, `after_pipeline_run`, and `after_node_run` hooks to collect metrics using `MLflow`:
+- Add `before_pipeline_run`, `after_pipeline_run`, and `after_node_run` hooks to collect metrics using `MLflow`:
 
 ```python
 # src/<package_name>/hooks.py
@@ -343,7 +345,7 @@ class ModelTrackingHooks:
         mlflow.end_run()
 ```
 
-* Register the Hook implementation, as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro) and run Kedro.
+- Register the Hook implementation, as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro) and run Kedro.
 
 `MLflow` example page:
 
@@ -381,9 +383,8 @@ class NodeInputReplacementHook:
 
 Node input overwrites created in `before_node_run` apply to a specific node and leave the corresponding datasets in the `DataCatalog` unchanged.
 
-
 !!! note
-    In the example above, the `before_node_run` hook implementation must return datasets present in the `inputs` dictionary. If they are not in `inputs`, the node fails with the following error: `Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>`.
 
+    In the example above, the `before_node_run` hook implementation must return datasets present in the `inputs` dictionary. If they are not in `inputs`, the node fails with the following error: `Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>`.
 
 Once you have implemented a new Hook you must register it as described in the [Hooks documentation](./introduction.md#registering-the-hook-implementation-with-kedro), and then run Kedro.

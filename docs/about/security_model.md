@@ -3,6 +3,7 @@
 This document describes Kedro's security model from the perspective of Kedro users. It is intended to help users understand Kedro's trust assumptions and make informed decisions about how to develop and deploy Kedro projects.
 
 !!! info "Reporting security issues"
+
     To report a vulnerability, or to learn how the Kedro team handles reports, see [Kedro's Security Policy](https://github.com/kedro-org/kedro/blob/main/SECURITY.md).
 
 ## Understanding Kedro's security model
@@ -26,6 +27,7 @@ The main security boundary in Kedro is the distinction between **code** and **da
 - **Data** is inputs meant to configure or feed code, not define new executable behaviour. This includes YAML files such as `catalog.yml`, `parameters.yml`, and `logging.yml`, runtime parameters, and dataset contents.
 
 !!! tip "The golden rule"
+
     **Code = responsibility**
 
     **Data becoming code = vulnerability**
@@ -47,6 +49,24 @@ def process_data(params: dict):
 ```
 
 This is not a Kedro vulnerability. The project developer explicitly wrote the code and must validate any inputs it uses.
+
+## Extensibility features and user responsibility
+
+Kedro is designed to be extensible. Project developers provide custom runners, datasets, Hooks, config loaders, plugins, and OmegaConf resolvers, and Kedro runs them as normal Python. That is the intended behaviour.
+
+Kedro's extensibility points include:
+
+- **Custom runners** — invoked with `kedro run --runner my.CustomRunner` or specified in `settings.py`
+- **Custom datasets** — registered in the data catalog and instantiated at runtime
+- **Hooks** — auto-discovered from installed plugins or explicitly registered in `settings.py`
+- **Config loaders** — specified in `settings.py`
+- **Plugins** — installed into the Python environment and discovered through entry points
+
+If a custom runner, dataset, Hook, config loader, plugin, or resolver contains malicious code, that is not a Kedro vulnerability. The project developer or the person who installed the package owns the code they introduce through these points.
+
+!!! warning "Hook auto-discovery"
+
+    Kedro auto-discovers Hooks from installed plugins through Python entry points. A plugin installed into your environment can register Hooks that run automatically. Review installed packages and their entry points if you need to audit what Hooks are active in your project.
 
 ## What counts as a security vulnerability in Kedro
 
@@ -83,6 +103,7 @@ Project developers are responsible for the safety of the code they add to a Kedr
 ## Reporting security vulnerabilities
 
 !!! info "What to include in your report"
+
     See [SECURITY.md](https://github.com/kedro-org/kedro/blob/main/SECURITY.md) for the full process. It helps if you explain:
 
     - Whether the issue is in Kedro's framework code or in user-authored project code
@@ -90,11 +111,14 @@ Project developers are responsible for the safety of the code they add to a Kedr
     - The impact of the issue
     - A minimal proof of concept
 
+    Reports that describe a Kedro extensibility feature running user-provided code — such as a custom runner, dataset, Hook, or plugin — without demonstrating an exploitation path beyond the developer's own code are unlikely to be treated as vulnerabilities. See [Extensibility features and user responsibility](#extensibility-features-and-user-responsibility) for details.
+
 ## Summary
 
 Kedro assumes that the people or systems authoring project code are trusted to write safe code that follows their organisation's security policies. Kedro's responsibility is to ensure that the framework code it ships does not turn configuration or other inputs into unintended code execution.
 
 !!! question "Is it a Kedro vulnerability?"
+
     If you are unsure, ask:
 
     1. Is the behaviour coming from Kedro's own framework code, or from user-authored project code?

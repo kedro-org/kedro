@@ -5,6 +5,7 @@ This guide shows how to configure the most common settings on a Data Catalog ent
 For an explanation of the concepts these settings are based on, see the [Data Catalog introduction](data_catalog.md). For a wider range of YAML recipes (load from S3, GCS, Azure, SQL, and so on), see [Data Catalog YAML examples](data_catalog_yaml_examples.md).
 
 !!! warning
+
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 
 ## How to specify load, save and filesystem arguments

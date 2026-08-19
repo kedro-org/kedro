@@ -3,10 +3,12 @@
 From Kedro version **`0.19.10`** `DataCatalog` introduces a helper class called `_LazyDataset` to improve performance and optimise dataset loading.
 
 ## What is `_LazyDataset`?
+
 `_LazyDataset` is a lightweight internal class that stores the configuration and versioning information of a dataset without instantiating it straight away. This allows the catalog to defer actual dataset creation (also called materialisation) until it is explicitly accessed.
 This approach reduces startup overhead for large catalogs because it instantiates datasets when they are required.
 
 ## When is `_LazyDataset` used?
+
 When you instantiate a `DataCatalog` from a config file (such as `catalog.yml`), Kedro doesn't instantly create all the underlying dataset objects. Instead, it wraps each dataset in a `_LazyDataset` and registers it in the catalog.
 These placeholders are automatically materialised when a dataset is accessed for the first time-either directly or during pipeline execution.
 
@@ -42,6 +44,7 @@ Out[3]: {
 ```
 
 ## When is this useful?
+
 This lazy loading mechanism is useful before runtime, during the warm-up phase of a pipeline. You can force materialisation of all datasets early on to:
 
 - Catch configuration or import errors

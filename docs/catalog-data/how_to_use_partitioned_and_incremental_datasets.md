@@ -20,6 +20,7 @@ my_partitioned_dataset:
 ```
 
 !!! note
+
     Like any other dataset, `PartitionedDataset` can also be instantiated programmatically in Python.
 
 ```python
@@ -64,13 +65,13 @@ For the full set of `PartitionedDataset` arguments and the rules around shorthan
 
 The table below covers every combination of top-level credentials on `PartitionedDataset` and credentials defined on the underlying dataset:
 
-| Top-level credentials | Underlying dataset credentials | Example `PartitionedDataset` definition                                                                                                                                    | Description                                                                                                                                                                                     |
-| --------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Undefined             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas.CSVDataset")`                                                                                  | Credentials are not passed to the underlying dataset or the filesystem.                                                                                                                          |
-| Undefined             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": {"secret": True}})`                                       | Underlying dataset credentials are passed to the `CSVDataset` constructor; the filesystem is instantiated without credentials.                                                                       |
-| Specified             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas.CSVDataset", credentials={"secret": True})`                                                    | Top-level credentials are passed to the underlying `CSVDataset` constructor and the filesystem.                                                                                                  |
+| Top-level credentials | Underlying dataset credentials | Example `PartitionedDataset` definition                                                                                                                                    | Description                                                                                                                                                                                    |
+| --------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Undefined             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas.CSVDataset")`                                                                                  | Credentials are not passed to the underlying dataset or the filesystem.                                                                                                                        |
+| Undefined             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": {"secret": True}})`                                       | Underlying dataset credentials are passed to the `CSVDataset` constructor; the filesystem is instantiated without credentials.                                                                 |
+| Specified             | Undefined                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset="pandas.CSVDataset", credentials={"secret": True})`                                                    | Top-level credentials are passed to the underlying `CSVDataset` constructor and the filesystem.                                                                                                |
 | Specified             | `None`                         | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": None}, credentials={"dataset_secret": True})`             | Top-level credentials are passed to the filesystem; `CSVDataset` is instantiated without credentials. This is how you stop the top-level credentials from propagating into the dataset config. |
-| Specified             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": {"dataset_secret": True}}, credentials={"secret": True})` | Top-level credentials are passed to the filesystem; underlying dataset credentials are passed to the `CSVDataset` constructor.                                                                   |
+| Specified             | Specified                      | `PartitionedDataset(path="s3://bucket-name/path/to/folder", dataset={"type": "pandas.CSVDataset", "credentials": {"dataset_secret": True}}, credentials={"secret": True})` | Top-level credentials are passed to the filesystem; underlying dataset credentials are passed to the `CSVDataset` constructor.                                                                 |
 
 ## How to load partitions in a node
 
@@ -155,6 +156,7 @@ def create_partitions() -> Dict[str, Any]:
 ```
 
 !!! note
+
     Writing to an existing partition may overwrite its data if the underlying dataset implementation does not handle this case. Add checks to ensure no existing data is lost. One safeguard is to use partition IDs with a high chance of uniqueness, such as the current timestamp.
 
 ## How to control lazy saving
@@ -181,6 +183,7 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
 ```
 
 !!! note
+
     Lazy saving is enabled by default. When a `Callable` is provided, the dataset is written _after_ the `after_node_run` [hook](../extend/hooks/introduction.md) finishes.
 
 To disable lazy saving, set `save_lazily: False`:
@@ -197,6 +200,7 @@ new_partitioned_dataset:
 ```
 
 !!! note
+
     If you create lambdas in a list/dictionary comprehension or a `for` loop, be careful when referencing variables defined outside the scope of the lambdas. See the [Python Programming FAQ](https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result) for an explanation of how this can result in unexpected values being returned from the lambdas.
 
 ## How to confirm incremental datasets
@@ -287,7 +291,9 @@ my_partitioned_dataset:
 ```
 
 !!! note
+
     Specifying `force_checkpoint` is also supported through shorthand notation:
+
     ```yaml
     my_partitioned_dataset:
       type: partitions.IncrementalDataset
@@ -297,7 +303,9 @@ my_partitioned_dataset:
     ```
 
 !!! note
+
     To force the partitioned dataset to load all available partitions, set `checkpoint` to an empty string:
+
     ```yaml
     my_partitioned_dataset:
       type: partitions.IncrementalDataset

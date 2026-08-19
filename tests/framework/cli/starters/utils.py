@@ -186,7 +186,7 @@ def _get_expected_files(tools: str, example_pipeline: str):
         "1": 0,  # Linting does not add any files
         "2": 3,  # If Testing is selected, we add 2 init.py files and 1 test_run.py
         "3": 1,  # If Logging is selected, we add logging.py
-        "4": 2,  # If Documentation is selected, we add conf.py and index.rst
+        "4": 4,  # If Documentation is selected, we add Sphinx config and build files
         "5": 8,  # If Data Structure is selected, we add 8 .gitkeep files
         "6": 0,  # PySpark selection no longer adds extra starter files
     }  # files added to template by each tool

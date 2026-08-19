@@ -1,14 +1,37 @@
 """Kedro validation framework."""
 
-from .exceptions import ModelInstantiationError, ParameterValidationError
+from .core import (
+    CallableValidator,
+    Validator,
+    ValidatorSpec,
+    preflight_check,
+    resolve_validator,
+)
+from .exceptions import (
+    CheckFailure,
+    DataValidationError,
+    ModelInstantiationError,
+    ParameterValidationError,
+    ValidationConfigurationError,
+)
 from .model_factory import instantiate_model
+from .pandera_validator import PanderaValidator
 from .parameter_validator import ParameterValidator
 from .type_extractor import TypeExtractor
 
 __all__ = [
+    "CallableValidator",
+    "CheckFailure",
+    "DataValidationError",
     "ModelInstantiationError",
+    "PanderaValidator",
     "ParameterValidationError",
     "ParameterValidator",
     "TypeExtractor",
+    "ValidationConfigurationError",
+    "Validator",
+    "ValidatorSpec",
     "instantiate_model",
+    "preflight_check",
+    "resolve_validator",
 ]

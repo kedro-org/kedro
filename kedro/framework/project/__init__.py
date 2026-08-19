@@ -7,6 +7,7 @@ import importlib.resources
 import logging.config
 import operator
 import os
+import threading
 import traceback
 import warnings
 from collections import UserDict
@@ -179,8 +180,9 @@ def _load_data_wrapper(func: Any) -> Any:
     """
 
     def inner(self: Any, *args: Any, **kwargs: Any) -> Any:
-        self._load_data()
-        return func(self._content, *args, **kwargs)
+        with self._lock:
+            content = self._load_data()
+            return func(content, *args, **kwargs)
 
     return inner
 
@@ -200,6 +202,17 @@ class _ProjectPipelines(MutableMapping):
     3. To ensure Kedro CLI remains functional when pipelines are broken. During development, broken
        pipelines are common, but they shouldn't prevent other parts of Kedro CLI from functioning
        properly (e.g. `kedro -h`).
+
+    Note:
+        Accessing `pipelines` from module-level code that runs during an import (e.g. a
+        helper module imported by `pipeline_registry.py` that reads `pipelines[...]` at
+        import time) is not supported and can deadlock. `_load_data()` holds the instance
+        lock across `importlib.import_module` and the user-supplied `register_pipelines()`
+        call, so if another thread is meanwhile importing that same module and blocked on
+        Python's per-module import lock waiting to acquire our instance lock, the two
+        threads wait on each other forever. The lock here only protects against per-call
+        state races (double loading, torn reads); it does not make import-time access to
+        `pipelines` safe.
     """
 
     def __init__(self) -> None:
@@ -207,6 +220,11 @@ class _ProjectPipelines(MutableMapping):
         self._is_data_loaded = False
         self._content: dict[str, Pipeline] = {}
         self._requested_pipelines: list[str] | None = None
+        # RLock because `inner` (in _load_data_wrapper) takes the lock and then calls
+        # _load_data(), which takes it again on the same thread — this happens on every
+        # load. It also lets configure()/set_requested() be re-entered from the same
+        # thread, e.g. if a user's register_pipelines() calls back into either of them.
+        self._lock = threading.RLock()
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str) -> Any:
@@ -214,21 +232,22 @@ class _ProjectPipelines(MutableMapping):
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def _load_data(self) -> None:
-        """Lazily read pipelines defined in the pipelines registry module."""
+    def _load_data(self) -> dict[str, Pipeline]:
+        """Lazily read pipelines defined in the pipelines registry module.
 
-        # If the pipelines dictionary has not been configured with a pipelines module
-        # or if data has been loaded
-        if self._pipelines_module is None or self._is_data_loaded:
-            return
-
-        register_pipelines = self._get_pipelines_registry_callable(
-            self._pipelines_module
-        )
-        project_pipelines = register_pipelines()
-
-        self._content = project_pipelines
-        self._is_data_loaded = True
+        Returns:
+            The loaded pipelines dictionary, or the current (possibly empty)
+            ``_content`` unchanged if not configured or already loaded.
+        """
+        with self._lock:
+            if self._pipelines_module is None or self._is_data_loaded:
+                return self._content
+            register_pipelines = self._get_pipelines_registry_callable(
+                self._pipelines_module
+            )
+            self._content = register_pipelines()
+            self._is_data_loaded = True
+            return self._content
 
     def set_requested(self, pipeline_names: list[str] | None) -> None:
         """Store which pipelines should be loaded on the next dict access.
@@ -240,32 +259,37 @@ class _ProjectPipelines(MutableMapping):
             pipeline_names: Names of the pipelines to load selectively, or
                 ``None`` to load all registered pipelines.
         """
-        if set(self._requested_pipelines or []) != set(pipeline_names or []):
-            self._is_data_loaded = False
-            self._content = {}
-        self._requested_pipelines = (
-            list(pipeline_names) if pipeline_names is not None else None
-        )
+        with self._lock:
+            if set(self._requested_pipelines or []) != set(pipeline_names or []):
+                self._is_data_loaded = False
+                self._content = {}
+            self._requested_pipelines = (
+                list(pipeline_names) if pipeline_names is not None else None
+            )
 
     def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every ``configure`` call,
         data are reloaded.
         """
-        self._pipelines_module = pipelines_module
-        self._is_data_loaded = False
-        self._content = {}
-        self._requested_pipelines = None
+        with self._lock:
+            self._pipelines_module = pipelines_module
+            self._is_data_loaded = False
+            self._content = {}
+            self._requested_pipelines = None
 
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)
     __setitem__ = _load_data_wrapper(operator.setitem)
     __delitem__ = _load_data_wrapper(operator.delitem)
-    __iter__ = _load_data_wrapper(iter)
     __len__ = _load_data_wrapper(len)
-    keys = _load_data_wrapper(operator.methodcaller("keys"))
-    values = _load_data_wrapper(operator.methodcaller("values"))
-    items = _load_data_wrapper(operator.methodcaller("items"))
+    # These return snapshots (not live views over `content`) so that iterating/reading
+    # them after the lock is released is safe even if a concurrent configure()/
+    # set_requested() mutates `self._content` in place in the meantime.
+    __iter__ = _load_data_wrapper(lambda content: iter(dict(content)))
+    keys = _load_data_wrapper(lambda content: dict(content).keys())
+    values = _load_data_wrapper(lambda content: dict(content).values())
+    items = _load_data_wrapper(lambda content: dict(content).items())
 
     # Presentation methods
     __repr__ = _load_data_wrapper(repr)

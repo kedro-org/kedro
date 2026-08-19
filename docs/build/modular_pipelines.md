@@ -3,20 +3,20 @@
 In most typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend you **separate your code into different pipelines (modules)** that are logically isolated and can be reused. Each pipeline should ideally be organised in its own folder, promoting copying and reuse within and between projects. In short: one pipeline, one folder.
 
 Kedro supports this concept of modular pipelines with the following tools:
+
 - [How to create a new blank pipeline using the `kedro pipeline create` command](#how-to-create-a-new-blank-pipeline-using-the-kedro-pipeline-create-command)
 - [How to structure your pipeline creation](#how-to-structure-your-pipeline-creation)
 - [How to use custom new pipeline templates](#how-to-use-custom-new-pipeline-templates)
 
 ## How to create a new blank pipeline using the `kedro pipeline create` command
 
- To create a new modular pipeline, use the following command:
+To create a new modular pipeline, use the following command:
 
 ```bash
 kedro pipeline create <pipeline_name>
 ```
 
 After running this command, a new pipeline with boilerplate folders and files will be created in your project. For your convenience, Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters file and appropriate `tests` structure. It also adds the appropriate `__init__.py` files. You can see the generated folder structure below:
-
 
 ```text
 ├── conf
@@ -44,6 +44,7 @@ After running this command, a new pipeline with boilerplate folders and files wi
 If you want to delete an existing pipeline, you can use `kedro pipeline delete <pipeline_name>` to do so.
 
 !!! note
+
     To see the full list of available CLI options, you can run `kedro pipeline create --help`.
 
 ## How to structure your pipeline creation
@@ -57,6 +58,7 @@ from kedro.pipeline import Pipeline
 def create_pipeline(**kwargs) -> Pipeline:
     return Pipeline([])
 ```
+
 Here, you are creating a `create_pipeline()` function that returns a `Pipeline` class instance. You should keep the function name as `create_pipeline()` because this allows Kedro to [automatically discover the pipeline](pipeline_registry.md#pipeline-autodiscovery). Otherwise, the pipeline would need to be [registered manually](pipeline_registry.md#the-pipeline-registry).
 
 Before filling `pipeline.py` with nodes, we recommend storing all node functions in `nodes.py`. From our previous example, we should add the functions `mean()`, `mean_sos()` and `variance()` into `nodes.py`:
@@ -97,19 +99,22 @@ def create_pipeline(**kwargs) -> Pipeline:
         parameters={},  # Optional
     )
 ```
+
 This shows that the pipeline creation function has optional parameters you can use:
+
 - tags on a pipeline level to apply them for all nodes inside of pipeline
 - namespace, inputs, outputs and parameters to reuse pipelines. More about that you can find at [Reuse pipelines with namespaces](namespaces.md)
-
 
 ## How to use custom new pipeline templates
 
 If you want to generate a pipeline with a custom Cookiecutter template, save it in `<project_root>/templates/pipeline`.
 The `kedro pipeline create` command will pick up the custom template in your project as the default.
 You can also specify the path to your custom Cookiecutter pipeline template with the `--template` flag:
+
 ```bash
 kedro pipeline create <pipeline_name> --template <path_to_template>
 ```
+
 A template folder passed to `kedro pipeline create` using the `--template` argument takes precedence over any local templates.
 Kedro supports a single pipeline template in your project. If you need multiple pipeline templates, save them in a separate folder and point to them with the `--template` flag.
 
@@ -128,11 +133,11 @@ See the [`cookiecutter.json` file in the Kedro default template](https://github.
 If you embed your custom pipeline template within a Kedro starter template, tell Cookiecutter not to render this template when creating a new project from the starter.
 Add [`_copy_without_render: ["templates"]`](https://cookiecutter.readthedocs.io/en/stable/advanced/copy_without_render.html) to the starter's `cookiecutter.json` file, not the `cookiecutter.json` for the pipeline template.
 
-
 ## Providing pipeline specific dependencies
 
-* A pipeline **might** have external dependencies specified in a local `requirements.txt` file.
-* These dependencies need to be manually installed using `pip`:
+- A pipeline **might** have external dependencies specified in a local `requirements.txt` file.
+- These dependencies need to be manually installed using `pip`:
+
 ```bash
 pip install -r requirements.txt
 ```

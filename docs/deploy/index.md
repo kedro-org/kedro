@@ -2,7 +2,7 @@
 
 ## Overview
 
-In this section we provide guides for different deployment methods; your choice  will depend on a range of factors.
+In this section we provide guides for different deployment methods; your choice will depend on a range of factors.
 
 If you decide to deploy your Kedro project onto a single machine, you should consult our [guide to single-machine deployment](single_machine.md), and decide whether to:
 
@@ -39,6 +39,7 @@ The following pages provide information for deployment to, or integration with, 
 - [Vertex AI](./supported-platforms/vertexai.md)
 
 !!! warning
+
     We also have legacy documentation pages for the following deployment targets, but these have not been tested against recent Kedro releases and we cannot guarantee them:
 
     - for [Argo Workflows](./supported-platforms/argo.md)

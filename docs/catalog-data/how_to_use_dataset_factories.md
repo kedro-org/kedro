@@ -300,6 +300,7 @@ data_processing:
 ```
 
 !!! note
+
     If no pipelines are specified, the `__default__` pipeline is used.
 
 **List patterns**
@@ -358,6 +359,7 @@ companies#csv:
 ```
 
 !!! note
+
     If no pipelines are specified, the `__default__` pipeline is used.
 
 ## How to access pipeline-aware catalog commands in code

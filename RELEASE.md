@@ -1,10 +1,12 @@
 # Upcoming Release
 
 ## Major features and improvements
+
 - Added `kedro.validation` core: a pluggable `Validator` protocol with a Pandera reference adapter and structured validation errors that subclass `DatasetError`, as groundwork for catalog-level dataset validation.
 - Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
 - Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 - Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
+
 ## Bug fixes and other changes
 
 - Fixed a thread-safety issue in the Kedro HTTP server by adding a `serving_mode` argument to `KedroServiceSession.create()` that preloads all pipelines upfront.

@@ -48,4 +48,4 @@ test.com/*
 fake*
 # Fake URLs used only in kedro.io credential-redaction tests
 presigned.s3.amazonaws.com/*
-https://*@host/*
+@host/file\.csv

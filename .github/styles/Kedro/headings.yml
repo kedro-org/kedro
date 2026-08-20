@@ -6,6 +6,7 @@ match: $sentence
 exceptions:
   - Kedro
   - Kedro-Viz
+  - Kedro Pipeline Builder
   - Airflow
   - Amazon
   - Amazon Web Services

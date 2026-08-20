@@ -2,12 +2,15 @@
 
 ## Major features and improvements
 
+- Datasets can now declare a `validator` in the catalog; the `DataCatalog` enforces it on every `load` and `save`, with a `DATASET_VALIDATION` setting and `KEDRO_DATASET_VALIDATION` environment variable to control it.
+- Added `kedro.validation` core: a pluggable `Validator` protocol with a Pandera reference adapter and structured validation errors that subclass `DatasetError`, as groundwork for catalog-level dataset validation.
 - Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
 - Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 - Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
 
 ## Bug fixes and other changes
 
+- Fixed a thread-safety issue in `_ProjectPipelines` where concurrent access could trigger duplicate pipeline loading or operate on a cleared cache; all shared state mutations are now protected by a reentrant lock.
 - Fixed a thread-safety issue in the Kedro HTTP server by adding a `serving_mode` argument to `KedroServiceSession.create()` that preloads all pipelines upfront.
 - Fixed a `RecursionError` when initialising a session with dynaconf-backed settings by converting `settings.SESSION_STORE_ARGS` to a plain `dict` before deepcopying it.
 - Excluded `kedro_benchmarks` from the built wheel so benchmark tests are no longer shipped with the package.

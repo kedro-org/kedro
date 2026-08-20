@@ -300,6 +300,8 @@ class KedroContext:
         for param_name, param_value in parameters.items():
             catalog[param_name] = param_value
 
+        self._configure_dataset_validation(catalog, conf_catalog)
+
         _validate_transcoded_datasets(catalog)
 
         self._hook_manager.hook.after_catalog_created(
@@ -361,6 +363,51 @@ class KedroContext:
             )
             conf_creds = {}
         return conf_creds
+
+    def _configure_dataset_validation(
+        self, catalog: CatalogProtocol, conf_catalog: dict[str, Any]
+    ) -> None:
+        """Propagate the `DATASET_VALIDATION` project setting to the catalog.
+
+        If the catalog class implements the validation funnel (exposes a
+        `validation_enabled` attribute), the setting is applied to it.
+        Otherwise, a warning is emitted when datasets declare validators
+        that this catalog class will ignore.
+
+        Args:
+            catalog: The catalog to configure dataset validation for.
+            conf_catalog: The raw catalog configuration, used to detect
+                declared `validator` keys on datasets.
+        """
+        from kedro.framework.project import settings
+
+        enabled = bool(getattr(settings, "DATASET_VALIDATION", True))
+
+        if hasattr(catalog, "validation_enabled"):
+            catalog.validation_enabled = enabled
+            specs = getattr(catalog, "validator_specs", None)
+            if enabled and specs:
+                from kedro.validation import preflight_check
+
+                for warning in preflight_check(specs):
+                    logging.getLogger(__name__).warning(warning)
+        elif enabled:
+            from kedro.io.core import VALIDATOR_KEY
+
+            declared = sorted(
+                ds_name
+                for ds_name, ds_config in conf_catalog.items()
+                if isinstance(ds_config, dict) and VALIDATOR_KEY in ds_config
+            )
+            if declared:
+                logging.getLogger(__name__).warning(
+                    "Datasets %s declare a '%s' key, but catalog class '%s' "
+                    "does not support dataset validation. Declared validators "
+                    "will be ignored.",
+                    declared,
+                    VALIDATOR_KEY,
+                    type(catalog).__name__,
+                )
 
 
 class KedroContextError(Exception):

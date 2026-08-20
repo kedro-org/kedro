@@ -1101,8 +1101,174 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["my_runtime_param"] == runtime_params["x"]
         # The default value is used if the key does not exist
         assert conf["parameters"]["my_param_default"] == 34
-        # runtime params are resolved correctly in catalog
+        # runtime params are allowed to select a catalog dataset's 'type' when
+        # restrict_runtime_params_type_selection is not set (the default) -- this
+        # is a trusted-caller use case, e.g. `kedro run --params`, see
+        # kedro-org/kedro#5706.
         assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]
+
+    def test_runtime_params_resolution_in_catalog_type_restricted(self, tmp_path):
+        """With restrict_runtime_params_type_selection set, runtime params are
+        NOT allowed to select a catalog dataset's 'type' -- see
+        kedro-org/kedro#5706. This is what an untrusted-caller session (e.g. the
+        HTTP server) sets."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        runtime_params = {"dataset": {"type": "pandas.CSVDataset"}}
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:dataset.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params=runtime_params,
+            restrict_runtime_params_type_selection=True,
+        )
+        # Blocked even for an otherwise-harmless resolved type -- there's no
+        # allowlist, the restriction is unconditional once set.
+        with pytest.raises(
+            InterpolationResolutionError,
+            match="not permitted",
+        ):
+            _ = conf["catalog"]
+
+    def test_runtime_params_do_not_affect_catalog_type_without_resolver(self, tmp_path):
+        """A catalog `type` that isn't driven by `runtime_params:` is unaffected,
+        even when restrict_runtime_params_type_selection is set."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={"dataset": {"type": "kedro_datasets.pickle.PickleDataset"}},
+            restrict_runtime_params_type_selection=True,
+        )
+        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataset"
+
+    def test_runtime_params_resolution_in_catalog_type_non_string(self, tmp_path):
+        """A `type` resolved via `runtime_params:` to a non-string value is rejected
+        when restrict_runtime_params_type_selection is set, the same as any other
+        value."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:dataset.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={"dataset": {"type": 123}},
+            restrict_runtime_params_type_selection=True,
+        )
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
+
+    def test_runtime_params_resolution_in_catalog_type_bare_name(self, tmp_path):
+        """A bare (non-dotted) class name resolved via `runtime_params:` is
+        rejected like any other value when restrict_runtime_params_type_selection
+        is set -- there's no allowlist to check its module against."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:dataset.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={"dataset": {"type": "MemoryDataset"}},
+            restrict_runtime_params_type_selection=True,
+        )
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
+
+        # Unrestricted (the default), the same bare name resolves normally.
+        conf_unrestricted = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={"dataset": {"type": "MemoryDataset"}},
+        )
+        assert conf_unrestricted["catalog"]["companies"]["type"] == "MemoryDataset"
+
+    def test_runtime_params_resolution_in_catalog_type_multiple_references(
+        self, tmp_path
+    ):
+        """A `type` field concatenating two `runtime_params:` resolver calls is
+        guarded even when only the second one is an actual runtime_params hit."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:prefix, 'kedro_datasets.pickle.'}${runtime_params:cls}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            # "prefix" is not supplied (falls back to its default), but "cls" is
+            # a real runtime_params hit -- the guard must still catch it.
+            runtime_params={"cls": "PickleDataset"},
+            restrict_runtime_params_type_selection=True,
+        )
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
+
+    def test_runtime_params_resolution_in_nested_dataset_type(self, tmp_path):
+        """A `type` resolved via `runtime_params:` inside a nested dataset config
+        (e.g. `CachedDataset`'s `dataset:` sub-config) is guarded, not just the
+        top-level catalog entry's own `type`."""
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "CachedDataset",
+                "dataset": {
+                    "type": "${runtime_params:dataset.type}",
+                    "filepath": "${runtime_params:dataset.path}",
+                },
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env="",
+            runtime_params={
+                "dataset": {
+                    "type": "kedro_datasets.pickle.PickleDataset",
+                    "path": "/tmp/evil.pkl",
+                }
+            },
+            restrict_runtime_params_type_selection=True,
+        )
+        with pytest.raises(InterpolationResolutionError, match="not permitted"):
+            _ = conf["catalog"]
+
+    def test_iter_nested_dicts_with_non_dict_raw_node(self):
+        """`_iter_nested_dicts` returns immediately for a non-dict raw_node --
+        covers the base case when a catalog entry's raw value isn't a dict
+        (e.g. a top-level metadata key)."""
+        assert list(OmegaConfigLoader._iter_nested_dicts("not a dict", {})) == []
 
     def test_runtime_params_resolution_with_soft_merge_base_env(self, tmp_path):
         """Test that runtime_params get softly merged with the base environment when soft merge is set
@@ -1247,6 +1413,10 @@ class TestOmegaConfigLoader:
             )
 
     def test_runtime_params_default_global(self, tmp_path):
+        """A `type` that falls back to a `globals` default (no real `runtime_params`
+        hit for the `type` variable) is unaffected even when
+        restrict_runtime_params_type_selection is set -- the provenance
+        distinction still matters with no allowlist to consult."""
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
         base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
         runtime_params = {
@@ -1266,7 +1436,10 @@ class TestOmegaConfigLoader:
         _write_yaml(base_catalog, catalog_config)
         _write_yaml(base_globals, globals_config)
         conf = OmegaConfigLoader(
-            tmp_path, base_env=_BASE_ENV, runtime_params=runtime_params
+            tmp_path,
+            base_env=_BASE_ENV,
+            runtime_params=runtime_params,
+            restrict_runtime_params_type_selection=True,
         )
         # runtime params are resolved correctly in catalog using global default
         assert conf["catalog"]["companies"]["type"] == globals_config["dataset"]["type"]
@@ -1587,7 +1760,8 @@ class TestOmegaConfigLoaderStandalone:
         assert conf["parameters"]["my_runtime_param"] == runtime_params["x"]
         # The default value is used if the key does not exist
         assert conf["parameters"]["my_param_default"] == 34
-        # runtime params are resolved correctly in catalog
+        # runtime params are allowed to select a catalog dataset's 'type' when
+        # restrict_runtime_params_type_selection is not set (the default).
         assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]
 
     def test_runtime_params_in_globals_not_allowed(self, tmp_path):

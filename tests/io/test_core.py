@@ -1111,14 +1111,14 @@ class TestVersionedDatasetCredentialRedaction:
     """Regression tests for credential/query redaction in ``AbstractVersionedDataset``
     error messages that embed filepath components directly."""
 
-    def test_prevent_overwrite_redacts_query_string(self, tmp_path):
+    def test_prevent_overwrite_redacts_query_string(self, tmp_path, mocker):
         filepath = f"{tmp_path.as_posix()}/data.csv?X-Amz-Signature=verysecretsig"
-        # Use a fixed save version so both saves target the same versioned
-        # path, deterministically triggering the "must not exist" error.
         version = Version(load=None, save="2024-01-01T00.00.00.000Z")
         dataset = MyVersionedDataset(filepath=filepath, version=version)
+        # Simulate the versioned path already existing without touching the
+        # filesystem -- a literal '?' in the path is invalid on Windows.
+        mocker.patch.object(dataset, "_exists_function", return_value=True)
 
-        dataset.save("some data")
         with pytest.raises(DatasetError) as exc_info:
             dataset.save("some data")
 

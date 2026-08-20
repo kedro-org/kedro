@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+import warnings
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import TYPE_CHECKING, Any, ClassVar, Iterator, List  # noqa: UP035
@@ -36,6 +37,25 @@ if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager
 
     from kedro.validation.core import ValidatorSpec
+
+
+# fsspec protocols that indicate a dataset is backed by remote/cloud storage.
+# Filesystem client objects for these protocols (e.g. S3FileSystem) commonly
+# hold non-serialisable state and cannot be pickled for use with
+# ``ParallelRunner``'s multiprocessing.
+_CLOUD_PROTOCOLS = {
+    "s3",
+    "s3a",
+    "s3n",
+    "gcs",
+    "gs",
+    "adl",
+    "abfs",
+    "abfss",
+    "az",
+    "hdfs",
+    "oci",
+}
 
 
 class _LazyDataset:
@@ -1446,6 +1466,11 @@ class SharedMemoryDataCatalog(DataCatalog):
         datasets that rely on single-process memory cannot be used in a multiprocessing
         context. If any such datasets are found, an exception is raised with details.
 
+        If a non-serializable dataset appears to be backed by remote/cloud storage
+        (detected via its `_protocol` attribute), a `UserWarning` is also issued for
+        that dataset suggesting `ThreadRunner` as an alternative, since cloud-based
+        filesystem clients (e.g. via `fsspec`) commonly cannot be pickled.
+
         Raises:
             AttributeError: If any datasets are found to be non-serializable or incompatible
                 with multiprocessing.
@@ -1471,6 +1496,16 @@ class SharedMemoryDataCatalog(DataCatalog):
                 ForkingPickler.dumps(dataset)
             except (AttributeError, PicklingError):
                 unserialisable.append(name)
+                protocol = getattr(dataset, "_protocol", None)
+                if protocol in _CLOUD_PROTOCOLS:
+                    warnings.warn(
+                        f"Dataset '{name}' appears to be backed by remote/cloud "
+                        f"storage (protocol: '{protocol}'). Its filesystem client "
+                        f"could not be pickled, which is a common issue with "
+                        f"cloud-based datasets under `ParallelRunner`. Consider "
+                        f"using `ThreadRunner` instead.",
+                        stacklevel=2,
+                    )
 
         if unserialisable:
             raise AttributeError(

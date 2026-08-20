@@ -131,3 +131,57 @@ class TestRunnerInputValidation:
         assert "The following datasets cannot be used with multiprocessing:" in str(
             excinfo.value
         )
+
+    def test_cloud_dataset_warns_and_suggests_thread_runner(
+        self, persistent_test_dataset
+    ):
+        cloud_dataset = persistent_test_dataset(
+            load=lambda: "data1", save=lambda data: None
+        )
+        cloud_dataset._protocol = "s3"
+
+        catalog = SharedMemoryDataCatalog(
+            {
+                "Input1": cloud_dataset,
+                "Output1": persistent_test_dataset(
+                    load=lambda: "data3", save=lambda data: None
+                ),
+            }
+        )
+        runner = ParallelRunner()
+
+        my_pipeline = pipeline(
+            [
+                node(lambda x: x, inputs="Input1", outputs="Output1", name="node1"),
+            ],
+        )
+
+        with pytest.warns(UserWarning, match="Input1.*s3.*ThreadRunner"):
+            with pytest.raises(AttributeError):
+                runner.run(my_pipeline, catalog)
+
+    def test_non_cloud_unserialisable_dataset_does_not_warn(
+        self, persistent_test_dataset, recwarn
+    ):
+        catalog = SharedMemoryDataCatalog(
+            {
+                "Input1": persistent_test_dataset(
+                    load=lambda: "data1", save=lambda data: None
+                ),
+                "Output1": persistent_test_dataset(
+                    load=lambda: "data3", save=lambda data: None
+                ),
+            }
+        )
+        runner = ParallelRunner()
+
+        my_pipeline = pipeline(
+            [
+                node(lambda x: x, inputs="Input1", outputs="Output1", name="node1"),
+            ],
+        )
+
+        with pytest.raises(AttributeError):
+            runner.run(my_pipeline, catalog)
+
+        assert not any("ThreadRunner" in str(w.message) for w in recwarn)

@@ -1041,6 +1041,13 @@ class TestRedactUrlCredentials:
         assert "p@ss" not in redacted
         assert "user" not in redacted
 
+    def test_malformed_url_is_returned_unchanged(self):
+        # An unclosed IPv6 bracket makes ``urlsplit`` raise ``ValueError``;
+        # the helper must swallow it and return the input as-is rather than
+        # crash the caller's error path.
+        value = "http://[bad"
+        assert _redact_url_credentials(value) == value
+
     @pytest.mark.parametrize("value", [None, 123, ["a", "b"], {"k": "v"}])
     def test_non_string_values_are_unchanged(self, value):
         assert _redact_url_credentials(value) is value

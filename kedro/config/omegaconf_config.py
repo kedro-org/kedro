@@ -20,12 +20,16 @@ from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
+from kedro import __version__
 from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigException
 from kedro.utils import CLOUD_PROTOCOLS, HTTP_PROTOCOLS, _parse_filepath
 
 _config_logger = logging.getLogger(__name__)
 
 _NO_VALUE = object()
+
+# S3-compatible protocols whose filesystem accepts a botocore client config.
+_S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
 class MergeStrategies(Enum):
@@ -409,7 +413,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Create and return the appropriate filesystem
         if protocol in HTTP_PROTOCOLS or protocol in CLOUD_PROTOCOLS:
             # For HTTP and cloud storage protocols, create the appropriate filesystem
-            return fsspec.filesystem(protocol=protocol), protocol
+            fs_args: dict[str, Any] = {}
+            if protocol in _S3_PROTOCOLS:
+                # Identify Kedro in the S3 user agent, appended not replaced.
+                fs_args["config_kwargs"] = {"user_agent_extra": f"kedro/{__version__}"}
+            return fsspec.filesystem(protocol=protocol, **fs_args), protocol
         else:
             # Default to local filesystem
             return fsspec.filesystem(protocol="file", fo=conf_source), "file"

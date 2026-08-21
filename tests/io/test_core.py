@@ -20,6 +20,7 @@ from kedro.io.core import (
     DatasetError,
     Version,
     VersionNotFoundError,
+    _redact_url_credentials,
     generate_timestamp,
     get_filepath_str,
     get_protocol_and_path,
@@ -943,3 +944,255 @@ def test_no_self_in_init_args_allows_safe_describe():
     assert isinstance(description, dict)
     assert "_init_args" in description
     assert "self" not in description["_init_args"]
+
+
+class TestRedactUrlCredentials:
+    """Unit tests for the shared ``_redact_url_credentials`` utility."""
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "data/01_raw/companies.csv",
+            "/Users/foo/bar.csv",
+            "C:\\Projects\\file.txt",
+            "some/path/without/secrets",
+        ],
+    )
+    def test_plain_paths_are_unchanged(self, value):
+        assert _redact_url_credentials(value) == value
+
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            (
+                "s3://ACCESSKEY:SECRETKEY@my-bucket/data/file.csv",  # pragma: allowlist secret
+                "s3://<redacted>@my-bucket/data/file.csv",
+            ),
+            (
+                "https://example.com/file.csv?sig=SECRETVALUE",  # pragma: allowlist secret
+                "https://example.com/file.csv?<redacted>",
+            ),
+            (
+                "https://presigned.example.com/bucket/key.csv"
+                "?X-Amz-Signature=deadbeef&X-Amz-Expires=3600",
+                "https://presigned.example.com/bucket/key.csv?<redacted>",
+            ),
+            (
+                "https://example.com/file.csv#section",
+                "https://example.com/file.csv#<redacted>",
+            ),
+            (
+                "https://user:pass@example.com:8080/path/file.csv?sig=abc#frag",  # pragma: allowlist secret
+                "https://<redacted>@example.com:8080/path/file.csv?<redacted>#<redacted>",
+            ),
+        ],
+        ids=[
+            "userinfo-only",
+            "query-only-common-name",
+            "query-only-multiple-non-standard-names",
+            "fragment-only",
+            "userinfo-query-and-fragment",
+        ],
+    )
+    def test_scheme_based_urls_are_redacted(self, value, expected):
+        assert _redact_url_credentials(value) == expected
+
+    def test_bare_path_with_query_is_redacted(self):
+        # Kedro strips the scheme from cloud-storage filepaths before storing
+        # them, so the query string can appear with no scheme prefix at all.
+        value = "my-bucket/data/file.csv?X-Amz-Signature=deadbeef"
+        assert _redact_url_credentials(value) == "my-bucket/data/file.csv?<redacted>"
+
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            # Kedro strips the scheme from HTTP(S) filepaths but keeps the
+            # userinfo and query, so the value reaching the redactor has no
+            # ``//`` for ``urlsplit`` to anchor on.
+            (
+                "user:pass@example.com/file.csv?sig=SECRETVALUE",  # pragma: allowlist secret
+                "<redacted>@example.com/file.csv?<redacted>",
+            ),
+            (
+                "user:pass@example.com/file.csv",  # pragma: allowlist secret
+                "<redacted>@example.com/file.csv",
+            ),
+            (
+                "user:pass@example.com:8080/path/file.csv#frag",  # pragma: allowlist secret
+                "<redacted>@example.com:8080/path/file.csv#<redacted>",
+            ),
+        ],
+        ids=[
+            "scheme-stripped-userinfo-and-query",
+            "scheme-stripped-userinfo-only",
+            "scheme-stripped-userinfo-and-fragment",
+        ],
+    )
+    def test_scheme_stripped_userinfo_is_redacted(self, value, expected):
+        assert _redact_url_credentials(value) == expected
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            # ``@`` sits before any URL delimiter (``/``, ``?``, ``#``), so
+            # there is no authority segment to interpret and the value must
+            # be returned unchanged.
+            "report@2024.csv",
+            "notes@backup",
+        ],
+    )
+    def test_filename_with_at_sign_is_unchanged(self, value):
+        assert _redact_url_credentials(value) == value
+
+    def test_at_sign_after_delimiter_is_unchanged(self):
+        # ``@`` appears after the first ``/`` so it is not in the authority
+        # position; there is nothing URL-shaped to redact.
+        value = "data/user@example.com/file.csv"
+        assert _redact_url_credentials(value) == value
+
+    def test_url_embedded_in_larger_text_is_redacted(self):
+        # The regex greedily consumes the trailing ``:`` before the space, so
+        # it lands inside the (redacted) query. The rest of the message is
+        # preserved verbatim.
+        message = (
+            "Failed to fetch https://user:pass@example.com/file.csv?sig=SECRETVALUE: "  # pragma: allowlist secret
+            "connection refused"
+        )
+        assert _redact_url_credentials(message) == (
+            "Failed to fetch https://<redacted>@example.com/file.csv?<redacted> "
+            "connection refused"
+        )
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "https://example.com/bucket/file.csv",
+            "s3://my-bucket/data/file.csv",
+            "https://example.com:8080/path/to/resource",
+        ],
+    )
+    def test_scheme_based_urls_without_secrets_are_unchanged(self, value):
+        # Exercises the short-circuit that skips URLs with no userinfo, no query
+        # and no fragment.
+        assert _redact_url_credentials(value) == value
+
+    def test_userinfo_containing_at_sign_is_fully_redacted(self):
+        # ``@`` is legal inside a percent-decoded password, so the netloc can
+        # contain more than one ``@``. Only the final one separates userinfo
+        # from host; everything before must still be redacted.
+        value = (
+            "https://user:p@ss@host.example.com/file.csv"  # pragma: allowlist secret
+        )
+        redacted = _redact_url_credentials(value)
+        assert redacted == "https://<redacted>@host.example.com/file.csv"
+        assert "p@ss" not in redacted
+        assert "user" not in redacted
+
+    def test_malformed_url_is_returned_unchanged(self):
+        # An unclosed IPv6 bracket makes ``urlsplit`` raise ``ValueError``;
+        # the helper must swallow it and return the input as-is rather than
+        # crash the caller's error path.
+        value = "http://[bad"
+        assert _redact_url_credentials(value) == value
+
+    @pytest.mark.parametrize("value", [None, 123, ["a", "b"], {"k": "v"}])
+    def test_non_string_values_are_unchanged(self, value):
+        assert _redact_url_credentials(value) is value
+
+
+class _CredentialedRepr(AbstractDataset):
+    """Minimal dataset whose ``_describe`` exposes a full URL string,
+    mirroring how a dataset might surface a presigned URL filepath."""
+
+    def __init__(self, filepath: str) -> None:
+        self._filepath = filepath
+
+    def _describe(self) -> dict[str, Any]:
+        return {"filepath": self._filepath}
+
+    def _load(self):
+        raise RuntimeError("boom")
+
+    def _save(self, data) -> None:
+        pass
+
+
+class TestDatasetReprCredentialRedaction:
+    """Regression tests ensuring dataset representations used in ``__repr__``
+    and ``DatasetError`` messages never leak credentials, signed URL
+    parameters, or fragments from a dataset's filepath/URL."""
+
+    def test_repr_redacts_credentials_and_query(self):
+        presigned_url = (
+            "https://AKIA:SECRETKEY@example.com/bucket/file.csv"  # pragma: allowlist secret
+            "?X-Amz-Signature=verysecretsig#frag"
+        )
+        dataset = _CredentialedRepr(filepath=presigned_url)
+
+        representation = repr(dataset)
+
+        assert "SECRETKEY" not in representation
+        assert "verysecretsig" not in representation
+        assert "frag" not in representation
+        assert "<redacted>" in representation
+        # The dataset itself must still hold the original URL for I/O.
+        assert dataset._filepath == presigned_url
+
+    def test_load_failure_error_message_redacts_credentials(self):
+        presigned_url = (
+            "https://AKIA:SECRETKEY@example.com/bucket/file.csv"  # pragma: allowlist secret
+            "?X-Amz-Signature=verysecretsig"
+        )
+        dataset = _CredentialedRepr(filepath=presigned_url)
+
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.load()
+
+        message = str(exc_info.value)
+        assert "SECRETKEY" not in message
+        assert "verysecretsig" not in message
+        assert "<redacted>" in message
+
+
+class TestVersionedDatasetCredentialRedaction:
+    """Regression tests for credential/query redaction in ``AbstractVersionedDataset``
+    error messages that embed filepath components directly."""
+
+    def test_prevent_overwrite_redacts_query_string(self, tmp_path, mocker):
+        filepath = f"{tmp_path.as_posix()}/data.csv?X-Amz-Signature=verysecretsig"
+        version = Version(load=None, save="2024-01-01T00.00.00.000Z")
+        dataset = MyVersionedDataset(filepath=filepath, version=version)
+        # Simulate the versioned path already existing without touching the
+        # filesystem -- a literal '?' in the path is invalid on Windows.
+        mocker.patch.object(dataset, "_exists_function", return_value=True)
+
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.save("some data")
+
+        message = str(exc_info.value)
+        assert "verysecretsig" not in message
+        assert "<redacted>" in message
+
+    def test_save_wrapper_redacts_filepath_in_not_a_directory_error(
+        self, tmp_path, mocker
+    ):
+        # The ``FileNotFoundError``/``NotADirectoryError`` branch of
+        # ``AbstractVersionedDataset._save_wrapper`` embeds three filepath
+        # components directly into the error message, all of which must be
+        # redacted.
+        filepath = f"{tmp_path.as_posix()}/data.csv?X-Amz-Signature=verysecretsig"
+        dataset = MyVersionedDataset(
+            filepath=filepath,
+            version=Version(load=None, save="2024-01-01T00.00.00.000Z"),
+        )
+        mocker.patch.object(
+            dataset._fs, "open", side_effect=NotADirectoryError("parent is a file")
+        )
+
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.save("some data")
+
+        message = str(exc_info.value)
+        assert "verysecretsig" not in message
+        assert message.count("<redacted>") >= 2
+        assert "Cannot save versioned dataset" in message

@@ -973,9 +973,9 @@ class TestRedactUrlCredentials:
                 "https://example.com/file.csv?<redacted>",
             ),
             (
-                "https://presigned.s3.amazonaws.com/bucket/key.csv"
+                "https://presigned.example.com/bucket/key.csv"
                 "?X-Amz-Signature=deadbeef&X-Amz-Expires=3600",
-                "https://presigned.s3.amazonaws.com/bucket/key.csv?<redacted>",
+                "https://presigned.example.com/bucket/key.csv?<redacted>",
             ),
             (
                 "https://example.com/file.csv#section",
@@ -1003,16 +1003,63 @@ class TestRedactUrlCredentials:
         value = "my-bucket/data/file.csv?X-Amz-Signature=deadbeef"
         assert _redact_url_credentials(value) == "my-bucket/data/file.csv?<redacted>"
 
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            # Kedro strips the scheme from HTTP(S) filepaths but keeps the
+            # userinfo and query, so the value reaching the redactor has no
+            # ``//`` for ``urlsplit`` to anchor on.
+            (
+                "user:pass@example.com/file.csv?sig=SECRETVALUE",  # pragma: allowlist secret
+                "<redacted>@example.com/file.csv?<redacted>",
+            ),
+            (
+                "user:pass@example.com/file.csv",  # pragma: allowlist secret
+                "<redacted>@example.com/file.csv",
+            ),
+            (
+                "user:pass@example.com:8080/path/file.csv#frag",  # pragma: allowlist secret
+                "<redacted>@example.com:8080/path/file.csv#<redacted>",
+            ),
+        ],
+        ids=[
+            "scheme-stripped-userinfo-and-query",
+            "scheme-stripped-userinfo-only",
+            "scheme-stripped-userinfo-and-fragment",
+        ],
+    )
+    def test_scheme_stripped_userinfo_is_redacted(self, value, expected):
+        assert _redact_url_credentials(value) == expected
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            # ``@`` sits before any URL delimiter (``/``, ``?``, ``#``), so
+            # there is no authority segment to interpret and the value must
+            # be returned unchanged.
+            "report@2024.csv",
+            "notes@backup",
+        ],
+    )
+    def test_filename_with_at_sign_is_unchanged(self, value):
+        assert _redact_url_credentials(value) == value
+
+    def test_at_sign_after_delimiter_is_unchanged(self):
+        # ``@`` appears after the first ``/`` so it is not in the authority
+        # position; there is nothing URL-shaped to redact.
+        value = "data/user@example.com/file.csv"
+        assert _redact_url_credentials(value) == value
+
     def test_url_embedded_in_larger_text_is_redacted(self):
         # The regex greedily consumes the trailing ``:`` before the space, so
         # it lands inside the (redacted) query. The rest of the message is
         # preserved verbatim.
         message = (
-            "Failed to fetch https://user:pass@host/file.csv?sig=SECRETVALUE: "  # pragma: allowlist secret
+            "Failed to fetch https://user:pass@example.com/file.csv?sig=SECRETVALUE: "  # pragma: allowlist secret
             "connection refused"
         )
         assert _redact_url_credentials(message) == (
-            "Failed to fetch https://<redacted>@host/file.csv?<redacted> "
+            "Failed to fetch https://<redacted>@example.com/file.csv?<redacted> "
             "connection refused"
         )
 

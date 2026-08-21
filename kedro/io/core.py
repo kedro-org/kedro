@@ -112,11 +112,22 @@ def _redact_url_credentials(value: Any) -> Any:
             lambda match: _redact_single_url(match.group(0)), value
         )
 
-    # Kedro strips the scheme from cloud-storage filepaths (e.g. 's3://')
-    # before storing/displaying them, so a filepath-shaped value (no
-    # whitespace) may still carry a query string or fragment with no
-    # scheme prefix at all.
-    if " " not in value and ("?" in value or "#" in value):
+    # Kedro strips the scheme from cloud-storage and HTTP(S) filepaths,
+    # so a scheme-less value may still carry userinfo, a query, or fragment.
+    if " " in value:
+        return value
+
+    # Prefix ``//`` when there is a ``@`` in the authority position so
+    # ``urlsplit`` treats it as netloc; the delimiter guard leaves plain
+    # filenames containing ``@`` (e.g. ``report@2024.csv``) untouched.
+    delimiter_idx = min(
+        (idx for idx in (value.find(c) for c in "/?#") if idx != -1),
+        default=-1,
+    )
+    if delimiter_idx != -1 and "@" in value[:delimiter_idx]:
+        return _redact_single_url("//" + value).removeprefix("//")
+
+    if "?" in value or "#" in value:
         return _redact_single_url(value)
 
     return value
@@ -126,6 +137,11 @@ def _redact_repr_value(value: Any) -> Any:
     """Recursively redact URL credentials from a value destined for
     ``repr()``-style display, without altering values that need no
     redaction (so unrelated ``repr()`` output is unaffected).
+
+    A ``PurePath`` whose posix form needs redacting is returned as a
+    plain ``str`` (paths with embedded ``?``/``#``/userinfo are not
+    round-trip-safe through ``PurePath``); untouched paths are returned
+    as the original ``PurePath``.
     """
     if isinstance(value, PurePath):
         posix = value.as_posix()

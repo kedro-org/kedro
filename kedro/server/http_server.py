@@ -6,6 +6,7 @@ import logging
 import os
 import threading
 import time
+import traceback
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
@@ -141,10 +142,15 @@ def create_http_server(
             )
         except Exception as exc:
             # Third-party exceptions (e.g. from a filesystem or storage client)
-            # may embed a dataset's own unsanitised URL, so the message is
-            # redacted before it is logged or returned to the client.
+            # may embed a dataset's own unsanitised URL, so both the message
+            # and the traceback are redacted before being logged or returned.
             redacted_message = _redact_url_credentials(str(exc))
-            logger.error("Snapshot request failed: %s", redacted_message)
+            redacted_traceback = _redact_url_credentials(
+                "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+            )
+            logger.error(
+                "Snapshot request failed: %s\n%s", redacted_message, redacted_traceback
+            )
             return SnapshotFailure(
                 status="failure",
                 error=ErrorDetail(
@@ -271,13 +277,17 @@ def _execute_pipeline(
     except Exception as exc:
         duration_ms = (time.perf_counter() - start_time) * 1000
         # Dataset load/save failures can surface a raw dataset URL via the
-        # underlying third-party exception, so the message is redacted
-        # before it is logged or returned to the client.
+        # underlying third-party exception, so both the message and the
+        # traceback are redacted before being logged or returned.
         redacted_message = _redact_url_credentials(str(exc))
+        redacted_traceback = _redact_url_credentials(
+            "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        )
         logger.error(
-            "Pipeline run %s failed: %s",
+            "Pipeline run %s failed: %s\n%s",
             run_id,
             redacted_message,
+            redacted_traceback,
         )
 
         return RunFailure(

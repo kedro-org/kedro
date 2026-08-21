@@ -17,7 +17,7 @@
 - Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
 - Fixed docs generated with `kedro new --tools=docs` so the Sphinx HTML build runs `sphinx-apidoc` and creates API docs.
 - Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
-- Redacted credentials if present in the `filepath` of a dataset from responses from the HTTP server endpoints.
+- Redacted credentials, signed-URL query parameters and fragments from dataset filepaths in `AbstractDataset.__repr__`, `DatasetError` messages, and HTTP server `/snapshot` and `/run` responses.
 
 ## Documentation changes
 

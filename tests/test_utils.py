@@ -11,6 +11,7 @@ from kedro.utils import (
     experimental,
     find_config_file,
     get_close_matches,
+    is_allowed_module,
     load_obj,
 )
 
@@ -332,3 +333,25 @@ def test_is_unsafe_version_rejects(version):
 )
 def test_is_unsafe_version_allows(version):
     assert _is_unsafe_version(version) is False
+
+
+class TestIsAllowedModule:
+    @pytest.mark.parametrize(
+        "module_name,allowed_prefixes,expected",
+        [
+            (None, ["kedro.runner"], True),
+            ("SequentialRunner", ["kedro.runner"], True),
+            ("kedro.runner.SequentialRunner", ["kedro.runner"], True),
+            ("kedro.runner.submodule.MyRunner", ["kedro.runner"], True),
+            ("mypackage.runners.CustomRunner", ["kedro.runner", "mypackage"], True),
+            ("mypackage.sub.runners.CustomRunner", ["kedro.runner", "mypackage"], True),
+            ("external.runners.ThirdPartyRunner", ["kedro.runner", "external.runners"], True),
+            ("os.system", ["kedro.runner", "mypackage"], False),
+            ("mypackage_other.runners.Runner", ["kedro.runner", "mypackage"], False),
+            ("builtins.eval", [], False),
+            ("custom.runner.Runner", [None, "kedro.runner"], False),
+        ],
+    )
+    def test_is_allowed_module(self, module_name, allowed_prefixes, expected):
+        assert is_allowed_module(module_name, allowed_prefixes) is expected
+

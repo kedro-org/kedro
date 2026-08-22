@@ -325,3 +325,30 @@ def _is_unsafe_version(version: str) -> bool:
     and must not be a dot-only component (``.`` or ``..``).
     """
     return not version or "/" in version or "\\" in version or version in (".", "..")
+
+
+def is_allowed_module(
+    module_name: str | None, allowed_prefixes: Iterable[str | None]
+) -> bool:
+    """Return True when the module is in the allowed prefixes.
+
+    A module_name without a module prefix (e.g. ``None`` or containing no dots)
+    returns True. A module is permitted if its name matches any allowed prefix
+    exactly or as a sub-package.
+
+    Args:
+        module_name: Full dotted module or object path, or None.
+        allowed_prefixes: Iterable of allowed prefix strings or None.
+
+    Returns:
+        True if the module is allowed, False otherwise.
+    """
+    if module_name is None or "." not in module_name:
+        return True
+    module = module_name.rsplit(".", 1)[0]
+    valid_prefixes = [p for p in allowed_prefixes if p is not None]
+    return any(
+        module == prefix or module.startswith(f"{prefix}.")
+        for prefix in valid_prefixes
+    )
+

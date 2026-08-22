@@ -204,11 +204,11 @@ The server creates this session with `serving_mode=True` (see [Create a `KedroSe
 
 #### Runner security
 
-Short names (for example, `SequentialRunner`) always resolve against `kedro.runner`. Fully-qualified names (for example, `mypackage.runners.MyRunner`) must belong to `kedro.runner`, the project's own package, or a module listed in `RUNNER_MODULES_WHITELIST` in `settings.py`. The module is never imported otherwise.
+Short names (for example, `SequentialRunner`) always resolve against `kedro.runner`. Fully-qualified names (for example, `mypackage.runners.MyRunner`) must belong to `kedro.runner`, the project's own package, or a module listed in `RUNNER_MODULE_ALLOWLIST` in `settings.py`. The module is never imported otherwise.
 
 ```python
 # settings.py
-RUNNER_MODULES_WHITELIST = ["external_lib.runners"]
+RUNNER_MODULE_ALLOWLIST = ["external_lib.runners"]
 ```
 
 ### Interactive API reference

@@ -455,7 +455,7 @@ class TestExecutePipeline:
         mock_session = mocker.Mock()
         mock_session._package_name = "mypackage"
         mock_load_obj = mocker.patch("kedro.server.http_server.load_obj")
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
+        mocker.patch.object(settings, "RUNNER_MODULE_ALLOWLIST", [])
 
         result = _execute_pipeline(
             session=mock_session,
@@ -469,15 +469,15 @@ class TestExecutePipeline:
         mock_load_obj.assert_not_called()
         mock_session.run.assert_not_called()
 
-    def test_execute_pipeline_allows_whitelisted_module(self, mocker):
-        """Runner from a module listed in RUNNER_MODULES_WHITELIST is permitted."""
+    def test_execute_pipeline_allows_allowlisted_module(self, mocker):
+        """Runner from a module listed in RUNNER_MODULE_ALLOWLIST is permitted."""
         mock_session = mocker.Mock()
         mock_session._package_name = "mypackage"
         mocker.patch(
             "kedro.server.http_server.load_obj",
             return_value=_FakeRunner,
         )
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", ["external.runners"])
+        mocker.patch.object(settings, "RUNNER_MODULE_ALLOWLIST", ["external.runners"])
 
         result = _execute_pipeline(
             session=mock_session,
@@ -487,15 +487,34 @@ class TestExecutePipeline:
         assert result.status == "success"
         mock_session.run.assert_called_once()
 
-    def test_execute_pipeline_allows_project_package_module(self, mocker):
-        """Runner from the project's own package namespace is permitted without whitelisting."""
+    def test_execute_pipeline_allows_legacy_whitelisted_module(self, mocker):
+        """Runner from a module listed in legacy RUNNER_MODULES_WHITELIST is permitted."""
         mock_session = mocker.Mock()
         mock_session._package_name = "mypackage"
         mocker.patch(
             "kedro.server.http_server.load_obj",
             return_value=_FakeRunner,
         )
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
+        mocker.patch.object(settings, "RUNNER_MODULE_ALLOWLIST", [])
+        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", ["legacy.runners"])
+
+        result = _execute_pipeline(
+            session=mock_session,
+            request=RunRequest(runner="legacy.runners.MyRunner"),
+        )
+
+        assert result.status == "success"
+        mock_session.run.assert_called_once()
+
+    def test_execute_pipeline_allows_project_package_module(self, mocker):
+        """Runner from the project's own package namespace is permitted without allowlisting."""
+        mock_session = mocker.Mock()
+        mock_session._package_name = "mypackage"
+        mocker.patch(
+            "kedro.server.http_server.load_obj",
+            return_value=_FakeRunner,
+        )
+        mocker.patch.object(settings, "RUNNER_MODULE_ALLOWLIST", [])
 
         result = _execute_pipeline(
             session=mock_session,
@@ -506,14 +525,14 @@ class TestExecutePipeline:
         mock_session.run.assert_called_once()
 
     def test_execute_pipeline_allows_project_subpackage_module(self, mocker):
-        """Runner from a subpackage of the project package is permitted without whitelisting."""
+        """Runner from a subpackage of the project package is permitted without allowlisting."""
         mock_session = mocker.Mock()
         mock_session._package_name = "mypackage"
         mocker.patch(
             "kedro.server.http_server.load_obj",
             return_value=_FakeRunner,
         )
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
+        mocker.patch.object(settings, "RUNNER_MODULE_ALLOWLIST", [])
 
         result = _execute_pipeline(
             session=mock_session,

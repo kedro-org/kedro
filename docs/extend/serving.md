@@ -211,6 +211,24 @@ Short names (for example, `SequentialRunner`) always resolve against `kedro.runn
 RUNNER_MODULES_WHITELIST = ["external_lib.runners"]
 ```
 
+#### Dataset type security
+
+A catalog entry's `type` field selects which dataset class Kedro imports and instantiates, so the HTTP server's `params` must never be able to choose it. The server rejects a catalog `type` that resolves through the [`runtime_params` resolver](../configure/how_to_use_templating.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader) to a request-supplied value, at any nesting depth, and returns an `InterpolationResolutionError`.
+
+This restriction applies only to requests served over HTTP. Using `runtime_params` to select a catalog dataset's `type` remains supported for trusted, non-server use, such as `kedro run --params`.
+
+```yaml
+# Rejected over HTTP: `type` resolves from runtime_params
+companies:
+  type: "${runtime_params:dataset.type}"
+  filepath: data/01_raw/companies.csv
+
+# Accepted: `type` is fixed; only other fields (e.g. filepath) use runtime_params
+companies:
+  type: pandas.CSVDataset
+  filepath: "${runtime_params:folder, 'data/01_raw'}/companies.csv"
+```
+
 ### Interactive API reference
 
 When the server is running, [FastAPI](https://fastapi.tiangolo.com/) automatically generates interactive API documentation at `http://127.0.0.1:8000/docs`. This page lists all available endpoints, their request and response schemas, and lets you try them out directly in the browser.

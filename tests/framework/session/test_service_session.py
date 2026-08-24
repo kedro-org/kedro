@@ -68,6 +68,38 @@ class TestKedroServiceSession:
         context = session.load_context(runtime_params=runtime_params)
         assert context.config_loader.runtime_params == runtime_params
 
+    def test_get_config_loader_trusted_runtime_params_by_default(self, fake_project):
+        """Outside serving mode, the config loader is not restricted -- this is
+        the behavior for trusted callers such as programmatic use of
+        `KedroServiceSession`."""
+        session = KedroServiceSession.create(project_path=fake_project)
+        config_loader = session._get_config_loader()
+        assert config_loader.restrict_runtime_params_type_selection is False
+
+    def test_get_config_loader_untrusted_runtime_params(self, fake_project):
+        """Serving mode -- what `http_server.py` enables for every `POST /run`
+        request -- forces the config loader to restrict `runtime_params`-driven
+        catalog `type` selection, regardless of `CONFIG_LOADER_ARGS`. See
+        kedro-org/kedro#5706."""
+        session = KedroServiceSession.create(
+            project_path=fake_project, serving_mode=True
+        )
+        config_loader = session._get_config_loader()
+        assert config_loader.restrict_runtime_params_type_selection is True
+
+    @pytest.mark.usefixtures("mock_settings_config_loader_args")
+    def test_get_config_loader_untrusted_overrides_config_loader_args(
+        self, fake_project
+    ):
+        """Serving mode must force the restriction on even if a project's own
+        `CONFIG_LOADER_ARGS` doesn't set it -- an untrusted caller's
+        classification must not be weakenable by project config."""
+        session = KedroServiceSession.create(
+            project_path=fake_project, serving_mode=True
+        )
+        config_loader = session._get_config_loader()
+        assert config_loader.restrict_runtime_params_type_selection is True
+
     def test_load_context_with_envvar(self, fake_project, monkeypatch):
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
 

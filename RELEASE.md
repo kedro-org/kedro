@@ -20,10 +20,15 @@
 
 ## Documentation changes
 
+- Documented the HTTP server's restriction on `runtime_params`-resolved catalog `type` fields, in the templating guide and the HTTP server guide.
 - Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
 - Added `mdformat` as a Markdown autoformatter, run via `make lint` and as a pre-commit hook, and reformatted the existing Markdown. Fixed several step-by-step guides where numbered lists were rendering as repeated "1." instead of counting up, because their content wasn't indented under the right list item.
 - Fixed the `DaskRunner` example on the Dask deployment page.
 - Fixed the `open_args_load` examples in the data catalog documentation to use text mode so the `encoding` option applies.
+
+## Breaking changes to the API
+
+- **Security fix**: A catalog `type` field resolved with `runtime_params` supplied through the HTTP server's `POST /run` no longer accepts an `AbstractDataset` class chosen by the request. `runtime_params`-driven `type` selection through other, trusted callers (for example, `kedro run --params`) is unaffected.
 
 ## Community contributions
 

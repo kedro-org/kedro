@@ -1503,7 +1503,7 @@ class SharedMemoryDataCatalog(DataCatalog):
                         f"storage (protocol: '{protocol}'). Its filesystem client "
                         f"could not be pickled, which is a common issue with "
                         f"cloud-based datasets under `ParallelRunner`. Consider "
-                        f"using `ThreadRunner` instead.",
+                        f"using `ThreadRunner` or `SequentialRunner` instead.",
                         stacklevel=2,
                     )
 

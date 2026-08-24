@@ -26,6 +26,7 @@ which is installed as one of Kedro’s dependencies.
 - **Starter:** The starter template used when creating the project. This field is visible when the project was created using one of [the official Kedro starters](https://github.com/kedro-org/kedro-starters).
 - **Number of Datasets, Nodes, and Pipelines:** Quantitative data about the project structure.
 - **Dataset Types:** The types of datasets used in the project. Dataset names are visible when they belong to `kedro.io` or [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets).
+- **Kedro-Skills usage:** When the [`kedro-skills`](https://github.com/kedro-org/kedro-skills) plugin is installed, the `kedro skills install`, `kedro skills update` and `kedro skills uninstall` commands each send an event describing the operation: the skill identifier (only when it matches a skill shipped with the package), the target IDEs, whether `--all` was used, the number of skills an update touched, whether locally modified skill files were detected, and whether the operation succeeded. `kedro skills list` sends no event, and skill content, file paths and project details are never collected. These events follow the same consent flow as all other telemetry described on this page.
 
 For technical information on how the telemetry collection works, you can browse
 [the source code of `kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry).

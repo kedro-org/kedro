@@ -7,7 +7,7 @@ This page contains a set of examples to help you structure your YAML configurati
     Datasets are not included in the core Kedro package from Kedro version **`0.19.0`**. Import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
     From version **`2.0.0`** of `kedro-datasets`, all dataset names have changed to replace the capital letter "S" in "DataSet" with a lower case "s". For example, `CSVDataSet` is now `CSVDataset`.
 
-## Load data from a local binary file using `utf-8` encoding
+## Load data from a local text file using `utf-8` encoding
 
 The `open_args_load` and `open_args_save` parameters are passed to the filesystem `open` method to configure how a dataset file (on a specific filesystem) is opened during a load or save operation respectively.
 
@@ -16,7 +16,7 @@ test_dataset:
   type: ...
   fs_args:
     open_args_load:
-      mode: "rb"
+      mode: "r"
       encoding: "utf-8"
 ```
 

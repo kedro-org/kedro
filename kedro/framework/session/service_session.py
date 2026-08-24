@@ -165,7 +165,7 @@ class KedroServiceSession(AbstractSession):
         catalog dataset `type` driven by `runtime_params`, regardless of what a
         project's own `CONFIG_LOADER_ARGS` says -- that restriction must not be
         weakenable by project config for an untrusted caller. See
-        kedro-org/kedro#5706.
+        https://github.com/kedro-org/kedro/issues/5706.
         """
         config_loader_class = settings.CONFIG_LOADER_CLASS
         config_loader_args = dict(settings.CONFIG_LOADER_ARGS)

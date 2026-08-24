@@ -156,10 +156,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self.merge_strategy = merge_strategy or {}
         self._globals_oc: DictConfig | None = None
         self._runtime_params_oc: DictConfig | None = None
-        # Variable paths (e.g. "dataset.type") that an actual runtime_params
-        # value was found for during the most recent resolution pass -- as
-        # opposed to falling back to a resolver default. Used to guard against
-        # runtime_params selecting a catalog dataset's 'type'.
+        # Paths where runtime_params actually resolved, not a resolver default.
         self._runtime_params_hits: set[str] = set()
         self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
@@ -438,26 +435,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
         aggregate_config: Iterable[DictConfig],
         merged_config_container: dict[str, Any],
     ) -> None:
-        """Block dataset ``type`` values that resolve through the
-        ``runtime_params:`` resolver, when ``self.restrict_runtime_params_type_selection``
-        is set.
+        """Reject a dataset ``type`` that resolves through ``runtime_params:``,
+        when ``self.restrict_runtime_params_type_selection`` is set.
 
-        ``type`` selects which class Kedro dynamically imports and
-        instantiates. Letting untrusted runtime params (e.g. from an HTTP
-        request) choose that class allows callers to pick arbitrary
-        importable ``AbstractDataset`` subclasses -- including ones like
-        ``kedro_datasets.pickle.PickleDataset`` that execute code on load.
-        Whether a resolved class would actually be dangerous to instantiate
-        isn't something this can determine from the string alone (a safe
-        and a dangerous dataset type are equally valid-looking dotted
-        paths), so when the flag is set, any real hit is rejected
-        unconditionally rather than checked against a list of safe values.
-
-        Checked at every nesting depth, not just each top-level catalog entry:
-        wrapper datasets such as ``CachedDataset`` and ``PartitionedDataset``
-        accept a nested dataset config (e.g. a ``dataset:`` key) with its own
-        ``type``, which reaches the same ``AbstractDataset.from_config`` /
-        ``load_obj`` path as a top-level entry.
+        ``type`` selects the class Kedro dynamically imports and instantiates,
+        so letting untrusted runtime params choose it allows arbitrary
+        importable ``AbstractDataset`` subclasses, including ones with side
+        effects on load (e.g. ``kedro_datasets.pickle.PickleDataset``).
+        Checked at every nesting depth to also cover wrapper datasets such as
+        ``CachedDataset`` and ``PartitionedDataset``.
         """
         if not self.restrict_runtime_params_type_selection:
             return

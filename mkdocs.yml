@@ -141,6 +141,7 @@ plugins:
           - catalog-data/kedro_dataset_factories.md: How dataset factories generalise catalog entries
           - catalog-data/partitioned_and_incremental_datasets.md: Partitioned and incremental dataset concepts
           - catalog-data/lazy_loading.md: Lazy loading for performance optimization
+          - catalog-data/dataset_validation.md: How to validate datasets with declared validators
           - catalog-data/how_to_configure_the_data_catalog.md: How to configure load/save arguments, credentials, versioning, and environments
           - catalog-data/how_to_use_dataset_factories.md: How to apply dataset factory patterns
           - catalog-data/how_to_use_partitioned_and_incremental_datasets.md: How to configure and use partitioned and incremental datasets
@@ -358,6 +359,7 @@ nav:
               - Use dataset factories: catalog-data/how_to_use_dataset_factories.md
               - Use partitioned and incremental datasets: catalog-data/how_to_use_partitioned_and_incremental_datasets.md
               - Access the Data Catalog in code: catalog-data/how_to_access_the_data_catalog_in_code.md
+              - Validate datasets: catalog-data/dataset_validation.md
           - Examples:
               - Data Catalog YAML examples: catalog-data/data_catalog_yaml_examples.md
       - Nodes & Pipelines:

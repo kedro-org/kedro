@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Added `validate_dataset` and `validate_catalog` to `kedro.validation`: on-demand validation of catalog datasets that reports structured `ValidationResult` outcomes instead of raising.
 - Datasets can now declare a `validator` in the catalog; the `DataCatalog` enforces it on every `load` and `save`, with a `DATASET_VALIDATION` setting and `KEDRO_DATASET_VALIDATION` environment variable to control it.
 - Added `kedro.validation` core: a pluggable `Validator` protocol with a Pandera reference adapter and structured validation errors that subclass `DatasetError`, as groundwork for catalog-level dataset validation.
 - Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.

@@ -152,19 +152,35 @@ class KedroServiceSession(AbstractSession):
         self._logger.info("Closing session %s", self.session_id)
 
     def _get_config_loader(
-        self, runtime_params: dict[str, Any] | None = None
+        self,
+        runtime_params: dict[str, Any] | None = None,
     ) -> AbstractConfigLoader:
-        """An instance of the config loader."""
+        """An instance of the config loader.
+
+        Args:
+            runtime_params: Extra parameters passed to a Kedro run.
+
+        In serving mode, ``runtime_params`` originates from an untrusted caller
+        (an HTTP request body), so the config loader is forced to reject a
+        catalog dataset `type` driven by `runtime_params`, regardless of what a
+        project's own `CONFIG_LOADER_ARGS` says -- that restriction must not be
+        weakenable by project config for an untrusted caller. See
+        https://github.com/kedro-org/kedro/issues/5706.
+        """
         config_loader_class = settings.CONFIG_LOADER_CLASS
+        config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
+        if self._serving_mode:
+            config_loader_args["restrict_runtime_params_type_selection"] = True
         return config_loader_class(  # type: ignore[no-any-return]
             conf_source=self._conf_source,
             env=self.env,
             runtime_params=runtime_params,
-            **settings.CONFIG_LOADER_ARGS,
+            **config_loader_args,
         )
 
     def load_context(
-        self, runtime_params: dict[str, Any] | None = None
+        self,
+        runtime_params: dict[str, Any] | None = None,
     ) -> KedroContext:
         """An instance of the project context with runtime parameters injected."""
         config_loader = self._get_config_loader(runtime_params)

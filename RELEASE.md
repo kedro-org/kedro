@@ -18,6 +18,7 @@
 - Fixed docs generated with `kedro new --tools=docs` so the Sphinx HTML build runs `sphinx-apidoc` and creates API docs.
 - Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 - Added a warning in `ParallelRunner` catalog validation that identifies cloud-backed datasets (e.g. S3, GCS, Azure Data Lake) failing to pickle and suggests using `ThreadRunner` or `ParallelRunner` instead.
+- Redacted credentials, signed-URL query parameters and fragments from dataset filepaths in `AbstractDataset.__repr__`, `DatasetError` messages, and HTTP server `/snapshot` and `/run` responses.
 
 ## Documentation changes
 

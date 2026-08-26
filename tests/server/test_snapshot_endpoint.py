@@ -200,3 +200,60 @@ class TestSnapshotEndpoint:
             mock_get.call_args[1]["metadata"]
             is make_http_server.mock_bootstrap.return_value
         )
+
+    def test_snapshot_dataset_filepath_redacts_credentials_and_query(
+        self, mocker, make_http_server
+    ):
+        """Dataset filepaths in a successful snapshot must not leak
+        authority credentials, signed URL query parameters, or fragments.
+        """
+        snapshot = _make_snapshot()
+        # Mirrors how the real snapshot-building path constructs
+        # DatasetSnapshot entries from raw catalog config.
+        snapshot.datasets["signed_data"] = DatasetSnapshot.from_config(
+            "signed_data",
+            {
+                "type": "pandas.CSVDataset",
+                "filepath": (
+                    "https://user:pass@example.com/bucket/file.csv"  # pragma: allowlist secret
+                    "?X-Amz-Signature=verysecretsig#frag"
+                ),
+            },
+        )
+        app = make_http_server()
+        mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=snapshot,
+        )
+        with TestClient(app) as client:
+            payload = client.get("/snapshot").json()
+
+        filepath = payload["datasets"]["signed_data"]["filepath"]
+        assert "pass" not in filepath
+        assert "verysecretsig" not in filepath
+        assert "frag" not in filepath
+        assert "<redacted>" in filepath
+
+    def test_snapshot_failure_message_redacts_credentials_from_exception(
+        self, mocker, make_http_server, caplog
+    ):
+        """A third-party exception raised while building the snapshot must
+        not leak dataset credentials in the response or in server logs."""
+        app = make_http_server()
+        mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            side_effect=RuntimeError(
+                "Could not reach https://user:pass@example.com/bucket/file.csv"  # pragma: allowlist secret
+                "?X-Amz-Signature=verysecretsig"
+            ),
+        )
+        with TestClient(app) as client:
+            response = client.get("/snapshot")
+
+        payload = response.json()
+        assert payload["status"] == "failure"
+        assert "verysecretsig" not in payload["error"]["message"]
+        assert "pass" not in payload["error"]["message"]
+        assert "<redacted>" in payload["error"]["message"]
+        assert "verysecretsig" not in caplog.text
+        assert "pass" not in caplog.text

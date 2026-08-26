@@ -7,5 +7,5 @@ A two-page cheatsheet covering the most commonly used Kedro concepts and command
 
 Download it in PDF for a higher-resolution, printable copy:
 
-- [Light version (PDF)](#TODO-pdf-light-url)
-- [Dark version (PDF)](#TODO-pdf-dark-url)
+- [Light version (PDF)](../meta/images/Kedro-Cheat-Sheet-Light-PDF.pdf)
+- [Dark version (PDF)](../meta/images/Kedro-Cheat-Sheet-Dark-PDF.pdf)

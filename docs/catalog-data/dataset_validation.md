@@ -35,7 +35,7 @@ companies:
   validator: my_project.schemas.CompaniesSchema
 ```
 
-That is the whole setup. Nodes do not change. When the data breaks the contract, the load or save fails with every failed check reported at once:
+That is the whole setup. Nodes do not change. When the data breaks the contract, the load or save fails, and the error reports every failed check in one message:
 
 ```text
 DataValidationError: Validation failed for dataset 'companies' on load
@@ -45,7 +45,7 @@ DataValidationError: Validation failed for dataset 'companies' on load
   - company_rating: greater_than_or_equal_to(0) — 1 case (e.g. -0.5)
 ```
 
-The rendered message stays this size however large the data is. The full backend report is available on the exception's `__cause__`, and the structured failures on its `failures` attribute.
+The rendered message stays the same size for a ten-row frame or a ten-million-row frame. The full backend report is available on the exception's `__cause__`, and the structured failures on its `failures` attribute.
 
 ## The long form
 
@@ -121,7 +121,7 @@ Whatever the validator raises is treated as a validation failure and reported as
 
 ## Validating on demand
 
-To check datasets without going through a load or save — in tooling, tests or CI — use the on-demand API. It never raises for validation outcomes; every outcome is a `ValidationResult`:
+To check datasets without going through a load or save — in tooling, tests, or CI — use the on-demand API. It never raises for validation outcomes; every outcome is a `ValidationResult`:
 
 ```python
 from kedro.validation import validate_catalog, validate_dataset
@@ -140,5 +140,5 @@ Explicit calls always validate, ignoring the `enabled` flags and the kill switch
 ## Current scope
 
 - One validator per dataset. The list form is reserved for future use.
-- pandas and Polars are the supported Pandera backends. Pandera's PySpark backend behaves differently under the hood, and support for it is experimental.
+- pandas and Polars are the supported Pandera backends. Pandera's PySpark backend reports failures differently, and support for it is experimental.
 - Validators on [dataset factory](kedro_dataset_factories.md) entries are captured when the dataset is first materialised.

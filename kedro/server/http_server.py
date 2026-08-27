@@ -6,6 +6,7 @@ import logging
 import os
 import threading
 import time
+import traceback
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
@@ -16,7 +17,7 @@ from kedro.framework.project import settings
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
 from kedro.inspection import get_project_snapshot
-from kedro.io.core import generate_timestamp
+from kedro.io.core import _redact_url_credentials, generate_timestamp
 from kedro.runner import AbstractRunner
 from kedro.server.models import (
     ErrorDetail,
@@ -140,12 +141,21 @@ def create_http_server(
                 parameters=snapshot.parameters,
             )
         except Exception as exc:
-            logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
+            # Third-party exceptions (e.g. from a filesystem or storage client)
+            # may embed a dataset's own unsanitised URL, so both the message
+            # and the traceback are redacted before being logged or returned.
+            redacted_message = _redact_url_credentials(str(exc))
+            redacted_traceback = _redact_url_credentials(
+                "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+            )
+            logger.error(
+                "Snapshot request failed: %s\n%s", redacted_message, redacted_traceback
+            )
             return SnapshotFailure(
                 status="failure",
                 error=ErrorDetail(
                     type=type(exc).__qualname__,
-                    message=str(exc),
+                    message=redacted_message,
                 ),
             )
 
@@ -266,11 +276,18 @@ def _execute_pipeline(
 
     except Exception as exc:
         duration_ms = (time.perf_counter() - start_time) * 1000
+        # Dataset load/save failures can surface a raw dataset URL via the
+        # underlying third-party exception, so both the message and the
+        # traceback are redacted before being logged or returned.
+        redacted_message = _redact_url_credentials(str(exc))
+        redacted_traceback = _redact_url_credentials(
+            "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        )
         logger.error(
-            "Pipeline run %s failed: %s",
+            "Pipeline run %s failed: %s\n%s",
             run_id,
-            str(exc),
-            exc_info=True,
+            redacted_message,
+            redacted_traceback,
         )
 
         return RunFailure(
@@ -279,6 +296,6 @@ def _execute_pipeline(
             duration_ms=round(duration_ms, 2),
             error=ErrorDetail(
                 type=type(exc).__qualname__,
-                message=str(exc),
+                message=redacted_message,
             ),
         )

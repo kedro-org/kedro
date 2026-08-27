@@ -8,6 +8,7 @@ import abc
 import copy
 import logging
 import pprint
+import re
 import sys
 import warnings
 from collections import namedtuple
@@ -28,6 +29,7 @@ from typing import (  # noqa: UP035
     TypeVar,
     runtime_checkable,
 )
+from urllib.parse import urlsplit, urlunsplit
 
 from typing_extensions import Self
 
@@ -54,6 +56,106 @@ VALIDATOR_KEY = "validator"
 
 # Type alias for copy modes
 TCopyMode = Literal["deepcopy", "copy", "assign"]
+
+_REDACTED = "<redacted>"
+# Matches a scheme-based URL (e.g. "s3://", "https://") that may be embedded
+# inside a larger string, such as a third-party exception message.
+_URL_TOKEN_RE = re.compile(r"[A-Za-z][A-Za-z0-9+.\-]*://[^\s'\"<>)\]]+")
+
+
+def _redact_single_url(url: str) -> str:
+    """Redact authority credentials, query string, and fragment from a
+    single URL-like string, preserving scheme, host, and path.
+    """
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return url
+
+    has_userinfo = "@" in parts.netloc
+    if not (has_userinfo or parts.query or parts.fragment):
+        return url
+
+    netloc = parts.netloc
+    if has_userinfo:
+        netloc = f"{_REDACTED}@{netloc.rsplit('@', 1)[1]}"
+
+    return urlunsplit(
+        parts._replace(
+            netloc=netloc,
+            query=_REDACTED if parts.query else "",
+            fragment=_REDACTED if parts.fragment else "",
+        )
+    )
+
+
+def _redact_url_credentials(value: Any) -> Any:
+    """Redact credentials, query strings, and fragments from any URL(s)
+    contained in ``value``.
+
+    This parses URLs structurally (rather than relying on a list of known
+    sensitive parameter names such as ``sig`` or ``token``) so it works
+    regardless of which query parameter names a given provider uses for
+    presigned-URL signatures, access tokens, etc.
+
+    Handles both a value that is itself a filepath/URL (e.g. a dataset's
+    ``filepath``) and a larger piece of text with a URL embedded in it
+    (e.g. a third-party exception message). Values that are not, or do not
+    contain, a URL -- such as plain local paths -- are returned unchanged.
+    Non-string values are returned unchanged.
+    """
+    if not isinstance(value, str):
+        return value
+
+    if "://" in value:
+        return _URL_TOKEN_RE.sub(
+            lambda match: _redact_single_url(match.group(0)), value
+        )
+
+    # Kedro strips the scheme from cloud-storage and HTTP(S) filepaths,
+    # so a scheme-less value may still carry userinfo, a query, or fragment.
+    if " " in value:
+        return value
+
+    # Prefix ``//`` when there is a ``@`` in the authority position so
+    # ``urlsplit`` treats it as netloc; the delimiter guard leaves plain
+    # filenames containing ``@`` (e.g. ``report@2024.csv``) untouched.
+    delimiter_idx = min(
+        (idx for idx in (value.find(c) for c in "/?#") if idx != -1),
+        default=-1,
+    )
+    if delimiter_idx != -1 and "@" in value[:delimiter_idx]:
+        return _redact_single_url("//" + value).removeprefix("//")
+
+    if "?" in value or "#" in value:
+        return _redact_single_url(value)
+
+    return value
+
+
+def _redact_repr_value(value: Any) -> Any:
+    """Recursively redact URL credentials from a value destined for
+    ``repr()``-style display, without altering values that need no
+    redaction (so unrelated ``repr()`` output is unaffected).
+
+    A ``PurePath`` whose posix form needs redacting is returned as a
+    plain ``str`` (paths with embedded ``?``/``#``/userinfo are not
+    round-trip-safe through ``PurePath``); untouched paths are returned
+    as the original ``PurePath``.
+    """
+    if isinstance(value, PurePath):
+        posix = value.as_posix()
+        redacted = _redact_url_credentials(posix)
+        return value if redacted == posix else redacted
+    if isinstance(value, str):
+        return _redact_url_credentials(value)
+    if isinstance(value, dict):
+        return {key: _redact_repr_value(val) for key, val in value.items()}
+    # Only plain list/tuple, not subclasses such as namedtuples (e.g.
+    # ``Version``), whose constructors don't accept a single iterable.
+    if type(value) in (list, tuple):
+        return type(value)(_redact_repr_value(val) for val in value)
+    return value
 
 
 class DatasetError(Exception):
@@ -372,7 +474,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         for arg_name, arg_descr in object_description.items():
             if arg_descr is not None:
                 descr = pprint.pformat(
-                    arg_descr,
+                    _redact_repr_value(arg_descr),
                     sort_dicts=False,
                     compact=True,
                     depth=2,
@@ -839,8 +941,8 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
         if self._exists_function(str(versioned_path)):
             raise DatasetError(
-                f"Save path '{versioned_path}' for {self!s} must not exist if "
-                f"versioning is enabled."
+                f"Save path '{_redact_url_credentials(str(versioned_path))}' for "
+                f"{self!s} must not exist if versioning is enabled."
             )
 
         return versioned_path
@@ -925,15 +1027,20 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             except (FileNotFoundError, NotADirectoryError) as err:
                 # FileNotFoundError raised in Win, NotADirectoryError raised in Unix
                 _default_version = "YYYY-MM-DDThh.mm.ss.sssZ"
+                filepath_name = _redact_url_credentials(self._filepath.name)
+                filepath_parent = _redact_url_credentials(
+                    self._filepath.parent.as_posix()
+                )
+                filepath_posix = _redact_url_credentials(self._filepath.as_posix())
                 raise DatasetError(
-                    f"Cannot save versioned dataset '{self._filepath.name}' to "
-                    f"'{self._filepath.parent.as_posix()}' because a file with the same "
+                    f"Cannot save versioned dataset '{filepath_name}' to "
+                    f"'{filepath_parent}' because a file with the same "
                     f"name already exists in the directory. This is likely because "
                     f"versioning was enabled on a dataset already saved previously. Either "
-                    f"remove '{self._filepath.name}' from the directory or manually "
+                    f"remove '{filepath_name}' from the directory or manually "
                     f"convert it into a versioned dataset by placing it in a versioned "
                     f"directory (e.g. with default versioning format "
-                    f"'{self._filepath.as_posix()}/{_default_version}/{self._filepath.name}"
+                    f"'{filepath_posix}/{_default_version}/{filepath_name}"
                     f"')."
                 ) from err
 

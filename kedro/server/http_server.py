@@ -35,7 +35,7 @@ from kedro.server.utils import (
     KEDRO_SERVER_ENV,
     _resolve_project_path,
 )
-from kedro.utils import load_obj
+from kedro.utils import _is_module_allowed, load_obj
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -193,19 +193,14 @@ def _validate_runner_module(runner_name: str | None, package_name: str | None) -
     A runner name without a module prefix (e.g. ``SequentialRunner``) always
     passes because ``load_obj`` will resolve it against ``kedro.runner``.
     Allowed prefixes are ``kedro.runner``, the project <package_name>, and any
-    additional entries in ``settings.RUNNER_MODULES_WHITELIST``.
+    additional entries in ``settings.RUNNER_MODULE_ALLOWLIST``.
     """
     if runner_name is None or "." not in runner_name:
         return True
     module = runner_name.rsplit(".", 1)[0]
-    allowed_prefixes = [
-        "kedro.runner",
-        package_name,
-        *settings.RUNNER_MODULES_WHITELIST,
-    ]
-    return any(
-        module == prefix or module.startswith(prefix + ".")
-        for prefix in allowed_prefixes
+    return _is_module_allowed(
+        module,
+        ["kedro.runner", package_name, *settings.RUNNER_MODULE_ALLOWLIST],
     )
 
 
@@ -238,7 +233,7 @@ def _execute_pipeline(
             raise ValueError(
                 f"Runner module '{module}' is not allowed. "
                 "Only 'kedro.runner', the project package, or modules listed in "
-                "'RUNNER_MODULES_WHITELIST' via settings.py are permitted."
+                "'RUNNER_MODULE_ALLOWLIST' via settings.py are permitted."
             )
         runner_class = load_obj(runner_name, "kedro.runner")
         if not (

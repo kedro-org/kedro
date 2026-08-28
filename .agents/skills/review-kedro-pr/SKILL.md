@@ -109,6 +109,7 @@ Match the style of existing docstrings in the same module — short, functional,
 - Keep docstrings concise. State what the function does, its arguments, return value, and any exceptions it raises. Do not restate what the signature already makes obvious.
 - Do not include long explanations, design rationale, or implementation notes in docstrings. Those belong in PR descriptions or docs pages, not in code.
 - For public APIs, ensure inputs and outputs are clearly documented. Add examples only when the behaviour is non-obvious and a short example genuinely helps — not as boilerplate.
+- Suggest adding examples if helpful.
 
 Flag as **Suggestion** when a docstring is verbose, repeats the function name, or documents design decisions instead of behaviour. Flag as **Critical** only when a public API is missing required documentation.
 

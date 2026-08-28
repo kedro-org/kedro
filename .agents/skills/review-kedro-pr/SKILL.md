@@ -98,13 +98,26 @@ These apply to any project. Work through them in order.
 - Suggest helper/utility functions if the same logic is repeated.
 - Aim for simple, maintainable code.
 
-### 6. Docstrings and inline documentation
+### 6. Docstrings and inline comments
+
+Match the style of existing docstrings in the same module — short, functional, and to the point.
+
+#### Docstrings
 
 - Check if docstrings are present on new/changed classes, functions, and methods.
 - Docstrings must use Google style (`Args:`, `Returns:`, `Raises:`) to avoid rendering issues in the API docs.
-- For public APIs:
-    - Ensure inputs/outputs are clearly documented.
-    - Suggest adding examples if helpful.
+- Keep docstrings concise. State what the function does, its arguments, return value, and any exceptions it raises. Do not restate what the signature already makes obvious.
+- Do not include long explanations, design rationale, or implementation notes in docstrings. Those belong in PR descriptions or docs pages, not in code.
+- For public APIs, ensure inputs and outputs are clearly documented. Add examples only when the behaviour is non-obvious and a short example genuinely helps — not as boilerplate.
+
+Flag as **Suggestion** when a docstring is verbose, repeats the function name, or documents design decisions instead of behaviour. Flag as **Critical** only when a public API is missing required documentation.
+
+#### Inline comments
+
+- Code should be self-explanatory through function names, docstrings, and clear structure. Readers should understand what it does without narrating comments.
+- Do not add comments that restate the code (e.g. `# increment counter` above `counter += 1`).
+- Inline comments are acceptable only for genuinely non-obvious logic — edge cases, platform quirks, or constraints that cannot be expressed clearly in code alone. See existing comments in files like `kedro/utils.py` for the expected bar.
+- Flag unnecessary inline comments as **Suggestion**.
 
 ### 7. Testing and coverage
 

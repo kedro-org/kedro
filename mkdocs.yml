@@ -104,7 +104,7 @@ plugins:
           - index.md: Welcome to Kedro documentation
           - getting-started/install.md: Installation guide for pip, conda, and development setup
           - getting-started/kedro_concepts.md: Core concepts - nodes, pipelines, catalog, and more
-          - getting-started/cheatsheet.md: Two-page Kedro cheatsheet, available as PNG and PDF
+          - getting-started/cheatsheet.md: Two-page Kedro cheatsheet, available as a SVG file
           - getting-started/faq.md: Frequently asked questions
           - getting-started/course.md: Learn about Kedro from our video course
           - getting-started/pipeline_builder.md: Design Kedro pipelines visually in the browser and export a project

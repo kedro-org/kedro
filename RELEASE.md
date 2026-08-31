@@ -18,6 +18,7 @@
 - Fixed docs generated with `kedro new --tools=docs` so the Sphinx HTML build runs `sphinx-apidoc` and creates API docs.
 - Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 - Redacted credentials, signed-URL query parameters and fragments from dataset filepaths in `AbstractDataset.__repr__`, `DatasetError` messages, and HTTP server `/snapshot` and `/run` responses.
+- Fixed `CachedDataset.__repr__` mislabelling the cache with the wrapped dataset's class name instead of `MemoryDataset`.
 
 ## Documentation changes
 

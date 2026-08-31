@@ -26,6 +26,7 @@
 - Added `mdformat` as a Markdown autoformatter, run via `make lint` and as a pre-commit hook, and reformatted the existing Markdown. Fixed several step-by-step guides where numbered lists were rendering as repeated "1." instead of counting up, because their content wasn't indented under the right list item.
 - Fixed the `DaskRunner` example on the Dask deployment page.
 - Fixed the `open_args_load` examples in the data catalog documentation to use text mode so the `encoding` option applies.
+- Added a cheatsheet with Kedro concepts and CLI commands to the documentation.
 
 ## Breaking changes to the API
 

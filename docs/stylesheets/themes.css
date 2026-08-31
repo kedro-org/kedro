@@ -39,3 +39,11 @@
     --social-link-fill-color: var(--black-400);
     --md-typeset-table-color: var(--white-800);
 }
+
+/* Material's built-in #only-light / #only-dark image variants are hardcoded to
+   the default/slate scheme names, which this site doesn't use, so the rule is
+   reimplemented here for our "light" / "dark" scheme names. */
+[data-md-color-scheme="light"] img[src$="#only-dark"],
+[data-md-color-scheme="dark"] img[src$="#only-light"] {
+    display: none;
+}

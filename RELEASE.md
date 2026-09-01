@@ -18,12 +18,21 @@
 - Fixed docs generated with `kedro new --tools=docs` so the Sphinx HTML build runs `sphinx-apidoc` and creates API docs.
 - Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 - Added a warning in `ParallelRunner` catalog validation that identifies cloud-backed datasets (e.g. S3, GCS, Azure Data Lake) failing to pickle and suggests using `ThreadRunner` or `SequentialRunner` instead.
+- Redacted credentials, signed-URL query parameters and fragments from dataset filepaths in `AbstractDataset.__repr__`, `DatasetError` messages, and HTTP server `/snapshot` and `/run` responses.
 
 ## Documentation changes
 
+- Documented the HTTP server's restriction on `runtime_params`-resolved catalog `type` fields, in the templating guide and the HTTP server guide.
 - Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
 - Added `mdformat` as a Markdown autoformatter, run via `make lint` and as a pre-commit hook, and reformatted the existing Markdown. Fixed several step-by-step guides where numbered lists were rendering as repeated "1." instead of counting up, because their content wasn't indented under the right list item.
 - Fixed the `DaskRunner` example on the Dask deployment page.
+- Fixed the `open_args_load` examples in the data catalog documentation to use text mode so the `encoding` option applies.
+- Added a cheatsheet with Kedro concepts and CLI commands to the documentation.
+
+## Breaking changes to the API
+
+- **Security fix**: A catalog `type` field resolved with `runtime_params` supplied through the HTTP server's `POST /run` no longer accepts an `AbstractDataset` class chosen by the request. `runtime_params`-driven `type` selection through other, trusted callers (for example, `kedro run --params`) is unaffected.
+- The `settings.py` entry `RUNNER_MODULES_WHITELIST` has been renamed to `RUNNER_MODULE_ALLOWLIST`, following the `<COMPONENT>_ALLOWLIST` naming convention for Kedro allowlists. Projects that set the old name must rename it, otherwise the entries are ignored and the HTTP server rejects those runner modules.
 
 ## Community contributions
 
@@ -34,6 +43,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Shizoqua](https://github.com/Shizoqua)
 - [BALOGUN DAVID TAIWO](https://github.com/BALOGUN-DAVID)
 - [kingjaiteh](https://github.com/kingjaiteh)
+- [Muhtasim Munif Fahim](https://github.com/Muhtasim-Munif-Fahim)
 
 # Release 1.5.0
 

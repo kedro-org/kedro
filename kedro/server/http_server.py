@@ -6,6 +6,7 @@ import logging
 import os
 import threading
 import time
+import traceback
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
@@ -16,7 +17,7 @@ from kedro.framework.project import settings
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
 from kedro.inspection import get_project_snapshot
-from kedro.io.core import generate_timestamp
+from kedro.io.core import _redact_url_credentials, generate_timestamp
 from kedro.runner import AbstractRunner
 from kedro.server.models import (
     ErrorDetail,
@@ -34,7 +35,7 @@ from kedro.server.utils import (
     KEDRO_SERVER_ENV,
     _resolve_project_path,
 )
-from kedro.utils import load_obj
+from kedro.utils import _is_module_allowed, load_obj
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -140,12 +141,21 @@ def create_http_server(
                 parameters=snapshot.parameters,
             )
         except Exception as exc:
-            logger.error("Snapshot request failed: %s", str(exc), exc_info=True)
+            # Third-party exceptions (e.g. from a filesystem or storage client)
+            # may embed a dataset's own unsanitised URL, so both the message
+            # and the traceback are redacted before being logged or returned.
+            redacted_message = _redact_url_credentials(str(exc))
+            redacted_traceback = _redact_url_credentials(
+                "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+            )
+            logger.error(
+                "Snapshot request failed: %s\n%s", redacted_message, redacted_traceback
+            )
             return SnapshotFailure(
                 status="failure",
                 error=ErrorDetail(
                     type=type(exc).__qualname__,
-                    message=str(exc),
+                    message=redacted_message,
                 ),
             )
 
@@ -183,19 +193,14 @@ def _validate_runner_module(runner_name: str | None, package_name: str | None) -
     A runner name without a module prefix (e.g. ``SequentialRunner``) always
     passes because ``load_obj`` will resolve it against ``kedro.runner``.
     Allowed prefixes are ``kedro.runner``, the project <package_name>, and any
-    additional entries in ``settings.RUNNER_MODULES_WHITELIST``.
+    additional entries in ``settings.RUNNER_MODULE_ALLOWLIST``.
     """
     if runner_name is None or "." not in runner_name:
         return True
     module = runner_name.rsplit(".", 1)[0]
-    allowed_prefixes = [
-        "kedro.runner",
-        package_name,
-        *settings.RUNNER_MODULES_WHITELIST,
-    ]
-    return any(
-        module == prefix or module.startswith(prefix + ".")
-        for prefix in allowed_prefixes
+    return _is_module_allowed(
+        module,
+        ["kedro.runner", package_name, *settings.RUNNER_MODULE_ALLOWLIST],
     )
 
 
@@ -228,7 +233,7 @@ def _execute_pipeline(
             raise ValueError(
                 f"Runner module '{module}' is not allowed. "
                 "Only 'kedro.runner', the project package, or modules listed in "
-                "'RUNNER_MODULES_WHITELIST' via settings.py are permitted."
+                "'RUNNER_MODULE_ALLOWLIST' via settings.py are permitted."
             )
         runner_class = load_obj(runner_name, "kedro.runner")
         if not (
@@ -266,11 +271,18 @@ def _execute_pipeline(
 
     except Exception as exc:
         duration_ms = (time.perf_counter() - start_time) * 1000
+        # Dataset load/save failures can surface a raw dataset URL via the
+        # underlying third-party exception, so both the message and the
+        # traceback are redacted before being logged or returned.
+        redacted_message = _redact_url_credentials(str(exc))
+        redacted_traceback = _redact_url_credentials(
+            "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        )
         logger.error(
-            "Pipeline run %s failed: %s",
+            "Pipeline run %s failed: %s\n%s",
             run_id,
-            str(exc),
-            exc_info=True,
+            redacted_message,
+            redacted_traceback,
         )
 
         return RunFailure(
@@ -279,6 +291,6 @@ def _execute_pipeline(
             duration_ms=round(duration_ms, 2),
             error=ErrorDetail(
                 type=type(exc).__qualname__,
-                message=str(exc),
+                message=redacted_message,
             ),
         )

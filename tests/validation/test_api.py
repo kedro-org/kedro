@@ -252,7 +252,7 @@ class TestResultBehaviour:
         for name in ("valid_companies", "invalid_companies", "unresolvable"):
             result = validate_dataset(catalog, name)
             as_dict = result.to_dict()
-            json.dumps(as_dict)  # must not raise
+            json.dumps(as_dict, allow_nan=False)  # strict JSON, must not raise
             assert "data" not in as_dict
             assert as_dict["dataset_name"] == name
             assert as_dict["status"] == result.status
@@ -346,7 +346,7 @@ class TestCatalogCompatibility:
         results = validate_catalog(catalog, names=["companies_data"])
         assert results["companies_data"].status == "passed"
 
-    def test_materialisation_failure_reports_no_validator(self):
+    def test_unqueryable_catalog_reports_no_validator(self):
         class ExplodingContains:
             validator_specs: ClassVar[dict] = {}
 
@@ -356,6 +356,30 @@ class TestCatalogCompatibility:
         result = validate_dataset(ExplodingContains(), "ds")
         assert result.status == "skipped"
         assert result.reason == "no validator declared"
+
+    def test_name_not_in_catalog_is_dataset_error(self, catalog):
+        result = validate_dataset(catalog, "no_such_dataset")
+
+        assert result.status == "errored"
+        assert result.error_type == "dataset_error"
+        assert "not found in the catalog" in result.message
+
+    def test_materialisation_failure_is_dataset_error(self, tmp_path):
+        catalog = DataCatalog.from_config(
+            {
+                "{name}_data": {
+                    "type": "pandas.NoSuchDatasetType",
+                    "filepath": str(tmp_path / "{name}_data.csv"),
+                    "validator": f"{_MODULE}.CompaniesSchema",
+                }
+            }
+        )
+
+        result = validate_dataset(catalog, "companies_data")
+
+        assert result.status == "errored"
+        assert result.error_type == "dataset_error"
+        assert "could not be created" in result.message
 
 
 class TestInternals:
@@ -386,3 +410,76 @@ class TestInternals:
         assert result.status == "errored"
         assert result.error_type == "dataset_error"
         assert "not found" in result.message
+
+
+class TestReviewedBehaviours:
+    def test_non_finite_failure_examples_are_strict_json_safe(self):
+        from kedro.validation import CheckFailure
+        from kedro.validation.api import _failure_to_dict
+
+        failure = CheckFailure(
+            message="m",
+            failure_examples=[float("nan"), float("inf"), float("-inf"), 1.5],
+        )
+        as_dict = _failure_to_dict(failure)
+
+        json.dumps(as_dict, allow_nan=False)  # must not raise
+        assert as_dict["failure_examples"] == ["nan", "inf", "-inf", 1.5]
+
+    def test_warn_severity_still_reports_failed(self, tmp_path, invalid_df):
+        path = tmp_path / "invalid.csv"
+        invalid_df.to_csv(path, index=False)
+        catalog = DataCatalog.from_config(
+            {
+                "companies": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": str(path),
+                    "validator": {
+                        "class": f"{_MODULE}.CompaniesSchema",
+                        "severity": "warn",
+                    },
+                }
+            }
+        )
+
+        result = validate_dataset(catalog, "companies")
+
+        assert result.status == "failed"
+
+    def test_save_mode_success(self, catalog, valid_df):
+        result = validate_dataset(catalog, "valid_companies", valid_df, on="save")
+
+        assert result.status == "passed"
+        pd.testing.assert_frame_equal(result.data, valid_df)
+
+    def test_version_forwarded_to_catalog_get(self, valid_df):
+        from kedro.validation import ValidatorSpec
+
+        received = {}
+
+        class Dataset:
+            def load(self):
+                return valid_df
+
+        class VersionedCatalog:
+            validator_specs: ClassVar[dict] = {
+                "companies": ValidatorSpec(class_path=f"{_MODULE}.CompaniesSchema")
+            }
+
+            def get(self, name, version=None):
+                received["version"] = version
+                return Dataset()
+
+        result = validate_dataset(
+            VersionedCatalog(), "companies", version="2026-01-01T00.00.00.000Z"
+        )
+
+        assert result.status == "passed"
+        assert received["version"].load == "2026-01-01T00.00.00.000Z"
+
+    def test_raise_if_failed_carries_error_type(self, catalog):
+        result = validate_dataset(catalog, "missing_dep")
+
+        with pytest.raises(DataValidationError) as exc_info:
+            result.raise_if_failed()
+        assert exc_info.value.error_type == "missing_dependency"

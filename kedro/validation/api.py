@@ -7,8 +7,9 @@ ignoring both the catalog-level and spec-level enabled flags.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 
 from kedro.validation.core import _VALID_MODES, resolve_validator
 from kedro.validation.exceptions import (
@@ -29,7 +30,13 @@ _UNSET = _UnsetType()
 
 
 def _json_safe(value: Any) -> Any:
-    """Coerce a value to a JSON-safe primitive, falling back to `repr`."""
+    """Coerce a value to a strict-JSON-safe primitive, falling back to `repr`.
+
+    Non-finite floats become strings, since `NaN` and `Infinity` are not
+    valid JSON and would break strict parsers.
+    """
+    if isinstance(value, float) and not math.isfinite(value):
+        return str(value)
     if value is None or isinstance(value, str | bool | int | float):
         return value
     return repr(value)
@@ -46,6 +53,9 @@ def _failure_to_dict(failure: CheckFailure) -> dict[str, Any]:
             _json_safe(example) for example in failure.failure_examples
         ],
     }
+
+
+ValidationStatus = Literal["passed", "failed", "skipped", "errored"]
 
 
 @dataclass(frozen=True)
@@ -69,7 +79,7 @@ class ValidationResult:
 
     dataset_name: str
     validator: str | None
-    status: str
+    status: ValidationStatus
     failures: list[CheckFailure] = field(default_factory=list)
     message: str | None = None
     reason: str | None = None
@@ -90,6 +100,7 @@ class ValidationResult:
                 mode="api",
                 validator=self.validator,
                 failures=list(self.failures),
+                error_type=self.error_type,
             )
 
     def to_dict(self) -> dict[str, Any]:
@@ -116,22 +127,40 @@ def _error_type_for(exc: ValidationConfigurationError) -> str:
     return "unresolvable_validator"
 
 
-def _get_spec(catalog: Any, name: str) -> Any:
+def _lookup_spec(catalog: Any, name: str) -> tuple[Any, ValidationResult | None]:
     """Look up the parsed validator spec for `name`.
 
     Dataset factory patterns only capture their validator spec when the
     dataset is materialised, so an unknown name that the catalog can resolve
-    is materialised first.
+    is materialised first. Returns the spec (or `None`) and an early
+    `ValidationResult` when the dataset is missing or cannot be created.
     """
     spec = catalog.validator_specs.get(name)
-    if spec is None:
-        try:
-            if name in catalog:
-                catalog.get(name)
-                spec = catalog.validator_specs.get(name)
-        except Exception:
-            spec = None
-    return spec
+    if spec is not None:
+        return spec, None
+    try:
+        in_catalog = name in catalog
+    except Exception:
+        return None, None
+    if not in_catalog:
+        return None, ValidationResult(
+            dataset_name=name,
+            validator=None,
+            status="errored",
+            message=f"Dataset '{name}' not found in the catalog.",
+            error_type="dataset_error",
+        )
+    try:
+        catalog.get(name)
+    except Exception as exc:
+        return None, ValidationResult(
+            dataset_name=name,
+            validator=None,
+            status="errored",
+            message=f"Dataset '{name}' exists but could not be created: {exc}",
+            error_type="dataset_error",
+        )
+    return catalog.validator_specs.get(name), None
 
 
 def validate_dataset(  # noqa: PLR0911
@@ -147,7 +176,9 @@ def validate_dataset(  # noqa: PLR0911
     This never raises for validation outcomes. Explicit calls always
     validate, ignoring `catalog.validation_enabled` and the spec's
     `enabled` flag (the result carries the spec's `enabled` value for
-    information).
+    information). The spec's `severity` is not applied either: a failing
+    validator declared with `severity: warn` reports `status="failed"`
+    here, where `catalog.load()` would log a warning and continue.
 
     Args:
         catalog: A `DataCatalog` (or compatible) instance.
@@ -177,7 +208,9 @@ def validate_dataset(  # noqa: PLR0911
             reason="catalog does not support declared validators",
         )
 
-    spec = _get_spec(catalog, name)
+    spec, early_result = _lookup_spec(catalog, name)
+    if early_result is not None:
+        return early_result
     if spec is None:
         return ValidationResult(
             dataset_name=name,
@@ -279,6 +312,12 @@ def validate_catalog(
     catalog: Any, names: list[str] | None = None
 ) -> dict[str, ValidationResult]:
     """Validate multiple catalog datasets against their declared validators.
+
+    Batch validation always checks against the `load` declaration, because
+    save-mode validation needs in-memory data that a batch call cannot
+    supply. Validators declared with `on: [save]` only are reported as
+    `skipped`; use `validate_dataset` with `data=` and `on="save"` to check
+    those.
 
     Args:
         catalog: A `DataCatalog` (or compatible) instance.

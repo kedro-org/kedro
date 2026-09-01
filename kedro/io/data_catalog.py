@@ -39,25 +39,6 @@ if TYPE_CHECKING:
     from kedro.validation.core import ValidatorSpec
 
 
-# fsspec protocols that indicate a dataset is backed by remote/cloud storage.
-# Filesystem client objects for these protocols (e.g. S3FileSystem) commonly
-# hold non-serialisable state and cannot be pickled for use with
-# ``ParallelRunner``'s multiprocessing.
-_CLOUD_PROTOCOLS = {
-    "s3",
-    "s3a",
-    "s3n",
-    "gcs",
-    "gs",
-    "adl",
-    "abfs",
-    "abfss",
-    "az",
-    "hdfs",
-    "oci",
-}
-
-
 class _LazyDataset:
     """
     A helper class to store `AbstractDataset` configuration and materialize the dataset object.
@@ -1498,7 +1479,7 @@ class SharedMemoryDataCatalog(DataCatalog):
             except (AttributeError, PicklingError):
                 unserialisable.append(name)
                 protocol = getattr(dataset, "_protocol", None)
-                if protocol in _CLOUD_PROTOCOLS:
+                if protocol and protocol != "file":
                     warnings.warn(
                         f"Dataset '{name}' appears to be backed by remote/cloud "
                         f"storage (protocol: '{protocol}'). Its filesystem client "

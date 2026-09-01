@@ -185,3 +185,30 @@ class TestRunnerInputValidation:
             runner.run(my_pipeline, catalog)
 
         assert not any("ThreadRunner" in str(w.message) for w in recwarn)
+
+    def test_local_file_dataset_does_not_warn(self, persistent_test_dataset, recwarn):
+        local_dataset = persistent_test_dataset(
+            load=lambda: "data1", save=lambda data: None
+        )
+        local_dataset._protocol = "file"
+
+        catalog = SharedMemoryDataCatalog(
+            {
+                "Input1": local_dataset,
+                "Output1": persistent_test_dataset(
+                    load=lambda: "data3", save=lambda data: None
+                ),
+            }
+        )
+        runner = ParallelRunner()
+
+        my_pipeline = pipeline(
+            [
+                node(lambda x: x, inputs="Input1", outputs="Output1", name="node1"),
+            ],
+        )
+
+        with pytest.raises(AttributeError):
+            runner.run(my_pipeline, catalog)
+
+        assert not any("ThreadRunner" in str(w.message) for w in recwarn)

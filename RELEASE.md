@@ -26,10 +26,12 @@
 - Added `mdformat` as a Markdown autoformatter, run via `make lint` and as a pre-commit hook, and reformatted the existing Markdown. Fixed several step-by-step guides where numbered lists were rendering as repeated "1." instead of counting up, because their content wasn't indented under the right list item.
 - Fixed the `DaskRunner` example on the Dask deployment page.
 - Fixed the `open_args_load` examples in the data catalog documentation to use text mode so the `encoding` option applies.
+- Added a cheatsheet with Kedro concepts and CLI commands to the documentation.
 
 ## Breaking changes to the API
 
 - **Security fix**: A catalog `type` field resolved with `runtime_params` supplied through the HTTP server's `POST /run` no longer accepts an `AbstractDataset` class chosen by the request. `runtime_params`-driven `type` selection through other, trusted callers (for example, `kedro run --params`) is unaffected.
+- The `settings.py` entry `RUNNER_MODULES_WHITELIST` has been renamed to `RUNNER_MODULE_ALLOWLIST`, following the `<COMPONENT>_ALLOWLIST` naming convention for Kedro allowlists. Projects that set the old name must rename it, otherwise the entries are ignored and the HTTP server rejects those runner modules.
 
 ## Community contributions
 

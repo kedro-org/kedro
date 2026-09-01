@@ -76,6 +76,10 @@ $ kedro run
 
 This example adds data validation to node inputs and outputs using [Great Expectations](https://docs.greatexpectations.io/en/latest/).
 
+!!! note
+
+    For validating catalog datasets on load and save, Kedro's built-in [dataset validation](../../catalog-data/dataset_validation.md) needs no hook code. Use hooks like this when you need validation at node boundaries.
+
 - Install dependencies:
 
 ```console

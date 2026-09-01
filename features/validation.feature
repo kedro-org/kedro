@@ -32,3 +32,11 @@ Feature: Dataset validation in a project
     When I execute the kedro command "run --runner=ParallelRunner"
     Then I should get a successful exit code
     And the logs should show that "split_data" was run
+
+  Scenario: A failing validator blocks the parallel runner too
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter "default"
+    And I have added a "failing" validator to the example dataset
+    When I execute the kedro command "run --runner=ParallelRunner"
+    Then I should get an error exit code
+    And I should get an error message including "rejected by the e2e validator"

@@ -171,6 +171,107 @@ def _lookup_spec(catalog: Any, name: str) -> tuple[Any, ValidationResult | None]
     return catalog.validator_specs.get(name), None
 
 
+def _gate_on_declared_modes(spec: Any, name: str, on: str) -> ValidationResult | None:
+    """Skip when the validator is not declared for the requested mode."""
+    if on in spec.on:
+        return None
+    declared = " and ".join(spec.on)
+    return ValidationResult(
+        dataset_name=name,
+        validator=spec.class_path,
+        status="skipped",
+        reason=f"validator declared for {declared} only",
+        enabled=spec.enabled,
+    )
+
+
+def _resolve_or_error(spec: Any, name: str) -> tuple[Any, ValidationResult | None]:
+    """Resolve the validator, reporting resolution failures as `errored`."""
+    try:
+        return resolve_validator(spec), None
+    except ValidationConfigurationError as exc:
+        return None, ValidationResult(
+            dataset_name=name,
+            validator=spec.class_path,
+            status="errored",
+            message=str(exc),
+            error_type=_error_type_for(exc),
+            enabled=spec.enabled,
+        )
+
+
+def _load_or_error(
+    catalog: Any, spec: Any, name: str, version: str | None
+) -> tuple[Any, ValidationResult | None]:
+    """Load the dataset's data, reporting load failures as `errored`."""
+    try:
+        from kedro.io import Version
+
+        dataset = catalog.get(name, version=Version(version, None) if version else None)
+        if dataset is None:
+            return None, ValidationResult(
+                dataset_name=name,
+                validator=spec.class_path,
+                status="errored",
+                message=f"Dataset '{name}' not found in catalog.",
+                error_type="dataset_error",
+                enabled=spec.enabled,
+            )
+        return dataset.load(), None
+    except Exception as exc:
+        return None, ValidationResult(
+            dataset_name=name,
+            validator=spec.class_path,
+            status="errored",
+            message=str(exc),
+            error_type="dataset_error",
+            enabled=spec.enabled,
+        )
+
+
+def _apply_validator(
+    validator: Any, spec: Any, name: str, data: Any
+) -> ValidationResult:
+    """Run the validator on `data` and report `passed` or `failed`."""
+    try:
+        validated = validator.validate(data)
+    except DataValidationError as exc:
+        exc.dataset_name = exc.dataset_name or name
+        exc.mode = "api"
+        return ValidationResult(
+            dataset_name=name,
+            validator=spec.class_path,
+            status="failed",
+            failures=list(exc.failures),
+            message=str(exc),
+            enabled=spec.enabled,
+        )
+    except Exception as exc:
+        # Any other raise counts as a validation failure, matching the funnel.
+        wrapped = DataValidationError(
+            str(exc),
+            dataset_name=name,
+            mode="api",
+            validator=spec.class_path,
+        )
+        wrapped.__cause__ = exc
+        return ValidationResult(
+            dataset_name=name,
+            validator=spec.class_path,
+            status="failed",
+            failures=list(wrapped.failures),
+            message=str(wrapped),
+            enabled=spec.enabled,
+        )
+    return ValidationResult(
+        dataset_name=name,
+        validator=spec.class_path,
+        status="passed",
+        enabled=spec.enabled,
+        data=validated,
+    )
+
+
 def validate_dataset(  # noqa: PLR0911
     catalog: Any,
     name: str,
@@ -227,93 +328,20 @@ def validate_dataset(  # noqa: PLR0911
             reason="no validator declared",
         )
 
-    if on not in spec.on:
-        declared = " and ".join(spec.on)
-        return ValidationResult(
-            dataset_name=name,
-            validator=spec.class_path,
-            status="skipped",
-            reason=f"validator declared for {declared} only",
-            enabled=spec.enabled,
-        )
+    skipped = _gate_on_declared_modes(spec, name, on)
+    if skipped is not None:
+        return skipped
 
-    try:
-        validator = resolve_validator(spec)
-    except ValidationConfigurationError as exc:
-        return ValidationResult(
-            dataset_name=name,
-            validator=spec.class_path,
-            status="errored",
-            message=str(exc),
-            error_type=_error_type_for(exc),
-            enabled=spec.enabled,
-        )
+    validator, errored = _resolve_or_error(spec, name)
+    if errored is not None:
+        return errored
 
     if data is _UNSET:
-        try:
-            from kedro.io import Version
+        data, errored = _load_or_error(catalog, spec, name, version)
+        if errored is not None:
+            return errored
 
-            dataset = catalog.get(
-                name, version=Version(version, None) if version else None
-            )
-            if dataset is None:
-                return ValidationResult(
-                    dataset_name=name,
-                    validator=spec.class_path,
-                    status="errored",
-                    message=f"Dataset '{name}' not found in catalog.",
-                    error_type="dataset_error",
-                    enabled=spec.enabled,
-                )
-            data = dataset.load()
-        except Exception as exc:
-            return ValidationResult(
-                dataset_name=name,
-                validator=spec.class_path,
-                status="errored",
-                message=str(exc),
-                error_type="dataset_error",
-                enabled=spec.enabled,
-            )
-
-    try:
-        validated = validator.validate(data)
-    except DataValidationError as exc:
-        exc.dataset_name = exc.dataset_name or name
-        exc.mode = "api"
-        return ValidationResult(
-            dataset_name=name,
-            validator=spec.class_path,
-            status="failed",
-            failures=list(exc.failures),
-            message=str(exc),
-            enabled=spec.enabled,
-        )
-    except Exception as exc:
-        # Any other raise counts as a validation failure, matching the funnel.
-        wrapped = DataValidationError(
-            str(exc),
-            dataset_name=name,
-            mode="api",
-            validator=spec.class_path,
-        )
-        wrapped.__cause__ = exc
-        return ValidationResult(
-            dataset_name=name,
-            validator=spec.class_path,
-            status="failed",
-            failures=list(wrapped.failures),
-            message=str(wrapped),
-            enabled=spec.enabled,
-        )
-
-    return ValidationResult(
-        dataset_name=name,
-        validator=spec.class_path,
-        status="passed",
-        enabled=spec.enabled,
-        data=validated,
-    )
+    return _apply_validator(validator, spec, name, data)
 
 
 def validate_catalog(

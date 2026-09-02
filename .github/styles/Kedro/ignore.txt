@@ -72,6 +72,7 @@ numpy
 np
 Opik
 Pandera
+Pandera's
 Palantir
 parallelisation
 Paramiko
@@ -119,6 +120,8 @@ untrusted
 validators
 vCPUs
 Unsplash
+validator
+validators
 uv
 VSCode
 Xebia

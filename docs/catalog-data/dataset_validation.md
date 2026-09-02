@@ -6,7 +6,7 @@ This page shows you how to declare validators, how to control when they run, how
 
 ## Quickstart with Pandera
 
-To follow along, install Kedro with the Pandera extra for your dataframe library:
+To follow along, install Kedro with the extra Pandera dependency for your dataframe library:
 
 ```bash
 pip install "kedro[pandera-pandas]"   # or kedro[pandera-polars]

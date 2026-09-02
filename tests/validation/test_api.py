@@ -346,7 +346,7 @@ class TestCatalogCompatibility:
         results = validate_catalog(catalog, names=["companies_data"])
         assert results["companies_data"].status == "passed"
 
-    def test_unqueryable_catalog_reports_no_validator(self):
+    def test_unqueryable_catalog_reports_dataset_error(self):
         class ExplodingContains:
             validator_specs: ClassVar[dict] = {}
 
@@ -354,8 +354,9 @@ class TestCatalogCompatibility:
                 raise RuntimeError("boom")
 
         result = validate_dataset(ExplodingContains(), "ds")
-        assert result.status == "skipped"
-        assert result.reason == "no validator declared"
+        assert result.status == "errored"
+        assert result.error_type == "dataset_error"
+        assert "Could not check whether" in result.message
 
     def test_name_not_in_catalog_is_dataset_error(self, catalog):
         result = validate_dataset(catalog, "no_such_dataset")

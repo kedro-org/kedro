@@ -28,6 +28,8 @@ class _UnsetType:
 
 _UNSET = _UnsetType()
 
+ValidationStatus = Literal["passed", "failed", "skipped", "errored"]
+
 
 def _json_safe(value: Any) -> Any:
     """Coerce a value to a strict-JSON-safe primitive, falling back to `repr`.
@@ -53,9 +55,6 @@ def _failure_to_dict(failure: CheckFailure) -> dict[str, Any]:
             _json_safe(example) for example in failure.failure_examples
         ],
     }
-
-
-ValidationStatus = Literal["passed", "failed", "skipped", "errored"]
 
 
 @dataclass(frozen=True)
@@ -140,8 +139,17 @@ def _lookup_spec(catalog: Any, name: str) -> tuple[Any, ValidationResult | None]
         return spec, None
     try:
         in_catalog = name in catalog
-    except Exception:
-        return None, None
+    except Exception as exc:
+        return None, ValidationResult(
+            dataset_name=name,
+            validator=None,
+            status="errored",
+            message=(
+                f"Could not check whether dataset '{name}' exists "
+                f"in the catalog: {exc}"
+            ),
+            error_type="dataset_error",
+        )
     if not in_catalog:
         return None, ValidationResult(
             dataset_name=name,

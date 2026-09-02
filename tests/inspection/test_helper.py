@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from kedro.config import MissingConfigException
+import pytest
+import yaml
+from omegaconf.errors import InterpolationResolutionError
+
+from kedro.config import MissingConfigException, OmegaConfigLoader
 from kedro.inspection.helper import (
     _get_parameter_keys,
     _make_config_loader,
@@ -37,6 +41,30 @@ class TestMakeConfigLoader:
         mock_loader_class.assert_called_once_with(
             conf_source=str(tmp_path / "conf"),
             env="staging",
+            runtime_params=None,
+            base_env="base",
+            default_run_env="local",
+        )
+
+    def test_passes_runtime_params_to_loader_class(self, mocker, tmp_path):
+        """runtime_params is forwarded as an explicit keyword argument."""
+        mock_loader_class = mocker.MagicMock()
+        mocker.patch(
+            "kedro.inspection.helper.settings",
+            mocker.MagicMock(
+                CONFIG_LOADER_CLASS=mock_loader_class,
+                CONFIG_LOADER_ARGS={"base_env": "base", "default_run_env": "local"},
+                CONF_SOURCE="conf",
+            ),
+        )
+
+        runtime_params = {"version": "02"}
+        _make_config_loader(tmp_path, runtime_params=runtime_params)
+
+        mock_loader_class.assert_called_once_with(
+            conf_source=str(tmp_path / "conf"),
+            env=None,
+            runtime_params=runtime_params,
             base_env="base",
             default_run_env="local",
         )
@@ -73,6 +101,87 @@ class TestMakeConfigLoader:
 
         result = _make_config_loader(tmp_path)
         assert result is sentinel
+
+
+class TestMakeConfigLoaderRuntimeParams:
+    @pytest.fixture
+    def omega_settings(self, mocker):
+        mocker.patch(
+            "kedro.inspection.helper.settings",
+            mocker.MagicMock(
+                CONFIG_LOADER_CLASS=OmegaConfigLoader,
+                CONFIG_LOADER_ARGS={"base_env": "base", "default_run_env": ""},
+                CONF_SOURCE="conf",
+            ),
+        )
+
+    @pytest.fixture
+    def project_with_runtime_catalog(self, tmp_path):
+        catalog_path = tmp_path / "conf" / "base" / "catalog.yml"
+        catalog_path.parent.mkdir(parents=True)
+        catalog_path.write_text(
+            yaml.dump(
+                {
+                    "companies": {
+                        "type": "pandas.CSVDataset",
+                        "filepath": "data/${runtime_params:version}/companies.csv",
+                    },
+                }
+            )
+        )
+        return tmp_path
+
+    def test_required_runtime_param_resolves_catalog(
+        self, omega_settings, project_with_runtime_catalog
+    ):
+        loader = _make_config_loader(
+            project_with_runtime_catalog, runtime_params={"version": "02"}
+        )
+        assert loader["catalog"]["companies"]["filepath"] == "data/02/companies.csv"
+
+    def test_required_runtime_param_raises_when_omitted(
+        self, omega_settings, project_with_runtime_catalog
+    ):
+        loader = _make_config_loader(project_with_runtime_catalog)
+        with pytest.raises(
+            InterpolationResolutionError,
+            match="Runtime parameter 'version' not found and no default value provided.",
+        ):
+            loader["catalog"]["companies"]["filepath"]
+
+    def test_runtime_param_with_default_uses_override(self, omega_settings, tmp_path):
+        catalog_path = tmp_path / "conf" / "base" / "catalog.yml"
+        catalog_path.parent.mkdir(parents=True)
+        catalog_path.write_text(
+            yaml.dump(
+                {
+                    "companies": {
+                        "type": "pandas.CSVDataset",
+                        "filepath": "data/${runtime_params:version,01}/companies.csv",
+                    },
+                }
+            )
+        )
+        loader = _make_config_loader(tmp_path, runtime_params={"version": "02"})
+        assert loader["catalog"]["companies"]["filepath"] == "data/02/companies.csv"
+
+    def test_runtime_param_with_default_falls_back_when_omitted(
+        self, omega_settings, tmp_path
+    ):
+        catalog_path = tmp_path / "conf" / "base" / "catalog.yml"
+        catalog_path.parent.mkdir(parents=True)
+        catalog_path.write_text(
+            yaml.dump(
+                {
+                    "companies": {
+                        "type": "pandas.CSVDataset",
+                        "filepath": "data/${runtime_params:version,01}/companies.csv",
+                    },
+                }
+            )
+        )
+        loader = _make_config_loader(tmp_path)
+        assert loader["catalog"]["companies"]["filepath"] == "data/01/companies.csv"
 
 
 class TestGetParameterKeys:

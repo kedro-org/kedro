@@ -19,6 +19,7 @@
 - Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 - Added a warning in `ParallelRunner` catalog validation that identifies cloud-backed datasets (e.g. S3, GCS, Azure Data Lake) failing to pickle and suggests using `ThreadRunner` or `SequentialRunner` instead.
 - Redacted credentials, signed-URL query parameters and fragments from dataset filepaths in `AbstractDataset.__repr__`, `DatasetError` messages, and HTTP server `/snapshot` and `/run` responses.
+- Added optional `runtime_params` to `get_project_snapshot()`.
 
 ## Documentation changes
 

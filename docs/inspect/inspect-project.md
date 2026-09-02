@@ -28,6 +28,7 @@ The following sections explain how to use the inspection API:
 - [How to inspect catalog datasets](#how-to-inspect-catalog-datasets)
 - [How to list parameter keys](#how-to-list-parameter-keys)
 - [How to inspect a specific environment](#how-to-inspect-a-specific-environment)
+- [How to pass runtime parameters](#how-to-pass-runtime-parameters)
 - [How to access the snapshot through the HTTP server](#how-to-access-the-snapshot-through-the-http-server)
 
 ## How to get a project snapshot
@@ -200,6 +201,23 @@ snapshot = get_project_snapshot("/path/to/my_project", conf_source="conf/custom"
     ```
 
     This avoids redundant project initialisation. When using the HTTP server, `env` is fixed at startup and cannot be overridden per request — use the programmatic API when you need multi-environment access in the same process.
+
+## How to pass runtime parameters
+
+When your catalog or parameters configuration uses `${runtime_params:...}` interpolation, pass a `runtime_params` dictionary to resolve those placeholders the same way `kedro run --params` or `KedroSession.create(runtime_params=...)` does:
+
+```python
+snapshot = get_project_snapshot(
+    "/path/to/my_project",
+    runtime_params={"version": "02"},
+)
+```
+
+For example, a catalog entry with `filepath: "data/${runtime_params:version}/companies.csv"` resolves to `data/02/companies.csv` when `version` is `"02"`.
+
+!!! note
+
+    The snapshot still returns parameter **key names** only, not resolved parameter values. `runtime_params` affects how configuration is loaded (for example, catalog file paths), not the contents of the `parameters` attribute.
 
 ## How to access the snapshot through the HTTP server
 

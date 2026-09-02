@@ -21,6 +21,7 @@ def _make_config_loader(
     project_path: Path,
     env: str | None = None,
     conf_source: str | None = None,
+    runtime_params: dict[str, Any] | None = None,
 ) -> AbstractConfigLoader:
     """Instantiate the project's configured config loader.
 
@@ -31,6 +32,8 @@ def _make_config_loader(
             ``CONFIG_LOADER_ARGS`` is used.
         conf_source: Optional path to the configuration directory.
             When ``None``, defaults to ``<project_path>/<settings.CONF_SOURCE>``.
+        runtime_params: Optional dictionary of runtime parameters forwarded to
+            the config loader for ``${runtime_params:...}`` interpolation.
 
     Returns:
         An initialised config loader instance.
@@ -44,6 +47,7 @@ def _make_config_loader(
     return config_loader_class(  # type: ignore[no-any-return]
         conf_source=resolved_conf_source,
         env=env,
+        runtime_params=runtime_params,
         **settings.CONFIG_LOADER_ARGS,
     )
 

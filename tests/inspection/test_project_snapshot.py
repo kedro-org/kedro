@@ -187,19 +187,29 @@ class TestBuildProjectSnapshot:
     def test_config_loader_created_with_explicit_env(self):
         _build_project_snapshot(self.project_path, env="staging")
         self.mock_make_config_loader.assert_called_once_with(
-            self.project_path, env="staging", conf_source=None
+            self.project_path, env="staging", conf_source=None, runtime_params=None
         )
 
     def test_config_loader_created_with_default_env(self):
         _build_project_snapshot(self.project_path)
         self.mock_make_config_loader.assert_called_once_with(
-            self.project_path, env=None, conf_source=None
+            self.project_path, env=None, conf_source=None, runtime_params=None
         )
 
     def test_config_loader_created_with_explicit_conf_source(self):
         _build_project_snapshot(self.project_path, conf_source="conf/custom")
         self.mock_make_config_loader.assert_called_once_with(
-            self.project_path, env=None, conf_source="conf/custom"
+            self.project_path, env=None, conf_source="conf/custom", runtime_params=None
+        )
+
+    def test_config_loader_created_with_runtime_params(self):
+        runtime_params = {"version": "02"}
+        _build_project_snapshot(self.project_path, runtime_params=runtime_params)
+        self.mock_make_config_loader.assert_called_once_with(
+            self.project_path,
+            env=None,
+            conf_source=None,
+            runtime_params=runtime_params,
         )
 
     def test_metadata_parameter_skips_bootstrap(self, project_metadata):
@@ -312,5 +322,8 @@ class TestBuildProjectSnapshot:
         _build_project_snapshot(metadata=project_metadata)
         self.mock_bootstrap.assert_not_called()
         self.mock_make_config_loader.assert_called_once_with(
-            project_metadata.project_path, env=None, conf_source=None
+            project_metadata.project_path,
+            env=None,
+            conf_source=None,
+            runtime_params=None,
         )

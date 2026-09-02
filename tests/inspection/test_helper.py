@@ -147,7 +147,7 @@ class TestMakeConfigLoaderRuntimeParams:
             InterpolationResolutionError,
             match="Runtime parameter 'version' not found and no default value provided.",
         ):
-            loader["catalog"]["companies"]["filepath"]
+            _ = loader["catalog"]["companies"]["filepath"]
 
     def test_runtime_param_with_default_uses_override(self, omega_settings, tmp_path):
         catalog_path = tmp_path / "conf" / "base" / "catalog.yml"

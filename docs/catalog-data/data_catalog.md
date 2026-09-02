@@ -105,6 +105,7 @@ Beyond `type` and `filepath`, the catalog accepts several other groups of settin
 The catalog accepts three groups of `*_args` parameters:
 
 - **`load_args` and `save_args`**: control how the underlying third-party library loads or saves data. For example, `load_args` for a [`pandas.ExcelDataset`](https://docs.kedro.org/projects/kedro-datasets/en/stable/api/kedro_datasets/pandas.ExcelDataset/) is passed to [`pandas.read_excel`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html) as keyword arguments.
+- **`validator`**: check the data behind an entry against a schema or custom rule every time it is loaded or saved. See [dataset validation](dataset_validation.md) for how to declare one.
 - **`fs_args`**: control how Kedro interacts with the filesystem itself. Top-level keys are passed to the underlying filesystem class (for example, `GCSFileSystem` for Google Cloud Storage), while `open_args_load` and `open_args_save` are forwarded to the filesystem's `open` method to control how the file is opened during a load or save.
 
 !!! note

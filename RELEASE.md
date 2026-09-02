@@ -1,5 +1,7 @@
 # Upcoming Release
 
+# Release 1.6.0
+
 ## Major features and improvements
 
 - Datasets can now declare a `validator` in the catalog; the `DataCatalog` enforces it on every `load` and `save`, with a `DATASET_VALIDATION` setting and `KEDRO_DATASET_VALIDATION` environment variable to control it.

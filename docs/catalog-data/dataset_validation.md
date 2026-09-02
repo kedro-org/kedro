@@ -135,7 +135,7 @@ Whatever your validator raises is treated as a validation failure and reported a
 
 ## Validating on demand
 
-During a `kedro run`, a failed validation stops the pipeline and raises an error. When you want to check datasets from your own code instead — in a script, a test, or a CI job — use `validate_dataset` and `validate_catalog`. These functions never raise for validation outcomes: each call returns a `ValidationResult` with a `status` of `passed`, `failed`, `skipped`, or `errored`:
+During a `kedro run`, a failed validation stops the pipeline and raises an error. When you want to check datasets from your own code instead — in a script, a test, or a CI job — use `validate_dataset` and `validate_catalog`. These functions never raise for validation outcomes. Each call returns a `ValidationResult` with a `status` of `passed`, `failed`, `skipped`, or `errored`:
 
 ```python
 from kedro.validation import validate_catalog, validate_dataset
@@ -153,6 +153,6 @@ Explicit calls always validate: the `enabled` flags and the kill switch are igno
 
 ## Current scope
 
-- One validator per dataset. The list form is reserved for future use.
+- One validator per dataset. Support for multiple validators per dataset might be added in a future release.
 - pandas and Polars are the supported Pandera backends. Pandera's PySpark backend reports failures differently, and support for it is experimental.
 - Validators on [dataset factory](kedro_dataset_factories.md) entries are captured when the dataset is first materialised.

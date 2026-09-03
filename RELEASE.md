@@ -1,4 +1,9 @@
 # Upcoming Release
+## Major features and improvements
+## Bug fixes and other changes
+## Documentation changes
+## Breaking changes to the API
+## Community contributions
 
 # Release 1.6.0
 

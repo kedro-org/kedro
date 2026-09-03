@@ -4,9 +4,11 @@
 
 ## Major features and improvements
 
-- Added `validate_dataset` and `validate_catalog` to `kedro.validation`: on-demand validation of catalog datasets that reports structured `ValidationResult` outcomes instead of raising.
-- Datasets can now declare a `validator` in the catalog; the `DataCatalog` enforces it on every `load` and `save`, with a `DATASET_VALIDATION` setting and `KEDRO_DATASET_VALIDATION` environment variable to control it.
-- Added `kedro.validation` core: a pluggable `Validator` protocol with a Pandera reference adapter and structured validation errors that subclass `DatasetError`, as groundwork for catalog-level dataset validation.
+- Added dataset validation: datasets can declare a `validator` in their catalog entry, and the `DataCatalog` enforces it on every `load` and `save`.
+    - Failures raise `DataValidationError` (a `DatasetError` subclass), reporting every failed check at once.
+    - Pandera is the built-in adapter, installed with the new `kedro[pandera-pandas]` or `kedro[pandera-polars]` extras; custom validator classes and functions also work.
+    - The `DATASET_VALIDATION` setting and the `KEDRO_DATASET_VALIDATION` environment variable switch validation off.
+    - `validate_dataset` and `validate_catalog` validate on demand, reporting structured `ValidationResult` outcomes instead of raising.
 - Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
 - Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 - Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
@@ -25,6 +27,7 @@
 
 ## Documentation changes
 
+- Added a documentation page for dataset validation.
 - Documented the HTTP server's restriction on `runtime_params`-resolved catalog `type` fields, in the templating guide and the HTTP server guide.
 - Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
 - Added `mdformat` as a Markdown autoformatter, run via `make lint` and as a pre-commit hook, and reformatted the existing Markdown. Fixed several step-by-step guides where numbered lists were rendering as repeated "1." instead of counting up, because their content wasn't indented under the right list item.

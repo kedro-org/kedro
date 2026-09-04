@@ -217,7 +217,7 @@ For example, a catalog entry with `filepath: "data/${runtime_params:version}/com
 
 !!! note
 
-    The snapshot still returns parameter **key names** only, not resolved parameter values. `runtime_params` affects how configuration is loaded (for example, catalog file paths), not the contents of the `parameters` attribute.
+    The snapshot still returns parameter **key names** only, not resolved parameter values. `runtime_params` are merged into the parameters configuration the same way as during a run, so a runtime key not already defined in your parameters files will appear as an extra key in parameters.
 
 ## How to access the snapshot through the HTTP server
 

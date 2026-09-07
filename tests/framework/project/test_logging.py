@@ -436,7 +436,7 @@ def test_validate_logging_class_blocks_non_logging_classes(class_path):
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
-    with pytest.raises(ValueError, match="Invalid logging class"):
+    with pytest.raises(ValueError, match="not allowed"):
         logging_instance._validate_logging_class(class_path)
 
 
@@ -454,7 +454,7 @@ def test_validate_logging_class_blocks_nonexistent_module():
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
-    with pytest.raises(ValueError, match="Cannot import module"):
+    with pytest.raises(ValueError, match="not allowed"):
         logging_instance._validate_logging_class("totally.fake.module.Handler")
 
 
@@ -467,7 +467,7 @@ def test_validate_logging_class_bare_name_passes():
 
 
 def test_configure_logging_instantiates_custom_filter_class():
-    from kedro.framework.project import _ProjectLogging
+    from kedro.framework.project import _ProjectLogging, settings
 
     stream = io.StringIO()
     filter_class = f"{__name__}.KeepOnlyFilter"
@@ -486,7 +486,10 @@ def test_configure_logging_instantiates_custom_filter_class():
     }
 
     logging_instance = _ProjectLogging()
-    logging_instance.configure(logging_config)
+    with mock.patch.object(
+        settings, "LOGGING_MODULE_ALLOWLIST", ("tests.framework.project.test_logging",)
+    ):
+        logging_instance.configure(logging_config)
 
     [handler] = logging.getLogger().handlers
     assert isinstance(handler.filters[0], KeepOnlyFilter)
@@ -507,7 +510,7 @@ def test_configure_logging_instantiates_custom_filter_class():
 
 
 def test_configure_logging_passes_custom_filter_constructor_parameters():
-    from kedro.framework.project import _ProjectLogging
+    from kedro.framework.project import _ProjectLogging, settings
 
     stream = io.StringIO()
     filter_class = f"{__name__}.KeepOnlyFilter"
@@ -526,7 +529,10 @@ def test_configure_logging_passes_custom_filter_constructor_parameters():
     }
 
     logging_instance = _ProjectLogging()
-    logging_instance.configure(logging_config)
+    with mock.patch.object(
+        settings, "LOGGING_MODULE_ALLOWLIST", ("tests.framework.project.test_logging",)
+    ):
+        logging_instance.configure(logging_config)
 
     [handler] = logging.getLogger().handlers
     custom_filter = handler.filters[0]
@@ -539,7 +545,7 @@ def test_configure_logging_passes_custom_filter_constructor_parameters():
 
 
 def test_configure_logging_reuses_validated_filter_class():
-    from kedro.framework.project import _ProjectLogging
+    from kedro.framework.project import _ProjectLogging, settings
 
     filter_class = f"{__name__}.KeepOnlyFilter"
     logging_config = {
@@ -557,11 +563,14 @@ def test_configure_logging_reuses_validated_filter_class():
 
     logging_instance = _ProjectLogging()
     with mock.patch.object(
-        logging_instance,
-        "_resolve_logging_class",
-        wraps=logging_instance._resolve_logging_class,
-    ) as resolve_logging_class:
-        logging_instance.configure(logging_config)
+        settings, "LOGGING_MODULE_ALLOWLIST", ("tests.framework.project.test_logging",)
+    ):
+        with mock.patch.object(
+            logging_instance,
+            "_resolve_logging_class",
+            wraps=logging_instance._resolve_logging_class,
+        ) as resolve_logging_class:
+            logging_instance.configure(logging_config)
 
     assert resolve_logging_class.call_count == 2
     resolve_logging_class.assert_any_call(filter_class)
@@ -664,7 +673,7 @@ def test_validate_config_blocks_rce_via_class():
     }
 
     logging_instance = _ProjectLogging()
-    with pytest.raises(ValueError, match="Invalid logging class"):
+    with pytest.raises(ValueError, match="not allowed"):
         logging_instance.configure(malicious_config)
 
 

@@ -22,7 +22,7 @@ from dynaconf.validator import ValidationError, Validator
 
 from kedro.io import CatalogProtocol
 from kedro.pipeline import Pipeline, pipeline
-from kedro.utils import find_config_file
+from kedro.utils import _is_module_allowed, find_config_file
 
 if TYPE_CHECKING:
     import types
@@ -37,6 +37,10 @@ _LOGGING_BASE_CLASSES = (
     logging.Formatter,
     logging.Filter,
 )
+
+# Allowed modules for logging "class" entries. Checked before import.
+# Project's own package (PACKAGE_NAME) + custom allowlist also permitted.
+_LOGGING_ALLOWED_MODULE_PREFIXES = ("logging", "kedro.logging")
 
 
 def _get_default_class(class_import_path: str) -> Any:
@@ -140,6 +144,7 @@ class _ProjectSettings(LazySettings):
     _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={})
     _DISABLE_HOOKS_FOR_PLUGINS = Validator("DISABLE_HOOKS_FOR_PLUGINS", default=tuple())
     _RUNNER_MODULE_ALLOWLIST = Validator("RUNNER_MODULE_ALLOWLIST", default=tuple())
+    _LOGGING_MODULE_ALLOWLIST = Validator("LOGGING_MODULE_ALLOWLIST", default=tuple())
     _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
         "CONFIG_LOADER_CLASS",
         default=_get_default_class("kedro.config.OmegaConfigLoader"),
@@ -165,6 +170,7 @@ class _ProjectSettings(LazySettings):
                 self._SESSION_STORE_ARGS,
                 self._DISABLE_HOOKS_FOR_PLUGINS,
                 self._RUNNER_MODULE_ALLOWLIST,
+                self._LOGGING_MODULE_ALLOWLIST,
                 self._CONFIG_LOADER_CLASS,
                 self._CONFIG_LOADER_ARGS,
                 self._DATA_CATALOG_CLASS,
@@ -347,6 +353,21 @@ class _ProjectLogging(UserDict):
         if not module_path:
             # Bare name (e.g. "StreamHandler") resolved internally by logging machinery.
             return None
+
+        # Only consult settings after bootstrap (PACKAGE_NAME set) to avoid
+        # triggering dynaconf validator machinery at CLI import time, causing
+        # circular import into this partially-initialised module.
+        extra_allowed = settings.LOGGING_MODULE_ALLOWLIST if PACKAGE_NAME else ()
+        if not _is_module_allowed(
+            module_path,
+            (*_LOGGING_ALLOWED_MODULE_PREFIXES, PACKAGE_NAME, *extra_allowed),
+        ):
+            raise ValueError(
+                f"Cannot use class '{class_path}' in logging configuration. "
+                f"Module '{module_path}' is not allowed. Only {_LOGGING_ALLOWED_MODULE_PREFIXES}, "
+                "the project's own package, and modules listed in "
+                "'LOGGING_MODULE_ALLOWLIST' via settings.py are permitted."
+            )
 
         try:
             module = importlib.import_module(module_path)

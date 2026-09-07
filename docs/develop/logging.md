@@ -187,6 +187,23 @@ root:
     Standard Python logging configuration also supports the `()` factory key for custom objects. Kedro does not allow `()` in `logging.yml` because it can execute arbitrary code.
     Use `class` for custom `logging.Filter` subclasses instead.
 
+### Module allowlist for logging classes
+
+For security, Kedro restricts which modules can be referenced in the `class` field of logging configuration. By default, only the following modules are allowed:
+
+- `logging` and `logging.handlers` (Python standard library)
+- `kedro.logging` (Kedro's logging extensions)
+- Your project's own package (after bootstrap)
+
+If you need to use a custom logging handler, filter, or formatter from a third-party library or other module, you can allow it via the `LOGGING_MODULE_ALLOWLIST` setting in your `settings.py`:
+
+```python
+# settings.py
+LOGGING_MODULE_ALLOWLIST = ("my_logging_lib", "another_vendor_lib")
+```
+
+This allows additional modules to be used in the `class` field of `logging.yml` alongside the default allowed modules.
+
 ## How to customise the `rich` handler
 
 Kedro's `kedro.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. You can disable it by setting `rich_tracebacks: False`.

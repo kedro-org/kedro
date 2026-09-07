@@ -466,6 +466,32 @@ def test_validate_logging_class_bare_name_passes():
     logging_instance._validate_logging_class("StreamHandler")  # should not raise
 
 
+def test_validate_logging_class_import_error_with_allowlist():
+    """A module that passes allowlist but cannot be imported must raise ValueError."""
+    from kedro.framework.project import _ProjectLogging, settings
+
+    logging_instance = _ProjectLogging()
+    # Mock PACKAGE_NAME to enable allowlist access from settings
+    with mock.patch("kedro.framework.project.PACKAGE_NAME", "test_project"):
+        with mock.patch.object(
+            settings, "LOGGING_MODULE_ALLOWLIST", ("nonexistent_module",)
+        ):
+            with pytest.raises(ValueError, match="Cannot import module"):
+                logging_instance._resolve_logging_class("nonexistent_module.Handler")
+
+
+def test_validate_logging_class_non_logging_class_with_allowlist():
+    """A non-logging class from allowlisted module must raise ValueError."""
+    from kedro.framework.project import _ProjectLogging, settings
+
+    logging_instance = _ProjectLogging()
+    # Mock PACKAGE_NAME to enable allowlist access from settings
+    with mock.patch("kedro.framework.project.PACKAGE_NAME", "test_project"):
+        with mock.patch.object(settings, "LOGGING_MODULE_ALLOWLIST", ("os",)):
+            with pytest.raises(ValueError, match="Invalid logging class"):
+                logging_instance._resolve_logging_class("os.system")
+
+
 def test_configure_logging_instantiates_custom_filter_class():
     from kedro.framework.project import _ProjectLogging, settings
 

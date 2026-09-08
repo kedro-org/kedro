@@ -11,7 +11,7 @@
 
 ## Bug fixes and other changes
 
-- **Security fix**: Fixed arbitrary code execution vulnerability in logging configuration via unsafe import-before-validate ordering. The `class` field in `conf/logging.yml` is now validated against an allowlist before import, preventing malicious modules from executing arbitrary code at CLI startup. Allowed by default: `logging`, `kedro.logging`, and the project's own package. Additional modules can be allowed via `settings.LOGGING_MODULE_ALLOWLIST`.
+- **Security fix**: Fixed arbitrary code execution vulnerability in logging configuration via unsafe import-before-validate ordering. The `class` field in `conf/logging.yml` is now validated against an allowlist before import, preventing malicious modules from executing arbitrary code at CLI startup. Allowed by default: `logging` and `kedro.logging`. Additional modules can be allowed via `settings.LOGGING_MODULE_ALLOWLIST`.
 - Fixed a thread-safety issue in `_ProjectPipelines` where concurrent access could trigger duplicate pipeline loading or operate on a cleared cache; all shared state mutations are now protected by a reentrant lock.
 - Fixed a thread-safety issue in the Kedro HTTP server by adding a `serving_mode` argument to `KedroServiceSession.create()` that preloads all pipelines upfront.
 - Fixed a `RecursionError` when initialising a session with dynaconf-backed settings by converting `settings.SESSION_STORE_ARGS` to a plain `dict` before deepcopying it.

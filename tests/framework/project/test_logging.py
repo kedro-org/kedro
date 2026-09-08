@@ -599,8 +599,8 @@ def test_configure_logging_reuses_validated_filter_class():
             logging_instance.configure(logging_config)
 
     assert resolve_logging_class.call_count == 2
-    resolve_logging_class.assert_any_call(filter_class)
-    resolve_logging_class.assert_any_call("logging.StreamHandler")
+    resolve_logging_class.assert_any_call(filter_class, strict=True)
+    resolve_logging_class.assert_any_call("logging.StreamHandler", strict=True)
 
 
 def test_prepare_logging_config_without_filters_does_not_add_filters_key():

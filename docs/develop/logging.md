@@ -193,13 +193,12 @@ For security, Kedro restricts which modules can be referenced in the `class` fie
 
 - `logging` and `logging.handlers` (Python standard library)
 - `kedro.logging` (Kedro's logging extensions)
-- Your project's own package (after bootstrap)
 
-If you need to use a custom logging handler, filter, or formatter from a third-party library or other module, you can allow it via the `LOGGING_MODULE_ALLOWLIST` setting in your `settings.py`:
+If you need to use custom logging handlers, filters, or formatters from your project package or other modules, you must explicitly allow them via the `LOGGING_MODULE_ALLOWLIST` setting in your `settings.py`:
 
 ```python
 # settings.py
-LOGGING_MODULE_ALLOWLIST = ("my_logging_lib", "another_vendor_lib")
+LOGGING_MODULE_ALLOWLIST = ("my_project.logging", "my_logging_lib")
 ```
 
 This allows additional modules to be used in the `class` field of `logging.yml` alongside the default allowed modules.

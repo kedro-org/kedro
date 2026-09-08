@@ -38,8 +38,8 @@ _LOGGING_BASE_CLASSES = (
     logging.Filter,
 )
 
-# Allowed modules for logging "class" entries. Checked before import.
-# Project's own package (PACKAGE_NAME) + custom allowlist also permitted.
+# Modules allowed for logging "class" entries, checked before import. Extend via
+# settings.LOGGING_MODULE_ALLOWLIST.
 _LOGGING_ALLOWED_MODULE_PREFIXES = ("logging", "kedro.logging")
 
 
@@ -329,21 +329,24 @@ class _ProjectLogging(UserDict):
 
         msg = f"Using '{path!s}' as logging configuration. " + msg
 
-        # Load and apply the logging configuration
+        # Runs before the project is bootstrapped, so settings.py isn't loaded yet;
+        # validate leniently here (see `configure`) and re-validate once it is.
+        self._raw_config: dict[str, Any] | None = None
         logging_config = Path(path).read_text(encoding="utf-8")
-        self.configure(yaml.safe_load(logging_config))
+        self.configure(yaml.safe_load(logging_config), strict=False)
         logger.info(msg)
 
-    def _resolve_logging_class(self, class_path: str) -> type[Any] | None:
+    def _resolve_logging_class(
+        self, class_path: str, strict: bool = True
+    ) -> tuple[type[Any] | None, bool]:
         """Resolve and validate that a class referenced in logging configuration is
         a legitimate logging class (i.e. a subclass of logging.Handler,
         logging.Formatter, or logging.Filter).
 
-        Args:
-            class_path: Dotted import path to the class, e.g. ``logging.StreamHandler``.
-
-        Returns:
-            Resolved class, or ``None`` for bare names resolved internally by logging.
+        Returns a ``(resolved_class, deferred)`` tuple. If ``strict`` is False, a
+        module that fails the allowlist check is deferred (returned as ``(None,
+        True)``) instead of raising - used pre-bootstrap, before settings.py can be
+        consulted.
 
         Raises:
             ValueError: If the class cannot be imported or is not a logging base class.
@@ -352,21 +355,22 @@ class _ProjectLogging(UserDict):
         module_path, _, class_name = class_path.rpartition(".")
         if not module_path:
             # Bare name (e.g. "StreamHandler") resolved internally by logging machinery.
-            return None
+            return None, False
 
-        # Only consult settings after bootstrap (PACKAGE_NAME set) to avoid
-        # triggering dynaconf validator machinery at CLI import time, causing
-        # circular import into this partially-initialised module.
-        extra_allowed = settings.LOGGING_MODULE_ALLOWLIST if PACKAGE_NAME else ()
+        # globals() lookup avoids a circular import: `settings` is assigned below,
+        # after `LOGGING` is constructed.
+        proj_settings = globals().get("settings")
+        allowlist = proj_settings.LOGGING_MODULE_ALLOWLIST if proj_settings else ()
         if not _is_module_allowed(
             module_path,
-            (*_LOGGING_ALLOWED_MODULE_PREFIXES, PACKAGE_NAME, *extra_allowed),
+            (*_LOGGING_ALLOWED_MODULE_PREFIXES, *allowlist),
         ):
+            if not strict:
+                return None, True
             raise ValueError(
                 f"Cannot use class '{class_path}' in logging configuration. "
-                f"Module '{module_path}' is not allowed. Only {_LOGGING_ALLOWED_MODULE_PREFIXES}, "
-                "the project's own package, and modules listed in "
-                "'LOGGING_MODULE_ALLOWLIST' via settings.py are permitted."
+                f"Module '{module_path}' is not allowed. Only {_LOGGING_ALLOWED_MODULE_PREFIXES} "
+                "and modules listed in 'LOGGING_MODULE_ALLOWLIST' via settings.py are permitted."
             )
 
         try:
@@ -390,41 +394,100 @@ class _ProjectLogging(UserDict):
                 f"Got {type(cls).__name__!r}."
             )
 
-        return cls
+        return cls, False
 
-    def _validate_logging_class(self, class_path: str) -> type[Any] | None:
+    def _validate_logging_class(
+        self, class_path: str, strict: bool = True
+    ) -> tuple[type[Any] | None, bool]:
         """Validate that a class referenced in logging configuration is a legitimate
         logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
         logging.Filter)."""
-        return self._resolve_logging_class(class_path)
+        return self._resolve_logging_class(class_path, strict=strict)
+
+    def _validate_handlers_config(
+        self,
+        handlers: dict[str, Any],
+        resolved_logging_classes: dict[str, type[Any] | None] | None,
+        strict: bool,
+    ) -> dict[str, Any]:
+        """Validate the top-level ``handlers`` section.
+
+        Unlike filters, a handler's ``class`` is imported directly by
+        ``logging.config.dictConfig`` itself, so a deferred class must never reach
+        it as-is - it's replaced with a harmless ``NullHandler`` placeholder instead.
+        """
+        # `dictConfig` passes any key besides these to the handler's constructor as
+        # kwargs, so when substituting NullHandler they must be dropped too (e.g. a
+        # RichHandler's `rich_tracebacks` kwarg would otherwise raise a TypeError).
+        _DICTCONFIG_HANDLER_KEYS = {"class", "level", "formatter", "filters"}
+        validated_handlers = {}
+        for name, handler_config in handlers.items():
+            if not isinstance(handler_config, dict):
+                validated_handlers[name] = handler_config
+                continue
+            if "()" in handler_config:
+                raise ValueError(
+                    "The '()' key is not allowed in logging configuration as it poses a security risk."
+                )
+            validated = dict(handler_config)
+            if "class" in handler_config:
+                class_path = handler_config["class"]
+                resolved_class, deferred = self._validate_logging_class(
+                    class_path, strict=strict
+                )
+                if resolved_logging_classes is not None:
+                    resolved_logging_classes[class_path] = resolved_class
+                if deferred:
+                    validated = {
+                        k: v
+                        for k, v in validated.items()
+                        if k in _DICTCONFIG_HANDLER_KEYS
+                    }
+                    validated["class"] = "logging.NullHandler"
+            validated_handlers[name] = validated
+        return validated_handlers
 
     def _validate_logging_config(
         self,
         config: Any,
         resolved_logging_classes: dict[str, type[Any] | None] | None = None,
+        strict: bool = True,
     ) -> Any:
         """Recursively check the logging configuration and raise an error if dangerous
         '()' factory keys are encountered or if any 'class' value is not a legitimate
-        logging class."""
+        logging class. Handlers are validated separately (see
+        ``_validate_handlers_config``); a deferred filter/formatter class is simply
+        left inert, since Kedro (not ``dictConfig``) is what instantiates it.
+        """
         if isinstance(config, dict):
             if "()" in config:
                 raise ValueError(
                     "The '()' key is not allowed in logging configuration as it poses a security risk."
                 )
-            if "class" in config:
-                class_path = config["class"]
-                resolved_class = self._validate_logging_class(class_path)
-                if resolved_logging_classes is not None:
-                    resolved_logging_classes[class_path] = resolved_class
             validated = {}
             for k, v in config.items():
+                if k == "handlers" and isinstance(v, dict):
+                    validated[k] = self._validate_handlers_config(
+                        v, resolved_logging_classes, strict
+                    )
+                    continue
+                if k == "class":
+                    resolved_class, _deferred = self._validate_logging_class(
+                        v, strict=strict
+                    )
+                    if resolved_logging_classes is not None:
+                        resolved_logging_classes[v] = resolved_class
+                    validated[k] = v
+                    continue
                 validated[k] = self._validate_logging_config(
-                    v, resolved_logging_classes
+                    v, resolved_logging_classes, strict=strict
                 )
             return validated
         elif isinstance(config, list):
             return [
-                self._validate_logging_config(item, resolved_logging_classes)
+                self._validate_logging_config(
+                    item, resolved_logging_classes, strict=strict
+                )
                 for item in config
             ]
         else:
@@ -465,7 +528,7 @@ class _ProjectLogging(UserDict):
                 resolved_logging_classes[class_path]
                 if resolved_logging_classes is not None
                 and class_path in resolved_logging_classes
-                else self._resolve_logging_class(class_path)
+                else self._resolve_logging_class(class_path)[0]
             )
 
             if filter_class is None:
@@ -485,14 +548,19 @@ class _ProjectLogging(UserDict):
 
         return prepared_config
 
-    def configure(self, logging_config: dict[str, Any]) -> None:
+    def configure(self, logging_config: dict[str, Any], strict: bool = True) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
+
+        If ``strict`` is False, classes failing the module allowlist are deferred
+        rather than raising (see ``_validate_logging_config``); ``set_project_logging``
+        re-validates strictly once the project is bootstrapped.
         """
+        self._raw_config = logging_config
         resolved_logging_classes: dict[str, type[Any] | None] = {}
         validated_config = self._validate_logging_config(
-            logging_config, resolved_logging_classes
+            logging_config, resolved_logging_classes, strict=strict
         )
         logging.config.dictConfig(
             self._prepare_logging_config(validated_config, resolved_logging_classes)
@@ -512,15 +580,22 @@ class _ProjectLogging(UserDict):
                 ``dictConfig``. This prevents runtime-added handlers from being wiped
                 when ``configure_project()`` is called after custom handlers have been
                 attached (e.g. in a long-running server process).
-        """
-        loggers = self.data.get("loggers", {})
-        if not loggers:
-            self.data["loggers"] = {}  # pragma: no cover
 
-        if package_name not in self.data["loggers"]:
-            self.data["loggers"][package_name] = {"level": "INFO"}
-            if not preserve_logging:
-                self.configure(self.data)
+        """
+        # Reconfigure from the raw config (not self.data) so classes deferred
+        # pre-bootstrap get re-validated now that settings.py is loaded. This must
+        # run even if `package_name` was already a logger in logging.yml.
+        raw_config = self._raw_config if self._raw_config is not None else self.data
+        raw_config.setdefault("loggers", {})
+
+        added_logger = package_name not in raw_config["loggers"]
+        if added_logger:
+            raw_config["loggers"][package_name] = {"level": "INFO"}
+
+        if not preserve_logging:
+            self.configure(raw_config, strict=True)
+        elif added_logger:
+            self.data.setdefault("loggers", {})[package_name] = {"level": "INFO"}
 
 
 PACKAGE_NAME = None

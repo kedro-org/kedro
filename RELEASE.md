@@ -8,6 +8,7 @@
 - Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
 - Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 - Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
+- Added optional `runtime_params` to `get_project_snapshot()`.
 
 ## Bug fixes and other changes
 

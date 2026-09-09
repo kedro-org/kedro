@@ -462,6 +462,17 @@ def test_validate_logging_class_blocks_nonexistent_module():
         logging_instance._validate_logging_class("totally.fake.module.Handler")
 
 
+def test_validate_logging_class_blocks_unimportable_allowlisted_module():
+    """An allowlisted but nonexistent module must still fail with a clear import error."""
+    from kedro.framework.project import _ProjectLogging
+
+    logging_instance = _ProjectLogging()
+    with pytest.raises(ValueError, match="Cannot import module"):
+        logging_instance._validate_logging_class(
+            "logging.nonexistent_submodule.Handler"
+        )
+
+
 def test_validate_logging_class_blocks_import_before_validation(tmp_path, monkeypatch):
     """Regression test: an attacker-named module must never be imported to validate it."""
     from kedro.framework.project import _ProjectLogging

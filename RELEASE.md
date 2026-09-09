@@ -4,6 +4,8 @@
 
 ## Bug fixes and other changes
 
+- Fixed a remote code execution vulnerability in logging configuration. `logging`, `logging.handlers`, and `kedro.logging` are trusted by default. Other modules can be opted in via the new `KEDRO_LOGGING_MODULE_ALLOWLIST` environment variable.
+
 ## Documentation changes
 
 ## Breaking changes to the API

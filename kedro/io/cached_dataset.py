@@ -99,7 +99,7 @@ class CachedDataset(AbstractDataset):
     def __repr__(self) -> str:
         object_description = {
             "dataset": self._dataset._pretty_repr(self._dataset._describe()),
-            "cache": self._dataset._pretty_repr(self._cache._describe()),
+            "cache": self._cache._pretty_repr(self._cache._describe()),
         }
         return self._pretty_repr(object_description)
 

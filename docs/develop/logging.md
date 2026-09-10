@@ -182,10 +182,16 @@ root:
   level: INFO
 ```
 
+By default, Kedro allows `class` values from `logging`, `logging.handlers`, and `kedro.logging`, so a custom class such as `your_project.logging.KeepOnlyFilter` is rejected unless you explicitly allow its module. Set `KEDRO_LOGGING_MODULE_ALLOWLIST` to a comma-separated list of trusted module prefixes:
+
+```bash
+export KEDRO_LOGGING_MODULE_ALLOWLIST=your_project.logging
+```
+
 !!! note
 
     Standard Python logging configuration also supports the `()` factory key for custom objects. Kedro does not allow `()` in `logging.yml` because it can execute arbitrary code.
-    Use `class` for custom `logging.Filter` subclasses instead.
+    Use `class` for custom `logging.Handler`, `logging.Formatter`, and `logging.Filter` subclasses instead.
 
 ## How to customise the `rich` handler
 

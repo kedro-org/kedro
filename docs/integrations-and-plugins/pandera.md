@@ -4,6 +4,10 @@
 
 Adding Pandera to a Kedro project enables you to catch data quality issues early in your pipeline. For example, you can validate that CSV columns have the correct types and enforce business rules (like "price must be positive"). When collaborating with others on a Kedro project, Pandera schemas serve as documentation of your data contracts.
 
+!!! note
+
+    Kedro has built-in [dataset validation](../catalog-data/dataset_validation.md): declare a `validator` on a catalog entry and the catalog enforces your Pandera schema on every load and save, with no hook code. Start there for validating catalog datasets. This page shows the hook-based approach, which gives you control the built-in feature does not, such as validating at node boundaries rather than catalog operations.
+
 ## Prerequisites
 
 You will need the following:
@@ -20,7 +24,7 @@ kedro new --starter=spaceflights-pandas --name spaceflights-pandera
 Navigate to your project directory and add Pandera with pandas support to your `requirements.txt`:
 
 ```bash
-pandera[pandas]>=0.18.0
+pandera[pandas]>=0.24
 ```
 
 Install the project dependencies:
@@ -223,6 +227,10 @@ Because the hook uses `lazy=True`, Pandera collects all errors at one go, making
 
 So far, we validated datasets when they were loaded into a node (`before_node_run`).
 You can also validate data before it is written back to the catalog, using `before_dataset_saved`.
+
+!!! tip
+
+    The built-in [dataset validation](../catalog-data/dataset_validation.md) feature enforces contracts on save with a single `validator` key in `catalog.yml`, without writing a hook.
 
 The main difference is in what Kedro passes to the hook:
 
@@ -615,6 +623,7 @@ python -m pytest src/spaceflights_pandera/schemas/test_schemas.py -v
 
 ## Further reading
 
+- [Kedro dataset validation](../catalog-data/dataset_validation.md) — declare a Pandera schema on a catalog entry and Kedro enforces it on every load and save
 - [Pandera documentation](https://pandera.readthedocs.io/)
 - [Kedro hooks documentation](https://docs.kedro.org/en/stable/hooks/introduction.html)
 - [Lazy validation](https://pandera.readthedocs.io/en/stable/lazy_validation.html)

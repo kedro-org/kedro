@@ -93,13 +93,15 @@ class DataValidationError(DatasetError):
             (`"load"`, `"save"` or `"api"`).
         validator: Class path of the validator that raised the failure.
         failures: Structured list of :class:`CheckFailure` objects.
+        error_type: Machine-readable failure category, when raised by the
+            on-demand validation API.
 
     The rendered message (`str(exc)`) is bounded regardless of the size of
     the validated data; the full backend report remains available on
     `__cause__`.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         message: str,
         *,
@@ -107,6 +109,7 @@ class DataValidationError(DatasetError):
         mode: str | None = None,
         validator: str | None = None,
         failures: list[CheckFailure] | None = None,
+        error_type: str | None = None,
     ) -> None:
         super().__init__(message)
         self.message = message
@@ -114,6 +117,7 @@ class DataValidationError(DatasetError):
         self.mode = mode
         self.validator = validator
         self.failures: list[CheckFailure] = list(failures) if failures else []
+        self.error_type = error_type
 
     @staticmethod
     def _render_failure(failure: CheckFailure) -> str:

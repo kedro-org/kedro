@@ -1,5 +1,6 @@
 """Kedro validation framework."""
 
+from .api import ValidationResult, validate_catalog, validate_dataset
 from .core import (
     CallableValidator,
     Validator,
@@ -29,9 +30,12 @@ __all__ = [
     "ParameterValidator",
     "TypeExtractor",
     "ValidationConfigurationError",
+    "ValidationResult",
     "Validator",
     "ValidatorSpec",
     "instantiate_model",
     "preflight_check",
     "resolve_validator",
+    "validate_catalog",
+    "validate_dataset",
 ]

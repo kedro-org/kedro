@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass, field
 
-# Matches URI credentials
-_CREDENTIAL_RE = re.compile(r"(://)[^@\s]*:[^@\s]*(@)")
+from kedro.io.core import _redact_url_credentials
 
 
 @dataclass
@@ -43,7 +41,7 @@ class DatasetSnapshot:
         """Construct a ``DatasetSnapshot`` from a raw catalog config entry."""
         filepath = config.get("filepath")
         if filepath:
-            filepath = _CREDENTIAL_RE.sub(r"\1<redacted>\2", filepath)
+            filepath = _redact_url_credentials(filepath)
         return cls(
             name=name,
             type=config.get("type", ""),

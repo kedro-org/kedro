@@ -2,11 +2,27 @@
 
 ## Major features and improvements
 
-- Datasets can now declare a `validator` in the catalog; the `DataCatalog` enforces it on every `load` and `save`, with a `DATASET_VALIDATION` setting and `KEDRO_DATASET_VALIDATION` environment variable to control it.
-- Added `kedro.validation` core: a pluggable `Validator` protocol with a Pandera reference adapter and structured validation errors that subclass `DatasetError`, as groundwork for catalog-level dataset validation.
+## Bug fixes and other changes
+
+## Documentation changes
+
+## Breaking changes to the API
+
+## Community contributions
+
+# Release 1.6.0
+
+## Major features and improvements
+
+- Added dataset validation: datasets can declare a `validator` in their catalog entry, and the `DataCatalog` enforces it on every `load` and `save`.
+    - Failures raise `DataValidationError` (a `DatasetError` subclass), reporting every failed check at once.
+    - Pandera is the built-in adapter, installed with the new `kedro[pandera-pandas]` or `kedro[pandera-polars]` extras; custom validator classes and functions also work.
+    - The `DATASET_VALIDATION` setting and the `KEDRO_DATASET_VALIDATION` environment variable switch validation off.
+    - `validate_dataset` and `validate_catalog` validate on demand, reporting structured `ValidationResult` outcomes instead of raising.
 - Added `--runner-params` to `kedro run`, allowing runner constructor keyword arguments such as `max_workers` to be passed from the CLI.
 - Added the node function name to project inspection snapshots as `NodeSnapshot.func_name`.
 - Added node source location metadata (`NodeSnapshot.source`) to inspection snapshots for displaying node code.
+- Added optional `runtime_params` to `get_project_snapshot()`.
 
 ## Bug fixes and other changes
 
@@ -17,18 +33,23 @@
 - Fixed `get_close_matches` returning duplicate suggestions when several inputs matched the same target, and being able to exhaust a one-shot iterable passed as `targets`.
 - Fixed docs generated with `kedro new --tools=docs` so the Sphinx HTML build runs `sphinx-apidoc` and creates API docs.
 - Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
+- Added a warning in `ParallelRunner` catalog validation that identifies cloud-backed datasets (e.g. S3, GCS, Azure Data Lake) failing to pickle and suggests using `ThreadRunner` or `SequentialRunner` instead.
+- Redacted credentials, signed-URL query parameters and fragments from dataset filepaths in `AbstractDataset.__repr__`, `DatasetError` messages, and HTTP server `/snapshot` and `/run` responses.
 
 ## Documentation changes
 
+- Added a documentation page for dataset validation.
 - Documented the HTTP server's restriction on `runtime_params`-resolved catalog `type` fields, in the templating guide and the HTTP server guide.
 - Added a new "Vibe coding with skills" page documenting the `kedro-skills` plugin.
 - Added `mdformat` as a Markdown autoformatter, run via `make lint` and as a pre-commit hook, and reformatted the existing Markdown. Fixed several step-by-step guides where numbered lists were rendering as repeated "1." instead of counting up, because their content wasn't indented under the right list item.
 - Fixed the `DaskRunner` example on the Dask deployment page.
 - Fixed the `open_args_load` examples in the data catalog documentation to use text mode so the `encoding` option applies.
+- Added a cheatsheet with Kedro concepts and CLI commands to the documentation.
 
 ## Breaking changes to the API
 
 - **Security fix**: A catalog `type` field resolved with `runtime_params` supplied through the HTTP server's `POST /run` no longer accepts an `AbstractDataset` class chosen by the request. `runtime_params`-driven `type` selection through other, trusted callers (for example, `kedro run --params`) is unaffected.
+- The `settings.py` entry `RUNNER_MODULES_WHITELIST` has been renamed to `RUNNER_MODULE_ALLOWLIST`, following the `<COMPONENT>_ALLOWLIST` naming convention for Kedro allowlists. Projects that set the old name must rename it, otherwise the entries are ignored and the HTTP server rejects those runner modules.
 
 ## Community contributions
 

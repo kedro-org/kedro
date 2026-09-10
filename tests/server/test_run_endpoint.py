@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from kedro.framework.project import settings
+from kedro.io.core import DatasetError
 from kedro.runner import AbstractRunner
 from kedro.server.http_server import _execute_pipeline, create_http_server
 from kedro.server.models import ErrorDetail, RunFailure, RunRequest, RunSuccess
@@ -386,6 +387,38 @@ class TestExecutePipeline:
         assert result.error.message == "Pipeline execution failed"
         assert not hasattr(result.error, "traceback")
 
+    def test_execute_pipeline_failure_redacts_credentials_from_exception(
+        self, mocker, caplog
+    ):
+        """A DatasetError (or any third-party exception) raised during a
+        run must not leak dataset credentials, signed URL parameters, or
+        fragments in the response or in server logs."""
+
+        mock_session = mocker.Mock()
+        mock_session.run.side_effect = DatasetError(
+            "Failed while loading data from dataset "
+            "kedro_datasets.pandas.CSVDataset(filepath="
+            "'https://user:pass@example.com/bucket/file.csv"  # pragma: allowlist secret
+            "?X-Amz-Signature=verysecretsig#frag').\n"
+            "Underlying error: could not connect"
+        )
+        mocker.patch(
+            "kedro.server.http_server.load_obj",
+            return_value=_FakeRunner,
+        )
+
+        result = _execute_pipeline(session=mock_session, request=RunRequest())
+
+        assert result.status == "failure"
+        assert result.error.type == "DatasetError"
+        assert "verysecretsig" not in result.error.message
+        assert "pass" not in result.error.message
+        assert "frag" not in result.error.message
+        assert "<redacted>" in result.error.message
+        assert "could not connect" in result.error.message
+        assert "verysecretsig" not in caplog.text
+        assert "pass" not in caplog.text
+
     def test_execute_pipeline_runner_loading_failure(self, mocker):
         """Test failure when runner class cannot be loaded."""
 
@@ -455,7 +488,7 @@ class TestExecutePipeline:
         mock_session = mocker.Mock()
         mock_session._package_name = "mypackage"
         mock_load_obj = mocker.patch("kedro.server.http_server.load_obj")
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
+        mocker.patch.object(settings, "RUNNER_MODULE_ALLOWLIST", [])
 
         result = _execute_pipeline(
             session=mock_session,
@@ -469,15 +502,15 @@ class TestExecutePipeline:
         mock_load_obj.assert_not_called()
         mock_session.run.assert_not_called()
 
-    def test_execute_pipeline_allows_whitelisted_module(self, mocker):
-        """Runner from a module listed in RUNNER_MODULES_WHITELIST is permitted."""
+    def test_execute_pipeline_allows_allowlisted_module(self, mocker):
+        """Runner from a module listed in RUNNER_MODULE_ALLOWLIST is permitted."""
         mock_session = mocker.Mock()
         mock_session._package_name = "mypackage"
         mocker.patch(
             "kedro.server.http_server.load_obj",
             return_value=_FakeRunner,
         )
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", ["external.runners"])
+        mocker.patch.object(settings, "RUNNER_MODULE_ALLOWLIST", ["external.runners"])
 
         result = _execute_pipeline(
             session=mock_session,
@@ -488,14 +521,14 @@ class TestExecutePipeline:
         mock_session.run.assert_called_once()
 
     def test_execute_pipeline_allows_project_package_module(self, mocker):
-        """Runner from the project's own package namespace is permitted without whitelisting."""
+        """Runner from the project's own package namespace is permitted without allowlisting."""
         mock_session = mocker.Mock()
         mock_session._package_name = "mypackage"
         mocker.patch(
             "kedro.server.http_server.load_obj",
             return_value=_FakeRunner,
         )
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
+        mocker.patch.object(settings, "RUNNER_MODULE_ALLOWLIST", [])
 
         result = _execute_pipeline(
             session=mock_session,
@@ -506,14 +539,14 @@ class TestExecutePipeline:
         mock_session.run.assert_called_once()
 
     def test_execute_pipeline_allows_project_subpackage_module(self, mocker):
-        """Runner from a subpackage of the project package is permitted without whitelisting."""
+        """Runner from a subpackage of the project package is permitted without allowlisting."""
         mock_session = mocker.Mock()
         mock_session._package_name = "mypackage"
         mocker.patch(
             "kedro.server.http_server.load_obj",
             return_value=_FakeRunner,
         )
-        mocker.patch.object(settings, "RUNNER_MODULES_WHITELIST", [])
+        mocker.patch.object(settings, "RUNNER_MODULE_ALLOWLIST", [])
 
         result = _execute_pipeline(
             session=mock_session,

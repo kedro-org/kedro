@@ -4,7 +4,7 @@ An important step towards achieving high code quality and maintainability in you
 
 ## Introduction
 
-Software testing is the process of checking that the code you have written fulfills its requirements. Software testing can either be **manual** or **automated**. In the context of Kedro:
+Software testing is the process of checking that the code you have written fulfills its requirements. Automated tests check your code, not your data: to check the data flowing through your pipeline, declare a validator on a catalog entry and Kedro checks it on every load and save. See [dataset validation](../catalog-data/dataset_validation.md). Software testing can either be **manual** or **automated**. In the context of Kedro:
 
 - **Manual testing** is when you run part or the entire project and check that the results are what you expect.
 - **Automated testing** is writing new code (using libraries called _testing frameworks_) that runs part or the entire project and automatically checks the results against what you expect.

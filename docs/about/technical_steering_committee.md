@@ -136,7 +136,7 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 | [Deepyaman Datta](https://github.com/deepyaman)          | [Goldman Sachs](https://www.goldmansachs.com/)                                          | Maintainer |
 | [Elena Khaustova](https://github.com/ElenaKhaustova)     | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Elijah Koh](https://github.com/iamelijahko)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer  |
-| [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |            |
+| [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Ivan Danov](https://github.com/idanov)                  | [PhysicsX](https://www.physicsx.ai/)                                                    | Advisor    |
 | [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Committer  |
 | [Joel Schwarzmann](https://github.com/datajoely)         | [PhysicsX](https://www.physicsx.ai/)                                                    | Advisor    |
@@ -144,7 +144,7 @@ Advisors may be automatically removed after 6 months of inactivity. Inactivity i
 | [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Marcin Zabłocki](https://github.com/marrrcin)           | [FYUL](https://www.fyul.com/)                                                           | Advisor    |
 | [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
-| [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
+| [Nok Lam Chan](https://github.com/noklam)                | [PhysicsX](https://www.physicsx.ai/)                                                    | Maintainer |
 | [Rashida Kanchwala](https://github.com/rashidakanchwala) | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla)  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |
 | [Sajid Alam](https://github.com/SajidAlamQB)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      | Maintainer |

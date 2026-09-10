@@ -53,6 +53,8 @@ Likewise for the `xlsx` dataset:
 
 The additional line, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the corresponding output argument is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
 
+You can also add a `validator` key to an entry so Kedro checks the data against a schema every time it is loaded or saved. See [dataset validation](../catalog-data/dataset_validation.md) for how to declare one.
+
 ### Test that Kedro can load the data
 
 Open a `kedro ipython` session in your terminal from the project root directory:

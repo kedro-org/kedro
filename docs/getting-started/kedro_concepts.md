@@ -4,6 +4,8 @@ This page introduces the most basic elements of Kedro. You can find further info
 
 You may prefer to skip to the next section to [create a Kedro project for hands-on Kedro experience](../create/new_project.md).
 
+For a quick visual reference, check out the [Kedro cheatsheet](../getting-started/cheatsheet.md).
+
 ## Summary
 
 - Kedro nodes are the building blocks of pipelines. A node is a wrapper for a Python function that names the inputs and outputs of that function.

@@ -7,6 +7,7 @@ import pytest
 
 from kedro.utils import (
     KedroExperimentalWarning,
+    _is_module_allowed,
     _is_unsafe_version,
     experimental,
     find_config_file,
@@ -61,6 +62,37 @@ class TestExtractObject:
     def test_load_obj_invalid_module(self):
         with pytest.raises(ImportError, match=r"No module named 'missing_path'"):
             load_obj("InvalidClass", "missing_path")
+
+
+class TestIsModuleAllowed:
+    @pytest.mark.parametrize(
+        "module_path,allowed_prefixes",
+        [
+            ("kedro.runner", ["kedro.runner"]),
+            ("kedro.runner.sequential_runner", ["kedro.runner"]),
+            ("my_project.runners", ["kedro.runner", "my_project"]),
+            ("external.runners", ["kedro.runner", None, "external.runners"]),
+        ],
+    )
+    def test_allowed(self, module_path, allowed_prefixes):
+        assert _is_module_allowed(module_path, allowed_prefixes)
+
+    @pytest.mark.parametrize(
+        "module_path,allowed_prefixes",
+        [
+            ("attacker.runners", ["kedro.runner", "my_project"]),
+            ("os", []),
+            # A prefix must match on a package boundary, not as a bare string.
+            ("kedro.runnerhack", ["kedro.runner"]),
+            ("my_projectevil", ["my_project"]),
+        ],
+    )
+    def test_rejected(self, module_path, allowed_prefixes):
+        assert not _is_module_allowed(module_path, allowed_prefixes)
+
+    def test_none_prefixes_are_ignored(self):
+        """A caller passing an unset package name must not raise."""
+        assert not _is_module_allowed("attacker.runners", [None])
 
 
 def identity(input1) -> T:

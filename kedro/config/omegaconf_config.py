@@ -199,7 +199,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             self._globals = value
         super().__setitem__(key, value)
 
-    def __getitem__(self, key: str) -> dict[str, Any]:  # noqa: PLR0912
+    def __getitem__(self, key: str) -> dict[str, Any]:
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
 
@@ -229,64 +229,91 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise KeyError(
                 f"No config patterns were found for '{key}' in your config loader"
             )
-        patterns = [*self.config_patterns[key]]
 
+        base_configs, env_configs, base_path, env_path, processed_files = (
+            self._read_raw_configs_for_key(key)
+        )
+        return self._resolve_from_raw(
+            key, base_configs, env_configs, base_path, env_path, processed_files
+        )
+
+    def _read_raw_configs_for_key(
+        self, key: str
+    ) -> tuple[dict[Path, DictConfig], dict[Path, DictConfig], str, str, set[Path]]:
+        """Read raw (unresolved) per-file configs from base and env dirs for ``key``.
+
+        Extracted so serving-mode callers can cache the raw parse and only
+        pay the resolve cost per request. Runs the duplicate-keys check but
+        does not merge, resolve, or apply the security guard.
+        """
+        patterns = [*self.config_patterns[key]]
+        read_environment_variables = key == "credentials"
+
+        processed_files: set[Path] = set()
+        base_path = self._get_conf_env_path(self.base_env)
+        base_configs = self._read_dir_config_files(
+            base_path, patterns, key, processed_files, read_environment_variables
+        )
+
+        run_env = self.env or self.default_run_env
+        env_path = self._get_conf_env_path(run_env)
+        if run_env == self.base_env:
+            return base_configs, {}, base_path, env_path, processed_files
+
+        env_configs = self._read_dir_config_files(
+            env_path, patterns, key, processed_files, read_environment_variables
+        )
+        return base_configs, env_configs, base_path, env_path, processed_files
+
+    def _get_conf_env_path(self, env: str) -> str:
+        if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
+            return f"{self._remote_root_path}/{env}"
+        if self._protocol == "file":
+            return str(Path(self.conf_source) / env)
+        return str(Path(self._fs.ls("", detail=False)[-1]) / env)
+
+    def _resolve_from_raw(  # noqa: PLR0913
+        self,
+        key: str,
+        base_configs: dict[Path, DictConfig],
+        env_configs: dict[Path, DictConfig],
+        base_path: str,
+        env_path: str,
+        processed_files: set[Path],
+    ) -> dict[str, Any]:
+        """Merge + resolve pre-parsed per-file configs into the final dict.
+
+        Uses whatever ``self.runtime_params`` currently holds; serving-mode
+        callers set that under a lock (resolver registrations are
+        process-global) before calling this.
+        """
         if key == "globals":
             # "runtime_params" resolver is not allowed in globals.
             OmegaConf.clear_resolver("runtime_params")
 
-        read_environment_variables = key == "credentials"
-
-        processed_files: set[Path] = set()
-        # Load base env config
-        # Handle remote paths
-        if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
-            base_path = f"{self._remote_root_path}/{self.base_env}"
-        elif self._protocol == "file":
-            base_path = str(Path(self.conf_source) / self.base_env)
-        else:
-            base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
         try:
-            base_config = self.load_and_merge_dir_config(  # type: ignore[no-untyped-call]
-                base_path, patterns, key, processed_files, read_environment_variables
-            )
+            base_config = self._merge_and_resolve(key, base_configs)
         except UnsupportedInterpolationType as exc:
             if "runtime_params" in str(exc):
                 raise UnsupportedInterpolationType(
                     "The `runtime_params:` resolver is not supported for globals."
                 )
-            else:
-                raise exc
+            raise
 
-        config = base_config
-
-        # Load chosen env config
         run_env = self.env or self.default_run_env
-
-        # Return if chosen env config is the same as base config to avoid loading the same config twice
         if run_env == self.base_env:
-            return config  # type: ignore[no-any-return]
+            return base_config
 
-        # Handle remote paths
-        if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
-            env_path = f"{self._remote_root_path}/{run_env}"
-        elif self._protocol == "file":
-            env_path = str(Path(self.conf_source) / run_env)
-        else:
-            env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
         try:
-            env_config = self.load_and_merge_dir_config(  # type: ignore[no-untyped-call]
-                env_path, patterns, key, processed_files, read_environment_variables
-            )
+            env_config = self._merge_and_resolve(key, env_configs)
         except UnsupportedInterpolationType as exc:
             if "runtime_params" in str(exc):
                 raise UnsupportedInterpolationType(
                     "The `runtime_params:` resolver is not supported for globals."
                 )
-            else:
-                raise exc
+            raise
 
-        resulting_config = self._merge_configs(config, env_config, key, env_path)
+        resulting_config = self._merge_configs(base_config, env_config, key, env_path)
 
         if not processed_files and key != "globals":
             raise MissingConfigException(
@@ -338,6 +365,21 @@ class OmegaConfigLoader(AbstractConfigLoader):
             Resulting configuration dictionary.
 
         """
+        config_per_file = self._read_dir_config_files(
+            conf_path, patterns, key, processed_files, read_environment_variables
+        )
+        return self._merge_and_resolve(key, config_per_file)
+
+    @typing.no_type_check
+    def _read_dir_config_files(
+        self,
+        conf_path: str,
+        patterns: Iterable[str],
+        key: str,
+        processed_files: set,
+        read_environment_variables: bool | None = False,
+    ) -> dict[Path, DictConfig]:
+        """Discover, load, and dedupe raw config files from ``conf_path``. No merge, no resolve."""
         # Handle directory existence check for remote paths
         if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
             try:
@@ -386,8 +428,19 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     f" unable to read line {line}, position {cursor}."
                 ) from exc
 
-        aggregate_config = config_per_file.values()
         self._check_duplicates(key, config_per_file)
+        return config_per_file
+
+    @typing.no_type_check
+    def _merge_and_resolve(
+        self, key: str, config_per_file: dict[Path, DictConfig]
+    ) -> dict[str, Any]:
+        """Merge pre-loaded per-file configs and resolve interpolations.
+
+        Uses whatever ``self.runtime_params`` currently holds. Serving-mode
+        callers reset that under a lock before calling.
+        """
+        aggregate_config = config_per_file.values()
 
         if not aggregate_config:
             return {}

@@ -94,9 +94,7 @@ def _read_raw_cache(
 ) -> _RawConfigCache | None:
     """Read raw per-file configs for ``key`` once, or return None if absent."""
     try:
-        base, env, base_path, env_path, processed = loader._read_raw_configs_for_key(
-            key
-        )
+        base, env, base_path, env_path, processed = loader._read_raw_config(key)
     except MissingConfigException:
         return None
     return _RawConfigCache(

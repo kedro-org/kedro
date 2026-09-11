@@ -231,27 +231,26 @@ class OmegaConfigLoader(AbstractConfigLoader):
             )
 
         base_configs, env_configs, base_path, env_path, processed_files = (
-            self._read_raw_configs_for_key(key)
+            self._read_raw_config(key)
         )
         return self._resolve_from_raw(
             key, base_configs, env_configs, base_path, env_path, processed_files
         )
 
-    def _read_raw_configs_for_key(
+    def _read_raw_config(
         self, key: str
     ) -> tuple[dict[Path, DictConfig], dict[Path, DictConfig], str, str, set[Path]]:
-        """Read raw (unresolved) per-file configs from base and env dirs for ``key``.
+        """Read raw per-file configs from base and env dirs for ``key``.
 
-        Extracted so serving-mode callers can cache the raw parse and only
-        pay the resolve cost per request. Runs the duplicate-keys check but
-        does not merge, resolve, or apply the security guard.
+        Split out so callers can cache the parse and only re-pay the
+        resolve cost per request.
         """
         patterns = [*self.config_patterns[key]]
         read_environment_variables = key == "credentials"
 
         processed_files: set[Path] = set()
         base_path = self._get_conf_env_path(self.base_env)
-        base_configs = self._read_dir_config_files(
+        base_configs = self._read_dir_configs(
             base_path, patterns, key, processed_files, read_environment_variables
         )
 
@@ -260,7 +259,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if run_env == self.base_env:
             return base_configs, {}, base_path, env_path, processed_files
 
-        env_configs = self._read_dir_config_files(
+        env_configs = self._read_dir_configs(
             env_path, patterns, key, processed_files, read_environment_variables
         )
         return base_configs, env_configs, base_path, env_path, processed_files
@@ -281,11 +280,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
         env_path: str,
         processed_files: set[Path],
     ) -> dict[str, Any]:
-        """Merge + resolve pre-parsed per-file configs into the final dict.
+        """Merge and resolve pre-parsed per-file configs into the final dict.
 
-        Uses whatever ``self.runtime_params`` currently holds; serving-mode
-        callers set that under a lock (resolver registrations are
-        process-global) before calling this.
+        Uses ``self.runtime_params`` as currently set. Resolver registrations
+        are process-global, so callers resolving per-request params must set
+        them under a lock before calling.
         """
         if key == "globals":
             # "runtime_params" resolver is not allowed in globals.
@@ -365,13 +364,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
             Resulting configuration dictionary.
 
         """
-        config_per_file = self._read_dir_config_files(
+        config_per_file = self._read_dir_configs(
             conf_path, patterns, key, processed_files, read_environment_variables
         )
         return self._merge_and_resolve(key, config_per_file)
 
     @typing.no_type_check
-    def _read_dir_config_files(
+    def _read_dir_configs(
         self,
         conf_path: str,
         patterns: Iterable[str],
@@ -437,8 +436,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
     ) -> dict[str, Any]:
         """Merge pre-loaded per-file configs and resolve interpolations.
 
-        Uses whatever ``self.runtime_params`` currently holds. Serving-mode
-        callers reset that under a lock before calling.
+        See ``_resolve_from_raw`` for the ``runtime_params`` locking note.
         """
         aggregate_config = config_per_file.values()
 

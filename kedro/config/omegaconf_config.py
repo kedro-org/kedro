@@ -265,6 +265,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         return base_configs, env_configs, base_path, env_path, processed_files
 
     def _get_conf_env_path(self, env: str) -> str:
+        """Get the full path to the configuration environment directory."""
         if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
             return f"{self._remote_root_path}/{env}"
         if self._protocol == "file":
@@ -301,7 +302,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         run_env = self.env or self.default_run_env
         if run_env == self.base_env:
-            return base_config
+            return base_config  # type: ignore[no-any-return]
 
         try:
             env_config = self._merge_and_resolve(key, env_configs)

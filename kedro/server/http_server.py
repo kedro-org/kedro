@@ -220,7 +220,7 @@ def _parse_snapshot_params(value: str) -> dict[str, Any]:
     Values must not contain commas.
     """
     try:
-        return _split_params(None, None, value)  # type: ignore[arg-type]
+        return _split_params(None, None, value)  # type: ignore[arg-type,no-any-return]
     except AttributeError as exc:
         # _split_params reports invalid input via ctx.fail(), which needs a
         # real click.Context; with ctx=None that raises AttributeError instead.

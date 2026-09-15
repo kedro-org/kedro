@@ -223,4 +223,4 @@ For example, a catalog entry with `filepath: "data/${runtime_params:version}/com
 
 The Kedro HTTP server exposes the same snapshot data at `GET /snapshot`. On success, the response contains the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, serialised as JSON. On failure, the response returns `status` and `error` with no data fields.
 
-See [Serving Kedro pipelines over HTTP](../extend/serving.md#get-snapshot) for the full endpoint reference, example responses, and failure behaviour.
+To resolve `${runtime_params:...}` interpolation for a single request, pass a `params` query string in the same format as `kedro run --params` (e.g. `GET /snapshot?params=version=02`). This format cannot represent values containing commas (inline lists, nested structures) and, being part of the URL, is subject to typical query-string length limits and shouldn't carry secrets — see [Serving Kedro pipelines over HTTP](../extend/serving.md#get-snapshot) for the full reference, examples, and these limitations in detail.

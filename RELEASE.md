@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Added an optional `params` query parameter to `GET /snapshot` for resolving `${runtime_params:...}` interpolation per request, using the same format as `kedro run --params`.
+
 ## Bug fixes and other changes
 
 ## Documentation changes

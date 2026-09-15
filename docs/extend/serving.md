@@ -122,9 +122,25 @@ If the snapshot cannot be built (for example, due to a catalog error), the respo
 }
 ```
 
+#### Runtime parameters for a single snapshot
+
+If your catalog or parameters configuration uses `${runtime_params:...}` interpolation, pass a `params` query string to resolve those placeholders for this request. The same comma-separated `key=value` format as `kedro run --params`:
+
+```bash
+curl "http://127.0.0.1:8000/snapshot?params=version=02,model.lr=0.01"
+```
+
+This resolves to `{"version": 2, "model": {"lr": 0.01}}` (dot-separated keys nest, and values are type-coerced the same way as `kedro run --params`) and is forwarded as `runtime_params` to `get_project_snapshot`, exactly like passing `runtime_params` programmatically — see [How to pass runtime parameters](../inspect/inspect-project.md#how-to-pass-runtime-parameters).
+
+!!! warning "Limitations of the `params` query format"
+
+    - **No commas within a value.** The query value is split on every comma to find individual `key=value` pairs, so a value containing a literal comma — an inline list (`a=[1,2,3]`), a nested structure, or any string with a comma in it — cannot be represented and is rejected as a failure response. Call `get_project_snapshot(runtime_params=...)` programmatically instead — it takes a real dict with no such restriction (see [How to pass runtime parameters](../inspect/inspect-project.md#how-to-pass-runtime-parameters)).
+    - **Query string length limits.** `params` travels in the URL, which most HTTP servers, proxies, and browsers cap somewhere around 2–8 KB. A very large parameter set can exceed this before it reaches the server. Prefer the programmatic API for large parameter sets.
+    - **Not for secrets.** Query strings are commonly recorded in server access logs, proxy logs, and browser history. Do not pass credentials or other sensitive values through `?params=`.
+
 !!! note
 
-    The `/snapshot` endpoint uses the environment and configuration source configured at server startup (`--env` / `KEDRO_SERVER_ENV` and `--conf-source` / `KEDRO_SERVER_CONF_SOURCE`). It does not accept per-request `env` or `conf_source` parameters.
+    The `/snapshot` endpoint uses the environment and configuration source configured at server startup (`--env` / `KEDRO_SERVER_ENV` and `--conf-source` / `KEDRO_SERVER_CONF_SOURCE`). It does not accept per-request `env` or `conf_source` parameters. Per-request overrides are limited to `params` (runtime parameters), described above.
 
 See [Inspect a Kedro project](../inspect/inspect-project.md) for the programmatic API and details on the snapshot structure.
 

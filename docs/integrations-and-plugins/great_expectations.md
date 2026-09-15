@@ -14,6 +14,10 @@ An expectation is a falsifiable, verifiable statement about your data. For examp
 
 When you run validations, Great Expectations checks if your data meets these expectations and tells you what passed or failed.
 
+!!! note
+
+    For schema checks on catalog datasets, Kedro's built-in [dataset validation](../catalog-data/dataset_validation.md) covers the common case with one line of YAML, and accepts custom validator classes, so you can wrap Great Expectations checks behind it too.
+
 All the types of expectations that are available can be found in the [expectations reference document](https://greatexpectations.io/expectations/).
 
 ## Prerequisites

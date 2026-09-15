@@ -76,6 +76,7 @@ exceptions:
   - MWAA
   - MySQL
   - Notebooks
+  - Pandera
   - Prefect
   - PyCharm
   - Python

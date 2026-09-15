@@ -22,6 +22,7 @@ By default, all code in `settings.py` is commented out. When settings are not su
 | `CONFIG_LOADER_CLASS`       | `kedro.config.ConfigLoader`                        | Customise how project configuration is handled.                                                                           |
 | `CONFIG_LOADER_ARGS`        | `dict()`                                           | Keyword arguments for the `CONFIG_LOADER_CLASS` constructor.                                                              |
 | `DATA_CATALOG_CLASS`        | `kedro.io.DataCatalog`                             | Customise how the [Data Catalog](../catalog-data/data_catalog.md) is handled.                                             |
+| `DATASET_VALIDATION`        | `True`                                             | Turn [dataset validation](../catalog-data/dataset_validation.md) on or off for the project.                               |
 | `RUNNER_MODULE_ALLOWLIST`   | `tuple()`                                          | Additional module prefixes the [HTTP server](../extend/serving.md#runner-security) may import a runner from.              |
 
 ## Project metadata

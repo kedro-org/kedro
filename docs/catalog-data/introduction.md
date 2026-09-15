@@ -12,6 +12,7 @@ These pages explain how the Data Catalog works and the model behind each feature
 - [Dataset factories](kedro_dataset_factories.md) — generalising catalog entries with patterns.
 - [Partitioned and incremental datasets](partitioned_and_incremental_datasets.md) — working with data split across multiple files.
 - [Lazy loading](lazy_loading.md) — how Kedro defers dataset instantiation until access.
+- [Dataset validation](dataset_validation.md) — checking data against a schema every time it is loaded or saved.
 
 ## How-to guides
 

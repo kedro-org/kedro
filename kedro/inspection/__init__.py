@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from kedro.inspection.snapshot import _build_project_snapshot
 
@@ -22,6 +22,7 @@ def get_project_snapshot(
     env: str | None = None,
     conf_source: str | None = None,
     metadata: ProjectMetadata | None = None,
+    runtime_params: dict[str, Any] | None = None,
 ) -> ProjectSnapshot:
     """Return a read-only snapshot of the Kedro project.
 
@@ -64,6 +65,16 @@ def get_project_snapshot(
                 snapshot_default = get_project_snapshot(metadata=metadata)
                 snapshot_staging = get_project_snapshot(env="staging", metadata=metadata)
 
+        runtime_params: Optional dictionary of runtime parameters forwarded to
+            the config loader for ``${runtime_params:...}`` interpolation. This
+            mirrors ``kedro run --params`` / ``KedroSession.create(runtime_params=...)``
+            for configuration resolution::
+
+                snapshot = get_project_snapshot(
+                    metadata=metadata,
+                    runtime_params={"version": "02"},
+                )
+
     Returns:
         A fully populated ``ProjectSnapshot``.
     """
@@ -72,4 +83,5 @@ def get_project_snapshot(
         env=env,
         conf_source=conf_source,
         metadata=metadata,
+        runtime_params=runtime_params,
     )

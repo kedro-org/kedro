@@ -182,6 +182,7 @@ def _build_project_snapshot(
     env: str | None = None,
     conf_source: str | None = None,
     metadata: ProjectMetadata | None = None,
+    runtime_params: dict[str, Any] | None = None,
 ) -> ProjectSnapshot:
     """Build a ``ProjectSnapshot`` for the Kedro project at project_path.
 
@@ -198,6 +199,8 @@ def _build_project_snapshot(
         metadata: Optional pre-computed ``ProjectMetadata`` returned by a prior
             ``bootstrap_project`` call. When provided, ``bootstrap_project`` is
             skipped entirely.
+        runtime_params: Optional dictionary of runtime parameters forwarded to
+            the config loader for ``${runtime_params:...}`` interpolation.
 
     Returns:
         A fully populated ``ProjectSnapshot``.
@@ -231,7 +234,10 @@ def _build_project_snapshot(
     if metadata is None:
         metadata = bootstrap_project(effective_project_path)
     config_loader = _make_config_loader(
-        effective_project_path, env=env, conf_source=conf_source
+        effective_project_path,
+        env=env,
+        conf_source=conf_source,
+        runtime_params=runtime_params,
     )
 
     try:

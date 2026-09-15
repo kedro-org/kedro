@@ -188,6 +188,8 @@ Kedro can validate parameters from your YAML configuration against type hints on
 
 This feature is **opt-in**: add a type hint to enable validation for that parameter, or leave it untyped to keep the existing behaviour.
 
+Kedro can validate more than parameters. To check the data flowing through your catalog entries, see [dataset validation](../catalog-data/dataset_validation.md), which enforces a schema on a dataset every time it is loaded or saved.
+
 ### Supported types
 
 Parameter validation supports two kinds of typed objects:

@@ -130,7 +130,7 @@ If your catalog or parameters configuration uses `${runtime_params:...}` interpo
 curl "http://127.0.0.1:8000/snapshot?params=version=02,model.lr=0.01"
 ```
 
-This resolves to `{"version": 2, "model": {"lr": 0.01}}` (dot-separated keys nest, and values are type-coerced the same way as `kedro run --params`) and is forwarded as `runtime_params` to `get_project_snapshot`, exactly like passing `runtime_params` programmatically — see [How to pass runtime parameters](../inspect/inspect-project.md#how-to-pass-runtime-parameters).
+This resolves to `{"version": 2, "model": {"lr": 0.01}}`. Dot-separated keys nest, and values are type-coerced the same way as `kedro run --params`. The result is forwarded as `runtime_params` to `get_project_snapshot`, the same as passing `runtime_params` programmatically — see [How to pass runtime parameters](../inspect/inspect-project.md#how-to-pass-runtime-parameters).
 
 !!! warning "Limitations of the `params` query format"
 

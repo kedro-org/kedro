@@ -7,7 +7,23 @@ from typing import Any
 
 from kedro.io.core import AbstractDataset, DatasetError, TCopyMode
 
-_EMPTY = object()
+class _Empty:
+    """Sentinel used to mean "nothing has been saved yet".
+
+    A bare ``object()`` cannot be used here: ``pickle`` restores it as a new
+    object, so a ``MemoryDataset`` -- or a catalogue holding one -- that has been
+    serialised into another process or another machine no longer recognises its
+    own sentinel and reports itself as holding data. ``__reduce__`` makes every
+    unpickled copy resolve to the module-level instance instead.
+    """
+
+    __slots__ = ()
+
+    def __reduce__(self) -> str:
+        return "_EMPTY"
+
+
+_EMPTY = _Empty()
 
 
 class MemoryDataset(AbstractDataset):

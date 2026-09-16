@@ -1,3 +1,5 @@
+import copy
+import pickle
 import re
 import sys
 
@@ -6,8 +8,9 @@ import pandas as pd
 import pytest
 from kedro_datasets.pandas import CSVDataset
 
-from kedro.io import DatasetError, MemoryDataset
+from kedro.io import DataCatalog, DatasetError, MemoryDataset
 from kedro.io.memory_dataset import (
+    _EMPTY,
     _copy_with_mode,
     _infer_copy_mode,
     _is_memory_dataset,
@@ -232,3 +235,52 @@ def test_infer_mode_assign():
 )
 def test_is_memory_dataset(ds_or_type, expected_result):
     assert _is_memory_dataset(ds_or_type) == expected_result
+
+
+class TestEmptySentinelSurvivesSerialisation:
+    """``_EMPTY`` must stay recognisable, because a runner can serialise the
+    catalogue into another process or another machine.
+    """
+
+    @pytest.mark.parametrize("round_trip", [pickle.loads, copy.copy, copy.deepcopy])
+    def test_sentinel_identity_is_preserved(self, round_trip):
+        def _round_trip(obj):
+            if round_trip is pickle.loads:
+                return pickle.loads(pickle.dumps(obj))
+            return round_trip(obj)
+
+        assert _round_trip(_EMPTY) is _EMPTY
+
+    def test_unsaved_dataset_still_raises_after_pickling(self):
+        pattern = "Data for MemoryDataset has not been saved yet."
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
+            MemoryDataset().load()
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
+            pickle.loads(pickle.dumps(MemoryDataset())).load()
+
+    def test_unsaved_dataset_does_not_report_itself_as_existing(self):
+        assert MemoryDataset()._exists() is False
+        assert pickle.loads(pickle.dumps(MemoryDataset()))._exists() is False
+
+    def test_unsaved_dataset_describes_itself_as_empty(self):
+        assert MemoryDataset()._describe() == {"data": None}
+        assert pickle.loads(pickle.dumps(MemoryDataset()))._describe() == {"data": None}
+
+    def test_released_dataset_still_raises_after_pickling(self):
+        dataset = MemoryDataset(data=[1, 2, 3])
+        dataset._release()
+        assert pickle.loads(pickle.dumps(dataset))._exists() is False
+
+    def test_saved_data_survives_pickling(self):
+        dataset = MemoryDataset(data=[1, 2, 3])
+        reloaded = pickle.loads(pickle.dumps(dataset))
+        assert reloaded.load() == [1, 2, 3]
+        assert reloaded._exists() is True
+
+    def test_catalogue_holding_an_unsaved_dataset_survives_pickling(self):
+        # this is what client.submit(..., catalog, ...) does in a distributed run
+        catalog = DataCatalog({"intermediate": MemoryDataset()})
+        shipped = pickle.loads(pickle.dumps(catalog))
+        assert shipped.exists("intermediate") is False
+        with pytest.raises(DatasetError, match="has not been saved yet"):
+            shipped.load("intermediate")

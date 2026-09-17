@@ -8,6 +8,8 @@
 
 ## Breaking changes to the API
 
+- **Security fix**: Custom logging handler, filter or formatter classes referenced in `conf/logging.yml` are no longer imported unless their module is on the logging allowlist. Only the `logging` standard-library package (including `logging.handlers`) and `kedro.logging` are trusted by default. Projects that point `conf/logging.yml` at their own logging classes must now list those modules in the `KEDRO_LOGGING_MODULE_ALLOWLIST` environment variable (comma-separated) to keep them working.
+
 ## Community contributions
 
 # Release 1.6.0

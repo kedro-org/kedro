@@ -1,3 +1,4 @@
+import pickle
 import re
 import sys
 
@@ -8,6 +9,7 @@ from kedro_datasets.pandas import CSVDataset
 
 from kedro.io import DatasetError, MemoryDataset
 from kedro.io.memory_dataset import (
+    _EMPTY,
     _copy_with_mode,
     _infer_copy_mode,
     _is_memory_dataset,
@@ -155,6 +157,31 @@ class TestMemoryDataset:
 
         dataset.save(new_data)
         assert dataset.exists()
+
+    def test_empty_sentinel_survives_pickle_roundtrip(self):
+        """The `_EMPTY` sentinel must keep its identity across pickling,
+        otherwise `is _EMPTY` checks break for datasets/catalogues shipped
+        to another process, e.g. via a runner that pickles the catalogue."""
+        assert pickle.loads(pickle.dumps(_EMPTY)) is _EMPTY  # noqa: S301
+
+    def test_unsaved_dataset_raises_after_pickle_roundtrip(self):
+        """An unsaved `MemoryDataset` must still raise on load, and report
+        as not existing, after a pickle round trip."""
+        roundtripped = pickle.loads(pickle.dumps(MemoryDataset()))  # noqa: S301
+
+        assert not roundtripped.exists()
+        pattern = r"Data for MemoryDataset has not been saved yet\."
+        with pytest.raises(DatasetError, match=pattern):
+            roundtripped.load()
+
+    def test_saved_dataset_survives_pickle_roundtrip(self, new_data):
+        """A dataset that has been saved to should still load correctly
+        after a pickle round trip."""
+        dataset = MemoryDataset(data=new_data)
+        roundtripped = pickle.loads(pickle.dumps(dataset))  # noqa: S301
+
+        assert roundtripped.exists()
+        assert _check_equals(roundtripped.load(), new_data)
 
 
 @pytest.mark.parametrize("data", [["a", "b"], [{"a": "b"}, {"c": "d"}]])

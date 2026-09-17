@@ -4,6 +4,8 @@
 
 ## Bug fixes and other changes
 
+- Fixed `MemoryDataset`'s internal "unsaved" sentinel losing its identity across a pickle round trip, which made `load()` silently return the sentinel object instead of raising `DatasetError`, and `_exists()` report `True` for a dataset that was never saved.
+
 ## Documentation changes
 
 ## Breaking changes to the API

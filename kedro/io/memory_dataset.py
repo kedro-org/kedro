@@ -7,7 +7,26 @@ from typing import Any
 
 from kedro.io.core import AbstractDataset, DatasetError, TCopyMode
 
-_EMPTY = object()
+
+class _Empty:
+    """Sentinel used to mean "nothing has been saved yet".
+
+    Unlike a bare ``object()``, this survives a pickle round trip: ``__reduce__``
+    always resolves back to the module-level ``_EMPTY`` singleton, so ``is``
+    comparisons keep working after a ``MemoryDataset`` is pickled and unpickled.
+    """
+
+    __slots__ = ()
+
+    def __reduce__(self) -> tuple[Any, tuple[()]]:
+        return (_get_empty, ())
+
+
+def _get_empty() -> _Empty:
+    return _EMPTY
+
+
+_EMPTY = _Empty()
 
 
 class MemoryDataset(AbstractDataset):

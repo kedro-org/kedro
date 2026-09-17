@@ -169,6 +169,27 @@ class TestOmegaConfigLoader:
         assert catalog["trains"]["type"] == "MemoryDataset"
 
     @use_config_dir
+    def test_load_and_merge_dir_config_public_method(self, tmp_path):
+        """``load_and_merge_dir_config`` loads and merges a single directory
+        directly. It's kept as public API even though ``__getitem__`` no
+        longer calls it, having been split into ``_read_dir_configs`` +
+        ``_merge_and_resolve`` to allow caching the raw parse separately.
+        """
+        conf = OmegaConfigLoader(
+            tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
+        )
+        processed_files: set = set()
+        catalog = conf.load_and_merge_dir_config(
+            str(tmp_path / _BASE_ENV),
+            conf.config_patterns["catalog"],
+            "catalog",
+            processed_files,
+        )
+
+        assert catalog["trains"]["type"] == "MemoryDataset"
+        assert processed_files
+
+    @use_config_dir
     def test_load_core_config_get_syntax(self, tmp_path):
         """Make sure core config can be fetched with .get()"""
         conf = OmegaConfigLoader(

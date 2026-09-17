@@ -382,9 +382,8 @@ returns_named_value = false
 # Unsupported in Zensical (as of 0.0.60), handled elsewhere or dropped:
 #   - mkdocs-mermaid2-plugin: mermaid renders natively via the classic theme /
 #     the superfences custom fence above, so the plugin is not needed.
-#   - mkdocs-llmstxt: no Zensical equivalent yet (tracked in zensical/backlog#83).
-#     llms.txt / llms-full.txt are still generated via a secondary `mkdocs build`
-#     driven by mkdocs.yml. Remove once native support lands.
+#   - llms.txt / llms-full.txt generation: not supported (tracked in
+#     zensical/backlog#83); no longer generated.
 #   - validation (omitted_files / absolute_links / unrecognized_links / anchors):
 #     not yet supported. Internal link breakage is not caught at build time;
 #     external links are still checked by the linkcheck CI job (lychee).

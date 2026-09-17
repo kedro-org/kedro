@@ -1,4 +1,4 @@
-name: Check links in MkDocs
+name: Check links in docs
 
 on:
   push:
@@ -41,9 +41,11 @@ jobs:
         run: |
           make install-docs-requirements
 
-      - name: Run MkDocs on strict mode.
+      - name: Build docs with Zensical
+        # NOTE: Zensical has no --strict mode yet, so broken internal links are not
+        # failed here; the lychee step below checks links against the built site.
         run: |
-          mkdocs build --strict
+          zensical build --clean
 
       - name: Serve docs locally in background
         run: |

@@ -29,7 +29,7 @@ install-docs-requirements:
 	uv pip install -e ".[docs]"
 
 serve-docs: install-docs-requirements
-	mkdocs serve --open
+	zensical serve --open
 
 build-docs: install-docs-requirements
 	zensical build --clean

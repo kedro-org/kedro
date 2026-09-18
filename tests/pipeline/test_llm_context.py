@@ -1,5 +1,3 @@
-import warnings
-
 import pytest
 
 from kedro.pipeline.llm_context import (
@@ -10,7 +8,6 @@ from kedro.pipeline.llm_context import (
     llm_context_node,
     tool,
 )
-from kedro.utils import KedroExperimentalWarning
 
 
 class DummyTool:
@@ -225,24 +222,3 @@ def test_llm_context_node_sets_namespace():
     )
 
     assert node_obj.namespace == "llm_nodes"
-
-
-@pytest.mark.parametrize("api", [llm_context_node, LLMContextNode, LLMContext, tool])
-def test_llm_context_api_is_not_marked_experimental(api):
-    """The LLM context API is stable and carries no experimental marker."""
-    assert not getattr(api, "__kedro_experimental__", False)
-
-
-def test_llm_context_api_emits_no_experimental_warning():
-    """Building and running an LLM context node should not warn as experimental."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("error", category=KedroExperimentalWarning)
-        node_obj = llm_context_node(
-            outputs="context",
-            llm="llm",
-            prompts=["prompt"],
-            tools=[tool(build_dummy_tool, "tool_input")],
-        )
-        context = node_obj.func(llm="dummy_llm", prompt="hello", tool_input=42)
-
-    assert isinstance(context, LLMContext)

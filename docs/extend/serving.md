@@ -124,13 +124,23 @@ If the snapshot cannot be built (for example, due to a catalog error), the respo
 
 #### Runtime parameters for a single snapshot
 
-If your catalog or parameters configuration uses `${runtime_params:...}` interpolation, pass a `params` query string to resolve those placeholders for this request. The same comma-separated `key=value` format as `kedro run --params`:
+If your catalog or parameters configuration uses `${runtime_params:...}` interpolation, pass a `params` query string to resolve those placeholders for this request. The same comma-separated `key=value` format as `kedro run --params`.
+
+For example, given a `parameters.yml` entry that has not yet been resolved:
+
+```yaml
+version: ${runtime_params:version}
+model:
+  lr: ${runtime_params:model.lr}
+```
 
 ```bash
 curl "http://127.0.0.1:8000/snapshot?params=version=02,model.lr=0.01"
 ```
 
-This resolves to `{"version": 2, "model": {"lr": 0.01}}`. Dot-separated keys nest, and values are type-coerced the same way as `kedro run --params`. The result is forwarded as `runtime_params` to `get_project_snapshot`, the same as passing `runtime_params` programmatically — see [How to pass runtime parameters](../inspect/inspect-project.md#how-to-pass-runtime-parameters).
+This resolves `version` and `model.lr` to `{"version": 2, "model": {"lr": 0.01}}`. Dot-separated keys nest, and values are type-coerced the same way as `kedro run --params`. The result is forwarded as `runtime_params` to `get_project_snapshot`, the same as passing `runtime_params` programmatically — see [How to pass runtime parameters](../inspect/inspect-project.md#how-to-pass-runtime-parameters).
+
+`${runtime_params:...}` can specify a fallback value, for example `${runtime_params:model.lr, 0.001}`. When a fallback is given, that key resolves even if it is absent from `params`, so passing it for that key becomes optional.
 
 !!! warning "Limitations of the `params` query format"
 

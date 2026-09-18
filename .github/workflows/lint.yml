@@ -17,6 +17,13 @@ jobs:
       contents: read
     runs-on: ${{ inputs.os }}
     steps:
+      - name: Validate branch input
+        if: inputs.branch != ''
+        run: |
+          case "${{ inputs.branch }}" in
+            main|develop) ;;
+            *) echo "::error::Disallowed branch input: ${{ inputs.branch }}"; exit 1 ;;
+          esac
       - name: Checkout code
         uses: actions/checkout@v7
         with:

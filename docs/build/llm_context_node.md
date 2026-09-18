@@ -6,10 +6,6 @@
 
 ## Overview
 
-!!! warning
-
-    This functionality is experimental and may change or be removed in future releases. Experimental features follow the process described in [`docs/about/experimental.md`](../about/experimental.md).
-
 LLM context nodes provide a structured way to construct an `LLMContext` inside a Kedro pipeline.
 An `LLMContext` bundles together:
 

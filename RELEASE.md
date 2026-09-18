@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Graduated `llm_context_node`, `LLMContextNode`, `LLMContext` and `tool` from experimental to stable. They no longer emit a `KedroExperimentalWarning`.
+
 ## Bug fixes and other changes
 
 ## Documentation changes

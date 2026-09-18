@@ -7,9 +7,6 @@ on:
         type: string
       python-version:
         type: string
-      branch:
-        type: string
-        default: ''
 
 env:
   COLUMNS: 120
@@ -21,17 +18,8 @@ jobs:
       contents: read
     runs-on: ${{ inputs.os }}
     steps:
-      - name: Validate branch input
-        if: inputs.branch != ''
-        run: |
-          case "${{ inputs.branch }}" in
-            main|develop) ;;
-            *) echo "::error::Disallowed branch input: ${{ inputs.branch }}"; exit 1 ;;
-          esac
       - name: Checkout code
         uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.branch }}
       - name: Install the latest version of uv with Python ${{inputs.python-version}}
         uses: astral-sh/setup-uv@v7
         with:

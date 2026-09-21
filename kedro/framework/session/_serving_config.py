@@ -137,7 +137,7 @@ class _ServingConfigLoader(AbstractConfigLoader):
             )
         loader = self._cache.persistent_loader
         with self._cache.lock, _swapped_runtime_params(loader, self.runtime_params):
-            return loader._resolve_from_raw(key, *raw)
+            return loader._resolve_from_raw_config(key, *raw)
 
     def _resolve_uncached(self, key: str) -> Any:
         loader = self._cache.persistent_loader

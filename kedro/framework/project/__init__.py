@@ -22,7 +22,7 @@ from dynaconf.validator import ValidationError, Validator
 
 from kedro.io import CatalogProtocol
 from kedro.pipeline import Pipeline, pipeline
-from kedro.utils import find_config_file
+from kedro.utils import _is_module_allowed, find_config_file
 
 if TYPE_CHECKING:
     import types
@@ -37,6 +37,10 @@ _LOGGING_BASE_CLASSES = (
     logging.Formatter,
     logging.Filter,
 )
+
+# Modules trusted by default to supply logging handler/formatter/filter classes.
+# Extended via the KEDRO_LOGGING_MODULE_ALLOWLIST env var.
+_DEFAULT_LOGGING_MODULE_ALLOWLIST = ("logging", "kedro.logging")
 
 
 def _get_default_class(class_import_path: str) -> Any:
@@ -301,6 +305,20 @@ class _ProjectLogging(UserDict):
         """Initialise project logging. The path to logging configuration is given in
         environment variable KEDRO_LOGGING_CONFIG (defaults to conf/logging.yml)."""
         logger = logging.getLogger(__name__)
+
+        # Extra trusted logging modules, on top of _DEFAULT_LOGGING_MODULE_ALLOWLIST.
+        _logging_module_allowlist_env = os.environ.get(
+            "KEDRO_LOGGING_MODULE_ALLOWLIST", ""
+        )
+        _extra_allowlist_logging_modules = tuple(
+            module.strip()
+            for module in _logging_module_allowlist_env.split(",")
+            if module.strip()
+        )
+        self._logging_module_allowlist = (
+            _DEFAULT_LOGGING_MODULE_ALLOWLIST + _extra_allowlist_logging_modules
+        )
+
         user_logging_path = os.environ.get("KEDRO_LOGGING_CONFIG")
         project_logging_path = find_config_file("conf/logging")
         default_logging_path = Path(
@@ -347,6 +365,16 @@ class _ProjectLogging(UserDict):
         if not module_path:
             # Bare name (e.g. "StreamHandler") resolved internally by logging machinery.
             return None
+
+        # Check against the allowlist before importing, so an untrusted module's
+        # top-level code can't run regardless of what the class check finds.
+        if not _is_module_allowed(module_path, self._logging_module_allowlist):
+            raise ValueError(
+                f"Module '{module_path}' specified as a logging class is not "
+                "permitted. Only 'logging', 'kedro.logging', and modules listed "
+                "in the KEDRO_LOGGING_MODULE_ALLOWLIST environment variable are "
+                "allowed."
+            )
 
         try:
             module = importlib.import_module(module_path)

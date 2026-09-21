@@ -2,11 +2,15 @@
 
 ## Major features and improvements
 
+- Graduated `llm_context_node`, `LLMContextNode`, `LLMContext` and `tool` from experimental to stable. They no longer emit a `KedroExperimentalWarning`.
+
 ## Bug fixes and other changes
 
 ## Documentation changes
 
 ## Breaking changes to the API
+
+- **Security fix**: Custom logging handler, filter or formatter classes referenced in `conf/logging.yml` are no longer imported unless their module is on the logging allowlist. Only the `logging` standard-library package (including `logging.handlers`) and `kedro.logging` are trusted by default. Projects that point `conf/logging.yml` at their own logging classes must now list those modules in the `KEDRO_LOGGING_MODULE_ALLOWLIST` environment variable (comma-separated) to keep them working.
 
 ## Community contributions
 
@@ -35,6 +39,7 @@
 - Deprecated `--async` flag for `kedro run` in favour of `--runner-params=is_async=True`.
 - Added a warning in `ParallelRunner` catalog validation that identifies cloud-backed datasets (e.g. S3, GCS, Azure Data Lake) failing to pickle and suggests using `ThreadRunner` or `SequentialRunner` instead.
 - Redacted credentials, signed-URL query parameters and fragments from dataset filepaths in `AbstractDataset.__repr__`, `DatasetError` messages, and HTTP server `/snapshot` and `/run` responses.
+- Fixed `CachedDataset.__repr__` mislabelling the cache with the wrapped dataset's class name instead of `MemoryDataset`.
 
 ## Documentation changes
 

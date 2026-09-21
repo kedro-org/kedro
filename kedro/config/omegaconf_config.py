@@ -233,7 +233,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         base_configs, env_configs, base_path, env_path, processed_files = (
             self._read_raw_config(key)
         )
-        return self._resolve_from_raw(
+        return self._resolve_from_raw_config(
             key, base_configs, env_configs, base_path, env_path, processed_files
         )
 
@@ -265,13 +265,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
         return base_configs, env_configs, base_path, env_path, processed_files
 
     def _get_conf_env_path(self, env: str) -> str:
+        """Get the full path to the configuration environment directory."""
         if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
             return f"{self._remote_root_path}/{env}"
         if self._protocol == "file":
             return str(Path(self.conf_source) / env)
         return str(Path(self._fs.ls("", detail=False)[-1]) / env)
 
-    def _resolve_from_raw(  # noqa: PLR0913
+    def _resolve_from_raw_config(  # noqa: PLR0913
         self,
         key: str,
         base_configs: dict[Path, DictConfig],
@@ -301,7 +302,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         run_env = self.env or self.default_run_env
         if run_env == self.base_env:
-            return base_config
+            return base_config  # type: ignore[no-any-return]
 
         try:
             env_config = self._merge_and_resolve(key, env_configs)
@@ -436,7 +437,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
     ) -> dict[str, Any]:
         """Merge pre-loaded per-file configs and resolve interpolations.
 
-        See ``_resolve_from_raw`` for the ``runtime_params`` locking note.
+        See ``_resolve_from_raw_config`` for the ``runtime_params`` locking note.
         """
         aggregate_config = config_per_file.values()
 

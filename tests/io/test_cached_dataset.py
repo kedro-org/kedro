@@ -133,6 +133,19 @@ class TestCachedDataset:
             """cache='kedro.io.memory_dataset.MemoryDataset()')"""
         )
 
+    def test_repr_wrapping_non_memory_dataset(self):
+        """The cache is always a ``MemoryDataset`` regardless of the wrapped
+        dataset's type, and the repr must say so rather than mislabelling the
+        cache with the wrapped dataset's class."""
+        representation = repr(CachedDataset(CSVDataset(filepath="example.csv")))
+        assert (
+            representation
+            == """kedro.io.cached_dataset.CachedDataset(dataset="kedro_datasets."""
+            """pandas.csv_dataset.CSVDataset(filepath=PurePosixPath('example.csv'), """
+            """protocol='file', load_args={}, save_args={'index': False})", """
+            """cache='kedro.io.memory_dataset.MemoryDataset()')"""
+        )
+
     def test_str(self):
         assert (
             str(CachedDataset(MemoryDataset(42)))

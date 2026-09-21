@@ -8,11 +8,12 @@ import threading
 import time
 import traceback
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 from kedro import __version__ as kedro_version
+from kedro.framework.cli.utils import _split_params
 from kedro.framework.project import settings
 from kedro.framework.session.service_session import KedroServiceSession
 from kedro.framework.startup import bootstrap_project
@@ -116,22 +117,47 @@ def create_http_server(
         )
 
     @app.get("/snapshot", response_model=SnapshotResponse, tags=["inspection"])
-    def get_snapshot() -> SnapshotResponse:
+    def get_snapshot(
+        params: str | None = Query(
+            default=None,
+            description=(
+                "Runtime parameters for this snapshot, in `kedro run --params` "
+                "format (e.g. `version=02,model.lr=0.01`). Values must not "
+                "contain commas."
+            ),
+        ),
+    ) -> SnapshotResponse:
         """Return a read-only snapshot of the Kedro project.
 
         Uses the server-level environment configured at startup (equivalent to
         the ``env`` passed to ``create_http_server`` or the ``KEDRO_SERVER_ENV``
         environment variable).
 
+        Args:
+            params: Optional comma-separated ``key=value`` pairs (CLI ``--params``
+                format) used to resolve ``${runtime_params:...}`` interpolation for
+                this request only. Values containing a literal comma are not
+                supported.
+
         Returns:
             `SnapshotResponse` with project metadata, pipelines, datasets,
             and parameter keys, or error details on failure.
         """
         try:
+            runtime_params = _parse_snapshot_params(params) if params else None
+        except ValueError as exc:
+            logger.error("Snapshot request failed to parse 'params': %s", exc)
+            return SnapshotFailure(
+                status="failure",
+                error=ErrorDetail(type=type(exc).__qualname__, message=str(exc)),
+            )
+
+        try:
             snapshot = get_project_snapshot(
                 env=app.state.default_env,
                 conf_source=app.state.default_conf_source,
                 metadata=app.state.metadata,
+                runtime_params=runtime_params,
             )
             return SnapshotSuccess(
                 status="success",
@@ -185,6 +211,24 @@ def create_http_server(
         return _execute_pipeline(session=app.state.session, request=request)
 
     return app
+
+
+def _parse_snapshot_params(value: str) -> dict[str, Any]:
+    """Parse a `kedro run --params`-style query string into a dict, e.g.:
+    "version=02,model.lr=0.01" -> {"version": 2, "model": {"lr": 0.01}}
+
+    Values must not contain commas.
+    """
+    try:
+        return _split_params(None, None, value)  # type: ignore[arg-type,no-any-return]
+    except AttributeError as exc:
+        # _split_params reports invalid input via ctx.fail(), which needs a
+        # real click.Context; with ctx=None that raises AttributeError instead.
+        raise ValueError(
+            f"Invalid 'params' value: '{value}'. Expected comma-separated "
+            "key=value pairs, e.g. 'version=02,model.lr=0.01'. Values must "
+            "not contain commas."
+        ) from exc
 
 
 def _validate_runner_module(runner_name: str | None, package_name: str | None) -> bool:

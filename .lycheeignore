@@ -5,6 +5,13 @@ http://127.0.0.1:8000/
 http://127.0.0.1:8000/*
 http://127.0.0.1:8787/
 http://127.0.0.1:8787/*
+https://slack.kedro.org
+https://slack.kedro.org/
+https://slack.kedro.org/*
+https://linen-slack.kedro.org/
+https://linen-slack.kedro.org/*
+https://unsplash.com/
+https://unsplash.com/*
 https://github.com/comym
 https://github.com/datajoely
 https://github.com/vladimir-mck

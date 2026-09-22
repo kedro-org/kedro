@@ -42,8 +42,9 @@ linkcheck: install-docs-requirements
 	# broken internal links/anchors are not caught at build time; lychee below
 	# checks links (internal + external) in the built HTML.
 	zensical build --clean
-	# lychee checks for broken links in the built site, with max concurrency set to 32
-	lychee --max-concurrency 32 --exclude "@.lycheeignore" site/
+	# lychee checks for broken links in the built site, with max concurrency set to 32.
+	# -q suppresses noisy "InvalidPathToUri" warnings for 404.html's root-relative
+	lychee -q --max-concurrency 32 --exclude "@.lycheeignore" site/
 
 fix-markdownlint:
 	npm install -g markdownlint-cli2

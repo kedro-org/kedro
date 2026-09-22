@@ -31,7 +31,7 @@ jobs:
             run_id=$(gh run list --repo "$REPO" --workflow all-checks.yml \
               --branch "$TARGET_BRANCH" --event workflow_dispatch \
               --json databaseId,createdAt \
-              --jq "[.[] | select((.createdAt | fromdateiso8601) >= ${before})] | .[0].databaseId // empty")
+              --jq "[.[] | select((.createdAt | fromdateiso8601) >= ${before})] | .[0].databaseId // empty") || true
             [ -n "$run_id" ] && break
           done
 
@@ -63,7 +63,7 @@ jobs:
             run_id=$(gh run list --repo "$REPO" --workflow all-checks.yml \
               --branch "$TARGET_BRANCH" --event workflow_dispatch \
               --json databaseId,createdAt \
-              --jq "[.[] | select((.createdAt | fromdateiso8601) >= ${before})] | .[0].databaseId // empty")
+              --jq "[.[] | select((.createdAt | fromdateiso8601) >= ${before})] | .[0].databaseId // empty") || true
             [ -n "$run_id" ] && break
           done
 

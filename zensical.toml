@@ -98,7 +98,7 @@ nav = [
       {"Namespaces" = "build/namespaces.md"},
       {"Pipeline registry" = "build/pipeline_registry.md"},
       {"Slice a pipeline" = "build/slice_a_pipeline.md"},
-      {"LLM context node (experimental)" = "build/llm_context_node.md"}
+      {"LLM context node" = "build/llm_context_node.md"}
     ]},
     {"Development" = [
       {"Dependency management" = "develop/dependencies.md"},

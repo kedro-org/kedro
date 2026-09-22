@@ -234,6 +234,75 @@ class TestSnapshotEndpoint:
         assert "frag" not in filepath
         assert "<redacted>" in filepath
 
+    def test_snapshot_passes_no_runtime_params_by_default(
+        self, mocker, make_http_server
+    ):
+        app = make_http_server()
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        with TestClient(app) as client:
+            client.get("/snapshot")
+        assert mock_get.call_args[1]["runtime_params"] is None
+
+    def test_snapshot_parses_params_query_into_runtime_params(
+        self, mocker, make_http_server
+    ):
+        app = make_http_server()
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        with TestClient(app) as client:
+            client.get("/snapshot", params={"params": "version=02"})
+        assert mock_get.call_args[1]["runtime_params"] == {"version": 2}
+
+    def test_snapshot_parses_dotted_params_into_nested_runtime_params(
+        self, mocker, make_http_server
+    ):
+        app = make_http_server()
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        with TestClient(app) as client:
+            client.get("/snapshot", params={"params": "model.lr=0.01,version=02"})
+        assert mock_get.call_args[1]["runtime_params"] == {
+            "model": {"lr": 0.01},
+            "version": 2,
+        }
+
+    def test_snapshot_returns_failure_on_malformed_params(
+        self, mocker, make_http_server
+    ):
+        app = make_http_server()
+        mock_get = mocker.patch("kedro.server.http_server.get_project_snapshot")
+        with TestClient(app) as client:
+            response = client.get("/snapshot", params={"params": "not-a-pair"})
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["status"] == "failure"
+        assert payload["error"]["type"] == "ValueError"
+        mock_get.assert_not_called()
+
+    def test_snapshot_params_with_comma_in_value_gives_actionable_error(
+        self, mocker, make_http_server
+    ):
+        """A value containing a literal comma (e.g. an inline list) is split
+        into broken fragments by the CLI-style '?params=' format, so it must
+        raise a clear ValueError instead of an unrelated AttributeError.
+        """
+        app = make_http_server()
+        mock_get = mocker.patch("kedro.server.http_server.get_project_snapshot")
+        with TestClient(app) as client:
+            response = client.get("/snapshot", params={"params": "a=[1,2,3]"})
+        payload = response.json()
+        assert payload["status"] == "failure"
+        assert payload["error"]["type"] == "ValueError"
+        assert "comma" in payload["error"]["message"]
+        mock_get.assert_not_called()
+
     def test_snapshot_failure_message_redacts_credentials_from_exception(
         self, mocker, make_http_server, caplog
     ):

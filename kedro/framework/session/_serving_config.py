@@ -1,21 +1,3 @@
-"""Serving-mode config loader.
-
-One ``OmegaConfigLoader`` (the "persistent loader") is created on the session
-thread before any request threads start. ``build_config_cache`` preloads
-everything that does not depend on ``runtime_params`` -- resolved
-credentials/globals, and the raw (unmerged, unresolved) per-file configs for
-every other config key -- into a ``_ConfigCache``.
-
-Each request then gets a cheap ``_ServingConfigLoader``: credentials/globals
-reads are lock-free, everything else resolves from the cached raw configs
-under the cache's lock, with the persistent loader's ``runtime_params``
-swapped to this request's values for the duration. The lock also protects
-the persistent loader's ``_runtime_params_hits``, which
-``_guard_runtime_params_in_catalog_type`` relies on to block
-``runtime_params``-driven catalog dataset ``type``s -- without it, concurrent
-requests could read each other's hits and let the check fail open.
-"""
-
 from __future__ import annotations
 
 import threading

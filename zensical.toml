@@ -1,7 +1,7 @@
 # Zensical configuration for the Kedro documentation.
 
 [project]
-site_name = ""
+site_name = "Kedro"
 site_url = "https://docs.kedro.org/en/stable/"
 site_description = "Kedro is a toolbox for production-ready data science."
 site_dir = "site"

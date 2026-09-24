@@ -1,5 +1,5 @@
 """
-Experimental utilities for constructing an ``LLMContext`` inside a Kedro pipeline.
+Utilities for constructing an `LLMContext` inside a Kedro pipeline.
 
 This module provides:
 
@@ -18,7 +18,6 @@ from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, NamedTuple, TypeVar
 
-from ..utils import experimental
 from .node import Node
 from .preview_contract import PreviewPayload
 
@@ -37,12 +36,8 @@ class _ToolConfig(NamedTuple):
     inputs: Sequence[str]
 
 
-@experimental
 def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig:
     """
-    !!! warning "Experimental"
-        This API is experimental and may change in future Kedro releases.
-
     Create a `_ToolConfig` definition for a tool builder.
 
     Args:
@@ -58,13 +53,9 @@ def tool(func: Callable[..., T], *inputs: str) -> _ToolConfig:
     return _ToolConfig(func=func, inputs=list(inputs))
 
 
-@experimental
 @dataclass
 class LLMContext:
     """
-    !!! warning "Experimental"
-        This API is experimental and may change in future Kedro releases.
-
     Runtime context passed to an LLM execution step.
 
     Args:
@@ -110,12 +101,8 @@ def _normalize_outputs(outputs: str | list[str] | dict[str, str]) -> str:
     return str(outputs)
 
 
-@experimental
 class LLMContextNode(Node):
     """
-    !!! warning "Experimental"
-        This API is experimental and may change in future Kedro releases.
-
     A Kedro Node that constructs an `LLMContext` at execution time.
 
     This node assembles a runtime context consisting of:
@@ -224,7 +211,6 @@ class LLMContextNode(Node):
         )
 
 
-@experimental
 def llm_context_node(  # noqa: PLR0913
     *,
     outputs: str,
@@ -238,9 +224,6 @@ def llm_context_node(  # noqa: PLR0913
     preview_fn: Callable[..., PreviewPayload] | None = None,
 ) -> Node:
     """
-    !!! warning "Experimental"
-        This API is experimental and may change in future Kedro releases.
-
     Create a Kedro node that builds an `LLMContext` at runtime.
 
     This is a convenience wrapper around `LLMContextNode` that mirrors

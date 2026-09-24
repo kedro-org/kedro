@@ -151,9 +151,9 @@ class KedroServiceSession(AbstractSession):
         """Build the session-scoped config cache once, on the session thread.
 
         Constructs a single persistent ``OmegaConfigLoader`` and caches
-        credentials, globals, and the raw parsed per-file configs for
-        ``parameters`` and ``catalog``. Request threads then read from this
-        cache via ``_ServingConfigLoader`` -- see ``_serving_config``.
+        credentials, globals, and the raw parsed per-file configs for every
+        other config key. Request threads then read from this cache via
+        ``_ServingConfigLoader`` -- see ``_serving_config``.
         """
         self._logger.info(
             "Serving mode: preloading config cache for session %s", self.session_id
@@ -201,10 +201,7 @@ class KedroServiceSession(AbstractSession):
         """
         if self._serving_mode and self._config_cache is not None:
             return _ServingConfigLoader(
-                cache=self._config_cache,
-                runtime_params=runtime_params,
-                conf_source=self._conf_source,
-                env=self.env,
+                cache=self._config_cache, runtime_params=runtime_params
             )
         config_loader_class = settings.CONFIG_LOADER_CLASS
         config_loader_args = dict(settings.CONFIG_LOADER_ARGS)

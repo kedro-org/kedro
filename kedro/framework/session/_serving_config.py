@@ -1,24 +1,19 @@
 """Serving-mode config loader.
 
-Prototype for the structural split described in the discussion of
-``KedroServiceSession`` thread safety:
+One ``OmegaConfigLoader`` (the "persistent loader") is created on the session
+thread before any request threads start. ``build_config_cache`` preloads
+everything that does not depend on ``runtime_params`` -- resolved
+credentials/globals, and the raw (unmerged, unresolved) per-file configs for
+every other config key -- into a ``_ConfigCache``.
 
-* One ``OmegaConfigLoader`` is created on the session thread at preload time
-  and never handed to request threads directly.
-* A ``_ConfigCache`` holds the runtime_params-independent output
-  (credentials, globals) and the raw parsed per-file configs for
-  ``parameters`` and ``catalog``, so no request thread re-reads YAML or
-  re-parses ``conf/``.
-* Each request builds a cheap ``_ServingConfigLoader`` bound to that
-  request's ``runtime_params``. Reads of credentials / globals are lock-free.
-  ``parameters`` and ``catalog`` still go through OmegaConf's process-global
-  resolver registry, so those calls are serialised by a cache-scoped
-  ``RLock``. The critical section is small: only the merge + resolve step
-  (no file I/O, no YAML parsing), which is exactly what needs to see the
-  request's ``runtime_params``.
-* The existing ``_guard_runtime_params_in_catalog_type`` security check is
-  preserved unchanged -- it runs inside the lock on ``_runtime_params_hits``
-  that was reset for this request.
+Each request then gets a cheap ``_ServingConfigLoader``: credentials/globals
+reads are lock-free, everything else resolves from the cached raw configs
+under the cache's lock, with the persistent loader's ``runtime_params``
+swapped to this request's values for the duration. The lock also protects
+the persistent loader's ``_runtime_params_hits``, which
+``_guard_runtime_params_in_catalog_type`` relies on to block
+``runtime_params``-driven catalog dataset ``type``s -- without it, concurrent
+requests could read each other's hits and let the check fail open.
 """
 
 from __future__ import annotations
@@ -44,68 +39,53 @@ if TYPE_CHECKING:
 
 @dataclass
 class _ConfigCache:
-    """Immutable session-scoped config cache built once on the session thread.
-
-    Attributes only mutated before request threads start. The ``lock`` guards
-    the small resolve step on ``persistent_loader`` (see module docstring).
-    """
+    """Session-scoped config cache, built once before request threads start."""
 
     persistent_loader: OmegaConfigLoader
     credentials: dict[str, Any]
     globals: dict[str, Any]
-    raw_parameters: _RawConfig | None
-    raw_catalog: _RawConfig | None
-    lock: threading.RLock = field(default_factory=threading.RLock)
+    raw_by_key: dict[str, _RawConfig | None]
+    lock: threading.Lock = field(default_factory=threading.Lock)
 
 
 def build_config_cache(persistent_loader: OmegaConfigLoader) -> _ConfigCache:
-    """Preload runtime_params-independent config and raw YAML into a cache.
-
-    Called once from the session thread before any request threads are started.
-    """
+    """Preload runtime_params-independent config and raw YAML into a cache."""
     try:
         credentials = deepcopy(persistent_loader["credentials"])
     except MissingConfigException:
         credentials = {}
 
-    globals_ = deepcopy(persistent_loader._globals)
+    # Constructing `persistent_loader` resolves "globals", which deactivates
+    # the `runtime_params:` resolver globally. Re-register it here: request
+    # resolves call `_resolve_from_raw_config` directly and never do so.
+    persistent_loader._register_runtime_params_resolver()
+
+    raw_by_key: dict[str, _RawConfig | None] = {}
+    for key in persistent_loader.config_patterns:
+        if key in ("credentials", "globals"):
+            continue
+        try:
+            raw_by_key[key] = persistent_loader._read_raw_config(key)
+        except MissingConfigException:
+            raw_by_key[key] = None
 
     return _ConfigCache(
         persistent_loader=persistent_loader,
         credentials=credentials,
-        globals=globals_,
-        raw_parameters=_read_raw(persistent_loader, "parameters"),
-        raw_catalog=_read_raw(persistent_loader, "catalog"),
+        globals=deepcopy(persistent_loader._globals),
+        raw_by_key=raw_by_key,
     )
 
 
-def _read_raw(loader: OmegaConfigLoader, key: str) -> _RawConfig | None:
-    """Read raw per-file configs for ``key`` once, or return None if absent."""
-    try:
-        return loader._read_raw_config(key)
-    except MissingConfigException:
-        return None
-
-
 class _ServingConfigLoader(AbstractConfigLoader):
-    """Per-request config loader for serving mode.
+    """Per-request config loader for serving mode, backed by a shared ``_ConfigCache``."""
 
-    Cheap to construct: holds references to a shared cache and this
-    request's ``runtime_params``. Credentials / globals are lock-free reads.
-    Parameters / catalog delegate to the cache's persistent loader under
-    the cache lock, with the persistent loader's ``runtime_params`` state
-    swapped for the duration of the resolve.
-    """
-
-    def __init__(
-        self,
-        cache: _ConfigCache,
-        runtime_params: dict[str, Any] | None,
-        conf_source: str,
-        env: str | None,
-    ):
+    def __init__(self, cache: _ConfigCache, runtime_params: dict[str, Any] | None):
+        persistent_loader = cache.persistent_loader
         super().__init__(
-            conf_source=conf_source, env=env, runtime_params=runtime_params
+            conf_source=persistent_loader.conf_source,
+            env=persistent_loader.env,
+            runtime_params=runtime_params,
         )
         self._cache = cache
 
@@ -122,15 +102,11 @@ class _ServingConfigLoader(AbstractConfigLoader):
             return deepcopy(self._cache.credentials)
         if key == "globals":
             return deepcopy(self._cache.globals)
-        if key == "parameters":
-            return self._resolve_cached(key, self._cache.raw_parameters)
-        if key == "catalog":
-            return self._resolve_cached(key, self._cache.raw_catalog)
-        # Fall back to the persistent loader (still under lock) for
-        # user-defined config_patterns not covered above.
-        return self._resolve_uncached(key)
-
-    def _resolve_cached(self, key: str, raw: _RawConfig | None) -> dict[str, Any]:
+        if key not in self._cache.raw_by_key:
+            raise KeyError(
+                f"No config patterns were found for '{key}' in your config loader"
+            )
+        raw = self._cache.raw_by_key[key]
         if raw is None:
             raise MissingConfigException(
                 f"'{key}' was not available at cache build time."
@@ -138,14 +114,6 @@ class _ServingConfigLoader(AbstractConfigLoader):
         loader = self._cache.persistent_loader
         with self._cache.lock, _swapped_runtime_params(loader, self.runtime_params):
             return loader._resolve_from_raw_config(key, *raw)
-
-    def _resolve_uncached(self, key: str) -> Any:
-        loader = self._cache.persistent_loader
-        with self._cache.lock, _swapped_runtime_params(loader, self.runtime_params):
-            # Force a fresh read; persistent loader's UserDict may have
-            # cached a prior request's result for this key.
-            loader.data.pop(key, None)
-            return loader[key]
 
 
 class _swapped_runtime_params:

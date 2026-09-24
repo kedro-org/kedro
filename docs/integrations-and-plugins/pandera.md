@@ -628,7 +628,7 @@ python -m pytest src/spaceflights_pandera/schemas/test_schemas.py -v
 - [Kedro hooks documentation](https://docs.kedro.org/en/stable/hooks/introduction.html)
 - [Lazy validation](https://pandera.readthedocs.io/en/stable/lazy_validation.html)
 - [Custom checks](https://pandera.readthedocs.io/en/stable/checks.html)
-- [Multi-backend support](https://pandera.readthedocs.io/en/stable/ecosystem.html) - Pandera also validates data in Dask, Polars, Modin, and PySpark
+- [Multi-backend support](https://pandera.readthedocs.io/en/stable/integrations.html) - Pandera also validates data in Dask, Polars, Modin, and PySpark
 - [Ibis backend](https://pandera.readthedocs.io/en/stable/ibis.html) - Validate data with Ibis for cross-database compatibility
 
 For a declarative approach to validation using catalog metadata, see the community-maintained [kedro-pandera plugin](https://github.com/Galileo-Galilei/kedro-pandera) (last updated July 2024).

@@ -23,6 +23,7 @@ from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project, get_close_matches
 
+from ._serving_config import _ConfigCache, _ServingConfigLoader, build_config_cache
 from .abstract_session import AbstractSession, KedroSessionError
 
 if TYPE_CHECKING:
@@ -79,6 +80,7 @@ class KedroServiceSession(AbstractSession):
             self._project_path / settings.CONF_SOURCE
         )
         self._serving_mode = False
+        self._config_cache: _ConfigCache | None = None
 
     @classmethod
     def create(
@@ -119,7 +121,7 @@ class KedroServiceSession(AbstractSession):
         return session
 
     def _enable_serving_mode(self) -> None:
-        """Preload all pipelines, then switch the session into serving mode.
+        """Preload all pipelines and config, then switch the session into serving mode.
 
         The flag is set *after* a successful preload so that a failure during
         loading leaves the session in normal CLI mode rather than in an
@@ -127,6 +129,7 @@ class KedroServiceSession(AbstractSession):
         against an empty pipeline registry.
         """
         self._preload_pipelines()
+        self._preload_config()
         self._serving_mode = True
 
     def _preload_pipelines(self) -> None:
@@ -143,6 +146,28 @@ class KedroServiceSession(AbstractSession):
         )
         pipelines.set_requested(None)
         list(pipelines)
+
+    def _preload_config(self) -> None:
+        """Build the session-scoped config cache once, on the session thread.
+
+        Constructs a single persistent ``OmegaConfigLoader`` and caches
+        credentials, globals, and the raw parsed per-file configs for every
+        other config key. Request threads then read from this cache via
+        ``_ServingConfigLoader`` -- see ``_serving_config``.
+        """
+        self._logger.info(
+            "Serving mode: preloading config cache for session %s", self.session_id
+        )
+        config_loader_class = settings.CONFIG_LOADER_CLASS
+        config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
+        config_loader_args["restrict_runtime_params_type_selection"] = True
+        persistent_loader = config_loader_class(
+            conf_source=self._conf_source,
+            env=self.env,
+            runtime_params=None,
+            **config_loader_args,
+        )
+        self._config_cache = build_config_cache(persistent_loader)
 
     @property
     def _logger(self) -> logging.Logger:
@@ -166,11 +191,20 @@ class KedroServiceSession(AbstractSession):
         project's own `CONFIG_LOADER_ARGS` says -- that restriction must not be
         weakenable by project config for an untrusted caller. See
         https://github.com/kedro-org/kedro/issues/5706.
+
+        In serving mode the returned loader is a ``_ServingConfigLoader`` bound
+        to the session-scoped cache: credentials / globals reads are
+        lock-free; parameters / catalog reads run under the cache lock so
+        concurrent requests don't race on OmegaConf's process-global resolver
+        registry or on the persistent loader's ``_runtime_params_hits``
+        (which the catalog type security guard relies on).
         """
+        if self._serving_mode and self._config_cache is not None:
+            return _ServingConfigLoader(
+                cache=self._config_cache, runtime_params=runtime_params
+            )
         config_loader_class = settings.CONFIG_LOADER_CLASS
         config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
-        if self._serving_mode:
-            config_loader_args["restrict_runtime_params_type_selection"] = True
         return config_loader_class(  # type: ignore[no-any-return]
             conf_source=self._conf_source,
             env=self.env,

@@ -7,6 +7,8 @@
 
 ## Bug fixes and other changes
 
+- Fixed `--load-versions` (and `DataCatalog.from_config(load_versions=...)`) rejecting a dataset name that the catalog resolves through a user catch-all pattern, even though the name is in the catalog and returns a versioned dataset.
+
 ## Documentation changes
 
 ## Breaking changes to the API

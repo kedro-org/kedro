@@ -754,12 +754,15 @@ class DataCatalog(CatalogProtocol):
         save_version = save_version or generate_timestamp()
         load_versions = load_versions or {}
 
+        # Mirrors how a name is actually resolved, minus the runtime pattern:
+        # that one produces a MemoryDataset, which has no versions to load.
         missing_keys = [
             ds_name
             for ds_name in load_versions
             if not (
                 ds_name in config_resolver.config
                 or config_resolver.match_dataset_pattern(ds_name)
+                or config_resolver.match_user_catch_all_pattern(ds_name)
             )
         ]
         if missing_keys:

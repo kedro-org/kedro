@@ -783,6 +783,26 @@ class TestDataCatalog:
             with pytest.raises(DatasetNotFoundError, match=pattern):
                 DataCatalog.from_config(**correct_config, load_versions=load_version)
 
+        def test_from_correct_config_load_versions_user_catch_all_pattern(
+            self, correct_config
+        ):
+            """A name served by a user catch-all pattern does resolve, so the
+            `load_versions` validation has to accept it: the catalog answers for
+            the name, and a catch-all is exactly the setup where every dataset is
+            versioned."""
+            correct_config["catalog"]["{name}"] = {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/01_raw/{name}.csv",
+                "versioned": True,
+            }
+            load_version = {"served_by_catch_all": generate_timestamp()}
+
+            catalog = DataCatalog.from_config(
+                **correct_config, load_versions=load_version
+            )
+
+            assert "served_by_catch_all" in catalog
+
         def test_load_version(self, correct_config, dummy_dataframe, mocker):
             """Test load versioned datasets from config"""
             new_dataframe = pd.DataFrame(

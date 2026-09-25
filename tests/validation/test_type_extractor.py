@@ -330,21 +330,36 @@ class TestExtractTypesFromNode:
         assert result == {}
 
     def test_dict_inputs(self, type_extractor):
-        """Uses MagicMock because real Node validates dict keys against
-        function signature, which conflicts with the dataset->arg mapping
-        format used by the type extractor.
-        """
-
         def my_func(options: SampleDataclass) -> None:
             pass
 
-        node = MagicMock()
-        node.func = my_func
-        node.inputs = {"params:eval_config": "options"}
+        test_node = kedro_node(
+            func=my_func,
+            inputs={"options": "params:eval_config"},
+            outputs="output",
+            name="test_node",
+        )
 
-        result = type_extractor._extract_types_from_node(node)
+        result = type_extractor._extract_types_from_node(test_node)
         assert "eval_config" in result
         assert result["eval_config"] == SampleDataclass
+
+    def test_dict_inputs_skipping_an_argument(self, type_extractor):
+        """The typed requirement has to come from the argument the node really
+        wires, not from the one that happens to sit at the same position."""
+
+        def my_func(data: int, config: SampleDataclass | None = None, seed: int = 0):
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs={"data": "raw", "seed": "params:seed"},
+            outputs="output",
+            name="test_node",
+        )
+
+        result = type_extractor._extract_types_from_node(test_node)
+        assert result == {}
 
     def test_union_type_hint_skipped(self, type_extractor):
         def my_func(data: _UnionType) -> None:
@@ -497,18 +512,57 @@ class TestExtractTypesFromPipeline:
 
 class TestBuildDatasetToArgMapping:
     def test_dict_inputs(self, type_extractor):
-        """Uses MagicMock because real Node validates dict keys against
-        function signature.
-        """
+        """A node's input dict is ``{argument: dataset}``, and the mapping is the
+        other way round."""
 
         def my_func(a, b):
             pass
 
-        node = MagicMock()
-        node.inputs = {"ds_a": "a", "ds_b": "b"}
-        sig = inspect.signature(my_func)
+        test_node = kedro_node(
+            func=my_func,
+            inputs={"a": "ds_a", "b": "ds_b"},
+            outputs="output",
+            name="test_node",
+        )
 
-        result = type_extractor._build_dataset_to_arg_mapping(node, sig)
+        sig = inspect.signature(my_func)
+        result = type_extractor._build_dataset_to_arg_mapping(test_node, sig)
+        assert result == {"ds_a": "a", "ds_b": "b"}
+
+    def test_dict_inputs_skipping_an_argument(self, type_extractor):
+        """The node only wires some of the arguments, and the one it leaves out
+        sits before a provided one. Position alone attributes every later input
+        to the wrong argument."""
+
+        def my_func(data, config=None, seed=0):
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs={"data": "raw", "seed": "params:seed"},
+            outputs="output",
+            name="test_node",
+        )
+
+        sig = inspect.signature(my_func)
+        result = type_extractor._build_dataset_to_arg_mapping(test_node, sig)
+        assert result == {"raw": "data", "params:seed": "seed"}
+
+    def test_dict_inputs_out_of_signature_order(self, type_extractor):
+        """The dict is written in a different order from the signature."""
+
+        def my_func(a, b):
+            pass
+
+        test_node = kedro_node(
+            func=my_func,
+            inputs={"b": "ds_b", "a": "ds_a"},
+            outputs="output",
+            name="test_node",
+        )
+
+        sig = inspect.signature(my_func)
+        result = type_extractor._build_dataset_to_arg_mapping(test_node, sig)
         assert result == {"ds_a": "a", "ds_b": "b"}
 
     def test_list_inputs(self, type_extractor):

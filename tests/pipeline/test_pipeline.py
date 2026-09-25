@@ -1170,6 +1170,33 @@ class TestPipelineFilterHelpers:
             )
             assert actual_namespaces == sorted(expected_namespaces)
 
+    @pytest.mark.parametrize(
+        "target_namespaces,expected_namespaces",
+        [
+            (["katie", "katie.lisa"], ["katie", "katie.lisa", "katie.lisa.john"]),
+            (["katie.lisa", "katie"], ["katie", "katie.lisa", "katie.lisa.john"]),
+            (
+                ["katie", "katie.lisa", "katie.lisa.john"],
+                ["katie", "katie.lisa", "katie.lisa.john"],
+            ),
+            (["katie", "katie"], ["katie", "katie.lisa", "katie.lisa.john"]),
+            (["lisa", "lisa.john"], ["lisa", "lisa.john"]),
+            (["katie", "john"], ["john", "katie", "katie.lisa", "katie.lisa.john"]),
+        ],
+    )
+    def test_only_nodes_with_overlapping_namespaces(
+        self, target_namespaces, expected_namespaces, pipeline_with_namespaces
+    ):
+        """Selecting a namespace together with one it already covers must not
+        duplicate the shared nodes, because a parent namespace also matches the
+        nodes of its children."""
+        resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespaces(
+            target_namespaces
+        )
+
+        actual_namespaces = sorted(node.namespace for node in resulting_pipeline.nodes)
+        assert actual_namespaces == sorted(expected_namespaces)
+
     @pytest.mark.parametrize("namespace", ["katie", None])
     def test_only_nodes_with_unknown_namespace_raises_value_error(self, namespace):
         """

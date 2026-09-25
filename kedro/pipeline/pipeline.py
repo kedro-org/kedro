@@ -680,6 +680,7 @@ class Pipeline:
             A new ``Pipeline`` containing nodes with the specified namespaces.
         """
         nodes = []
+        seen = set()  # A node can match more than one of the requested namespaces
         unmatched_namespaces = []  # Track namespaces that don't match any nodes
 
         for node_namespace in node_namespaces:
@@ -693,7 +694,13 @@ class Pipeline:
 
             if not matching_nodes:
                 unmatched_namespaces.append(node_namespace)
-            nodes.extend(matching_nodes)
+
+            # A namespace also matches the nodes of its children, so requesting a
+            # parent and a child together matches the shared nodes twice.
+            for matching_node in matching_nodes:
+                if matching_node not in seen:
+                    seen.add(matching_node)
+                    nodes.append(matching_node)
 
         if unmatched_namespaces:
             raise ValueError(

@@ -7,6 +7,8 @@
 
 ## Bug fixes and other changes
 
+- Fixed the `runner` entry in the `run_params` passed to hooks: it now carries the runner name, instead of `'None'` for a default run or the `repr` of the runner instance, which included a memory address. Applies to both `KedroSession` and `KedroServiceSession`.
+
 ## Documentation changes
 
 ## Breaking changes to the API

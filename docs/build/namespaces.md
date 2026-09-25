@@ -294,6 +294,12 @@ Or, you can run the first two nodes with:
 kedro run --namespaces=data_processing.preprocessing
 ```
 
+Selecting a namespace also selects the nodes of its nested namespaces, so `data_processing` already covers `data_processing.preprocessing`. Passing both together is accepted and runs each node once:
+
+```bash
+kedro run --namespaces=data_processing,data_processing.preprocessing
+```
+
 Open the visualisation with `kedro viz run` to see the collapsible pipeline parts, which you can toggle with "Collapse pipelines" button on the left panel.
 
 ![nested pipeline visualisation](../meta/images/viz_collapse_panel.png)

@@ -11,14 +11,68 @@ permissions:
 
 jobs:
   kedro-main-test:
-    uses: ./.github/workflows/all-checks.yml
-    with:
-      branch: main
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Trigger and wait for all-checks on main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          TARGET_BRANCH: main
+        run: |
+          set -euo pipefail
+          before=$(date -u +%s)
+          gh workflow run all-checks.yml --ref "$TARGET_BRANCH" --repo "$REPO"
+
+          run_id=""
+          for _ in $(seq 1 30); do
+            sleep 2
+            run_id=$(gh run list --repo "$REPO" --workflow all-checks.yml \
+              --branch "$TARGET_BRANCH" --event workflow_dispatch \
+              --json databaseId,createdAt \
+              --jq "[.[] | select((.createdAt | fromdateiso8601) >= ${before})] | .[0].databaseId // empty") || true
+            [ -n "$run_id" ] && break
+          done
+
+          if [ -z "$run_id" ]; then
+            echo "::error::Could not find the dispatched all-checks.yml run on $TARGET_BRANCH" >&2
+            exit 1
+          fi
+
+          gh run watch "$run_id" --repo "$REPO" --exit-status
 
   kedro-develop-test:
-    uses: ./.github/workflows/all-checks.yml
-    with:
-      branch: develop
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Trigger and wait for all-checks on develop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          TARGET_BRANCH: develop
+        run: |
+          set -euo pipefail
+          before=$(date -u +%s)
+          gh workflow run all-checks.yml --ref "$TARGET_BRANCH" --repo "$REPO"
+
+          run_id=""
+          for _ in $(seq 1 30); do
+            sleep 2
+            run_id=$(gh run list --repo "$REPO" --workflow all-checks.yml \
+              --branch "$TARGET_BRANCH" --event workflow_dispatch \
+              --json databaseId,createdAt \
+              --jq "[.[] | select((.createdAt | fromdateiso8601) >= ${before})] | .[0].databaseId // empty") || true
+            [ -n "$run_id" ] && break
+          done
+
+          if [ -z "$run_id" ]; then
+            echo "::error::Could not find the dispatched all-checks.yml run on $TARGET_BRANCH" >&2
+            exit 1
+          fi
+
+          gh run watch "$run_id" --repo "$REPO" --exit-status
 
   notify-main:
     permissions:

@@ -69,17 +69,14 @@ class _ServingConfigLoader(AbstractConfigLoader):
 
     @property
     def restrict_runtime_params_type_selection(self) -> bool:
-        """Mirror the persistent loader's setting so callers introspecting the
-        loader (e.g. tests, hooks) see the same value they'd see in CLI mode."""
+        """Mirror the persistent loader's setting (e.g. for tests, hooks)."""
         return self._cache.persistent_loader.restrict_runtime_params_type_selection
 
     def __getitem__(self, key: str) -> Any:
         if key in self:
             return super().__getitem__(key)
-        if key == "credentials":
-            return deepcopy(self._cache.credentials)
-        if key == "globals":
-            return deepcopy(self._cache.globals)
+        if key in ("credentials", "globals"):
+            return deepcopy(getattr(self._cache, key))
         if key not in self._cache.raw_by_key:
             raise KeyError(
                 f"No config patterns were found for '{key}' in your config loader"
@@ -91,22 +88,18 @@ class _ServingConfigLoader(AbstractConfigLoader):
             )
         loader = self._cache.persistent_loader
         with _RESOLVE_LOCK:
-            # Another session's persistent loader may have replaced these
-            # process-global callbacks since this cache was built (or since
-            # this loader last resolved anything) -- reclaim them before
-            # resolving, while still holding the lock that keeps them ours
-            # for the duration of the resolve below.
+            # Reclaim the resolvers: another session's loader may have
+            # registered them last (OmegaConf's registry is process-global).
             loader._register_globals_resolver()
             loader._register_runtime_params_resolver()
-            with _swapped_runtime_params(loader, self.runtime_params):
+            with _swap_runtime_params(loader, self.runtime_params):
                 return loader._resolve_from_raw_config(key, *raw)
 
 
-class _swapped_runtime_params:
-    """Context manager: swap the persistent loader's runtime_params state for
-    the duration of one resolve, then restore. Must be used under
-    ``_RESOLVE_LOCK`` -- resets ``_runtime_params_hits``, which the catalog
-    security guard reads."""
+class _swap_runtime_params:
+    """Swap the loader's runtime_params for one resolve, then restore. Use
+    under ``_RESOLVE_LOCK`` -- also resets ``_runtime_params_hits``, which
+    the catalog security guard reads."""
 
     def __init__(
         self, loader: OmegaConfigLoader, runtime_params: dict[str, Any] | None

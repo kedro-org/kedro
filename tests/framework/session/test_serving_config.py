@@ -11,7 +11,7 @@ from kedro.config.abstract_config import MissingConfigException
 from kedro.config.omegaconf_config import OmegaConfigLoader
 from kedro.framework.session._serving_config import (
     _ServingConfigLoader,
-    _swapped_runtime_params,
+    _swap_runtime_params,
     build_config_cache,
 )
 
@@ -65,8 +65,7 @@ def persistent_loader(conf_source) -> OmegaConfigLoader:
 
 @pytest.fixture
 def second_conf_source(tmp_path_factory) -> str:
-    """A second, independent project -- distinct defaults from ``conf_source``
-    so cross-contamination between the two is easy to detect."""
+    """A second project with different defaults, to catch cross-contamination."""
     root = tmp_path_factory.mktemp("second_project")
     base = root / _BASE_ENV
     _write_yaml(
@@ -128,9 +127,8 @@ class TestBuildConfigCache:
         assert set(cache.raw_by_key) == {"catalog", "parameters", "spark"}
 
     def test_missing_config_dir_for_key_is_cached_as_none(self, conf_source):
-        # The "does_not_exist" env directory doesn't exist, so reading the raw
-        # per-file config for any key fails with MissingConfigException --
-        # build_config_cache must record that as a cache miss, not raise.
+        # "does_not_exist" doesn't exist, so build_config_cache must record
+        # that as a cache miss, not raise.
         loader = OmegaConfigLoader(
             conf_source=conf_source,
             env="does_not_exist",
@@ -143,9 +141,8 @@ class TestBuildConfigCache:
         assert cache.raw_by_key["parameters"] is None
 
     def test_cache_has_no_per_instance_lock(self, persistent_loader):
-        # Resolving must be serialized process-wide (via the module-level
-        # `_RESOLVE_LOCK`), not per-cache -- see TestMultipleSessions below
-        # for why a per-cache lock isn't enough.
+        # Resolving is serialized via the module-level `_RESOLVE_LOCK`, not
+        # per-cache -- see TestMultipleSessions for why.
         cache = build_config_cache(persistent_loader)
         assert not hasattr(cache, "lock")
 
@@ -259,21 +256,17 @@ class TestServingConfigLoaderGetItem:
 
 
 class TestMultipleSessions:
-    """OmegaConf's resolver registry is process-global: constructing a second
-    persistent loader (e.g. a second `KedroServiceSession` in the same
-    process) re-registers the "globals"/"runtime_params" resolver callbacks
-    globally, which would silently corrupt an *already-built* cache's
-    resolves unless every resolve reclaims its own loader's resolvers under
-    a lock shared across every session, not just within one.
+    """A second persistent loader re-registers OmegaConf's process-global
+    "globals"/"runtime_params" resolvers, since that registry isn't
+    per-loader -- so every resolve must reclaim its own loader's resolvers
+    under a lock shared across sessions, not just within one.
     """
 
     def test_second_session_does_not_hijack_the_first(
         self, persistent_loader, second_persistent_loader
     ):
         cache_a = build_config_cache(persistent_loader)
-        # Building a second session's cache re-registers the process-global
-        # resolvers to point at `second_persistent_loader`.
-        build_config_cache(second_persistent_loader)
+        build_config_cache(second_persistent_loader)  # rebinds the resolvers
 
         request_loader = _ServingConfigLoader(
             cache=cache_a, runtime_params={"filepath": "/tmp/a-request.csv"}
@@ -287,9 +280,7 @@ class TestMultipleSessions:
         build_config_cache(second_persistent_loader)
 
         request_loader = _ServingConfigLoader(cache=cache_a, runtime_params={})
-        # `conf_source`'s globals.yml sets env_name to "base"; if the
-        # resolver were still bound to `second_persistent_loader` this would
-        # resolve to "other" instead (or raise, if it can't find the key).
+        # Would resolve to "other" (or raise) if bound to the second loader.
         assert request_loader["globals"]["env_name"] == "base"
 
     def test_interleaved_requests_across_two_sessions_do_not_cross_contaminate(
@@ -314,13 +305,13 @@ class TestMultipleSessions:
             list(executor.map(worker, range(300)))
 
 
-class TestSwappedRuntimeParams:
+class TestSwapRuntimeParams:
     def test_enter_sets_and_exit_restores_loader_state(self, persistent_loader):
         persistent_loader.runtime_params = {"original": True}
         persistent_loader._runtime_params_oc = "original_oc"
         persistent_loader._runtime_params_hits = {"original_hit"}
 
-        with _swapped_runtime_params(persistent_loader, {"filepath": "/tmp/x.csv"}):
+        with _swap_runtime_params(persistent_loader, {"filepath": "/tmp/x.csv"}):
             assert persistent_loader.runtime_params == {"filepath": "/tmp/x.csv"}
             assert persistent_loader._runtime_params_oc is None
             assert persistent_loader._runtime_params_hits == set()
@@ -330,5 +321,5 @@ class TestSwappedRuntimeParams:
         assert persistent_loader._runtime_params_hits == {"original_hit"}
 
     def test_none_runtime_params_defaults_to_empty_dict(self, persistent_loader):
-        with _swapped_runtime_params(persistent_loader, None):
+        with _swap_runtime_params(persistent_loader, None):
             assert persistent_loader.runtime_params == {}

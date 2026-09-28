@@ -198,7 +198,44 @@ class KedroServiceSession(AbstractSession):
             runtime_params=None,
             **config_loader_args,
         )
+        self._warn_if_credentials_use_runtime_params(persistent_loader)
         self._config_cache = build_config_cache(persistent_loader)
+
+    def _warn_if_credentials_use_runtime_params(
+        self, persistent_loader: OmegaConfigLoader
+    ) -> None:
+        """Warn if a credentials file appears to use ``${runtime_params:...}``.
+
+        Serving mode resolves credentials once at session startup, with no
+        ``runtime_params``, unlike catalog/parameters -- so this interpolation
+        is fixed for the life of the session rather than varying per request.
+
+        Checked as raw file text, not via the loader: reading credentials at
+        all (even "raw", unresolved) triggers ``OmegaConfigLoader``'s
+        environment-variable resolution pass, which would resolve --
+        or, with no default, raise on -- the very interpolation this warning
+        is about.
+        """
+        patterns = persistent_loader.config_patterns.get("credentials", [])
+        run_env = persistent_loader.env or persistent_loader.default_run_env
+        for env_name in {persistent_loader.base_env, run_env}:
+            conf_path = persistent_loader._get_conf_env_path(env_name)
+            for pattern in patterns:
+                for filepath in persistent_loader._fs.glob(f"{conf_path}/{pattern}"):
+                    if not persistent_loader._fs.isfile(filepath):
+                        continue
+                    with persistent_loader._fs.open(filepath) as f:
+                        if b"runtime_params:" in f.read():
+                            self._logger.warning(
+                                "Serving mode: '%s' appears to use "
+                                "`runtime_params:` interpolation. Credentials "
+                                "are resolved once when the session is "
+                                "created, not per request, so this value is "
+                                "fixed for the life of the session and will "
+                                "not reflect each request's runtime_params.",
+                                filepath,
+                            )
+                            return
 
     @property
     def _logger(self) -> logging.Logger:

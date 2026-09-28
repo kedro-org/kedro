@@ -4,6 +4,7 @@
 
 - Added an optional `params` query parameter to `GET /snapshot` for resolving `${runtime_params:...}` interpolation per request, using the same format as `kedro run --params`.
 - Graduated `llm_context_node`, `LLMContextNode`, `LLMContext` and `tool` from experimental to stable. They no longer emit a `KedroExperimentalWarning`.
+- Added pre-loading of raw configuration in serving mode to improve request handling performance.
 
 ## Bug fixes and other changes
 

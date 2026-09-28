@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import threading
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigException
+
+_RESOLVE_LOCK = threading.Lock()
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -27,7 +29,6 @@ class _ConfigCache:
     credentials: dict[str, Any]
     globals: dict[str, Any]
     raw_by_key: dict[str, _RawConfig | None]
-    lock: threading.Lock = field(default_factory=threading.Lock)
 
 
 def build_config_cache(persistent_loader: OmegaConfigLoader) -> _ConfigCache:
@@ -36,11 +37,6 @@ def build_config_cache(persistent_loader: OmegaConfigLoader) -> _ConfigCache:
         credentials = deepcopy(persistent_loader["credentials"])
     except MissingConfigException:
         credentials = {}
-
-    # Constructing `persistent_loader` resolves "globals", which deactivates
-    # the `runtime_params:` resolver globally. Re-register it here: request
-    # resolves call `_resolve_from_raw_config` directly and never do so.
-    persistent_loader._register_runtime_params_resolver()
 
     raw_by_key: dict[str, _RawConfig | None] = {}
     for key in persistent_loader.config_patterns:
@@ -94,14 +90,22 @@ class _ServingConfigLoader(AbstractConfigLoader):
                 f"'{key}' was not available at cache build time."
             )
         loader = self._cache.persistent_loader
-        with self._cache.lock, _swapped_runtime_params(loader, self.runtime_params):
-            return loader._resolve_from_raw_config(key, *raw)
+        with _RESOLVE_LOCK:
+            # Another session's persistent loader may have replaced these
+            # process-global callbacks since this cache was built (or since
+            # this loader last resolved anything) -- reclaim them before
+            # resolving, while still holding the lock that keeps them ours
+            # for the duration of the resolve below.
+            loader._register_globals_resolver()
+            loader._register_runtime_params_resolver()
+            with _swapped_runtime_params(loader, self.runtime_params):
+                return loader._resolve_from_raw_config(key, *raw)
 
 
 class _swapped_runtime_params:
     """Context manager: swap the persistent loader's runtime_params state for
-    the duration of one resolve, then restore. Must be used under the
-    cache lock -- resets ``_runtime_params_hits``, which the catalog
+    the duration of one resolve, then restore. Must be used under
+    ``_RESOLVE_LOCK`` -- resets ``_runtime_params_hits``, which the catalog
     security guard reads."""
 
     def __init__(

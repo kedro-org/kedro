@@ -717,6 +717,35 @@ class TestKedroServiceSession:
         mock_pipelines.set_requested.assert_called_once_with(None)
         mock_pipelines.__iter__.assert_called()
 
+    @pytest.mark.usefixtures("mock_settings_custom_config_loader_class")
+    def test_serving_mode_rejects_non_omega_config_loader_class(
+        self, fake_project, mocker
+    ):
+        """Serving mode's config cache reaches into OmegaConfigLoader-specific
+        internals and relies on it to guard untrusted runtime_params, so a
+        project-supplied loader that isn't OmegaConfigLoader (or a subclass)
+        must be rejected up front with a clear error, not an AttributeError
+        deep inside the cache-building internals."""
+        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.service_session.pipelines"
+        )
+
+        with pytest.raises(KedroSessionError, match="OmegaConfigLoader"):
+            KedroServiceSession.create(project_path=fake_project, serving_mode=True)
+
+        # Validation must happen before any preloading work starts.
+        mock_pipelines.set_requested.assert_not_called()
+
+    @pytest.mark.usefixtures("mock_settings_custom_config_loader_class")
+    def test_cli_mode_allows_non_omega_config_loader_class(self, fake_project):
+        """The same custom loader that serving mode rejects must continue to
+        work in ordinary CLI mode (serving_mode=False, the default) -- the
+        restriction is serving-mode-only."""
+        session = KedroServiceSession.create(project_path=fake_project)
+        assert session._serving_mode is False
+        assert session._get_config_loader().__class__.__name__ == "MyConfigLoader"
+
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_run_in_serving_mode_skips_set_requested(
         self, fake_project, mock_runner, mocker

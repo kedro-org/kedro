@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from kedro import __version__ as kedro_version
+from kedro.config.omegaconf_config import OmegaConfigLoader
 from kedro.framework import project as kedro_project
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
@@ -104,9 +105,17 @@ class KedroServiceSession(AbstractSession):
                 ``run()`` calls begin, making pipeline lookups safe across
                 threads. Leave ``False`` (the default) for CLI use, where
                 selective pipeline loading is preferred for startup performance.
+                Requires the project's ``CONFIG_LOADER_CLASS`` to be
+                ``OmegaConfigLoader`` (or a subclass); raises ``KedroSessionError``
+                otherwise.
 
         Returns:
             A new ``KedroServiceSession`` instance ready for use.
+
+        Raises:
+            KedroSessionError: If ``serving_mode`` is ``True`` and the project's
+                ``CONFIG_LOADER_CLASS`` is not ``OmegaConfigLoader`` (or a
+                subclass).
         """
         validate_settings()
         env = env or os.getenv("KEDRO_ENV")
@@ -128,9 +137,31 @@ class KedroServiceSession(AbstractSession):
         inconsistent state where ``run()`` would skip ``set_requested()``
         against an empty pipeline registry.
         """
+        self._validate_config_loader_class_for_serving_mode()
         self._preload_pipelines()
         self._preload_config()
         self._serving_mode = True
+
+    def _validate_config_loader_class_for_serving_mode(self) -> None:
+        """Serving mode requires ``CONFIG_LOADER_CLASS`` to be ``OmegaConfigLoader``
+        (or a subclass), unlike CLI mode, which supports any ``AbstractConfigLoader``.
+
+        ``_preload_config`` caches config and guards untrusted ``runtime_params``
+        (see ``restrict_runtime_params_type_selection``) by reaching into
+        ``OmegaConfigLoader``-specific internals (``_read_raw_config``,
+        ``_globals``, its resolver registrations, ...). A project-supplied
+        loader that doesn't have those isn't just unsupported for caching --
+        it has no way to enforce that guard at all, so it must not silently
+        run in serving mode.
+        """
+        config_loader_class = settings.CONFIG_LOADER_CLASS
+        if not issubclass(config_loader_class, OmegaConfigLoader):
+            raise KedroSessionError(
+                "KedroServiceSession serving mode requires `CONFIG_LOADER_CLASS` "
+                "to be `OmegaConfigLoader` or a subclass for safe config caching "
+                "and `runtime_params` validation. Got "
+                f"`{config_loader_class.__name__}`."
+            )
 
     def _preload_pipelines(self) -> None:
         """Eagerly load all registered pipelines into the shared singleton.

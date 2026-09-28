@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING
 
@@ -64,6 +63,40 @@ def persistent_loader(conf_source) -> OmegaConfigLoader:
     )
 
 
+@pytest.fixture
+def second_conf_source(tmp_path_factory) -> str:
+    """A second, independent project -- distinct defaults from ``conf_source``
+    so cross-contamination between the two is easy to detect."""
+    root = tmp_path_factory.mktemp("second_project")
+    base = root / _BASE_ENV
+    _write_yaml(
+        base / "catalog.yml",
+        {
+            "cars": {
+                "type": "pandas.CSVDataset",
+                "filepath": "${runtime_params:filepath,'/other/cars.csv'}",
+            },
+            "labelled": {
+                "type": "MemoryDataset",
+                "copy_mode": "${globals:env_name}",
+            },
+        },
+    )
+    _write_yaml(base / "globals.yml", {"env_name": "other"})
+    return str(root)
+
+
+@pytest.fixture
+def second_persistent_loader(second_conf_source) -> OmegaConfigLoader:
+    return OmegaConfigLoader(
+        conf_source=second_conf_source,
+        env=None,
+        base_env=_BASE_ENV,
+        default_run_env=_BASE_ENV,
+        restrict_runtime_params_type_selection=True,
+    )
+
+
 class TestBuildConfigCache:
     def test_caches_resolved_credentials_and_globals(self, persistent_loader):
         cache = build_config_cache(persistent_loader)
@@ -83,9 +116,7 @@ class TestBuildConfigCache:
         cache = build_config_cache(loader)
         assert cache.credentials == {}
 
-    def test_raw_by_key_covers_every_non_special_config_pattern(
-        self, conf_source
-    ):
+    def test_raw_by_key_covers_every_non_special_config_pattern(self, conf_source):
         loader = OmegaConfigLoader(
             conf_source=conf_source,
             env=None,
@@ -111,9 +142,12 @@ class TestBuildConfigCache:
         assert cache.raw_by_key["catalog"] is None
         assert cache.raw_by_key["parameters"] is None
 
-    def test_lock_is_not_reentrant(self, persistent_loader):
+    def test_cache_has_no_per_instance_lock(self, persistent_loader):
+        # Resolving must be serialized process-wide (via the module-level
+        # `_RESOLVE_LOCK`), not per-cache -- see TestMultipleSessions below
+        # for why a per-cache lock isn't enough.
         cache = build_config_cache(persistent_loader)
-        assert type(cache.lock) is type(threading.Lock())
+        assert not hasattr(cache, "lock")
 
 
 class TestServingConfigLoaderGetItem:
@@ -222,6 +256,62 @@ class TestServingConfigLoaderGetItem:
         with ThreadPoolExecutor(max_workers=16) as executor:
             results = list(executor.map(worker, range(300)))
         assert all(results)
+
+
+class TestMultipleSessions:
+    """OmegaConf's resolver registry is process-global: constructing a second
+    persistent loader (e.g. a second `KedroServiceSession` in the same
+    process) re-registers the "globals"/"runtime_params" resolver callbacks
+    globally, which would silently corrupt an *already-built* cache's
+    resolves unless every resolve reclaims its own loader's resolvers under
+    a lock shared across every session, not just within one.
+    """
+
+    def test_second_session_does_not_hijack_the_first(
+        self, persistent_loader, second_persistent_loader
+    ):
+        cache_a = build_config_cache(persistent_loader)
+        # Building a second session's cache re-registers the process-global
+        # resolvers to point at `second_persistent_loader`.
+        build_config_cache(second_persistent_loader)
+
+        request_loader = _ServingConfigLoader(
+            cache=cache_a, runtime_params={"filepath": "/tmp/a-request.csv"}
+        )
+        assert request_loader["catalog"]["cars"]["filepath"] == "/tmp/a-request.csv"
+
+    def test_globals_resolver_is_not_hijacked_either(
+        self, persistent_loader, second_persistent_loader
+    ):
+        cache_a = build_config_cache(persistent_loader)
+        build_config_cache(second_persistent_loader)
+
+        request_loader = _ServingConfigLoader(cache=cache_a, runtime_params={})
+        # `conf_source`'s globals.yml sets env_name to "base"; if the
+        # resolver were still bound to `second_persistent_loader` this would
+        # resolve to "other" instead (or raise, if it can't find the key).
+        assert request_loader["globals"]["env_name"] == "base"
+
+    def test_interleaved_requests_across_two_sessions_do_not_cross_contaminate(
+        self, persistent_loader, second_persistent_loader
+    ):
+        cache_a = build_config_cache(persistent_loader)
+        cache_b = build_config_cache(second_persistent_loader)
+
+        def worker(i: int) -> None:
+            if i % 2 == 0:
+                loader = _ServingConfigLoader(
+                    cache=cache_a, runtime_params={"filepath": f"a-{i}"}
+                )
+                assert loader["catalog"]["cars"]["filepath"] == f"a-{i}"
+            else:
+                loader = _ServingConfigLoader(
+                    cache=cache_b, runtime_params={"filepath": f"b-{i}"}
+                )
+                assert loader["catalog"]["cars"]["filepath"] == f"b-{i}"
+
+        with ThreadPoolExecutor(max_workers=16) as executor:
+            list(executor.map(worker, range(300)))
 
 
 class TestSwappedRuntimeParams:

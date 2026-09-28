@@ -181,38 +181,11 @@ class KedroServiceSession(AbstractSession):
             runtime_params=None,
             **config_loader_args,
         )
-        self._warn_if_credentials_use_runtime_params(persistent_loader)
+        self._logger.warning(
+            "`runtime_params` are not supported in credentials in serving mode; "
+            "credentials are loaded once at startup and do not vary per request."
+        )
         self._config_cache = build_config_cache(persistent_loader)
-
-    def _warn_if_credentials_use_runtime_params(
-        self, persistent_loader: OmegaConfigLoader
-    ) -> None:
-        """Warn if a credentials file uses ``${runtime_params:...}``.
-
-        Serving mode resolves credentials once at startup, so this is fixed
-        for the session rather than varying per request, unlike
-        catalog/parameters. Checked as raw text: reading credentials via the
-        loader, even "raw", would itself resolve (or crash on) this
-        interpolation.
-        """
-        patterns = persistent_loader.config_patterns.get("credentials", [])
-        run_env = persistent_loader.env or persistent_loader.default_run_env
-        for env_name in {persistent_loader.base_env, run_env}:
-            conf_path = persistent_loader._get_conf_env_path(env_name)
-            for pattern in patterns:
-                for filepath in persistent_loader._fs.glob(f"{conf_path}/{pattern}"):
-                    if not persistent_loader._fs.isfile(filepath):
-                        continue
-                    with persistent_loader._fs.open(filepath) as f:
-                        if b"runtime_params:" in f.read():
-                            self._logger.warning(
-                                "Serving mode: '%s' uses `runtime_params:` "
-                                "interpolation, but credentials are resolved "
-                                "once at startup, not per request -- this "
-                                "value is fixed for the life of the session.",
-                                filepath,
-                            )
-                            return
 
     @property
     def _logger(self) -> logging.Logger:

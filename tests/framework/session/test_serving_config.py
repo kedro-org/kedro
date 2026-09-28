@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 _BASE_ENV = "base"
-_RUN_ENV = "local"
 
 
 def _write_yaml(filepath: Path, config: dict) -> None:

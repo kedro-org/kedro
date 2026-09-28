@@ -717,62 +717,28 @@ class TestKedroServiceSession:
         mock_pipelines.set_requested.assert_called_once_with(None)
         mock_pipelines.__iter__.assert_called()
 
-    def test_serving_mode_warns_if_credentials_use_runtime_params(
-        self, fake_project, mocker, caplog
-    ):
-        """Credentials are resolved once at session startup in serving mode,
-        with no runtime_params, unlike catalog/parameters -- so `${runtime_params:...}`
-        there is fixed for the life of the session. Warn about it up front
-        rather than let it silently do nothing per request."""
-        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
-        mocker.patch("kedro.framework.session.service_session.pipelines")
-        (fake_project / "conf" / "base" / "credentials.yml").write_text(
-            "api:\n  key: \"${runtime_params:api_key,'default'}\"\n"
-        )
-
-        with caplog.at_level(logging.WARNING):
-            KedroServiceSession.create(project_path=fake_project, serving_mode=True)
-
-        assert "runtime_params" in caplog.text
-        assert "credentials.yml" in caplog.text
-
-    def test_serving_mode_does_not_warn_for_plain_credentials(
+    def test_serving_mode_warns_runtime_params_not_supported_in_credentials(
         self, fake_project, mocker, caplog
     ):
         mocker.patch("kedro.framework.session.service_session._create_hook_manager")
         mocker.patch("kedro.framework.session.service_session.pipelines")
-        (fake_project / "conf" / "base" / "credentials.yml").write_text(
-            "api:\n  key: static-key\n"
-        )
 
         with caplog.at_level(logging.WARNING):
             KedroServiceSession.create(project_path=fake_project, serving_mode=True)
 
-        assert "runtime_params" not in caplog.text
-
-    def test_credentials_runtime_params_warning_check_skips_directories(
-        self, fake_project
-    ):
-        """A `credentials*` glob pattern can match a directory too (e.g.
-        `credentials_extra/`); the check must skip it, not try to open it."""
-        (fake_project / "conf" / "base" / "credentials_extra").mkdir()
-        session = KedroServiceSession.create(project_path=fake_project)
-        persistent_loader = OmegaConfigLoader(
-            conf_source=session._conf_source, env=session.env
+        assert (
+            "`runtime_params:` resolver is not supported in credentials in serving mode. "
+            "Credentials are loaded once at startup and do not vary per request."
+            in caplog.text
         )
-
-        # Must not raise despite the directory matching "credentials*".
-        session._warn_if_credentials_use_runtime_params(persistent_loader)
 
     @pytest.mark.usefixtures("mock_settings_custom_config_loader_class")
     def test_serving_mode_rejects_non_omega_config_loader_class(
         self, fake_project, mocker
     ):
-        """Serving mode's config cache reaches into OmegaConfigLoader-specific
-        internals and relies on it to guard untrusted runtime_params, so a
+        """Serving mode's config cache uses OmegaConfigLoader internal functionsso a
         project-supplied loader that isn't OmegaConfigLoader (or a subclass)
-        must be rejected up front with a clear error, not an AttributeError
-        deep inside the cache-building internals."""
+        must be rejected up front with a clear error"""
         mocker.patch("kedro.framework.session.service_session._create_hook_manager")
         mock_pipelines = mocker.patch(
             "kedro.framework.session.service_session.pipelines"

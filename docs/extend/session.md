@@ -92,12 +92,19 @@ You can provide the following optional arguments in `KedroServiceSession.create(
 - `project_path`: Path to the project root directory
 - `env`: Environment for the `KedroContext`
 - `conf_source`: Optional argument to specify the configuration source for the `KedroContext`
-- `serving_mode`: A Boolean value, `False` by default. Set to `True` when the session will handle concurrent `run()` calls; preloads all pipelines eagerly during `create()` to avoid race conditions.
+- `serving_mode`: A Boolean value, `False` by default. Set to `True` when the session will handle concurrent `run()` calls; preloads all pipelines and configuration eagerly during `create()` to avoid race conditions.
 
 The main differences in the `create()` method between `KedroSession` and `KedroServiceSession` are:
 
 - `KedroServiceSession` does not have the `save_on_close` argument.
 - `KedroServiceSession` does not have the `runtime_params` argument, as runtime parameters are provided in the `run()` method for each run, allowing you to update the `KedroContext` parameters for that specific run.
+
+### Serving mode and configuration
+
+With `serving_mode=True`, `create()` builds the project configuration once, up front, and every `run()` call reuses it instead of re-reading it from disk. This has two consequences:
+
+- **`CONFIG_LOADER_CLASS` must be `OmegaConfigLoader`** (or a subclass). `create()` raises `KedroSessionError` if the project's `CONFIG_LOADER_CLASS` setting is not compatible.
+- **`credentials.yml` cannot use `${runtime_params:...}`.** Credentials are resolved once when the session is created, not per request, so this interpolation would be fixed for the life of the session rather than reflecting each `run()` call. `create()` logs a warning about this whenever serving mode starts. `catalog.yml` and `parameters.yml` are unaffected — each `run()` call's `runtime_params` are still applied to them correctly.
 
 ## `bootstrap_project` and `configure_project`
 

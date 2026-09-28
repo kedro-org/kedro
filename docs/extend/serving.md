@@ -228,6 +228,13 @@ The server creates this session with `serving_mode=True` (see [Create a `KedroSe
 
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the `--env` and `--conf-source` options instead.
 
+#### Config caching
+
+Serving mode also preloads and caches the project configuration once, on the first `/run` request, and every subsequent request reuses it (see [Serving mode and configuration](./session.md#serving-mode-and-configuration)). Two consequences:
+
+- The project's `CONFIG_LOADER_CLASS` must be `OmegaConfigLoader` (or a subclass); otherwise the first `/run` request fails with an error instead of running the pipeline.
+- `credentials.yml` cannot use `${runtime_params:...}` — the server logs a warning about this on the first request. `catalog.yml` and `parameters.yml` are unaffected; `params` in the request body still applies to them per request as usual.
+
 #### Runner security
 
 Short names (for example, `SequentialRunner`) always resolve against `kedro.runner`. Fully-qualified names (for example, `mypackage.runners.MyRunner`) must belong to `kedro.runner`, the project's own package, or a module listed in `RUNNER_MODULE_ALLOWLIST` in `settings.py`. The module is never imported otherwise.

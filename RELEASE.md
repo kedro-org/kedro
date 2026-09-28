@@ -11,10 +11,10 @@
 ## Breaking changes to the API
 
 ## Community contributions
+
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Rodrigo-Palma](https://github.com/Rodrigo-Palma)
-
 
 # Release 1.7.0
 

@@ -294,7 +294,7 @@ Or, you can run the first two nodes with:
 kedro run --namespaces=data_processing.preprocessing
 ```
 
-Selecting a namespace also selects the nodes of its nested namespaces, so `data_processing` already covers `data_processing.preprocessing`. Passing both together is accepted and runs each node once:
+Selecting a namespace also selects the nodes of its nested namespaces, so `data_processing` already covers `data_processing.preprocessing`. Passing both together is accepted and each node still runs a single time:
 
 ```bash
 kedro run --namespaces=data_processing,data_processing.preprocessing

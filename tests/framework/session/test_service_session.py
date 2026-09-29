@@ -727,8 +727,8 @@ class TestKedroServiceSession:
             KedroServiceSession.create(project_path=fake_project, serving_mode=True)
 
         assert (
-            "`runtime_params:` resolver is not supported in credentials in serving mode. "
-            "Credentials are loaded once at startup and do not vary per request."
+            "`runtime_params` are not supported in credentials in serving mode; "
+            "credentials are loaded once at startup and do not vary per request."
             in caplog.text
         )
 

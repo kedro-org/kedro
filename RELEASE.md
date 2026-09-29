@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.
 
 ## Bug fixes and other changes

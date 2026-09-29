@@ -333,11 +333,14 @@ class Node:
     def _set_unique_name(self) -> str:
         """Set a unique name for the node."""
         if isinstance(self._func, partial):
-            base = f"partial({self._func.func.__name__})"  # Use the original function's name
+            func = self._func.func
+            func_name = getattr(func, "__name__", type(func).__name__)
+            base = f"partial({func_name})"  # Use the original callable's name
             key = f"{base}|{self.inputs}|{self.outputs}"
         else:
-            base = self._func_name
-            key = f"{self._func.__module__}.{self._func.__name__}|{self.inputs}|{self.outputs}"
+            func_name = getattr(self._func, "__name__", type(self._func).__name__)
+            base = func_name
+            key = f"{self._func.__module__}.{func_name}|{self.inputs}|{self.outputs}"
 
         suffix = hashlib.sha256(key.encode()).hexdigest()[:8]
         return f"{base}__{suffix}"

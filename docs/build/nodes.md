@@ -211,6 +211,8 @@ Set up a Kedro project using the legacy `pandas-iris` starter. Create the projec
 kedro new --starter=pandas-iris --checkout=0.18.14
 ```
 
+A generator node wrapped by a decorator using `functools.wraps` is streamed in the same way as the original generator function. The decorator must return the generator rather than consuming it. Asynchronous data loading and saving does not support generator nodes, decorated or not.
+
 ### Loading data with generators
 
 To use generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.

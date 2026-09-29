@@ -234,7 +234,7 @@ This pattern is useful when migrating older projects that passed `context` throu
 
 !!! note
 
-    Keep stored data small and treat it as `read-only` to avoid surprising side effects across hooks.
+    `KedroServiceSession`, the same Hook instance is reused across multiple `run()` calls, so accumulated state persists between runs. See [Hook state across runs](../session.md#hook-state-across-runs).
 
 ## Use Hooks to read `metadata` from `DataCatalog`
 

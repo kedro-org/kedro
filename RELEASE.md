@@ -4,11 +4,17 @@
 
 ## Bug fixes and other changes
 
+- Fixed `Pipeline.only_nodes_with_namespaces` (and `kedro run --namespaces`) raising `ValueError: Pipeline nodes must have unique names` when a namespace is selected together with one it already covers, such as `--namespaces a,a.b`.
+
 ## Documentation changes
 
 ## Breaking changes to the API
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Rodrigo-Palma](https://github.com/Rodrigo-Palma)
 
 # Release 1.7.0
 

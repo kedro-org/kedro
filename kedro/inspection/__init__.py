@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from kedro.inspection.grouping import (
+    GroupingIssue,
+    GroupingValidationError,
+    GroupingValidationResult,
+    validate_grouping,
+)
 from kedro.inspection.snapshot import _build_project_snapshot
 
 if TYPE_CHECKING:
@@ -13,7 +19,11 @@ if TYPE_CHECKING:
     from kedro.inspection.models import ProjectSnapshot
 
 __all__ = [
+    "GroupingIssue",
+    "GroupingValidationError",
+    "GroupingValidationResult",
     "get_project_snapshot",
+    "validate_grouping",
 ]
 
 

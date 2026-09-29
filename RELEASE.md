@@ -4,6 +4,8 @@
 
 ## Bug fixes and other changes
 
+- Stream outputs from generator nodes decorated with `functools.wraps`, and reject these nodes when asynchronous loading and saving is enabled.
+
 ## Documentation changes
 
 ## Breaking changes to the API

@@ -46,6 +46,6 @@ authors:
 - family-names: Zabłocki
   given-names: Marcin
 title: Kedro
-version: 1.6.0
-date-released: 2026-09-03
+version: 1.7.0
+date-released: 2026-09-28
 url: https://github.com/kedro-org/kedro

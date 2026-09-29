@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-import kedro.inspection
+from kedro import inspection
 from kedro.inspection import (
     GroupingValidationError,
     GroupingValidationResult,
@@ -551,4 +551,4 @@ class TestResult:
             "GroupingValidationResult",
             "validate_grouping",
         ):
-            assert name in kedro.inspection.__all__
+            assert name in inspection.__all__

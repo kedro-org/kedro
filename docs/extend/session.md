@@ -105,7 +105,18 @@ The main differences in the `create()` method between `KedroSession` and `KedroS
 
 ## Customising the session class
 
-The `SESSION_CLASS` setting in `settings.py` controls which class `kedro run`, `kedro catalog`, and `%reload_kedro` instantiate. It defaults to `KedroSession` and any custom value must share `AbstractSession` as a common ancestor, so you can point it at `KedroServiceSession`, a subclass of either, or your own `AbstractSession` implementation.
+The `SESSION_CLASS` setting in `settings.py` controls which class `kedro run`, `kedro catalog`, and `%reload_kedro` instantiate. It defaults to `KedroSession`.
+
+To use `KedroServiceSession` instead, for example, so a hook or plugin can rely on `session.run()` accepting `runtime_params` per call, set it directly:
+
+```python
+# settings.py
+from kedro.framework.session import KedroServiceSession
+
+SESSION_CLASS = KedroServiceSession
+```
+
+Any custom value must share `AbstractSession` as a common ancestor, so you can also subclass `KedroSession`, `KedroServiceSession`, or `AbstractSession` directly for custom behaviour:
 
 ```python
 # settings.py

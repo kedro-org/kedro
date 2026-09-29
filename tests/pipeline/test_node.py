@@ -449,6 +449,36 @@ class TestNames:
         assert re.match(r"^partial\(identity\)__[0-9a-f]{8}$", n.name)
         assert n.short_name == "<Partial>"
 
+    def test_callable_object_name(self):
+        class Double:
+            def __call__(self, value):
+                return value * 2
+
+        func = Double()
+        first = node(func, "in", "out")
+        same = node(func, "in", "out")
+        different = node(func, "other", "out")
+
+        assert re.fullmatch(r"Double__[0-9a-f]{8}", first.name)
+        assert first.name == same.name
+        assert first.name != different.name
+        assert first.run({"in": 3}) == {"out": 6}
+
+    def test_partial_callable_object_name(self):
+        class Add:
+            def __call__(self, value, increment):
+                return value + increment
+
+        func = partial(Add(), increment=2)
+        first = node(func, "in", "out")
+        same = node(func, "in", "out")
+        different = node(func, "other", "out")
+
+        assert re.fullmatch(r"partial\(Add\)__[0-9a-f]{8}", first.name)
+        assert first.name == same.name
+        assert first.name != different.name
+        assert first.run({"in": 3}) == {"out": 5}
+
     def test_updated_partial(self):
         n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])
         assert str(n) == "identity([in]) -> [out]"

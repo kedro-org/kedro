@@ -1,3 +1,5 @@
+from functools import wraps
+
 import pytest
 
 from kedro.framework.hooks.manager import _NullPluginManager
@@ -32,6 +34,20 @@ class TestTask:
                 is_async=True,
             )
             task.execute()
+
+    def test_wrapped_generator_fails_async(self, catalog):
+        @wraps(generate_one)
+        def wrapped(*args, **kwargs):
+            return generate_one(*args, **kwargs)
+
+        n = node(wrapped, inputs=None, outputs="result")
+        with pytest.raises(ValueError, match="nodes wrapping generator functions"):
+            Task(
+                node=n,
+                catalog=catalog,
+                hook_manager=_NullPluginManager(),
+                is_async=True,
+            ).execute()
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_package_name_and_logging_provided(

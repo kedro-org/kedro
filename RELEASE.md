@@ -2,18 +2,30 @@
 
 ## Major features and improvements
 
-- Added an optional `params` query parameter to `GET /snapshot` for resolving `${runtime_params:...}` interpolation per request, using the same format as `kedro run --params`.
-- Graduated `llm_context_node`, `LLMContextNode`, `LLMContext` and `tool` from experimental to stable. They no longer emit a `KedroExperimentalWarning`.
-
 ## Bug fixes and other changes
+
+- Fixed `Pipeline.only_nodes_with_namespaces` (and `kedro run --namespaces`) raising `ValueError: Pipeline nodes must have unique names` when a namespace is selected together with one it already covers, such as `--namespaces a,a.b`.
 
 ## Documentation changes
 
 ## Breaking changes to the API
 
-- **Security fix**: Custom logging handler, filter or formatter classes referenced in `conf/logging.yml` are no longer imported unless their module is on the logging allowlist. Only the `logging` standard-library package (including `logging.handlers`) and `kedro.logging` are trusted by default. Projects that point `conf/logging.yml` at their own logging classes must now list those modules in the `KEDRO_LOGGING_MODULE_ALLOWLIST` environment variable (comma-separated) to keep them working.
-
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Rodrigo-Palma](https://github.com/Rodrigo-Palma)
+
+# Release 1.7.0
+
+## Major features and improvements
+
+- Added an optional `params` query parameter to `GET /snapshot` for resolving `${runtime_params:...}` interpolation per request, using the same format as `kedro run --params`.
+- Graduated `llm_context_node`, `LLMContextNode`, `LLMContext` and `tool` from experimental to stable. They no longer emit a `KedroExperimentalWarning`.
+
+## Breaking changes to the API
+
+- **Security fix**: Custom logging handler, filter or formatter classes referenced in `conf/logging.yml` are no longer imported unless their module is on the logging allowlist. Only the `logging` standard-library package (including `logging.handlers`) and `kedro.logging` are trusted by default. Projects that point `conf/logging.yml` at their own logging classes must now list those modules in the `KEDRO_LOGGING_MODULE_ALLOWLIST` environment variable (comma-separated) to keep them working.
 
 # Release 1.6.0
 

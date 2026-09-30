@@ -33,6 +33,11 @@
   color: var(--black-900);
 }
 
+/* Hide the title in the header for all pages */
+.md-header__title {
+  visibility: hidden;
+}
+
 /* Search Box Styles */
 .md-search__button {
   position: relative;

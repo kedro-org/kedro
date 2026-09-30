@@ -5,12 +5,17 @@
 ## Bug fixes and other changes
 
 - Fixed typed parameter validation binding a `params:` input to the wrong function argument when a node declared with a dict of inputs leaves an earlier argument to its default. The typed requirement was taken from an argument the node never receives, so a run could fail on a type the user never asked for.
+- Fixed `Pipeline.only_nodes_with_namespaces` (and `kedro run --namespaces`) raising `ValueError: Pipeline nodes must have unique names` when a namespace is selected together with one it already covers, such as `--namespaces a,a.b`.
 
 ## Documentation changes
 
 ## Breaking changes to the API
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Rodrigo-Palma](https://github.com/Rodrigo-Palma)
 
 # Release 1.7.0
 

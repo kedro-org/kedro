@@ -303,6 +303,7 @@ def _execute_pipeline(
             namespaces=request.namespaces,
             only_missing_outputs=request.only_missing_outputs,
             runtime_params=request.params,
+            runtime_datasets=request.datasets,
         )
 
         duration_ms = (time.perf_counter() - start_time) * 1000

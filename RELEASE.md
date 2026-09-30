@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Added `runtime_datasets` to `KedroServiceSession.run()` and a corresponding `datasets` field to the HTTP `/run` endpoint's `RunRequest`, allowing raw data or `AbstractDataset` instances to be injected into a run's catalog for that run only.
+
 ## Bug fixes and other changes
 
 - Fixed `Pipeline.only_nodes_with_namespaces` (and `kedro run --namespaces`) raising `ValueError: Pipeline nodes must have unique names` when a namespace is selected together with one it already covers, such as `--namespaces a,a.b`.

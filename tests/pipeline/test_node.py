@@ -347,7 +347,7 @@ def partial_inconsistent_input_size():
         ),
         (
             partial_inconsistent_input_size,
-            r"Inputs of '<partial>' function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+            r"Inputs of 'identity' function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
     ],
 )
@@ -445,9 +445,9 @@ class TestNames:
 
     def test_partial(self):
         n = node(partial(identity), ["in"], ["out"])
-        assert str(n) == "<partial>([in]) -> [out]"
+        assert str(n) == "identity([in]) -> [out]"
         assert re.match(r"^partial\(identity\)__[0-9a-f]{8}$", n.name)
-        assert n.short_name == "<Partial>"
+        assert n.short_name == "Identity"
 
     def test_callable_object_name(self):
         class Double:
@@ -463,6 +463,10 @@ class TestNames:
         assert first.name == same.name
         assert first.name != different.name
         assert first.run({"in": 3}) == {"out": 6}
+        assert first.short_name == "Double"
+        assert str(first) == "Double([in]) -> [out]"
+        # stable across instances: no memory address in the rendered name
+        assert first.short_name == node(Double(), "in", "out").short_name
 
     def test_partial_callable_object_name(self):
         class Add:
@@ -478,6 +482,8 @@ class TestNames:
         assert first.name == same.name
         assert first.name != different.name
         assert first.run({"in": 3}) == {"out": 5}
+        assert first.short_name == "Add"
+        assert str(first) == "Add([in]) -> [out]"
 
     def test_updated_partial(self):
         n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])

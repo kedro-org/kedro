@@ -165,15 +165,24 @@ class TypeExtractor:
 
         Node inputs can be a list/tuple (positionally mapped) or a dict
         (explicitly mapped). This normalises both into ``{dataset: arg_name}``.
+
+        Reads the node's own inputs rather than ``node.inputs``: the property
+        always returns a list, and for a dict it lists only the datasets the
+        node provides. Matching that list against the full signature by
+        position attributes an input to the wrong argument as soon as the node
+        leaves an earlier argument to its default.
         """
         dataset_to_arg: dict[str, str] = {}
-        node_inputs = getattr(node, "inputs", None)
+        node_inputs = getattr(node, "_inputs", None)
 
         if isinstance(node_inputs, dict):
-            dataset_to_arg.update(node_inputs)
-        elif isinstance(node_inputs, list | tuple):
+            # A node's input dict is {argument: dataset}; this mapping is the reverse.
+            for arg_name, ds in node_inputs.items():
+                dataset_to_arg[ds] = arg_name
+        else:
             sig_param_names = list(signature.parameters.keys())
-            for idx, ds in enumerate(node_inputs):
+            positional = [node_inputs] if isinstance(node_inputs, str) else node_inputs
+            for idx, ds in enumerate(positional or []):
                 if idx < len(sig_param_names):
                     dataset_to_arg[ds] = sig_param_names[idx]
 

@@ -189,7 +189,7 @@ class KedroCLI(CommandCollection):
             ):
                 warn = click.style(
                     "\nKedro project not found in this directory. ",
-                    fg=ORANGE,
+                    fg=ORANGE,  # type: ignore[arg-type]
                     bold=True,
                 )
                 result = (
@@ -202,12 +202,13 @@ class KedroCLI(CommandCollection):
                 message = warn + result
                 hint = (
                     click.style(
-                        "\nHint: Kedro is looking for a file called ", fg=BRIGHT_BLACK
+                        "\nHint: Kedro is looking for a file called ",
+                        fg=BRIGHT_BLACK,  # type: ignore[arg-type]
                     )
                     + click.style("'pyproject.toml", fg="magenta")
                     + click.style(
                         ", is one present in your current working directory?",
-                        fg=BRIGHT_BLACK,
+                        fg=BRIGHT_BLACK,  # type: ignore[arg-type]
                     )
                 )
                 click.echo(message)

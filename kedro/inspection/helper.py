@@ -9,6 +9,7 @@ from kedro.config import MissingConfigException
 from kedro.framework.project import settings
 from kedro.inspection.models import DatasetSnapshot
 from kedro.io.catalog_config_resolver import CatalogConfigResolver
+from kedro.io.core import is_parameter
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -111,8 +112,8 @@ def _resolve_factory_patterns(
     }
 
     for ds_name in pipeline_ds_names:
-        if ds_name in result:
-            continue  # direct catalog entry
+        if ds_name in result or is_parameter(ds_name):
+            continue  # direct catalog entry, or a parameter (never a dataset)
 
         matched = next(
             CatalogConfigResolver._get_matches(sorted_patterns, ds_name), None

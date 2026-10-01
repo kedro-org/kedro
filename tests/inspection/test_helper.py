@@ -430,3 +430,22 @@ class TestResolveFactoryPatterns:
         assert "p1.ds_b" in result
         assert "p2.ds_c" in result
         assert "{ns}.{name}" not in result
+
+    def test_parameters_not_resolved_as_datasets(self):
+        """Parameter inputs are never matched against factory patterns."""
+        catalog_config = {
+            "{namespace}.{name}": {"type": "pandas.CSVDataset"},
+            "{default}": {"type": "pandas.ParquetDataset"},
+        }
+        pipelines = [
+            _make_pipeline_snapshot(
+                [
+                    _make_node_snapshot(
+                        ["companies", "params:model.test_size", "parameters"],
+                        ["out"],
+                    )
+                ]
+            )
+        ]
+        result = _resolve_factory_patterns(catalog_config, {}, pipelines)
+        assert set(result) == {"companies", "out"}

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from kedro import __version__ as kedro_version
+from kedro.config.omegaconf_config import OmegaConfigLoader
 from kedro.framework import project as kedro_project
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
@@ -23,6 +24,7 @@ from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import find_kedro_project, get_close_matches
 
+from ._serving_config import _ConfigCache, _ServingConfigLoader, build_config_cache
 from .abstract_session import AbstractSession, KedroSessionError
 
 if TYPE_CHECKING:
@@ -79,6 +81,7 @@ class KedroServiceSession(AbstractSession):
             self._project_path / settings.CONF_SOURCE
         )
         self._serving_mode = False
+        self._config_cache: _ConfigCache | None = None
 
     @classmethod
     def create(
@@ -97,14 +100,17 @@ class KedroServiceSession(AbstractSession):
             env: Optional Kedro environment name.
             conf_source: Optional path to the configuration source directory.
             serving_mode: When ``True``, all pipelines are preloaded eagerly at
-                session creation time. This ensures that the shared
-                ``pipelines`` singleton is fully populated before any concurrent
-                ``run()`` calls begin, making pipeline lookups safe across
-                threads. Leave ``False`` (the default) for CLI use, where
-                selective pipeline loading is preferred for startup performance.
+                session creation time, making pipeline lookups safe across
+                concurrent ``run()`` calls. Leave ``False`` (the default) for
+                CLI use. Requires ``CONFIG_LOADER_CLASS`` to be
+                ``OmegaConfigLoader`` (or a subclass).
 
         Returns:
             A new ``KedroServiceSession`` instance ready for use.
+
+        Raises:
+            KedroSessionError: If ``serving_mode=True`` and
+                ``CONFIG_LOADER_CLASS`` isn't ``OmegaConfigLoader`` (or a subclass).
         """
         validate_settings()
         env = env or os.getenv("KEDRO_ENV")
@@ -119,15 +125,29 @@ class KedroServiceSession(AbstractSession):
         return session
 
     def _enable_serving_mode(self) -> None:
-        """Preload all pipelines, then switch the session into serving mode.
+        """Preload all pipelines and config, then switch the session into serving mode.
 
         The flag is set *after* a successful preload so that a failure during
         loading leaves the session in normal CLI mode rather than in an
         inconsistent state where ``run()`` would skip ``set_requested()``
         against an empty pipeline registry.
         """
+        self._validate_config_loader_class()
         self._preload_pipelines()
+        self._preload_config()
         self._serving_mode = True
+
+    def _validate_config_loader_class(self) -> None:
+        """Serving mode requires ``OmegaConfigLoader`` (or a subclass): a
+        custom loader can't be cached the same way, and has no way to
+        enforce the untrusted-``runtime_params`` guard
+        (``restrict_runtime_params_type_selection``)."""
+        config_loader_class = settings.CONFIG_LOADER_CLASS
+        if not issubclass(config_loader_class, OmegaConfigLoader):
+            raise KedroSessionError(
+                "Serving mode requires `CONFIG_LOADER_CLASS` to be "
+                f"`OmegaConfigLoader` (or a subclass). Got `{config_loader_class.__name__}`."
+            )
 
     def _preload_pipelines(self) -> None:
         """Eagerly load all registered pipelines into the shared singleton.
@@ -143,6 +163,29 @@ class KedroServiceSession(AbstractSession):
         )
         pipelines.set_requested(None)
         list(pipelines)
+
+    def _preload_config(self) -> None:
+        """Build the session-scoped config cache once, before requests start.
+
+        See ``_serving_config`` for how ``_ServingConfigLoader`` uses it.
+        """
+        self._logger.info(
+            "Serving mode: preloading config cache for session %s", self.session_id
+        )
+        config_loader_class = settings.CONFIG_LOADER_CLASS
+        config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
+        config_loader_args["restrict_runtime_params_type_selection"] = True
+        persistent_loader = config_loader_class(
+            conf_source=self._conf_source,
+            env=self.env,
+            runtime_params=None,
+            **config_loader_args,
+        )
+        self._logger.warning(
+            "`runtime_params` are not supported in credentials in serving mode; "
+            "credentials are loaded once at startup and do not vary per request."
+        )
+        self._config_cache = build_config_cache(persistent_loader)
 
     @property
     def _logger(self) -> logging.Logger:
@@ -166,11 +209,17 @@ class KedroServiceSession(AbstractSession):
         project's own `CONFIG_LOADER_ARGS` says -- that restriction must not be
         weakenable by project config for an untrusted caller. See
         https://github.com/kedro-org/kedro/issues/5706.
+
+        In serving mode the returned loader is a ``_ServingConfigLoader``
+        reading from the session-scoped cache -- see ``_serving_config`` for
+        the locking.
         """
+        if self._serving_mode and self._config_cache is not None:
+            return _ServingConfigLoader(
+                cache=self._config_cache, runtime_params=runtime_params
+            )
         config_loader_class = settings.CONFIG_LOADER_CLASS
         config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
-        if self._serving_mode:
-            config_loader_args["restrict_runtime_params_type_selection"] = True
         return config_loader_class(  # type: ignore[no-any-return]
             conf_source=self._conf_source,
             env=self.env,

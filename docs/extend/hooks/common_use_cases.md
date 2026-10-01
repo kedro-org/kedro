@@ -232,9 +232,9 @@ class RuntimeConfigHook:
 
 This pattern is useful when migrating older projects that passed `context` through custom integrations, or when coordinating configuration and runtime behaviour across multiple Hook points.
 
-!!! note
+!!! warning
 
-    `KedroServiceSession`, the same Hook instance is reused across multiple `run()` calls, so accumulated state persists between runs. See [Hook state across runs](../session.md#hook-state-across-runs).
+    `KedroServiceSession` creates a single hook manager when the session is created and reuses it, unchanged, for every subsequent `run()` call. If a Hook keeps state in instance attributes (for example, a metrics collector or timing accumulator), that state persists and can bleed across runs. Scope per-run data to values passed through hook arguments (such as `run_id` in `run_params`) instead, or reset the state explicitly at the start of each run, for example in `before_pipeline_run`.
 
 ## Use Hooks to read `metadata` from `DataCatalog`
 

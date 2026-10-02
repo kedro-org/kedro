@@ -11,6 +11,7 @@
 | [`ProjectSnapshot`](#kedro.inspection.models.ProjectSnapshot)                 | Dataclass | Read-only snapshot of an entire Kedro project.                |
 | [`ProjectMetadataSnapshot`](#kedro.inspection.models.ProjectMetadataSnapshot) | Dataclass | Read-only snapshot of project metadata from `pyproject.toml`. |
 | [`PipelineSnapshot`](#kedro.inspection.models.PipelineSnapshot)               | Dataclass | Read-only snapshot of a registered pipeline.                  |
+| [`GroupSnapshot`](#kedro.inspection.models.GroupSnapshot)                     | Dataclass | Read-only snapshot of a node group deployable as one task.    |
 | [`NodeSnapshot`](#kedro.inspection.models.NodeSnapshot)                       | Dataclass | Read-only snapshot of a single pipeline node.                 |
 | [`NodeSourceSnapshot`](#kedro.inspection.models.NodeSourceSnapshot)           | Dataclass | Source location metadata for a pipeline node's function.      |
 | [`DatasetSnapshot`](#kedro.inspection.models.DatasetSnapshot)                 | Dataclass | Read-only snapshot of a catalog dataset entry.                |
@@ -24,6 +25,10 @@
       show_source: true
 
 ::: kedro.inspection.models.PipelineSnapshot
+    options:
+      show_source: true
+
+::: kedro.inspection.models.GroupSnapshot
     options:
       show_source: true
 

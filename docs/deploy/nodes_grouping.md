@@ -116,6 +116,49 @@ This reduces the number of Airflow tasks and keeps logically related nodes toget
 
 ______________________________________________________________________
 
+## Check a grouping before deploying
+
+When each group runs as a separate task, groups no longer share memory or local disk. A pipeline that runs with `kedro run` can then fail on the platform. The most common cause is a dataset passed from one group to another that has no catalog entry, so it only ever existed in memory.
+
+`validate_grouping` finds these problems before you deploy. It reads the pipeline and the catalog configuration, including dataset factories and catch-all patterns, without loading data or importing dataset classes, so dataset types from libraries that are not installed are still resolved.
+
+```python
+from pathlib import Path
+
+from kedro.framework.project import pipelines
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
+from kedro.inspection import validate_grouping
+
+bootstrap_project(Path.cwd())
+with KedroSession.create() as session:
+    catalog = session.load_context().catalog
+
+result = validate_grouping(pipelines["__default__"], catalog)
+for issue in result.issues:
+    print(issue.severity, issue.message)
+```
+
+The spaceflights starter does not use namespaces, so every node becomes its own task. The check reports errors for `X_train`, `X_test`, `y_train` and `y_test`, which the starter keeps in memory, and warnings for the datasets it saves under `data/`. The first error reads:
+
+```text
+error Dataset 'X_test' is passed from group 'split_data_node' to group 'evaluate_model_node' but is only kept in memory, so it will not exist when the receiving group runs as a separate task. Add a catalog entry that saves it to shared storage, or move the nodes that use it into group 'split_data_node'.
+```
+
+By default the check groups nodes by namespace. Pass `group_by=None` to check one task per node, or `groups=` to check a grouping you built yourself.
+
+| Code                 | Severity | Reported when                                                                                                                                       |
+| -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ephemeral_boundary` | error    | A dataset produced in one group and used in another is only kept in memory                                                                          |
+| `group_cycle`        | error    | Groups depend on each other in a loop, usually because a namespace is interrupted by a node outside it                                              |
+| `invalid_grouping`   | error    | A grouping passed with `groups=` leaves a node out, repeats a node or a group name, has an empty group, or names a node that is not in the pipeline |
+| `local_boundary`     | warning  | A dataset passed between groups is saved to local disk. Databricks shared paths such as `/dbfs/` and `/Volumes/` are not reported                   |
+| `single_node_groups` | info     | Groups that contain a single node and so run as their own task                                                                                      |
+
+The result is truthy when there are no errors. `result.raise_if_failed()` raises a `GroupingValidationError` instead, and `result.to_dict()` returns a JSON-safe summary, for example to fail a CI job before deploying.
+
+______________________________________________________________________
+
 **Summary table**
 
 | Aspect                        | Pipelines                                                                                                                                                                                           | Tags                                                                                                                                                                                                                             | Namespaces                                                                                                                                                                                                                                                                                                                                          |

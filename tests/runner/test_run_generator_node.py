@@ -1,6 +1,7 @@
 import importlib
 import inspect
 from collections.abc import Iterator
+from functools import wraps
 
 import numpy as np
 
@@ -43,6 +44,22 @@ class TestRunGeneratorNode:
         expected = [((i,),) for i in range(10)]
         assert fake_dataset.save.call_count == 10
         assert fake_dataset.save.call_args_list == expected
+
+    def test_wrapped_generator_node_streams_chunks(self, mocker, catalog):
+        """A wraps decorator should not turn a generator node into a single save."""
+        fake_dataset = mocker.Mock()
+        mocker.patch.object(catalog, "get", return_value=fake_dataset)
+
+        @wraps(generate_one)
+        def wrapped(*args, **kwargs):
+            return generate_one(*args, **kwargs)
+
+        n = node(wrapped, inputs=None, outputs="result")
+        SequentialRunner().run(Pipeline([n]), catalog, _NullPluginManager())
+
+        assert [call.args[0] for call in fake_dataset.save.call_args_list] == list(
+            range(10)
+        )
 
     def test_generator_node_tuple(self, mocker, catalog):
         left = mocker.Mock()

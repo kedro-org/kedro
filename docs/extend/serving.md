@@ -96,7 +96,17 @@ curl http://127.0.0.1:8000/snapshot
         }
       ],
       "inputs": ["example_iris_data"],
-      "outputs": ["example_predictions"]
+      "outputs": ["example_predictions"],
+      "groups": [
+        {
+          "name": "split_data_node",
+          "type": "nodes",
+          "nodes": ["split_data_node"],
+          "dependencies": [],
+          "inputs": ["example_iris_data"],
+          "outputs": ["X_test", "X_train"]
+        }
+      ]
     }
   ],
   "datasets": {

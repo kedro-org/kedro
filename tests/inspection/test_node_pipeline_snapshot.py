@@ -1,4 +1,4 @@
-"""Tests for NodeSnapshot, PipelineSnapshot models and their builders."""
+"""Tests for NodeSnapshot, GroupSnapshot, PipelineSnapshot models and their builders."""
 
 from __future__ import annotations
 
@@ -9,13 +9,19 @@ from pathlib import Path
 
 import pytest
 
-from kedro.inspection.models import NodeSnapshot, NodeSourceSnapshot, PipelineSnapshot
+from kedro.inspection.models import (
+    GroupSnapshot,
+    NodeSnapshot,
+    NodeSourceSnapshot,
+    PipelineSnapshot,
+)
 from kedro.inspection.snapshot import (
+    _build_group_snapshots,
     _build_pipeline_snapshots,
     _node_to_snapshot,
     _resolve_node_source,
 )
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import Pipeline, node, pipeline
 
 
 @pytest.fixture
@@ -65,8 +71,44 @@ def pipeline_with_project_source(node_with_project_source):
     return Pipeline([node_with_project_source])
 
 
+@pytest.fixture
+def grouped_pipeline():
+    """Two namespaced pipelines joined by `model_input_table`, plus one loose node."""
+    data_processing = pipeline(
+        [
+            node(_identity, "companies", "preprocessed", name="preprocess"),
+            node(_identity, "preprocessed", "model_input_table", name="create_table"),
+        ],
+        namespace="data_processing",
+        inputs={"companies"},
+        outputs={"model_input_table"},
+    )
+    data_science = pipeline(
+        [
+            node(
+                _first,
+                ["model_input_table", "params:model_options"],
+                "regressor",
+                name="train",
+            ),
+            node(
+                _first, ["regressor", "model_input_table"], "metrics", name="evaluate"
+            ),
+        ],
+        namespace="data_science",
+        inputs={"model_input_table"},
+        parameters={"params:model_options"},
+    )
+    report = node(_identity, "model_input_table", "report", name="make_report")
+    return data_processing + data_science + Pipeline([report])
+
+
 def _identity(x):
     return x
+
+
+def _first(*args):
+    return args[0]
 
 
 def _load_func_from_project(project_path: Path, source: str, func_name: str):
@@ -281,6 +323,133 @@ class TestPipelineSnapshot:
         assert snapshot.nodes == [node_snap]
         assert snapshot.inputs == []
         assert snapshot.outputs == []
+        assert snapshot.groups == []
+
+
+class TestGroupSnapshot:
+    def test_instantiation_defaults(self):
+        snapshot = GroupSnapshot(name="data_science", type="namespace")
+        assert snapshot.name == "data_science"
+        assert snapshot.type == "namespace"
+        assert snapshot.nodes == []
+        assert snapshot.dependencies == []
+        assert snapshot.inputs == []
+        assert snapshot.outputs == []
+
+
+class TestBuildGroupSnapshots:
+    def test_groups_follow_namespaces(self, grouped_pipeline):
+        groups = _build_group_snapshots(grouped_pipeline)
+
+        assert [(g.name, g.type) for g in groups] == [
+            ("data_processing", "namespace"),
+            ("data_science", "namespace"),
+            ("make_report", "nodes"),
+        ]
+
+    def test_nodes_are_in_execution_order(self, grouped_pipeline):
+        groups = {g.name: g for g in _build_group_snapshots(grouped_pipeline)}
+
+        assert groups["data_processing"].nodes == [
+            "data_processing.preprocess",
+            "data_processing.create_table",
+        ]
+        assert groups["data_science"].nodes == [
+            "data_science.train",
+            "data_science.evaluate",
+        ]
+        assert groups["make_report"].nodes == ["make_report"]
+
+    def test_dependencies_name_upstream_groups(self, grouped_pipeline):
+        groups = {g.name: g for g in _build_group_snapshots(grouped_pipeline)}
+
+        assert groups["data_processing"].dependencies == []
+        assert groups["data_science"].dependencies == ["data_processing"]
+        assert groups["make_report"].dependencies == ["data_processing"]
+
+    def test_inputs_are_read_but_not_produced_by_the_group(self, grouped_pipeline):
+        groups = {g.name: g for g in _build_group_snapshots(grouped_pipeline)}
+
+        assert groups["data_processing"].inputs == ["companies"]
+        assert groups["data_science"].inputs == [
+            "model_input_table",
+            "params:model_options",
+        ]
+        assert groups["make_report"].inputs == ["model_input_table"]
+
+    def test_outputs_are_read_by_another_group_or_final(self, grouped_pipeline):
+        groups = {g.name: g for g in _build_group_snapshots(grouped_pipeline)}
+
+        assert groups["data_processing"].outputs == ["model_input_table"]
+        assert groups["data_science"].outputs == ["data_science.metrics"]
+        assert groups["make_report"].outputs == ["report"]
+
+    def test_datasets_used_only_inside_a_group_are_not_listed(self, grouped_pipeline):
+        groups = _build_group_snapshots(grouped_pipeline)
+
+        listed = {name for g in groups for name in (*g.inputs, *g.outputs)}
+        assert "data_processing.preprocessed" not in listed
+        assert "data_science.regressor" not in listed
+
+    def test_dataset_read_inside_and_outside_its_group_is_an_output(self):
+        pipe = Pipeline(
+            [
+                node(_identity, "raw", "table", name="make", namespace="a"),
+                node(_identity, "table", "summary", name="summarise", namespace="a"),
+                node(_identity, "table", "scored", name="score", namespace="b"),
+            ]
+        )
+
+        groups = {g.name: g for g in _build_group_snapshots(pipe)}
+
+        assert groups["a"].outputs == ["summary", "table"]
+        assert groups["b"].inputs == ["table"]
+
+    def test_transcoded_names_keep_each_groups_spelling(self):
+        pipe = Pipeline(
+            [
+                node(_identity, "raw", "table@spark", name="make", namespace="a"),
+                node(_identity, "table@pandas", "scored", name="score", namespace="b"),
+            ]
+        )
+
+        groups = {g.name: g for g in _build_group_snapshots(pipe)}
+
+        assert groups["a"].outputs == ["table@spark"]
+        assert groups["b"].inputs == ["table@pandas"]
+
+    def test_transcoded_dataset_used_inside_one_group_is_not_listed(self):
+        pipe = Pipeline(
+            [
+                node(_identity, "raw", "table@spark", name="make", namespace="a"),
+                node(_identity, "table@pandas", "scored", name="score", namespace="a"),
+            ]
+        )
+
+        (group,) = _build_group_snapshots(pipe)
+
+        assert group.inputs == ["raw"]
+        assert group.outputs == ["scored"]
+
+    def test_nested_namespaces_group_by_top_level(self):
+        pipe = Pipeline(
+            [
+                node(_identity, "raw", "cleaned", name="clean", namespace="a.prep"),
+                node(
+                    _identity, "cleaned", "features", name="build", namespace="a.feat"
+                ),
+            ]
+        )
+
+        (group,) = _build_group_snapshots(pipe)
+
+        assert group.name == "a"
+        assert group.nodes == ["a.prep.clean", "a.feat.build"]
+        assert group.inputs == ["raw"]
+        assert group.outputs == ["features"]
+
+    def test_empty_pipeline_has_no_groups(self):
+        assert _build_group_snapshots(Pipeline([])) == []
 
 
 class TestBuildPipelineSnapshots:
@@ -306,6 +475,17 @@ class TestBuildPipelineSnapshots:
         )
         assert snapshots[0].inputs == sorted(simple_pipeline.inputs())
         assert snapshots[0].outputs == sorted(simple_pipeline.outputs())
+
+    def test_groups_are_populated(self, grouped_pipeline, project_path):
+        snapshots = _build_pipeline_snapshots(
+            {"__default__": grouped_pipeline}, project_path
+        )
+        assert snapshots[0].groups == _build_group_snapshots(grouped_pipeline)
+        assert [g.name for g in snapshots[0].groups] == [
+            "data_processing",
+            "data_science",
+            "make_report",
+        ]
 
     def test_empty_registry_returns_empty_list(self, project_path):
         assert _build_pipeline_snapshots({}, project_path) == []

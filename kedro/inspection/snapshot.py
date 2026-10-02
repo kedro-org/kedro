@@ -5,6 +5,7 @@ from __future__ import annotations
 import inspect
 import re
 import warnings
+from collections import defaultdict
 from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -19,15 +20,18 @@ from kedro.inspection.helper import (
 )
 from kedro.inspection.models import (
     DatasetSnapshot,
+    GroupSnapshot,
     NodeSnapshot,
     NodeSourceSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
     ProjectSnapshot,
 )
+from kedro.pipeline.transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
     from kedro.framework.startup import ProjectMetadata
+    from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
 
 
@@ -144,6 +148,66 @@ def _node_to_snapshot(node: Node, resolved_project_path: Path) -> NodeSnapshot:
     )
 
 
+def _build_group_snapshots(pipeline: Pipeline) -> list[GroupSnapshot]:
+    """Build a `GroupSnapshot` for each namespace group of `pipeline`.
+
+    A group's inputs are the datasets and parameters it reads but does not
+    produce. Its outputs are the datasets it produces that another group reads
+    or that no node reads, which makes them final pipeline outputs.
+
+    Transcoded names such as `df@spark` and `df@pandas` refer to one dataset,
+    so they are matched on the name without the transcoding suffix and
+    reported the way the group's own nodes spell them.
+
+    Args:
+        pipeline: A Kedro pipeline.
+
+    Returns:
+        Group snapshots in the order returned by `Pipeline.group_nodes_by`.
+    """
+    groups = pipeline.group_nodes_by("namespace")
+    nodes_by_name = {node.name: node for node in pipeline.nodes}
+    group_of = {name: group.name for group in groups for name in group.nodes}
+
+    readers: dict[str, set[str]] = defaultdict(set)
+    for node in pipeline.nodes:
+        for input_ in node.inputs:
+            readers[_strip_transcoding(input_)].add(group_of[node.name])
+
+    snapshots = []
+    for group in groups:
+        group_nodes = [nodes_by_name[name] for name in group.nodes]
+        produced = {
+            _strip_transcoding(output)
+            for node in group_nodes
+            for output in node.outputs
+        }
+        inputs = {
+            input_
+            for node in group_nodes
+            for input_ in node.inputs
+            if _strip_transcoding(input_) not in produced
+        }
+        outputs = set()
+        for node in group_nodes:
+            for output in node.outputs:
+                read_by = readers.get(_strip_transcoding(output), set())
+                if not read_by or read_by - {group.name}:
+                    outputs.add(output)
+
+        snapshots.append(
+            GroupSnapshot(
+                name=group.name,
+                type=group.type,
+                nodes=list(group.nodes),
+                dependencies=list(group.dependencies),
+                inputs=sorted(inputs),
+                outputs=sorted(outputs),
+            )
+        )
+    return snapshots
+
+
 def _build_pipeline_snapshots(
     pipeline_dict: dict[str, Any],
     project_path: Path,
@@ -172,6 +236,7 @@ def _build_pipeline_snapshots(
                 ],
                 inputs=sorted(pipeline.inputs()),
                 outputs=sorted(pipeline.outputs()),
+                groups=_build_group_snapshots(pipeline),
             )
         )
     return snapshots

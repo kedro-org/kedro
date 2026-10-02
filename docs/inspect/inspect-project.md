@@ -121,6 +121,40 @@ if node.source:
 
 `source` is `None` when the location cannot be resolved. For example, `functools.partial`, lambdas, built-ins, or functions defined outside the project root.
 
+## How to read deployable node groups
+
+Each pipeline snapshot also lists its node groups in `groups`. A group is a set of nodes that a deployment tool can run as one task. Nodes that share a top-level [namespace](../build/namespaces.md) form one group, and a node without a namespace is a group of its own. This is the grouping that `Pipeline.group_nodes_by("namespace")` returns.
+
+```python
+default_pipeline = next(p for p in snapshot.pipelines if p.name == "__default__")
+
+for group in default_pipeline.groups:
+    print(group.name, f"({group.type})")
+    print("  nodes:     ", group.nodes)
+    print("  runs after:", group.dependencies)
+    print("  inputs:    ", group.inputs)
+    print("  outputs:   ", group.outputs)
+```
+
+For a project with `data_processing` and `data_science` namespaces, the output looks as follows:
+
+```console
+data_processing (namespace)
+  nodes:      ['data_processing.preprocess_companies', 'data_processing.preprocess_shuttles', 'data_processing.create_model_input_table']
+  runs after: []
+  inputs:     ['companies', 'shuttles']
+  outputs:    ['model_input_table']
+data_science (namespace)
+  nodes:      ['data_science.train_model', 'data_science.evaluate_model']
+  runs after: ['data_processing']
+  inputs:     ['model_input_table', 'params:model_options']
+  outputs:    ['data_science.metrics']
+```
+
+Each group is a [GroupSnapshot][kedro.inspection.models.GroupSnapshot]. `inputs` lists the datasets and parameters the group reads but does not produce. `outputs` lists the datasets it produces that another group reads or that are final pipeline outputs. Datasets used only inside a group are not listed.
+
+When each group runs as a separate task, tasks do not share memory. An output that another group lists in its `inputs` therefore needs a catalog entry that saves it to storage both tasks can reach. See [node grouping for deployment](../deploy/nodes_grouping.md) for how to choose a grouping.
+
 ## How to inspect catalog datasets
 
 The `datasets` attribute is a dictionary mapping dataset names to [DatasetSnapshot][kedro.inspection.models.DatasetSnapshot] objects. Each snapshot contains the dataset type and, where present, its file path:

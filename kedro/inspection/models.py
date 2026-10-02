@@ -89,6 +89,36 @@ class NodeSnapshot:
 
 
 @dataclass
+class GroupSnapshot:
+    """Read-only snapshot of a group of nodes that can be deployed as one task.
+
+    Groups come from `Pipeline.group_nodes_by("namespace")`: nodes that share a
+    top-level namespace form one group, and a node without a namespace is a
+    group of its own.
+
+    Attributes:
+        name: Group name. The top-level namespace, or the node name for a node
+            without a namespace.
+        type: `"namespace"` for a namespace group, `"nodes"` for a single node
+            without a namespace.
+        nodes: Names of the nodes in the group, in execution order.
+        dependencies: Names of the groups that must run before this one.
+        inputs: Sorted names of the datasets and parameters the group reads but
+            does not produce: free pipeline inputs and outputs of other groups.
+        outputs: Sorted names of the datasets the group produces that are read
+            by another group or are final pipeline outputs. Datasets used only
+            inside the group are not listed.
+    """
+
+    name: str
+    type: str
+    nodes: list[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
+    inputs: list[str] = field(default_factory=list)
+    outputs: list[str] = field(default_factory=list)
+
+
+@dataclass
 class PipelineSnapshot:
     """Read-only snapshot of a registered pipeline.
 
@@ -97,12 +127,14 @@ class PipelineSnapshot:
         nodes: Ordered list of node snapshots in topological execution order.
         inputs: Sorted list of free pipeline inputs.
         outputs: Sorted list of final pipeline outputs.
+        groups: Node groups that can each be deployed as one task.
     """
 
     name: str
     nodes: list[NodeSnapshot]
     inputs: list[str] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
+    groups: list[GroupSnapshot] = field(default_factory=list)
 
 
 @dataclass

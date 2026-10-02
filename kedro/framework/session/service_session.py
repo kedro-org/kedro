@@ -301,7 +301,7 @@ class KedroServiceSession(AbstractSession):
             "runtime_params": runtime_params or {},
             "pipeline_names": pipeline_names,
             "namespaces": namespaces,
-            "runner": getattr(runner, "__name__", str(runner)),
+            "runner": runner.__class__.__name__,
             "only_missing_outputs": only_missing_outputs,
         }
 

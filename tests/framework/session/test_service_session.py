@@ -16,6 +16,7 @@ from kedro.framework.project import (
 )
 from kedro.framework.session import KedroServiceSession
 from kedro.framework.session.abstract_session import KedroSessionError
+from kedro.runner import ThreadRunner
 
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
@@ -229,7 +230,6 @@ class TestKedroServiceSession:
         )
         mock_context = mock_context_class.return_value
         mock_context._pipelines_to_validate = None
-        mock_runner.__name__ = "SequentialRunner"
 
         with KedroServiceSession.create(
             project_path=fake_project, session_id="fake_id"
@@ -267,7 +267,6 @@ class TestKedroServiceSession:
         mock_pipelines = mocker.patch(
             "kedro.framework.session.service_session.pipelines"
         )
-        mock_runner.__name__ = "SequentialRunner"
 
         with KedroServiceSession.create(
             project_path=fake_project, session_id="fake_id"
@@ -275,6 +274,29 @@ class TestKedroServiceSession:
             session.run(runner=mock_runner, pipeline_names=pipeline_names)
 
         mock_pipelines.set_requested.assert_called_once_with(expected_requested)
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_records_the_runner_name_of_a_real_instance(
+        self, fake_project, mock_context_class, mocker
+    ):
+        """The runner is always an instance, and an instance has no `__name__`:
+        reading one leaves the hooks with a repr carrying a memory address."""
+        mock_hook = mocker.patch(
+            "kedro.framework.session.service_session._create_hook_manager"
+        ).return_value.hook
+        mocker.patch(
+            "kedro.framework.session.service_session.pipelines",
+            return_value={"__default__": mocker.Mock()},
+        )
+        mocker.patch.object(ThreadRunner, "run", return_value={})
+
+        with KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id"
+        ) as session:
+            session.run(runner=ThreadRunner())
+
+        run_params = mock_hook.before_pipeline_run.call_args.kwargs["run_params"]
+        assert run_params["runner"] == "ThreadRunner"
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, [_FAKE_PIPELINE_NAME]])
@@ -301,7 +323,6 @@ class TestKedroServiceSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = (
             mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
         )
@@ -326,7 +347,7 @@ class TestKedroServiceSession:
             "runtime_params": {},
             "pipeline_names": fake_pipeline_name or ["__default__"],
             "namespaces": None,
-            "runner": mock_runner.__name__,
+            "runner": "SequentialRunner",
             "only_missing_outputs": False,
         }
 
@@ -382,7 +403,6 @@ class TestKedroServiceSession:
                 "__default__": mocker.Mock(),
             },
         )
-        mock_runner.__name__ = "SequentialRunner"
         with KedroServiceSession.create(
             project_path=tmp_path, session_id="fake_id"
         ) as session:
@@ -464,7 +484,7 @@ class TestKedroServiceSession:
             "runtime_params": {},
             "pipeline_names": fake_pipeline_name or ["__default__"],
             "namespaces": None,
-            "runner": mock_thread_runner.__name__,
+            "runner": "ThreadRunner",
             "only_missing_outputs": False,
         }
         mock_catalog = mock_context._get_catalog.return_value
@@ -535,7 +555,6 @@ class TestKedroServiceSession:
         )
         mock_pipelines.__getitem__.side_effect = KeyError("nonexistent")
         mock_pipelines.keys.return_value = ["__default__", "data_engineering"]
-        mock_runner.__name__ = "SequentialRunner"
 
         with pytest.raises(ValueError):
             with KedroServiceSession.create(project_path=fake_project) as session:
@@ -600,7 +619,7 @@ class TestKedroServiceSession:
             "runtime_params": {},
             "pipeline_names": fake_pipeline_name or ["__default__"],
             "namespaces": None,
-            "runner": mock_runner.__name__,
+            "runner": "SequentialRunner",
             "only_missing_outputs": False,
         }
 
@@ -651,7 +670,6 @@ class TestKedroServiceSession:
                 "__default__": mocker.Mock(),
             },
         )
-        mock_runner.__name__ = "SequentialRunner"
 
         with KedroServiceSession.create(
             project_path=fake_project, session_id="fake_id"
@@ -727,7 +745,6 @@ class TestKedroServiceSession:
         mock_pipelines = mocker.patch(
             "kedro.framework.session.service_session.pipelines"
         )
-        mock_runner.__name__ = "SequentialRunner"
 
         with KedroServiceSession.create(
             project_path=fake_project, session_id="fake_id", serving_mode=True
@@ -771,7 +788,6 @@ class TestKedroServiceSession:
                 "__default__": mocker.Mock(),
             },
         )
-        mock_runner.__name__ = "SequentialRunner"
 
         session = KedroServiceSession.create(
             project_path=fake_project, session_id="fake_id", serving_mode=True

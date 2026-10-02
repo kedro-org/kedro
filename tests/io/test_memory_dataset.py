@@ -131,6 +131,17 @@ class TestMemoryDataset:
         with pytest.raises(DatasetError, match=pattern):
             MemoryDataset().load()
 
+    def test_pickle_without_data(self):
+        import pickle
+
+        dataset = MemoryDataset()
+
+        pickled = pickle.dumps(dataset)
+        unpickled = pickle.loads(pickled)
+
+        with pytest.raises(DatasetError):
+            unpickled.load()
+
     def test_saving_none(self):
         """Check the error when attempting to save the dataset without
         providing the data"""

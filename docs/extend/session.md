@@ -99,6 +99,43 @@ The main differences in the `create()` method between `KedroSession` and `KedroS
 - `KedroServiceSession` does not have the `save_on_close` argument.
 - `KedroServiceSession` does not have the `runtime_params` argument, as runtime parameters are provided in the `run()` method for each run, allowing you to update the `KedroContext` parameters for that specific run.
 
+!!! warning
+
+    `KedroServiceSession` creates a single hook manager when the session is created and reuses it, unchanged, for every subsequent `run()` call. If a Hook keeps state in instance attributes (for example, a metrics collector or timing accumulator), that state persists and can bleed across runs. Scope per-run data to values passed through hook arguments (such as `run_id` in `run_params`) instead, or reset the state explicitly at the start of each run, for example in `before_pipeline_run`.
+
+## Customising the session class
+
+The `SESSION_CLASS` setting in your project's `src/<project_name>/settings.py` controls which class `kedro run`, `kedro catalog`, and `%reload_kedro` instantiate. It defaults to `KedroSession`. Customising the session class lets you adapt session behaviour to your application's needs, such as supporting multiple runs or adding custom logging and metrics.
+
+You can also use `KedroServiceSession` for single run CLI cases, for example, so a hook or plugin can rely on `session.run()` accepting `runtime_params` per call, set it directly:
+
+```python
+# src/<project_name>/settings.py
+from kedro.framework.session import KedroServiceSession
+
+SESSION_CLASS = KedroServiceSession
+```
+
+Any custom value must share `AbstractSession` as a common ancestor, so you can also subclass `KedroSession`, `KedroServiceSession`, or `AbstractSession` directly for custom behaviour:
+
+```python
+# src/<project_name>/settings.py
+from my_project.sessions import MyServiceSession
+
+SESSION_CLASS = MyServiceSession
+```
+
+```python
+# src/<project_name>/settings.py
+from kedro.framework.session import KedroServiceSession
+
+
+class MyServiceSession(KedroServiceSession):
+    def run(self, *args, **kwargs):
+        # e.g. add custom logging or metrics around every run
+        return super().run(*args, **kwargs)
+```
+
 ## `bootstrap_project` and `configure_project`
 
 ![General overview diagram for KedroSession creation](../meta/images/kedro-session-creation.png)

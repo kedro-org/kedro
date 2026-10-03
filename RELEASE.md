@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Added `kedro.inspection.validate_grouping` to check a node grouping before deployment. It reports datasets kept in memory that are passed between groups, cycles between groups, and datasets passed between groups on local disk.
+
 ## Bug fixes and other changes
 
 - Fixed typed parameter validation binding a `params:` input to the wrong function argument when a node declared with a dict of inputs leaves an earlier argument to its default. The typed requirement was taken from an argument the node never receives, so a run could fail on a type the user never asked for.

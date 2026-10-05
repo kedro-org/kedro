@@ -53,6 +53,8 @@ class KedroServiceSession(AbstractSession):
     with KedroServiceSession.create() as session:
         run_1 = session.run(runtime_params={"param1": "value1"})
         run_2 = session.run(runtime_params={"param1": "value2"})
+        # Inject ad-hoc data for this run only, without touching catalog config
+        run_3 = session.run(runtime_datasets={"input_df": some_dataframe})
     ```
     NOTE: This session implementation is under active development and may occasionally contain breaking changes.
     """
@@ -212,8 +214,21 @@ class KedroServiceSession(AbstractSession):
         namespaces: Iterable[str] | None = None,
         only_missing_outputs: bool = False,
         runtime_params: dict[str, Any] | None = None,
+        runtime_datasets: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Run the pipeline."""
+        """Run the pipeline.
+
+        Args:
+            runtime_datasets: Optional mapping of dataset name to value, injected
+                into this run's catalog immediately before execution via
+                ``catalog[name] = value``. Each value is either raw data
+                (wrapped in a ``MemoryDataset``) or an ``AbstractDataset``
+                instance (stored directly). An existing catalog entry with the
+                same name is replaced for this run only (a warning is logged).
+                Note: with ``ParallelRunner``, injected raw data is wrapped in
+                a plain ``MemoryDataset``, not a ``SharedMemoryDataset``, and
+                may not be visible across worker processes.
+        """
         run_id = run_id or generate_timestamp()
         project_name = self._package_name or self._project_path.name
         self._logger.info("Kedro project %s", project_name)
@@ -285,6 +300,10 @@ class KedroServiceSession(AbstractSession):
             load_versions=load_versions,
         )
 
+        if runtime_datasets:
+            for dataset_name, dataset_value in runtime_datasets.items():
+                catalog[dataset_name] = dataset_value
+
         record_data = {
             "session_id": self.session_id,
             "run_id": run_id,
@@ -299,6 +318,7 @@ class KedroServiceSession(AbstractSession):
             "to_outputs": to_outputs,
             "load_versions": load_versions,
             "runtime_params": runtime_params or {},
+            "runtime_datasets": list((runtime_datasets or {}).keys()),
             "pipeline_names": pipeline_names,
             "namespaces": namespaces,
             "runner": runner.__class__.__name__,

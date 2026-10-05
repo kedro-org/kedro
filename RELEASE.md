@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Added `runtime_datasets` to `KedroServiceSession.run()` and a corresponding `datasets` field to the HTTP `/run` endpoint's `RunRequest`, allowing raw data or `AbstractDataset` instances to be injected into a run's catalog for that run only.
+
 ## Bug fixes and other changes
 
 - Fixed typed parameter validation binding a `params:` input to the wrong function argument when a node declared with a dict of inputs leaves an earlier argument to its default. The typed requirement was taken from an argument the node never receives, so a run could fail on a type the user never asked for.

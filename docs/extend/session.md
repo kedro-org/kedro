@@ -27,7 +27,7 @@ The main methods and properties of both `KedroSession` and `KedroServiceSession`
 - `create()`: Create a new instance of session class with session data
 - `load_context()`: Instantiate `KedroContext` object. For `KedroServiceSession`, this method accepts an optional `runtime_params` argument, which allows you to update the `KedroContext` parameters for that run
 - `close()`: Close the current session. For `KedroSession`, this also saves the session data to disk if `save_on_close` is set to `True`.
-- `run()`: Run the pipeline with the arguments provided; see [Running pipelines](../build/run_a_pipeline.md) for details
+- `run()`: Run the pipeline with the arguments provided; see [Running pipelines](../build/run_a_pipeline.md) for details. For `KedroServiceSession`, this method also accepts an optional `runtime_datasets` argument, which injects data or datasets into that run's catalog only
 
 ## Create a `KedroSession`
 
@@ -82,9 +82,14 @@ session.run(runtime_params={"param1": "value1"})
 # second run with different runtime parameters
 session.run(runtime_params={"param1": "value2"})
 
+# third run with an ad-hoc runtime dataset, without touching catalog config
+session.run(runtime_datasets={"input_df": some_dataframe})
+
 # close the session when done
 session.close()
 ```
+
+`run()` also accepts an optional `runtime_datasets` argument: a mapping of dataset name to value, injected into that run's catalog immediately before execution (via `catalog[name] = value`). Each value is either raw data (wrapped in a `MemoryDataset`) or an `AbstractDataset` instance (stored directly). This is useful for feeding ad-hoc or externally-produced data into a single run without writing it to disk or declaring it in `catalog.yml`. An existing catalog entry with the same name is replaced for that run only.
 
 You can provide the following optional arguments in `KedroServiceSession.create()`:
 

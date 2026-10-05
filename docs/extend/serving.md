@@ -174,6 +174,14 @@ curl -X POST http://127.0.0.1:8000/run \
   -d '{"pipeline_names": ["training"], "params": {"n_splits": 5}}'
 ```
 
+Run a pipeline with an ad-hoc input dataset:
+
+```bash
+curl -X POST http://127.0.0.1:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{"pipeline_names": ["training"], "datasets": {"input_df": [[1, 2], [3, 4]]}}'
+```
+
 Key request fields:
 
 | Field                  | Type             | Description                                                                                                                |
@@ -190,7 +198,12 @@ Key request fields:
 | `pipeline_names`       | `list[str]`      | Pipelines to run (default pipeline if omitted)                                                                             |
 | `namespaces`           | `list[str]`      | Run nodes in these namespaces                                                                                              |
 | `params`               | `dict`           | Runtime parameters passed to the context                                                                                   |
+| `datasets`             | `dict`           | Runtime datasets to inject into the catalog for this run, keyed by name; values are wrapped in a `MemoryDataset`           |
 | `only_missing_outputs` | `bool`           | Skip nodes whose outputs already exist and are persisted                                                                   |
+
+!!! note
+
+    `datasets` lets any caller of `/run` override the value of any named catalog entry for that run (always wrapped as a `MemoryDataset`, never selecting an arbitrary dataset `type`). This is intentional, analogous to how `params` can override any runtime parameter — anyone able to call `/run` already has full control over pipeline inputs and parameters for that run.
 
 On success the response contains `run_id`, `status`, and `duration_ms`:
 

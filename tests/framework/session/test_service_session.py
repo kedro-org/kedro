@@ -345,6 +345,7 @@ class TestKedroServiceSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
+            "runtime_datasets": [],
             "pipeline_names": fake_pipeline_name or ["__default__"],
             "namespaces": None,
             "runner": "SequentialRunner",
@@ -482,6 +483,7 @@ class TestKedroServiceSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
+            "runtime_datasets": [],
             "pipeline_names": fake_pipeline_name or ["__default__"],
             "namespaces": None,
             "runner": "ThreadRunner",
@@ -617,6 +619,7 @@ class TestKedroServiceSession:
             "to_outputs": None,
             "load_versions": None,
             "runtime_params": {},
+            "runtime_datasets": [],
             "pipeline_names": fake_pipeline_name or ["__default__"],
             "namespaces": None,
             "runner": "SequentialRunner",
@@ -719,6 +722,127 @@ class TestKedroServiceSession:
         assert first_run_id != second_run_id
         assert first_runtime_params == {"param1": "value1"}
         assert second_runtime_params == {"param2": "value2"}
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_injects_runtime_datasets(
+        self, fake_project, mock_context_class, mock_runner, mocker
+    ):
+        """`runtime_datasets` should be written into the run's catalog via
+        `catalog[name] = value`, and recorded (by name only) in the hook payload."""
+        mock_hook = mocker.patch(
+            "kedro.framework.session.service_session._create_hook_manager"
+        ).return_value.hook
+        mocker.patch(
+            "kedro.framework.session.service_session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_context = mock_context_class.return_value
+        mock_catalog = mock_context._get_catalog.return_value
+        mock_runner.__name__ = "SequentialRunner"
+
+        with KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id"
+        ) as session:
+            session.run(
+                runner=mock_runner,
+                pipeline_names=[_FAKE_PIPELINE_NAME],
+                runtime_datasets={"input_df": "some_raw_value"},
+            )
+
+        mock_catalog.__setitem__.assert_any_call("input_df", "some_raw_value")
+        recorded_datasets = mock_hook.before_pipeline_run.call_args.kwargs[
+            "run_params"
+        ]["runtime_datasets"]
+        assert recorded_datasets == ["input_df"]
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.parametrize("runtime_datasets", [None, {}])
+    def test_run_without_runtime_datasets_skips_injection(
+        self, fake_project, mock_context_class, mock_runner, mocker, runtime_datasets
+    ):
+        """`runtime_datasets=None`/`{}` should be a no-op: no catalog writes, and
+        an empty list recorded in the hook payload."""
+        mock_hook = mocker.patch(
+            "kedro.framework.session.service_session._create_hook_manager"
+        ).return_value.hook
+        mocker.patch(
+            "kedro.framework.session.service_session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_context = mock_context_class.return_value
+        mock_catalog = mock_context._get_catalog.return_value
+        mock_runner.__name__ = "SequentialRunner"
+
+        with KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id"
+        ) as session:
+            session.run(
+                runner=mock_runner,
+                pipeline_names=[_FAKE_PIPELINE_NAME],
+                runtime_datasets=runtime_datasets,
+            )
+
+        mock_catalog.__setitem__.assert_not_called()
+        recorded_datasets = mock_hook.before_pipeline_run.call_args.kwargs[
+            "run_params"
+        ]["runtime_datasets"]
+        assert recorded_datasets == []
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_multiple_runs_with_different_runtime_datasets(
+        self, fake_project, mock_context_class, mock_runner, mocker
+    ):
+        """Each `run()` call injects only its own `runtime_datasets`, independent
+        of any other run in the same session."""
+        mocker.patch(
+            "kedro.framework.session.service_session._create_hook_manager"
+        ).return_value.hook
+        mocker.patch(
+            "kedro.framework.session.service_session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_context = mock_context_class.return_value
+        mock_catalog = mock_context._get_catalog.return_value
+        mock_runner.__name__ = "SequentialRunner"
+
+        with KedroServiceSession.create(
+            project_path=fake_project, session_id="fake_id"
+        ) as session:
+            session.run(
+                runner=mock_runner,
+                pipeline_names=[_FAKE_PIPELINE_NAME],
+                runtime_datasets={"input_1": "value_1"},
+            )
+            first_runtime_datasets = (
+                session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
+                    "run_params"
+                ]["runtime_datasets"]
+            )
+
+            session.run(
+                runner=mock_runner,
+                pipeline_names=[_FAKE_PIPELINE_NAME],
+                runtime_datasets={"input_2": "value_2"},
+            )
+            second_runtime_datasets = (
+                session._hook_manager.hook.before_pipeline_run.call_args.kwargs[
+                    "run_params"
+                ]["runtime_datasets"]
+            )
+
+        assert first_runtime_datasets == ["input_1"]
+        assert second_runtime_datasets == ["input_2"]
+        mock_catalog.__setitem__.assert_any_call("input_1", "value_1")
+        mock_catalog.__setitem__.assert_any_call("input_2", "value_2")
 
     def test_create_serving_mode_preloads_all_pipelines(self, fake_project, mocker):
         """create(serving_mode=True) calls set_requested(None) to clear any filter and

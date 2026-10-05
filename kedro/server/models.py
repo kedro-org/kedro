@@ -87,6 +87,16 @@ class RunRequest(BaseModel):
         default=None,
         description="Extra parameters to pass to the context at runtime.",
     )
+    datasets: dict[str, Any] | None = Field(
+        default=None,
+        description=(
+            "Runtime datasets to inject into this run's catalog, keyed by "
+            "dataset name. Each value must be raw JSON-serializable data; it "
+            "will be wrapped in a MemoryDataset before the run starts. An "
+            "existing catalog entry with the same name is replaced for this "
+            "run only."
+        ),
+    )
     only_missing_outputs: bool = Field(
         default=False,
         description="Run only nodes with missing outputs. Skip nodes whose outputs already exist and are persisted.",

@@ -491,6 +491,14 @@ class TestNames:
         assert re.match(r"^partial\(identity\)__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Identity"
 
+    def test_partial_keeps_its_own_name(self):
+        def other(x):
+            return x
+
+        n = node(update_wrapper(partial(identity), other), ["in"], ["out"])
+        assert str(n) == "other([in]) -> [out]"
+        assert re.match(r"^partial\(other\)__[0-9a-f]{8}$", n.name)
+
     def test_updated_partial_dict_inputs(self):
         n = node(
             update_wrapper(partial(biconcat, input1=["in1"]), biconcat),

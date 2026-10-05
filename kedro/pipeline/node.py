@@ -337,7 +337,6 @@ class Node:
             base = f"partial({func_name})"  # Use the original callable's name
             key = f"{base}|{self.inputs}|{self.outputs}"
         else:
-            func_name = getattr(self._func, "__name__", type(self._func).__name__)
             base = func_name
             key = f"{self._func.__module__}.{func_name}|{self.inputs}|{self.outputs}"
 
@@ -895,6 +894,9 @@ def _get_readable_func_name(func: Callable) -> str:
     Returns:
         str: readable name of the provided callable func.
     """
+    name = getattr(func, "__name__", None)
+    if name is not None:
+        return name
     if isinstance(func, partial):
-        func = func.func
-    return getattr(func, "__name__", type(func).__name__)
+        return _get_readable_func_name(func.func)
+    return type(func).__name__

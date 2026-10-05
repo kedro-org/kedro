@@ -1,6 +1,7 @@
 import re
 from collections.abc import Callable
 from functools import partial, update_wrapper, wraps
+from unittest.mock import Mock
 
 import pytest
 
@@ -484,6 +485,20 @@ class TestNames:
         assert first.run({"in": 3}) == {"out": 5}
         assert first.short_name == "Add"
         assert str(first) == "Add([in]) -> [out]"
+
+    def test_partial_callable_object_still_warns(self):
+        class Add:
+            def __call__(self, value, increment):
+                return value + increment
+
+        n = node(partial(Add(), increment=2), "in", "out")
+        with pytest.warns(UserWarning, match="Partial functions do not have"):
+            assert str(n) == "Add([in]) -> [out]"
+
+    def test_mock_name(self):
+        n = node(Mock(), "in", "out")
+        assert str(n) == "Mock([in]) -> [out]"
+        assert re.fullmatch(r"Mock__[0-9a-f]{8}", n.name)
 
     def test_updated_partial(self):
         n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])

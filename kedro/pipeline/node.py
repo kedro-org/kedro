@@ -891,6 +891,12 @@ def _to_list(element: str | Iterable[str] | dict[str, str] | None) -> list[str]:
 def _get_readable_func_name(func: Callable) -> str:
     """Get a user-friendly readable name of the function provided.
 
+    The function's own ``__name__`` is used when it has one, including a
+    ``functools.partial`` given a name with ``functools.update_wrapper``.
+    A ``functools.partial`` without a ``__name__`` is unwrapped and the name of
+    the function it wraps is used. A callable without a ``__name__``, such as an
+    instance of a class with ``__call__``, falls back to the name of its class.
+
     Returns:
         str: readable name of the provided callable func.
     """

@@ -211,8 +211,6 @@ Set up a Kedro project using the legacy `pandas-iris` starter. Create the projec
 kedro new --starter=pandas-iris --checkout=0.18.14
 ```
 
-A generator node wrapped by a decorator using `functools.wraps` is streamed in the same way as the original generator function. The decorator must return the generator rather than consuming it. Asynchronous data loading and saving does not support generator nodes, decorated or not.
-
 ### Loading data with generators
 
 To use generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.
@@ -362,6 +360,14 @@ With these changes, when you run `kedro run` in your terminal, you should see `y
                     INFO     Loading data from 'y_pred' (ChunkWiseCSVDataset)...                                                                                    data_catalog.py:475
 ...                                                                              runner.py:105
 ```
+
+### Use decorators with generator nodes
+
+If you decorate a generator function with a decorator that uses `functools.wraps`, Kedro still streams its output to the catalog in the same way as the undecorated function. The decorator must return the generator produced by the wrapped function without iterating over it. If the decorator iterates over the generator, for example by calling `list()` on it, Kedro saves the result as a single value.
+
+!!! note
+
+    Generator nodes, whether decorated or not, cannot be run with asynchronous data loading and saving. Kedro raises a `ValueError` if you use `--async` with a generator node.
 
 ## How to add preview functions to nodes
 

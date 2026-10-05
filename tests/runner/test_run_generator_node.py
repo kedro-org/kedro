@@ -1,13 +1,15 @@
 import importlib
 import inspect
+import json
 from collections.abc import Iterator
-from functools import wraps
+from functools import partial, update_wrapper, wraps
 
 import numpy as np
 
 from kedro.framework.hooks.manager import _NullPluginManager
+from kedro.io import AbstractDataset, SharedMemoryDataCatalog
 from kedro.pipeline import Pipeline, node
-from kedro.runner import SequentialRunner
+from kedro.runner import ParallelRunner, SequentialRunner
 
 node_module = importlib.import_module("kedro.pipeline.node")
 
@@ -29,6 +31,65 @@ def generate_list():
 def generate_dict():
     for i in range(10):
         yield {"idx": i, "square": i * i}
+
+
+def streaming_decorator(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def consuming_decorator(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return list(func(*args, **kwargs))
+
+    return wrapper
+
+
+class ClassDecorator:
+    def __init__(self, func):
+        self.func = func
+        update_wrapper(self, func)
+
+    def __call__(self, *args, **kwargs):
+        return self.func(*args, **kwargs)
+
+
+class AppendingDataset(AbstractDataset):
+    """Records every save as one line in a file, so that saves made in another
+    process can be counted."""
+
+    def __init__(self, filepath):
+        self._filepath = filepath
+
+    def _load(self):
+        with open(self._filepath) as f:
+            return [json.loads(line) for line in f]
+
+    def _save(self, data):
+        with open(self._filepath, "a") as f:
+            f.write(json.dumps(data) + "\n")
+
+    def _describe(self):
+        return {"filepath": self._filepath}
+
+
+def _module_level(func, name):
+    # ParallelRunner pickles functions by name, so the decorated function needs
+    # its own importable name rather than the one ``wraps`` copies from the original.
+    func.__name__ = func.__qualname__ = name
+    return func
+
+
+wrapped_generate_one = _module_level(
+    streaming_decorator(generate_one), "wrapped_generate_one"
+)
+consumed_generate_one = _module_level(
+    consuming_decorator(generate_one), "consumed_generate_one"
+)
 
 
 class TestRunGeneratorNode:
@@ -60,6 +121,95 @@ class TestRunGeneratorNode:
         assert [call.args[0] for call in fake_dataset.save.call_args_list] == list(
             range(10)
         )
+
+    def test_wrapper_that_consumes_the_generator_is_saved_once(self, mocker, catalog):
+        fake_dataset = mocker.Mock()
+        mocker.patch.object(catalog, "get", return_value=fake_dataset)
+
+        @wraps(generate_one)
+        def wrapped(*args, **kwargs):
+            return list(generate_one(*args, **kwargs))
+
+        n = node(wrapped, inputs=None, outputs="result")
+        SequentialRunner().run(Pipeline([n]), catalog, _NullPluginManager())
+
+        assert fake_dataset.save.call_args_list == [((list(range(10)),),)]
+
+    def test_partial_of_wrapped_generator_streams_chunks(self, mocker, catalog):
+        fake_dataset = mocker.Mock()
+        mocker.patch.object(catalog, "get", return_value=fake_dataset)
+
+        n = node(partial(wrapped_generate_one), inputs=None, outputs="result")
+        SequentialRunner().run(Pipeline([n]), catalog, _NullPluginManager())
+
+        assert fake_dataset.save.call_count == 10
+
+    def test_class_based_decorator_streams_chunks(self, mocker, catalog):
+        fake_dataset = mocker.Mock()
+        mocker.patch.object(catalog, "get", return_value=fake_dataset)
+
+        n = node(ClassDecorator(generate_one), inputs=None, outputs="result")
+        SequentialRunner().run(Pipeline([n]), catalog, _NullPluginManager())
+
+        assert fake_dataset.save.call_count == 10
+
+    def test_wrapped_generator_node_tuple(self, mocker, catalog):
+        left = mocker.Mock()
+        right = mocker.Mock()
+        mocker.patch.object(
+            catalog,
+            "get",
+            side_effect=lambda ds_name, **kwargs: left if ds_name == "left" else right,
+        )
+
+        n = node(
+            streaming_decorator(generate_tuple), inputs=None, outputs=["left", "right"]
+        )
+        SequentialRunner().run(Pipeline([n]), catalog, _NullPluginManager())
+
+        assert left.save.call_args_list == [((i,),) for i in range(10)]
+        assert right.save.call_args_list == [((i * i,),) for i in range(10)]
+
+    def test_wrapped_generator_node_dict(self, mocker, catalog):
+        left = mocker.Mock()
+        right = mocker.Mock()
+        mocker.patch.object(
+            catalog,
+            "get",
+            side_effect=lambda ds_name, **kwargs: left if ds_name == "left" else right,
+        )
+
+        n = node(
+            streaming_decorator(generate_dict),
+            inputs=None,
+            outputs={"idx": "left", "square": "right"},
+        )
+        SequentialRunner().run(Pipeline([n]), catalog, _NullPluginManager())
+
+        assert left.save.call_args_list == [((i,),) for i in range(10)]
+        assert right.save.call_args_list == [((i * i,),) for i in range(10)]
+
+    def test_wrapped_generator_node_parallel_runner(self, tmp_path):
+        # ParallelRunner pickles ``node.func``, so the decorated functions are
+        # defined at module level.
+        catalog = SharedMemoryDataCatalog(
+            {"streamed": AppendingDataset(str(tmp_path / "streamed"))}
+        )
+        streamed = node(wrapped_generate_one, inputs=None, outputs="streamed")
+        ParallelRunner(max_workers=1).run(
+            Pipeline([streamed]), catalog, _NullPluginManager()
+        )
+        assert catalog.load("streamed") == list(range(10))
+
+    def test_consuming_wrapper_parallel_runner(self, tmp_path):
+        catalog = SharedMemoryDataCatalog(
+            {"consumed": AppendingDataset(str(tmp_path / "consumed"))}
+        )
+        consumed = node(consumed_generate_one, inputs=None, outputs="consumed")
+        ParallelRunner(max_workers=1).run(
+            Pipeline([consumed]), catalog, _NullPluginManager()
+        )
+        assert catalog.load("consumed") == [list(range(10))]
 
     def test_generator_node_tuple(self, mocker, catalog):
         left = mocker.Mock()

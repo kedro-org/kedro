@@ -198,6 +198,16 @@ class TestServingConfigLoaderGetItem:
         )
         assert params_loader["parameters"]["model_options"]["test_size"] == 0.4
 
+    def test_runtime_params_do_not_leak_into_later_requests(self, persistent_loader):
+        """`unsafe_merge` mutates its first argument; the cached raw config must
+        not be that argument, or one request's params persist for the next."""
+        cache = build_config_cache(persistent_loader)
+        _ServingConfigLoader(cache=cache, runtime_params={"leaked": 1})["parameters"]
+
+        later = _ServingConfigLoader(cache=cache, runtime_params=None)["parameters"]
+        assert "leaked" not in later
+        assert later["model_options"]["test_size"] == 0.2
+
     def test_guard_blocks_runtime_params_driven_type(self, persistent_loader):
         cache = build_config_cache(persistent_loader)
         loader = _ServingConfigLoader(

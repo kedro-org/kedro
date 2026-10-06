@@ -88,18 +88,31 @@ class TestKedroServiceSession:
         config_loader = session._get_config_loader()
         assert config_loader.restrict_runtime_params_type_selection is True
 
+        # The cache is built on enabling serving mode; without it, fail loudly
+        # rather than fall back to an unrestricted loader.
+        session._config_cache = None
+        with pytest.raises(RuntimeError, match="config cache was not built"):
+            session._get_config_loader()
+
     @pytest.mark.usefixtures("mock_settings_config_loader_args")
     def test_get_config_loader_untrusted_overrides_config_loader_args(
-        self, fake_project
+        self, fake_project, mocker, caplog
     ):
         """Serving mode must force the restriction on even if a project's own
-        `CONFIG_LOADER_ARGS` doesn't set it -- an untrusted caller's
-        classification must not be weakenable by project config."""
-        session = KedroServiceSession.create(
-            project_path=fake_project, serving_mode=True
+        `CONFIG_LOADER_ARGS` sets it to False -- an untrusted caller's
+        classification must not be weakenable by project config -- and warn
+        about the override."""
+        mocker.patch(
+            "kedro.framework.session.service_session.settings.CONFIG_LOADER_ARGS",
+            {"restrict_runtime_params_type_selection": False},
         )
+        with caplog.at_level(logging.WARNING):
+            session = KedroServiceSession.create(
+                project_path=fake_project, serving_mode=True
+            )
         config_loader = session._get_config_loader()
         assert config_loader.restrict_runtime_params_type_selection is True
+        assert "overrides `restrict_runtime_params_type_selection`" in caplog.text
 
     def test_load_context_with_envvar(self, fake_project, monkeypatch):
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")

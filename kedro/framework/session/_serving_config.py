@@ -93,7 +93,7 @@ class _ServingConfigLoader(AbstractConfigLoader):
             loader._register_globals_resolver()
             loader._register_runtime_params_resolver()
             with _SwapRuntimeParams(loader, self.runtime_params):
-                return loader._resolve_from_raw_config(key, *raw)
+                return loader._resolve_from_raw_config(key, *deepcopy(raw))
 
 
 class _SwapRuntimeParams:

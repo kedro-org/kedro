@@ -161,15 +161,15 @@ class TestInvalidParallelRunner:
             ParallelRunner(is_async=is_async).run(test_pipeline, shared_memory_catalog)
 
     def test_memory_dataset_output(self, is_async, fan_out_fan_in):
-        """MemoryDataset can be used as output in SharedMemoryDataCatalog."""
+        """MemoryDataset output is not shared between processes, so loading
+        it in a downstream node raises an error."""
         test_pipeline = pipeline([fan_out_fan_in])
         shared_memory_catalog = SharedMemoryDataCatalog({"C": MemoryDataset()})
         shared_memory_catalog["A"] = 42
 
-        result = ParallelRunner(is_async=is_async).run(
-            test_pipeline, shared_memory_catalog
-        )
-        assert set(result) == {"Z"}
+        pattern = "Data for MemoryDataset has not been saved yet"
+        with pytest.raises(DatasetError, match=pattern):
+            ParallelRunner(is_async=is_async).run(test_pipeline, shared_memory_catalog)
 
     def test_node_returning_none(self, is_async):
         test_pipeline = pipeline(

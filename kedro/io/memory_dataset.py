@@ -7,12 +7,13 @@ from typing import Any
 
 from kedro.io.core import AbstractDataset, DatasetError, TCopyMode
 
+
 class _Empty:
-    def __reduce__(self):
+    def __reduce__(self) -> tuple[Any, ...]:
         return (_get_empty, ())
 
 
-def _get_empty():
+def _get_empty() -> _Empty:
     return _EMPTY
 
 

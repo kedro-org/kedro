@@ -137,7 +137,7 @@ class TestMemoryDataset:
         dataset = MemoryDataset()
 
         pickled = pickle.dumps(dataset)
-        unpickled = pickle.loads(pickled)
+        unpickled = pickle.loads(pickled)  # noqa: S301
 
         with pytest.raises(DatasetError):
             unpickled.load()

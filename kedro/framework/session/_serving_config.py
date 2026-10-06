@@ -92,11 +92,11 @@ class _ServingConfigLoader(AbstractConfigLoader):
             # registered them last (OmegaConf's registry is process-global).
             loader._register_globals_resolver()
             loader._register_runtime_params_resolver()
-            with _swap_runtime_params(loader, self.runtime_params):
+            with _SwapRuntimeParams(loader, self.runtime_params):
                 return loader._resolve_from_raw_config(key, *raw)
 
 
-class _swap_runtime_params:
+class _SwapRuntimeParams:
     """Swap the loader's runtime_params for one resolve, then restore. Use
     under ``_RESOLVE_LOCK`` -- also resets ``_runtime_params_hits``, which
     the catalog security guard reads."""

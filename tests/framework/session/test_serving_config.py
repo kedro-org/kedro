@@ -11,7 +11,7 @@ from kedro.config.abstract_config import MissingConfigException
 from kedro.config.omegaconf_config import OmegaConfigLoader
 from kedro.framework.session._serving_config import (
     _ServingConfigLoader,
-    _swap_runtime_params,
+    _SwapRuntimeParams,
     build_config_cache,
 )
 
@@ -310,7 +310,7 @@ class TestSwapRuntimeParams:
         persistent_loader._runtime_params_oc = "original_oc"
         persistent_loader._runtime_params_hits = {"original_hit"}
 
-        with _swap_runtime_params(persistent_loader, {"filepath": "/tmp/x.csv"}):
+        with _SwapRuntimeParams(persistent_loader, {"filepath": "/tmp/x.csv"}):
             assert persistent_loader.runtime_params == {"filepath": "/tmp/x.csv"}
             assert persistent_loader._runtime_params_oc is None
             assert persistent_loader._runtime_params_hits == set()
@@ -320,5 +320,5 @@ class TestSwapRuntimeParams:
         assert persistent_loader._runtime_params_hits == {"original_hit"}
 
     def test_none_runtime_params_defaults_to_empty_dict(self, persistent_loader):
-        with _swap_runtime_params(persistent_loader, None):
+        with _SwapRuntimeParams(persistent_loader, None):
             assert persistent_loader.runtime_params == {}

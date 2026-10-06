@@ -174,6 +174,11 @@ class KedroServiceSession(AbstractSession):
         )
         config_loader_class = settings.CONFIG_LOADER_CLASS
         config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
+        if config_loader_args.get("restrict_runtime_params_type_selection") is False:
+            self._logger.warning(
+                "Serving mode overrides `restrict_runtime_params_type_selection` "
+                "from `CONFIG_LOADER_ARGS` to True."
+            )
         config_loader_args["restrict_runtime_params_type_selection"] = True
         persistent_loader = config_loader_class(
             conf_source=self._conf_source,
@@ -214,7 +219,11 @@ class KedroServiceSession(AbstractSession):
         reading from the session-scoped cache -- see ``_serving_config`` for
         the locking.
         """
-        if self._serving_mode and self._config_cache is not None:
+        if self._serving_mode:
+            if self._config_cache is None:
+                raise RuntimeError(
+                    "Serving mode is enabled but the config cache was not built."
+                )
             return _ServingConfigLoader(
                 cache=self._config_cache, runtime_params=runtime_params
             )

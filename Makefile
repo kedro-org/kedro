@@ -29,19 +29,22 @@ install-docs-requirements:
 	uv pip install -e ".[docs]"
 
 serve-docs: install-docs-requirements
-	mkdocs serve --open
+	zensical serve --open
 
 build-docs: install-docs-requirements
-	mkdocs build
+	zensical build --clean
 
 show-docs:
 	open site/index.html
 
 linkcheck: install-docs-requirements
-	# this checks: mkdocs.yml is valid, all listed pages exist, plugins are correctly configured, no broken references in nav or Markdown links (internal), broken links and images (internal, not external)
-	mkdocs build --strict
-	# lychee checks for broken external links in the built site, with max concurrency set to 32
-	lychee --max-concurrency 32 --exclude "@.lycheeignore" site/
+	# Build the site with Zensical. NOTE: Zensical has no --strict mode yet, so
+	# broken internal links/anchors are not caught at build time; lychee below
+	# checks links (internal + external) in the built HTML.
+	zensical build --clean
+	# lychee checks for broken links in the built site, with max concurrency set to 32.
+	# -q suppresses noisy "InvalidPathToUri" warnings for 404.html's root-relative
+	lychee -q --max-concurrency 32 --exclude "@.lycheeignore" site/
 
 fix-markdownlint:
 	npm install -g markdownlint-cli2

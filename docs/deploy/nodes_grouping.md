@@ -120,7 +120,7 @@ ______________________________________________________________________
 
 When each group runs as a separate task, groups no longer share memory or local disk. A pipeline that runs with `kedro run` can then fail on the platform. The most common cause is a dataset passed from one group to another that has no catalog entry, so it only ever existed in memory.
 
-`validate_grouping` finds these problems before you deploy. It reads the pipeline and the catalog configuration, including dataset factories and catch-all patterns, without loading data or importing dataset classes, so dataset types from libraries that are not installed are still resolved.
+`validate_deployment_grouping` finds these problems before you deploy. It reads the pipeline and the catalog configuration, including dataset factories and catch-all patterns, without loading data or importing dataset classes, so dataset types from libraries that are not installed are still resolved.
 
 ```python
 from pathlib import Path
@@ -128,13 +128,13 @@ from pathlib import Path
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
-from kedro.inspection import validate_grouping
+from kedro.inspection import validate_deployment_grouping
 
 bootstrap_project(Path.cwd())
 with KedroSession.create() as session:
     catalog = session.load_context().catalog
 
-result = validate_grouping(pipelines["__default__"], catalog)
+result = validate_deployment_grouping(pipelines["__default__"], catalog)
 for issue in result.issues:
     print(issue.severity, issue.message)
 ```
@@ -155,7 +155,19 @@ By default the check groups nodes by namespace. Pass `group_by=None` to check on
 | `local_boundary`     | warning  | A dataset passed between groups is saved to local disk. Databricks shared paths such as `/dbfs/` and `/Volumes/` are not reported                   |
 | `single_node_groups` | info     | Groups that contain a single node and so run as their own task                                                                                      |
 
-The result is truthy when there are no errors. `result.raise_if_failed()` raises a `GroupingValidationError` instead, and `result.to_dict()` returns a JSON-safe summary, for example to fail a CI job before deploying.
+The severity is fixed for each code. An error means the pipeline will fail once each group runs as a separate task, a warning means it may fail depending on where the tasks run, and info needs no change. The check only reports: it never stops a run or a deployment. The result is truthy when there are no errors, and `result.to_dict()` returns a JSON-safe summary.
+
+### When to run the check
+
+- **While developing**, from a script or notebook as shown above, after you change namespaces or catalog entries.
+
+- **In CI**, as a step before the job that deploys. `raise_if_failed()` raises a `DeploymentGroupingError` when there are errors, which fails the step:
+
+    ```python
+    validate_deployment_grouping(pipelines["__default__"], catalog).raise_if_failed()
+    ```
+
+- **In a deployment plugin**, straight after it calls `Pipeline.group_nodes_by()`, so that problems are reported while the plugin generates tasks.
 
 ______________________________________________________________________
 

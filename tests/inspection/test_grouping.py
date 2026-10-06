@@ -1,4 +1,4 @@
-"""Tests for `validate_grouping` and its result model."""
+"""Tests for `validate_deployment_grouping` and its result model."""
 
 from __future__ import annotations
 
@@ -10,9 +10,9 @@ import pytest
 
 from kedro import inspection
 from kedro.inspection import (
-    GroupingValidationError,
-    GroupingValidationResult,
-    validate_grouping,
+    DeploymentGroupingError,
+    DeploymentGroupingResult,
+    validate_deployment_grouping,
 )
 from kedro.io import AbstractDataset, CachedDataset, DataCatalog, MemoryDataset
 from kedro.io.core import get_protocol_and_path
@@ -121,11 +121,11 @@ def two_groups():
 TWO_GROUPS_NODES = ["a.prepare", "a.make", "b.use", "b.report"]
 
 
-def _issue_codes(result: GroupingValidationResult) -> list[str]:
+def _issue_codes(result: DeploymentGroupingResult) -> list[str]:
     return [issue.code for issue in result.issues]
 
 
-def _problems(result: GroupingValidationResult) -> list[str]:
+def _problems(result: DeploymentGroupingResult) -> list[str]:
     """Codes of the errors and warnings in `result`, ignoring info."""
     return [issue.code for issue in (*result.errors, *result.warnings)]
 
@@ -134,7 +134,7 @@ class TestBoundaryDatasets:
     def test_persisted_boundary_passes(self, spaceflights):
         catalog = DataCatalog.from_config({"model_input_table": PERSISTED})
 
-        result = validate_grouping(spaceflights, catalog)
+        result = validate_deployment_grouping(spaceflights, catalog)
 
         assert result
         assert result.status == "passed"
@@ -142,7 +142,7 @@ class TestBoundaryDatasets:
         assert result.issues == ()
 
     def test_in_memory_boundary_is_an_error(self, spaceflights):
-        result = validate_grouping(spaceflights, DataCatalog())
+        result = validate_deployment_grouping(spaceflights, DataCatalog())
 
         assert not result
         assert result.status == "failed"
@@ -156,7 +156,7 @@ class TestBoundaryDatasets:
     def test_free_inputs_and_parameters_are_not_boundaries(self, spaceflights):
         catalog = DataCatalog.from_config({"model_input_table": PERSISTED})
 
-        result = validate_grouping(spaceflights, catalog)
+        result = validate_deployment_grouping(spaceflights, catalog)
 
         reported = {name for issue in result.issues for name in issue.datasets}
         assert reported.isdisjoint({"companies", "shuttles", "params:model_options"})
@@ -164,7 +164,7 @@ class TestBoundaryDatasets:
     def test_datasets_used_within_one_group_are_not_boundaries(self, spaceflights):
         catalog = DataCatalog.from_config({"model_input_table": PERSISTED})
 
-        result = validate_grouping(spaceflights, catalog)
+        result = validate_deployment_grouping(spaceflights, catalog)
 
         assert "data_processing.preprocessed_companies" not in {
             name for issue in result.issues for name in issue.datasets
@@ -180,7 +180,7 @@ class TestBoundaryDatasets:
             }
         )
 
-        assert validate_grouping(spaceflights, catalog)
+        assert validate_deployment_grouping(spaceflights, catalog)
 
     def test_namespaced_dataset_resolved_through_factory_pattern(self):
         pipe = Pipeline(
@@ -196,8 +196,8 @@ class TestBoundaryDatasets:
             }
         }
 
-        assert validate_grouping(pipe, DataCatalog.from_config(pattern))
-        assert _problems(validate_grouping(pipe, DataCatalog())) == [
+        assert validate_deployment_grouping(pipe, DataCatalog.from_config(pattern))
+        assert _problems(validate_deployment_grouping(pipe, DataCatalog())) == [
             "ephemeral_boundary"
         ]
 
@@ -210,7 +210,7 @@ class TestBoundaryDatasets:
             ]
         )
 
-        (issue,) = validate_grouping(pipe, DataCatalog()).errors
+        (issue,) = validate_deployment_grouping(pipe, DataCatalog()).errors
 
         assert issue.groups == ("a", "b", "c")
         assert "groups 'b', 'c'" in issue.message
@@ -227,9 +227,9 @@ class TestBoundaryDatasets:
             {"table@spark": PERSISTED, "table@pandas": PERSISTED}
         )
 
-        (issue,) = validate_grouping(pipe, only_spark).errors
+        (issue,) = validate_deployment_grouping(pipe, only_spark).errors
         assert issue.datasets == ("table@pandas",)
-        assert validate_grouping(pipe, both)
+        assert validate_deployment_grouping(pipe, both)
 
 
 class TestDatasetResolution:
@@ -339,7 +339,7 @@ class TestDatasetResolution:
         ],
     )
     def test_dataset_resolution(self, two_groups, catalog, expected):
-        assert _problems(validate_grouping(two_groups, catalog)) == expected
+        assert _problems(validate_deployment_grouping(two_groups, catalog)) == expected
 
 
 class TestLocalPaths:
@@ -356,7 +356,7 @@ class TestLocalPaths:
             {"table": {"type": "pandas.ParquetDataset", "filepath": filepath}}
         )
 
-        result = validate_grouping(two_groups, catalog)
+        result = validate_deployment_grouping(two_groups, catalog)
 
         assert result
         (issue,) = result.warnings
@@ -381,14 +381,14 @@ class TestLocalPaths:
             {"table": {"type": "pandas.ParquetDataset", "filepath": filepath}}
         )
 
-        assert validate_grouping(two_groups, catalog).issues == ()
+        assert validate_deployment_grouping(two_groups, catalog).issues == ()
 
     def test_boundary_without_filepath_is_not_reported(self, two_groups):
         catalog = DataCatalog.from_config(
             {"table": {"type": "pandas.SQLTableDataset", "table_name": "t"}}
         )
 
-        assert validate_grouping(two_groups, catalog).issues == ()
+        assert validate_deployment_grouping(two_groups, catalog).issues == ()
 
 
 class TestGroupCycles:
@@ -402,7 +402,7 @@ class TestGroupCycles:
         )
         catalog = DataCatalog.from_config({"first": PERSISTED, "second": PERSISTED})
 
-        result = validate_grouping(pipe, catalog)
+        result = validate_deployment_grouping(pipe, catalog)
 
         assert not result
         (issue,) = result.errors
@@ -422,7 +422,7 @@ class TestSingleNodeGroups:
             }
         )
 
-        result = validate_grouping(spaceflights, catalog, group_by=None)
+        result = validate_deployment_grouping(spaceflights, catalog, group_by=None)
 
         assert result
         (issue,) = result.issues
@@ -435,7 +435,7 @@ class TestSingleNodeGroups:
         catalog = DataCatalog.from_config({"model_input_table": PERSISTED})
 
         assert "single_node_groups" not in _issue_codes(
-            validate_grouping(spaceflights, catalog)
+            validate_deployment_grouping(spaceflights, catalog)
         )
 
 
@@ -449,7 +449,7 @@ class TestExplicitGroups:
     def test_explicit_groups_are_used_instead_of_group_by(self, two_groups):
         groups = self._groups(("everything", TWO_GROUPS_NODES))
 
-        result = validate_grouping(
+        result = validate_deployment_grouping(
             two_groups, DataCatalog(), groups=groups, group_by=None
         )
 
@@ -477,7 +477,7 @@ class TestExplicitGroups:
         ],
     )
     def test_invalid_grouping_skips_other_checks(self, two_groups, spec, message):
-        result = validate_grouping(
+        result = validate_deployment_grouping(
             two_groups, DataCatalog(), groups=self._groups(*spec)
         )
 
@@ -506,7 +506,7 @@ class TestResult:
         catalog = DataCatalog.from_config(
             {"a_local": {"type": "pandas.ParquetDataset", "filepath": "data/a.parquet"}}
         )
-        return validate_grouping(pipe, catalog)
+        return validate_deployment_grouping(pipe, catalog)
 
     def test_issues_are_ordered_by_severity(self, mixed_result):
         assert [issue.severity for issue in mixed_result.issues] == [
@@ -532,13 +532,13 @@ class TestResult:
         }
 
     def test_raise_if_failed_raises_with_messages(self, mixed_result):
-        with pytest.raises(GroupingValidationError, match="b_memory") as exc_info:
+        with pytest.raises(DeploymentGroupingError, match="b_memory") as exc_info:
             mixed_result.raise_if_failed()
 
         assert exc_info.value.result is mixed_result
 
     def test_raise_if_failed_is_silent_when_passed(self, two_groups):
-        result = validate_grouping(
+        result = validate_deployment_grouping(
             two_groups, DataCatalog.from_config({"table": PERSISTED})
         )
 
@@ -546,9 +546,9 @@ class TestResult:
 
     def test_public_api(self):
         for name in (
-            "GroupingIssue",
-            "GroupingValidationError",
-            "GroupingValidationResult",
-            "validate_grouping",
+            "DeploymentGroupingIssue",
+            "DeploymentGroupingError",
+            "DeploymentGroupingResult",
+            "validate_deployment_grouping",
         ):
             assert name in inspection.__all__

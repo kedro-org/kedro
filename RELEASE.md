@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 
-- Added `kedro.inspection.validate_grouping` to check a node grouping before deployment. It reports datasets kept in memory that are passed between groups, cycles between groups, and datasets passed between groups on local disk.
+- Added `kedro.inspection.validate_deployment_grouping` to check a node grouping before deployment. It reports datasets kept in memory that are passed between groups, cycles between groups, and datasets passed between groups on local disk.
 
 ## Bug fixes and other changes
 

@@ -45,15 +45,17 @@ _SHARED_MOUNT_PREFIXES = ("/dbfs/", "/Volumes/", "/Workspace/", "dbfs:/")
 
 
 @dataclass(frozen=True)
-class GroupingIssue:
-    """A problem found in a node grouping.
+class DeploymentGroupingIssue:
+    """A problem found when checking a node grouping for deployment.
 
     Attributes:
         code: Kind of issue, one of `"invalid_grouping"`, `"group_cycle"`,
             `"ephemeral_boundary"`, `"local_boundary"` or `"single_node_groups"`.
-        severity: `"error"` when the pipeline will fail with each group run as a
-            separate task, `"warning"` when it may fail depending on where the
-            tasks run, and `"info"` for observations that need no change.
+        severity: Fixed for each `code`. `"error"` means the pipeline will fail
+            with each group run as a separate task, `"warning"` means it may fail
+            depending on where the tasks run, and `"info"` is an observation that
+            needs no change. Severity only describes the issue: nothing is
+            stopped because of it, and the caller decides how to act.
         message: Description of the issue and how to fix it.
         datasets: Names of the datasets involved.
         groups: Names of the groups involved.
@@ -80,10 +82,11 @@ class GroupingIssue:
 
 
 @dataclass(frozen=True)
-class GroupingValidationResult:
-    """Outcome of `validate_grouping`.
+class DeploymentGroupingResult:
+    """Outcome of `validate_deployment_grouping`.
 
-    Truthy when no issue has severity `"error"`.
+    Truthy when no issue has severity `"error"`, so `if not result:` detects a
+    grouping that will fail once deployed.
 
     Attributes:
         groups: Names of the checked groups.
@@ -91,15 +94,15 @@ class GroupingValidationResult:
     """
 
     groups: tuple[str, ...]
-    issues: tuple[GroupingIssue, ...] = field(default_factory=tuple)
+    issues: tuple[DeploymentGroupingIssue, ...] = field(default_factory=tuple)
 
     @property
-    def errors(self) -> tuple[GroupingIssue, ...]:
+    def errors(self) -> tuple[DeploymentGroupingIssue, ...]:
         """Issues with severity `"error"`."""
         return tuple(issue for issue in self.issues if issue.severity == "error")
 
     @property
-    def warnings(self) -> tuple[GroupingIssue, ...]:
+    def warnings(self) -> tuple[DeploymentGroupingIssue, ...]:
         """Issues with severity `"warning"`."""
         return tuple(issue for issue in self.issues if issue.severity == "warning")
 
@@ -112,9 +115,9 @@ class GroupingValidationResult:
         return not self.errors
 
     def raise_if_failed(self) -> None:
-        """Raise `GroupingValidationError` if there is at least one error."""
+        """Raise `DeploymentGroupingError` if there is at least one error."""
         if self.errors:
-            raise GroupingValidationError(self)
+            raise DeploymentGroupingError(self)
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-safe dictionary representation."""
@@ -125,14 +128,14 @@ class GroupingValidationResult:
         }
 
 
-class GroupingValidationError(Exception):
-    """Raised by `GroupingValidationResult.raise_if_failed` when a grouping has errors.
+class DeploymentGroupingError(Exception):
+    """Raised by `DeploymentGroupingResult.raise_if_failed` when a grouping has errors.
 
     Attributes:
         result: The result that contained the errors.
     """
 
-    def __init__(self, result: GroupingValidationResult):
+    def __init__(self, result: DeploymentGroupingResult):
         self.result = result
         details = "\n".join(f"- {issue.message}" for issue in result.errors)
         super().__init__(f"Node grouping failed validation:\n{details}")
@@ -148,13 +151,22 @@ class _DatasetInfo:
 
 
 @dataclass
-class _Boundary:
-    """A dataset produced in one group and used in at least one other."""
+class _DatasetBoundary:
+    """A dataset produced in one group and read in at least one other.
+
+    Attributes:
+        dataset: Dataset name without any transcoding suffix.
+        producer_group: Name of the group whose node produces the dataset.
+        catalog_names: Every name the dataset is written or read under across
+            the boundary. A transcoded dataset has several, such as `df@spark`
+            and `df@pandas`, and each has its own catalog entry.
+        consumer_groups: Names of the other groups whose nodes read the dataset.
+    """
 
     dataset: str
-    producer: str
-    names: set[str]
-    consumers: set[str] = field(default_factory=set)
+    producer_group: str
+    catalog_names: set[str]
+    consumer_groups: set[str] = field(default_factory=set)
 
 
 def _type_name(dataset_type: Any) -> str:
@@ -175,9 +187,9 @@ def _is_kedro_io_type(type_name: str, class_names: frozenset[str]) -> bool:
     )
 
 
-def _describe_object(dataset: Any) -> _DatasetInfo:
+def _describe_dataset_object(dataset: Any) -> _DatasetInfo:
     if isinstance(dataset, CachedDataset):
-        return _describe_object(dataset._dataset)
+        return _describe_dataset_object(dataset._dataset)
     filepath = getattr(dataset, "_filepath", None)
     protocol = getattr(dataset, "_protocol", None)
     if filepath is not None and protocol and protocol != "file":
@@ -189,13 +201,13 @@ def _describe_object(dataset: Any) -> _DatasetInfo:
     )
 
 
-def _describe_config(config: dict[str, Any]) -> _DatasetInfo:
+def _describe_dataset_config(config: dict[str, Any]) -> _DatasetInfo:
     type_name = _type_name(config.get("type", ""))
     if _is_kedro_io_type(type_name, _CACHED_TYPES):
         wrapped = config.get("dataset")
         if isinstance(wrapped, dict):
-            return _describe_config(wrapped)
-        return _describe_object(wrapped)
+            return _describe_dataset_config(wrapped)
+        return _describe_dataset_object(wrapped)
     filepath = next(
         (str(config[key]) for key in _FILEPATH_KEYS if config.get(key)), None
     )
@@ -216,16 +228,16 @@ def _describe_dataset(catalog: CatalogProtocol, name: str) -> _DatasetInfo:
     """
     datasets = getattr(catalog, "_datasets", {})
     if name in datasets:
-        return _describe_object(datasets[name])
+        return _describe_dataset_object(datasets[name])
 
     lazy_datasets = getattr(catalog, "_lazy_datasets", {})
     if name in lazy_datasets:
-        return _describe_config(lazy_datasets[name].config)
+        return _describe_dataset_config(lazy_datasets[name].config)
 
     resolver = getattr(catalog, "config_resolver", None)
     if resolver is None:
         if name in catalog:
-            return _describe_object(catalog[name])
+            return _describe_dataset_object(catalog[name])
         return _DatasetInfo(type="kedro.io.MemoryDataset", ephemeral=True)
 
     pattern = (
@@ -236,7 +248,7 @@ def _describe_dataset(catalog: CatalogProtocol, name: str) -> _DatasetInfo:
     config = resolver._resolve_dataset_config(
         name, pattern, copy.deepcopy(resolver._get_pattern_config(pattern))
     )
-    return _describe_config(config)
+    return _describe_dataset_config(config)
 
 
 def _is_local_path(filepath: str) -> bool:
@@ -257,7 +269,7 @@ def _groups_phrase(groups: list[str]) -> str:
 
 def _check_structure(
     pipeline: Pipeline, groups: list[GroupedNodes]
-) -> list[GroupingIssue]:
+) -> list[DeploymentGroupingIssue]:
     """Check that `groups` assigns every pipeline node to exactly one group."""
     issues = []
 
@@ -266,7 +278,7 @@ def _check_structure(
     )
     if repeated_names:
         issues.append(
-            GroupingIssue(
+            DeploymentGroupingIssue(
                 code="invalid_grouping",
                 severity="error",
                 message=(
@@ -280,7 +292,7 @@ def _check_structure(
     empty = sorted(g.name for g in groups if not g.nodes)
     if empty:
         issues.append(
-            GroupingIssue(
+            DeploymentGroupingIssue(
                 code="invalid_grouping",
                 severity="error",
                 message=f"Groups {_quoted(empty)} contain no nodes.",
@@ -297,7 +309,7 @@ def _check_structure(
     unknown = sorted(set(membership) - pipeline_nodes)
     if unknown:
         issues.append(
-            GroupingIssue(
+            DeploymentGroupingIssue(
                 code="invalid_grouping",
                 severity="error",
                 message=f"Nodes {_quoted(unknown)} are in a group but not in the pipeline.",
@@ -313,7 +325,7 @@ def _check_structure(
             {owner for name in repeated_nodes for owner in membership[name]}
         )
         issues.append(
-            GroupingIssue(
+            DeploymentGroupingIssue(
                 code="invalid_grouping",
                 severity="error",
                 message=(
@@ -328,7 +340,7 @@ def _check_structure(
     missing = sorted(pipeline_nodes - set(membership))
     if missing:
         issues.append(
-            GroupingIssue(
+            DeploymentGroupingIssue(
                 code="invalid_grouping",
                 severity="error",
                 message=(
@@ -341,9 +353,9 @@ def _check_structure(
     return issues
 
 
-def _find_boundaries(
+def _find_dataset_boundaries(
     pipeline: Pipeline, node_to_group: dict[str, str]
-) -> list[_Boundary]:
+) -> list[_DatasetBoundary]:
     """Find datasets produced in one group and used in another.
 
     Transcoded names such as `df@spark` and `df@pandas` refer to one dataset, so
@@ -355,7 +367,7 @@ def _find_boundaries(
         for output in node.outputs:
             producers[_strip_transcoding(output)] = (node_to_group[node.name], output)
 
-    boundaries: dict[str, _Boundary] = {}
+    boundaries: dict[str, _DatasetBoundary] = {}
     for node in pipeline.nodes:
         group = node_to_group[node.name]
         for input_ in node.inputs:
@@ -366,28 +378,31 @@ def _find_boundaries(
             if producer == group:
                 continue
             boundary = boundaries.setdefault(
-                dataset, _Boundary(dataset=dataset, producer=producer, names={output})
+                dataset,
+                _DatasetBoundary(
+                    dataset=dataset, producer_group=producer, catalog_names={output}
+                ),
             )
-            boundary.names.add(input_)
-            boundary.consumers.add(group)
+            boundary.catalog_names.add(input_)
+            boundary.consumer_groups.add(group)
 
     return [boundaries[dataset] for dataset in sorted(boundaries)]
 
 
 def _check_cycles(
-    group_names: Iterable[str], boundaries: list[_Boundary]
-) -> list[GroupingIssue]:
+    group_names: Iterable[str], boundaries: list[_DatasetBoundary]
+) -> list[DeploymentGroupingIssue]:
     graph: dict[str, set[str]] = {name: set() for name in sorted(group_names)}
     for boundary in boundaries:
-        for consumer in boundary.consumers:
-            graph[consumer].add(boundary.producer)
+        for consumer in boundary.consumer_groups:
+            graph[consumer].add(boundary.producer_group)
 
     try:
         tuple(TopologicalSorter(graph).static_order())
     except CycleError as exc:
         cycle = [str(name) for name in exc.args[1]]
         return [
-            GroupingIssue(
+            DeploymentGroupingIssue(
                 code="group_cycle",
                 severity="error",
                 message=(
@@ -402,24 +417,23 @@ def _check_cycles(
     return []
 
 
-def _check_boundaries(
-    catalog: CatalogProtocol, boundaries: list[_Boundary]
-) -> list[GroupingIssue]:
+def _check_dataset_boundaries(
+    catalog: CatalogProtocol, boundaries: list[_DatasetBoundary]
+) -> list[DeploymentGroupingIssue]:
     issues = []
     for boundary in boundaries:
-        consumers = sorted(boundary.consumers)
-        involved = (boundary.producer, *consumers)
+        consumers = sorted(boundary.consumer_groups)
+        involved = (boundary.producer_group, *consumers)
         described = {
-            name: _describe_dataset(catalog, name) for name in sorted(boundary.names)
+            name: _describe_dataset(catalog, name)
+            for name in sorted(boundary.catalog_names)
         }
-        passage = (
-            f"is passed from group '{boundary.producer}' to {_groups_phrase(consumers)}"
-        )
+        passage = f"is passed from group '{boundary.producer_group}' to {_groups_phrase(consumers)}"
 
         in_memory = [name for name, info in described.items() if info.ephemeral]
         if in_memory:
             issues.append(
-                GroupingIssue(
+                DeploymentGroupingIssue(
                     code="ephemeral_boundary",
                     severity="error",
                     message=(
@@ -427,7 +441,7 @@ def _check_boundaries(
                         "memory, so it will not exist when the receiving group runs "
                         "as a separate task. Add a catalog entry that saves it to "
                         "shared storage, or move the nodes that use it into group "
-                        f"'{boundary.producer}'."
+                        f"'{boundary.producer_group}'."
                     ),
                     datasets=tuple(in_memory),
                     groups=involved,
@@ -443,7 +457,7 @@ def _check_boundaries(
         if local:
             paths = ", ".join(f"'{filepath}'" for _, filepath in local)
             issues.append(
-                GroupingIssue(
+                DeploymentGroupingIssue(
                     code="local_boundary",
                     severity="warning",
                     message=(
@@ -460,13 +474,15 @@ def _check_boundaries(
     return issues
 
 
-def _check_single_node_groups(groups: list[GroupedNodes]) -> list[GroupingIssue]:
+def _check_single_node_groups(
+    groups: list[GroupedNodes],
+) -> list[DeploymentGroupingIssue]:
     single = [g for g in groups if len(g.nodes) == 1]
     if not single:
         return []
     names = tuple(g.name for g in single)
     return [
-        GroupingIssue(
+        DeploymentGroupingIssue(
             code="single_node_groups",
             severity="info",
             message=(
@@ -480,12 +496,12 @@ def _check_single_node_groups(groups: list[GroupedNodes]) -> list[GroupingIssue]
     ]
 
 
-def validate_grouping(
+def validate_deployment_grouping(
     pipeline: Pipeline,
     catalog: CatalogProtocol,
     groups: list[GroupedNodes] | None = None,
     group_by: str | None = "namespace",
-) -> GroupingValidationResult:
+) -> DeploymentGroupingResult:
     """Check that a node grouping can run with each group as a separate task.
 
     Deployment platforms such as Airflow or Databricks run each group from
@@ -519,13 +535,13 @@ def validate_grouping(
             `groups` is not given.
 
     Returns:
-        A `GroupingValidationResult`, truthy when no errors were found.
+        A `DeploymentGroupingResult`, truthy when no errors were found.
 
     Example:
     ```python
-        from kedro.inspection import validate_grouping
+        from kedro.inspection import validate_deployment_grouping
 
-        result = validate_grouping(pipeline, catalog)
+        result = validate_deployment_grouping(pipeline, catalog)
         if not result:
             for issue in result.errors:
                 print(issue.message)
@@ -537,14 +553,14 @@ def validate_grouping(
 
     structural = _check_structure(pipeline, groups)
     if structural:
-        return GroupingValidationResult(groups=group_names, issues=tuple(structural))
+        return DeploymentGroupingResult(groups=group_names, issues=tuple(structural))
 
     node_to_group = {node_name: g.name for g in groups for node_name in g.nodes}
-    boundaries = _find_boundaries(pipeline, node_to_group)
+    boundaries = _find_dataset_boundaries(pipeline, node_to_group)
     issues = [
         *_check_cycles(group_names, boundaries),
-        *_check_boundaries(catalog, boundaries),
+        *_check_dataset_boundaries(catalog, boundaries),
         *_check_single_node_groups(groups),
     ]
     issues.sort(key=lambda issue: _SEVERITY_ORDER[issue.severity])
-    return GroupingValidationResult(groups=group_names, issues=tuple(issues))
+    return DeploymentGroupingResult(groups=group_names, issues=tuple(issues))

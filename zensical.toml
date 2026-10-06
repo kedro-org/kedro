@@ -1,0 +1,391 @@
+# Zensical configuration for the Kedro documentation.
+
+[project]
+site_name = "Kedro"
+site_url = "https://docs.kedro.org/en/stable/"
+site_description = "Kedro is a toolbox for production-ready data science."
+site_dir = "site"
+docs_dir = "docs"
+use_directory_urls = true
+
+repo_name = "kedro-org/kedro"
+repo_url = "https://github.com/kedro-org/kedro"
+
+extra_css = [
+  "stylesheets/colors.css",
+  "stylesheets/globals.css",
+  "stylesheets/typography.css",
+  "stylesheets/themes.css",
+  "stylesheets/footer.css",
+  "stylesheets/welcome.css",
+  "stylesheets/mermaid.css"
+]
+
+extra_javascript = [
+  "https://kedro.org/consent/kedro-consent.js",
+  "javascript/readthedocs.js",
+  "javascript/deindex-old-docs.js"
+]
+
+nav = [
+  {"Welcome" = "index.md"},
+  {"Kedro" = [
+    {"Get started" = [
+      {"Installation" = "getting-started/install.md"},
+      {"Kedro concepts" = "getting-started/kedro_concepts.md"},
+      {"Cheatsheet" = "getting-started/cheatsheet.md"},
+      {"FAQs" = "getting-started/faq.md"},
+      {"Video course" = "getting-started/course.md"},
+      {"Build a pipeline visually" = "getting-started/pipeline_builder.md"}
+    ]},
+    {"Tutorials" = [
+      {"Kedro Spaceflights tutorial" = [
+        {"Spaceflight tutorial" = "tutorials/spaceflights_tutorial.md"},
+        {"Spaceflight tutorial template" = "tutorials/tutorial_template.md"},
+        {"Set up data" = "tutorials/set_up_data.md"},
+        {"Create a pipeline" = "tutorials/create_a_pipeline.md"},
+        {"Add another pipeline" = "tutorials/add_another_pipeline.md"},
+        {"Settings" = "tutorials/settings.md"},
+        {"Test a project" = "tutorials/test_a_project.md"},
+        {"FAQs" = "tutorials/spaceflights_tutorial_faqs.md"}
+      ]},
+      {"Notebook tutorial" = "tutorials/notebooks_tutorial.md"}
+    ]},
+    {"Create projects" = [
+      {"Create a Kedro project" = "create/new_project.md"},
+      {"Create a minimal Kedro project" = "create/minimal_kedro_project.md"},
+      {"Customise a new project" = "create/customise_project.md"},
+      {"Project tools" = "create/new_project_tools.md"},
+      {"Kedro starters" = "create/starters.md"}
+    ]},
+    {"Configuration" = [
+      {"Concepts" = [
+        {"Configuration" = "configure/configuration_basics.md"},
+        {"Parameters and credentials" = "configure/parameters_and_credentials.md"},
+        {"Templating" = "configure/templating.md"}
+      ]},
+      {"How-to Guides" = [
+        {"Configuration" = "configure/how_to_configure_project.md"},
+        {"Parameters and credentials" = "configure/how_to_use_parameters_and_credentials.md"},
+        {"Templating" = "configure/how_to_use_templating.md"},
+        {"Config loader migration" = "configure/config_loader_migration.md"}
+      ]}
+    ]},
+    {"Data Catalog" = [
+      {"Introduction" = "catalog-data/introduction.md"},
+      {"Concepts" = [
+        {"Data Catalog" = "catalog-data/data_catalog.md"},
+        {"Dataset factories" = "catalog-data/kedro_dataset_factories.md"},
+        {"Partitioned and incremental datasets" = "catalog-data/partitioned_and_incremental_datasets.md"},
+        {"Lazy loading" = "catalog-data/lazy_loading.md"}
+      ]},
+      {"How-to Guides" = [
+        {"Configure the Data Catalog" = "catalog-data/how_to_configure_the_data_catalog.md"},
+        {"Use dataset factories" = "catalog-data/how_to_use_dataset_factories.md"},
+        {"Use partitioned and incremental datasets" = "catalog-data/how_to_use_partitioned_and_incremental_datasets.md"},
+        {"Access the Data Catalog in code" = "catalog-data/how_to_access_the_data_catalog_in_code.md"},
+        {"Validate datasets" = "catalog-data/dataset_validation.md"}
+      ]},
+      {"Examples" = [
+        {"Data Catalog YAML examples" = "catalog-data/data_catalog_yaml_examples.md"}
+      ]}
+    ]},
+    {"Nodes & Pipelines" = [
+      {"Nodes" = "build/nodes.md"},
+      {"Pipeline object" = "build/pipeline_introduction.md"},
+      {"Run a pipeline" = "build/run_a_pipeline.md"},
+      {"Modular pipelines" = "build/modular_pipelines.md"},
+      {"Namespaces" = "build/namespaces.md"},
+      {"Pipeline registry" = "build/pipeline_registry.md"},
+      {"Slice a pipeline" = "build/slice_a_pipeline.md"},
+      {"LLM context node" = "build/llm_context_node.md"}
+    ]},
+    {"Development" = [
+      {"Dependency management" = "develop/dependencies.md"},
+      {"Logging" = "develop/logging.md"},
+      {"Automated testing" = "develop/automated_testing.md"},
+      {"Formatting and linting" = "develop/linting.md"},
+      {"Debugging" = "develop/debugging.md"},
+      {"Inspect a project" = "inspect/inspect-project.md"},
+      {"Vibe coding with MCP" = "develop/vibe_coding_with_mcp.md"},
+      {"Vibe coding with skills" = "develop/vibe_coding_with_skills.md"}
+    ]},
+    {"Deployment" = [
+      {"Overview" = "deploy/index.md"},
+      {"How to package your project" = "deploy/package_a_project.md"},
+      {"How to group your nodes effectively" = "deploy/nodes_grouping.md"},
+      {"Single-machine deployment" = "deploy/single_machine.md"},
+      {"Distributed deployment" = "deploy/distributed.md"},
+      {"Supported platforms" = [
+        {"Apache Airflow" = "deploy/supported-platforms/airflow.md"},
+        {"Amazon SageMaker" = "deploy/supported-platforms/amazon_sagemaker.md"},
+        {"Amazon EMR Serverless" = "deploy/supported-platforms/amazon_emr_serverless.md"},
+        {"AWS Step Functions" = "deploy/supported-platforms/aws_step_functions.md"},
+        {"Azure ML pipelines" = "deploy/supported-platforms/azure.md"},
+        {"Dagster" = "deploy/supported-platforms/dagster.md"},
+        {"Dask" = "deploy/supported-platforms/dask.md"},
+        {"Databricks" = "deploy/supported-platforms/databricks.md"},
+        {"Kubeflow Pipelines" = "deploy/supported-platforms/kubeflow.md"},
+        {"Prefect" = "deploy/supported-platforms/prefect.md"},
+        {"VertexAI" = "deploy/supported-platforms/vertexai.md"},
+        {"Argo Workflows" = "deploy/supported-platforms/argo.md"},
+        {"AWS Batch" = "deploy/supported-platforms/aws_batch.md"}
+      ]}
+    ]},
+    {"Extend a project" = [
+      {"Use cases" = "extend/common_use_cases.md"},
+      {"Custom datasets" = "extend/how_to_create_a_custom_dataset.md"},
+      {"Hooks" = [
+        {"Introduction" = "extend/hooks/introduction.md"},
+        {"Common use cases" = "extend/hooks/common_use_cases.md"},
+        {"Examples" = "extend/hooks/examples.md"}
+      ]},
+      {"Kedro sessions" = "extend/session.md"},
+      {"Serving over HTTP" = "extend/serving.md"},
+      {"Custom plugins" = "extend/plugins.md"},
+      {"Custom starters" = "extend/create_a_starter.md"}
+    ]},
+    {"Reference" = [
+      {"Kedro API" = [
+        {"Overview" = "api/index.md"},
+        {"kedro.config" = [
+          {"Overview" = "api/config/kedro.config.md"},
+          {"AbstractConfigLoader" = "api/config/kedro.config.AbstractConfigLoader.md"},
+          {"OmegaConfigLoader" = "api/config/kedro.config.OmegaConfigLoader.md"},
+          {"MissingConfigException" = "api/config/kedro.config.MissingConfigException.md"}
+        ]},
+        {"kedro.framework" = [
+          {"Overview" = "api/framework/kedro.framework.md"},
+          {"CLI" = "api/framework/kedro.framework.cli.md"},
+          {"Context" = "api/framework/kedro.framework.context.md"},
+          {"Hooks" = "api/framework/kedro.framework.hooks.md"},
+          {"Project" = "api/framework/kedro.framework.project.md"},
+          {"Session" = "api/framework/kedro.framework.session.md"},
+          {"Startup" = "api/framework/kedro.framework.startup.md"}
+        ]},
+        {"kedro.io" = [
+          {"Overview" = "api/io/kedro.io.md"},
+          {"DataCatalog" = "api/io/kedro.io.DataCatalog.md"},
+          {"CatalogProtocol" = "api/io/kedro.io.CatalogProtocol.md"},
+          {"SharedMemoryDataCatalog" = "api/io/kedro.io.SharedMemoryDataCatalog.md"},
+          {"SharedMemoryCatalogProtocol" = "api/io/kedro.io.SharedMemoryCatalogProtocol.md"},
+          {"CatalogConfigResolver" = "api/io/kedro.io.CatalogConfigResolver.md"},
+          {"AbstractDataset" = "api/io/kedro.io.AbstractDataset.md"},
+          {"AbstractVersionedDataset" = "api/io/kedro.io.AbstractVersionedDataset.md"},
+          {"CachedDataset" = "api/io/kedro.io.CachedDataset.md"},
+          {"MemoryDataset" = "api/io/kedro.io.MemoryDataset.md"},
+          {"Version" = "api/io/kedro.io.Version.md"},
+          {"DatasetAlreadyExistsError" = "api/io/kedro.io.DatasetAlreadyExistsError.md"},
+          {"DatasetError" = "api/io/kedro.io.DatasetError.md"},
+          {"DatasetNotFoundError" = "api/io/kedro.io.DatasetNotFoundError.md"}
+        ]},
+        {"kedro.ipython" = [
+          {"Overview" = "api/ipython/kedro.ipython.md"},
+          {"load_ipython_extension" = "api/ipython/kedro.ipython.load_ipython_extension.md"},
+          {"magic_load_node" = "api/ipython/kedro.ipython.magic_load_node.md"},
+          {"magic_reload_kedro" = "api/ipython/kedro.ipython.magic_reload_kedro.md"},
+          {"reload_kedro" = "api/ipython/kedro.ipython.reload_kedro.md"}
+        ]},
+        {"kedro.logging" = "api/kedro.logging.md"},
+        {"kedro.pipeline" = [
+          {"Overview" = "api/pipeline/kedro.pipeline.md"},
+          {"Node" = "api/pipeline/kedro.pipeline.node.md"},
+          {"Pipeline" = "api/pipeline/kedro.pipeline.Pipeline.md"},
+          {"LLM context node" = "api/pipeline/kedro.pipeline.llm_context.md"}
+        ]},
+        {"kedro.runner" = [
+          {"Overview" = "api/runner/kedro.runner.md"},
+          {"AbstractRunner" = "api/runner/kedro.runner.AbstractRunner.md"},
+          {"SequentialRunner" = "api/runner/kedro.runner.SequentialRunner.md"},
+          {"ParallelRunner" = "api/runner/kedro.runner.ParallelRunner.md"},
+          {"ThreadRunner" = "api/runner/kedro.runner.ThreadRunner.md"}
+        ]},
+        {"kedro.inspection" = [
+          {"Overview" = "api/inspection/kedro.inspection.md"},
+          {"Models" = "api/inspection/kedro.inspection.models.md"}
+        ]},
+        {"kedro.server" = [
+          {"Overview" = "api/server/kedro.server.md"},
+          {"Models" = "api/server/kedro.server.models.md"}
+        ]},
+        {"kedro.utils" = "api/kedro.utils.md"},
+        {"kedro.load_ipython_extension" = "api/kedro.load_ipython_extension.md"},
+        {"kedro.KedroDeprecationWarning" = "api/kedro.KedroDeprecationWarning.md"},
+        {"kedro.KedroPythonVersionWarning" = "api/kedro.KedroPythonVersionWarning.md"}
+      ]},
+      {"Kedro CLI" = "getting-started/commands_reference.md"}
+    ]},
+    {"Integration & Plugins" = [
+      {"IPython and Jupyter" = [
+        {"Introduction" = "integrations-and-plugins/notebooks_and_ipython/index.md"},
+        {"Kedro and Jupyter notebooks" = "integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md"},
+        {"How to add Kedro to Jupyter Notebook" = "integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md"}
+      ]},
+      {"PySpark" = "integrations-and-plugins/pyspark_integration.md"},
+      {"MLflow" = "integrations-and-plugins/mlflow.md"},
+      {"DVC" = "integrations-and-plugins/dvc.md"},
+      {"Delta Lake" = "integrations-and-plugins/deltalake_versioning.md"},
+      {"Iceberg" = "integrations-and-plugins/iceberg_versioning.md"},
+      {"Great Expectations" = "integrations-and-plugins/great_expectations.md"},
+      {"Pandera" = "integrations-and-plugins/pandera.md"}
+    ]},
+    {"IDE Support" = [
+      {"Visual Studio Code & Cursor" = "ide/set_up_vscode.md"},
+      {"PyCharm" = "ide/set_up_pycharm.md"}
+    ]},
+    {"About" = [
+      {"Kedro architecture" = "getting-started/architecture_overview.md"},
+      {"Kedro security model" = "about/security_model.md"},
+      {"Glossary" = "getting-started/glossary.md"},
+      {"Contributing" = [
+        {"Kedro's Technical Steering Committee" = "about/technical_steering_committee.md"}
+      ]},
+      {"Experimental APIs" = "about/experimental.md"},
+      {"Migration guide" = "about/migration.md"},
+      {"Kedro telemetry" = "about/telemetry.md"}
+    ]}
+  ]},
+  {"Kedro-Viz" = "https://docs.kedro.org/projects/kedro-viz/en/stable/"},
+  {"Kedro-Datasets" = "https://docs.kedro.org/projects/kedro-datasets/en/stable/"}
+]
+
+# -------------------------
+# theme
+# -------------------------
+[project.theme]
+language = "en"
+custom_dir = "docs/overrides"
+variant = "classic"
+favicon = "https://kedro.org/images/favicon.ico"
+logo = "assets/kedro_logo_black.svg"
+features = [
+  "navigation.instant",
+  "navigation.tabs",
+  "navigation.tabs.sticky",
+  "navigation.sections",
+  "navigation.tracking",
+  "navigation.footer",
+  "search.suggest",
+  "search.highlight",
+  "content.tabs.link",
+  "content.code.annotation",
+  "content.code.copy",
+  "content.code.annotate",
+  "content.code.highlight"
+]
+
+[project.theme.font]
+text = "Inter"
+code = "Inter Regular"
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+
+[project.theme.icon.admonition]
+note = "octicons/note-16"
+tip = "octicons/info-16"
+warning = "octicons/alert-16"
+example = "octicons/code-16"
+
+[[project.theme.palette]]
+scheme = "light"
+toggle.icon = "material/white-balance-sunny"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+scheme = "dark"
+toggle.icon = "material/white-balance-sunny"
+toggle.name = "Switch to light mode"
+
+# -------------------------
+# markdown_extensions
+# -------------------------
+[project.markdown_extensions.attr_list]
+
+[project.markdown_extensions.mkdocs-click]
+
+[project.markdown_extensions.md_in_html]
+
+[project.markdown_extensions.pymdownx.inlinehilite]
+
+[project.markdown_extensions.pymdownx.snippets]
+
+[project.markdown_extensions.tables]
+
+[project.markdown_extensions.footnotes]
+
+[project.markdown_extensions.admonition]
+
+[project.markdown_extensions.pymdownx.details]
+
+[project.markdown_extensions.pymdownx.tabbed]
+alternate_style = true
+
+[project.markdown_extensions.def_list]
+
+[project.markdown_extensions.pymdownx.tasklist]
+custom_checkbox = true
+
+[project.markdown_extensions.toc]
+permalink = true
+title = "Contents"
+
+[project.markdown_extensions.pymdownx.arithmatex]
+generic = true
+
+[project.markdown_extensions.pymdownx.highlight]
+
+[project.markdown_extensions.pymdownx.superfences]
+
+[[project.markdown_extensions.pymdownx.superfences.custom_fences]]
+name = "mermaid"
+class = "mermaid"
+format = "pymdownx.superfences.fence_code_format"
+
+# -------------------------
+# plugins
+# -------------------------
+[project.plugins.search]
+
+[project.plugins.autorefs]
+
+[project.plugins.redirects.redirect_maps]
+"configuration/telemetry.md" = "about/telemetry.md"
+"configure/advanced_configuration.md" = "configure/how_to_configure_project.md"
+"configure/parameters.md" = "configure/parameters_and_credentials.md"
+"configure/credentials.md" = "configure/parameters_and_credentials.md"
+"configure/parameter_validation.md" = "configure/how_to_use_parameters_and_credentials.md"
+"catalog-data/advanced_data_catalog_usage.md" = "catalog-data/how_to_access_the_data_catalog_in_code.md"
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+inventories = [
+  "https://docs.kedro.org/en/stable/objects.inv",
+  "https://docs.kedro.org/projects/kedro-datasets/en/stable/objects.inv"
+]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+show_root_toc_entry = true
+show_source = false
+docstring_style = "google"
+merge_init_into_class = true
+docstring_section_style = "list"
+separate_signature = true
+show_root_heading = true
+
+[project.plugins.mkdocstrings.handlers.python.options.docstring_options]
+ignore_init_summary = true
+warn_unknown_params = false
+returns_named_value = false
+
+# -------------------------
+# Unsupported in Zensical (as of 0.0.60), handled elsewhere or dropped:
+#   - mkdocs-mermaid2-plugin: mermaid renders natively via the classic theme /
+#     the superfences custom fence above, so the plugin is not needed.
+#   - llms.txt / llms-full.txt generation: not supported (tracked in
+#     zensical/backlog#83); no longer generated.
+#   - validation (omitted_files / absolute_links / unrecognized_links / anchors):
+#     not yet supported. Internal link breakage is not caught at build time;
+#     external links are still checked by the linkcheck CI job (lychee).
+#   - not_in_nav: not supported; pages outside the nav are simply built.
+# -------------------------

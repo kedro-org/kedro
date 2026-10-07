@@ -767,7 +767,7 @@ class TestKedroServiceSession:
     def test_serving_mode_rejects_non_omega_config_loader_class(
         self, fake_project, mocker
     ):
-        """Serving mode's config cache uses OmegaConfigLoader internal functionsso a
+        """Serving mode's config cache uses OmegaConfigLoader internal functions so a
         project-supplied loader that isn't OmegaConfigLoader (or a subclass)
         must be rejected up front with a clear error"""
         mocker.patch("kedro.framework.session.service_session._create_hook_manager")

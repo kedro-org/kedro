@@ -182,6 +182,7 @@ class TestSnapshotEndpoint:
         with TestClient(app) as client:
             pipeline = client.get("/snapshot").json()["pipelines"][0]
 
+        assert pipeline["group_by"] == "namespace"
         assert pipeline["groups"] == [
             {
                 "name": "ns",
@@ -209,6 +210,10 @@ class TestSnapshotEndpoint:
 
         assert "GroupSnapshot" in schemas
         assert "groups" in schemas["PipelineSnapshot"]["properties"]
+        assert schemas["PipelineSnapshot"]["properties"]["group_by"]["enum"] == [
+            "namespace",
+            "none",
+        ]
         assert schemas["GroupSnapshot"]["properties"]["type"]["enum"] == [
             "namespace",
             "nodes",

@@ -129,6 +129,9 @@ class PipelineSnapshot:
         nodes: Ordered list of node snapshots in topological execution order.
         inputs: Sorted list of free pipeline inputs.
         outputs: Sorted list of final pipeline outputs.
+        group_by: Strategy of `Pipeline.group_nodes_by` that produced `groups`:
+            `"namespace"` groups nodes by top-level namespace, `"none"` makes
+            every node a group of its own.
         groups: Node groups that can each be deployed as one task.
     """
 
@@ -136,6 +139,7 @@ class PipelineSnapshot:
     nodes: list[NodeSnapshot]
     inputs: list[str] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
+    group_by: Literal["namespace", "none"] = "namespace"
     groups: list[GroupSnapshot] = field(default_factory=list)
 
 

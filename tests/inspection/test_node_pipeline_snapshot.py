@@ -323,6 +323,7 @@ class TestPipelineSnapshot:
         assert snapshot.nodes == [node_snap]
         assert snapshot.inputs == []
         assert snapshot.outputs == []
+        assert snapshot.group_by == "namespace"
         assert snapshot.groups == []
 
 
@@ -510,6 +511,23 @@ class TestBuildPipelineSnapshots:
         assert snapshots[0].groups == _build_group_snapshots(
             grouped_pipeline, group_by=None
         )
+
+    @pytest.mark.parametrize(
+        "group_by, expected",
+        [
+            ("namespace", "namespace"),
+            ("NAMESPACE", "namespace"),
+            (None, "none"),
+            ("none", "none"),
+        ],
+    )
+    def test_group_by_is_recorded_on_the_snapshot(
+        self, grouped_pipeline, project_path, group_by, expected
+    ):
+        snapshots = _build_pipeline_snapshots(
+            {"__default__": grouped_pipeline}, project_path, group_by=group_by
+        )
+        assert snapshots[0].group_by == expected
 
     def test_empty_registry_returns_empty_list(self, project_path):
         assert _build_pipeline_snapshots({}, project_path) == []

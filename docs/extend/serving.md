@@ -97,6 +97,7 @@ curl http://127.0.0.1:8000/snapshot
       ],
       "inputs": ["example_iris_data"],
       "outputs": ["example_predictions"],
+      "group_by": "namespace",
       "groups": [
         {
           "name": "split_data_node",

@@ -211,6 +211,16 @@ def _build_group_snapshots(
     return snapshots
 
 
+def _group_by_name(group_by: str | None) -> Literal["namespace", "none"]:
+    """Return the name of a grouping strategy as `PipelineSnapshot.group_by` records it.
+
+    `Pipeline.group_nodes_by` accepts `None` and `"none"` for the same strategy
+    and compares names case-insensitively, so both spellings map to `"none"`.
+    """
+    name = "none" if group_by is None else group_by.lower()
+    return cast(Literal["namespace", "none"], name)
+
+
 def _build_pipeline_snapshots(
     pipeline_dict: dict[str, Any],
     project_path: Path,
@@ -241,6 +251,7 @@ def _build_pipeline_snapshots(
                 ],
                 inputs=sorted(pipeline.inputs()),
                 outputs=sorted(pipeline.outputs()),
+                group_by=_group_by_name(group_by),
                 groups=_build_group_snapshots(pipeline, group_by),
             )
         )

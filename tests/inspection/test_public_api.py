@@ -20,6 +20,7 @@ class TestGetProjectSnapshot:
             conf_source=None,
             metadata=None,
             runtime_params=None,
+            group_by="namespace",
         )
         assert result is mock_snapshot
 
@@ -37,5 +38,18 @@ class TestGetProjectSnapshot:
             conf_source=None,
             metadata=None,
             runtime_params=runtime_params,
+            group_by="namespace",
         )
         assert result is mock_snapshot
+
+    def test_delegates_group_by_to_build_project_snapshot(self, mocker, tmp_path):
+        mock_build = mocker.patch("kedro.inspection._build_project_snapshot")
+        get_project_snapshot(tmp_path, group_by=None)
+        mock_build.assert_called_once_with(
+            project_path=tmp_path,
+            env=None,
+            conf_source=None,
+            metadata=None,
+            runtime_params=None,
+            group_by=None,
+        )

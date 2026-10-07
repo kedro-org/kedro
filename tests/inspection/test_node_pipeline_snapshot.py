@@ -451,6 +451,22 @@ class TestBuildGroupSnapshots:
     def test_empty_pipeline_has_no_groups(self):
         assert _build_group_snapshots(Pipeline([])) == []
 
+    def test_group_by_none_makes_every_node_a_group(self, grouped_pipeline):
+        groups = _build_group_snapshots(grouped_pipeline, group_by=None)
+
+        assert [g.name for g in groups] == [n.name for n in grouped_pipeline.nodes]
+        assert {g.type for g in groups} == {"nodes"}
+        by_name = {g.name: g for g in groups}
+        assert by_name["data_science.train"].inputs == [
+            "model_input_table",
+            "params:model_options",
+        ]
+        assert by_name["data_science.train"].outputs == ["data_science.regressor"]
+
+    def test_unsupported_group_by_raises(self, grouped_pipeline):
+        with pytest.raises(ValueError, match="Unsupported group_by strategy"):
+            _build_group_snapshots(grouped_pipeline, group_by="tags")
+
 
 class TestBuildPipelineSnapshots:
     def test_returns_correct_name(self, simple_pipeline, project_path):
@@ -486,6 +502,14 @@ class TestBuildPipelineSnapshots:
             "data_science",
             "make_report",
         ]
+
+    def test_group_by_is_passed_to_group_builder(self, grouped_pipeline, project_path):
+        snapshots = _build_pipeline_snapshots(
+            {"__default__": grouped_pipeline}, project_path, group_by=None
+        )
+        assert snapshots[0].groups == _build_group_snapshots(
+            grouped_pipeline, group_by=None
+        )
 
     def test_empty_registry_returns_empty_list(self, project_path):
         assert _build_pipeline_snapshots({}, project_path) == []

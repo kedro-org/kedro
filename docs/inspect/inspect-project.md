@@ -123,7 +123,7 @@ if node.source:
 
 ## How to read deployable node groups
 
-Each pipeline snapshot also lists its node groups in `groups`. A group is a set of nodes that a deployment tool can run as one task. Nodes that share a top-level [namespace](../build/namespaces.md) form one group, and a node without a namespace is a group of its own. This is the grouping that `Pipeline.group_nodes_by("namespace")` returns.
+Each pipeline snapshot also lists its node groups in `groups`. A group is a set of nodes that a deployment tool can run as one task. Nodes that share a top-level [namespace](../build/namespaces.md) form one group, and a node without a namespace is a group of its own. This is the `"namespace"` strategy of `Pipeline.group_nodes_by`, which the snapshot uses by default. To use another strategy, pass `group_by` to `get_project_snapshot`. For example, `group_by=None` makes every node a group of its own.
 
 ```python
 default_pipeline = next(p for p in snapshot.pipelines if p.name == "__default__")

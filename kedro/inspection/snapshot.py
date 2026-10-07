@@ -8,7 +8,7 @@ import warnings
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from kedro.config import MissingConfigException
 from kedro.framework.project import pipelines
@@ -148,8 +148,10 @@ def _node_to_snapshot(node: Node, resolved_project_path: Path) -> NodeSnapshot:
     )
 
 
-def _build_group_snapshots(pipeline: Pipeline) -> list[GroupSnapshot]:
-    """Build a `GroupSnapshot` for each namespace group of `pipeline`.
+def _build_group_snapshots(
+    pipeline: Pipeline, group_by: str | None = "namespace"
+) -> list[GroupSnapshot]:
+    """Build a `GroupSnapshot` for each group of nodes in `pipeline`.
 
     A group's inputs are the datasets and parameters it reads but does not
     produce. Its outputs are the datasets it produces that another group reads
@@ -161,11 +163,12 @@ def _build_group_snapshots(pipeline: Pipeline) -> list[GroupSnapshot]:
 
     Args:
         pipeline: A Kedro pipeline.
+        group_by: Grouping strategy passed to `Pipeline.group_nodes_by`.
 
     Returns:
         Group snapshots in the order returned by `Pipeline.group_nodes_by`.
     """
-    groups = pipeline.group_nodes_by("namespace")
+    groups = pipeline.group_nodes_by(group_by)
     nodes_by_name = {node.name: node for node in pipeline.nodes}
     group_of = {name: group.name for group in groups for name in group.nodes}
 
@@ -198,7 +201,7 @@ def _build_group_snapshots(pipeline: Pipeline) -> list[GroupSnapshot]:
         snapshots.append(
             GroupSnapshot(
                 name=group.name,
-                type=group.type,
+                type=cast(Literal["namespace", "nodes"], group.type),
                 nodes=list(group.nodes),
                 dependencies=list(group.dependencies),
                 inputs=sorted(inputs),
@@ -211,6 +214,7 @@ def _build_group_snapshots(pipeline: Pipeline) -> list[GroupSnapshot]:
 def _build_pipeline_snapshots(
     pipeline_dict: dict[str, Any],
     project_path: Path,
+    group_by: str | None = "namespace",
 ) -> list[PipelineSnapshot]:
     """Build a ``PipelineSnapshot`` for every registered pipeline.
 
@@ -218,6 +222,7 @@ def _build_pipeline_snapshots(
         pipeline_dict: Dictionary of pipeline name to ``Pipeline`` object,
             as returned by ``dict(kedro.framework.project.pipelines)``.
         project_path: Absolute path to the project root directory.
+        group_by: Grouping strategy used to build each pipeline's `groups`.
 
     Returns:
         List of pipeline snapshots in registry iteration order.
@@ -236,18 +241,19 @@ def _build_pipeline_snapshots(
                 ],
                 inputs=sorted(pipeline.inputs()),
                 outputs=sorted(pipeline.outputs()),
-                groups=_build_group_snapshots(pipeline),
+                groups=_build_group_snapshots(pipeline, group_by),
             )
         )
     return snapshots
 
 
-def _build_project_snapshot(
+def _build_project_snapshot(  # noqa: PLR0913
     project_path: str | Path | None = None,
     env: str | None = None,
     conf_source: str | None = None,
     metadata: ProjectMetadata | None = None,
     runtime_params: dict[str, Any] | None = None,
+    group_by: str | None = "namespace",
 ) -> ProjectSnapshot:
     """Build a ``ProjectSnapshot`` for the Kedro project at project_path.
 
@@ -266,6 +272,7 @@ def _build_project_snapshot(
             skipped entirely.
         runtime_params: Optional dictionary of runtime parameters forwarded to
             the config loader for ``${runtime_params:...}`` interpolation.
+        group_by: Grouping strategy used to build each pipeline's `groups`.
 
     Returns:
         A fully populated ``ProjectSnapshot``.
@@ -312,7 +319,7 @@ def _build_project_snapshot(
 
     metadata_snapshot = _build_project_metadata_snapshot(metadata)
     pipeline_snapshots = _build_pipeline_snapshots(
-        dict(pipelines), effective_project_path
+        dict(pipelines), effective_project_path, group_by
     )
     dataset_snapshots = _build_dataset_snapshots(conf_catalog)
 

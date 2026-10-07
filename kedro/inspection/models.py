@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Literal
 
 from kedro.io.core import _redact_url_credentials
 
@@ -92,15 +93,16 @@ class NodeSnapshot:
 class GroupSnapshot:
     """Read-only snapshot of a group of nodes that can be deployed as one task.
 
-    Groups come from `Pipeline.group_nodes_by("namespace")`: nodes that share a
-    top-level namespace form one group, and a node without a namespace is a
-    group of its own.
+    Groups come from `Pipeline.group_nodes_by`. With the default `"namespace"`
+    strategy, nodes that share a top-level namespace form one group and a node
+    without a namespace is a group of its own. `get_project_snapshot` takes a
+    `group_by` argument to use another strategy.
 
     Attributes:
-        name: Group name. The top-level namespace, or the node name for a node
-            without a namespace.
+        name: Group name. With the `"namespace"` strategy this is the top-level
+            namespace, or the node name for a node without a namespace.
         type: `"namespace"` for a namespace group, `"nodes"` for a single node
-            without a namespace.
+            that is a group of its own.
         nodes: Names of the nodes in the group, in execution order.
         dependencies: Names of the groups that must run before this one.
         inputs: Sorted names of the datasets and parameters the group reads but
@@ -111,7 +113,7 @@ class GroupSnapshot:
     """
 
     name: str
-    type: str
+    type: Literal["namespace", "nodes"]
     nodes: list[str] = field(default_factory=list)
     dependencies: list[str] = field(default_factory=list)
     inputs: list[str] = field(default_factory=list)

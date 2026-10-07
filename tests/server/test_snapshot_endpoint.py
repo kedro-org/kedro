@@ -209,6 +209,10 @@ class TestSnapshotEndpoint:
 
         assert "GroupSnapshot" in schemas
         assert "groups" in schemas["PipelineSnapshot"]["properties"]
+        assert schemas["GroupSnapshot"]["properties"]["type"]["enum"] == [
+            "namespace",
+            "nodes",
+        ]
 
     def test_snapshot_uses_server_env(self, mocker, make_http_server):
         app = make_http_server(env="staging")

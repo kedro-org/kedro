@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 
-- Added node groups to the project snapshot. Each `PipelineSnapshot` has a `groups` list of `GroupSnapshot` entries with the group's nodes, dependencies, inputs and outputs, also returned by `GET /snapshot`.
+- Added node groups to the project snapshot. Each `PipelineSnapshot` has a `groups` list of `GroupSnapshot` entries with the group's nodes, dependencies, inputs and outputs, also returned by `GET /snapshot`. `get_project_snapshot` takes a `group_by` argument to choose the grouping strategy.
 
 ## Bug fixes and other changes
 

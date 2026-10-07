@@ -17,12 +17,13 @@ __all__ = [
 ]
 
 
-def get_project_snapshot(
+def get_project_snapshot(  # noqa: PLR0913
     project_path: str | Path | None = None,
     env: str | None = None,
     conf_source: str | None = None,
     metadata: ProjectMetadata | None = None,
     runtime_params: dict[str, Any] | None = None,
+    group_by: str | None = "namespace",
 ) -> ProjectSnapshot:
     """Return a read-only snapshot of the Kedro project.
 
@@ -75,6 +76,11 @@ def get_project_snapshot(
                     runtime_params={"version": "02"},
                 )
 
+        group_by: Strategy used to build the node groups in each pipeline's
+            `groups`, passed to `Pipeline.group_nodes_by`. The default,
+            `"namespace"`, groups nodes by their top-level namespace. `None`
+            makes every node a group of its own.
+
     Returns:
         A fully populated ``ProjectSnapshot``.
     """
@@ -84,4 +90,5 @@ def get_project_snapshot(
         conf_source=conf_source,
         metadata=metadata,
         runtime_params=runtime_params,
+        group_by=group_by,
     )

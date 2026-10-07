@@ -138,7 +138,7 @@ class TestBuildProjectSnapshot:
             "kedro.inspection.snapshot.pipelines",
             new={},
         )
-        mocker.patch(
+        self.mock_build_pipeline_snapshots = mocker.patch(
             "kedro.inspection.snapshot._build_pipeline_snapshots",
             return_value=self.pipeline_snapshots,
         )
@@ -171,6 +171,18 @@ class TestBuildProjectSnapshot:
     def test_pipelines_populated(self):
         result = _build_project_snapshot(self.project_path)
         assert result.pipelines is self.pipeline_snapshots
+
+    def test_pipelines_grouped_by_namespace_by_default(self):
+        _build_project_snapshot(self.project_path)
+        self.mock_build_pipeline_snapshots.assert_called_once_with(
+            {}, self.project_path, "namespace"
+        )
+
+    def test_group_by_forwarded_to_pipeline_snapshots(self):
+        _build_project_snapshot(self.project_path, group_by=None)
+        self.mock_build_pipeline_snapshots.assert_called_once_with(
+            {}, self.project_path, None
+        )
 
     def test_datasets_populated(self):
         result = _build_project_snapshot(self.project_path)

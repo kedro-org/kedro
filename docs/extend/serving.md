@@ -230,8 +230,9 @@ The server creates this session with `serving_mode=True` (see [Create a `KedroSe
 
 #### Config caching
 
-Serving mode also preloads and caches the project configuration once, on the first `/run` request, and every subsequent request reuses it (see [Serving mode and configuration](./session.md#serving-mode-and-configuration)). Two consequences:
+Serving mode also preloads and caches the project configuration once, on the first `/run` request, and every subsequent request reuses it (see [Serving mode and configuration](./session.md#serving-mode-and-configuration)). Three consequences:
 
+- Configuration is read once, so edits to files under `conf/` while the server is running are not picked up. Restart the server to apply them.
 - The project's `CONFIG_LOADER_CLASS` must be `OmegaConfigLoader` (or a subclass); otherwise the first `/run` request fails with an error instead of running the pipeline.
 - `credentials.yml` cannot use `${runtime_params:...}` — the server logs a warning about this on the first request. `catalog.yml` and `parameters.yml` are unaffected; `params` in the request body still applies to them per request as usual.
 

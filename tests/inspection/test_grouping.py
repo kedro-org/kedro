@@ -48,6 +48,15 @@ class _FileDataset(AbstractDataset):
         return {}
 
 
+class _PathDataset(_FileDataset):
+    """Dataset object that stores its location under `_path`, like `PartitionedDataset`."""
+
+    def __init__(self, path: str):
+        protocol, location = get_protocol_and_path(path)
+        self._protocol = protocol
+        self._path = location
+
+
 class _MinimalCatalog:
     """Catalog implementing only lookup, without a config resolver."""
 
@@ -253,6 +262,15 @@ class TestDatasetResolution:
                 ["local_boundary"],
             ),
             (
+                DataCatalog(datasets={"table": _FileDataset("memory://t.csv")}),
+                ["ephemeral_boundary"],
+            ),
+            (
+                DataCatalog(datasets={"table": _PathDataset("data/parts")}),
+                ["local_boundary"],
+            ),
+            (DataCatalog(datasets={"table": _PathDataset("s3://b/parts")}), []),
+            (
                 DataCatalog.from_config(
                     {"table": {"type": "CachedDataset", "dataset": PERSISTED}}
                 ),
@@ -324,6 +342,9 @@ class TestDatasetResolution:
             "object-cached-persisted",
             "object-cloud",
             "object-local",
+            "object-memory-filesystem",
+            "object-path-attribute-local",
+            "object-path-attribute-cloud",
             "config-cached-persisted",
             "config-cached-memory-config",
             "config-cached-memory-object",
@@ -389,6 +410,80 @@ class TestLocalPaths:
         )
 
         assert validate_deployment_grouping(two_groups, catalog).issues == ()
+
+    def test_in_process_filesystem_is_ephemeral(self, two_groups):
+        catalog = DataCatalog.from_config(
+            {"table": {"type": "pandas.CSVDataset", "filepath": "memory://table.csv"}}
+        )
+
+        (issue,) = validate_deployment_grouping(two_groups, catalog).errors
+        assert issue.code == "ephemeral_boundary"
+        assert issue.datasets == ("table",)
+
+    @pytest.mark.parametrize(
+        "filepath",
+        ["DBFS:/mnt/table.parquet", "/volumes/catalog/schema/volume/table.parquet"],
+    )
+    def test_shared_storage_prefixes_ignore_case(self, two_groups, filepath):
+        catalog = DataCatalog.from_config(
+            {"table": {"type": "pandas.ParquetDataset", "filepath": filepath}}
+        )
+
+        assert validate_deployment_grouping(two_groups, catalog).issues == ()
+
+
+class TestLazyAndMaterialisedDatasetsAgree:
+    @pytest.mark.parametrize(
+        "config, expected",
+        [
+            ({"type": "pandas.ParquetDataset", "filepath": "s3://b/table.parquet"}, []),
+            (
+                {"type": "pandas.ParquetDataset", "filepath": "data/table.parquet"},
+                ["local_boundary"],
+            ),
+            (
+                {
+                    "type": "partitions.PartitionedDataset",
+                    "path": "data/parts",
+                    "dataset": "pandas.CSVDataset",
+                },
+                ["local_boundary"],
+            ),
+            (
+                {
+                    "type": "partitions.PartitionedDataset",
+                    "path": "s3://b/parts",
+                    "dataset": "pandas.CSVDataset",
+                },
+                [],
+            ),
+            (
+                {"type": "pandas.CSVDataset", "filepath": "memory://table.csv"},
+                ["ephemeral_boundary"],
+            ),
+            ({"type": "MemoryDataset"}, ["ephemeral_boundary"]),
+        ],
+        ids=[
+            "cloud",
+            "local",
+            "partitioned-local",
+            "partitioned-cloud",
+            "memory-filesystem",
+            "memory-dataset",
+        ],
+    )
+    def test_same_issues_before_and_after_materialising(
+        self, two_groups, config, expected
+    ):
+        lazy = DataCatalog.from_config({"table": config})
+        materialised = DataCatalog.from_config({"table": config})
+        materialised["table"]
+
+        assert _problems(validate_deployment_grouping(two_groups, lazy)) == expected
+        assert (
+            _problems(validate_deployment_grouping(two_groups, materialised))
+            == expected
+        )
 
 
 class TestGroupCycles:

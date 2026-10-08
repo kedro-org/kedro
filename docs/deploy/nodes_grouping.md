@@ -118,9 +118,11 @@ ______________________________________________________________________
 
 ## Check a grouping before deploying
 
-When each group runs as a separate task, groups no longer share memory or local disk. A pipeline that runs with `kedro run` can then fail on the platform. The most common cause is a dataset passed from one group to another that has no catalog entry, so it only ever existed in memory.
+When each group runs as a separate task, groups no longer share memory or local disk. A pipeline that runs with `kedro run` can then fail on the platform. The most common cause is a dataset passed from one group to another without a catalog entry, which means it exists in memory and nowhere else.
 
-`validate_deployment_grouping` finds these problems before you deploy. It reads the pipeline and the catalog configuration, including dataset factories and catch-all patterns, without loading data or importing dataset classes, so dataset types from libraries that are not installed are still resolved.
+`validate_deployment_grouping` finds these problems before you deploy. It reads the pipeline and the catalog configuration, including dataset factories and catch-all patterns. It does not load data or import dataset classes, so dataset types from libraries that are not installed are still resolved.
+
+Run it from the project root, against the configuration environment you deploy with. The example uses `prod`; replace it with the name of your environment:
 
 ```python
 from pathlib import Path
@@ -131,7 +133,7 @@ from kedro.framework.startup import bootstrap_project
 from kedro.inspection import validate_deployment_grouping
 
 bootstrap_project(Path.cwd())
-with KedroSession.create() as session:
+with KedroSession.create(env="prod") as session:
     catalog = session.load_context().catalog
 
 result = validate_deployment_grouping(pipelines["__default__"], catalog)
@@ -139,7 +141,9 @@ for issue in result.issues:
     print(issue.severity, issue.message)
 ```
 
-The spaceflights starter does not use namespaces, so every node becomes its own task. The check reports errors for `X_train`, `X_test`, `y_train` and `y_test`, which the starter keeps in memory, and warnings for the datasets it saves under `data/`. The first error reads:
+The result depends on the dataset types and paths in the catalog you pass. The default `local` environment often points at local paths or in-memory datasets that a production environment overrides with shared storage, so pass the `env` you deploy with. In `kedro jupyter` or `kedro ipython`, `pipelines` and `catalog` already exist and the setup lines are not needed.
+
+The spaceflights starter does not use namespaces, so with its default `local` environment every node becomes its own task. The check reports errors for `X_train`, `X_test`, `y_train` and `y_test`, which the starter keeps in memory, and warnings for the datasets it saves under `data/`. The first error reads:
 
 ```text
 error Dataset 'X_test' is passed from group 'split_data_node' to group 'evaluate_model_node' but is only kept in memory, so it will not exist when the receiving group runs as a separate task. Add a catalog entry that saves it to shared storage, or move the nodes that use it into group 'split_data_node'.
@@ -149,23 +153,39 @@ By default the check groups nodes by namespace. Pass `group_by=None` to check on
 
 | Code                 | Severity | Reported when                                                                                                                                       |
 | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ephemeral_boundary` | error    | A dataset produced in one group and used in another is only kept in memory                                                                          |
-| `group_cycle`        | error    | Groups depend on each other in a loop, usually because a namespace is interrupted by a node outside it                                              |
+| `ephemeral_boundary` | error    | A dataset produced in one group and used in another is kept in memory and never saved                                                               |
+| `group_cycle`        | error    | Groups depend on each other in a loop, for example when a namespace is interrupted by a node outside it                                             |
 | `invalid_grouping`   | error    | A grouping passed with `groups=` leaves a node out, repeats a node or a group name, has an empty group, or names a node that is not in the pipeline |
 | `local_boundary`     | warning  | A dataset passed between groups is saved to local disk. Databricks shared paths such as `/dbfs/` and `/Volumes/` are not reported                   |
 | `single_node_groups` | info     | Groups that contain a single node and so run as their own task                                                                                      |
 
-The severity is fixed for each code. An error means the pipeline will fail once each group runs as a separate task, a warning means it may fail depending on where the tasks run, and info needs no change. The check only reports: it never stops a run or a deployment. The result is truthy when there are no errors, and `result.to_dict()` returns a JSON-safe summary.
+The severity is fixed for each code. An error means the pipeline will fail after each group starts running as a separate task. A warning means it may fail depending on where the tasks run. Info needs no change. The check reports issues and does nothing else: it never stops a run or a deployment. `bool(result)` is `True` when there are no errors, and `result.to_dict()` returns a JSON-safe summary.
 
 ### When to run the check
 
 - **While developing**, from a script or notebook as shown above, after you change namespaces or catalog entries.
 
-- **In CI**, as a step before the job that deploys. `raise_if_failed()` raises a `DeploymentGroupingError` when there are errors, which fails the step:
+- **In CI**, as a step before the job that deploys. `raise_if_failed()` raises a `DeploymentGroupingError` when there are errors, which fails the step, and the exception message lists every error. Warnings never fail the step, so print them to the CI log:
 
     ```python
-    validate_deployment_grouping(pipelines["__default__"], catalog).raise_if_failed()
+    from pathlib import Path
+
+    from kedro.framework.project import pipelines
+    from kedro.framework.session import KedroSession
+    from kedro.framework.startup import bootstrap_project
+    from kedro.inspection import validate_deployment_grouping
+
+    bootstrap_project(Path.cwd())
+    with KedroSession.create(env="prod") as session:
+        catalog = session.load_context().catalog
+
+    result = validate_deployment_grouping(pipelines["__default__"], catalog)
+    for issue in result.warnings:
+        print("warning:", issue.message)
+    result.raise_if_failed()
     ```
+
+    The starters save intermediate datasets under `data/`, which produces warnings rather than errors, so a step that checks errors alone passes for them.
 
 - **In a deployment plugin**, straight after it calls `Pipeline.group_nodes_by()`, so that problems are reported while the plugin generates tasks.
 

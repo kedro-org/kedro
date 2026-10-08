@@ -39,9 +39,14 @@ GroupingStatus = Literal["passed", "failed"]
 _SEVERITY_ORDER: dict[str, int] = {"error": 0, "warning": 1, "info": 2}
 _EPHEMERAL_TYPES = frozenset({"MemoryDataset", "SharedMemoryDataset"})
 _CACHED_TYPES = frozenset({"CachedDataset"})
+# Catalog config keys, and dataset attributes with a leading underscore, that
+# hold a dataset's location.
 _FILEPATH_KEYS = ("filepath", "path")
-# Paths that look local but are shared storage on Databricks.
-_SHARED_MOUNT_PREFIXES = ("/dbfs/", "/Volumes/", "/Workspace/", "dbfs:/")
+# fsspec filesystems that live inside the process, so a file on them is as
+# unshared between tasks as a `MemoryDataset`.
+_IN_PROCESS_PROTOCOLS = frozenset({"memory"})
+# Paths that look local but are shared storage on Databricks, lower-cased.
+_SHARED_MOUNT_PREFIXES = ("/dbfs/", "/volumes/", "/workspace/", "dbfs:/")
 
 
 @dataclass(frozen=True)
@@ -187,17 +192,32 @@ def _is_kedro_io_type(type_name: str, class_names: frozenset[str]) -> bool:
     )
 
 
+def _is_in_process_path(filepath: str | None) -> bool:
+    if filepath is None:
+        return False
+    protocol, _ = get_protocol_and_path(filepath)
+    return protocol in _IN_PROCESS_PROTOCOLS
+
+
 def _describe_dataset_object(dataset: Any) -> _DatasetInfo:
     if isinstance(dataset, CachedDataset):
         return _describe_dataset_object(dataset._dataset)
-    filepath = getattr(dataset, "_filepath", None)
+    filepath = next(
+        (
+            str(getattr(dataset, f"_{key}"))
+            for key in _FILEPATH_KEYS
+            if getattr(dataset, f"_{key}", None) is not None
+        ),
+        None,
+    )
     protocol = getattr(dataset, "_protocol", None)
     if filepath is not None and protocol and protocol != "file":
         filepath = f"{protocol}://{filepath}"
     return _DatasetInfo(
         type=_type_name(type(dataset)),
-        ephemeral=bool(getattr(dataset, "_EPHEMERAL", False)),
-        filepath=None if filepath is None else str(filepath),
+        ephemeral=bool(getattr(dataset, "_EPHEMERAL", False))
+        or _is_in_process_path(filepath),
+        filepath=filepath,
     )
 
 
@@ -213,7 +233,8 @@ def _describe_dataset_config(config: dict[str, Any]) -> _DatasetInfo:
     )
     return _DatasetInfo(
         type=type_name,
-        ephemeral=_is_kedro_io_type(type_name, _EPHEMERAL_TYPES),
+        ephemeral=_is_kedro_io_type(type_name, _EPHEMERAL_TYPES)
+        or _is_in_process_path(filepath),
         filepath=filepath,
     )
 
@@ -252,7 +273,7 @@ def _describe_dataset(catalog: CatalogProtocol, name: str) -> _DatasetInfo:
 
 
 def _is_local_path(filepath: str) -> bool:
-    if filepath.startswith(_SHARED_MOUNT_PREFIXES):
+    if filepath.lower().startswith(_SHARED_MOUNT_PREFIXES):
         return False
     protocol, _ = get_protocol_and_path(filepath)
     return protocol == "file"

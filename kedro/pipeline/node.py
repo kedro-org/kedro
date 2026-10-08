@@ -901,7 +901,7 @@ def _get_readable_func_name(func: Callable) -> str:
         str: readable name of the provided callable func.
     """
     name = getattr(func, "__name__", None)
-    if name is not None:
+    if isinstance(name, str):
         return name
     if isinstance(func, partial):
         return _get_readable_func_name(func.func)

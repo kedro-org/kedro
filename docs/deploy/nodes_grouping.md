@@ -141,7 +141,7 @@ for issue in result.issues:
     print(issue.severity, issue.message)
 ```
 
-The result depends on the dataset types and paths in the catalog you pass. The default `local` environment often points at local paths or in-memory datasets that a production environment overrides with shared storage, so pass the `env` you deploy with. In `kedro jupyter` or `kedro ipython`, `pipelines` and `catalog` already exist and the setup lines are not needed.
+The result depends on the dataset types and paths in the catalog you pass. The default `local` environment often points at local paths or in-memory datasets that a production environment overrides with shared storage, so pass the `env` you deploy with.
 
 The spaceflights starter does not use namespaces, so with its default `local` environment every node becomes its own task. The check reports errors for `X_train`, `X_test`, `y_train` and `y_test`, which the starter keeps in memory, and warnings for the datasets it saves under `data/`. The first error reads:
 
@@ -149,7 +149,7 @@ The spaceflights starter does not use namespaces, so with its default `local` en
 error Dataset 'X_test' is passed from group 'split_data_node' to group 'evaluate_model_node' but is only kept in memory, so it will not exist when the receiving group runs as a separate task. Add a catalog entry that saves it to shared storage, or move the nodes that use it into group 'split_data_node'.
 ```
 
-By default the check groups nodes by namespace. Pass `group_by=None` to check one task per node, or `groups=` to check a grouping you built yourself.
+By default the check groups nodes by namespace. Pass `group_by=None` to check one task per node.
 
 | Code                 | Severity | Reported when                                                                                                                                       |
 | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -187,7 +187,7 @@ The severity is fixed for each code. An error means the pipeline will fail after
 
     The starters save intermediate datasets under `data/`, which produces warnings rather than errors, so a step that checks errors alone passes for them.
 
-- **In a deployment plugin**, straight after it calls `Pipeline.group_nodes_by()`, so that problems are reported while the plugin generates tasks.
+- **In a deployment plugin**, straight after it calls `Pipeline.group_nodes_by()`. Pass the groups it returns as `groups=`, so the check reports problems in the grouping the plugin turns into tasks.
 
 ______________________________________________________________________
 

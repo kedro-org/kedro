@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Added `kedro.inspection.validate_deployment_grouping` to check a node grouping before deployment. It reports datasets kept in memory that are passed between groups, cycles between groups, and datasets passed between groups on local disk.
+
 ## Bug fixes and other changes
 
 - Fixed `AttributeError` when naming a node built from a callable object, such as a class instance with `__call__`, and no explicit name. The node name now falls back to the class name.

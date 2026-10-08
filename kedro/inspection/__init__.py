@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from kedro.inspection.snapshot import _build_project_snapshot
 
@@ -17,12 +17,13 @@ __all__ = [
 ]
 
 
-def get_project_snapshot(
+def get_project_snapshot(  # noqa: PLR0913
     project_path: str | Path | None = None,
     env: str | None = None,
     conf_source: str | None = None,
     metadata: ProjectMetadata | None = None,
     runtime_params: dict[str, Any] | None = None,
+    group_by: Literal["namespace", "none"] | None = "namespace",
 ) -> ProjectSnapshot:
     """Return a read-only snapshot of the Kedro project.
 
@@ -75,8 +76,19 @@ def get_project_snapshot(
                     runtime_params={"version": "02"},
                 )
 
+        group_by: Strategy used to build the node groups in each pipeline's
+            `groups`, passed to `Pipeline.group_nodes_by`. Accepted values are
+            `"namespace"` (the default), which groups nodes by their top-level
+            namespace, and `"none"` or `None`, which makes every node a group
+            of its own. Matching is case-insensitive, and the value used is
+            recorded in `PipelineSnapshot.group_by`.
+
     Returns:
         A fully populated ``ProjectSnapshot``.
+
+    Raises:
+        ValueError: If `group_by` is not a supported strategy. Raised before
+            the project is bootstrapped or any configuration is loaded.
     """
     return _build_project_snapshot(
         project_path=project_path,
@@ -84,4 +96,5 @@ def get_project_snapshot(
         conf_source=conf_source,
         metadata=metadata,
         runtime_params=runtime_params,
+        group_by=group_by,
     )

@@ -5,9 +5,10 @@ from __future__ import annotations
 import inspect
 import re
 import warnings
+from collections import defaultdict
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, cast, get_args
 
 from kedro.config import MissingConfigException
 from kedro.framework.project import pipelines
@@ -19,15 +20,18 @@ from kedro.inspection.helper import (
 )
 from kedro.inspection.models import (
     DatasetSnapshot,
+    GroupSnapshot,
     NodeSnapshot,
     NodeSourceSnapshot,
     PipelineSnapshot,
     ProjectMetadataSnapshot,
     ProjectSnapshot,
 )
+from kedro.pipeline.transcoding import _strip_transcoding
 
 if TYPE_CHECKING:
     from kedro.framework.startup import ProjectMetadata
+    from kedro.pipeline import Pipeline
     from kedro.pipeline.node import Node
 
 
@@ -144,9 +148,95 @@ def _node_to_snapshot(node: Node, resolved_project_path: Path) -> NodeSnapshot:
     )
 
 
+def _build_group_snapshots(
+    pipeline: Pipeline, group_by: str | None = "namespace"
+) -> list[GroupSnapshot]:
+    """Build a `GroupSnapshot` for each group of nodes in `pipeline`.
+
+    A group's inputs are the datasets and parameters it reads but does not
+    produce. Its outputs are the datasets it produces that another group reads
+    or that no node reads, which makes them final pipeline outputs.
+
+    Transcoded names such as `df@spark` and `df@pandas` refer to one dataset,
+    so they are matched on the name without the transcoding suffix and
+    reported the way the group's own nodes spell them.
+
+    Args:
+        pipeline: A Kedro pipeline.
+        group_by: Grouping strategy passed to `Pipeline.group_nodes_by`.
+
+    Returns:
+        Group snapshots in the order returned by `Pipeline.group_nodes_by`.
+    """
+    groups = pipeline.group_nodes_by(group_by)
+    nodes_by_name = {node.name: node for node in pipeline.nodes}
+    group_of = {name: group.name for group in groups for name in group.nodes}
+
+    readers: dict[str, set[str]] = defaultdict(set)
+    for node in pipeline.nodes:
+        for input_ in node.inputs:
+            readers[_strip_transcoding(input_)].add(group_of[node.name])
+
+    snapshots = []
+    for group in groups:
+        group_nodes = [nodes_by_name[name] for name in group.nodes]
+        produced = {
+            _strip_transcoding(output)
+            for node in group_nodes
+            for output in node.outputs
+        }
+        inputs = {
+            input_
+            for node in group_nodes
+            for input_ in node.inputs
+            if _strip_transcoding(input_) not in produced
+        }
+        outputs = set()
+        for node in group_nodes:
+            for output in node.outputs:
+                read_by = readers.get(_strip_transcoding(output), set())
+                if not read_by or read_by - {group.name}:
+                    outputs.add(output)
+
+        snapshots.append(
+            GroupSnapshot(
+                name=group.name,
+                type=cast(Literal["namespace", "nodes"], group.type),
+                nodes=list(group.nodes),
+                dependencies=list(group.dependencies),
+                inputs=sorted(inputs),
+                outputs=sorted(outputs),
+            )
+        )
+    return snapshots
+
+
+GroupBy = Literal["namespace", "none"]
+
+
+def _normalise_group_by(group_by: str | None) -> GroupBy:
+    """Return the canonical name of a grouping strategy.
+
+    `Pipeline.group_nodes_by` accepts `None` and `"none"` for the same strategy
+    and compares names case-insensitively, so every spelling of a strategy maps
+    to one name, which is what `PipelineSnapshot.group_by` records.
+
+    Raises:
+        ValueError: If `group_by` is not a supported strategy.
+    """
+    name = "none" if group_by is None else group_by
+    if not isinstance(name, str) or name.lower() not in get_args(GroupBy):
+        raise ValueError(
+            f"Unsupported group_by strategy: {group_by!r}. "
+            "Expected 'namespace', 'none' or None."
+        )
+    return cast(GroupBy, name.lower())
+
+
 def _build_pipeline_snapshots(
     pipeline_dict: dict[str, Any],
     project_path: Path,
+    group_by: str | None = "namespace",
 ) -> list[PipelineSnapshot]:
     """Build a ``PipelineSnapshot`` for every registered pipeline.
 
@@ -154,10 +244,12 @@ def _build_pipeline_snapshots(
         pipeline_dict: Dictionary of pipeline name to ``Pipeline`` object,
             as returned by ``dict(kedro.framework.project.pipelines)``.
         project_path: Absolute path to the project root directory.
+        group_by: Grouping strategy used to build each pipeline's `groups`.
 
     Returns:
         List of pipeline snapshots in registry iteration order.
     """
+    group_by = _normalise_group_by(group_by)
     resolved_project_path = project_path.resolve()
     snapshots = []
     for pipeline_id, pipeline in pipeline_dict.items():
@@ -172,17 +264,20 @@ def _build_pipeline_snapshots(
                 ],
                 inputs=sorted(pipeline.inputs()),
                 outputs=sorted(pipeline.outputs()),
+                group_by=group_by,
+                groups=_build_group_snapshots(pipeline, group_by),
             )
         )
     return snapshots
 
 
-def _build_project_snapshot(
+def _build_project_snapshot(  # noqa: PLR0913
     project_path: str | Path | None = None,
     env: str | None = None,
     conf_source: str | None = None,
     metadata: ProjectMetadata | None = None,
     runtime_params: dict[str, Any] | None = None,
+    group_by: str | None = "namespace",
 ) -> ProjectSnapshot:
     """Build a ``ProjectSnapshot`` for the Kedro project at project_path.
 
@@ -201,10 +296,16 @@ def _build_project_snapshot(
             skipped entirely.
         runtime_params: Optional dictionary of runtime parameters forwarded to
             the config loader for ``${runtime_params:...}`` interpolation.
+        group_by: Grouping strategy used to build each pipeline's `groups`.
 
     Returns:
         A fully populated ``ProjectSnapshot``.
+
+    Raises:
+        ValueError: If `group_by` is not a supported strategy. Raised before
+            the project is bootstrapped or any configuration is loaded.
     """
+    group_by = _normalise_group_by(group_by)
     resolved_project_path = (
         Path(project_path).expanduser().resolve() if project_path is not None else None
     )
@@ -247,7 +348,7 @@ def _build_project_snapshot(
 
     metadata_snapshot = _build_project_metadata_snapshot(metadata)
     pipeline_snapshots = _build_pipeline_snapshots(
-        dict(pipelines), effective_project_path
+        dict(pipelines), effective_project_path, group_by
     )
     dataset_snapshots = _build_dataset_snapshots(conf_catalog)
 

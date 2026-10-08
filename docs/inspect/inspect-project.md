@@ -136,7 +136,7 @@ for group in default_pipeline.groups:
     print("  outputs:   ", group.outputs)
 ```
 
-For a project with `data_processing` and `data_science` namespaces, the output looks as follows:
+For the spaceflights project with its `data_processing` and `data_science` pipelines namespaced, the output looks as follows:
 
 ```console
 data_processing (namespace)
@@ -151,9 +151,9 @@ data_science (namespace)
   outputs:    ['data_science.metrics']
 ```
 
-Each group is a [GroupSnapshot][kedro.inspection.models.GroupSnapshot]. `inputs` lists the datasets and parameters the group reads but does not produce. `outputs` lists the datasets it produces that another group reads or that are final pipeline outputs. Datasets used only inside a group are not listed.
+Each group is a [GroupSnapshot][kedro.inspection.models.GroupSnapshot]. `inputs` lists the datasets and parameters the group reads but does not produce. `outputs` lists the datasets it produces that another group reads or that are final pipeline outputs. Datasets used inside a single group are not listed.
 
-When each group runs as a separate task, tasks do not share memory. An output that another group lists in its `inputs` therefore needs a catalog entry that saves it to storage both tasks can reach. See [node grouping for deployment](../deploy/nodes_grouping.md) for how to choose a grouping.
+When each group runs as a separate task, tasks do not share memory. An output that another group lists in its `inputs` needs a catalog entry that saves it to storage both tasks can reach. See [node grouping for deployment](../deploy/nodes_grouping.md) for how to choose a grouping.
 
 ## How to inspect catalog datasets
 
@@ -255,6 +255,6 @@ For example, a catalog entry with `filepath: "data/${runtime_params:version}/com
 
 ## How to access the snapshot through the HTTP server
 
-The Kedro HTTP server exposes the same snapshot data at `GET /snapshot`. On success, the response contains the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, serialised as JSON. On failure, the response returns `status` and `error` with no data fields.
+The Kedro HTTP server exposes the same snapshot data at `GET /snapshot`, with a `group_by` query parameter for the grouping strategy. On success, the response contains the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, serialised as JSON. On failure, the response returns `status` and `error` with no data fields.
 
 To resolve `${runtime_params:...}` interpolation for a single request, pass a `params` query string in the same format as `kedro run --params` (for example, `GET /snapshot?params=version=02`). This format cannot represent values containing commas, such as inline lists or nested structures. It is also part of the URL, so it is subject to typical query-string length limits and should not carry secrets. See [Serving Kedro pipelines over HTTP](../extend/serving.md#get-snapshot) for the full reference and examples.

@@ -98,13 +98,29 @@ class GroupSnapshot:
     without a namespace is a group of its own. `get_project_snapshot` takes a
     `group_by` argument to use another strategy.
 
+    Use `dependencies` to order groups. Groups are listed in the order of their
+    first node in the pipeline's execution order, which is not itself a valid
+    order in which to run the groups.
+
+    Two shapes of pipeline produce groups that need care:
+
+    - A namespace interrupted by a node outside it, such as
+      `a.first -> middle -> a.last`, gives groups that depend on each other in
+      a cycle, so no order exists to run them as separate tasks. Kedro warns
+      when such a pipeline is created, but the snapshot itself does not flag
+      it. `validate_deployment_grouping` reports it as an error.
+    - A node without a namespace whose name equals a namespace, such as a node
+      `a` next to a node `a.other`, is merged into that namespace's group with
+      type `"nodes"`.
+
     Attributes:
         name: Group name. With the `"namespace"` strategy this is the top-level
             namespace, or the node name for a node without a namespace.
-        type: `"namespace"` for a namespace group, `"nodes"` for a single node
-            that is a group of its own.
+        type: `"namespace"` for a group built from a namespace, `"nodes"` for a
+            group built from a node without a namespace.
         nodes: Names of the nodes in the group, in execution order.
-        dependencies: Names of the groups that must run before this one.
+        dependencies: Names of the groups whose outputs this group reads, so
+            that must run before it.
         inputs: Sorted names of the datasets and parameters the group reads but
             does not produce: free pipeline inputs and outputs of other groups.
         outputs: Sorted names of the datasets the group produces that are read

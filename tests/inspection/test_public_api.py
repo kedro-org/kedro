@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from kedro.inspection import get_project_snapshot
 from kedro.inspection.models import ProjectSnapshot
 
@@ -41,6 +43,12 @@ class TestGetProjectSnapshot:
             group_by="namespace",
         )
         assert result is mock_snapshot
+
+    def test_unsupported_group_by_raises_without_bootstrapping(self, mocker, tmp_path):
+        mock_bootstrap = mocker.patch("kedro.inspection.snapshot.bootstrap_project")
+        with pytest.raises(ValueError, match="Unsupported group_by strategy: 'tags'"):
+            get_project_snapshot(tmp_path, group_by="tags")
+        mock_bootstrap.assert_not_called()
 
     def test_delegates_group_by_to_build_project_snapshot(self, mocker, tmp_path):
         mock_build = mocker.patch("kedro.inspection._build_project_snapshot")

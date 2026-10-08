@@ -211,14 +211,28 @@ def _build_group_snapshots(
     return snapshots
 
 
-def _group_by_name(group_by: str | None) -> Literal["namespace", "none"]:
-    """Return the name of a grouping strategy as `PipelineSnapshot.group_by` records it.
+GroupBy = Literal["namespace", "none"]
+
+_GROUP_BY_STRATEGIES: dict[str, GroupBy] = {"namespace": "namespace", "none": "none"}
+
+
+def _normalise_group_by(group_by: str | None) -> GroupBy:
+    """Return the canonical name of a grouping strategy.
 
     `Pipeline.group_nodes_by` accepts `None` and `"none"` for the same strategy
-    and compares names case-insensitively, so both spellings map to `"none"`.
+    and compares names case-insensitively, so every spelling of a strategy maps
+    to one name, which is what `PipelineSnapshot.group_by` records.
+
+    Raises:
+        ValueError: If `group_by` is not a supported strategy.
     """
-    name = "none" if group_by is None else group_by.lower()
-    return cast(Literal["namespace", "none"], name)
+    name = "none" if group_by is None else group_by
+    if not isinstance(name, str) or name.lower() not in _GROUP_BY_STRATEGIES:
+        raise ValueError(
+            f"Unsupported group_by strategy: {group_by!r}. "
+            "Expected 'namespace', 'none' or None."
+        )
+    return _GROUP_BY_STRATEGIES[name.lower()]
 
 
 def _build_pipeline_snapshots(
@@ -237,6 +251,7 @@ def _build_pipeline_snapshots(
     Returns:
         List of pipeline snapshots in registry iteration order.
     """
+    group_by = _normalise_group_by(group_by)
     resolved_project_path = project_path.resolve()
     snapshots = []
     for pipeline_id, pipeline in pipeline_dict.items():
@@ -251,7 +266,7 @@ def _build_pipeline_snapshots(
                 ],
                 inputs=sorted(pipeline.inputs()),
                 outputs=sorted(pipeline.outputs()),
-                group_by=_group_by_name(group_by),
+                group_by=group_by,
                 groups=_build_group_snapshots(pipeline, group_by),
             )
         )
@@ -287,7 +302,12 @@ def _build_project_snapshot(  # noqa: PLR0913
 
     Returns:
         A fully populated ``ProjectSnapshot``.
+
+    Raises:
+        ValueError: If `group_by` is not a supported strategy. Raised before
+            the project is bootstrapped or any configuration is loaded.
     """
+    group_by = _normalise_group_by(group_by)
     resolved_project_path = (
         Path(project_path).expanduser().resolve() if project_path is not None else None
     )

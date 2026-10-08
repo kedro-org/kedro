@@ -452,6 +452,34 @@ class TestBuildGroupSnapshots:
     def test_empty_pipeline_has_no_groups(self):
         assert _build_group_snapshots(Pipeline([])) == []
 
+    def test_interrupted_namespace_gives_cyclic_dependencies(self):
+        pipe = Pipeline(
+            [
+                node(_identity, "raw", "first", name="first", namespace="a"),
+                node(_identity, "first", "middle", name="middle"),
+                node(_identity, "middle", "last", name="last", namespace="a"),
+            ]
+        )
+
+        groups = {g.name: g for g in _build_group_snapshots(pipe)}
+
+        assert groups["a"].dependencies == ["middle"]
+        assert groups["middle"].dependencies == ["a"]
+
+    def test_node_named_like_a_namespace_joins_that_group(self):
+        pipe = Pipeline(
+            [
+                node(_identity, "raw", "table", name="a"),
+                node(_identity, "table", "out", name="other", namespace="a"),
+            ]
+        )
+
+        (group,) = _build_group_snapshots(pipe)
+
+        assert group.name == "a"
+        assert group.type == "nodes"
+        assert group.nodes == ["a", "a.other"]
+
     def test_group_by_none_makes_every_node_a_group(self, grouped_pipeline):
         groups = _build_group_snapshots(grouped_pipeline, group_by=None)
 

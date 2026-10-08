@@ -178,11 +178,27 @@ class TestBuildProjectSnapshot:
             {}, self.project_path, "namespace"
         )
 
-    def test_group_by_forwarded_to_pipeline_snapshots(self):
-        _build_project_snapshot(self.project_path, group_by=None)
+    @pytest.mark.parametrize(
+        "group_by, expected",
+        [
+            (None, "none"),
+            ("none", "none"),
+            ("NONE", "none"),
+            ("Namespace", "namespace"),
+        ],
+    )
+    def test_group_by_spellings_are_normalised(self, group_by, expected):
+        _build_project_snapshot(self.project_path, group_by=group_by)
         self.mock_build_pipeline_snapshots.assert_called_once_with(
-            {}, self.project_path, None
+            {}, self.project_path, expected
         )
+
+    @pytest.mark.parametrize("group_by", ["tags", "", 5])
+    def test_unsupported_group_by_raises_before_bootstrap(self, group_by):
+        with pytest.raises(ValueError, match="Unsupported group_by strategy"):
+            _build_project_snapshot(self.project_path, group_by=group_by)
+        self.mock_bootstrap.assert_not_called()
+        self.mock_build_pipeline_snapshots.assert_not_called()
 
     def test_datasets_populated(self):
         result = _build_project_snapshot(self.project_path)

@@ -96,7 +96,7 @@ curl http://127.0.0.1:8000/snapshot
         }
       ],
       "inputs": ["example_iris_data"],
-      "outputs": ["example_predictions"],
+      "outputs": ["X_test", "X_train"],
       "group_by": "namespace",
       "groups": [
         {
@@ -133,6 +133,23 @@ If the snapshot cannot be built (for example, due to a catalog error), the respo
 }
 ```
 
+Each pipeline also lists its node groups, the units a deployment tool can run as separate tasks:
+
+- `group_by` is the strategy that produced the groups, `"namespace"` or `"none"`.
+- `groups` has one entry per group. `type` is `"namespace"` for a group built from a namespace and `"nodes"` for a node without a namespace. `nodes` are the node names in execution order, `dependencies` are the groups that must run first, `inputs` are the datasets and parameters the group reads but does not produce, and `outputs` are the datasets it produces for other groups or as final pipeline outputs.
+
+See [How to read deployable node groups](../inspect/inspect-project.md#how-to-read-deployable-node-groups) for details.
+
+#### Grouping strategy for a single snapshot
+
+By default the endpoint groups nodes by top-level namespace. Pass `group_by=none` to get one group per node instead:
+
+```bash
+curl "http://127.0.0.1:8000/snapshot?group_by=none"
+```
+
+Any other value is rejected with HTTP 422. The response records the strategy used in each pipeline's `group_by` field.
+
 #### Runtime parameters for a single snapshot
 
 If your catalog or parameters configuration uses `${runtime_params:...}` interpolation, pass a `params` query string to resolve those placeholders for this request. The same comma-separated `key=value` format as `kedro run --params`.
@@ -161,7 +178,7 @@ This resolves `version` and `model.lr` to `{"version": 2, "model": {"lr": 0.01}}
 
 !!! note
 
-    The `/snapshot` endpoint uses the environment and configuration source configured at server startup (`--env` / `KEDRO_SERVER_ENV` and `--conf-source` / `KEDRO_SERVER_CONF_SOURCE`). It does not accept per-request `env` or `conf_source` parameters. Per-request overrides are limited to `params` (runtime parameters), described above.
+    The `/snapshot` endpoint uses the environment and configuration source configured at server startup (`--env` / `KEDRO_SERVER_ENV` and `--conf-source` / `KEDRO_SERVER_CONF_SOURCE`). It does not accept per-request `env` or `conf_source` parameters. Per-request overrides are limited to `params` (runtime parameters) and `group_by` (grouping strategy), described above.
 
 See [Inspect a Kedro project](../inspect/inspect-project.md) for the programmatic API and details on the snapshot structure.
 

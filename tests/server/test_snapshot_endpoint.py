@@ -205,6 +205,46 @@ class TestSnapshotEndpoint:
 
         assert pipeline["groups"] == []
 
+    def test_snapshot_groups_by_namespace_by_default(self, mocker, make_http_server):
+        app = make_http_server()
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        with TestClient(app) as client:
+            client.get("/snapshot")
+        assert mock_get.call_args[1]["group_by"] == "namespace"
+
+    def test_snapshot_passes_group_by_query_to_get_project_snapshot(
+        self, mocker, make_http_server
+    ):
+        app = make_http_server()
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        with TestClient(app) as client:
+            client.get("/snapshot", params={"group_by": "none"})
+        assert mock_get.call_args[1]["group_by"] == "none"
+
+    def test_snapshot_rejects_unknown_group_by(self, mocker, make_http_server):
+        app = make_http_server()
+        mock_get = mocker.patch("kedro.server.http_server.get_project_snapshot")
+        with TestClient(app) as client:
+            response = client.get("/snapshot", params={"group_by": "tags"})
+        assert response.status_code == 422
+        mock_get.assert_not_called()
+
+    def test_openapi_lists_group_by_query_values(self, make_http_server):
+        spec = make_http_server().openapi()
+        parameter = next(
+            p
+            for p in spec["paths"]["/snapshot"]["get"]["parameters"]
+            if p["name"] == "group_by"
+        )
+        assert parameter["schema"]["enum"] == ["namespace", "none"]
+        assert parameter["schema"]["default"] == "namespace"
+
     def test_openapi_schema_describes_groups(self, make_http_server):
         schemas = make_http_server().openapi()["components"]["schemas"]
 

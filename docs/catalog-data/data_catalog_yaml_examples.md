@@ -302,7 +302,7 @@ The list of all available parameters is given in the [Paramiko documentation](ht
 
 ## Cache a dataset in memory with `CachedDataset`
 
-`CachedDataset` wraps another dataset and keeps a copy of its data in memory. On save, data is written through to the wrapped dataset and stored in the in-memory cache; later loads are then served from memory instead of re-read from storage. This avoids repeated I/O when a dataset saved to slow storage is loaded in several runs or nodes.
+`CachedDataset` wraps another dataset and keeps a copy of its data in memory. On save, data is written through to the wrapped dataset and stored in the in-memory cache; later loads are then served from memory instead of re-read from storage. This avoids repeated I/O when a dataset saved to slow storage is loaded in several nodes.
 
 ```yaml
 test_ds:

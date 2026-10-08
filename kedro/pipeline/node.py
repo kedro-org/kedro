@@ -266,7 +266,7 @@ class Node:
     @property
     def _func_name(self) -> str:
         name = _get_readable_func_name(self._func)
-        if name == "<partial>":
+        if isinstance(self._func, partial) and not hasattr(self._func, "__name__"):
             warn(
                 f"The node producing outputs '{self.outputs}' is made from a 'partial' function. "
                 f"Partial functions do not have a '__name__' attribute: consider using "
@@ -332,12 +332,13 @@ class Node:
 
     def _set_unique_name(self) -> str:
         """Set a unique name for the node."""
+        func_name = _get_readable_func_name(self._func)
         if isinstance(self._func, partial):
-            base = f"partial({self._func.func.__name__})"  # Use the original function's name
+            base = f"partial({func_name})"  # Use the original callable's name
             key = f"{base}|{self.inputs}|{self.outputs}"
         else:
-            base = self._func_name
-            key = f"{self._func.__module__}.{self._func.__name__}|{self.inputs}|{self.outputs}"
+            base = func_name
+            key = f"{self._func.__module__}.{func_name}|{self.inputs}|{self.outputs}"
 
         suffix = hashlib.sha256(key.encode()).hexdigest()[:8]
         return f"{base}__{suffix}"
@@ -890,15 +891,18 @@ def _to_list(element: str | Iterable[str] | dict[str, str] | None) -> list[str]:
 def _get_readable_func_name(func: Callable) -> str:
     """Get a user-friendly readable name of the function provided.
 
+    The function's own ``__name__`` is used when it has one, including a
+    ``functools.partial`` given a name with ``functools.update_wrapper``.
+    A ``functools.partial`` without a ``__name__`` is unwrapped and the name of
+    the function it wraps is used. A callable without a ``__name__``, such as an
+    instance of a class with ``__call__``, falls back to the name of its class.
+
     Returns:
         str: readable name of the provided callable func.
     """
-
-    if hasattr(func, "__name__"):
-        return func.__name__
-
-    name = repr(func)
-    if "functools.partial" in name:
-        name = "<partial>"
-
-    return name
+    name = getattr(func, "__name__", None)
+    if isinstance(name, str):
+        return name
+    if isinstance(func, partial):
+        return _get_readable_func_name(func.func)
+    return type(func).__name__

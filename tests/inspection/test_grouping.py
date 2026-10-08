@@ -48,13 +48,22 @@ class _FileDataset(AbstractDataset):
         return {}
 
 
-class _PathDataset(_FileDataset):
+class _PathDataset(AbstractDataset):
     """Dataset object that stores its location under `_path`, like `PartitionedDataset`."""
 
     def __init__(self, path: str):
         protocol, location = get_protocol_and_path(path)
         self._protocol = protocol
         self._path = location
+
+    def load(self) -> Any:  # pragma: no cover
+        return None
+
+    def save(self, data: Any) -> None:  # pragma: no cover
+        return None
+
+    def _describe(self) -> dict[str, Any]:  # pragma: no cover
+        return {}
 
 
 class _MinimalCatalog:
@@ -477,7 +486,7 @@ class TestLazyAndMaterialisedDatasetsAgree:
     ):
         lazy = DataCatalog.from_config({"table": config})
         materialised = DataCatalog.from_config({"table": config})
-        materialised["table"]
+        materialised.get("table")  # materialise the lazy entry
 
         assert _problems(validate_deployment_grouping(two_groups, lazy)) == expected
         assert (

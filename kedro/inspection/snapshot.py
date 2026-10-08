@@ -8,7 +8,7 @@ import warnings
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast, get_args
 
 from kedro.config import MissingConfigException
 from kedro.framework.project import pipelines
@@ -213,8 +213,6 @@ def _build_group_snapshots(
 
 GroupBy = Literal["namespace", "none"]
 
-_GROUP_BY_STRATEGIES: dict[str, GroupBy] = {"namespace": "namespace", "none": "none"}
-
 
 def _normalise_group_by(group_by: str | None) -> GroupBy:
     """Return the canonical name of a grouping strategy.
@@ -227,12 +225,12 @@ def _normalise_group_by(group_by: str | None) -> GroupBy:
         ValueError: If `group_by` is not a supported strategy.
     """
     name = "none" if group_by is None else group_by
-    if not isinstance(name, str) or name.lower() not in _GROUP_BY_STRATEGIES:
+    if not isinstance(name, str) or name.lower() not in get_args(GroupBy):
         raise ValueError(
             f"Unsupported group_by strategy: {group_by!r}. "
             "Expected 'namespace', 'none' or None."
         )
-    return _GROUP_BY_STRATEGIES[name.lower()]
+    return cast(GroupBy, name.lower())
 
 
 def _build_pipeline_snapshots(

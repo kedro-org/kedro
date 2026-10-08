@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Added pre-loading of raw configuration in serving mode to improve request handling performance.
+
 ## Bug fixes and other changes
 
 - Fixed `AttributeError` when naming a node built from a callable object, such as a class instance with `__call__`, and no explicit name. The node name now falls back to the class name.

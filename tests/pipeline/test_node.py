@@ -1,6 +1,7 @@
 import re
 from collections.abc import Callable
 from functools import partial, update_wrapper, wraps
+from unittest.mock import Mock
 
 import pytest
 
@@ -347,7 +348,7 @@ def partial_inconsistent_input_size():
         ),
         (
             partial_inconsistent_input_size,
-            r"Inputs of '<partial>' function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+            r"Inputs of 'identity' function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
     ],
 )
@@ -445,15 +446,73 @@ class TestNames:
 
     def test_partial(self):
         n = node(partial(identity), ["in"], ["out"])
-        assert str(n) == "<partial>([in]) -> [out]"
+        assert str(n) == "identity([in]) -> [out]"
         assert re.match(r"^partial\(identity\)__[0-9a-f]{8}$", n.name)
-        assert n.short_name == "<Partial>"
+        assert n.short_name == "Identity"
+
+    def test_callable_object_name(self):
+        class Double:
+            def __call__(self, value):
+                return value * 2
+
+        func = Double()
+        first = node(func, "in", "out")
+        same = node(func, "in", "out")
+        different = node(func, "other", "out")
+
+        assert re.fullmatch(r"Double__[0-9a-f]{8}", first.name)
+        assert first.name == same.name
+        assert first.name != different.name
+        assert first.run({"in": 3}) == {"out": 6}
+        assert first.short_name == "Double"
+        assert str(first) == "Double([in]) -> [out]"
+        # stable across instances: no memory address in the rendered name
+        assert first.short_name == node(Double(), "in", "out").short_name
+
+    def test_partial_callable_object_name(self):
+        class Add:
+            def __call__(self, value, increment):
+                return value + increment
+
+        func = partial(Add(), increment=2)
+        first = node(func, "in", "out")
+        same = node(func, "in", "out")
+        different = node(func, "other", "out")
+
+        assert re.fullmatch(r"partial\(Add\)__[0-9a-f]{8}", first.name)
+        assert first.name == same.name
+        assert first.name != different.name
+        assert first.run({"in": 3}) == {"out": 5}
+        assert first.short_name == "Add"
+        assert str(first) == "Add([in]) -> [out]"
+
+    def test_partial_callable_object_still_warns(self):
+        class Add:
+            def __call__(self, value, increment):
+                return value + increment
+
+        n = node(partial(Add(), increment=2), "in", "out")
+        with pytest.warns(UserWarning, match="Partial functions do not have"):
+            assert str(n) == "Add([in]) -> [out]"
+
+    def test_mock_name(self):
+        n = node(Mock(), "in", "out")
+        assert str(n) == "Mock([in]) -> [out]"
+        assert re.fullmatch(r"Mock__[0-9a-f]{8}", n.name)
 
     def test_updated_partial(self):
         n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])
         assert str(n) == "identity([in]) -> [out]"
         assert re.match(r"^partial\(identity\)__[0-9a-f]{8}$", n.name)
         assert n.short_name == "Identity"
+
+    def test_partial_keeps_its_own_name(self):
+        def other(x):
+            return x
+
+        n = node(update_wrapper(partial(identity), other), ["in"], ["out"])
+        assert str(n) == "other([in]) -> [out]"
+        assert re.match(r"^partial\(other\)__[0-9a-f]{8}$", n.name)
 
     def test_updated_partial_dict_inputs(self):
         n = node(

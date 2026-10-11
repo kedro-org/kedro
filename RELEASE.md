@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple.
+
 - Added `kedro.inspection.validate_deployment_grouping` to check a node grouping before deployment. It reports datasets kept in memory that are passed between groups, cycles between groups, and datasets passed between groups on local disk.
 
 ## Bug fixes and other changes

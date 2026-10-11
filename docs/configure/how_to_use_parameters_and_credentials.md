@@ -62,6 +62,22 @@ Node(
 )
 ```
 
+If the node function takes the nested keys as keyword arguments, you can unpack the whole group with a `**` prefix instead of taking the dictionary and indexing it:
+
+```python
+def train_model(data, learning_rate, test_data_ratio, number_of_train_iterations): ...
+
+
+# in pipeline definition
+Node(
+    func=train_model,
+    inputs=["input_data", "**params:model_params"],
+    outputs="output_data",
+)
+```
+
+The dictionary registered under `params:model_params` is passed to the function as keyword arguments, following Python's `**` unpacking. A key that does not match a function argument raises a `TypeError` when the node runs, so a parameters file that falls out of sync with the function signature fails loudly. The `**` prefix also works when it is the node's only input, for example `inputs="**parameters"` to pass every parameter as a keyword argument.
+
 You can also pass `parameters` to the node inputs and access the entire collection of values inside the node function.
 
 ```python

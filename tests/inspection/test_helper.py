@@ -325,6 +325,53 @@ class TestResolveFactoryPatterns:
         assert "{namespace}.{name}" not in result
         assert "ns.ds" in result
 
+    def test_parameter_names_not_resolved_from_patterns(self):
+        """Parameter names (``params:*`` / ``parameters``) never appear as datasets.
+
+        Regression test for https://github.com/kedro-org/kedro/issues/5804:
+        namespaced and catch-all factory patterns must not turn node inputs
+        such as ``params:model_options.test_size`` into dataset entries.
+        """
+        catalog_config = {
+            "{namespace}.{name}": {
+                "type": "pandas.CSVDataset",
+                "filepath": "data/{name}.csv",
+            },
+            "{default}": {
+                "type": "pandas.ParquetDataset",
+                "filepath": "data/{default}.pq",
+            },
+        }
+        datasets = {
+            "{namespace}.{name}": DatasetSnapshot(
+                name="{namespace}.{name}",
+                type="pandas.CSVDataset",
+                filepath="data/{name}.csv",
+            ),
+            "{default}": DatasetSnapshot(
+                name="{default}",
+                type="pandas.ParquetDataset",
+                filepath="data/{default}.pq",
+            ),
+        }
+        node = _make_node_snapshot(
+            [
+                "companies",
+                "params:model_options.test_size",
+                "params:seed",
+                "parameters",
+            ],
+            ["ds.out"],
+        )
+        pipelines = [_make_pipeline_snapshot([node])]
+
+        result = _resolve_factory_patterns(catalog_config, datasets, pipelines)
+
+        assert sorted(result) == ["companies", "ds.out"]
+        assert "params:model_options.test_size" not in result
+        assert "params:seed" not in result
+        assert "parameters" not in result
+
     def test_no_match_dataset_not_added(self):
         """A pipeline dataset that does not match any pattern is not added."""
         catalog_config = {

@@ -6,6 +6,7 @@
 
 ## Bug fixes and other changes
 
+- Fixed the project snapshot listing parameter inputs (e.g. `params:model_options.test_size`, `parameters`) under `datasets` whenever a catalog factory pattern matched their names. Such names are no longer resolved into dataset entries.
 - Fixed `AttributeError` when naming a node built from a callable object, such as a class instance with `__call__`, and no explicit name. The node name now falls back to the class name.
 - Fixed typed parameter validation binding a `params:` input to the wrong function argument when a node declared with a dict of inputs leaves an earlier argument to its default. The typed requirement was taken from an argument the node never receives, so a run could fail on a type the user never asked for.
 - Fixed `--load-versions` (and `DataCatalog.from_config(load_versions=...)`) rejecting a dataset name that the catalog resolves through a user catch-all pattern, even though the name is in the catalog and returns a versioned dataset.

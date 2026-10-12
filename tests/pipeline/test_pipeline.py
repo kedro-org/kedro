@@ -1,4 +1,5 @@
 import re
+from functools import partial
 from itertools import chain
 
 import pytest
@@ -514,6 +515,23 @@ def non_unique_node_outputs():
         node(identity, "B", {"out1": "D", "out2": "E"}, name="node3"),
         node(identity, "D", ["E"], name="node4"),  # E non-unique
     ]
+
+
+class TestCallableObjectPipeline:
+    def test_unnamed_callable_objects(self):
+        class Double:
+            def __call__(self, value):
+                return value * 2
+
+        callable_node = node(Double(), "input", "middle")
+        partial_node = node(partial(Double()), "middle", "output")
+        result = pipeline([callable_node, partial_node])
+
+        assert {item.name for item in result.nodes} == {
+            callable_node.name,
+            partial_node.name,
+        }
+        assert len(result.nodes) == 2
 
 
 class TestInvalidPipeline:

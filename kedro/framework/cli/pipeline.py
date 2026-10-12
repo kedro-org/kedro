@@ -102,7 +102,7 @@ def pipeline() -> None:
     "template_path",
     "-t",
     "--template",
-    type=click.Path(file_okay=False, dir_okay=True, exists=True, path_type=Path),
+    type=click.Path(file_okay=False, dir_okay=True, exists=True, path_type=Path),  # type: ignore[type-var]
     help="Path to cookiecutter template to use for pipeline(s). Will override any local templates.",
 )
 @env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")

@@ -300,6 +300,29 @@ cluster_credentials:
 
 The list of all available parameters is given in the [Paramiko documentation](https://docs.paramiko.org/en/2.4/api/client.html#paramiko.client.SSHClient.connect).
 
+## Cache a dataset in memory with `CachedDataset`
+
+`CachedDataset` wraps another dataset and keeps a copy of its data in memory. On save, data is written through to the wrapped dataset and stored in the in-memory cache; later loads are then served from memory instead of re-read from storage. This avoids repeated I/O when a dataset saved to slow storage is loaded in several nodes.
+
+```yaml
+test_ds:
+  type: CachedDataset
+  versioned: true
+  dataset:
+    type: pandas.CSVDataset
+    filepath: example.csv
+```
+
+If the wrapped dataset is versioned, set `versioned` on the `CachedDataset` wrapper itself, not on the nested dataset definition.
+
+!!! note
+
+    `CachedDataset` cannot be used with the `ParallelRunner` because the in-memory cache is local to a single process. Use the `ThreadRunner` instead if you need concurrency.
+
+!!! note
+
+    Because later loads are served from memory rather than re-read from storage, `CachedDataset` can mask differences between the in-memory object and what a fresh load would return (for example, dtype coercion on a CSV round-trip). It is best suited to data that is written once and re-read verbatim.
+
 ## Load multiple datasets with similar configuration using YAML anchors
 
 Different datasets might use the same file format, share the same load and save arguments, and be stored in the same folder. [YAML has a built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file. This means you can decide what is generalisable across your datasets, so that you need not spend time copying and pasting dataset configurations in the `catalog.yml` file.

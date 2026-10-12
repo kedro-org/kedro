@@ -166,7 +166,7 @@ class CommandCollection(click.CommandCollection):
         return [
             click.CommandCollection(
                 name=group_name,
-                sources=cli_list,
+                sources=cli_list,  # type: ignore[arg-type]
                 help="\n\n".join(helps[group_name]),
                 callback=cli_list[0].callback,
                 params=cli_list[0].params,
@@ -175,7 +175,7 @@ class CommandCollection(click.CommandCollection):
             if cli_list
         ]
 
-    def resolve_command(
+    def resolve_command(  # type: ignore[override]
         self, ctx: click.core.Context, args: list
     ) -> tuple[str | None, click.Command | None, list[str]]:
         try:

@@ -22,6 +22,7 @@ from kedro.framework.session import AbstractSession, KedroSession
 from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io import DatasetNotFoundError, MemoryDataset
+from kedro.runner import SequentialRunner, ThreadRunner
 from kedro.utils import _has_rich_handler
 
 
@@ -519,6 +520,49 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_records_the_default_runner_name(
+        self, fake_project, mock_context_class, mocker
+    ):
+        """A run with no runner argument is executed by SequentialRunner, so that
+        is the name the hooks must receive. Uses a real runner instance, because
+        a mock can be given a `__name__` that no runner actually has."""
+        mock_hook = mocker.patch(
+            "kedro.framework.session.session._create_hook_manager"
+        ).return_value.hook
+        mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={"__default__": mocker.Mock()},
+        )
+        mocker.patch.object(SequentialRunner, "run", return_value={})
+
+        with KedroSession.create(fake_project) as session:
+            session.run()
+
+        run_params = mock_hook.before_pipeline_run.call_args.kwargs["run_params"]
+        assert run_params["runner"] == "SequentialRunner"
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_records_the_runner_name_of_a_real_instance(
+        self, fake_project, mock_context_class, mocker
+    ):
+        """The runner is always an instance, and an instance has no `__name__`:
+        reading one leaves the hooks with a repr carrying a memory address."""
+        mock_hook = mocker.patch(
+            "kedro.framework.session.session._create_hook_manager"
+        ).return_value.hook
+        mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={"__default__": mocker.Mock()},
+        )
+        mocker.patch.object(ThreadRunner, "run", return_value={})
+
+        with KedroSession.create(fake_project) as session:
+            session.run(runner=ThreadRunner())
+
+        run_params = mock_hook.before_pipeline_run.call_args.kwargs["run_params"]
+        assert run_params["runner"] == "ThreadRunner"
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
     def test_run(
         self,
@@ -543,7 +587,6 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = (
             mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
         )
@@ -565,7 +608,7 @@ class TestKedroSession:
             "runtime_params": {},
             "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
-            "runner": mock_runner.__name__,
+            "runner": "SequentialRunner",
             "only_missing_outputs": False,
         }
 
@@ -622,7 +665,6 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_context._pipelines_to_validate = None
-        mock_runner.__name__ = "SequentialRunner"
 
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, pipeline_names=pipeline_names)
@@ -656,7 +698,6 @@ class TestKedroSession:
         the requested modules."""
         mocker.patch("kedro.framework.session.session._create_hook_manager")
         mock_pipelines = mocker.patch("kedro.framework.session.session.pipelines")
-        mock_runner.__name__ = "SequentialRunner"
 
         with KedroSession.create(fake_project) as session:
             session.run(runner=mock_runner, pipeline_names=pipeline_names)
@@ -761,7 +802,7 @@ class TestKedroSession:
             "runtime_params": {},
             "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
-            "runner": mock_thread_runner.__name__,
+            "runner": "ThreadRunner",
             "only_missing_outputs": False,
         }
         mock_catalog = mock_context._get_catalog.return_value
@@ -838,7 +879,7 @@ class TestKedroSession:
             "runtime_params": {},
             "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
-            "runner": mock_runner.__name__,
+            "runner": "SequentialRunner",
             "only_missing_outputs": False,
         }
 
@@ -907,7 +948,6 @@ class TestKedroSession:
         mock_pipelines = mocker.patch("kedro.framework.session.session.pipelines")
         mock_pipelines.__getitem__.side_effect = KeyError("nonexistent")
         mock_pipelines.keys.return_value = ["__default__", "data_engineering"]
-        mock_runner.__name__ = "SequentialRunner"
 
         with pytest.raises(ValueError):
             with KedroSession.create(fake_project) as session:
@@ -967,7 +1007,7 @@ class TestKedroSession:
             "runtime_params": {},
             "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
-            "runner": mock_runner.__name__,
+            "runner": "SequentialRunner",
             "only_missing_outputs": False,
         }
 
@@ -1016,7 +1056,6 @@ class TestKedroSession:
             "kedro.runner.SequentialRunner",
             autospec=True,
         )
-        broken_runner.__name__ = "BrokenRunner"
         error = FakeException("You shall not pass!")
         broken_runner.run.side_effect = error  # runner.run() raises an error
         mock_pipeline = (
@@ -1042,7 +1081,7 @@ class TestKedroSession:
             "runtime_params": {},
             "pipeline_names": [fake_pipeline_name] if fake_pipeline_name else None,
             "namespaces": None,
-            "runner": broken_runner.__name__,
+            "runner": "SequentialRunner",
             "only_missing_outputs": False,
         }
 
@@ -1066,7 +1105,7 @@ class TestKedroSession:
             only_missing_outputs=False,
         )
 
-        record_data["runner"] = "MockRunner"
+        record_data["runner"] = "SequentialRunner"
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,
             run_result=fixed_runner.run.return_value,
@@ -1124,7 +1163,6 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = (
             mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
         )
@@ -1156,7 +1194,7 @@ class TestKedroSession:
             "runtime_params": {},
             "pipeline_names": None,
             "namespaces": None,
-            "runner": mock_runner.__name__,
+            "runner": "SequentialRunner",
             "only_missing_outputs": True,
         }
 
@@ -1187,7 +1225,6 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = (
             mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
         )
@@ -1223,7 +1260,6 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = (
             mock_pipelines.__getitem__().__radd__.return_value.filter.return_value
         )
@@ -1255,7 +1291,7 @@ class TestKedroSession:
             "runtime_params": {},
             "pipeline_names": None,
             "namespaces": None,
-            "runner": mock_runner.__name__,
+            "runner": "SequentialRunner",
             "only_missing_outputs": True,
         }
 

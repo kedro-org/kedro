@@ -381,6 +381,15 @@ class KedroSession(AbstractSession):
             node_namespaces=namespaces,
         )
 
+        # Resolved before the run record is built, so that hooks receive the
+        # runner that actually runs the pipeline and not the unset argument.
+        runner = runner or SequentialRunner()
+        if not isinstance(runner, AbstractRunner):
+            raise KedroSessionError(
+                "KedroSession expect an instance of Runner instead of a class."
+                "Have you forgotten the `()` at the end of the statement?"
+            )
+
         record_data = {
             "run_id": session_id,
             "project_path": self._project_path.as_posix(),
@@ -396,16 +405,9 @@ class KedroSession(AbstractSession):
             "runtime_params": runtime_params,
             "pipeline_names": pipeline_names,
             "namespaces": namespaces,
-            "runner": getattr(runner, "__name__", str(runner)),
+            "runner": runner.__class__.__name__,
             "only_missing_outputs": only_missing_outputs,
         }
-
-        runner = runner or SequentialRunner()
-        if not isinstance(runner, AbstractRunner):
-            raise KedroSessionError(
-                "KedroSession expect an instance of Runner instead of a class."
-                "Have you forgotten the `()` at the end of the statement?"
-            )
 
         catalog_class = (
             SharedMemoryDataCatalog

@@ -321,7 +321,7 @@ class KedroServiceSession(AbstractSession):
             "runtime_datasets": list((runtime_datasets or {}).keys()),
             "pipeline_names": pipeline_names,
             "namespaces": namespaces,
-            "runner": getattr(runner, "__name__", str(runner)),
+            "runner": runner.__class__.__name__,
             "only_missing_outputs": only_missing_outputs,
         }
 

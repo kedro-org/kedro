@@ -532,7 +532,6 @@ def mock_runner(mocker):
         "kedro.runner.sequential_runner.SequentialRunner",
         autospec=True,
     )
-    mock_runner.__name__ = "MockRunner"
     return mock_runner
 
 
@@ -542,5 +541,4 @@ def mock_thread_runner(mocker):
         "kedro.runner.thread_runner.ThreadRunner",
         autospec=True,
     )
-    mock_runner.__name__ = "MockThreadRunner`"
     return mock_runner

@@ -1,6 +1,6 @@
 ### 📚 Documentation - local setup guide
 
-This guide will help you set up and run the documentation site locally using MkDocs.
+This guide will help you set up and run the documentation site locally using [Zensical](https://zensical.org/).
 
 ______________________________________________________________________
 
@@ -24,10 +24,10 @@ ______________________________________________________________________
 
 ### 🚀 Run documentation locally
 
-Once the installation is complete, start the MkDocs development server with:
+Once the installation is complete, start the Zensical development server with:
 
 ```
-mkdocs serve
+zensical serve
 ```
 
 You can now view the documentation in your browser at:

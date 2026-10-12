@@ -9,6 +9,7 @@ from kedro.config import MissingConfigException
 from kedro.framework.project import settings
 from kedro.inspection.models import DatasetSnapshot
 from kedro.io.catalog_config_resolver import CatalogConfigResolver
+from kedro.io.core import is_parameter
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -97,11 +98,18 @@ def _resolve_factory_patterns(
     sorted_patterns = CatalogConfigResolver._sort_patterns(pattern_configs)
 
     # Collect every concrete dataset name referenced across all pipeline nodes.
+    # Parameters are excluded: like ``CatalogConfigResolver``/``resolve_patterns``
+    # they are never resolved through factory patterns, otherwise a catch-all
+    # pattern would turn every parameter into a "dataset" with a bogus filepath.
     pipeline_ds_names: set[str] = set()
     for pipeline_snapshot in pipelines:
         for node_snapshot in pipeline_snapshot.nodes:
-            pipeline_ds_names.update(node_snapshot.inputs)
-            pipeline_ds_names.update(node_snapshot.outputs)
+            pipeline_ds_names.update(
+                name for name in node_snapshot.inputs if not is_parameter(name)
+            )
+            pipeline_ds_names.update(
+                name for name in node_snapshot.outputs if not is_parameter(name)
+            )
 
     # Start from non-pattern entries
     result = {

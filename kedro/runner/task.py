@@ -3,6 +3,7 @@ from __future__ import annotations
 import inspect
 import itertools as it
 import multiprocessing
+from collections.abc import Iterator
 from concurrent.futures import (
     ALL_COMPLETED,
     Future,
@@ -10,6 +11,7 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
+from functools import partial
 from typing import TYPE_CHECKING, Any
 
 from more_itertools import interleave
@@ -173,7 +175,7 @@ class Task:
         # Stream chunks only for generator-function nodes, so iterable
         # business objects (e.g. ``mne.Epochs``) are passed to
         # ``catalog.save`` unchanged. See kedro-org/kedro#5412.
-        if outputs and inspect.isgeneratorfunction(node.func):
+        if _streams_generators(node, outputs):
             # Python dictionaries are ordered, so we are sure
             # the keys and the chunk streams are in the same order
             # [a, b, c]
@@ -224,6 +226,14 @@ class Task:
             )
 
             future_dataset_mapping = {}
+            if _streams_generators(node, outputs):
+                raise ValueError(
+                    f"Async data loading and saving does not work with "
+                    f"nodes wrapping generator functions. Please make "
+                    f"sure you don't use `yield` anywhere "
+                    f"in node {node!s}."
+                )
+
             for name, data in outputs.items():
                 hook_manager.hook.before_dataset_saved(
                     dataset_name=name, data=data, node=node
@@ -322,3 +332,34 @@ class Task:
             run_id=run_id,
         )
         return outputs
+
+
+def _is_generator_node_func(func: Any) -> bool:
+    """Whether ``func`` is a generator function, looking through decorators
+    that use ``functools.wraps`` and through ``functools.partial``."""
+    seen: set[int] = set()
+    while id(func) not in seen:
+        seen.add(id(func))
+        if inspect.isgeneratorfunction(func):
+            return True
+        if isinstance(func, partial):
+            func = func.func
+        elif hasattr(func, "__wrapped__"):
+            func = func.__wrapped__
+        else:
+            return False
+    return False  # cyclic ``__wrapped__`` chain
+
+
+def _streams_generators(node: Node, outputs: dict[str, Any]) -> bool:
+    """Whether the outputs of ``node`` are generators to be saved chunk by chunk.
+
+    Both the declared function must be a generator function and what the node
+    actually returned must be iterators, so a decorator that consumes the generator keeps its output
+    saved as a single value.
+    """
+    return (
+        bool(outputs)
+        and _is_generator_node_func(node.func)
+        and all(isinstance(value, Iterator) for value in outputs.values())
+    )

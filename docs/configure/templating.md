@@ -24,12 +24,12 @@ Templating in `OmegaConfigLoader` addresses three related problems:
 
 `OmegaConfigLoader` supports four complementary ways to make configuration dynamic. The right choice depends on where the value comes from and when it changes:
 
-| Situation | Approach | Reference style |
-|---|---|---|
-| A value is reused within one configuration type (for example, the same dataset type across several catalog entries) | Variable interpolation | `${...}` |
-| A value is shared across configuration types, for example between parameters and the catalog | Globals | `${globals:...}` |
-| A value that is known when the pipeline runs, for example a date or experiment name passed through the CLI | Runtime parameters | `${runtime_params:...}` |
-| A value must be computed dynamically, for example today's date or a non-primitive type | Custom resolvers | `${my_resolver:...}` |
+| Situation                                                                                                           | Approach               | Reference style         |
+| ------------------------------------------------------------------------------------------------------------------- | ---------------------- | ----------------------- |
+| A value is reused within one configuration type (for example, the same dataset type across several catalog entries) | Variable interpolation | `${...}`                |
+| A value is shared across configuration types, for example between parameters and the catalog                        | Globals                | `${globals:...}`        |
+| A value that is known when the pipeline runs, for example a date or experiment name passed through the CLI          | Runtime parameters     | `${runtime_params:...}` |
+| A value must be computed dynamically, for example today's date or a non-primitive type                              | Custom resolvers       | `${my_resolver:...}`    |
 
 ## Variable interpolation
 

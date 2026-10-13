@@ -7,7 +7,17 @@ from typing import Any
 
 from kedro.io.core import AbstractDataset, DatasetError, TCopyMode
 
-_EMPTY = object()
+
+class _Empty:
+    def __reduce__(self) -> tuple[Any, ...]:
+        return (_get_empty, ())
+
+
+def _get_empty() -> _Empty:
+    return _EMPTY
+
+
+_EMPTY = _Empty()
 
 
 class MemoryDataset(AbstractDataset):

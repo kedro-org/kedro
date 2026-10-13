@@ -361,6 +361,14 @@ With these changes, when you run `kedro run` in your terminal, you should see `y
 ...                                                                              runner.py:105
 ```
 
+### Use decorators with generator nodes
+
+If you decorate a generator function with a decorator that uses `functools.wraps`, Kedro still streams its output to the catalog in the same way as the undecorated function. The decorator must return the generator produced by the wrapped function without iterating over it. If the decorator iterates over the generator, for example by calling `list()` on it, Kedro saves the result as a single value.
+
+!!! note
+
+    Generator nodes, whether decorated or not, cannot be run with asynchronous data loading and saving. Kedro raises a `ValueError` if you use `--async` with a generator node.
+
 ## How to add preview functions to nodes
 
 !!! warning

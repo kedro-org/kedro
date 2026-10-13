@@ -2,11 +2,8 @@
 
 ## Major features and improvements
 
-<<<<<<< HEAD
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.
-=======
 - Added node groups to the project snapshot. Each `PipelineSnapshot` has a `groups` list of `GroupSnapshot` entries with the group's nodes, dependencies, inputs and outputs, also returned by `GET /snapshot`. `get_project_snapshot` takes a `group_by` argument to choose the grouping strategy, `GET /snapshot` takes it as a query parameter, and each `PipelineSnapshot` records it in `group_by`.
->>>>>>> origin/main
 - Added `kedro.inspection.validate_deployment_grouping` to check a node grouping before deployment. It reports datasets kept in memory that are passed between groups, cycles between groups, and datasets passed between groups on local disk.
 
 ## Bug fixes and other changes

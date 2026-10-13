@@ -309,7 +309,7 @@ class TestNodeToSnapshot:
             snapshot = _node_to_snapshot(partial_node, project_path)
 
         assert snapshot.name == "partial_node"
-        assert snapshot.func_name == "<partial>"
+        assert snapshot.func_name == "_identity"
         assert snapshot.source is None
 
 

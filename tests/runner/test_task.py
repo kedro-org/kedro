@@ -1,9 +1,11 @@
+from functools import wraps
+
 import pytest
 
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.pipeline import node
 from kedro.runner import Task
-from kedro.runner.task import TaskError
+from kedro.runner.task import TaskError, _is_generator_node_func
 
 
 def generate_one():
@@ -32,6 +34,51 @@ class TestTask:
                 is_async=True,
             )
             task.execute()
+
+    def test_wrapped_generator_fails_async(self, catalog):
+        @wraps(generate_one)
+        def wrapped(*args, **kwargs):
+            return generate_one(*args, **kwargs)
+
+        n = node(wrapped, inputs=None, outputs="result")
+        with pytest.raises(ValueError, match="nodes wrapping generator functions"):
+            Task(
+                node=n,
+                catalog=catalog,
+                hook_manager=_NullPluginManager(),
+                is_async=True,
+            ).execute()
+
+    def test_cyclic_wrapped_chain_is_not_a_generator(self):
+        def plain():
+            return None
+
+        def other():
+            return None
+
+        plain.__wrapped__ = other
+        other.__wrapped__ = plain
+
+        assert _is_generator_node_func(plain) is False
+
+    def test_wrapper_that_consumes_the_generator_still_runs_async(
+        self, mocker, catalog
+    ):
+        fake_dataset = mocker.Mock()
+        mocker.patch.object(catalog, "get", return_value=fake_dataset)
+
+        @wraps(generate_one)
+        def wrapped(*args, **kwargs):
+            return list(generate_one(*args, **kwargs))
+
+        n = node(wrapped, inputs=None, outputs="result")
+        Task(
+            node=n,
+            catalog=catalog,
+            hook_manager=_NullPluginManager(),
+            is_async=True,
+        ).execute()
+        assert fake_dataset.save.call_args_list == [((list(range(10)),),)]
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_package_name_and_logging_provided(

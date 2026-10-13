@@ -121,6 +121,40 @@ if node.source:
 
 `source` is `None` when the location cannot be resolved. For example, `functools.partial`, lambdas, built-ins, or functions defined outside the project root.
 
+## How to read deployable node groups
+
+Each pipeline snapshot also lists its node groups in `groups`. A group is a set of nodes that a deployment tool can run as one task. Nodes that share a top-level [namespace](../build/namespaces.md) form one group, and a node without a namespace is a group of its own. This is the `"namespace"` strategy of `Pipeline.group_nodes_by`, which the snapshot uses by default. To use another strategy, pass `group_by` to `get_project_snapshot`. For example, `group_by=None` makes every node a group of its own. The strategy that produced the groups is recorded in `pipeline.group_by`, so a consumer does not have to infer it.
+
+```python
+default_pipeline = next(p for p in snapshot.pipelines if p.name == "__default__")
+
+for group in default_pipeline.groups:
+    print(group.name, f"({group.type})")
+    print("  nodes:     ", group.nodes)
+    print("  runs after:", group.dependencies)
+    print("  inputs:    ", group.inputs)
+    print("  outputs:   ", group.outputs)
+```
+
+For the spaceflights project with its `data_processing` and `data_science` pipelines namespaced, the output looks as follows:
+
+```console
+data_processing (namespace)
+  nodes:      ['data_processing.preprocess_companies', 'data_processing.preprocess_shuttles', 'data_processing.create_model_input_table']
+  runs after: []
+  inputs:     ['companies', 'shuttles']
+  outputs:    ['model_input_table']
+data_science (namespace)
+  nodes:      ['data_science.train_model', 'data_science.evaluate_model']
+  runs after: ['data_processing']
+  inputs:     ['model_input_table', 'params:model_options']
+  outputs:    ['data_science.metrics']
+```
+
+Each group is a [GroupSnapshot][kedro.inspection.models.GroupSnapshot]. `inputs` lists the datasets and parameters the group reads but does not produce. `outputs` lists the datasets it produces that another group reads or that are final pipeline outputs. Datasets used inside a single group are not listed.
+
+When each group runs as a separate task, tasks do not share memory. An output that another group lists in its `inputs` needs a catalog entry that saves it to storage both tasks can reach. See [node grouping for deployment](../deploy/nodes_grouping.md) for how to choose a grouping.
+
 ## How to inspect catalog datasets
 
 The `datasets` attribute is a dictionary mapping dataset names to [DatasetSnapshot][kedro.inspection.models.DatasetSnapshot] objects. Each snapshot contains the dataset type and, where present, its file path:
@@ -221,6 +255,6 @@ For example, a catalog entry with `filepath: "data/${runtime_params:version}/com
 
 ## How to access the snapshot through the HTTP server
 
-The Kedro HTTP server exposes the same snapshot data at `GET /snapshot`. On success, the response contains the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, serialised as JSON. On failure, the response returns `status` and `error` with no data fields.
+The Kedro HTTP server exposes the same snapshot data at `GET /snapshot`, with a `group_by` query parameter for the grouping strategy. On success, the response contains the same `metadata`, `pipelines`, `datasets`, and `parameters` fields as `ProjectSnapshot`, serialised as JSON. On failure, the response returns `status` and `error` with no data fields.
 
 To resolve `${runtime_params:...}` interpolation for a single request, pass a `params` query string in the same format as `kedro run --params` (for example, `GET /snapshot?params=version=02`). This format cannot represent values containing commas, such as inline lists or nested structures. It is also part of the URL, so it is subject to typical query-string length limits and should not carry secrets. See [Serving Kedro pipelines over HTTP](../extend/serving.md#get-snapshot) for the full reference and examples.

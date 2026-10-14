@@ -16,7 +16,10 @@ from kedro.framework.project import (
 )
 from kedro.framework.session import KedroServiceSession
 from kedro.framework.session.abstract_session import KedroSessionError
+from kedro.framework.session.service_session import _inject_runtime_datasets
+from kedro.io import DataCatalog
 from kedro.runner import ThreadRunner
+from kedro.validation import DataValidationError
 
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
@@ -931,3 +934,58 @@ class TestKedroServiceSession:
             results = [future.result() for future in as_completed(futures)]
 
         assert len(results) == num_threads
+
+
+class RejectNegativeValidator:
+    """Fails validation for any negative value in a list."""
+
+    def validate(self, data):
+        if any(value < 0 for value in data):
+            raise DataValidationError("negative values found")
+        return data
+
+
+_VALIDATOR_PATH = f"{__name__}.RejectNegativeValidator"
+
+
+class TestInjectRuntimeDatasets:
+    def test_keeps_validator_of_replaced_entry(self, tmp_path):
+        catalog = DataCatalog.from_config(
+            {
+                "input_data": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "input.pkl"),
+                    "validator": _VALIDATOR_PATH,
+                }
+            }
+        )
+
+        _inject_runtime_datasets(catalog, {"input_data": [1, -2]})
+
+        assert "input_data" in catalog.validator_specs
+        with pytest.raises(DataValidationError, match="negative values found"):
+            catalog.load("input_data")
+
+    def test_keeps_validator_of_factory_pattern_entry(self, tmp_path):
+        catalog = DataCatalog.from_config(
+            {
+                "{name}_input": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "{name}.pkl"),
+                    "validator": _VALIDATOR_PATH,
+                }
+            }
+        )
+
+        _inject_runtime_datasets(catalog, {"raw_input": [-1]})
+
+        with pytest.raises(DataValidationError, match="negative values found"):
+            catalog.load("raw_input")
+
+    def test_new_entry_has_no_validator(self):
+        catalog = DataCatalog()
+
+        _inject_runtime_datasets(catalog, {"new_data": [-1]})
+
+        assert catalog.validator_specs == {}
+        assert catalog.load("new_data") == [-1]

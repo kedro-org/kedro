@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 
     from kedro.config import AbstractConfigLoader
     from kedro.framework.context import KedroContext
+    from kedro.io import CatalogProtocol
 
 
 class KedroServiceSession(AbstractSession):
@@ -301,8 +302,7 @@ class KedroServiceSession(AbstractSession):
         )
 
         if runtime_datasets:
-            for dataset_name, dataset_value in runtime_datasets.items():
-                catalog[dataset_name] = dataset_value
+            _inject_runtime_datasets(catalog, runtime_datasets)
 
         record_data = {
             "session_id": self.session_id,
@@ -354,3 +354,35 @@ class KedroServiceSession(AbstractSession):
             catalog=catalog,
         )
         return run_result
+
+
+def _inject_runtime_datasets(
+    catalog: CatalogProtocol, runtime_datasets: dict[str, Any]
+) -> None:
+    """Inject runtime datasets into the catalog, keeping any validator declared
+    for the replaced entry so injected data is still validated on load/save."""
+    validator_specs = getattr(catalog, "_validator_specs", None)
+    if not isinstance(validator_specs, dict):
+        # Catalog does not support dataset validation; nothing to preserve.
+        for dataset_name, dataset_value in runtime_datasets.items():
+            catalog[dataset_name] = dataset_value
+        return
+
+    from kedro.io.core import VALIDATOR_KEY
+    from kedro.validation.core import ValidatorSpec
+
+    for dataset_name, dataset_value in runtime_datasets.items():
+        spec = validator_specs.get(dataset_name)
+        if spec is None:
+            # Entries matched only by a dataset factory pattern have no spec
+            # until resolved, so read the validator from the resolved config.
+            ds_config = catalog.config_resolver.resolve_pattern(dataset_name)  # type: ignore[attr-defined]
+            if isinstance(ds_config, dict) and VALIDATOR_KEY in ds_config:
+                spec = ValidatorSpec.from_dataset_config(
+                    dataset_name, ds_config[VALIDATOR_KEY]
+                )
+
+        # Replacing an entry clears its validator state, so restore it after.
+        catalog[dataset_name] = dataset_value
+        if spec is not None:
+            validator_specs[dataset_name] = spec

@@ -27,7 +27,7 @@ test_pyproject_requirements = [  # For pyproject.toml
 # Configuration key for documentation dependencies
 docs_pyproject_requirements = ["project.optional-dependencies.docs"]  # For pyproject.toml
 # Configuration key for linting and testing dependencies
-dev_pyproject_requirements = ["project.optional-dependencies.dev"]  # For pyproject.toml
+dev_pyproject_requirements = ["dependency-groups.dev"]  # For pyproject.toml
 
 # Requirements for example pipelines
 example_pipeline_requirements = "seaborn~=0.12.1\nscikit-learn~=1.0\n"

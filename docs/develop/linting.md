@@ -23,7 +23,7 @@ There are a variety of Python tools available to use with your Kedro projects. T
 To install `ruff` add the following section to the `pyproject.toml` file located in the project root:
 
 ```toml
-[project.optional-dependencies]
+[dependency-groups]
 dev = ["ruff"]
 ```
 
@@ -31,8 +31,10 @@ Then to install your project including all the project-specific dependencies and
 project and run:
 
 ```bash
-pip install ."[dev]"
+pip install . --group dev
 ```
+
+The `--group` flag requires pip 25.1 or newer.
 
 You can instead install the linting tools individually using the following shell commands:
 

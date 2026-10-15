@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from kedro.inspection.models import (
     DatasetSnapshot,
+    GroupSnapshot,
     NodeSnapshot,
     NodeSourceSnapshot,
     PipelineSnapshot,
@@ -79,6 +80,45 @@ def _make_snapshot_with_node_source() -> ProjectSnapshot:
     )
 
 
+def _make_snapshot_with_groups() -> ProjectSnapshot:
+    """Return a project snapshot whose pipeline includes node groups."""
+    return ProjectSnapshot(
+        metadata=ProjectMetadataSnapshot(
+            project_name="test_project",
+            package_name="test_pkg",
+            kedro_version="1.0.0",
+        ),
+        pipelines=[
+            PipelineSnapshot(
+                name="__default__",
+                nodes=[
+                    NodeSnapshot(
+                        name="ns.my_node",
+                        func_name="process_data",
+                        namespace="ns",
+                        inputs=["raw_data"],
+                        outputs=["processed"],
+                    )
+                ],
+                inputs=["raw_data"],
+                outputs=["processed"],
+                groups=[
+                    GroupSnapshot(
+                        name="ns",
+                        type="namespace",
+                        nodes=["ns.my_node"],
+                        dependencies=["upstream"],
+                        inputs=["raw_data"],
+                        outputs=["processed"],
+                    )
+                ],
+            )
+        ],
+        datasets={},
+        parameters=[],
+    )
+
+
 class TestSnapshotEndpoint:
     """Test GET /snapshot via TestClient."""
 
@@ -132,6 +172,92 @@ class TestSnapshotEndpoint:
             "line_start": 10,
             "line_end": 25,
         }
+
+    def test_snapshot_serializes_groups(self, mocker, make_http_server):
+        app = make_http_server()
+        mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot_with_groups(),
+        )
+        with TestClient(app) as client:
+            pipeline = client.get("/snapshot").json()["pipelines"][0]
+
+        assert pipeline["group_by"] == "namespace"
+        assert pipeline["groups"] == [
+            {
+                "name": "ns",
+                "type": "namespace",
+                "nodes": ["ns.my_node"],
+                "dependencies": ["upstream"],
+                "inputs": ["raw_data"],
+                "outputs": ["processed"],
+            }
+        ]
+
+    def test_snapshot_groups_default_to_empty_list(self, mocker, make_http_server):
+        app = make_http_server()
+        mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        with TestClient(app) as client:
+            pipeline = client.get("/snapshot").json()["pipelines"][0]
+
+        assert pipeline["groups"] == []
+
+    def test_snapshot_groups_by_namespace_by_default(self, mocker, make_http_server):
+        app = make_http_server()
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        with TestClient(app) as client:
+            client.get("/snapshot")
+        assert mock_get.call_args[1]["group_by"] == "namespace"
+
+    def test_snapshot_passes_group_by_query_to_get_project_snapshot(
+        self, mocker, make_http_server
+    ):
+        app = make_http_server()
+        mock_get = mocker.patch(
+            "kedro.server.http_server.get_project_snapshot",
+            return_value=_make_snapshot(),
+        )
+        with TestClient(app) as client:
+            client.get("/snapshot", params={"group_by": "none"})
+        assert mock_get.call_args[1]["group_by"] == "none"
+
+    def test_snapshot_rejects_unknown_group_by(self, mocker, make_http_server):
+        app = make_http_server()
+        mock_get = mocker.patch("kedro.server.http_server.get_project_snapshot")
+        with TestClient(app) as client:
+            response = client.get("/snapshot", params={"group_by": "tags"})
+        assert response.status_code == 422
+        mock_get.assert_not_called()
+
+    def test_openapi_lists_group_by_query_values(self, make_http_server):
+        spec = make_http_server().openapi()
+        parameter = next(
+            p
+            for p in spec["paths"]["/snapshot"]["get"]["parameters"]
+            if p["name"] == "group_by"
+        )
+        assert parameter["schema"]["enum"] == ["namespace", "none"]
+        assert parameter["schema"]["default"] == "namespace"
+
+    def test_openapi_schema_describes_groups(self, make_http_server):
+        schemas = make_http_server().openapi()["components"]["schemas"]
+
+        assert "GroupSnapshot" in schemas
+        assert "groups" in schemas["PipelineSnapshot"]["properties"]
+        assert schemas["PipelineSnapshot"]["properties"]["group_by"]["enum"] == [
+            "namespace",
+            "none",
+        ]
+        assert schemas["GroupSnapshot"]["properties"]["type"]["enum"] == [
+            "namespace",
+            "nodes",
+        ]
 
     def test_snapshot_uses_server_env(self, mocker, make_http_server):
         app = make_http_server(env="staging")

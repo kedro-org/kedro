@@ -30,7 +30,7 @@ To install your project including all the project-specific dependencies and test
 1. Add the following section to the `pyproject.toml` file located in the project root:
 
     ```toml
-    [project.optional-dependencies]
+    [dependency-groups]
     dev = [
         "pytest-cov",
         "pytest-mock",
@@ -41,8 +41,10 @@ To install your project including all the project-specific dependencies and test
 2. Navigate to the root directory of the project and run:
 
     ```bash
-    pip install ."[dev]"
+    pip install . --group dev
     ```
+
+    The `--group` flag requires pip 25.1 or newer.
 
 You can also install test requirements individually as you would install other packages with `pip`, making sure you have installed your project locally and your [project's virtual environment is active](../getting-started/install.md#how-to-manually-create-a-virtual-environment-for-your-kedro-project).
 

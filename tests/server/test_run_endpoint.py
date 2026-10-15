@@ -286,6 +286,41 @@ class TestRunEndpoint:
         assert request.from_inputs == ["input_data"]
         assert request.is_async is True
 
+    def test_run_endpoint_passes_datasets_to_execute_pipeline(self, mocker, tmp_path):
+        """Test that a `datasets` field in the request body reaches `_execute_pipeline`
+        as `RunRequest.datasets`, confirming the JSON field name wiring end-to-end."""
+        project_path = Path(tmp_path).resolve()
+        fake_session = mocker.Mock()
+        mocker.patch(
+            "kedro.server.http_server.KedroServiceSession.create",
+            return_value=fake_session,
+        )
+        mocker.patch(
+            "kedro.server.http_server._resolve_project_path", return_value=project_path
+        )
+        mocker.patch("kedro.server.http_server.bootstrap_project")
+        mock_execute = mocker.patch(
+            "kedro.server.http_server._execute_pipeline",
+            return_value=RunSuccess(
+                run_id="run-datasets",
+                status="success",
+                duration_ms=5.0,
+            ),
+        )
+
+        app = create_http_server()
+        with TestClient(app) as client:
+            response = client.post(
+                "/run",
+                json={"datasets": {"input_df": [[1, 2], [3, 4]]}},
+            )
+
+        assert response.status_code == 200
+        mock_execute.assert_called_once()
+        call_kwargs = mock_execute.call_args[1]
+        request = call_kwargs["request"]
+        assert request.datasets == {"input_df": [[1, 2], [3, 4]]}
+
 
 class TestRunRequest:
     """Tests for RunRequest model validation."""
@@ -570,6 +605,7 @@ class TestExecutePipeline:
             request=RunRequest(
                 pipeline_names=["pipeline1", "pipeline2"],
                 params={"param1": "value1"},
+                datasets={"input_df": [1, 2, 3]},
                 runner="SequentialRunner",
                 is_async=False,
                 tags=["tag1", "tag2"],
@@ -597,3 +633,18 @@ class TestExecutePipeline:
         assert call_kwargs["namespaces"] == ["ns1"]
         assert call_kwargs["only_missing_outputs"] is True
         assert call_kwargs["runtime_params"] == {"param1": "value1"}
+        assert call_kwargs["runtime_datasets"] == {"input_df": [1, 2, 3]}
+
+    def test_execute_pipeline_with_defaults_omits_datasets(self, mocker):
+        """When `datasets` is omitted, `runtime_datasets=None` reaches `session.run()`."""
+        mock_session = mocker.Mock()
+        mocker.patch(
+            "kedro.server.http_server.load_obj",
+            return_value=_FakeRunner,
+        )
+
+        result = _execute_pipeline(session=mock_session, request=RunRequest())
+
+        assert result.status == "success"
+        call_kwargs = mock_session.run.call_args[1]
+        assert call_kwargs["runtime_datasets"] is None

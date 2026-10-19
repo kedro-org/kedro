@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 - Added `runtime_datasets` to `KedroServiceSession.run()` and a corresponding `datasets` field to the HTTP `/run` endpoint's `RunRequest`, allowing raw data or `AbstractDataset` instances to be injected into a run's catalog for that run only.
+- Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple.
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.
 - Added node groups to the project snapshot. Each `PipelineSnapshot` has a `groups` list of `GroupSnapshot` entries with the group's nodes, dependencies, inputs and outputs, also returned by `GET /snapshot`. `get_project_snapshot` takes a `group_by` argument to choose the grouping strategy, `GET /snapshot` takes it as a query parameter, and each `PipelineSnapshot` records it in `group_by`.
 - Added `kedro.inspection.validate_deployment_grouping` to check a node grouping before deployment. It reports datasets kept in memory that are passed between groups, cycles between groups, and datasets passed between groups on local disk.
@@ -26,6 +27,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Rodrigo-Palma](https://github.com/Rodrigo-Palma)
+- [Charan Rathore](https://github.com/charan-rathore)
 
 # Release 1.7.0
 

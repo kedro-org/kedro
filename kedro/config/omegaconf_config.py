@@ -703,16 +703,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
         a plain callable is registered with no extra arguments.
         """
         for name, resolver in resolvers.items():
-            if not OmegaConf.has_resolver(name):
-                msg = f"Registering new custom resolver: {name}"
-                _config_logger.debug(msg)
-                if isinstance(resolver, tuple):
-                    resolver_fn, resolver_kwargs = resolver
+            if isinstance(resolver, tuple):
+                resolver_fn, resolver_kwargs = resolver
+                if not OmegaConf.has_resolver(name) or resolver_kwargs.get(
+                    "replace", False
+                ):
+                    _config_logger.debug("Registering custom resolver: %s", name)
                     OmegaConf.register_new_resolver(
                         name=name, resolver=resolver_fn, **resolver_kwargs
                     )
-                else:
-                    OmegaConf.register_new_resolver(name=name, resolver=resolver)
+            elif not OmegaConf.has_resolver(name):
+                _config_logger.debug("Registering new custom resolver: %s", name)
+                OmegaConf.register_new_resolver(name=name, resolver=resolver)
 
     def _check_duplicates(self, key: str, config_per_file: dict[Path, Any]) -> None:
         if key == "parameters":

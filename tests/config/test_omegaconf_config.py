@@ -910,6 +910,23 @@ class TestOmegaConfigLoader:
         assert params["cached1"] == params["cached2"]
         assert params["uncached1"] != params["uncached2"]
 
+    def test_custom_resolver_with_replace_kwarg_replaces_existing_resolver(
+        self, tmp_path
+    ):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        resolver_name = "kedro_test_replace_probe"
+        _write_yaml(base_params, {"answer": f"${{{resolver_name}:}}"})
+        OmegaConf.register_new_resolver(resolver_name, lambda: "old", replace=True)
+        try:
+            conf = OmegaConfigLoader(
+                tmp_path,
+                custom_resolvers={resolver_name: (lambda: "new", {"replace": True})},
+                base_env=_BASE_ENV,
+            )
+            assert conf["parameters"]["answer"] == "new"
+        finally:
+            OmegaConf.clear_resolver(resolver_name)
+
     def test_globals(self, tmp_path):
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
         globals_config = {

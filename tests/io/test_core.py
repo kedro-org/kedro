@@ -272,6 +272,15 @@ class TestCoreFunctions:
             ("adl://bucket/file.txt", ("adl", "bucket/file.txt")),
             ("abfs://bucket/file.txt", ("abfs", "bucket/file.txt")),
             ("abfss://bucket/file.txt", ("abfss", "bucket/file.txt")),
+            ("az://bucket/file.txt", ("az", "bucket/file.txt")),
+            (
+                "abfs://mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
+                ("abfs", "mycontainer@mystorageaccount.dfs.core.windows.net/mypath"),
+            ),
+            (
+                "az://mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
+                ("az", "mycontainer@mystorageaccount.dfs.core.windows.net/mypath"),
+            ),
             (
                 "abfss://mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
                 ("abfss", "mycontainer@mystorageaccount.dfs.core.windows.net/mypath"),

@@ -5,6 +5,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
         return;
     }
     searchButton.addEventListener("click", (e) => {
+            // RTD search works on Read the Docs hosting;
+            // fall back to Zensical's built-in search elsewhere (e.g. locally)
+            if (!window.customElements.get("readthedocs-search")) {
+                return;
+            }
+
             e.preventDefault();
             e.stopImmediatePropagation();
             const event = new CustomEvent("readthedocs-search-show");

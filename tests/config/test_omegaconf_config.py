@@ -910,6 +910,42 @@ class TestOmegaConfigLoader:
         assert params["cached1"] == params["cached2"]
         assert params["uncached1"] != params["uncached2"]
 
+    def test_custom_resolvers_replace_existing(self, tmp_path):
+        # A second loader in the same process can replace an already-registered
+        # resolver by passing `replace=True` in the `(callable, kwargs)` tuple.
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        _write_yaml(base_params, {"greeting": "${replaceable_greet:world}"})
+        OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={"replaceable_greet": lambda x: f"old {x}"},
+            base_env=_BASE_ENV,
+        )
+        conf = OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={
+                "replaceable_greet": (lambda x: f"new {x}", {"replace": True})
+            },
+            base_env=_BASE_ENV,
+        )
+        assert conf["parameters"]["greeting"] == "new world"
+
+    def test_custom_resolvers_skip_registered_without_replace(self, tmp_path):
+        # Without `replace=True` an already-registered resolver keeps its
+        # original implementation, matching previous behaviour.
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        _write_yaml(base_params, {"greeting": "${keepable_greet:world}"})
+        OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={"keepable_greet": lambda x: f"old {x}"},
+            base_env=_BASE_ENV,
+        )
+        conf = OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={"keepable_greet": lambda x: f"new {x}"},
+            base_env=_BASE_ENV,
+        )
+        assert conf["parameters"]["greeting"] == "old world"
+
     def test_globals(self, tmp_path):
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
         globals_config = {

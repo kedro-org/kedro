@@ -78,6 +78,7 @@ def logging_probe(tmp_path, monkeypatch):
         ("ext", dict),
         ("cfg_handler", dict),
         ("cfg_formatter", dict),
+        ("formatter", dict),
         ("bare", dict),
         ("cfg_formatter", UserDict),
     ],
@@ -100,6 +101,8 @@ def test_untrusted_references_do_not_execute(logging_probe, vector, mapping):
     elif vector == "cfg_formatter":
         config["formatters"] = {"probe": {"class": "cfg://target"}}
         config["target"] = f"{module_name}.Probe"
+    elif vector == "formatter":
+        config["formatters"] = {"probe": {"class": f"{module_name}.Probe"}}
     else:
         handler["class"] = module_name
 
@@ -169,18 +172,31 @@ def test_mapping_wrappers_cannot_hide_factory_keys(mocker):
 
 
 @pytest.mark.parametrize(
-    "class_path",
-    [None, 123, "", "ext://logging.StreamHandler"],
+    ("class_path", "replacement"),
+    [
+        (None, None),
+        (123, None),
+        ("", None),
+        ("ext://logging.StreamHandler", None),
+        ("_StderrHandler", None),
+        ("StreamHandler", "logging.StreamHandler"),
+        ("SysLogHandler", "logging.handlers.SysLogHandler"),
+    ],
 )
-def test_class_references_must_be_explicit_names(class_path, mocker):
+def test_class_references_must_be_explicit_names(class_path, replacement, mocker):
     """Class values must be dotted names rather than objects or references."""
     logging_instance = _ProjectLogging()
     importer = mocker.patch("kedro.framework.project.importlib.import_module")
 
-    with pytest.raises(ValueError, match="fully qualified"):
+    with pytest.raises(ValueError, match="fully qualified") as error:
         logging_instance._validate_logging_class(class_path)
 
     importer.assert_not_called()
+    assert "#supported-logging-references" in str(error.value)
+    if replacement:
+        assert f"Use '{replacement}' instead." in str(error.value)
+    else:
+        assert "Use 'logging." not in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -190,8 +206,46 @@ def test_module_aliases_cannot_escape_the_allowlist(reference):
     """An approved module's attributes cannot act as alternate import paths."""
     logging_instance = _ProjectLogging()
 
-    with pytest.raises(ValueError, match="Cannot import module"):
+    with pytest.raises(ValueError, match="Cannot import module") as error:
         logging_instance._resolve_logging_object(reference)
+
+    assert "exported directly by an importable module" in str(error.value)
+    assert "use 'ext://sys.stdout'" in str(error.value)
+
+
+@pytest.mark.parametrize(
+    ("import_statement", "exception_type", "missing_name"),
+    [
+        (
+            "import kedro_logging_missing_dependency",
+            ModuleNotFoundError,
+            "kedro_logging_missing_dependency",
+        ),
+        (
+            "from kedro_logging_broken_formatter import missing_symbol",
+            ImportError,
+            "kedro_logging_broken_formatter",
+        ),
+    ],
+)
+def test_import_failures_do_not_suggest_attribute_chains(
+    tmp_path, monkeypatch, import_statement, exception_type, missing_name
+):
+    """Failures inside a trusted module retain their cause without migration hints."""
+    module_name = "kedro_logging_broken_formatter"
+    (tmp_path / f"{module_name}.py").write_text(import_statement, encoding="utf-8")
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", module_name)
+    logging_instance = _ProjectLogging()
+
+    with pytest.raises(ValueError, match=missing_name) as error:
+        logging_instance._resolve_logging_object(f"{module_name}.Formatter")
+
+    assert "attribute chain" not in str(error.value)
+    cause = error.value.__cause__
+    assert type(cause) is exception_type
+    assert cause.name == missing_name
+    assert str(cause) in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -256,9 +310,21 @@ def test_untrusted_queue_references_preserve_existing_handlers(
     """Reject queue references before stdlib closes or unregisters existing handlers."""
     module_name, marker = logging_probe
     logging_instance = _ProjectLogging()
+    logging_instance.configure(
+        {
+            "version": 1,
+            "disable_existing_loggers": False,
+            "handlers": {
+                "existing": {
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout",
+                }
+            },
+            "root": {"handlers": ["existing"], "level": "INFO"},
+        }
+    )
     root = logging.getLogger()
-    existing_handler = root.handlers[0]
-    existing_name = existing_handler.name
+    [existing_handler] = root.handlers
     original_config = dict(logging_instance)
     config = {
         "version": 1,
@@ -274,7 +340,7 @@ def test_untrusted_queue_references_preserve_existing_handlers(
         logging_instance.configure(config)
 
     assert existing_handler in root.handlers
-    assert logging._handlers[existing_name] is existing_handler
+    assert logging._handlers["existing"] is existing_handler
     assert logging_instance.data == original_config
     assert not marker.exists()
     assert module_name not in sys.modules
@@ -470,9 +536,11 @@ def test_project_logging_mapping_can_be_reconfigured(capsys):
     assert "Reconfigured mapping" in capsys.readouterr().out
 
 
-def test_standard_formatter_and_handler_connections_still_work(capsys):
+def test_standard_formatter_and_handler_connections_still_work(capsys, mocker):
     """Handler and formatter identifiers connect real components without cfg://."""
-    _ProjectLogging().configure(
+    logging_instance = _ProjectLogging()
+    resolve_formatter = mocker.spy(logging.config, "_resolve")
+    logging_instance.configure(
         {
             "version": 1,
             "disable_existing_loggers": False,
@@ -500,6 +568,8 @@ def test_standard_formatter_and_handler_connections_still_work(capsys):
 
     logging.getLogger().info("Buffered message")
     assert "FORMATTED: Buffered message" in capsys.readouterr().out
+    resolve_formatter.assert_called_once_with("logging.Formatter")
+    assert resolve_formatter.spy_return is logging.Formatter
 
 
 @pytest.mark.parametrize(

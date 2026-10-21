@@ -48,6 +48,9 @@ _DEFAULT_LOGGING_MODULE_ALLOWLIST = ("logging", "kedro.logging")
 _SAFE_LOGGING_REFERENCES = frozenset(
     {"sys.stdout", "sys.stderr", "queue.Queue", "queue.SimpleQueue"}
 )
+_LOGGING_CONFIG_DOCS_URL = (
+    "https://docs.kedro.org/en/stable/develop/logging/#supported-logging-references"
+)
 
 
 class _RestrictedLoggingConfig(logging.config.DictConfigurator):
@@ -365,26 +368,43 @@ class _ProjectLogging(UserDict):
         logger.info(msg)
 
     def _validate_logging_reference(self, reference: object) -> tuple[str, str]:
-        """Check a complete object path before any import or attribute lookup."""
+        """Validate a reference's syntax and module policy before resolving it."""
         if isinstance(reference, str) and reference.startswith("cfg://"):
             raise ValueError(
                 "The 'cfg://' prefix is not allowed in logging configuration. "
-                "Use explicit logging class names and handler or formatter identifiers instead."
+                "Use explicit logging class names and handler or formatter identifiers instead. "
+                "Use YAML anchors and aliases to reuse configuration values. "
+                f"See {_LOGGING_CONFIG_DOCS_URL}."
             )
         if (
             not isinstance(reference, str)
             or "." not in reference
             or not all(part.isidentifier() for part in reference.split("."))
         ):
+            hint = ""
+            if (
+                isinstance(reference, str)
+                and reference.isidentifier()
+                and not reference.startswith("_")
+            ):
+                for module in (logging, logging.handlers):
+                    candidate = getattr(module, reference, None)
+                    if isinstance(candidate, type) and issubclass(
+                        candidate, _LOGGING_BASE_CLASSES
+                    ):
+                        hint = f" Use '{module.__name__}.{reference}' instead."
+                        break
             raise ValueError(
                 "Logging references must be fully qualified Python object names, "
-                f"such as 'logging.StreamHandler'. Got {reference!r}."
+                f"such as 'logging.StreamHandler'. Got {reference!r}.{hint} "
+                f"See {_LOGGING_CONFIG_DOCS_URL}."
             )
 
         module_path, _, object_name = reference.rpartition(".")
         if object_name.startswith("_"):
             raise ValueError(
-                f"Logging reference '{reference}' names a private object, which is not allowed."
+                f"Logging reference '{reference}' names a private object, which is not allowed. "
+                f"Use a public export from a trusted module. See {_LOGGING_CONFIG_DOCS_URL}."
             )
         if reference not in _SAFE_LOGGING_REFERENCES and not _is_module_allowed(
             module_path, self._logging_module_allowlist
@@ -394,7 +414,8 @@ class _ProjectLogging(UserDict):
                 f"'{module_path}' must match 'logging', 'kedro.logging', or a prefix "
                 "listed in KEDRO_LOGGING_MODULE_ALLOWLIST, including submodules. "
                 "The standard-library exceptions are: "
-                f"{', '.join(sorted(_SAFE_LOGGING_REFERENCES))}."
+                f"{', '.join(sorted(_SAFE_LOGGING_REFERENCES))}. "
+                f"See {_LOGGING_CONFIG_DOCS_URL}."
             )
         return module_path, object_name
 
@@ -407,8 +428,24 @@ class _ProjectLogging(UserDict):
         try:
             module = importlib.import_module(module_path)
         except ImportError as exc:
+            # A missing dependency inside a trusted module is not a reference error.
+            chain_hint = (
+                " References must name an object exported directly by an importable module, "
+                "not an attribute chain. For example, use 'ext://sys.stdout' instead of "
+                "'ext://logging.sys.stdout'."
+                if (
+                    isinstance(exc, ModuleNotFoundError)
+                    and exc.name is not None
+                    and (
+                        module_path == exc.name
+                        or module_path.startswith(exc.name + ".")
+                    )
+                )
+                else ""
+            )
             raise ValueError(
-                f"Cannot import module '{module_path}' specified in logging configuration: {exc}"
+                f"Cannot import module '{module_path}' specified in logging configuration: "
+                f"{exc}.{chain_hint} See {_LOGGING_CONFIG_DOCS_URL}."
             ) from exc
 
         try:
@@ -416,7 +453,7 @@ class _ProjectLogging(UserDict):
         except AttributeError as exc:
             raise ValueError(
                 f"Object '{object_name}' not found in module '{module_path}' "
-                "as specified in logging configuration."
+                f"as specified in logging configuration. See {_LOGGING_CONFIG_DOCS_URL}."
             ) from exc
 
     def _resolve_logging_class(self, class_path: str) -> type[Any]:
@@ -441,7 +478,7 @@ class _ProjectLogging(UserDict):
             raise ValueError(
                 f"Invalid logging class '{class_path}'. "
                 f"Must be a subclass of logging.Handler, logging.Formatter, or logging.Filter. "
-                f"Got {type(cls).__name__!r}."
+                f"Got {type(cls).__name__!r}. See {_LOGGING_CONFIG_DOCS_URL}."
             )
 
         return cls
@@ -452,12 +489,11 @@ class _ProjectLogging(UserDict):
         logging.Filter)."""
         return self._resolve_logging_class(class_path)
 
-    def _validate_queue_handler_references(
-        self, handler_class: type[Any], config: Mapping[str, Any]
+    def _validate_queue_factory_and_listener_names(
+        self, config: Mapping[str, Any]
     ) -> None:
-        """Check queue and listener names before stdlib replaces existing handlers."""
-        if not issubclass(handler_class, logging.handlers.QueueHandler):
-            return
+        """Check string queue factory and listener names before logging setup."""
+        # The caller validates nested containers; stdlib checks supplied objects.
         for key in ("queue", "listener"):
             reference = config.get(key)
             if isinstance(reference, str):
@@ -474,16 +510,18 @@ class _ProjectLogging(UserDict):
         if isinstance(config, Mapping):
             if "()" in config:
                 raise ValueError(
-                    "The '()' key is not allowed in logging configuration as it poses a security risk."
+                    "The '()' key is not allowed in logging configuration as it poses a security risk. "
+                    f"Use logging classes from trusted modules instead. See {_LOGGING_CONFIG_DOCS_URL}."
                 )
             if "class" in config:
                 class_path = config["class"]
-                # Formatter classes bypass our runtime resolve() override, so
-                # this static class check is their security gate.
+                # Formatters use stdlib's _resolve(), so validate the full module
+                # path and logging class before stdlib imports or instantiates it.
                 resolved_class = self._validate_logging_class(class_path)
                 if resolved_logging_classes is not None:
                     resolved_logging_classes[class_path] = resolved_class
-                self._validate_queue_handler_references(resolved_class, config)
+                if issubclass(resolved_class, logging.handlers.QueueHandler):
+                    self._validate_queue_factory_and_listener_names(config)
             validated = {}
             for k, v in config.items():
                 validated[k] = self._validate_logging_config(
@@ -555,7 +593,8 @@ class _ProjectLogging(UserDict):
             if not issubclass(filter_class, logging.Filter):
                 raise ValueError(
                     f"Invalid logging filter class '{class_path}' for filter "
-                    f"'{filter_name}'. Must be a subclass of logging.Filter."
+                    f"'{filter_name}'. Must be a subclass of logging.Filter. "
+                    f"See {_LOGGING_CONFIG_DOCS_URL}."
                 )
 
             prepared_filter_config = {

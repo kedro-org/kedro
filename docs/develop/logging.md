@@ -193,6 +193,29 @@ export KEDRO_LOGGING_MODULE_ALLOWLIST=your_project.logging
     Standard Python logging configuration also supports the `()` factory key for custom objects. Kedro does not allow `()` in `logging.yml` because it can execute arbitrary code.
     Use `class` for custom `logging.Handler`, `logging.Formatter`, and `logging.Filter` subclasses instead.
 
+## Supported logging references
+
+Logging class names must be fully qualified, such as `logging.StreamHandler` or `your_project.logging.KeepOnlyFilter`. Bare names such as `StreamHandler` and references such as `cfg://target` or `ext://your_project.logging.KeepOnlyFilter` cannot be used as class names.
+
+Kedro applies the logging module allowlist to external `ext://` references, queue factory and listener names, and logging classes. Each reference must name a public object exported directly by an importable, trusted module. Object names beginning with `_`, such as `logging._lock`, are rejected. Attribute chains such as `logging.handlers.SysLogHandler.LOG_LOCAL0` are not supported; write the constant's value in the configuration instead. Set `KEDRO_LOGGING_MODULE_ALLOWLIST` before starting Kedro to opt in custom modules. Include modules whose import and factory code you trust to run.
+
+The exact standard-library references `sys.stdout`, `sys.stderr`, `queue.Queue`, and `queue.SimpleQueue` are also supported. For example, `ext://sys.stdout` continues to direct log messages to the screen. These exceptions do not permit other objects from `sys` or `queue` unless you explicitly allow their modules. On Python 3.12 and later, the standard queue classes can also be used as `QueueHandler` queue factories.
+
+Kedro rejects `cfg://` configuration navigation as an additional safeguard. Write class names explicitly and use handler and formatter identifiers for connections: `handlers` and a `MemoryHandler`'s `target` name handlers, while `formatter` names a formatter.
+
+To reuse configuration values, use YAML anchors (`&name`) and aliases (`*name`). For example:
+
+```yaml
+console_stream: &console_stream ext://sys.stdout
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    stream: *console_stream
+```
+
+Anchors and aliases reuse configuration values; they do not reference instantiated handlers or other runtime objects. Keep logging configuration trusted: standard handlers can still write files or send log messages over the network.
+
 ## How to customise the `rich` handler
 
 Kedro's `kedro.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. You can disable it by setting `rich_tracebacks: False`.

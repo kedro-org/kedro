@@ -5,13 +5,14 @@ from __future__ import annotations
 
 import importlib.resources
 import logging.config
+import logging.handlers
 import operator
 import os
 import threading
 import traceback
 import warnings
 from collections import UserDict
-from collections.abc import MutableMapping
+from collections.abc import Callable, Mapping, MutableMapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -38,9 +39,26 @@ _LOGGING_BASE_CLASSES = (
     logging.Filter,
 )
 
-# Modules trusted by default to supply logging handler/formatter/filter classes.
+# Modules trusted by default to supply logging classes and external objects.
 # Extended via the KEDRO_LOGGING_MODULE_ALLOWLIST env var.
 _DEFAULT_LOGGING_MODULE_ALLOWLIST = ("logging", "kedro.logging")
+
+# Exact standard-library objects needed by common logging configurations. These
+# exceptions must not grant access to the rest of their modules.
+_SAFE_LOGGING_REFERENCES = frozenset(
+    {"sys.stdout", "sys.stderr", "queue.Queue", "queue.SimpleQueue"}
+)
+
+
+class _RestrictedLoggingConfig(logging.config.DictConfigurator):
+    """Apply Kedro's import policy to references resolved during logging setup."""
+
+    def __init__(self, config: dict[str, Any], resolver: Callable[[str], Any]) -> None:
+        super().__init__(config)
+        self._resolve_object = resolver
+
+    def resolve(self, s: str) -> Any:
+        return self._resolve_object(s)
 
 
 def _get_default_class(class_import_path: str) -> Any:
@@ -346,7 +364,62 @@ class _ProjectLogging(UserDict):
         self.configure(yaml.safe_load(logging_config))
         logger.info(msg)
 
-    def _resolve_logging_class(self, class_path: str) -> type[Any] | None:
+    def _validate_logging_reference(self, reference: object) -> tuple[str, str]:
+        """Check a complete object path before any import or attribute lookup."""
+        if isinstance(reference, str) and reference.startswith("cfg://"):
+            raise ValueError(
+                "The 'cfg://' prefix is not allowed in logging configuration. "
+                "Use explicit logging class names and handler or formatter identifiers instead."
+            )
+        if (
+            not isinstance(reference, str)
+            or "." not in reference
+            or not all(part.isidentifier() for part in reference.split("."))
+        ):
+            raise ValueError(
+                "Logging references must be fully qualified Python object names, "
+                f"such as 'logging.StreamHandler'. Got {reference!r}."
+            )
+
+        module_path, _, object_name = reference.rpartition(".")
+        if object_name.startswith("_"):
+            raise ValueError(
+                f"Logging reference '{reference}' names a private object, which is not allowed."
+            )
+        if reference not in _SAFE_LOGGING_REFERENCES and not _is_module_allowed(
+            module_path, self._logging_module_allowlist
+        ):
+            raise ValueError(
+                f"Logging reference '{reference}' is not permitted. Its module "
+                f"'{module_path}' must match 'logging', 'kedro.logging', or a prefix "
+                "listed in KEDRO_LOGGING_MODULE_ALLOWLIST, including submodules. "
+                "The standard-library exceptions are: "
+                f"{', '.join(sorted(_SAFE_LOGGING_REFERENCES))}."
+            )
+        return module_path, object_name
+
+    def _resolve_logging_object(self, reference: str) -> Any:
+        """Resolve an approved module export, without arbitrary attribute traversal."""
+        module_path, object_name = self._validate_logging_reference(reference)
+        # Import the complete module path rather than walking attributes: an
+        # exported module such as logging.os is allowed, but traversing through
+        # that alias (logging.os.system) must not bypass the module allowlist.
+        try:
+            module = importlib.import_module(module_path)
+        except ImportError as exc:
+            raise ValueError(
+                f"Cannot import module '{module_path}' specified in logging configuration: {exc}"
+            ) from exc
+
+        try:
+            return getattr(module, object_name)
+        except AttributeError as exc:
+            raise ValueError(
+                f"Object '{object_name}' not found in module '{module_path}' "
+                "as specified in logging configuration."
+            ) from exc
+
+    def _resolve_logging_class(self, class_path: str) -> type[Any]:
         """Resolve and validate that a class referenced in logging configuration is
         a legitimate logging class (i.e. a subclass of logging.Handler,
         logging.Formatter, or logging.Filter).
@@ -355,40 +428,14 @@ class _ProjectLogging(UserDict):
             class_path: Dotted import path to the class, e.g. ``logging.StreamHandler``.
 
         Returns:
-            Resolved class, or ``None`` for bare names resolved internally by logging.
+            Resolved logging class.
 
         Raises:
-            ValueError: If the class cannot be imported or is not a logging base class.
+            ValueError: If the reference is not a public, fully qualified name in a
+                trusted module, cannot be imported, or is not a logging base class.
         """
 
-        module_path, _, class_name = class_path.rpartition(".")
-        if not module_path:
-            # Bare name (e.g. "StreamHandler") resolved internally by logging machinery.
-            return None
-
-        # Check against the allowlist before importing, so an untrusted module's
-        # top-level code can't run regardless of what the class check finds.
-        if not _is_module_allowed(module_path, self._logging_module_allowlist):
-            raise ValueError(
-                f"Module '{module_path}' specified as a logging class is not "
-                "permitted. Only 'logging', 'kedro.logging', and modules listed "
-                "in the KEDRO_LOGGING_MODULE_ALLOWLIST environment variable are "
-                "allowed."
-            )
-
-        try:
-            module = importlib.import_module(module_path)
-        except ImportError as exc:
-            raise ValueError(
-                f"Cannot import module '{module_path}' specified as a logging class: {exc}"
-            ) from exc
-
-        cls = getattr(module, class_name, None)
-        if cls is None:
-            raise ValueError(
-                f"Class '{class_name}' not found in module '{module_path}' "
-                f"as specified in logging configuration."
-            )
+        cls = self._resolve_logging_object(class_path)
 
         if not (isinstance(cls, type) and issubclass(cls, _LOGGING_BASE_CLASSES)):
             raise ValueError(
@@ -399,30 +446,44 @@ class _ProjectLogging(UserDict):
 
         return cls
 
-    def _validate_logging_class(self, class_path: str) -> type[Any] | None:
+    def _validate_logging_class(self, class_path: str) -> type[Any]:
         """Validate that a class referenced in logging configuration is a legitimate
         logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
         logging.Filter)."""
         return self._resolve_logging_class(class_path)
 
+    def _validate_queue_handler_references(
+        self, handler_class: type[Any], config: Mapping[str, Any]
+    ) -> None:
+        """Check queue and listener names before stdlib replaces existing handlers."""
+        if not issubclass(handler_class, logging.handlers.QueueHandler):
+            return
+        for key in ("queue", "listener"):
+            reference = config.get(key)
+            if isinstance(reference, str):
+                self._validate_logging_reference(reference.removeprefix("ext://"))
+
     def _validate_logging_config(
         self,
         config: Any,
-        resolved_logging_classes: dict[str, type[Any] | None] | None = None,
+        resolved_logging_classes: dict[str, type[Any]] | None = None,
     ) -> Any:
         """Recursively check the logging configuration and raise an error if dangerous
-        '()' factory keys are encountered or if any 'class' value is not a legitimate
-        logging class."""
-        if isinstance(config, dict):
+        '()' factory keys, internal references, untrusted external references, or
+        invalid logging classes are encountered."""
+        if isinstance(config, Mapping):
             if "()" in config:
                 raise ValueError(
                     "The '()' key is not allowed in logging configuration as it poses a security risk."
                 )
             if "class" in config:
                 class_path = config["class"]
+                # Formatter classes bypass our runtime resolve() override, so
+                # this static class check is their security gate.
                 resolved_class = self._validate_logging_class(class_path)
                 if resolved_logging_classes is not None:
                     resolved_logging_classes[class_path] = resolved_class
+                self._validate_queue_handler_references(resolved_class, config)
             validated = {}
             for k, v in config.items():
                 validated[k] = self._validate_logging_config(
@@ -434,13 +495,28 @@ class _ProjectLogging(UserDict):
                 self._validate_logging_config(item, resolved_logging_classes)
                 for item in config
             ]
+        elif isinstance(config, tuple):
+            validated_items = tuple(
+                self._validate_logging_config(item, resolved_logging_classes)
+                for item in config
+            )
+            # Like stdlib logging, preserve namedtuples as opaque values. Check
+            # their contents without calling a user-defined constructor.
+            return config if hasattr(config, "_fields") else validated_items
+        elif isinstance(config, str):
+            if config.startswith("cfg://"):
+                # Always raises for cfg://: ban navigation as an additional safeguard.
+                self._validate_logging_reference(config)
+            if config.startswith("ext://"):
+                self._validate_logging_reference(config.removeprefix("ext://"))
+            return config
         else:
             return config
 
     def _prepare_logging_config(
         self,
         logging_config: dict[str, Any],
-        resolved_logging_classes: dict[str, type[Any] | None] | None = None,
+        resolved_logging_classes: dict[str, type[Any]] | None = None,
     ) -> dict[str, Any]:
         """Prepare a validated logging configuration for ``dictConfig``.
 
@@ -450,6 +526,7 @@ class _ProjectLogging(UserDict):
         internal callable so custom ``logging.Filter`` subclasses are instantiated
         without allowing user-provided factories.
         """
+        # Validation normalises Mapping inputs to plain dicts before this step.
         prepared_config = logging_config.copy()
 
         if "filters" not in logging_config:
@@ -475,9 +552,6 @@ class _ProjectLogging(UserDict):
                 else self._resolve_logging_class(class_path)
             )
 
-            if filter_class is None:
-                continue
-
             if not issubclass(filter_class, logging.Filter):
                 raise ValueError(
                     f"Invalid logging filter class '{class_path}' for filter "
@@ -492,18 +566,19 @@ class _ProjectLogging(UserDict):
 
         return prepared_config
 
-    def configure(self, logging_config: dict[str, Any]) -> None:
+    def configure(self, logging_config: Mapping[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
         """
-        resolved_logging_classes: dict[str, type[Any] | None] = {}
+        resolved_logging_classes: dict[str, type[Any]] = {}
         validated_config = self._validate_logging_config(
             logging_config, resolved_logging_classes
         )
-        logging.config.dictConfig(
-            self._prepare_logging_config(validated_config, resolved_logging_classes)
-        )
+        _RestrictedLoggingConfig(
+            self._prepare_logging_config(validated_config, resolved_logging_classes),
+            self._resolve_logging_object,
+        ).configure()
         self.data = validated_config
 
     def set_project_logging(
@@ -566,8 +641,8 @@ def configure_project(package_name: str, preserve_logging: bool = False) -> None
         LOGGING.set_project_logging(PACKAGE_NAME, preserve_logging=preserve_logging)
 
 
-def configure_logging(logging_config: dict[str, Any]) -> None:
-    """Configure logging according to ``logging_config`` dictionary."""
+def configure_logging(logging_config: Mapping[str, Any]) -> None:
+    """Configure logging according to the ``logging_config`` mapping."""
     LOGGING.configure(logging_config)
 
 

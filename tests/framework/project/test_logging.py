@@ -304,7 +304,7 @@ def test_configure_project_preserve_logging_keeps_runtime_handlers():
     """Runtime-added handlers should survive configure_project() when preserve_logging=True.
 
     Regression test for https://github.com/kedro-org/kedro/issues/4606:
-    calling configure_project() triggers dictConfig(), which resets the logging
+    calling configure_project() reconfigures logging, which resets the logging
     state and silently discards any handlers added after the initial LOGGING setup.
     """
     custom_handler = logging.StreamHandler()
@@ -488,12 +488,13 @@ def test_validate_logging_class_blocks_import_before_validation(tmp_path, monkey
     assert "kedro_test_marker_module" not in sys.modules
 
 
-def test_validate_logging_class_bare_name_passes():
-    """A bare class name with no module prefix must pass (logging resolves it)."""
+def test_validate_logging_class_rejects_bare_names():
+    """Bare names must not bypass the module check and reach stdlib imports."""
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
-    logging_instance._validate_logging_class("StreamHandler")  # should not raise
+    with pytest.raises(ValueError, match="fully qualified"):
+        logging_instance._validate_logging_class("StreamHandler")
 
 
 def test_validate_logging_class_allowlist_env_var(monkeypatch):
@@ -713,7 +714,7 @@ def test_prepare_logging_config_ignores_filters_without_class(filter_config):
     assert prepared_config["filters"]["passthrough"] == filter_config
 
 
-def test_prepare_logging_config_ignores_bare_filter_class_name():
+def test_prepare_logging_config_rejects_bare_filter_class_name():
     from kedro.framework.project import _ProjectLogging
 
     logging_config = {
@@ -722,9 +723,8 @@ def test_prepare_logging_config_ignores_bare_filter_class_name():
     }
 
     logging_instance = _ProjectLogging()
-    prepared_config = logging_instance._prepare_logging_config(logging_config)
-
-    assert prepared_config["filters"]["keep_only"] == {"class": "Filter"}
+    with pytest.raises(ValueError, match="fully qualified"):
+        logging_instance._prepare_logging_config(logging_config)
 
 
 def test_configure_logging_rejects_non_filter_class_in_filters():

@@ -279,11 +279,13 @@ class KedroServiceSession(AbstractSession):
 
         Args:
             runtime_datasets: Optional mapping of dataset name to value, injected
-                into this run's catalog immediately before execution via
-                ``catalog[name] = value``. Each value is either raw data
-                (wrapped in a ``MemoryDataset``) or an ``AbstractDataset``
-                instance (stored directly). An existing catalog entry with the
-                same name is replaced for this run only (a warning is logged).
+                into this run's catalog immediately before execution. Each
+                value is either raw data (wrapped in a ``MemoryDataset``) or an
+                ``AbstractDataset`` instance (stored directly). Only free inputs
+                of the pipeline being run can be injected; parameters must be
+                passed through ``runtime_params``. An existing catalog entry
+                with the same name is replaced for this run only, and any
+                validator declared for it is applied to the injected data.
                 Note: with ``ParallelRunner``, injected raw data is wrapped in
                 a plain ``MemoryDataset``, not a ``SharedMemoryDataset``, and
                 may not be visible across worker processes.
@@ -335,6 +337,9 @@ class KedroServiceSession(AbstractSession):
             to_outputs=to_outputs,
             node_namespaces=namespaces,
         )
+        if runtime_datasets:
+            _check_runtime_dataset_names(runtime_datasets, filtered_pipeline)
+
         runner = runner or SequentialRunner()
         if not isinstance(runner, AbstractRunner):
             raise KedroSessionError(
@@ -414,33 +419,43 @@ class KedroServiceSession(AbstractSession):
         return run_result
 
 
+def _check_runtime_dataset_names(
+    runtime_datasets: dict[str, Any], pipeline: Pipeline
+) -> None:
+    """Only allow free inputs of the pipeline being run to be injected.
+
+    Parameters are rejected so they cannot bypass parameter validation, and
+    intermediate or output datasets are rejected so a caller cannot skip
+    upstream nodes or silently replace persisted outputs.
+    """
+    param_names = sorted(
+        name
+        for name in runtime_datasets
+        if name == "parameters" or name.startswith("params:")
+    )
+    if param_names:
+        raise KedroSessionError(
+            f"Cannot inject parameters as runtime datasets: {param_names}. "
+            "Pass parameters through runtime params instead."
+        )
+
+    not_free_inputs = sorted(set(runtime_datasets) - pipeline.inputs())
+    if not_free_inputs:
+        raise KedroSessionError(
+            f"Only free inputs of the pipeline being run can be injected as "
+            f"runtime datasets, but got: {not_free_inputs}."
+        )
+
+
 def _inject_runtime_datasets(
     catalog: CatalogProtocol, runtime_datasets: dict[str, Any]
 ) -> None:
-    """Inject runtime datasets into the catalog, keeping any validator declared
-    for the replaced entry so injected data is still validated on load/save."""
-    validator_specs = getattr(catalog, "_validator_specs", None)
-    if not isinstance(validator_specs, dict):
-        # Catalog does not support dataset validation; nothing to preserve.
-        for dataset_name, dataset_value in runtime_datasets.items():
-            catalog[dataset_name] = dataset_value
-        return
-
-    from kedro.io.core import VALIDATOR_KEY
-    from kedro.validation.core import ValidatorSpec
-
+    """Inject runtime datasets into the catalog, keeping and applying any
+    validator declared for the replaced entry."""
+    inject = getattr(catalog, "inject", None)
     for dataset_name, dataset_value in runtime_datasets.items():
-        spec = validator_specs.get(dataset_name)
-        if spec is None:
-            # Entries matched only by a dataset factory pattern have no spec
-            # until resolved, so read the validator from the resolved config.
-            ds_config = catalog.config_resolver.resolve_pattern(dataset_name)  # type: ignore[attr-defined]
-            if isinstance(ds_config, dict) and VALIDATOR_KEY in ds_config:
-                spec = ValidatorSpec.from_dataset_config(
-                    dataset_name, ds_config[VALIDATOR_KEY]
-                )
-
-        # Replacing an entry clears its validator state, so restore it after.
-        catalog[dataset_name] = dataset_value
-        if spec is not None:
-            validator_specs[dataset_name] = spec
+        if inject is not None:
+            inject(dataset_name, dataset_value)
+        else:
+            # Catalog does not support dataset validation; nothing to preserve.
+            catalog[dataset_name] = dataset_value

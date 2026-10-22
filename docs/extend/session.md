@@ -89,7 +89,7 @@ session.run(runtime_datasets={"input_df": some_dataframe})
 session.close()
 ```
 
-`run()` also accepts an optional `runtime_datasets` argument: a mapping of dataset name to value, injected into that run's catalog immediately before execution (via `catalog[name] = value`). Each value is either raw data (wrapped in a `MemoryDataset`) or an `AbstractDataset` instance (stored directly). This is useful for feeding ad-hoc or externally-produced data into a single run without writing it to disk or declaring it in `catalog.yml`. An existing catalog entry with the same name is replaced for that run only.
+`run()` also accepts an optional `runtime_datasets` argument: a mapping of dataset name to value, injected into that run's catalog immediately before execution (via `DataCatalog.inject`). Each value is either raw data (wrapped in a `MemoryDataset`) or an `AbstractDataset` instance (stored directly). This is useful for feeding ad-hoc or externally-produced data into a single run without writing it to disk or declaring it in `catalog.yml`. Only free inputs of the pipeline being run can be injected, and parameters must be passed through `runtime_params` instead. An existing catalog entry with the same name is replaced for that run only, and any validator declared for it is applied to the injected data whatever its `on` modes: raw data is validated immediately, and a dataset instance is validated when it is loaded.
 
 You can provide the following optional arguments in `KedroServiceSession.create()`:
 

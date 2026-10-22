@@ -17,11 +17,34 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroServiceSession
 from kedro.framework.session.abstract_session import KedroSessionError
 from kedro.framework.session.service_session import _inject_runtime_datasets
-from kedro.io import DataCatalog
+from kedro.io import DataCatalog, MemoryDataset
+from kedro.pipeline import Pipeline, node
 from kedro.runner import ThreadRunner
 from kedro.validation import DataValidationError
 
 _FAKE_PIPELINE_NAME = "fake_pipeline"
+
+
+def _identity(x):
+    return x
+
+
+def _first(x, *_):
+    return x
+
+
+def _pipeline_with_inputs(*inputs):
+    """A real pipeline whose free inputs are exactly `inputs`."""
+    return Pipeline(
+        [node(_identity, name, f"{name}_out", name=f"{name}_node") for name in inputs]
+    )
+
+
+def _patch_pipelines(mocker, pipeline):
+    """Register `pipeline` as `_FAKE_PIPELINE_NAME` in the project pipelines."""
+    mock_pipelines = mocker.patch("kedro.framework.session.service_session.pipelines")
+    mock_pipelines.__getitem__.side_effect = {_FAKE_PIPELINE_NAME: pipeline}.__getitem__
+    return mock_pipelines
 
 
 @pytest.fixture
@@ -743,18 +766,12 @@ class TestKedroServiceSession:
     def test_run_injects_runtime_datasets(
         self, fake_project, mock_context_class, mock_runner, mocker
     ):
-        """`runtime_datasets` should be written into the run's catalog via
-        `catalog[name] = value`, and recorded (by name only) in the hook payload."""
+        """`runtime_datasets` should be injected into the run's catalog via
+        `catalog.inject`, and recorded (by name only) in the hook payload."""
         mock_hook = mocker.patch(
             "kedro.framework.session.service_session._create_hook_manager"
         ).return_value.hook
-        mocker.patch(
-            "kedro.framework.session.service_session.pipelines",
-            return_value={
-                _FAKE_PIPELINE_NAME: mocker.Mock(),
-                "__default__": mocker.Mock(),
-            },
-        )
+        _patch_pipelines(mocker, _pipeline_with_inputs("input_df"))
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
@@ -768,7 +785,7 @@ class TestKedroServiceSession:
                 runtime_datasets={"input_df": "some_raw_value"},
             )
 
-        mock_catalog.__setitem__.assert_any_call("input_df", "some_raw_value")
+        mock_catalog.inject.assert_any_call("input_df", "some_raw_value")
         recorded_datasets = mock_hook.before_pipeline_run.call_args.kwargs[
             "run_params"
         ]["runtime_datasets"]
@@ -805,6 +822,7 @@ class TestKedroServiceSession:
             )
 
         mock_catalog.__setitem__.assert_not_called()
+        mock_catalog.inject.assert_not_called()
         recorded_datasets = mock_hook.before_pipeline_run.call_args.kwargs[
             "run_params"
         ]["runtime_datasets"]
@@ -819,13 +837,7 @@ class TestKedroServiceSession:
         mocker.patch(
             "kedro.framework.session.service_session._create_hook_manager"
         ).return_value.hook
-        mocker.patch(
-            "kedro.framework.session.service_session.pipelines",
-            return_value={
-                _FAKE_PIPELINE_NAME: mocker.Mock(),
-                "__default__": mocker.Mock(),
-            },
-        )
+        _patch_pipelines(mocker, _pipeline_with_inputs("input_1", "input_2"))
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner.__name__ = "SequentialRunner"
@@ -857,8 +869,8 @@ class TestKedroServiceSession:
 
         assert first_runtime_datasets == ["input_1"]
         assert second_runtime_datasets == ["input_2"]
-        mock_catalog.__setitem__.assert_any_call("input_1", "value_1")
-        mock_catalog.__setitem__.assert_any_call("input_2", "value_2")
+        mock_catalog.inject.assert_any_call("input_1", "value_1")
+        mock_catalog.inject.assert_any_call("input_2", "value_2")
 
     def test_create_serving_mode_preloads_all_pipelines(self, fake_project, mocker):
         """create(serving_mode=True) calls set_requested(None) to clear any filter and
@@ -1003,7 +1015,35 @@ class RejectNegativeValidator:
 _VALIDATOR_PATH = f"{__name__}.RejectNegativeValidator"
 
 
+class DoubleValidator:
+    """Doubles every value, to check validated output replaces injected data."""
+
+    def validate(self, data):
+        return [value * 2 for value in data]
+
+
+_DOUBLE_VALIDATOR_PATH = f"{__name__}.DoubleValidator"
+
+
 class TestInjectRuntimeDatasets:
+    """Unit tests for `_inject_runtime_datasets`: an injected entry keeps the
+    validator declared for it (explicitly or via a factory pattern) and that
+    validator is applied to the injected data, whatever its `on` modes."""
+
+    def test_validates_raw_data_at_injection(self, tmp_path):
+        catalog = DataCatalog.from_config(
+            {
+                "input_data": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "input.pkl"),
+                    "validator": _VALIDATOR_PATH,
+                }
+            }
+        )
+
+        with pytest.raises(DataValidationError, match="negative values found"):
+            _inject_runtime_datasets(catalog, {"input_data": [1, -2]})
+
     def test_keeps_validator_of_replaced_entry(self, tmp_path):
         catalog = DataCatalog.from_config(
             {
@@ -1015,11 +1055,91 @@ class TestInjectRuntimeDatasets:
             }
         )
 
-        _inject_runtime_datasets(catalog, {"input_data": [1, -2]})
+        _inject_runtime_datasets(catalog, {"input_data": [1, 2]})
 
-        assert "input_data" in catalog.validator_specs
+        assert catalog.validators == {"input_data": _VALIDATOR_PATH}
+        assert catalog.load("input_data") == [1, 2]
+
+    def test_save_only_validator_runs_at_injection(self, tmp_path):
+        catalog = DataCatalog.from_config(
+            {
+                "clean_data": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "clean.pkl"),
+                    "validator": {"class": _VALIDATOR_PATH, "on": ["save"]},
+                }
+            }
+        )
+
         with pytest.raises(DataValidationError, match="negative values found"):
-            catalog.load("input_data")
+            _inject_runtime_datasets(catalog, {"clean_data": [-5]})
+
+    def test_save_only_validator_runs_on_load_of_injected_dataset(self, tmp_path):
+        catalog = DataCatalog.from_config(
+            {
+                "clean_data": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "clean.pkl"),
+                    "validator": {"class": _VALIDATOR_PATH, "on": ["save"]},
+                }
+            }
+        )
+
+        _inject_runtime_datasets(catalog, {"clean_data": MemoryDataset([-5])})
+
+        with pytest.raises(DataValidationError, match="negative values found"):
+            catalog.load("clean_data")
+
+    def test_stores_validated_data(self, tmp_path):
+        catalog = DataCatalog.from_config(
+            {
+                "input_data": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "input.pkl"),
+                    "validator": {"class": _DOUBLE_VALIDATOR_PATH, "on": ["save"]},
+                }
+            }
+        )
+
+        _inject_runtime_datasets(catalog, {"input_data": [1, 2]})
+
+        assert catalog.load("input_data") == [2, 4]
+
+    def test_warn_severity_keeps_injected_data(self, tmp_path, caplog):
+        catalog = DataCatalog.from_config(
+            {
+                "input_data": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "input.pkl"),
+                    "validator": {
+                        "class": _VALIDATOR_PATH,
+                        "on": ["save"],
+                        "severity": "warn",
+                    },
+                }
+            }
+        )
+
+        _inject_runtime_datasets(catalog, {"input_data": [-1]})
+
+        assert catalog.load("input_data") == [-1]
+        assert "negative values found" in caplog.text
+
+    def test_skips_validation_when_disabled(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("KEDRO_DATASET_VALIDATION", "0")
+        catalog = DataCatalog.from_config(
+            {
+                "input_data": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "input.pkl"),
+                    "validator": _VALIDATOR_PATH,
+                }
+            }
+        )
+
+        _inject_runtime_datasets(catalog, {"input_data": [-1]})
+
+        assert catalog.load("input_data") == [-1]
 
     def test_keeps_validator_of_factory_pattern_entry(self, tmp_path):
         catalog = DataCatalog.from_config(
@@ -1032,10 +1152,23 @@ class TestInjectRuntimeDatasets:
             }
         )
 
-        _inject_runtime_datasets(catalog, {"raw_input": [-1]})
-
         with pytest.raises(DataValidationError, match="negative values found"):
-            catalog.load("raw_input")
+            _inject_runtime_datasets(catalog, {"raw_input": [-1]})
+
+    def test_catch_all_pattern_lookup_has_no_side_effects(self, tmp_path, caplog):
+        catalog = DataCatalog.from_config(
+            {
+                "{default}": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "{default}.pkl"),
+                }
+            }
+        )
+
+        _inject_runtime_datasets(catalog, {"some_input": [1]})
+
+        assert "override the default dataset creation" not in caplog.text
+        assert catalog.load("some_input") == [1]
 
     def test_new_entry_has_no_validator(self):
         catalog = DataCatalog()
@@ -1044,3 +1177,66 @@ class TestInjectRuntimeDatasets:
 
         assert catalog.validator_specs == {}
         assert catalog.load("new_data") == [-1]
+
+    def test_empty_name_does_not_crash(self):
+        catalog = DataCatalog()
+
+        _inject_runtime_datasets(catalog, {"": 1})
+
+        assert catalog.load("") == 1
+
+
+class TestRuntimeDatasetNames:
+    """`run()` only accepts free inputs of the pipeline being run, and never
+    parameters, so injection cannot bypass validation or overwrite outputs."""
+
+    @pytest.fixture
+    def run_with(self, fake_project, mock_context_class, mock_runner, mocker):
+        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        mock_runner.__name__ = "SequentialRunner"
+        pipeline = Pipeline(
+            [
+                node(_first, ["raw", "params:cfg"], "clean", name="clean_node"),
+                node(_identity, "clean", "scored", name="score_node"),
+            ]
+        )
+        _patch_pipelines(mocker, pipeline)
+        mock_catalog = mock_context_class.return_value._get_catalog.return_value
+
+        def _run(runtime_datasets, **kwargs):
+            with KedroServiceSession.create(
+                project_path=fake_project, session_id="fake_id"
+            ) as session:
+                session.run(
+                    runner=mock_runner,
+                    pipeline_names=[_FAKE_PIPELINE_NAME],
+                    runtime_datasets=runtime_datasets,
+                    **kwargs,
+                )
+            return mock_catalog
+
+        return _run
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.parametrize("name", ["params:cfg", "parameters"])
+    def test_rejects_parameters(self, run_with, name):
+        with pytest.raises(KedroSessionError, match="Cannot inject parameters"):
+            run_with({name: {"factor": 1000}})
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.parametrize("name", ["clean", "scored", "unknown"])
+    def test_rejects_non_free_inputs(self, run_with, name):
+        with pytest.raises(KedroSessionError, match="Only free inputs"):
+            run_with({name: [1]})
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_accepts_free_input(self, run_with):
+        catalog = run_with({"raw": [1]})
+
+        catalog.inject.assert_called_once_with("raw", [1])
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_accepts_free_input_of_filtered_pipeline(self, run_with):
+        catalog = run_with({"clean": [1]}, from_nodes=["score_node"])
+
+        catalog.inject.assert_called_once_with("clean", [1])

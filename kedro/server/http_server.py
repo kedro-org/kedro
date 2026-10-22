@@ -8,7 +8,7 @@ import threading
 import time
 import traceback
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from fastapi import FastAPI, Query
 
@@ -126,6 +126,13 @@ def create_http_server(
                 "contain commas."
             ),
         ),
+        group_by: Literal["namespace", "none"] = Query(
+            default="namespace",
+            description=(
+                "Strategy for each pipeline's `groups`: `namespace` groups nodes "
+                "by top-level namespace, `none` makes every node its own group."
+            ),
+        ),
     ) -> SnapshotResponse:
         """Return a read-only snapshot of the Kedro project.
 
@@ -138,6 +145,8 @@ def create_http_server(
                 format) used to resolve ``${runtime_params:...}`` interpolation for
                 this request only. Values containing a literal comma are not
                 supported.
+            group_by: Grouping strategy for each pipeline's ``groups``, passed to
+                ``get_project_snapshot``. Defaults to ``"namespace"``.
 
         Returns:
             `SnapshotResponse` with project metadata, pipelines, datasets,
@@ -158,6 +167,7 @@ def create_http_server(
                 conf_source=app.state.default_conf_source,
                 metadata=app.state.metadata,
                 runtime_params=runtime_params,
+                group_by=group_by,
             )
             return SnapshotSuccess(
                 status="success",

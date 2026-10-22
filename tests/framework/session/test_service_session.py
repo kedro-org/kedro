@@ -9,6 +9,7 @@ from kedro import __version__ as kedro_version
 from kedro.config.abstract_config import AbstractConfigLoader
 from kedro.config.omegaconf_config import OmegaConfigLoader
 from kedro.framework.context.context import KedroContext
+from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.project import (
     LOGGING,
     ValidationError,
@@ -17,9 +18,9 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroServiceSession
 from kedro.framework.session.abstract_session import KedroSessionError
 from kedro.framework.session.service_session import _inject_runtime_datasets
-from kedro.io import DataCatalog, MemoryDataset
+from kedro.io import DataCatalog, MemoryDataset, SharedMemoryDataCatalog
 from kedro.pipeline import Pipeline, node
-from kedro.runner import ThreadRunner
+from kedro.runner import ParallelRunner, ThreadRunner
 from kedro.validation import DataValidationError
 
 _FAKE_PIPELINE_NAME = "fake_pipeline"
@@ -1177,6 +1178,24 @@ class TestInjectRuntimeDatasets:
 
         assert catalog.validator_specs == {}
         assert catalog.load("new_data") == [-1]
+
+    def test_injected_data_is_visible_to_parallel_runner_workers(self, tmp_path):
+        """Injected entries are free inputs, so workers only read them and a
+        pickled `MemoryDataset` is enough; no `SharedMemoryDataset` is needed."""
+        catalog = SharedMemoryDataCatalog.from_config(
+            {
+                "out": {
+                    "type": "pickle.PickleDataset",
+                    "filepath": str(tmp_path / "out.pkl"),
+                }
+            }
+        )
+        pipeline = Pipeline([node(sum, "raw", "out", name="sum_node")])
+
+        _inject_runtime_datasets(catalog, {"raw": [1, 2, 3]})
+        ParallelRunner().run(pipeline, catalog, _create_hook_manager())
+
+        assert catalog.load("out") == 6
 
     def test_empty_name_does_not_crash(self):
         catalog = DataCatalog()

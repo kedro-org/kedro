@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 
     from kedro.config import AbstractConfigLoader
     from kedro.framework.context import KedroContext
+    from kedro.io import CatalogProtocol
 
 
 class KedroServiceSession(AbstractSession):
@@ -55,6 +56,8 @@ class KedroServiceSession(AbstractSession):
     with KedroServiceSession.create() as session:
         run_1 = session.run(runtime_params={"param1": "value1"})
         run_2 = session.run(runtime_params={"param1": "value2"})
+        # Inject ad-hoc data for this run only, without touching catalog config
+        run_3 = session.run(runtime_datasets={"input_df": some_dataframe})
     ```
     NOTE: This session implementation is under active development and may occasionally contain breaking changes.
     """
@@ -270,8 +273,60 @@ class KedroServiceSession(AbstractSession):
         namespaces: Iterable[str] | None = None,
         only_missing_outputs: bool = False,
         runtime_params: dict[str, Any] | None = None,
+        runtime_datasets: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Run the pipeline."""
+        """Runs the pipeline with a specified runner.
+
+        Args:
+            run_id: An optional identifier for this run, also used as the save
+                version. Defaults to a generated timestamp.
+            pipeline_names: Name of the pipelines that is being run. Defaults
+                to ``["__default__"]``.
+            tags: An optional list of node tags which should be used to
+                filter the nodes of the ``Pipeline``. If specified, only the nodes
+                containing *any* of these tags will be run.
+            runner: An optional parameter specifying the runner that you want to run
+                the pipeline with. Defaults to ``SequentialRunner``.
+            node_names: An optional list of node names which should be used to
+                filter the nodes of the ``Pipeline``. If specified, only the nodes
+                with these names will be run.
+            from_nodes: An optional list of node names which should be used as a
+                starting point of the new ``Pipeline``.
+            to_nodes: An optional list of node names which should be used as an
+                end point of the new ``Pipeline``.
+            from_inputs: An optional list of input datasets which should be
+                used as a starting point of the new ``Pipeline``.
+            to_outputs: An optional list of output datasets which should be
+                used as an end point of the new ``Pipeline``.
+            load_versions: An optional flag to specify a particular dataset
+                version timestamp to load.
+            namespaces: The namespaces of the nodes that are being run.
+            only_missing_outputs: Run only nodes with missing outputs.
+            runtime_params: Optional parameters for this run only, used to
+                resolve ``runtime_params`` interpolation and passed through
+                parameter validation.
+            runtime_datasets: Optional mapping of dataset name to value, injected
+                into this run's catalog immediately before execution. Each
+                value is either raw data (wrapped in a ``MemoryDataset``) or an
+                ``AbstractDataset`` instance (stored directly). Only free inputs
+                of the pipeline being run can be injected; parameters must be
+                passed through ``runtime_params``. An existing catalog entry
+                with the same name is replaced for this run only, and any
+                validator declared for it is applied to the injected data.
+                With ``ParallelRunner``, injected values are only read by
+                worker processes, so they must be serialisable.
+        Raises:
+            ValueError: If a requested pipeline is not defined by
+                `register_pipelines`.
+            KedroSessionError: If `runner` is not a runner instance, or if
+                `runtime_datasets` contains parameters or names that are not
+                free inputs of the pipeline being run.
+            Exception: Any uncaught exception during the run will be re-raised
+                after being passed to ``on_pipeline_error`` hook.
+        Returns:
+            Dictionary with pipeline outputs, where keys are dataset names
+            and values are dataset objects.
+        """
         run_id = run_id or generate_timestamp()
         project_name = self._package_name or self._project_path.name
         self._logger.info("Kedro project %s", project_name)
@@ -319,6 +374,9 @@ class KedroServiceSession(AbstractSession):
             to_outputs=to_outputs,
             node_namespaces=namespaces,
         )
+        if runtime_datasets:
+            _check_runtime_dataset_names(runtime_datasets, filtered_pipeline)
+
         runner = runner or SequentialRunner()
         if not isinstance(runner, AbstractRunner):
             raise KedroSessionError(
@@ -343,6 +401,9 @@ class KedroServiceSession(AbstractSession):
             load_versions=load_versions,
         )
 
+        if runtime_datasets:
+            _inject_runtime_datasets(catalog, runtime_datasets)
+
         record_data = {
             "session_id": self.session_id,
             "run_id": run_id,
@@ -357,6 +418,7 @@ class KedroServiceSession(AbstractSession):
             "to_outputs": to_outputs,
             "load_versions": load_versions,
             "runtime_params": runtime_params or {},
+            "runtime_datasets": list((runtime_datasets or {}).keys()),
             "pipeline_names": pipeline_names,
             "namespaces": namespaces,
             "runner": runner.__class__.__name__,
@@ -392,3 +454,45 @@ class KedroServiceSession(AbstractSession):
             catalog=catalog,
         )
         return run_result
+
+
+def _check_runtime_dataset_names(
+    runtime_datasets: dict[str, Any], pipeline: Pipeline
+) -> None:
+    """Only allow free inputs of the pipeline being run to be injected.
+
+    Parameters are rejected so they cannot bypass parameter validation, and
+    intermediate or output datasets are rejected so a caller cannot skip
+    upstream nodes or silently replace persisted outputs.
+    """
+    param_names = sorted(
+        name
+        for name in runtime_datasets
+        if name == "parameters" or name.startswith("params:")
+    )
+    if param_names:
+        raise KedroSessionError(
+            f"Cannot inject parameters as runtime datasets: {param_names}. "
+            "Pass parameters through runtime params instead."
+        )
+
+    not_free_inputs = sorted(set(runtime_datasets) - pipeline.inputs())
+    if not_free_inputs:
+        raise KedroSessionError(
+            f"Only free inputs of the pipeline being run can be injected as "
+            f"runtime datasets, but got: {not_free_inputs}."
+        )
+
+
+def _inject_runtime_datasets(
+    catalog: CatalogProtocol, runtime_datasets: dict[str, Any]
+) -> None:
+    """Inject runtime datasets into the catalog, keeping and applying any
+    validator declared for the replaced entry."""
+    inject = getattr(catalog, "inject", None)
+    for dataset_name, dataset_value in runtime_datasets.items():
+        if inject is not None:
+            inject(dataset_name, dataset_value)
+        else:
+            # Catalog does not support dataset validation; nothing to preserve.
+            catalog[dataset_name] = dataset_value

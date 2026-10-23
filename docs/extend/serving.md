@@ -202,6 +202,14 @@ curl -X POST http://127.0.0.1:8000/run \
   -d '{"pipeline_names": ["training"], "params": {"n_splits": 5}}'
 ```
 
+Run a pipeline with an ad-hoc input dataset:
+
+```bash
+curl -X POST http://127.0.0.1:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{"pipeline_names": ["training"], "datasets": {"input_df": [[1, 2], [3, 4]]}}'
+```
+
 Key request fields:
 
 | Field                  | Type             | Description                                                                                                                |
@@ -218,7 +226,12 @@ Key request fields:
 | `pipeline_names`       | `list[str]`      | Pipelines to run (default pipeline if omitted)                                                                             |
 | `namespaces`           | `list[str]`      | Run nodes in these namespaces                                                                                              |
 | `params`               | `dict`           | Runtime parameters passed to the context                                                                                   |
+| `datasets`             | `dict`           | Runtime datasets to inject into the catalog for this run, keyed by name; values are wrapped in a `MemoryDataset`           |
 | `only_missing_outputs` | `bool`           | Skip nodes whose outputs already exist and are persisted                                                                   |
+
+!!! note
+
+    `datasets` can only override free inputs of the pipeline being run (after filtering with options such as `from_nodes`), and values are always wrapped as a `MemoryDataset`, never selecting an arbitrary dataset `type`. Parameters (`parameters` and `params:*`) cannot be injected; use `params` so they go through parameter validation. Intermediate and output datasets are rejected, so injection cannot skip upstream nodes or replace persisted outputs. Any validator declared for an injected entry is applied to the injected value when the request is handled, including validators declared with `on: [save]`.
 
 On success the response contains `run_id`, `status`, and `duration_ms`:
 

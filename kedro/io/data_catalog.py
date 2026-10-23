@@ -7,6 +7,8 @@ save functions to the underlying datasets.
 
 from __future__ import annotations
 
+import copy
+import dataclasses
 import logging
 import os
 import re
@@ -597,6 +599,74 @@ class DataCatalog(CatalogProtocol):
         else:
             self._logger.debug(f"Adding input data {key} as a default MemoryDataset")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
+
+    def inject(self, key: str, value: Any) -> None:
+        """Register runtime data under ``key`` while keeping its declared validator.
+
+        Unlike ``catalog[key] = value``, which drops any validator configured for
+        a replaced entry, this keeps the validator declared for ``key``, either
+        explicitly or through a matching dataset factory pattern. Injected data
+        is only ever loaded, so the validator is applied regardless of its
+        ``on`` modes: raw data is validated immediately, and an
+        ``AbstractDataset`` instance is validated when it is loaded.
+
+        Args:
+            key: Name of the dataset.
+            value: Either an instance of `AbstractDataset` or raw data, which is
+                wrapped in a `MemoryDataset`.
+
+        Raises:
+            DataValidationError: If raw data fails a validator with
+                ``severity: error``.
+
+        Example:
+        ```python
+            catalog = DataCatalog.from_config(
+                {"input": {"type": "pickle.PickleDataset", "filepath": "in.pkl",
+                           "validator": "my_project.validators.NonNegative"}}
+            )
+            catalog.inject("input", [1, 2])  # validated now, replaces the entry
+        ```
+        """
+        spec = self._validator_specs.get(key) or self._pattern_validator_spec(key)
+        self[key] = value
+        if spec is None:
+            return
+
+        if isinstance(value, AbstractDataset | _LazyDataset):
+            # Force load-mode so a save-only validator still guards the data.
+            self._validator_specs[key] = dataclasses.replace(spec, on=("load",))
+            return
+
+        self._validator_specs[key] = spec
+        if self._is_validation_enabled() and spec.enabled:
+            eager_spec = dataclasses.replace(spec, on=("load",))
+            self._validator_specs[key] = eager_spec
+            try:
+                validated = self._validate(key, value, mode="load")
+            finally:
+                self._validator_specs[key] = spec
+            self._datasets[key] = MemoryDataset(data=validated)  # type: ignore[abstract]
+
+    def _pattern_validator_spec(self, ds_name: str) -> ValidatorSpec | None:
+        """Return the validator declared by a dataset factory pattern matching
+        ``ds_name``, without resolving or caching the dataset itself."""
+        resolver = self._config_resolver
+        pattern = resolver.match_dataset_pattern(
+            ds_name
+        ) or resolver.match_user_catch_all_pattern(ds_name)
+        if pattern is None:
+            return None
+        pattern_config = resolver._get_pattern_config(pattern)
+        if not isinstance(pattern_config, dict) or VALIDATOR_KEY not in pattern_config:
+            return None
+
+        from kedro.validation.core import ValidatorSpec
+
+        resolved = resolver._resolve_dataset_config(
+            ds_name, pattern, copy.deepcopy(pattern_config[VALIDATOR_KEY])
+        )
+        return ValidatorSpec.from_dataset_config(ds_name, resolved)
 
     def __len__(self) -> int:
         """

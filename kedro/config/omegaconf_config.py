@@ -137,7 +137,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             custom_resolvers: A dictionary of custom resolvers to be registered. For more information,
                 see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
                 A resolver can be given as a `(callable, kwargs)` tuple to pass keyword arguments such as
-                `use_cache` or `replace` on to `OmegaConf.register_new_resolver()`.
+                `use_cache` or `replace` on to `OmegaConf.register_resolver()`.
             merge_strategy: A dictionary that specifies the merging strategy for each configuration type.
                 The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
             ignore_hidden: A boolean flag that determines whether hidden files and directories should be
@@ -637,14 +637,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _register_globals_resolver(self) -> None:
         """Register the globals resolver"""
-        OmegaConf.register_new_resolver(
+        OmegaConf.register_resolver(
             "globals",
             self._get_globals_value,
             replace=True,
         )
 
     def _register_runtime_params_resolver(self) -> None:
-        OmegaConf.register_new_resolver(
+        OmegaConf.register_resolver(
             "runtime_params",
             self._get_runtime_value,
             replace=True,
@@ -699,7 +699,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         resolvers: dict[str, Callable | tuple[Callable, dict[str, Any]]],
     ) -> None:
         """Register custom resolvers. A resolver given as a `(callable, kwargs)` tuple passes the
-        `kwargs` on to `OmegaConf.register_new_resolver()` (for example `use_cache` or `replace`);
+        `kwargs` on to `OmegaConf.register_resolver()` (for example `use_cache` or `replace`);
         a plain callable is registered with no extra arguments.
         """
         for name, resolver in resolvers.items():
@@ -708,11 +708,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 _config_logger.debug(msg)
                 if isinstance(resolver, tuple):
                     resolver_fn, resolver_kwargs = resolver
-                    OmegaConf.register_new_resolver(
+                    OmegaConf.register_resolver(
                         name=name, resolver=resolver_fn, **resolver_kwargs
                     )
                 else:
-                    OmegaConf.register_new_resolver(name=name, resolver=resolver)
+                    OmegaConf.register_resolver(name=name, resolver=resolver)
 
     def _check_duplicates(self, key: str, config_per_file: dict[Path, Any]) -> None:
         if key == "parameters":
@@ -760,7 +760,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             config (DictConfig): The configuration dictionary to resolve.
         """
         if not OmegaConf.has_resolver("oc.env"):
-            OmegaConf.register_new_resolver("oc.env", oc.env)
+            OmegaConf.register_resolver("oc.env", oc.env)
             OmegaConf.resolve(config)
             OmegaConf.clear_resolver("oc.env")
         else:

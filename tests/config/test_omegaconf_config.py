@@ -697,7 +697,7 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(
             tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
-        OmegaConf.register_new_resolver("oc.env", oc.env)
+        OmegaConf.register_resolver("oc.env", oc.env)
         os.environ["TEST_USERNAME"] = "test_user"
         os.environ["TEST_KEY"] = "test_key"
         assert conf["credentials"]["user"]["name"] == "test_user"
@@ -895,7 +895,7 @@ class TestOmegaConfigLoader:
 
         custom_resolvers = {
             # A `(callable, kwargs)` tuple passes the kwargs on to
-            # `OmegaConf.register_new_resolver()`, so `use_cache` applies
+            # `OmegaConf.register_resolver()`, so `use_cache` applies
             "count_cached": (count_calls, {"use_cache": True}),
             "count_uncached": count_calls,
         }

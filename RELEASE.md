@@ -9,6 +9,7 @@
 
 ## Bug fixes and other changes
 
+- Fixed `OmegaConfigLoader` ignoring `replace=True` for an already-registered custom resolver: a resolver given as a `(callable, kwargs)` tuple with `replace=True` is now re-registered, while resolvers without `replace` keep the previously registered implementation.
 - Fixed MemoryDataset losing its empty sentinel identity after pickle/unpickle, which could cause load() to return the sentinel instead of raising DatasetError.
 - Fixed `AttributeError` when naming a node built from a callable object, such as a class instance with `__call__`, and no explicit name. The node name now falls back to the class name.
 - Fixed typed parameter validation binding a `params:` input to the wrong function argument when a node declared with a dict of inputs leaves an earlier argument to its default. The typed requirement was taken from an argument the node never receives, so a run could fail on a type the user never asked for.

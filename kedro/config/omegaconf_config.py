@@ -106,7 +106,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         config_patterns: dict[str, list[str]] | None = None,
         base_env: str | None = None,
         default_run_env: str | None = None,
-        custom_resolvers: dict[str, Callable] | None = None,
+        custom_resolvers: dict[str, Callable | tuple[Callable, dict[str, Any]]]
+        | None = None,
         merge_strategy: dict[str, str] | None = None,
         ignore_hidden: bool = True,
         restrict_runtime_params_type_selection: bool = False,
@@ -135,6 +136,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 Can be overridden by supplying the `env` argument.
             custom_resolvers: A dictionary of custom resolvers to be registered. For more information,
                 see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
+                A resolver can be given as a `(callable, kwargs)` tuple to pass keyword arguments such as
+                `use_cache` or `replace` on to `OmegaConf.register_new_resolver()`.
             merge_strategy: A dictionary that specifies the merging strategy for each configuration type.
                 The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
             ignore_hidden: A boolean flag that determines whether hidden files and directories should be
@@ -692,13 +695,24 @@ class OmegaConfigLoader(AbstractConfigLoader):
         )
 
     @staticmethod
-    def _register_new_resolvers(resolvers: dict[str, Callable]) -> None:
-        """Register custom resolvers"""
+    def _register_new_resolvers(
+        resolvers: dict[str, Callable | tuple[Callable, dict[str, Any]]],
+    ) -> None:
+        """Register custom resolvers. A resolver given as a `(callable, kwargs)` tuple passes the
+        `kwargs` on to `OmegaConf.register_new_resolver()` (for example `use_cache` or `replace`);
+        a plain callable is registered with no extra arguments.
+        """
         for name, resolver in resolvers.items():
             if not OmegaConf.has_resolver(name):
                 msg = f"Registering new custom resolver: {name}"
                 _config_logger.debug(msg)
-                OmegaConf.register_new_resolver(name=name, resolver=resolver)
+                if isinstance(resolver, tuple):
+                    resolver_fn, resolver_kwargs = resolver
+                    OmegaConf.register_new_resolver(
+                        name=name, resolver=resolver_fn, **resolver_kwargs
+                    )
+                else:
+                    OmegaConf.register_new_resolver(name=name, resolver=resolver)
 
     def _check_duplicates(self, key: str, config_per_file: dict[Path, Any]) -> None:
         if key == "parameters":

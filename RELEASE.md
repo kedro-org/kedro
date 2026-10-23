@@ -21,7 +21,7 @@
 
 ## Breaking changes to the API
 
-- **Security fix**: Logging configuration now enforces the logging module allowlist for `ext://` references and `QueueHandler`'s `queue` and `listener` names. References must name a public object exported directly by an importable module; bare class names, private objects, and attribute chains such as `logging.handlers.SysLogHandler.LOG_LOCAL0` are no longer supported. `cfg://` configuration navigation is also disabled as an additional safeguard. Use fully qualified class names, handler and formatter identifiers for connections, and YAML anchors and aliases to reuse configuration values. List trusted custom modules in `KEDRO_LOGGING_MODULE_ALLOWLIST` before starting Kedro. The exact references `sys.stdout`, `sys.stderr`, `queue.Queue`, and `queue.SimpleQueue` remain supported without opting in their modules.
+- **Security hardening**: Logging configuration now enforces the logging module allowlist for `ext://` references and `QueueHandler`'s `queue` and `listener` names. References must name a public object exported directly by an importable module; bare class names, private objects, and attribute chains such as `logging.handlers.SysLogHandler.LOG_LOCAL0` are no longer supported. `cfg://` configuration navigation is also disabled as an additional safeguard. Use fully qualified class names, handler and formatter identifiers for connections, and YAML anchors and aliases to reuse configuration values. List trusted custom modules in `KEDRO_LOGGING_MODULE_ALLOWLIST` before starting Kedro. The exact references `sys.stdout`, `sys.stderr`, `queue.Queue`, and `queue.SimpleQueue` remain supported without opting in their modules.
 
 ## Community contributions
 

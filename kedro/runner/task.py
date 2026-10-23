@@ -24,7 +24,7 @@ from kedro.framework.hooks.manager import (
 from kedro.framework.project import settings
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Mapping
 
     from pluggy import PluginManager
 
@@ -77,7 +77,7 @@ class Task:
 
             hook_manager = Task._run_node_synchronization(
                 package_name=PACKAGE_NAME,
-                logging_config=LOGGING,  # type: ignore[arg-type]
+                logging_config=LOGGING,
             )
             self.hook_manager = hook_manager
         if self.is_async:
@@ -106,7 +106,7 @@ class Task:
 
     @staticmethod
     def _bootstrap_subprocess(
-        package_name: str, logging_config: dict[str, Any] | None = None
+        package_name: str, logging_config: Mapping[str, Any] | None = None
     ) -> None:
         from kedro.framework.project import configure_logging, configure_project
 
@@ -117,7 +117,7 @@ class Task:
     @staticmethod
     def _run_node_synchronization(
         package_name: str | None = None,
-        logging_config: dict[str, Any] | None = None,
+        logging_config: Mapping[str, Any] | None = None,
     ) -> Any:
         """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -126,7 +126,7 @@ class Task:
 
         Args:
             package_name: The name of the project Python package.
-            logging_config: A dictionary containing logging configuration.
+            logging_config: A mapping containing logging configuration.
 
         Returns:
             The node argument.

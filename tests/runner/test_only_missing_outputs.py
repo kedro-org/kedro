@@ -279,8 +279,6 @@ class TestOnlyMissingOutputs:
 
         catalog["input1"] = MemoryDataset("data1")
         catalog["input2"] = MemoryDataset("data2")
-        for mem_ds in ["memA", "memC", "memE"]:
-            catalog[mem_ds] = MemoryDataset()
 
         # Set up persistent datasets with different exists results
         catalog["persistentA"] = create_persistent_dataset(exists_result=True)
@@ -432,9 +430,6 @@ class TestOnlyMissingOutputs:
             )
 
         # Set up all datasets
-        catalog["shared_output"] = MemoryDataset()
-        catalog["B"] = MemoryDataset()
-        catalog["C"] = MemoryDataset()
         catalog["D"] = create_persistent_dataset(exists_result=False)
 
         runner = runner_class()

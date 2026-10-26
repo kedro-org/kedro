@@ -32,3 +32,7 @@ A Kedro maintainer will, after validating the report:
     to discuss the vulnerability details in private.
 
 The private Security Advisory will be used to confirm the issue, prepare a fix, and publicly disclose it after the fix has been released.
+
+## CRA stewardship
+
+LF AI & Data is supported under the Linux Foundation CRA stewardship framework. The LF AI & Data Foundation’s CRA steward is The Linux Foundation and its policy is available at https://www.linuxfoundation.org/security. Most of the individual LF AI projects report up to the parent LF Projects, LLC but this can be checked on a per project basis in LFX PCC (see Operations->Project Definition->Legal Details - or ask at support@linuxfoundation.org)

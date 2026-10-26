@@ -27,7 +27,7 @@ The main methods and properties of both `KedroSession` and `KedroServiceSession`
 - `create()`: Create a new instance of session class with session data
 - `load_context()`: Instantiate `KedroContext` object. For `KedroServiceSession`, this method accepts an optional `runtime_params` argument, which allows you to update the `KedroContext` parameters for that run
 - `close()`: Close the current session. For `KedroSession`, this also saves the session data to disk if `save_on_close` is set to `True`.
-- `run()`: Run the pipeline with the arguments provided; see [Running pipelines](../build/run_a_pipeline.md) for details. For `KedroServiceSession`, this method also accepts an optional `runtime_datasets` argument, which injects data or datasets into that run's catalog only
+- `run()`: Run the pipeline with the arguments provided; see [Running pipelines](../build/run_a_pipeline.md) for details. For `KedroServiceSession`, this method also accepts an optional `runtime_datasets` argument, which injects data or datasets into that run's catalog.
 
 ## Create a `KedroSession`
 

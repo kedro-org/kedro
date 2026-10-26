@@ -14,7 +14,7 @@ import pandas as pd
 import pandera.pandas as pa
 import pytest
 
-from kedro.io import AbstractDataset, DataCatalog
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.io.core import DatasetError
 from kedro.validation import (
     DataValidationError,
@@ -587,3 +587,97 @@ class TestValidatorAttribution:
 
         assert exc_info.value.validator == f"{_MODULE}._raise_bare_validation_error"
         assert "(validator:" in str(exc_info.value)
+
+
+class TestInject:
+    """`inject` keeps the validator declared for the replaced entry (explicitly
+    or via a factory pattern) and applies it whatever its `on` modes."""
+
+    @pytest.mark.parametrize(
+        "validator",
+        [
+            f"{_MODULE}.CompaniesSchema",
+            {"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]},
+        ],
+    )
+    def test_validates_raw_data_at_injection(self, csv_path, invalid_df, validator):
+        catalog = make_catalog(csv_path, validator=validator)
+
+        with pytest.raises(DataValidationError):
+            catalog.inject("companies", invalid_df)
+
+    def test_validates_factory_pattern_entry_at_injection(self, tmp_path, invalid_df):
+        catalog = DataCatalog.from_config(
+            {
+                "{name}_data": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": f"{tmp_path}/{{name}}_data.csv",
+                    "validator": f"{_MODULE}.CompaniesSchema",
+                }
+            }
+        )
+
+        with pytest.raises(DataValidationError):
+            catalog.inject("companies_data", invalid_df)
+
+    def test_save_only_validator_runs_on_load_of_injected_dataset(
+        self, csv_path, invalid_df
+    ):
+        catalog = make_catalog(
+            csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
+        )
+
+        catalog.inject("companies", MemoryDataset(invalid_df))
+
+        with pytest.raises(DataValidationError):
+            catalog.load("companies")
+
+    def test_keeps_spec_and_stores_validated_data(self, csv_path):
+        catalog = make_catalog(
+            csv_path,
+            validator={"class": f"{_MODULE}.UppercasingValidator", "on": ["save"]},
+        )
+
+        catalog.inject("companies", pd.DataFrame({"name": ["acme"]}))
+
+        assert "companies" in catalog.validators
+        assert catalog.load("companies")["name"].tolist() == ["ACME"]
+
+    def test_severity_warn_keeps_injected_data(self, csv_path, invalid_df, caplog):
+        catalog = make_catalog(
+            csv_path,
+            validator={"class": f"{_MODULE}.CompaniesSchema", "severity": "warn"},
+        )
+
+        with caplog.at_level(logging.WARNING):
+            catalog.inject("companies", invalid_df)
+
+        pd.testing.assert_frame_equal(catalog.load("companies"), invalid_df)
+        assert "companies" in caplog.text
+
+    def test_env_var_disables_validation(self, csv_path, invalid_df, monkeypatch):
+        monkeypatch.setenv("KEDRO_DATASET_VALIDATION", "0")
+        catalog = make_catalog(csv_path)
+
+        catalog.inject("companies", invalid_df)  # must not raise
+
+        pd.testing.assert_frame_equal(catalog.load("companies"), invalid_df)
+
+    def test_catch_all_pattern_lookup_has_no_side_effects(self, tmp_path, caplog):
+        catalog = DataCatalog.from_config(
+            {"{default}": {"type": "pickle.PickleDataset", "filepath": "{default}.pkl"}}
+        )
+
+        catalog.inject("some_input", [1])
+
+        assert "override the default dataset creation" not in caplog.text
+        assert catalog.load("some_input") == [1]
+
+    @pytest.mark.parametrize("name", ["new_data", ""])
+    def test_new_entry_has_no_validator(self, name):
+        catalog = DataCatalog()
+
+        catalog.inject(name, [-1])
+
+        assert catalog.validator_specs == {}
+        assert catalog.load(name) == [-1]

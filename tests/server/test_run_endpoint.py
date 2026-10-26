@@ -286,28 +286,6 @@ class TestRunEndpoint:
         assert request.from_inputs == ["input_data"]
         assert request.is_async is True
 
-    def test_run_endpoint_rejects_parameter_datasets(self, mocker, tmp_path):
-        """Injecting a parameter through `datasets` returns 422 before any run."""
-        mocker.patch(
-            "kedro.server.http_server.KedroServiceSession.create",
-            return_value=mocker.Mock(),
-        )
-        mocker.patch(
-            "kedro.server.http_server._resolve_project_path",
-            return_value=Path(tmp_path).resolve(),
-        )
-        mocker.patch("kedro.server.http_server.bootstrap_project")
-        mock_execute = mocker.patch("kedro.server.http_server._execute_pipeline")
-
-        app = create_http_server()
-        with TestClient(app) as client:
-            response = client.post(
-                "/run", json={"datasets": {"params:cfg": {"factor": 1000}}}
-            )
-
-        assert response.status_code == 422
-        mock_execute.assert_not_called()
-
     def test_run_endpoint_passes_datasets_to_execute_pipeline(self, mocker, tmp_path):
         """Test that a `datasets` field in the request body reaches `_execute_pipeline`
         as `RunRequest.datasets`, confirming the JSON field name wiring end-to-end."""

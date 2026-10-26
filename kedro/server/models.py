@@ -87,7 +87,7 @@ class RunRequest(BaseModel):
         default=None,
         description="Extra parameters to pass to the context at runtime.",
     )
-    datasets: dict[str, Any] | None = Field(
+    runtime_datasets: dict[str, Any] | None = Field(
         default=None,
         description=(
             "Runtime datasets to inject into this run's catalog, keyed by "
@@ -100,7 +100,7 @@ class RunRequest(BaseModel):
         ),
     )
 
-    @field_validator("datasets")
+    @field_validator("runtime_datasets")
     @classmethod
     def _validate_dataset_names(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
         for name in v or {}:

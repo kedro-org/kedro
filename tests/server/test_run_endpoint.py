@@ -286,9 +286,11 @@ class TestRunEndpoint:
         assert request.from_inputs == ["input_data"]
         assert request.is_async is True
 
-    def test_run_endpoint_passes_datasets_to_execute_pipeline(self, mocker, tmp_path):
-        """Test that a `datasets` field in the request body reaches `_execute_pipeline`
-        as `RunRequest.datasets`, confirming the JSON field name wiring end-to-end."""
+    def test_run_endpoint_passes_runtime_datasets_to_execute_pipeline(
+        self, mocker, tmp_path
+    ):
+        """Test that a `runtime_datasets` field in the request body reaches `_execute_pipeline`
+        as `RunRequest.runtime_datasets`, confirming the JSON field name wiring end-to-end."""
         project_path = Path(tmp_path).resolve()
         fake_session = mocker.Mock()
         mocker.patch(
@@ -312,14 +314,14 @@ class TestRunEndpoint:
         with TestClient(app) as client:
             response = client.post(
                 "/run",
-                json={"datasets": {"input_df": [[1, 2], [3, 4]]}},
+                json={"runtime_datasets": {"input_df": [[1, 2], [3, 4]]}},
             )
 
         assert response.status_code == 200
         mock_execute.assert_called_once()
         call_kwargs = mock_execute.call_args[1]
         request = call_kwargs["request"]
-        assert request.datasets == {"input_df": [[1, 2], [3, 4]]}
+        assert request.runtime_datasets == {"input_df": [[1, 2], [3, 4]]}
 
 
 class TestRunRequest:
@@ -362,7 +364,7 @@ class TestRunRequest:
     def test_valid_dataset_names(self):
         """Ordinary dataset names, including namespaced and transcoded, are accepted."""
         datasets = {"input_df": [1], "ns.raw": [2], "raw@pandas": [3]}
-        assert RunRequest(datasets=datasets).datasets == datasets
+        assert RunRequest(runtime_datasets=datasets).runtime_datasets == datasets
 
     @pytest.mark.parametrize("name", ["", "   ", "params:cfg", "parameters"])
     def test_invalid_dataset_names_are_rejected(self, name):
@@ -370,7 +372,7 @@ class TestRunRequest:
         from pydantic import ValidationError
 
         with pytest.raises(ValidationError):
-            RunRequest(datasets={name: 1})
+            RunRequest(runtime_datasets={name: 1})
 
 
 class TestExecutePipeline:
@@ -618,7 +620,7 @@ class TestExecutePipeline:
             request=RunRequest(
                 pipeline_names=["pipeline1", "pipeline2"],
                 params={"param1": "value1"},
-                datasets={"input_df": [1, 2, 3]},
+                runtime_datasets={"input_df": [1, 2, 3]},
                 runner="SequentialRunner",
                 is_async=False,
                 tags=["tag1", "tag2"],
@@ -648,8 +650,8 @@ class TestExecutePipeline:
         assert call_kwargs["runtime_params"] == {"param1": "value1"}
         assert call_kwargs["runtime_datasets"] == {"input_df": [1, 2, 3]}
 
-    def test_execute_pipeline_with_defaults_omits_datasets(self, mocker):
-        """When `datasets` is omitted, `runtime_datasets=None` reaches `session.run()`."""
+    def test_execute_pipeline_with_defaults_omits_runtime_datasets(self, mocker):
+        """When `runtime_datasets` is omitted, `runtime_datasets=None` reaches `session.run()`."""
         mock_session = mocker.Mock()
         mocker.patch(
             "kedro.server.http_server.load_obj",

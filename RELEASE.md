@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 
-- Added `runtime_datasets` to `KedroServiceSession.run()` and a corresponding `datasets` field to the HTTP `/run` endpoint's `RunRequest`, allowing raw data or `AbstractDataset` instances to be injected into a run's catalog for that run only. Only free inputs of the pipeline being run can be injected, and any declared validator is applied to the injected data.
+- Added `runtime_datasets` to `KedroServiceSession.run()` and the HTTP `/run` endpoint's `RunRequest`, allowing raw data or `AbstractDataset` instances to be injected into a run's catalog for that run only. Only free inputs of the pipeline being run can be injected, and any declared validator is applied to the injected data.
 - Added `DataCatalog.inject()` to replace a catalog entry with runtime data while keeping and applying its declared validator.
 - Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple.
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.

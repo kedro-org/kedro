@@ -22,6 +22,7 @@ CLOUD_PROTOCOLS = (
     "abfs",
     "abfss",
     "adl",
+    "az",
     "gcs",
     "gdrive",
     "gs",
@@ -79,7 +80,7 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
         #   'username' field of a URL (@ syntax), so we need to add it to the path
         # - Oracle Cloud Infrastructure (OCI) Object Storage filesystem (ocifs) also
         #   uses the @ syntax for I/O operations: "oci://bucket@namespace/path_to_file"
-        if protocol in ["abfss", "oci"] and parsed_path.username:
+        if protocol in ["abfs", "abfss", "az", "oci"] and parsed_path.username:
             options["path"] = parsed_path.username + "@" + options["path"]
 
     return options

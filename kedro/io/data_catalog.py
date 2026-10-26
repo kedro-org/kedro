@@ -606,10 +606,11 @@ class DataCatalog(CatalogProtocol):
         Unlike ``catalog[key] = value``, which drops any validator configured for
         a replaced entry, this keeps the validator declared for ``key``: on its
         catalog entry if it has one, otherwise through a matching dataset
-        factory pattern. Injected data
-        is only ever loaded, so the validator is applied regardless of its
-        ``on`` modes: raw data is validated immediately, and an
-        ``AbstractDataset`` instance is validated when it is loaded.
+        factory pattern. The validator is applied to the injected data even
+        if it is declared for save only: raw data is validated when it is
+        injected, and an ``AbstractDataset`` instance is validated when it is
+        loaded. Any save validation declared for the entry still applies to
+        later saves.
 
         Args:
             key: Name of the dataset.

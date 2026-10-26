@@ -876,6 +876,40 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["model_options"]["param2"] == 3
         assert conf["parameters"]["model_options"]["param3"] == "my_env_variable"
 
+    def test_custom_resolvers_with_kwargs(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        param_config = {
+            "model_options": {
+                "cached1": "${count_cached:}",
+                "cached2": "${count_cached:}",
+                "uncached1": "${count_uncached:}",
+                "uncached2": "${count_uncached:}",
+            }
+        }
+        _write_yaml(base_params, param_config)
+        calls = []
+
+        def count_calls():
+            calls.append(1)
+            return len(calls)
+
+        custom_resolvers = {
+            # A `(callable, kwargs)` tuple passes the kwargs on to
+            # `OmegaConf.register_new_resolver()`, so `use_cache` applies
+            "count_cached": (count_calls, {"use_cache": True}),
+            "count_uncached": count_calls,
+        }
+        conf = OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers=custom_resolvers,
+            base_env=_BASE_ENV,
+        )
+        params = conf["parameters"]["model_options"]
+        # The cached resolver runs once per distinct call and both parameters resolve to its
+        # cached result, while the uncached one runs again for every interpolation
+        assert params["cached1"] == params["cached2"]
+        assert params["uncached1"] != params["uncached2"]
+
     def test_globals(self, tmp_path):
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
         globals_config = {

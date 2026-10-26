@@ -604,8 +604,9 @@ class DataCatalog(CatalogProtocol):
         """Register runtime data under ``key`` while keeping its declared validator.
 
         Unlike ``catalog[key] = value``, which drops any validator configured for
-        a replaced entry, this keeps the validator declared for ``key``, either
-        explicitly or through a matching dataset factory pattern. Injected data
+        a replaced entry, this keeps the validator declared for ``key``: on its
+        catalog entry if it has one, otherwise through a matching dataset
+        factory pattern. Injected data
         is only ever loaded, so the validator is applied regardless of its
         ``on`` modes: raw data is validated immediately, and an
         ``AbstractDataset`` instance is validated when it is loaded.
@@ -628,14 +629,21 @@ class DataCatalog(CatalogProtocol):
             catalog.inject("input", [1, 2])  # validated now, replaces the entry
         ```
         """
-        spec = self._validator_specs.get(key) or self._pattern_validator_spec(key)
+        # Mirror `get()`: patterns only apply to names with no explicit entry.
+        if key in self._datasets or key in self._lazy_datasets:
+            spec = self._validator_specs.get(key)
+        else:
+            spec = self._pattern_validator_spec(key)
         self[key] = value
         if spec is None:
             return
 
         if isinstance(value, AbstractDataset | _LazyDataset):
-            # Force load-mode so a save-only validator still guards the data.
-            self._validator_specs[key] = dataclasses.replace(spec, on=("load",))
+            # Add load-mode so a save-only validator still guards the data,
+            # while keeping save validation for anything written to it later.
+            if "load" not in spec.on:
+                spec = dataclasses.replace(spec, on=("load", *spec.on))
+            self._validator_specs[key] = spec
             return
 
         self._validator_specs[key] = spec

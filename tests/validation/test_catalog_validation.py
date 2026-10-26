@@ -632,6 +632,41 @@ class TestInject:
         with pytest.raises(DataValidationError):
             catalog.load("companies")
 
+    def test_injected_dataset_keeps_save_validation(self, csv_path, invalid_df):
+        catalog = make_catalog(
+            csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
+        )
+
+        catalog.inject("companies", MemoryDataset())
+
+        assert catalog.validator_specs["companies"].on == ("load", "save")
+        with pytest.raises(DataValidationError):
+            catalog.save("companies", invalid_df)
+
+    def test_explicit_entry_ignores_matching_pattern_validator(
+        self, tmp_path, invalid_df
+    ):
+        """An explicit entry without a validator is not validated on inject,
+        just as on a normal load, even if a validated pattern matches its name."""
+        catalog = DataCatalog.from_config(
+            {
+                "companies_data": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": f"{tmp_path}/plain.csv",
+                },
+                "{name}_data": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": f"{tmp_path}/{{name}}_data.csv",
+                    "validator": f"{_MODULE}.CompaniesSchema",
+                },
+            }
+        )
+
+        catalog.inject("companies_data", invalid_df)  # must not raise
+
+        assert "companies_data" not in catalog.validator_specs
+        pd.testing.assert_frame_equal(catalog.load("companies_data"), invalid_df)
+
     def test_keeps_spec_and_stores_validated_data(self, csv_path):
         catalog = make_catalog(
             csv_path,

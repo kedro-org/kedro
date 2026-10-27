@@ -470,7 +470,7 @@ def _get_node_bound_arguments(node: Node) -> _NodeBoundArguments:
     node_func = node.func
     node_inputs = node.inputs
 
-    args, kwargs = Node._process_inputs_for_bind(node_inputs)
+    args, kwargs, _ = Node._process_inputs_for_bind(node_inputs)
     signature = inspect.signature(node_func)
     bound_arguments = signature.bind(*args, **kwargs)
     return _NodeBoundArguments(

@@ -16,6 +16,7 @@
 - Fixed `Pipeline.only_nodes_with_namespaces` (and `kedro run --namespaces`) raising `ValueError: Pipeline nodes must have unique names` when a namespace is selected together with one it already covers, such as `--namespaces a,a.b`.
 - Stream outputs from generator nodes decorated with `functools.wraps`, and reject these nodes when asynchronous loading and saving is enabled. A decorator that consumes the generator, for example with `list()`, still has its result saved once.
 - Fixed the `runner` entry in the `run_params` passed to hooks: it now carries the runner name, instead of `'None'` for a default run or the `repr` of the runner instance, which included a memory address. Applies to both `KedroSession` and `KedroServiceSession`.
+- Fixed `OmegaConfigLoader` ignoring `config_loader["globals"]` set after a `${globals:}` interpolation was resolved.
 
 ## Documentation changes
 

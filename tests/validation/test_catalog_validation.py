@@ -747,6 +747,31 @@ class TestInject:
 
         pd.testing.assert_frame_equal(catalog.load("companies"), invalid_df)
 
+    def test_failed_validation_keeps_previous_entry(self, csv_path, invalid_df):
+        catalog = make_catalog(
+            csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
+        )
+        previous = catalog.get("companies")
+
+        with pytest.raises(DataValidationError):
+            catalog._inject("companies", invalid_df)
+
+        assert catalog.get("companies") is previous
+        assert catalog.validator_specs["companies"].on == ("save",)
+
+    def test_raw_data_injected_while_disabled_is_validated_on_load(
+        self, csv_path, invalid_df, monkeypatch
+    ):
+        catalog = make_catalog(
+            csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
+        )
+        monkeypatch.setenv("KEDRO_DATASET_VALIDATION", "0")
+        catalog._inject("companies", invalid_df)  # must not raise
+
+        monkeypatch.setenv("KEDRO_DATASET_VALIDATION", "1")
+        with pytest.raises(DataValidationError):
+            catalog.load("companies")
+
     def test_catch_all_pattern_lookup_has_no_side_effects(self, tmp_path, caplog):
         catalog = DataCatalog.from_config(
             {"{default}": {"type": "pickle.PickleDataset", "filepath": "{default}.pkl"}}

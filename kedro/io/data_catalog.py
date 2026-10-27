@@ -609,10 +609,11 @@ class DataCatalog(CatalogProtocol):
         a replaced entry, this keeps the validator declared for ``key``: on its
         catalog entry if it has one, otherwise through a matching dataset
         factory pattern. The validator is applied to the injected data even
-        if it is declared for save only: raw data is validated when it is
-        injected, and an ``AbstractDataset`` instance is validated when it is
-        loaded. Any save validation declared for the entry still applies to
-        later saves.
+        if it is declared for save only: raw data is validated before it is
+        stored (or on load, if validation is off when it is injected), and an
+        ``AbstractDataset`` instance is validated when it is loaded. If raw
+        data fails validation, the existing entry is left unchanged. Any save
+        validation declared for the entry still applies to later saves.
 
         Args:
             key: Name of the dataset.
@@ -637,24 +638,35 @@ class DataCatalog(CatalogProtocol):
             spec = self._validator_specs.get(key)
         else:
             spec = self._pattern_validator_spec(key)
-        self[key] = value
         if spec is None:
+            self[key] = value
             return
 
-        if isinstance(value, AbstractDataset | _LazyDataset):
-            # Add load-mode so a save-only validator still guards the data,
-            # while keeping save validation for anything written to it later.
-            if "load" not in spec.on:
-                spec = dataclasses.replace(spec, on=("load", *spec.on))
-            self._validator_specs[key] = spec
-            return
+        # Add load-mode so a save-only validator still guards the injected data
+        # (including raw data injected while validation is off), while keeping
+        # save validation for anything written to it later.
+        if "load" not in spec.on:
+            spec = dataclasses.replace(spec, on=("load", *spec.on))
 
+        validated = (
+            not isinstance(value, AbstractDataset | _LazyDataset)
+            and self._is_validation_enabled()
+            and spec.enabled
+        )
+        if validated:
+            # Validate before replacing the entry so data that fails is never
+            # stored. Clear skip markers left by the previous entry first.
+            self._save_validated.discard(key)
+            self._inject_validated.discard(key)
+            value = self._validate(key, value, mode="load", spec=spec)
+
+        validator = self._validators.get(key)
+        self[key] = value
         self._validator_specs[key] = spec
-        if self._is_validation_enabled() and spec.enabled:
-            validated = self._validate(
-                key, value, mode="load", spec=dataclasses.replace(spec, on=("load",))
-            )
-            self._datasets[key] = MemoryDataset(data=validated)  # type: ignore[abstract]
+        if validator is not None:
+            # Keep the validator instance resolved for the replaced entry.
+            self._validators[key] = validator
+        if validated:
             # The stored data is already validated, so loads need not repeat it.
             self._inject_validated.add(key)
 

@@ -590,7 +590,7 @@ class TestValidatorAttribution:
 
 
 class TestInject:
-    """`inject` keeps the validator declared for the replaced entry (explicitly
+    """`_inject` keeps the validator declared for the replaced entry (explicitly
     or via a factory pattern) and applies it whatever its `on` modes."""
 
     @pytest.mark.parametrize(
@@ -604,7 +604,7 @@ class TestInject:
         catalog = make_catalog(csv_path, validator=validator)
 
         with pytest.raises(DataValidationError):
-            catalog.inject("companies", invalid_df)
+            catalog._inject("companies", invalid_df)
 
     def test_validates_factory_pattern_entry_at_injection(self, tmp_path, invalid_df):
         catalog = DataCatalog.from_config(
@@ -618,7 +618,7 @@ class TestInject:
         )
 
         with pytest.raises(DataValidationError):
-            catalog.inject("companies_data", invalid_df)
+            catalog._inject("companies_data", invalid_df)
 
     def test_save_only_validator_runs_on_load_of_injected_dataset(
         self, csv_path, invalid_df
@@ -627,7 +627,7 @@ class TestInject:
             csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
         )
 
-        catalog.inject("companies", MemoryDataset(invalid_df))
+        catalog._inject("companies", MemoryDataset(invalid_df))
 
         with pytest.raises(DataValidationError):
             catalog.load("companies")
@@ -637,7 +637,7 @@ class TestInject:
             csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
         )
 
-        catalog.inject("companies", MemoryDataset())
+        catalog._inject("companies", MemoryDataset())
 
         assert catalog.validator_specs["companies"].on == ("load", "save")
         with pytest.raises(DataValidationError):
@@ -662,10 +662,59 @@ class TestInject:
             }
         )
 
-        catalog.inject("companies_data", invalid_df)  # must not raise
+        catalog._inject("companies_data", invalid_df)  # must not raise
 
         assert "companies_data" not in catalog.validator_specs
         pd.testing.assert_frame_equal(catalog.load("companies_data"), invalid_df)
+
+    def test_raw_data_is_not_validated_again_on_load(self, csv_path, valid_df):
+        catalog = make_catalog(csv_path, validator=f"{_MODULE}.CountingValidator")
+
+        catalog._inject("companies", valid_df)
+        catalog.load("companies")
+        catalog.load("companies")
+
+        assert catalog._validators["companies"].calls == 1
+
+    @pytest.mark.parametrize(
+        "action",
+        [
+            lambda catalog, df: catalog.save("companies", df),
+            lambda catalog, _: catalog.release("companies"),
+            lambda catalog, df: catalog._inject("companies", MemoryDataset(df)),
+        ],
+        ids=["save", "release", "replace"],
+    )
+    def test_load_validates_again_after_injected_data_changes(
+        self, csv_path, valid_df, action
+    ):
+        catalog = make_catalog(csv_path, validator=f"{_MODULE}.CountingValidator")
+        catalog._inject("companies", valid_df)
+        assert "companies" in catalog._inject_validated
+
+        action(catalog, valid_df)
+
+        assert "companies" not in catalog._inject_validated
+
+    def test_validation_does_not_rewrite_registered_spec(self, csv_path, mocker):
+        catalog = make_catalog(
+            csv_path,
+            validator={"class": f"{_MODULE}.CountingValidator", "on": ["save"]},
+        )
+        specs_during_validation = []
+        mocker.patch.object(
+            CountingValidator,
+            "validate",
+            autospec=True,
+            side_effect=lambda _, data: specs_during_validation.append(
+                catalog.validator_specs["companies"].on
+            )
+            or data,
+        )
+
+        catalog._inject("companies", pd.DataFrame({"id": [1]}))
+
+        assert specs_during_validation == [("save",)]
 
     def test_keeps_spec_and_stores_validated_data(self, csv_path):
         catalog = make_catalog(
@@ -673,7 +722,7 @@ class TestInject:
             validator={"class": f"{_MODULE}.UppercasingValidator", "on": ["save"]},
         )
 
-        catalog.inject("companies", pd.DataFrame({"name": ["acme"]}))
+        catalog._inject("companies", pd.DataFrame({"name": ["acme"]}))
 
         assert "companies" in catalog.validators
         assert catalog.load("companies")["name"].tolist() == ["ACME"]
@@ -685,7 +734,7 @@ class TestInject:
         )
 
         with caplog.at_level(logging.WARNING):
-            catalog.inject("companies", invalid_df)
+            catalog._inject("companies", invalid_df)
 
         pd.testing.assert_frame_equal(catalog.load("companies"), invalid_df)
         assert "companies" in caplog.text
@@ -694,7 +743,7 @@ class TestInject:
         monkeypatch.setenv("KEDRO_DATASET_VALIDATION", "0")
         catalog = make_catalog(csv_path)
 
-        catalog.inject("companies", invalid_df)  # must not raise
+        catalog._inject("companies", invalid_df)  # must not raise
 
         pd.testing.assert_frame_equal(catalog.load("companies"), invalid_df)
 
@@ -703,7 +752,7 @@ class TestInject:
             {"{default}": {"type": "pickle.PickleDataset", "filepath": "{default}.pkl"}}
         )
 
-        catalog.inject("some_input", [1])
+        catalog._inject("some_input", [1])
 
         assert "override the default dataset creation" not in caplog.text
         assert catalog.load("some_input") == [1]
@@ -712,7 +761,7 @@ class TestInject:
     def test_new_entry_has_no_validator(self, name):
         catalog = DataCatalog()
 
-        catalog.inject(name, [-1])
+        catalog._inject(name, [-1])
 
         assert catalog.validator_specs == {}
         assert catalog.load(name) == [-1]

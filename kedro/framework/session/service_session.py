@@ -489,10 +489,12 @@ def _inject_runtime_datasets(
 ) -> None:
     """Inject runtime datasets into the catalog, keeping and applying any
     validator declared for the replaced entry."""
-    inject = getattr(catalog, "inject", None)
+    inject = getattr(catalog, "_inject", None)
+    if inject is None:
+        # A plain `catalog[name] = value` would silently drop validators.
+        raise KedroSessionError(
+            f"The catalog class '{type(catalog).__name__}' does not support "
+            "runtime datasets because it does not implement `_inject()`."
+        )
     for dataset_name, dataset_value in runtime_datasets.items():
-        if inject is not None:
-            inject(dataset_name, dataset_value)
-        else:
-            # Catalog does not support dataset validation; nothing to preserve.
-            catalog[dataset_name] = dataset_value
+        inject(dataset_name, dataset_value)

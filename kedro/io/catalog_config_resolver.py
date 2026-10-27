@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 from parse import parse
 
-from kedro.io.core import DatasetError
+from kedro.io.core import VALIDATOR_KEY, DatasetError
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable
@@ -757,3 +757,44 @@ class CatalogConfigResolver:
             return ds_config  # type: ignore[no-any-return]
 
         return self._resolved_configs[ds_name]
+
+    def resolve_pattern_validator(self, ds_name: str) -> Any | None:
+        """
+        Resolve the validator declared by the dataset pattern matching a dataset name.
+
+        Unlike `resolve_pattern`, this does not fall back to runtime patterns
+        and does not log the catch-all pattern warning.
+
+        Args:
+            ds_name: The name of the dataset to look up.
+
+        Returns:
+            The resolved `validator` config of the first matching dataset or
+            user catch-all pattern, or `None` if no pattern matches or the
+            matching pattern declares no validator.
+
+        Example:
+        ``` python
+        config = {
+            "{name}_data": {
+                "type": "pandas.CSVDataset",
+                "filepath": "{name}.csv",
+                "validator": "my_project.schemas.{name}Schema",
+            }
+        }
+        resolver = CatalogConfigResolver(config=config)
+        print(resolver.resolve_pattern_validator("companies_data"))
+        # my_project.schemas.companiesSchema
+        ```
+        """
+        matched_pattern = self.match_dataset_pattern(
+            ds_name
+        ) or self.match_user_catch_all_pattern(ds_name)
+        if matched_pattern is None:
+            return None
+        pattern_config = self._get_pattern_config(matched_pattern)
+        if not isinstance(pattern_config, dict) or VALIDATOR_KEY not in pattern_config:
+            return None
+        return self._resolve_dataset_config(
+            ds_name, matched_pattern, copy.deepcopy(pattern_config[VALIDATOR_KEY])
+        )

@@ -765,7 +765,7 @@ class TestKedroServiceSession:
         self, fake_project, mock_context_class, mock_runner, mocker
     ):
         """`runtime_datasets` should be injected into the run's catalog via
-        `catalog.inject`, and recorded (by name only) in the hook payload."""
+        `catalog._inject`, and recorded (by name only) in the hook payload."""
         mock_hook = mocker.patch(
             "kedro.framework.session.service_session._create_hook_manager"
         ).return_value.hook
@@ -783,7 +783,7 @@ class TestKedroServiceSession:
                 runtime_datasets={"input_df": "some_raw_value"},
             )
 
-        mock_catalog.inject.assert_any_call("input_df", "some_raw_value")
+        mock_catalog._inject.assert_any_call("input_df", "some_raw_value")
         recorded_datasets = mock_hook.before_pipeline_run.call_args.kwargs[
             "run_params"
         ]["runtime_datasets"]
@@ -820,7 +820,7 @@ class TestKedroServiceSession:
             )
 
         mock_catalog.__setitem__.assert_not_called()
-        mock_catalog.inject.assert_not_called()
+        mock_catalog._inject.assert_not_called()
         recorded_datasets = mock_hook.before_pipeline_run.call_args.kwargs[
             "run_params"
         ]["runtime_datasets"]
@@ -867,8 +867,8 @@ class TestKedroServiceSession:
 
         assert first_runtime_datasets == ["input_1"]
         assert second_runtime_datasets == ["input_2"]
-        mock_catalog.inject.assert_any_call("input_1", "value_1")
-        mock_catalog.inject.assert_any_call("input_2", "value_2")
+        mock_catalog._inject.assert_any_call("input_1", "value_1")
+        mock_catalog._inject.assert_any_call("input_2", "value_2")
 
     def test_create_serving_mode_preloads_all_pipelines(self, fake_project, mocker):
         """create(serving_mode=True) calls set_requested(None) to clear any filter and
@@ -1004,7 +1004,7 @@ class TestKedroServiceSession:
 class TestRuntimeDatasets:
     """`run()` only accepts free inputs of the pipeline being run, and never
     parameters, so injection cannot bypass validation or overwrite outputs.
-    Validation of injected data itself is tested with `DataCatalog.inject`."""
+    Validation of injected data itself is tested with `DataCatalog._inject`."""
 
     @pytest.fixture
     def run_with(self, fake_project, mock_context_class, mock_runner, mocker):
@@ -1056,13 +1056,14 @@ class TestRuntimeDatasets:
     def test_accepts_free_inputs_of_filtered_pipeline(self, run_with, name, run_kwargs):
         catalog = run_with({name: [1]}, **run_kwargs)
 
-        catalog.inject.assert_called_once_with(name, [1])
+        catalog._inject.assert_called_once_with(name, [1])
 
-    def test_falls_back_to_setitem_for_catalog_without_inject(self, mocker):
-        """Custom catalogs without `inject` (no validation support) still get
-        the data via `catalog[name] = value`."""
+    def test_rejects_catalog_without_inject(self, mocker):
+        """Custom catalogs without `_inject` cannot keep validators, so
+        injection fails loudly instead of falling back to `__setitem__`."""
         catalog = mocker.MagicMock(spec=["__setitem__"])
 
-        _inject_runtime_datasets(catalog, {"new_data": [1]})
+        with pytest.raises(KedroSessionError, match="does not implement `_inject"):
+            _inject_runtime_datasets(catalog, {"new_data": [1]})
 
-        catalog.__setitem__.assert_called_once_with("new_data", [1])
+        catalog.__setitem__.assert_not_called()

@@ -673,7 +673,7 @@ class DataCatalog(CatalogProtocol):
     def _pattern_validator_spec(self, ds_name: str) -> ValidatorSpec | None:
         """Return the validator declared by a dataset factory pattern matching
         ``ds_name``, without resolving or caching the dataset itself."""
-        validator_config = self._config_resolver.resolve_pattern_validator(ds_name)
+        validator_config = self._config_resolver._resolve_pattern_validator(ds_name)
         if validator_config is None:
             return None
 

@@ -242,7 +242,7 @@ class TestCatalogConfigResolver:
             == resolver._resolved_configs["cars"]
         )
 
-    def test_resolve_pattern_validator(self):
+    def test__resolve_pattern_validator(self):
         resolver = CatalogConfigResolver(
             {
                 "{name}_data": {
@@ -253,15 +253,15 @@ class TestCatalogConfigResolver:
             }
         )
 
-        assert resolver.resolve_pattern_validator("companies_data") == {
+        assert resolver._resolve_pattern_validator("companies_data") == {
             "class": "schemas.companiesSchema",
             "on": ["save"],
         }
-        assert resolver.resolve_pattern_validator("companies_plain") is None
-        assert resolver.resolve_pattern_validator("unmatched") is None
-        assert resolver.resolve_pattern_validator("") is None
+        assert resolver._resolve_pattern_validator("companies_plain") is None
+        assert resolver._resolve_pattern_validator("unmatched") is None
+        assert resolver._resolve_pattern_validator("") is None
 
-    def test_resolve_pattern_validator_has_no_side_effects(self, caplog):
+    def test__resolve_pattern_validator_has_no_side_effects(self, caplog):
         resolver = CatalogConfigResolver(
             {"{default}": {"type": "MemoryDataset", "validator": "schemas.Schema"}}
         )
@@ -269,7 +269,7 @@ class TestCatalogConfigResolver:
         caplog.clear()  # drop the constructor's runtime-pattern warning
 
         with caplog.at_level(logging.WARNING):
-            assert resolver.resolve_pattern_validator("anything") == "schemas.Schema"
+            assert resolver._resolve_pattern_validator("anything") == "schemas.Schema"
 
         assert caplog.text == ""
         assert "anything" not in resolver._resolved_configs

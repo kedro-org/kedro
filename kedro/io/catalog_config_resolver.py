@@ -758,7 +758,7 @@ class CatalogConfigResolver:
 
         return self._resolved_configs[ds_name]
 
-    def resolve_pattern_validator(self, ds_name: str) -> Any | None:
+    def _resolve_pattern_validator(self, ds_name: str) -> Any | None:
         """
         Resolve the validator declared by the dataset pattern matching a dataset name.
 
@@ -783,7 +783,7 @@ class CatalogConfigResolver:
             }
         }
         resolver = CatalogConfigResolver(config=config)
-        print(resolver.resolve_pattern_validator("companies_data"))
+        print(resolver._resolve_pattern_validator("companies_data"))
         # my_project.schemas.companiesSchema
         ```
         """

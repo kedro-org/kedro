@@ -29,6 +29,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Rodrigo-Palma](https://github.com/Rodrigo-Palma)
 - [Charan Rathore](https://github.com/charan-rathore)
+- [inchang-ing](https://github.com/inchang-ing)
 
 # Release 1.7.0
 

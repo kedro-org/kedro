@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Added the option to allow data to be injected at run time when using the `KedroServiceSession`.
 - Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple.
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.
 - Added node groups to the project snapshot. Each `PipelineSnapshot` has a `groups` list of `GroupSnapshot` entries with the group's nodes, dependencies, inputs and outputs, also returned by `GET /snapshot`. `get_project_snapshot` takes a `group_by` argument to choose the grouping strategy, `GET /snapshot` takes it as a query parameter, and each `PipelineSnapshot` records it in `group_by`.

@@ -14,7 +14,7 @@ import pandas as pd
 import pandera.pandas as pa
 import pytest
 
-from kedro.io import AbstractDataset, DataCatalog
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.io.core import DatasetError
 from kedro.validation import (
     DataValidationError,
@@ -587,3 +587,206 @@ class TestValidatorAttribution:
 
         assert exc_info.value.validator == f"{_MODULE}._raise_bare_validation_error"
         assert "(validator:" in str(exc_info.value)
+
+
+class TestInject:
+    """`_inject` keeps the validator declared for the replaced entry (explicitly
+    or via a factory pattern) and applies it whatever its `on` modes."""
+
+    @pytest.mark.parametrize(
+        "validator",
+        [
+            f"{_MODULE}.CompaniesSchema",
+            {"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]},
+        ],
+    )
+    def test_validates_raw_data_at_injection(self, csv_path, invalid_df, validator):
+        catalog = make_catalog(csv_path, validator=validator)
+
+        with pytest.raises(DataValidationError):
+            catalog._inject("companies", invalid_df)
+
+    def test_validates_factory_pattern_entry_at_injection(self, tmp_path, invalid_df):
+        catalog = DataCatalog.from_config(
+            {
+                "{name}_data": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": f"{tmp_path}/{{name}}_data.csv",
+                    "validator": f"{_MODULE}.CompaniesSchema",
+                }
+            }
+        )
+
+        with pytest.raises(DataValidationError):
+            catalog._inject("companies_data", invalid_df)
+
+    def test_save_only_validator_runs_on_load_of_injected_dataset(
+        self, csv_path, invalid_df
+    ):
+        catalog = make_catalog(
+            csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
+        )
+
+        catalog._inject("companies", MemoryDataset(invalid_df))
+
+        with pytest.raises(DataValidationError):
+            catalog.load("companies")
+
+    def test_injected_dataset_keeps_save_validation(self, csv_path, invalid_df):
+        catalog = make_catalog(
+            csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
+        )
+
+        catalog._inject("companies", MemoryDataset())
+
+        assert catalog.validator_specs["companies"].on == ("load", "save")
+        with pytest.raises(DataValidationError):
+            catalog.save("companies", invalid_df)
+
+    def test_explicit_entry_ignores_matching_pattern_validator(
+        self, tmp_path, invalid_df
+    ):
+        """An explicit entry without a validator is not validated on inject,
+        just as on a normal load, even if a validated pattern matches its name."""
+        catalog = DataCatalog.from_config(
+            {
+                "companies_data": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": f"{tmp_path}/plain.csv",
+                },
+                "{name}_data": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": f"{tmp_path}/{{name}}_data.csv",
+                    "validator": f"{_MODULE}.CompaniesSchema",
+                },
+            }
+        )
+
+        catalog._inject("companies_data", invalid_df)  # must not raise
+
+        assert "companies_data" not in catalog.validator_specs
+        pd.testing.assert_frame_equal(catalog.load("companies_data"), invalid_df)
+
+    def test_raw_data_is_not_validated_again_on_load(self, csv_path, valid_df):
+        catalog = make_catalog(csv_path, validator=f"{_MODULE}.CountingValidator")
+
+        catalog._inject("companies", valid_df)
+        catalog.load("companies")
+        catalog.load("companies")
+
+        assert catalog._validators["companies"].calls == 1
+
+    @pytest.mark.parametrize(
+        "action",
+        [
+            lambda catalog, df: catalog.save("companies", df),
+            lambda catalog, _: catalog.release("companies"),
+            lambda catalog, df: catalog._inject("companies", MemoryDataset(df)),
+        ],
+        ids=["save", "release", "replace"],
+    )
+    def test_load_validates_again_after_injected_data_changes(
+        self, csv_path, valid_df, action
+    ):
+        catalog = make_catalog(csv_path, validator=f"{_MODULE}.CountingValidator")
+        catalog._inject("companies", valid_df)
+        assert "companies" in catalog._inject_validated
+
+        action(catalog, valid_df)
+
+        assert "companies" not in catalog._inject_validated
+
+    def test_validation_does_not_rewrite_registered_spec(self, csv_path, mocker):
+        catalog = make_catalog(
+            csv_path,
+            validator={"class": f"{_MODULE}.CountingValidator", "on": ["save"]},
+        )
+        specs_during_validation = []
+        mocker.patch.object(
+            CountingValidator,
+            "validate",
+            autospec=True,
+            side_effect=lambda _, data: specs_during_validation.append(
+                catalog.validator_specs["companies"].on
+            )
+            or data,
+        )
+
+        catalog._inject("companies", pd.DataFrame({"id": [1]}))
+
+        assert specs_during_validation == [("save",)]
+
+    def test_keeps_spec_and_stores_validated_data(self, csv_path):
+        catalog = make_catalog(
+            csv_path,
+            validator={"class": f"{_MODULE}.UppercasingValidator", "on": ["save"]},
+        )
+
+        catalog._inject("companies", pd.DataFrame({"name": ["acme"]}))
+
+        assert "companies" in catalog.validators
+        assert catalog.load("companies")["name"].tolist() == ["ACME"]
+
+    def test_severity_warn_keeps_injected_data(self, csv_path, invalid_df, caplog):
+        catalog = make_catalog(
+            csv_path,
+            validator={"class": f"{_MODULE}.CompaniesSchema", "severity": "warn"},
+        )
+
+        with caplog.at_level(logging.WARNING):
+            catalog._inject("companies", invalid_df)
+
+        pd.testing.assert_frame_equal(catalog.load("companies"), invalid_df)
+        assert "companies" in caplog.text
+
+    def test_env_var_disables_validation(self, csv_path, invalid_df, monkeypatch):
+        monkeypatch.setenv("KEDRO_DATASET_VALIDATION", "0")
+        catalog = make_catalog(csv_path)
+
+        catalog._inject("companies", invalid_df)  # must not raise
+
+        pd.testing.assert_frame_equal(catalog.load("companies"), invalid_df)
+
+    def test_failed_validation_keeps_previous_entry(self, csv_path, invalid_df):
+        catalog = make_catalog(
+            csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
+        )
+        previous = catalog.get("companies")
+
+        with pytest.raises(DataValidationError):
+            catalog._inject("companies", invalid_df)
+
+        assert catalog.get("companies") is previous
+        assert catalog.validator_specs["companies"].on == ("save",)
+
+    def test_raw_data_injected_while_disabled_is_validated_on_load(
+        self, csv_path, invalid_df, monkeypatch
+    ):
+        catalog = make_catalog(
+            csv_path, validator={"class": f"{_MODULE}.CompaniesSchema", "on": ["save"]}
+        )
+        monkeypatch.setenv("KEDRO_DATASET_VALIDATION", "0")
+        catalog._inject("companies", invalid_df)  # must not raise
+
+        monkeypatch.setenv("KEDRO_DATASET_VALIDATION", "1")
+        with pytest.raises(DataValidationError):
+            catalog.load("companies")
+
+    def test_catch_all_pattern_lookup_has_no_side_effects(self, tmp_path, caplog):
+        catalog = DataCatalog.from_config(
+            {"{default}": {"type": "pickle.PickleDataset", "filepath": "{default}.pkl"}}
+        )
+
+        catalog._inject("some_input", [1])
+
+        assert "override the default dataset creation" not in caplog.text
+        assert catalog.load("some_input") == [1]
+
+    @pytest.mark.parametrize("name", ["new_data", ""])
+    def test_new_entry_has_no_validator(self, name):
+        catalog = DataCatalog()
+
+        catalog._inject(name, [-1])
+
+        assert catalog.validator_specs == {}
+        assert catalog.load(name) == [-1]

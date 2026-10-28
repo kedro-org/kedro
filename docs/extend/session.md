@@ -27,7 +27,7 @@ The main methods and properties of both `KedroSession` and `KedroServiceSession`
 - `create()`: Create a new instance of session class with session data
 - `load_context()`: Instantiate `KedroContext` object. For `KedroServiceSession`, this method accepts an optional `runtime_params` argument, which allows you to update the `KedroContext` parameters for that run
 - `close()`: Close the current session. For `KedroSession`, this also saves the session data to disk if `save_on_close` is set to `True`.
-- `run()`: Run the pipeline with the arguments provided; see [Running pipelines](../build/run_a_pipeline.md) for details
+- `run()`: Run the pipeline with the arguments provided; see [Running pipelines](../build/run_a_pipeline.md) for details. For `KedroServiceSession`, this method also accepts an optional `runtime_datasets` argument, which injects data or datasets into that run's catalog.
 
 ## Create a `KedroSession`
 
@@ -82,9 +82,20 @@ session.run(runtime_params={"param1": "value1"})
 # second run with different runtime parameters
 session.run(runtime_params={"param1": "value2"})
 
+# third run with an ad-hoc runtime dataset, without touching catalog config
+session.run(runtime_datasets={"input_df": some_dataframe})
+
 # close the session when done
 session.close()
 ```
+
+`run()` also accepts an optional `runtime_datasets` argument. It maps dataset names to values. Kedro injects these values into the run's catalog before execution starts. Each value is either raw data or an `AbstractDataset` instance. Raw data is wrapped in a `MemoryDataset`, and a dataset instance is stored as it is. Use this to feed ad-hoc or externally produced data into a single run without writing it to disk or declaring it in `catalog.yml`.
+
+You can inject free inputs of the pipeline being run, but not intermediate or output datasets. Pass parameters through `runtime_params` instead. If a catalog entry with the same name exists, it is replaced for that run, and other runs are unaffected. Any [validator](../catalog-data/dataset_validation.md) declared for the entry is applied to the injected data, whatever its `on` modes. Raw data is validated when it is injected. A dataset instance is validated when it is loaded.
+
+!!! note
+
+    With `ParallelRunner`, injected values are read by worker processes, so they must be serialisable.
 
 You can provide the following optional arguments in `KedroServiceSession.create()`:
 

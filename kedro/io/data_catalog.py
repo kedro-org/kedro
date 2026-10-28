@@ -7,6 +7,7 @@ save functions to the underlying datasets.
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import os
 import re
@@ -279,6 +280,8 @@ class DataCatalog(CatalogProtocol):
         self._validator_specs: dict[str, ValidatorSpec] = {}
         self._validators: dict[str, Any] = {}
         self._save_validated: set[str] = set()
+        # Raw data stored by `_inject` after it was validated.
+        self._inject_validated: set[str] = set()
 
         for ds_name in list(self._config_resolver.config):
             if ds_name in self._datasets:
@@ -587,6 +590,7 @@ class DataCatalog(CatalogProtocol):
             self._validator_specs.pop(key, None)
             self._validators.pop(key, None)
             self._save_validated.discard(key)
+            self._inject_validated.discard(key)
         if isinstance(value, AbstractDataset):
             self._load_versions, self._save_version = self._validate_versions(
                 {key: value}, self._load_versions, self._save_version
@@ -597,6 +601,85 @@ class DataCatalog(CatalogProtocol):
         else:
             self._logger.debug(f"Adding input data {key} as a default MemoryDataset")
             self._datasets[key] = MemoryDataset(data=value)  # type: ignore[abstract]
+
+    def _inject(self, key: str, value: Any) -> None:
+        """Register runtime data under ``key`` while keeping its declared validator.
+
+        Unlike ``catalog[key] = value``, which drops any validator configured for
+        a replaced entry, this keeps the validator declared for ``key``: on its
+        catalog entry if it has one, otherwise through a matching dataset
+        factory pattern. The validator is applied to the injected data even
+        if it is declared for save only: raw data is validated before it is
+        stored (or on load, if validation is off when it is injected), and an
+        ``AbstractDataset`` instance is validated when it is loaded. If raw
+        data fails validation, the existing entry is left unchanged. Any save
+        validation declared for the entry still applies to later saves.
+
+        Args:
+            key: Name of the dataset.
+            value: Either an instance of `AbstractDataset` or raw data, which is
+                wrapped in a `MemoryDataset`.
+
+        Raises:
+            DataValidationError: If raw data fails a validator with
+                ``severity: error``.
+
+        Example:
+        ```python
+            catalog = DataCatalog.from_config(
+                {"input": {"type": "pickle.PickleDataset", "filepath": "in.pkl",
+                           "validator": "my_project.validators.NonNegative"}}
+            )
+            catalog._inject("input", [1, 2])  # validated now, replaces the entry
+        ```
+        """
+        # Mirror `get()`: patterns only apply to names with no explicit entry.
+        if key in self._datasets or key in self._lazy_datasets:
+            spec = self._validator_specs.get(key)
+        else:
+            spec = self._pattern_validator_spec(key)
+        if spec is None:
+            self[key] = value
+            return
+
+        # Add load-mode so a save-only validator still guards the injected data
+        # (including raw data injected while validation is off), while keeping
+        # save validation for anything written to it later.
+        if "load" not in spec.on:
+            spec = dataclasses.replace(spec, on=("load", *spec.on))
+
+        validated = (
+            not isinstance(value, AbstractDataset | _LazyDataset)
+            and self._is_validation_enabled()
+            and spec.enabled
+        )
+        if validated:
+            # Validate before replacing the entry so data that fails is never
+            # stored. Clear skip markers left by the previous entry first.
+            self._save_validated.discard(key)
+            self._inject_validated.discard(key)
+            value = self._validate(key, value, mode="load", spec=spec)
+
+        validator = self._validators.get(key)
+        self[key] = value
+        self._validator_specs[key] = spec
+        if validator is not None:
+            # Keep the validator instance resolved for the replaced entry.
+            self._validators[key] = validator
+        if validated:
+            # The stored data is already validated, so loads need not repeat it.
+            self._inject_validated.add(key)
+
+    def _pattern_validator_spec(self, ds_name: str) -> ValidatorSpec | None:
+        """Return the validator declared by a dataset factory pattern matching
+        ``ds_name``, without resolving or caching the dataset itself."""
+        validator_config = self._config_resolver._resolve_pattern_validator(ds_name)
+        if validator_config is None:
+            return None
+
+        from kedro.validation.core import ValidatorSpec
+
+        return ValidatorSpec.from_dataset_config(ds_name, validator_config)
 
     def __len__(self) -> int:
         """
@@ -1106,6 +1189,7 @@ class DataCatalog(CatalogProtocol):
 
         if self._is_validation_enabled():
             data = self._validate(ds_name, data, mode="save")
+        self._inject_validated.discard(ds_name)
         try:
             dataset.save(data)
         except DatasetError as e:
@@ -1190,19 +1274,28 @@ class DataCatalog(CatalogProtocol):
                 return True
         return self.validation_enabled
 
-    def _validate(self, ds_name: str, data: Any, mode: str) -> Any:
+    def _validate(
+        self,
+        ds_name: str,
+        data: Any,
+        mode: str,
+        spec: ValidatorSpec | None = None,
+    ) -> Any:
         """Apply the dataset's declared validator to `data` if applicable.
 
         This is the single validation funnel for catalog `load` and `save`
         operations. Callers gate on `_is_validation_enabled` first. It is a
         no-op when no validator is declared for the dataset, when the
-        validator is disabled or not declared for `mode`, or when
-        `skip_load_after_save` applies.
+        validator is disabled or not declared for `mode`, when
+        `skip_load_after_save` applies, or when the data was validated by
+        `_inject` and has not been saved or released since.
 
         Args:
             ds_name: The name of the dataset being loaded or saved.
             data: The data to validate.
             mode: Either `"load"` or `"save"`.
+            spec: Optional spec to apply instead of the one registered for
+                `ds_name`, without changing the registered spec.
 
         Returns:
             The validated (possibly transformed/coerced) data, or `data`
@@ -1215,14 +1308,13 @@ class DataCatalog(CatalogProtocol):
             ValidationConfigurationError: If the declared validator cannot be
                 resolved.
         """
-        spec = self._validator_specs.get(ds_name)
+        spec = spec or self._validator_specs.get(ds_name)
         if spec is None or mode not in spec.on or not spec.enabled:
             return data
 
-        if (
-            mode == "load"
-            and spec.skip_load_after_save
-            and ds_name in self._save_validated
+        if mode == "load" and (
+            (spec.skip_load_after_save and ds_name in self._save_validated)
+            or ds_name in self._inject_validated
         ):
             return data
 
@@ -1282,6 +1374,7 @@ class DataCatalog(CatalogProtocol):
 
         dataset.release()
         self._save_validated.discard(ds_name)
+        self._inject_validated.discard(ds_name)
 
     def confirm(self, ds_name: str) -> None:
         """Confirm a dataset by its name.

@@ -27,7 +27,10 @@ test_pyproject_requirements = [  # For pyproject.toml
 # Configuration key for documentation dependencies
 docs_pyproject_requirements = ["project.optional-dependencies.docs"]  # For pyproject.toml
 # Configuration key for linting and testing dependencies
-dev_pyproject_requirements = ["project.optional-dependencies.dev"]  # For pyproject.toml
+dev_pyproject_requirements = [
+    "dependency-groups.dev",
+    "project.optional-dependencies.dev",
+]  # Current templates and older starter refs
 
 # Requirements for example pipelines
 example_pipeline_requirements = "seaborn~=0.12.1\nscikit-learn~=1.0\n"
@@ -98,6 +101,23 @@ def _remove_from_toml(file_path: Path, sections_to_remove: list) -> None:
     for section in sections_to_remove:
         _remove_nested_section(data, section)
 
+    with open(file_path, "wb") as file:
+        tomli_w.dump(data, file)
+
+
+def _migrate_dev_extra(file_path: Path) -> None:
+    """Keep older starters' development tools out of published extras."""
+    with open(file_path, "rb") as file:
+        data = tomllib.load(file)
+    legacy = data.get("project", {}).get("optional-dependencies", {}).get("dev")
+    if legacy is None:
+        return
+
+    _remove_nested_section(data, "project.optional-dependencies.dev")
+    dev = data.setdefault("dependency-groups", {}).setdefault("dev", [])
+    for requirement in legacy:
+        if requirement not in dev:
+            dev.append(requirement)
     with open(file_path, "wb") as file:
         tomli_w.dump(data, file)
 
@@ -195,6 +215,8 @@ def setup_template_tools(
         python_package_name (str): The name of the python package.
         example_pipeline (str): 'True' if example pipeline was selected
     """
+
+    _migrate_dev_extra(pyproject_file_path)
 
     if "Linting" not in selected_tools_list and "Testing" not in selected_tools_list:
         _remove_from_toml(pyproject_file_path, dev_pyproject_requirements)

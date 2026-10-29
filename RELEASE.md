@@ -24,6 +24,8 @@
 
 ## Breaking changes to the API
 
+- Newly generated projects now use PEP 735 dependency groups for development tools. Existing projects are not migrated. For new projects, `pip install ".[dev]"` no longer installs the development tools: use `pip install . --group dev` (pip 25.1 or newer), or `uv sync`, which installs the `dev` group by default.
+
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:

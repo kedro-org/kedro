@@ -748,7 +748,7 @@ def change_dir(context, dir):
 def pip_install_project_and_dev_dependencies(context):
     """Install project and its development dependencies using pip."""
     _ = run(
-        [context.pip, "install", ".[dev]"],
+        [context.pip, "install", ".", "--group", "dev"],
         env=context.env,
         cwd=str(context.root_project_dir),
     )

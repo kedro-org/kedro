@@ -44,7 +44,9 @@ To install your project including all the project-specific dependencies and test
     pip install . --group dev
     ```
 
-    The `--group` flag requires pip 25.1 or newer.
+    !!! note
+
+        The `--group` flag requires pip 25.1 or newer. If you use uv, `uv sync` installs the `dev` group by default.
 
 You can also install test requirements individually as you would install other packages with `pip`, making sure you have installed your project locally and your [project's virtual environment is active](../getting-started/install.md#how-to-manually-create-a-virtual-environment-for-your-kedro-project).
 

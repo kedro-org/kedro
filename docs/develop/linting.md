@@ -34,7 +34,9 @@ project and run:
 pip install . --group dev
 ```
 
-The `--group` flag requires pip 25.1 or newer.
+!!! note
+
+    The `--group` flag requires pip 25.1 or newer. If you use uv, `uv sync` installs the `dev` group by default.
 
 You can instead install the linting tools individually using the following shell commands:
 

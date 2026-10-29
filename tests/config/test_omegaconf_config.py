@@ -1580,6 +1580,17 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["my_global"] == 89
         assert conf["parameters"]["my_second_global"] == 24
 
+    def test_override_globals_after_resolving(self, tmp_path):
+        """Overwritten globals are used after a globals interpolation has been resolved"""
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        _write_yaml(base_params, {"my_global": "${globals:x}"})
+        _write_yaml(base_globals, {"x": 45})
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV, default_run_env="")
+        assert conf["parameters"]["my_global"] == 45
+        conf["globals"] = {"x": 89}
+        assert conf["parameters"]["my_global"] == 89
+
     def test_init_filesystem_http_protocol(self, mocker, tmp_path):
         """Test initialising filesystem with HTTP protocol."""
         # Mock fsspec

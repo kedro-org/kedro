@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Added the option to allow data to be injected at run time when using the `KedroServiceSession`.
 - Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple.
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.
 - Added node groups to the project snapshot. Each `PipelineSnapshot` has a `groups` list of `GroupSnapshot` entries with the group's nodes, dependencies, inputs and outputs, also returned by `GET /snapshot`. `get_project_snapshot` takes a `group_by` argument to choose the grouping strategy, `GET /snapshot` takes it as a query parameter, and each `PipelineSnapshot` records it in `group_by`.
@@ -9,7 +10,7 @@
 
 ## Bug fixes and other changes
 
-- Newly generated projects now use PEP 735 dependency groups for development tools. Existing projects are not migrated. For new projects, `pip install ".[dev]"` no longer installs the development tools: use `pip install . --group dev` (pip 25.1 or newer), or `uv sync`, which installs the `dev` group by default.
+- Fixed the project snapshot (`kedro inspect` and `GET /snapshot`) listing parameter inputs such as `params:model_options.test_size` and `parameters` as datasets when a dataset factory pattern, for example a catch-all `{default}`, matches their names.
 - Fixed MemoryDataset losing its empty sentinel identity after pickle/unpickle, which could cause load() to return the sentinel instead of raising DatasetError.
 - Fixed `AttributeError` when naming a node built from a callable object, such as a class instance with `__call__`, and no explicit name. The node name now falls back to the class name.
 - Fixed typed parameter validation binding a `params:` input to the wrong function argument when a node declared with a dict of inputs leaves an earlier argument to its default. The typed requirement was taken from an argument the node never receives, so a run could fail on a type the user never asked for.
@@ -17,10 +18,13 @@
 - Fixed `Pipeline.only_nodes_with_namespaces` (and `kedro run --namespaces`) raising `ValueError: Pipeline nodes must have unique names` when a namespace is selected together with one it already covers, such as `--namespaces a,a.b`.
 - Stream outputs from generator nodes decorated with `functools.wraps`, and reject these nodes when asynchronous loading and saving is enabled. A decorator that consumes the generator, for example with `list()`, still has its result saved once.
 - Fixed the `runner` entry in the `run_params` passed to hooks: it now carries the runner name, instead of `'None'` for a default run or the `repr` of the runner instance, which included a memory address. Applies to both `KedroSession` and `KedroServiceSession`.
+- Fixed `OmegaConfigLoader` ignoring `config_loader["globals"]` set after a `${globals:}` interpolation was resolved.
 
 ## Documentation changes
 
 ## Breaking changes to the API
+
+- Newly generated projects now use PEP 735 dependency groups for development tools. Existing projects are not migrated. For new projects, `pip install ".[dev]"` no longer installs the development tools: use `pip install . --group dev` (pip 25.1 or newer), or `uv sync`, which installs the `dev` group by default.
 
 ## Community contributions
 
@@ -28,6 +32,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [Rodrigo-Palma](https://github.com/Rodrigo-Palma)
 - [Charan Rathore](https://github.com/charan-rathore)
+- [inchang-ing](https://github.com/inchang-ing)
 
 # Release 1.7.0
 

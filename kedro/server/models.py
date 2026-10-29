@@ -87,6 +87,32 @@ class RunRequest(BaseModel):
         default=None,
         description="Extra parameters to pass to the context at runtime.",
     )
+    runtime_datasets: dict[str, Any] | None = Field(
+        default=None,
+        description=(
+            "Runtime datasets to inject into this run's catalog, keyed by "
+            "dataset name. Each value must be raw JSON-serializable data; it "
+            "will be wrapped in a MemoryDataset before the run starts. Only "
+            "free inputs of the pipeline being run can be injected; use "
+            "`params` for parameters. An existing catalog entry with the same "
+            "name is replaced for this run only, and any validator declared "
+            "for it is applied to the injected data."
+        ),
+    )
+
+    @field_validator("runtime_datasets")
+    @classmethod
+    def _validate_dataset_names(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
+        for name in v or {}:
+            if not name.strip():
+                raise ValueError("dataset names must be non-empty.")
+            if name == "parameters" or name.startswith("params:"):
+                raise ValueError(
+                    f"'{name}' is a parameter and cannot be injected as a "
+                    "dataset. Use `params` instead."
+                )
+        return v
+
     only_missing_outputs: bool = Field(
         default=False,
         description="Run only nodes with missing outputs. Skip nodes whose outputs already exist and are persisted.",

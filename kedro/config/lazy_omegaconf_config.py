@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import logging
 import threading
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 from omegaconf import DictConfig, OmegaConf
@@ -16,7 +17,6 @@ from kedro.utils import CLOUD_PROTOCOLS, HTTP_PROTOCOLS, _parse_filepath, experi
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from pathlib import Path
 
 _RESOLVE_LOCK = threading.Lock()
 _UNSET = object()
@@ -30,6 +30,26 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
     ``interpolation_scope="environment"`` resolves each environment before merging,
     matching ``OmegaConfigLoader``. ``interpolation_scope="merged"`` merges raw
     environments first and then resolves the result.
+
+        This class intentionally subclasses ``OmegaConfigLoader`` to reuse its raw-file
+        loading, validation, resolver and merge helpers while avoiding its eager globals
+        resolution and constructor-time resolver registration.
+
+        It currently relies on these inherited private methods:
+
+        - ``_initialise_filesystem_and_protocol`` and ``_register_new_resolvers`` during
+            initialisation.
+        - ``_read_raw_config`` for environment paths, file discovery, hidden-file handling,
+            duplicate checks and credential environment-variable resolution.
+        - ``_resolve_from_raw_config`` for the ``"environment"`` interpolation scope.
+        - ``_register_globals_resolver`` and ``_register_runtime_params_resolver`` during
+            each locked resolution.
+        - ``_guard_runtime_params_in_catalog_type`` for catalog type-selection protection.
+        - ``_merge_configs`` when a custom merge strategy is configured.
+
+        If this class later moves to ``AbstractConfigLoader``, extract or port those helpers
+        and their tests before changing the base class. This list should be updated whenever
+        an inherited private helper is added or removed.
     """
 
     def __init__(  # noqa: PLR0913
@@ -48,6 +68,9 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         restrict_runtime_params_type_selection: bool = False,
         interpolation_scope: str = "merged",
     ):
+        if isinstance(conf_source, Path):
+            conf_source = str(conf_source)
+
         if interpolation_scope not in {"environment", "merged"}:
             raise ValueError(
                 "interpolation_scope must be either 'environment' or 'merged'."
@@ -87,13 +110,9 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             if custom_resolvers_to_register:
                 self._register_new_resolvers(custom_resolvers_to_register)
 
-        self._fs, self._protocol = self._initialise_filesystem_and_protocol(
-            str(conf_source)
-        )
+        self._fs, self._protocol = self._initialise_filesystem_and_protocol(conf_source)
         if self._protocol in CLOUD_PROTOCOLS or self._protocol in HTTP_PROTOCOLS:
-            self._remote_root_path = _parse_filepath(str(conf_source))["path"].rstrip(
-                "/"
-            )
+            self._remote_root_path = _parse_filepath(conf_source)["path"].rstrip("/")
 
         AbstractConfigLoader.__init__(
             self,

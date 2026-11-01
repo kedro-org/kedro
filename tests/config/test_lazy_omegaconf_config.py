@@ -158,6 +158,25 @@ class TestLazyOmegaConfigLoader:
         with ThreadPoolExecutor(max_workers=8) as executor:
             assert list(executor.map(load_globals, range(8))) == [{}] * 8
 
+    def test_globals_loaded_while_waiting_for_lock_skips_duplicate_load(
+        self, tmp_path: Path, mocker
+    ) -> None:
+        # The concurrent test above (test_concurrent_first_globals_load_is_safe) is scheduler-dependent: callers may see the flag
+        # before taking the lock. Set it on lock entry to reliably cover the second check.
+        # This avoids the CI test coverage being flaky due to race conditions
+        loader = _loader(tmp_path)
+
+        def mark_globals_loaded() -> None:
+            loader._globals = {"loaded": "by another thread"}
+            loader._globals_loaded = True
+
+        lock = mocker.patch.object(loader, "_globals_lock")
+        lock.__enter__.side_effect = mark_globals_loaded
+
+        loader._ensure_globals()
+
+        assert loader._globals == {"loaded": "by another thread"}
+
     def test_custom_resolver_is_applied(self, tmp_path: Path) -> None:
         _write_yaml(
             tmp_path / "base" / "parameters.yml",
@@ -214,6 +233,10 @@ class TestLazyOmegaConfigLoader:
     def test_oc_env_resolver_is_restored_when_an_existing_resolver_is_present(
         self, tmp_path: Path
     ) -> None:
+        # OmegaConf may start without an oc.env resolver, so the test above only covers
+        # restoring None. Register one here to reliably cover restoring an existing one.
+        # this is required to make the CI test coverage non flaky
+
         _write_yaml(
             tmp_path / "base" / "parameters.yml",
             {"value": "${oc.env:LAZY_CUSTOM}"},

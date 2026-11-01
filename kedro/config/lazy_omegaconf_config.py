@@ -5,22 +5,35 @@ from __future__ import annotations
 import copy
 import logging
 import threading
+from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 from omegaconf import DictConfig, OmegaConf
+from omegaconf.basecontainer import BaseContainer
 from omegaconf.errors import UnsupportedInterpolationType
+from omegaconf.resolvers import oc
 
 from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigException
 from kedro.config.omegaconf_config import OmegaConfigLoader
 from kedro.utils import CLOUD_PROTOCOLS, HTTP_PROTOCOLS, _parse_filepath, experimental
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
 
 _RESOLVE_LOCK = threading.Lock()
 _UNSET = object()
 _logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class _RawConfig:
+    base_configs: dict[Path, DictConfig]
+    env_configs: dict[Path, DictConfig]
+    base_path: str
+    env_path: str
+    processed_files: set[Path]
 
 
 @experimental
@@ -48,8 +61,8 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         - ``_merge_configs`` when a custom merge strategy is configured.
 
         If this class later moves to ``AbstractConfigLoader``, extract or port those helpers
-        and their tests before changing the base class. This list should be updated whenever
-        an inherited private helper is added or removed.
+        and their tests before changing the base class. Update this list when inherited
+        private dependencies change.
     """
 
     def __init__(  # noqa: PLR0913
@@ -134,7 +147,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
 
     def __getitem__(self, key: str) -> dict[str, Any]:
         if key in self.data:
-            return super().__getitem__(key)  # type: ignore[no-any-return]
+            return copy.deepcopy(super().__getitem__(key))  # type: ignore[no-any-return]
         if key == "globals":
             self._ensure_globals()
         if key in self._resolved_static_config:
@@ -160,7 +173,16 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             self._resolved_static_config["globals"] = copy.deepcopy(self._globals)
 
     def preload(self) -> None:
-        """Read all configured raw files before serving requests."""
+        """Parse configured files and check duplicates before repeated use.
+
+        This method is optional: ``__getitem__`` loads an uncached key on demand.
+        Preloading reads raw files and validates their syntax and duplicate keys. It
+        resolves globals and credentials eagerly, but leaves parameters and catalog
+        interpolation resolution until those keys are requested.
+
+        Missing environment directories are cached as missing. Accessing a key with no
+        matching configuration still raises ``MissingConfigException``.
+        """
         self._ensure_globals()
         for key in tuple(self.config_patterns):
             try:
@@ -183,16 +205,16 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
     ) -> LazyOmegaConfigLoader:
         """Return a per-run view sharing this loader's raw configuration snapshot."""
         view = copy.copy(self)
-        view.data = copy.deepcopy(self.data)
+        view.data = self.data.copy()
         view.config_patterns = copy.deepcopy(self.config_patterns)
         view.runtime_params = runtime_params or {}
-        view._globals = copy.deepcopy(self._globals)
+        view._globals = self._globals
         view._globals_loaded = self._globals_loaded
         view._globals_lock = self._globals_lock
         view._globals_oc = None
         view._runtime_params_oc = None
         view._runtime_params_hits = set()
-        view._resolved_static_config = copy.deepcopy(self._resolved_static_config)
+        view._resolved_static_config = self._resolved_static_config.copy()
         if restrict_runtime_params_type_selection is not None:
             view.restrict_runtime_params_type_selection = (
                 restrict_runtime_params_type_selection
@@ -210,16 +232,20 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         OmegaConf.set_readonly(config, True)
         return config
 
-    def _get_raw_config(self, key: str) -> Any:
+    def _get_raw_config(self, key: str) -> _RawConfig:
         patterns = tuple(self.config_patterns.get(key, ()))
         run_env = self.env or self.default_run_env
         cache_key = (key, patterns, self.base_env, run_env)
         with self._raw_config_lock:
             if cache_key not in self._raw_config_cache:
                 try:
-                    with _RESOLVE_LOCK:
-                        self._prepare_oc_env_resolver()
-                        self._raw_config_cache[cache_key] = self._read_raw_config(key)
+                    with (
+                        _RESOLVE_LOCK,
+                        self._oc_env_resolver_scope(allow_builtin=key == "credentials"),
+                    ):
+                        self._raw_config_cache[cache_key] = _RawConfig(
+                            *self._read_raw_config(key)
+                        )
                 except MissingConfigException as exc:
                     self._raw_config_cache[cache_key] = exc
             raw_config = self._raw_config_cache[cache_key]
@@ -243,8 +269,10 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             self._runtime_params_oc,
             self._runtime_params_hits,
         )
-        with _RESOLVE_LOCK:
-            self._prepare_oc_env_resolver()
+        with (
+            _RESOLVE_LOCK,
+            self._oc_env_resolver_scope(allow_builtin=key == "credentials"),
+        ):
             self.runtime_params = params or {}
             self._runtime_params_oc = None
             self._runtime_params_hits = set()
@@ -253,7 +281,12 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             try:
                 if self.interpolation_scope == "environment":
                     return self._resolve_from_raw_config(
-                        key, *self._copy_raw_config(raw_config)
+                        key,
+                        raw_config.base_configs,
+                        raw_config.env_configs,
+                        raw_config.base_path,
+                        raw_config.env_path,
+                        raw_config.processed_files,
                     )
                 return self._resolve_merged_config(key, raw_config)
             finally:
@@ -265,24 +298,22 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                 ) = previous
 
     @staticmethod
-    def _copy_raw_config(raw_config: tuple[Any, ...]) -> tuple[Any, ...]:
-        return (
-            copy.deepcopy(raw_config[0]),
-            copy.deepcopy(raw_config[1]),
-            raw_config[2],
-            raw_config[3],
-            set(raw_config[4]),
+    def _copy_raw_config(raw_config: _RawConfig) -> _RawConfig:
+        return _RawConfig(
+            base_configs=copy.deepcopy(raw_config.base_configs),
+            env_configs=copy.deepcopy(raw_config.env_configs),
+            base_path=raw_config.base_path,
+            env_path=raw_config.env_path,
+            processed_files=set(raw_config.processed_files),
         )
 
     def _merge_raw_environments(
-        self, key: str, raw_config: tuple[Any, ...] | None = None
+        self, key: str, raw_config: _RawConfig | None = None
     ) -> DictConfig:
-        raw_config = raw_config or self._get_raw_config(key)
-        base_configs, env_configs, _, env_path, processed_files = self._copy_raw_config(
-            raw_config
-        )
-        base = self._merge_dict_configs(*base_configs.values())
-        env = self._merge_dict_configs(*env_configs.values())
+        raw_config = raw_config if raw_config is not None else self._get_raw_config(key)
+        copied_config = self._copy_raw_config(raw_config)
+        base = self._merge_dict_configs(*copied_config.base_configs.values())
+        env = self._merge_dict_configs(*copied_config.env_configs.values())
         if (self.env or self.default_run_env) == self.base_env:
             merged = base
         else:
@@ -295,7 +326,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                     _logger.debug(
                         "Config from path '%s' will override the following "
                         "existing top-level config keys: %s",
-                        env_path,
+                        copied_config.env_path,
                         ", ".join(sorted(common_keys)),
                     )
                 base_container.update(env_container)
@@ -306,17 +337,19 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                 base_container = self._to_dict(base)
                 env_container = self._to_dict(env)
                 merged = OmegaConf.create(
-                    self._merge_configs(base_container, env_container, key, env_path)
+                    self._merge_configs(
+                        base_container, env_container, key, copied_config.env_path
+                    )
                 )
-        if not processed_files and key != "globals":
+        if not copied_config.processed_files and key != "globals":
             raise MissingConfigException(
-                f"No files of YAML or JSON format found in {raw_config[2]} or {env_path} matching"
+                f"No files of YAML or JSON format found in {copied_config.base_path} or {copied_config.env_path} matching"
                 f" the glob pattern(s): {[*self.config_patterns[key]]}"
             )
         return merged
 
     def _resolve_merged_config(
-        self, key: str, raw_config: tuple[Any, ...]
+        self, key: str, raw_config: _RawConfig
     ) -> dict[str, Any]:
         merged = self._merge_raw_environments(key, raw_config)
         if key == "parameters":
@@ -353,18 +386,28 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         container = OmegaConf.to_container(config, resolve=False)
         return cast("dict[str, Any]", container)
 
-    def _prepare_oc_env_resolver(self) -> None:
-        if self._oc_env_custom_resolver is None:
-            OmegaConf.clear_resolver("oc.env")
-            return
-
+    @contextmanager
+    def _oc_env_resolver_scope(self, *, allow_builtin: bool = False) -> Iterator[None]:
+        """Temporarily register the configured oc.env resolver and restore the prior one."""
         resolver = self._oc_env_custom_resolver
-        if isinstance(resolver, tuple):
-            resolver_fn, resolver_kwargs = resolver
-            kwargs = dict(resolver_kwargs)
-            kwargs.pop("replace", None)
-            OmegaConf.register_new_resolver(
-                "oc.env", resolver_fn, replace=True, **kwargs
-            )
-        else:
-            OmegaConf.register_new_resolver("oc.env", resolver, replace=True)
+        previous_resolver = OmegaConf._get_resolver("oc.env")
+        try:
+            if resolver is None and allow_builtin:
+                OmegaConf.register_new_resolver("oc.env", oc.env, replace=True)
+            elif resolver is None:
+                OmegaConf.clear_resolver("oc.env")
+            elif isinstance(resolver, tuple):
+                resolver_fn, resolver_kwargs = resolver
+                kwargs = dict(resolver_kwargs)
+                kwargs.pop("replace", None)
+                OmegaConf.register_new_resolver(
+                    "oc.env", resolver_fn, replace=True, **kwargs
+                )
+            else:
+                OmegaConf.register_new_resolver("oc.env", resolver, replace=True)
+            yield
+        finally:
+            if previous_resolver is None:
+                OmegaConf.clear_resolver("oc.env")
+            else:
+                BaseContainer._resolvers["oc.env"] = previous_resolver

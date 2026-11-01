@@ -184,6 +184,32 @@ class TestLazyOmegaConfigLoader:
 
         assert loader["parameters"] == {"value": "custom-value"}
 
+    def test_oc_env_resolver_is_restored_after_custom_resolution(
+        self, tmp_path: Path
+    ) -> None:
+        _write_yaml(
+            tmp_path / "base" / "parameters.yml",
+            {"value": "${oc.env:LAZY_CUSTOM}"},
+        )
+        original_resolver = OmegaConf._get_resolver("oc.env")
+        loader = _loader(
+            tmp_path,
+            custom_resolvers={"oc.env": lambda variable: "custom-value"},
+        )
+
+        assert loader["parameters"] == {"value": "custom-value"}
+        assert OmegaConf._get_resolver("oc.env") is original_resolver
+
+    def test_builtin_oc_env_resolver_is_unchanged_by_parameter_resolution(
+        self, tmp_path: Path
+    ) -> None:
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"value": 1})
+        original_resolver = OmegaConf._get_resolver("oc.env")
+        loader = _loader(tmp_path)
+
+        assert loader["parameters"] == {"value": 1}
+        assert OmegaConf._get_resolver("oc.env") is original_resolver
+
     def test_oc_env_resolver_is_not_used_outside_credentials(
         self, tmp_path: Path, monkeypatch
     ) -> None:
@@ -364,6 +390,35 @@ class TestLazyOmegaConfigLoader:
         high["globals"] = {"run": "high"}
         assert low["globals"] == {"run": "low"}
         assert high["globals"] == {"run": "high"}
+
+    def test_run_view_shares_raw_cache_but_copies_override_state(
+        self, tmp_path: Path
+    ) -> None:
+        loader = _loader(tmp_path)
+        loader.preload()
+        loader["parameters"] = {"owner": "base", "nested": {"value": 1}}
+        view = loader.with_runtime_params()
+
+        assert view._raw_config_cache is loader._raw_config_cache
+        assert view.data is not loader.data
+        assert view._resolved_static_config is not loader._resolved_static_config
+        view["parameters"] = {"owner": "view"}
+        assert loader["parameters"] == {"owner": "base", "nested": {"value": 1}}
+
+        view = loader.with_runtime_params()
+        view["parameters"]["nested"]["value"] = 2
+        assert loader["parameters"]["nested"]["value"] == 1
+
+    def test_preload_does_not_resolve_parameters(self, tmp_path: Path) -> None:
+        _write_yaml(
+            tmp_path / "base" / "parameters.yml",
+            {"value": "${runtime_params:value}"},
+        )
+        loader = _loader(tmp_path)
+
+        loader.preload()
+        with pytest.raises(InterpolationResolutionError):
+            loader["parameters"]
 
     def test_concurrent_run_views_do_not_cross_contaminate(
         self, tmp_path: Path

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from omegaconf import DictConfig, OmegaConf
 from omegaconf.basecontainer import BaseContainer
-from omegaconf.errors import UnsupportedInterpolationType
+from omegaconf.errors import InterpolationResolutionError, UnsupportedInterpolationType
 from omegaconf.resolvers import oc
 
 from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigException
@@ -279,16 +279,26 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             self._register_globals_resolver()
             self._register_runtime_params_resolver()
             try:
-                if self.interpolation_scope == "environment":
-                    return self._resolve_from_raw_config(
-                        key,
-                        raw_config.base_configs,
-                        raw_config.env_configs,
-                        raw_config.base_path,
-                        raw_config.env_path,
-                        raw_config.processed_files,
-                    )
-                return self._resolve_merged_config(key, raw_config)
+                try:
+                    if self.interpolation_scope == "environment":
+                        return self._resolve_from_raw_config(
+                            key,
+                            raw_config.base_configs,
+                            raw_config.env_configs,
+                            raw_config.base_path,
+                            raw_config.env_path,
+                            raw_config.processed_files,
+                        )
+                    return self._resolve_merged_config(key, raw_config)
+                except InterpolationResolutionError as exc:
+                    if "Runtime parameter '" in str(
+                        exc
+                    ) and "not found and no default value provided" in str(exc):
+                        raise InterpolationResolutionError(
+                            f"{exc} Supply this value with `with_runtime_params(...)` "
+                            "or provide a default in the interpolation."
+                        ) from exc
+                    raise
             finally:
                 self._register_runtime_params_resolver()
                 (

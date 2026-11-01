@@ -23,10 +23,10 @@ CONFIG_LOADER_ARGS = {
 
 `LazyOmegaConfigLoader` accepts the same file patterns, merge strategies, custom resolvers, and runtime-parameter type-selection option as `OmegaConfigLoader`. It adds `interpolation_scope`, which controls when interpolation is resolved:
 
-| Value | Behaviour |
-| --- | --- |
-| `"merged"` | Merge the raw configuration from the environments, then resolve interpolations. This is the default. |
-| `"environment"` | Resolve each environment before merging, matching `OmegaConfigLoader`. |
+| Value           | Behaviour                                                                                            |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| `"merged"`      | Merge the raw configuration from the environments, then resolve interpolations. This is the default. |
+| `"environment"` | Resolve each environment before merging, matching `OmegaConfigLoader`.                               |
 
 See [Interpolation scope](#interpolation-scope) before choosing a value.
 
@@ -87,10 +87,10 @@ The `"merged"` scope also applies `runtime_params` after merging environments. T
 
 For example, with `x: {a: 1}` in `conf/base/parameters.yml`, `y: 2` in `conf/local/parameters.yml`, and runtime parameters `{"x": {"b": 5}}`, the results differ:
 
-| Scope | Result |
-| --- | --- |
-| `"environment"` | `{x: {b: 5}, y: 2}` |
-| `"merged"` | `{x: {a: 1, b: 5}, y: 2}` |
+| Scope           | Result                    |
+| --------------- | ------------------------- |
+| `"environment"` | `{x: {b: 5}, y: 2}`       |
+| `"merged"`      | `{x: {a: 1, b: 5}, y: 2}` |
 
 ## Configuration lifetime
 

@@ -34,6 +34,14 @@ See [Interpolation scope](#interpolation-scope) before choosing a value.
 
 Use `preload()` before serving repeated requests. It reads the configured raw files once, so later calls reuse the snapshot even if files change on disk.
 
+Start with this `conf/base/parameters.yml`:
+
+```yaml
+report_label: "Report for ${runtime_params:customer_id}"
+```
+
+Then resolve the parameters separately for each run:
+
 ```python
 from pathlib import Path
 
@@ -53,7 +61,9 @@ first_run = loader.with_runtime_params({"customer_id": "customer-001"})
 second_run = loader.with_runtime_params({"customer_id": "customer-002"})
 
 first_parameters = first_run["parameters"]
+# {"report_label": "Report for customer-001", "customer_id": "customer-001"}
 second_parameters = second_run["parameters"]
+# {"report_label": "Report for customer-002", "customer_id": "customer-002"}
 ```
 
 Each `with_runtime_params()` call returns a per-run view with its own runtime parameters and explicit configuration overrides. The views share the loader's raw configuration snapshot. Resolving one view does not change the results of another.

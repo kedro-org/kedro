@@ -417,7 +417,10 @@ class TestLazyOmegaConfigLoader:
         loader = _loader(tmp_path)
 
         loader.preload()
-        with pytest.raises(InterpolationResolutionError):
+        with pytest.raises(
+            InterpolationResolutionError,
+            match=r"with_runtime_params\(\.\.\.\).*default in the interpolation",
+        ):
             loader["parameters"]
 
     def test_concurrent_run_views_do_not_cross_contaminate(

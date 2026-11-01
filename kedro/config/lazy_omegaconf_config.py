@@ -133,7 +133,9 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             env=env,
             runtime_params=runtime_params,
         )
-        self._raw_config_cache: dict[tuple[Any, ...], Any] = {}
+        self._raw_config_cache: dict[
+            tuple[Any, ...], _RawConfig | MissingConfigException
+        ] = {}
         self._raw_config_lock = threading.Lock()
         self._resolved_static_config: dict[str, Any] = {}
 

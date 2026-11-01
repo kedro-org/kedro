@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
+- Added the experimental `LazyOmegaConfigLoader`, which caches raw configuration for repeated resolution with per-run parameters. It supports `environment` and `merged` interpolation scopes.
 
 ## Bug fixes and other changes
 

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 import yaml
 from omegaconf import OmegaConf
+from omegaconf.basecontainer import BaseContainer
 from omegaconf.errors import (
     InterpolationResolutionError,
     ReadonlyConfigError,
@@ -209,6 +210,34 @@ class TestLazyOmegaConfigLoader:
 
         assert loader["parameters"] == {"value": 1}
         assert OmegaConf._get_resolver("oc.env") is original_resolver
+
+    def test_oc_env_resolver_is_restored_when_an_existing_resolver_is_present(
+        self, tmp_path: Path
+    ) -> None:
+        _write_yaml(
+            tmp_path / "base" / "parameters.yml",
+            {"value": "${oc.env:LAZY_CUSTOM}"},
+        )
+        original_resolver = OmegaConf._get_resolver("oc.env")
+
+        def previous_resolver(variable: str) -> str:
+            return "previous-value"
+
+        OmegaConf.register_new_resolver("oc.env", previous_resolver, replace=True)
+        registered_resolver = OmegaConf._get_resolver("oc.env")
+        loader = _loader(
+            tmp_path,
+            custom_resolvers={"oc.env": lambda variable: "custom-value"},
+        )
+
+        try:
+            assert loader["parameters"] == {"value": "custom-value"}
+            assert OmegaConf._get_resolver("oc.env") is registered_resolver
+        finally:
+            if original_resolver is None:
+                OmegaConf.clear_resolver("oc.env")
+            else:
+                BaseContainer._resolvers["oc.env"] = original_resolver
 
     def test_oc_env_resolver_is_not_used_outside_credentials(
         self, tmp_path: Path, monkeypatch

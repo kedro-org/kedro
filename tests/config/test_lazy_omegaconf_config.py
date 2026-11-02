@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
@@ -556,6 +557,160 @@ class TestLazyOmegaConfigLoader:
         high["globals"] = {"run": "high"}
         assert low["globals"] == {"run": "low"}
         assert high["globals"] == {"run": "high"}
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    @pytest.mark.parametrize("key", ["parameters", "catalog"])
+    def test_resolving_a_run_view_does_not_mutate_raw_snapshot(
+        self, tmp_path: Path, scope: str, key: str
+    ) -> None:
+        _write_yaml(tmp_path / "base" / f"{key}.yml", {"a": {"type": "A"}})
+        _write_yaml(tmp_path / "base" / f"{key}_extra.yml", {"b": {"type": "B"}})
+        _write_yaml(tmp_path / "local" / f"{key}.yml", {"c": {"type": "C"}})
+        loader = _loader(tmp_path, interpolation_scope=scope)
+        loader.preload()
+        raw = loader._get_raw_config(key)
+        base_before = copy.deepcopy(raw.base_configs)
+        env_before = copy.deepcopy(raw.env_configs)
+
+        loader.with_runtime_params({"only_in_this_run": "x"})[key]
+
+        assert raw.base_configs == base_before
+        assert raw.env_configs == env_before
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_runtime_params_do_not_leak_into_later_runs(
+        self, tmp_path: Path, scope: str
+    ) -> None:
+        _write_yaml(
+            tmp_path / "base" / "parameters.yml",
+            {"label": "${runtime_params:x,'default'}"},
+        )
+        _write_yaml(tmp_path / "local" / "parameters.yml", {"other": 1})
+        loader = _loader(tmp_path, interpolation_scope=scope)
+        loader.preload()
+
+        loader.with_runtime_params({"only_in_first_run": "x", "x": "first"})[
+            "parameters"
+        ]
+
+        expected = {"label": "default", "other": 1}
+        assert loader.with_runtime_params({})["parameters"] == expected
+        assert loader["parameters"] == expected
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    @pytest.mark.parametrize("key", ["catalog", "parameters", "spark"])
+    def test_underscore_prefixed_template_keys_match_omega_config_loader(
+        self, tmp_path: Path, scope: str, key: str
+    ) -> None:
+        """Only `parameters` keeps `_`-prefixed keys; they are templates elsewhere."""
+        patterns = {"spark": ["spark*", "spark*/**", "**/spark*"]}
+        _write_yaml(
+            tmp_path / "base" / f"{key}.yml",
+            {"_template": {"value": 1}, "first": "${_template.value}"},
+        )
+        _write_yaml(tmp_path / "local" / f"{key}.yml", {"second": 2})
+
+        expected = OmegaConfigLoader(
+            tmp_path,
+            base_env="base",
+            default_run_env="local",
+            config_patterns=patterns,
+        )[key]
+        actual = _loader(tmp_path, interpolation_scope=scope, config_patterns=patterns)[
+            key
+        ]
+
+        assert actual == expected
+        assert ("_template" in actual) is (key == "parameters")
+
+    def test_merged_scope_merges_environments_once_across_runs(
+        self, tmp_path: Path, mocker
+    ) -> None:
+        _write_yaml(tmp_path / "base" / "catalog.yml", {"a": {"type": "A"}})
+        _write_yaml(tmp_path / "local" / "catalog.yml", {"b": {"type": "B"}})
+        loader = _loader(tmp_path)
+        merge = mocker.spy(loader, "_merge_raw_environments")
+        loader.preload()
+        merges_after_preload = merge.call_count
+
+        for index in range(3):
+            loader.with_runtime_params({"run": index})["catalog"]
+
+        assert merges_after_preload >= 1
+        assert merge.call_count == merges_after_preload
+
+    def test_merged_cache_follows_merge_strategy_changes(self, tmp_path: Path) -> None:
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"x": {"a": 1}})
+        _write_yaml(tmp_path / "local" / "parameters.yml", {"x": {"b": 2}})
+        loader = _loader(tmp_path)
+
+        assert loader["parameters"] == {"x": {"b": 2}}
+        loader.merge_strategy = {"parameters": "soft"}
+        assert loader["parameters"] == {"x": {"a": 1, "b": 2}}
+
+    def test_preload_surfaces_merge_errors_in_merged_scope(
+        self, tmp_path: Path
+    ) -> None:
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"value": 1})
+        _write_yaml(tmp_path / "local" / "parameters.yml", {"value": 2})
+        loader = _loader(tmp_path, merge_strategy={"parameters": "invalid"})
+
+        with pytest.raises(ValueError, match="Merging strategy invalid not supported"):
+            loader.preload()
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_cached_resolver_results_do_not_leak_between_runs(
+        self, tmp_path: Path, scope: str
+    ) -> None:
+        calls: list[int] = []
+
+        def counter() -> int:
+            calls.append(1)
+            return len(calls)
+
+        _write_yaml(tmp_path / "base" / "catalog.yml", {"a": {"id": "${counter:}"}})
+        _write_yaml(tmp_path / "local" / "catalog.yml", {"b": {"id": "${counter:}"}})
+        loader = _loader(
+            tmp_path,
+            interpolation_scope=scope,
+            custom_resolvers={"counter": (counter, {"use_cache": True})},
+        )
+        loader.preload()
+
+        first = loader.with_runtime_params({})["catalog"]
+        second = loader.with_runtime_params({})["catalog"]
+
+        assert first != second
+
+    def test_concurrent_resolution_with_absolute_interpolations(
+        self, tmp_path: Path
+    ) -> None:
+        _write_yaml(
+            tmp_path / "base" / "catalog.yml",
+            {
+                "shared": {"folder": "${runtime_params:folder}"},
+                **{
+                    f"dataset_{index}": {
+                        "type": "MemoryDataset",
+                        "path": f"${{shared.folder}}/{index}",
+                    }
+                    for index in range(40)
+                },
+            },
+        )
+        loader = _loader(tmp_path)
+        loader.preload()
+
+        def resolve(index: int) -> bool:
+            catalog = loader.with_runtime_params({"folder": f"run-{index}"})["catalog"]
+            return all(
+                entry["path"].startswith(f"run-{index}/")
+                for name, entry in catalog.items()
+                if name.startswith("dataset_")
+            )
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            assert all(executor.map(resolve, range(60)))
 
     def test_run_view_shares_raw_cache_but_copies_override_state(
         self, tmp_path: Path

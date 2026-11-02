@@ -137,6 +137,8 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             tuple[Any, ...], _RawConfig | MissingConfigException
         ] = {}
         self._raw_config_lock = threading.Lock()
+        self._merged_config_cache: dict[tuple[Any, ...], DictConfig] = {}
+        self._merged_config_lock = threading.Lock()
         self._resolved_static_config: dict[str, Any] = {}
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -178,9 +180,11 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         """Parse configured files and check duplicates before repeated use.
 
         This method is optional: ``__getitem__`` loads an uncached key on demand.
-        Preloading reads raw files and validates their syntax and duplicate keys. It
-        resolves globals and credentials eagerly, but leaves parameters and catalog
-        interpolation resolution until those keys are requested.
+        Preloading reads raw files and validates their syntax and duplicate keys. With
+        the ``"merged"`` scope it also merges the environments, so merge errors such as
+        an unsupported merge strategy surface here. It resolves globals and credentials
+        eagerly, but leaves parameters and catalog interpolation resolution until those
+        keys are requested.
 
         Missing environment directories are cached as missing. Accessing a key with no
         matching configuration still raises ``MissingConfigException``.
@@ -188,7 +192,9 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         self._ensure_globals()
         for key in tuple(self.config_patterns):
             try:
-                self._get_raw_config(key)
+                raw_config = self._get_raw_config(key)
+                if self.interpolation_scope == "merged":
+                    self._get_merged_config(key, raw_config)
             except MissingConfigException:
                 pass
 
@@ -230,9 +236,35 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             if not isinstance(config, DictConfig):
                 raise TypeError("Config overrides must be mapping values.")
         else:
-            config = self._merge_raw_environments(key)
+            config = self._get_merged_config(key)
+            with _RESOLVE_LOCK:
+                config = copy.deepcopy(config)
         OmegaConf.set_readonly(config, True)
         return config
+
+    def _get_merged_config(
+        self, key: str, raw_config: _RawConfig | None = None
+    ) -> DictConfig:
+        """Return the cached, unresolved merge of the selected environments.
+
+        The result is shared: copy it under ``_RESOLVE_LOCK`` before using or changing it.
+        """
+        raw_config = raw_config if raw_config is not None else self._get_raw_config(key)
+        strategy = self.merge_strategy.get(key, "destructive").lower()
+        cache_key = (
+            key,
+            tuple(self.config_patterns.get(key, ())),
+            self.base_env,
+            self.env or self.default_run_env,
+            strategy,
+        )
+        with self._merged_config_lock:
+            if cache_key not in self._merged_config_cache:
+                with _RESOLVE_LOCK:
+                    self._merged_config_cache[cache_key] = self._merge_raw_environments(
+                        key, raw_config
+                    )
+            return self._merged_config_cache[cache_key]
 
     def _get_raw_config(self, key: str) -> _RawConfig:
         patterns = tuple(self.config_patterns.get(key, ()))
@@ -261,6 +293,11 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         runtime_params: dict[str, Any] | object = _UNSET,
     ) -> dict[str, Any]:
         raw_config = self._get_raw_config(key)
+        merged_config = (
+            self._get_merged_config(key, raw_config)
+            if self.interpolation_scope == "merged"
+            else None
+        )
         params = (
             self.runtime_params
             if runtime_params is _UNSET
@@ -282,16 +319,18 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             self._register_runtime_params_resolver()
             try:
                 try:
-                    if self.interpolation_scope == "environment":
+                    if merged_config is None:
+                        # The inherited resolver merges in place, so it gets a copy.
+                        copied_config = self._copy_raw_config(raw_config)
                         return self._resolve_from_raw_config(
                             key,
-                            raw_config.base_configs,
-                            raw_config.env_configs,
-                            raw_config.base_path,
-                            raw_config.env_path,
-                            raw_config.processed_files,
+                            copied_config.base_configs,
+                            copied_config.env_configs,
+                            copied_config.base_path,
+                            copied_config.env_path,
+                            copied_config.processed_files,
                         )
-                    return self._resolve_merged_config(key, raw_config)
+                    return self._resolve_merged_config(key, merged_config)
                 except InterpolationResolutionError as exc:
                     if "Runtime parameter '" in str(
                         exc
@@ -361,15 +400,16 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         return merged
 
     def _resolve_merged_config(
-        self, key: str, raw_config: _RawConfig
+        self, key: str, merged_config: DictConfig
     ) -> dict[str, Any]:
-        merged = self._merge_raw_environments(key, raw_config)
         if key == "parameters":
+            # ``OmegaConf.merge`` copies its first argument, so the shared one is untouched.
             merged = self._merge_dict_configs(
-                merged, OmegaConf.create(self.runtime_params)
+                merged_config, OmegaConf.create(self.runtime_params)
             )
+        else:
+            merged = copy.deepcopy(merged_config)
 
-        guard_config = copy.deepcopy(merged) if key == "catalog" else None
         if key == "globals":
             OmegaConf.clear_resolver("runtime_params")
         try:
@@ -383,10 +423,11 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
 
         resolved = cast("dict[str, Any]", resolved_container)
         if key == "catalog":
-            self._guard_runtime_params_in_catalog_type([guard_config], resolved)
-        elif isinstance(resolved, dict):
-            resolved = {k: v for k, v in resolved.items() if not k.startswith("_")}
-        return resolved
+            self._guard_runtime_params_in_catalog_type([merged], resolved)
+        if key == "parameters":
+            return resolved
+        # Like ``OmegaConfigLoader``: `_`-prefixed keys are templates, not config.
+        return {k: v for k, v in resolved.items() if not k.startswith("_")}
 
     @staticmethod
     def _merge_dict_configs(*configs: DictConfig) -> DictConfig:

@@ -422,6 +422,120 @@ class TestLazyOmegaConfigLoader:
 
         assert result == expected
 
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_runtime_params_are_returned_with_parameters(
+        self, tmp_path: Path, scope: str
+    ) -> None:
+        _write_yaml(
+            tmp_path / "base" / "parameters.yml",
+            {"report_label": "Report for ${runtime_params:customer_id}"},
+        )
+        loader = _loader(tmp_path, interpolation_scope=scope)
+        loader.preload()
+
+        run = loader.with_runtime_params({"customer_id": "customer-001"})
+
+        expected = {
+            "report_label": "Report for customer-001",
+            "customer_id": "customer-001",
+        }
+        assert run["parameters"] == expected
+        assert run.runtime_params == {"customer_id": "customer-001"}
+        assert (
+            OmegaConfigLoader(
+                tmp_path,
+                base_env="base",
+                default_run_env="local",
+                runtime_params={"customer_id": "customer-001"},
+            )["parameters"]
+            == expected
+        )
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_runtime_params_override_existing_parameter_keys(
+        self, tmp_path: Path, scope: str
+    ) -> None:
+        _write_yaml(
+            tmp_path / "base" / "parameters.yml",
+            {
+                "customer_id": "yaml-001",
+                "report_label": "Report for ${runtime_params:customer_id}",
+            },
+        )
+        loader = _loader(tmp_path, interpolation_scope=scope)
+        loader.preload()
+
+        run = loader.with_runtime_params(
+            {
+                "customer_id": "request-002",
+                "runtime_only": "x",
+            }
+        )
+
+        expected = {
+            "customer_id": "request-002",
+            "report_label": "Report for request-002",
+            "runtime_only": "x",
+        }
+        assert run["parameters"] == expected
+        assert (
+            OmegaConfigLoader(
+                tmp_path,
+                base_env="base",
+                default_run_env="local",
+                runtime_params={"customer_id": "request-002", "runtime_only": "x"},
+            )["parameters"]
+            == expected
+        )
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_runtime_params_not_propagate_non_parameters_config(
+        self, tmp_path: Path, scope: str, monkeypatch
+    ) -> None:
+        """`catalog`, `credentials` and custom configs are resolved with
+        `runtime_params` but never receive its keys; only `parameters` does."""
+        monkeypatch.setenv("LAZY_USER", "kedro-user")
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"param1": 1})
+        _write_yaml(
+            tmp_path / "base" / "catalog.yml",
+            {
+                "companies": {
+                    "type": "MemoryDataset",
+                    "filepath": "data/${runtime_params:folder}/companies.csv",
+                }
+            },
+        )
+        _write_yaml(
+            tmp_path / "base" / "credentials.yml",
+            {"database": {"user": "${oc.env:LAZY_USER}"}},
+        )
+        _write_yaml(
+            tmp_path / "base" / "spark.yml", {"master": "${runtime_params:master}"}
+        )
+        loader = _loader(
+            tmp_path,
+            interpolation_scope=scope,
+            config_patterns={"spark": ["spark*", "spark*/**", "**/spark*"]},
+        )
+
+        run = loader.with_runtime_params(
+            {
+                "test_env": "dummy",
+                "folder": "raw",
+                "master": "local[2]",
+            }
+        )
+
+        assert "test_env" in run["parameters"]
+        assert run["catalog"] == {
+            "companies": {
+                "type": "MemoryDataset",
+                "filepath": "data/raw/companies.csv",
+            }
+        }
+        assert run["credentials"] == {"database": {"user": "kedro-user"}}
+        assert run["spark"] == {"master": "local[2]"}
+
     def test_run_views_resolve_independently_and_do_not_mutate_snapshot(
         self, tmp_path: Path
     ) -> None:

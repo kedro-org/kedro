@@ -775,6 +775,31 @@ class TestOmegaConfigLoader:
         params = conf["parameters"]
         assert params["interpolated_param"] == "dummy"
 
+    def test_runtime_params_are_merged_into_parameters_not_only_interpolated(
+        self, tmp_path
+    ):
+        """`KedroContext.params` relies on this: runtime params are returned
+        in `parameters`, override existing keys, and also feed `runtime_params:`."""
+        _write_yaml(
+            tmp_path / _BASE_ENV / "parameters.yml",
+            {
+                "customer_id": "yaml-001",
+                "report_label": "Report for ${runtime_params:customer_id}",
+            },
+        )
+        conf = OmegaConfigLoader(
+            tmp_path,
+            base_env=_BASE_ENV,
+            default_run_env=_BASE_ENV,
+            runtime_params={"customer_id": "request-002", "runtime_only": "x"},
+        )
+
+        assert conf["parameters"] == {
+            "customer_id": "request-002",
+            "report_label": "Report for request-002",
+            "runtime_only": "x",
+        }
+
     @use_config_dir
     @use_credentials_env_variable_yml
     def test_runtime_params_not_propagate_non_parameters_config(self, tmp_path):

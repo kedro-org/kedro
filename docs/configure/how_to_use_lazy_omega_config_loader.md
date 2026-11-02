@@ -66,6 +66,8 @@ second_parameters = second_run["parameters"]
 # {"report_label": "Report for customer-002", "customer_id": "customer-002"}
 ```
 
+As with `OmegaConfigLoader`, the runtime parameters are also merged into `parameters`: `customer_id` appears in the result, and a runtime value replaces a YAML key with the same name. `KedroContext` reads runtime parameters from this result. The values stay available on the view as `first_run.runtime_params`.
+
 Each `with_runtime_params()` call returns a per-run view with its own runtime parameters and explicit configuration overrides. The views share the loader's raw configuration snapshot. Resolving one view does not change the results of another.
 
 `__getitem__` returns a resolved Python dictionary, as it does with `OmegaConfigLoader`. `_get_unresolved_config(key)` is a private method used to inspect the read-only, merged `DictConfig`; it is not a supported public API.
@@ -93,7 +95,7 @@ param2: "local"
 
 `OmegaConfigLoader` and `LazyOmegaConfigLoader(interpolation_scope="environment")` return `param1: "base"`. `LazyOmegaConfigLoader(interpolation_scope="merged")` returns `param1: "local"`.
 
-The `"merged"` scope also applies `runtime_params` after merging environments. This can preserve base keys that the default destructive strategy replaces in `OmegaConfigLoader`.
+Both scopes merge `runtime_params` into `parameters`. The `"merged"` scope does so after merging environments, which can preserve base keys that the default destructive strategy replaces in `OmegaConfigLoader`.
 
 For example, with `x: {a: 1}` in `conf/base/parameters.yml`, `y: 2` in `conf/local/parameters.yml`, and runtime parameters `{"x": {"b": 5}}`, the results differ:
 

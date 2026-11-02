@@ -191,6 +191,7 @@ def _get_expected_files(tools: str, example_pipeline: str):
         "6": 0,  # PySpark selection no longer adds extra starter files
     }  # files added to template by each tool
     tools_list = _parse_tools_input(tools)
+
     example_pipeline_bool = _parse_yes_no_to_bool(example_pipeline)
     expected_files = FILES_IN_TEMPLATE_WITH_NO_TOOLS
 
@@ -233,6 +234,9 @@ def _assert_requirements_ok(
 
     tools_list = _parse_tools_input(tools)
 
+    if "1" not in tools_list and "2" not in tools_list:
+        assert "dependency-groups" not in pyproject_config
+
     if "1" in tools_list:
         expected = {
             "tool": {
@@ -248,10 +252,7 @@ def _assert_requirements_ok(
             }
         }
         assert expected["tool"]["ruff"] == pyproject_config["tool"]["ruff"]
-        assert (
-            "ruff~=0.12.0"
-            in pyproject_config["project"]["optional-dependencies"]["dev"]
-        )
+        assert "ruff~=0.12.0" in pyproject_config["dependency-groups"]["dev"]
 
     if "2" in tools_list:
         expected = {
@@ -271,17 +272,12 @@ def _assert_requirements_ok(
         assert expected["pytest"] == pyproject_config["tool"]["pytest"]
         assert expected["coverage"] == pyproject_config["tool"]["coverage"]
 
+        assert "pytest-cov>=3,<7" in pyproject_config["dependency-groups"]["dev"]
         assert (
-            "pytest-cov>=3,<7"
-            in pyproject_config["project"]["optional-dependencies"]["dev"]
+            "pytest-mock>=1.7.1, <2.0" in pyproject_config["dependency-groups"]["dev"]
         )
-        assert (
-            "pytest-mock>=1.7.1, <2.0"
-            in pyproject_config["project"]["optional-dependencies"]["dev"]
-        )
-        assert (
-            "pytest~=7.2" in pyproject_config["project"]["optional-dependencies"]["dev"]
-        )
+        assert "pytest~=7.2" in pyproject_config["dependency-groups"]["dev"]
+        assert "dev" not in pyproject_config["project"].get("optional-dependencies", {})
 
     if "4" in tools_list:
         expected = {

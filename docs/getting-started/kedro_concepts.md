@@ -103,7 +103,7 @@ project-dir          # Parent directory of the template
 
 During `kedro new`, you can select which [tools to include in your project](../create/new_project_tools.md). Each tool adds specific files or folders to the project structure:
 
-- **Lint (Ruff)**: Modifies the `pyproject.toml` file to include Ruff configuration settings for linting. It sets up `ruff` under `[tool.ruff]`, defines options like line length, selected rules, and ignored rules, and includes `ruff` as an optional `dev` dependency.
+- **Lint (Ruff)**: Modifies the `pyproject.toml` file to include Ruff configuration settings for linting. It sets up `ruff` under `[tool.ruff]`, defines options like line length, selected rules, and ignored rules, and includes `ruff` in the `dev` dependency group.
 - **Test (Pytest)**: Adds a `tests` folder for storing unit and integration tests, helping to maintain code quality and ensuring that changes in the codebase do not introduce bugs. For more information about testing in Kedro, see the [Automated Testing Guide](../develop/automated_testing.md).
 - **Log**: Allows specific logging configurations by including a `logging.yml` file inside the `conf` folder. For more information about logging customisation in Kedro, see the [Logging Customisation Guide](../develop/logging.md).
 - **Docs (Sphinx)**: Adds a `docs` folder with a Sphinx documentation setup. This folder is typically used to generate technical documentation for the project.

@@ -115,7 +115,7 @@ def _setup_minimal_env(context):
                 "pip",
                 "install",
                 "-U",
-                "pip>=21.2",
+                "pip>=25.1",
             ],
             env=context.env,
         )

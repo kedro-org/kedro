@@ -171,11 +171,13 @@ The available tools include: [linting](#linting), [testing](#testing), [custom l
 
 ### Linting
 
-The Kedro linting tool introduces [`ruff`](https://docs.astral.sh/ruff/) as dependency in your new project's requirements. After project creation, make sure these are installed by running the following command from the project root:
+The Kedro linting tool adds [`ruff`](https://docs.astral.sh/ruff/) to the `dev` dependency group in your new project's `pyproject.toml`. After project creation, install the project and its development tools from the project root:
 
 ```bash
-uv pip install -r requirements.txt
+uv sync
 ```
+
+You can also run `pip install . --group dev` with pip 25.1 or newer.
 
 The linting tool will configure `ruff` with the following settings by default:
 
@@ -207,11 +209,13 @@ Though it has no impact on how your code works, linting is important for code qu
 
 ### Testing
 
-This tool introduces the `tests` directory to the new project's structure, containing the file `test_run.py` with an example unit test. [`Pytest`](https://docs.pytest.org/en/7.4.x/) is added as a dependency in your new project's requirements. After project creation, make sure it is installed by running the following command from your project root:
+This tool introduces the `tests` directory to the new project's structure, containing the file `test_run.py` with an example unit test. [`Pytest`](https://docs.pytest.org/en/7.4.x/) is added to the `dev` dependency group in `pyproject.toml`. After project creation, install the project and its development tools from the project root:
 
 ```bash
-uv pip install -r requirements.txt
+uv sync
 ```
+
+You can also run `pip install . --group dev` with pip 25.1 or newer.
 
 The tool leverages `pytest` with the following configuration:
 

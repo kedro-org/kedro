@@ -182,7 +182,8 @@ class TypeExtractor:
         else:
             sig_param_names = list(signature.parameters.keys())
             positional = [node_inputs] if isinstance(node_inputs, str) else node_inputs
-            for idx, ds in enumerate(positional or []):
+            positional = [ds for ds in (positional or []) if not ds.startswith("**")]
+            for idx, ds in enumerate(positional):
                 if idx < len(sig_param_names):
                     dataset_to_arg[ds] = sig_param_names[idx]
 

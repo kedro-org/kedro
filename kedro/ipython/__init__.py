@@ -399,6 +399,24 @@ def _load_node(node_name: str, pipelines: _ProjectPipelines) -> list[str]:
     imports_cell = _prepare_imports(node_func)
     function_definition_cell = _prepare_function_body(node_func)
 
+    raw_inputs = node._inputs
+    raw_list = [raw_inputs] if isinstance(raw_inputs, str) else raw_inputs
+    if isinstance(raw_list, list) and any(name.startswith("**") for name in raw_list):
+        # Keep the dataset marker until code generation: node.inputs removes it.
+        loads = ["# Prepare necessary inputs for debugging"]
+        positional: list[str] = []
+        unpacked: list[str] = []
+        for index, dataset in enumerate(raw_list):
+            variable = f"_kedro_input_{index}"
+            is_unpacked = dataset.startswith("**")
+            dataset_name = dataset[2:] if is_unpacked else dataset
+            loads.append(f"{variable} = catalog.load({dataset_name!r})")
+            (unpacked if is_unpacked else positional).append(
+                f"**{variable}" if is_unpacked else variable
+            )
+        call = f"{node_func.__name__}({', '.join(positional + unpacked)})"
+        return ["\n".join(loads), imports_cell, function_definition_cell, call]
+
     node_bound_arguments = _get_node_bound_arguments(node)
     inputs_params_mapping = _prepare_node_inputs(node_bound_arguments)
     node_inputs_cell = _format_node_inputs_text(inputs_params_mapping)

@@ -1090,6 +1090,11 @@ class Pipeline:
         namespace: str | None,
         prefix_datasets_with_namespace: bool,
     ) -> str:
+        if name.startswith("**"):
+            return "**" + self._rename(
+                name[2:], mapping, namespace, prefix_datasets_with_namespace
+            )
+
         def _prefix_dataset(name: str) -> str:
             return f"{namespace}.{name}"
 

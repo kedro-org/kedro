@@ -11,7 +11,7 @@ import logging
 import re
 import warnings
 from collections import Counter
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from functools import cached_property, partial
 from typing import TYPE_CHECKING, Any
@@ -126,6 +126,13 @@ class Node:
                         f"is '{type(_input)}'."
                     )
                 )
+            if _input.startswith(_UNPACKING_PREFIX):
+                if isinstance(inputs, dict):
+                    raise ValueError(
+                        "Unpacking inputs are not supported in dict-form inputs"
+                    )
+                if not _strip_unpacking_prefix(_input):
+                    raise ValueError("Unpacking input must name a dataset after '**'")
             _node_dataset_name_validation(_strip_unpacking_prefix(_input), namespace)
 
         if outputs and not isinstance(outputs, (list | dict | str)):
@@ -581,8 +588,18 @@ class Node:
             )
 
         if node_input.startswith(_UNPACKING_PREFIX):
-            return self._func(**inputs[_strip_unpacking_prefix(node_input)])
+            return self._func(**self._unpacked_mapping(inputs, node_input))
         return self._func(inputs[node_input])
+
+    def _unpacked_mapping(self, inputs: dict[str, Any], name: str) -> Mapping:
+        dataset = _strip_unpacking_prefix(name)
+        value = inputs[dataset]
+        if not isinstance(value, Mapping):
+            raise TypeError(
+                f"Node {self!s} input '{dataset}' must be a mapping for unpacking, "
+                f"got {type(value).__name__}"
+            )
+        return value
 
     def _run_with_list(self, inputs: dict[str, Any], node_inputs: list[str]) -> Any:
         # Node inputs and provided run inputs should completely overlap,
@@ -597,11 +614,18 @@ class Node:
             )
         # Ensure the function gets the inputs in the correct order; a "**name"
         # entry is unpacked into keyword arguments, like Python's ** syntax
-        args = []
-        kwargs = {}
+        args: list[Any] = []
+        kwargs: dict[str, Any] = {}
         for item in node_inputs:
             if item.startswith(_UNPACKING_PREFIX):
-                kwargs.update(inputs[_strip_unpacking_prefix(item)])
+                unpacked = self._unpacked_mapping(inputs, item)
+                duplicates = kwargs.keys() & unpacked.keys()
+                if duplicates:
+                    raise TypeError(
+                        f"Node {self!s} got multiple values for keyword argument(s): "
+                        f"{sorted(duplicates, key=str)}"
+                    )
+                kwargs.update(unpacked)
             else:
                 args.append(inputs[item])
         return self._func(*args, **kwargs)
@@ -706,6 +730,8 @@ class Node:
                 # The keys an unpacking "**params:..." entry provides are only
                 # known at run time, so only the other arguments can be bound
                 if has_unpacking:
+                    # An unpacked mapping may be empty, even if all named
+                    # parameters are already bound. Validate its keys at run time.
                     signature.bind_partial(*args, **kwargs)
                 else:
                     signature.bind(*args, **kwargs)

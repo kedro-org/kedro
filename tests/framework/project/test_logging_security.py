@@ -424,6 +424,35 @@ def test_trusted_external_stream_and_handler(logging_probe, monkeypatch, capsys)
     assert marker.read_text() == "imported\nhandler\n"
 
 
+def test_formatter_via_trusted_ext_reference_still_gated(tmp_path, monkeypatch):
+    """A formatter 'class' reached indirectly via a trusted ``ext://`` reference is
+    still gated by the allowlist, so the untrusted module is never imported."""
+    marker = tmp_path / "untrusted_formatter_imported.txt"
+    (tmp_path / "trusted_formatter_cfg.py").write_text(
+        'FORMATTER = {"class": "untrusted_formatter_mod.Formatter", '
+        '"format": "%(message)s"}\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "untrusted_formatter_mod.py").write_text(
+        f"from pathlib import Path\n\nPath({str(marker)!r}).write_text('imported\\n')\n",
+        encoding="utf-8",
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", "trusted_formatter_cfg")
+
+    with pytest.raises(ValueError) as error:
+        _ProjectLogging().configure(
+            {
+                "version": 1,
+                "formatters": {"f": "ext://trusted_formatter_cfg.FORMATTER"},
+            }
+        )
+
+    # stdlib wraps the formatter failure, so the allowlist rejection is the cause.
+    assert "is not permitted" in str(error.value.__cause__)
+    assert not marker.exists()
+
+
 @SKIP_WITHOUT_QUEUE_CONFIG
 def test_trusted_queue_factory_and_listener(logging_probe, monkeypatch):
     """Trusted custom factories and listener classes remain usable."""

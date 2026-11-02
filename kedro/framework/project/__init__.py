@@ -63,6 +63,15 @@ class _RestrictedLoggingConfig(logging.config.DictConfigurator):
     def resolve(self, s: str) -> Any:
         return self._resolve_object(s)
 
+    def configure_formatter(self, config: Any) -> Any:
+        # stdlib resolves a formatter 'class' via the module-level _resolve, not
+        # resolve() above, so gate it here to cover classes reached indirectly
+        # (e.g. an ext:// reference to a config dict in a trusted module).
+        class_name = config.get("class")
+        if isinstance(class_name, str):
+            self._resolve_object(class_name)
+        return super().configure_formatter(config)
+
 
 def _get_default_class(class_import_path: str) -> Any:
     module, _, class_name = class_import_path.rpartition(".")

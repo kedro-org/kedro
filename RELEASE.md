@@ -25,7 +25,9 @@
 
 ## Breaking changes to the API
 
-- **Security hardening**: Logging configuration now enforces the logging module allowlist for `ext://` references and `QueueHandler`'s `queue` and `listener` names. References must name a public object exported directly by an importable module; bare class names, private objects, and attribute chains such as `logging.handlers.SysLogHandler.LOG_LOCAL0` are no longer supported. `cfg://` configuration navigation is also disabled as an additional safeguard. Use fully qualified class names, handler and formatter identifiers for connections, and YAML anchors and aliases to reuse configuration values. List trusted custom modules in `KEDRO_LOGGING_MODULE_ALLOWLIST` before starting Kedro. The exact references `sys.stdout`, `sys.stderr`, `queue.Queue`, and `queue.SimpleQueue` remain supported without opting in their modules.
+- **Security hardening**: Logging configuration now applies `KEDRO_LOGGING_MODULE_ALLOWLIST` to `class`, `ext://`, and `QueueHandler` `queue` and `listener` references. Bare names, private objects, attribute chains, and `cfg://` are no longer supported. Use fully qualified names and allowlist trusted custom modules. `sys.stdout`, `sys.stderr`, `queue.Queue`, and `queue.SimpleQueue` remain allowed by default. See the [logging documentation](https://docs.kedro.org/en/stable/develop/logging/#supported-logging-references) for migration guidance.
+
+Thanks to [leetomo2528](https://github.com/leetomo2528), and to [Hongwei Li](https://github.com/3rdn4Li), [Junmin Zhu](https://github.com/wzunknown), [Zhun Wang](https://github.com/1chig0), [Jiacheng Zhong](https://github.com/superboy-zjc), [Han Dai](https://github.com/DennyDai), [Suyue Guo](https://github.com/SuyueGuo), [Songyang Peng](https://github.com/alexps9) and [Ziyue Pan](https://github.com/ziyue-pan), for independently and responsibly reporting this issue.
 
 ## Community contributions
 

@@ -547,6 +547,52 @@ def test_queue_handler_via_trusted_ext_reference_still_gated(
     assert logging.root.manager.disable == logging.NOTSET
 
 
+@pytest.mark.parametrize(
+    ("section", "name"),
+    [
+        ("handlers", "HANDLER"),
+        ("formatters", "FORMATTER"),
+        ("filters", "FILTER"),
+        pytest.param("handlers", "QUEUE", marks=SKIP_WITHOUT_QUEUE_CONFIG),
+        pytest.param("handlers", "LISTENER", marks=SKIP_WITHOUT_QUEUE_CONFIG),
+    ],
+)
+def test_factories_via_trusted_ext_reference_rejected(
+    section, name, tmp_path, monkeypatch, undo_logging_disable
+):
+    """A '()' factory in a config reached via a trusted ``ext://`` reference is
+    rejected before stdlib calls it."""
+    (tmp_path / "trusted_factory_cfg.py").write_text(
+        textwrap.dedent(
+            """
+            HANDLER = {"()": "logging.disable"}
+            FORMATTER = {"()": "logging.disable"}
+            FILTER = {"()": "logging.disable"}
+            QUEUE = {
+                "class": "logging.handlers.QueueHandler",
+                "queue": {"()": "logging.disable"},
+            }
+            LISTENER = {
+                "class": "logging.handlers.QueueHandler",
+                "queue": "queue.Queue",
+                "listener": {"()": "logging.disable"},
+            }
+            """
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", "trusted_factory_cfg")
+
+    with pytest.raises(ValueError) as error:
+        _ProjectLogging().configure(
+            {"version": 1, section: {"x": f"ext://trusted_factory_cfg.{name}"}}
+        )
+
+    assert "'()' key is not allowed" in str(error.value.__cause__)
+    assert logging.root.manager.disable == logging.NOTSET
+
+
 @SKIP_WITHOUT_QUEUE_CONFIG
 def test_trusted_queue_object_and_listener_class(logging_probe, monkeypatch):
     """Trusted queue objects and listener classes remain usable."""

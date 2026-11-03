@@ -55,6 +55,10 @@ _SAFE_LOGGING_REFERENCES = (
 _LOGGING_CONFIG_DOCS_URL = (
     "https://docs.kedro.org/en/stable/develop/logging/#supported-logging-references"
 )
+_FACTORY_KEY_ERROR = (
+    "The '()' key is not allowed in logging configuration as it poses a security risk. "
+    f"Use logging classes from trusted modules instead. See {_LOGGING_CONFIG_DOCS_URL}."
+)
 
 
 def _validate_queue_handler_references(
@@ -117,9 +121,20 @@ class _RestrictedLoggingConfig(logging.config.DictConfigurator):
             self._resolve_object(class_name)
         return super().configure_formatter(config)
 
+    def configure_custom(self, config: Any) -> Any:
+        # stdlib calls every '()' factory except a handler's here, including those in
+        # config dicts reached via ext:// that the static check never saw. Kedro only
+        # adds '()' for filter classes it has already validated.
+        factory = config.get("()")
+        if not (isinstance(factory, type) and issubclass(factory, logging.Filter)):
+            raise ValueError(_FACTORY_KEY_ERROR)
+        return super().configure_custom(config)
+
     def configure_handler(self, config: Any) -> Any:
-        # Recheck QueueHandler references the static check never saw, e.g. in a
-        # handler config reached via an ext:// reference to a dict in a trusted module.
+        # Recheck factories and QueueHandler references the static check never saw,
+        # e.g. in a handler config reached via an ext:// reference to a trusted dict.
+        if "()" in config:
+            raise ValueError(_FACTORY_KEY_ERROR)
         handler_class = config.get("class")
         if isinstance(handler_class, str):
             handler_class = self._resolve_object(handler_class)
@@ -565,10 +580,7 @@ class _ProjectLogging(UserDict):
         invalid logging classes are encountered."""
         if isinstance(config, Mapping):
             if "()" in config:
-                raise ValueError(
-                    "The '()' key is not allowed in logging configuration as it poses a security risk. "
-                    f"Use logging classes from trusted modules instead. See {_LOGGING_CONFIG_DOCS_URL}."
-                )
+                raise ValueError(_FACTORY_KEY_ERROR)
             if "class" in config:
                 class_path = config["class"]
                 # Formatters use stdlib's _resolve(), so validate the full module

@@ -138,6 +138,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
                 A resolver can be given as a `(callable, kwargs)` tuple to pass keyword arguments such as
                 `use_cache` or `replace` on to `OmegaConf.register_new_resolver()`.
+                A resolver whose name is already registered is skipped unless its kwargs include
+                `replace=True`.
             merge_strategy: A dictionary that specifies the merging strategy for each configuration type.
                 The accepted merging strategies are `soft` and `destructive`. Defaults to `destructive`.
             ignore_hidden: A boolean flag that determines whether hidden files and directories should be
@@ -700,7 +702,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
     ) -> None:
         """Register custom resolvers. A resolver given as a `(callable, kwargs)` tuple passes the
         `kwargs` on to `OmegaConf.register_new_resolver()` (for example `use_cache` or `replace`);
-        a plain callable is registered with no extra arguments.
+        a plain callable is registered with no extra arguments. A resolver whose name is already
+        registered is skipped unless its kwargs include `replace=True`.
         """
         for name, resolver in resolvers.items():
             if isinstance(resolver, tuple):

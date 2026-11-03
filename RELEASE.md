@@ -2,14 +2,13 @@
 
 ## Major features and improvements
 
-- Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple.
+- Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple. A resolver that is already registered is skipped unless `replace=True` is passed.
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.
 - Added node groups to the project snapshot. Each `PipelineSnapshot` has a `groups` list of `GroupSnapshot` entries with the group's nodes, dependencies, inputs and outputs, also returned by `GET /snapshot`. `get_project_snapshot` takes a `group_by` argument to choose the grouping strategy, `GET /snapshot` takes it as a query parameter, and each `PipelineSnapshot` records it in `group_by`.
 - Added `kedro.inspection.validate_deployment_grouping` to check a node grouping before deployment. It reports datasets kept in memory that are passed between groups, cycles between groups, and datasets passed between groups on local disk.
 
 ## Bug fixes and other changes
 
-- Fixed `OmegaConfigLoader` ignoring `replace=True` for an already-registered custom resolver: a resolver given as a `(callable, kwargs)` tuple with `replace=True` is now re-registered, while resolvers without `replace` keep the previously registered implementation.
 - Fixed MemoryDataset losing its empty sentinel identity after pickle/unpickle, which could cause load() to return the sentinel instead of raising DatasetError.
 - Fixed `AttributeError` when naming a node built from a callable object, such as a class instance with `__call__`, and no explicit name. The node name now falls back to the class name.
 - Fixed typed parameter validation binding a `params:` input to the wrong function argument when a node declared with a dict of inputs leaves an earlier argument to its default. The typed requirement was taken from an argument the node never receives, so a run could fail on a type the user never asked for.

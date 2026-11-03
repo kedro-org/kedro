@@ -37,6 +37,7 @@ def logging_probe(tmp_path, monkeypatch):
             marker = Path({str(marker)!r})
             marker.write_text("imported\\n")
             STREAM = sys.stdout
+            LOG_QUEUE = queue.Queue()
 
             class Probe:
                 # Force a later handler.name assignment to fail, proving that
@@ -248,32 +249,9 @@ def test_import_failures_do_not_suggest_attribute_chains(
     assert str(cause) in str(error.value)
 
 
-@pytest.mark.parametrize(
-    ("key", "reference"),
-    [
-        ("stream", "ext://logging.sys.stdout"),
-        pytest.param(
-            "queue",
-            "logging.handlers.queue.Queue",
-            marks=SKIP_WITHOUT_QUEUE_CONFIG,
-        ),
-        pytest.param(
-            "listener",
-            "logging.handlers.logging.handlers.QueueListener",
-            marks=SKIP_WITHOUT_QUEUE_CONFIG,
-        ),
-    ],
-)
-def test_runtime_resolution_rejects_attribute_chains(key, reference):
+def test_runtime_resolution_rejects_attribute_chains():
     """The runtime guard must block attribute walks that pass static name checks."""
-    handler = {
-        "class": (
-            "logging.StreamHandler"
-            if key == "stream"
-            else "logging.handlers.QueueHandler"
-        ),
-        key: reference,
-    }
+    handler = {"class": "logging.StreamHandler", "stream": "ext://logging.sys.stdout"}
 
     with pytest.raises(ValueError) as error:
         _ProjectLogging().configure({"version": 1, "handlers": {"probe": handler}})
@@ -453,9 +431,125 @@ def test_formatter_via_trusted_ext_reference_still_gated(tmp_path, monkeypatch):
     assert not marker.exists()
 
 
+@pytest.fixture
+def undo_logging_disable():
+    """Re-enable logging if a regression lets configuration call logging.disable()."""
+    yield
+    logging.disable(logging.NOTSET)
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [
+        "logging.disable",
+        "logging.shutdown",
+        "logging.handlers.queue.Queue",
+        "queue.LifoQueue",
+        "{probe}.queue_factory",
+    ],
+)
+def test_queue_factories_limited_to_standard_queues(
+    factory, logging_probe, monkeypatch, undo_logging_disable
+):
+    """stdlib calls a queue factory without arguments, so only the standard queues
+    are accepted, even from allowlisted modules."""
+    module_name, marker = logging_probe
+    monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", f"queue,{module_name}")
+    handler = {
+        "class": "logging.handlers.QueueHandler",
+        "queue": factory.format(probe=module_name),
+    }
+
+    with pytest.raises(ValueError, match=r"queue factory .* is not permitted"):
+        _ProjectLogging().configure({"version": 1, "handlers": {"queued": handler}})
+
+    assert logging.root.manager.disable == logging.NOTSET
+    assert not marker.exists()
+
+
+@pytest.mark.parametrize(
+    ("listener", "reason"),
+    [
+        ("logging.disable", "subclass of logging.handlers.QueueListener"),
+        ("logging.StreamHandler", "subclass of logging.handlers.QueueListener"),
+        ("{probe}.queue_factory", "subclass of logging.handlers.QueueListener"),
+        ("logging.handlers.logging.handlers.QueueListener", "Cannot import module"),
+    ],
+)
+def test_listeners_must_be_queue_listener_classes(
+    listener, reason, logging_probe, monkeypatch, undo_logging_disable
+):
+    """Listener names must resolve to QueueListener subclasses, never other callables."""
+    module_name, marker = logging_probe
+    monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", module_name)
+    handler = {
+        "class": "logging.handlers.QueueHandler",
+        "queue": "queue.Queue",
+        "listener": listener.format(probe=module_name),
+    }
+
+    with pytest.raises(ValueError, match=reason):
+        _ProjectLogging().configure({"version": 1, "handlers": {"queued": handler}})
+
+    assert logging.root.manager.disable == logging.NOTSET
+    # Resolving a trusted listener name may import its module, but calls nothing.
+    assert not marker.exists() or marker.read_text() == "imported\n"
+
+
+@pytest.mark.parametrize(
+    ("handler_name", "reason"),
+    [
+        ("QUEUE_FACTORY", "queue factory"),
+        ("CLASS_OBJECT", "queue factory"),
+        ("LISTENER", "QueueHandler listener"),
+    ],
+)
+def test_queue_handler_via_trusted_ext_reference_still_gated(
+    handler_name, reason, tmp_path, monkeypatch, undo_logging_disable
+):
+    """A QueueHandler config reached via a trusted ``ext://`` reference is rechecked
+    before stdlib calls its queue factory or listener."""
+    (tmp_path / "trusted_handler_cfg.py").write_text(
+        textwrap.dedent(
+            """
+            import logging.handlers
+
+            QUEUE_FACTORY = {
+                "class": "logging.handlers.QueueHandler",
+                "queue": "logging.disable",
+            }
+            CLASS_OBJECT = {
+                "class": logging.handlers.QueueHandler,
+                "queue": "logging.disable",
+            }
+            LISTENER = {
+                "class": "logging.handlers.QueueHandler",
+                "queue": "queue.Queue",
+                "listener": "logging.disable",
+            }
+            """
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", "trusted_handler_cfg")
+
+    with pytest.raises(ValueError) as error:
+        _ProjectLogging().configure(
+            {
+                "version": 1,
+                "handlers": {"queued": f"ext://trusted_handler_cfg.{handler_name}"},
+            }
+        )
+
+    # stdlib wraps the handler failure, so the queue rejection is the cause.
+    assert reason in str(error.value.__cause__)
+    assert logging.root.manager.disable == logging.NOTSET
+
+
 @SKIP_WITHOUT_QUEUE_CONFIG
-def test_trusted_queue_factory_and_listener(logging_probe, monkeypatch):
-    """Trusted custom factories and listener classes remain usable."""
+def test_trusted_queue_object_and_listener_class(logging_probe, monkeypatch):
+    """Trusted queue objects and listener classes remain usable."""
     module_name, marker = logging_probe
     monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", module_name)
     logging_instance = _ProjectLogging()
@@ -466,7 +560,7 @@ def test_trusted_queue_factory_and_listener(logging_probe, monkeypatch):
             "handlers": {
                 "queued": {
                     "class": "logging.handlers.QueueHandler",
-                    "queue": f"{module_name}.queue_factory",
+                    "queue": f"ext://{module_name}.LOG_QUEUE",
                     "listener": f"{module_name}.Listener",
                 }
             },
@@ -475,9 +569,10 @@ def test_trusted_queue_factory_and_listener(logging_probe, monkeypatch):
     )
 
     handler = logging.getLogger().handlers[0]
-    assert isinstance(handler.queue, queue.Queue)
-    assert type(handler.listener).__module__ == module_name
-    assert marker.read_text() == "imported\nfactory\n"
+    probe_module = sys.modules[module_name]
+    assert handler.queue is probe_module.LOG_QUEUE
+    assert type(handler.listener) is probe_module.Listener
+    assert marker.read_text() == "imported\n"
 
 
 @pytest.mark.parametrize("filename", ["default_logging.yml", "rich_logging.yml"])
@@ -662,7 +757,7 @@ def test_fresh_startup_rejects_before_execution(
     expected_reason = {
         "ext": "is not permitted",
         "cfg": "'cfg://' prefix is not allowed",
-        "private_queue": "private object",
+        "private_queue": "QueueHandler queue factory",
     }
     assert expected_reason[vector] in result.stderr
     if vector in ("ext", "cfg"):

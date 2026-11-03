@@ -43,14 +43,59 @@ _LOGGING_BASE_CLASSES = (
 # Extended via the KEDRO_LOGGING_MODULE_ALLOWLIST env var.
 _DEFAULT_LOGGING_MODULE_ALLOWLIST = ("logging", "kedro.logging")
 
+# The only queue factories stdlib may call when configuring a QueueHandler, even
+# from allowlisted modules, since stdlib calls any resolved factory without arguments.
+_QUEUE_FACTORY_REFERENCES = frozenset({"queue.Queue", "queue.SimpleQueue"})
+
 # Exact standard-library objects needed by common logging configurations. These
 # exceptions must not grant access to the rest of their modules.
-_SAFE_LOGGING_REFERENCES = frozenset(
-    {"sys.stdout", "sys.stderr", "queue.Queue", "queue.SimpleQueue"}
+_SAFE_LOGGING_REFERENCES = (
+    frozenset({"sys.stdout", "sys.stderr"}) | _QUEUE_FACTORY_REFERENCES
 )
 _LOGGING_CONFIG_DOCS_URL = (
     "https://docs.kedro.org/en/stable/develop/logging/#supported-logging-references"
 )
+
+
+def _validate_queue_handler_references(
+    config: Mapping[str, Any], resolver: Callable[[str], Any]
+) -> None:
+    """Check a ``QueueHandler``'s ``queue`` and ``listener`` names before stdlib calls them.
+
+    Args:
+        config: The ``QueueHandler`` configuration.
+        resolver: Resolves a reference under Kedro's logging import policy.
+
+    Raises:
+        ValueError: If ``queue`` names a factory other than ``queue.Queue`` or
+            ``queue.SimpleQueue``, or ``listener`` does not name a
+            ``logging.handlers.QueueListener`` subclass.
+    """
+    queue_factory = config.get("queue")
+    # stdlib uses an ext:// object as the queue itself and never calls it.
+    if (
+        isinstance(queue_factory, str)
+        and not queue_factory.startswith("ext://")
+        and queue_factory not in _QUEUE_FACTORY_REFERENCES
+    ):
+        raise ValueError(
+            f"QueueHandler queue factory '{queue_factory}' is not permitted. Use "
+            "'queue.Queue' or 'queue.SimpleQueue', or an ext:// reference to a queue "
+            f"object in a trusted module. See {_LOGGING_CONFIG_DOCS_URL}."
+        )
+
+    listener = config.get("listener")
+    if isinstance(listener, str):
+        listener_class = resolver(listener.removeprefix("ext://"))
+        if not (
+            isinstance(listener_class, type)
+            and issubclass(listener_class, logging.handlers.QueueListener)
+        ):
+            raise ValueError(
+                f"QueueHandler listener '{listener}' is not permitted. It must name a "
+                "subclass of logging.handlers.QueueListener. "
+                f"See {_LOGGING_CONFIG_DOCS_URL}."
+            )
 
 
 class _RestrictedLoggingConfig(logging.config.DictConfigurator):
@@ -71,6 +116,18 @@ class _RestrictedLoggingConfig(logging.config.DictConfigurator):
         if isinstance(class_name, str):
             self._resolve_object(class_name)
         return super().configure_formatter(config)
+
+    def configure_handler(self, config: Any) -> Any:
+        # Recheck QueueHandler references the static check never saw, e.g. in a
+        # handler config reached via an ext:// reference to a dict in a trusted module.
+        handler_class = config.get("class")
+        if isinstance(handler_class, str):
+            handler_class = self._resolve_object(handler_class)
+        if isinstance(handler_class, type) and issubclass(
+            handler_class, logging.handlers.QueueHandler
+        ):
+            _validate_queue_handler_references(config, self._resolve_object)
+        return super().configure_handler(config)
 
 
 def _get_default_class(class_import_path: str) -> Any:
@@ -498,16 +555,6 @@ class _ProjectLogging(UserDict):
         logging.Filter)."""
         return self._resolve_logging_class(class_path)
 
-    def _validate_queue_factory_and_listener_names(
-        self, config: Mapping[str, Any]
-    ) -> None:
-        """Check string queue factory and listener names before logging setup."""
-        # The caller validates nested containers; stdlib checks supplied objects.
-        for key in ("queue", "listener"):
-            reference = config.get(key)
-            if isinstance(reference, str):
-                self._validate_logging_reference(reference.removeprefix("ext://"))
-
     def _validate_logging_config(
         self,
         config: Any,
@@ -530,7 +577,9 @@ class _ProjectLogging(UserDict):
                 if resolved_logging_classes is not None:
                     resolved_logging_classes[class_path] = resolved_class
                 if issubclass(resolved_class, logging.handlers.QueueHandler):
-                    self._validate_queue_factory_and_listener_names(config)
+                    _validate_queue_handler_references(
+                        config, self._resolve_logging_object
+                    )
             validated = {}
             for k, v in config.items():
                 validated[k] = self._validate_logging_config(
@@ -618,6 +667,11 @@ class _ProjectLogging(UserDict):
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
+
+        Raises:
+            ValueError: If the configuration contains a '()' key, a 'cfg://' reference,
+                a reference outside the allowed modules, an invalid logging class, or
+                an unsupported ``QueueHandler`` queue factory or listener.
         """
         resolved_logging_classes: dict[str, type[Any]] = {}
         validated_config = self._validate_logging_config(
@@ -690,7 +744,13 @@ def configure_project(package_name: str, preserve_logging: bool = False) -> None
 
 
 def configure_logging(logging_config: Mapping[str, Any]) -> None:
-    """Configure logging according to the ``logging_config`` mapping."""
+    """Configure logging according to the ``logging_config`` mapping.
+
+    Raises:
+        ValueError: If the configuration contains a '()' key, a 'cfg://' reference,
+            a reference outside the allowed modules, an invalid logging class, or
+            an unsupported ``QueueHandler`` queue factory or listener.
+    """
     LOGGING.configure(logging_config)
 
 

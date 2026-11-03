@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 
+- Added support for unpacking a parameters dictionary into a node's keyword arguments with a `**` prefix in `node(inputs=)`, for example `inputs=["data", "**params:model_params"]`, so a node no longer needs one `params:` entry per key or a `dict` argument it indexes itself. Input dataset names starting with `**` now request keyword unpacking and cannot be used as literal dataset names.
 - Added the option to allow data to be injected at run time when using the `KedroServiceSession`.
 - Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple.
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.

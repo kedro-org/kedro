@@ -11,7 +11,7 @@ import logging
 import re
 import warnings
 from collections import Counter
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from functools import cached_property, partial
 from typing import TYPE_CHECKING, Any
@@ -126,7 +126,14 @@ class Node:
                         f"is '{type(_input)}'."
                     )
                 )
-            _node_dataset_name_validation(_input, namespace)
+            if _input.startswith(_UNPACKING_PREFIX):
+                if isinstance(inputs, dict):
+                    raise ValueError(
+                        "Unpacking inputs are not supported in dict-form inputs"
+                    )
+                if not _strip_unpacking_prefix(_input):
+                    raise ValueError("Unpacking input must name a dataset after '**'")
+            _node_dataset_name_validation(_strip_unpacking_prefix(_input), namespace)
 
         if outputs and not isinstance(outputs, (list | dict | str)):
             raise ValueError(
@@ -395,7 +402,7 @@ class Node:
         """
         if isinstance(self._inputs, dict):
             return _dict_inputs_to_list(self._func, self._inputs)
-        return _to_list(self._inputs)
+        return [_strip_unpacking_prefix(name) for name in _to_list(self._inputs)]
 
     @property
     def outputs(self) -> list[str]:
@@ -573,25 +580,55 @@ class Node:
         return self._func()
 
     def _run_with_one_input(self, inputs: dict[str, Any], node_input: str) -> Any:
-        if len(inputs) != 1 or node_input not in inputs:
+        if len(inputs) != 1 or _strip_unpacking_prefix(node_input) not in inputs:
             raise ValueError(
                 f"Node {self!s} expected one input named '{node_input}', "
                 f"but got the following {len(inputs)} input(s) instead: "
                 f"{sorted(inputs.keys())}."
             )
 
+        if node_input.startswith(_UNPACKING_PREFIX):
+            return self._func(**self._unpacked_mapping(inputs, node_input))
         return self._func(inputs[node_input])
 
+    def _unpacked_mapping(self, inputs: dict[str, Any], name: str) -> Mapping:
+        dataset = _strip_unpacking_prefix(name)
+        value = inputs[dataset]
+        if not isinstance(value, Mapping):
+            raise TypeError(
+                f"Node {self!s} input '{dataset}' must be a mapping for unpacking, "
+                f"got {type(value).__name__}"
+            )
+        return value
+
     def _run_with_list(self, inputs: dict[str, Any], node_inputs: list[str]) -> Any:
-        # Node inputs and provided run inputs should completely overlap
-        if set(node_inputs) != set(inputs.keys()):
+        # Node inputs and provided run inputs should completely overlap,
+        # comparing by the dataset names (without any "**" unpacking prefix)
+        if {_strip_unpacking_prefix(name) for name in node_inputs} != set(
+            inputs.keys()
+        ):
             raise ValueError(
                 f"Node {self!s} expected {len(node_inputs)} input(s) {node_inputs}, "
                 f"but got the following {len(inputs)} input(s) instead: "
                 f"{sorted(inputs.keys())}."
             )
-        # Ensure the function gets the inputs in the correct order
-        return self._func(*(inputs[item] for item in node_inputs))
+        # Ensure the function gets the inputs in the correct order; a "**name"
+        # entry is unpacked into keyword arguments, like Python's ** syntax
+        args: list[Any] = []
+        kwargs: dict[str, Any] = {}
+        for item in node_inputs:
+            if item.startswith(_UNPACKING_PREFIX):
+                unpacked = self._unpacked_mapping(inputs, item)
+                duplicates = kwargs.keys() & unpacked.keys()
+                if duplicates:
+                    raise TypeError(
+                        f"Node {self!s} got multiple values for keyword argument(s): "
+                        f"{sorted(duplicates, key=str)}"
+                    )
+                kwargs.update(unpacked)
+            else:
+                args.append(inputs[item])
+        return self._func(*args, **kwargs)
 
     def _run_with_dict(
         self, inputs: dict[str, Any], node_inputs: dict[str, str]
@@ -687,9 +724,17 @@ class Node:
         # inspect does not support built-in Python functions written in C.
         # Thus we only validate func if it is not built-in.
         if not inspect.isbuiltin(func):
-            args, kwargs = self._process_inputs_for_bind(inputs)
+            args, kwargs, has_unpacking = self._process_inputs_for_bind(inputs)
+            signature = inspect.signature(func, follow_wrapped=False)
             try:
-                inspect.signature(func, follow_wrapped=False).bind(*args, **kwargs)
+                # The keys an unpacking "**params:..." entry provides are only
+                # known at run time, so only the other arguments can be bound
+                if has_unpacking:
+                    # An unpacked mapping may be empty, even if all named
+                    # parameters are already bound. Validate its keys at run time.
+                    signature.bind_partial(*args, **kwargs)
+                else:
+                    signature.bind(*args, **kwargs)
             except Exception as exc:
                 func_args = inspect.signature(
                     func, follow_wrapped=False
@@ -724,18 +769,26 @@ class Node:
     @staticmethod
     def _process_inputs_for_bind(
         inputs: str | list[str] | dict[str, str] | None,
-    ) -> tuple[list[str], dict[str, str]]:
+    ) -> tuple[list[str], dict[str, str], bool]:
         # Safeguard that we do not mutate list inputs
         inputs = copy.copy(inputs)
         args: list[str] = []
         kwargs: dict[str, str] = {}
+        has_unpacking = False
         if isinstance(inputs, str):
-            args = [inputs]
+            if inputs.startswith(_UNPACKING_PREFIX):
+                has_unpacking = True
+            else:
+                args = [inputs]
         elif isinstance(inputs, list):
-            args = inputs
+            for name in inputs:
+                if name.startswith(_UNPACKING_PREFIX):
+                    has_unpacking = True
+                else:
+                    args.append(name)
         elif isinstance(inputs, dict):
             kwargs = inputs
-        return args, kwargs
+        return args, kwargs, has_unpacking
 
 
 def _node_error_message(msg: str) -> str:
@@ -746,6 +799,14 @@ def _node_error_message(msg: str) -> str:
 
 
 _DOTTED_DATASET_NAME_WARNED = "__dotted_dataset_name_warned__"
+
+_UNPACKING_PREFIX = "**"
+
+
+def _strip_unpacking_prefix(name: str) -> str:
+    """Remove the "**" prefix of an unpacking input (for example
+    "**params:foo"), leaving the name of the dataset it reads."""
+    return name.removeprefix(_UNPACKING_PREFIX)
 
 
 def _node_dataset_name_validation(name: str, namespace: str | None) -> None:

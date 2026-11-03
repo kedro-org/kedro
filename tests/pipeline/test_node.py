@@ -1,4 +1,5 @@
 import re
+import warnings
 from collections.abc import Callable
 from functools import partial, update_wrapper, wraps
 from unittest.mock import Mock
@@ -155,6 +156,37 @@ class TestValidNode:
     def test_confirms(self, confirms_arg, expected):
         dummy_node = node(identity, "input", None, confirms=confirms_arg)
         assert dummy_node.confirms == expected
+
+
+class TestNodeWithUnpackingInputs:
+    def test_inputs_property_strips_unpacking_prefix(self):
+        n = node(lambda data, a, b: None, ["data", "**params:bar"], "out")
+        assert n.inputs == ["data", "params:bar"]
+
+    def test_run_unpacks_params_dict(self):
+        def join(data, a, b):
+            return f"{data}-{a}-{b}"
+
+        n = node(join, ["data", "**params:bar"], "out")
+        assert n.run({"data": "x", "params:bar": {"a": 1, "b": 2}}) == {"out": "x-1-2"}
+
+    def test_run_single_unpacking_input(self):
+        n = node(lambda **kwargs: sorted(kwargs), "**params:bar", "out")
+        assert n.run({"params:bar": {"b": 2, "a": 1}}) == {"out": ["a", "b"]}
+
+    def test_run_unpacking_with_wrong_key_raises_type_error(self):
+        n = node(lambda data, a, b: None, ["data", "**params:bar"], "out")
+        with pytest.raises(TypeError, match="unexpected keyword argument 'c'"):
+            n.run({"data": "x", "params:bar": {"a": 1, "b": 2, "c": 3}})
+
+    def test_definition_still_rejects_extra_positional_inputs(self):
+        with pytest.raises(TypeError, match="but got"):
+            node(lambda data: None, ["data", "extra", "**params:bar"], "out")
+
+    def test_dotted_unpacking_name_raises_no_namespace_warning(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            node(lambda a, b: None, ["**params:foo.bar"], "out")
 
 
 class TestNodeComparisons:

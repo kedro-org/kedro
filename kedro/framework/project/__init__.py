@@ -146,7 +146,7 @@ class _ProjectSettings(LazySettings):
     _RUNNER_MODULE_ALLOWLIST = Validator("RUNNER_MODULE_ALLOWLIST", default=tuple())
     _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
         "CONFIG_LOADER_CLASS",
-        default=_get_default_class("kedro.config.OmegaConfigLoader"),
+        default=_get_default_class("kedro.config.LazyOmegaConfigLoader"),
     )
     _CONFIG_LOADER_ARGS = Validator(
         "CONFIG_LOADER_ARGS", default={"base_env": "base", "default_run_env": "local"}

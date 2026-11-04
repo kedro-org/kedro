@@ -92,7 +92,17 @@ class _ImplementsCatalogProtocolValidator(Validator):
 
 class _HasSharedParentClassValidator(Validator):
     """A validator to check that the parent of the default class is an ancestor of
-    the settings value."""
+    the settings value.
+
+    Pass ``parent_class_path`` to require another base class than the direct parent
+    of the default class.
+    """
+
+    def __init__(
+        self, *names: str, parent_class_path: str | None = None, **kwargs: Any
+    ):
+        super().__init__(*names, **kwargs)
+        self._parent_class_path = parent_class_path
 
     def validate(
         self, settings: dynaconf.base.Settings, *args: Any, **kwargs: Any
@@ -112,7 +122,13 @@ class _HasSharedParentClassValidator(Validator):
             # the abstract class that must be inherited from.
             # A more general check just for a shared ancestor would be:
             # set(default_class.mro()) & set(setting_value.mro()) - {abc.ABC, object}
-            default_class_parent = default_class.mro()[1]
+            if self._parent_class_path:
+                module, _, class_name = self._parent_class_path.rpartition(".")
+                default_class_parent = getattr(
+                    importlib.import_module(module), class_name
+                )
+            else:
+                default_class_parent = default_class.mro()[1]
             if default_class_parent not in setting_value.mro():
                 raise ValidationError(
                     f"Invalid value '{setting_value.__module__}.{setting_value.__qualname__}' "
@@ -147,6 +163,7 @@ class _ProjectSettings(LazySettings):
     _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
         "CONFIG_LOADER_CLASS",
         default=_get_default_class("kedro.config.LazyOmegaConfigLoader"),
+        parent_class_path="kedro.config.abstract_config.AbstractConfigLoader",
     )
     _CONFIG_LOADER_ARGS = Validator(
         "CONFIG_LOADER_ARGS", default={"base_env": "base", "default_run_env": "local"}

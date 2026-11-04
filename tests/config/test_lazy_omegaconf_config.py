@@ -915,6 +915,21 @@ class TestLazyOmegaConfigLoader:
         assert loader["credentials"] == {"token": "override"}
         assert loader["parameters"] == {"value": "override"}
 
+    def test_deleting_an_override_makes_preload_read_files_again(
+        self, tmp_path: Path
+    ) -> None:
+        _write_yaml(tmp_path / "base" / "globals.yml", {"g": "file"})
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"value": "${globals:g}"})
+        loader = _loader(tmp_path)
+        loader["globals"] = {"g": "override"}
+        loader.preload()
+        assert loader["parameters"] == {"value": "override"}
+
+        del loader["globals"]
+        loader.preload()
+
+        assert loader["parameters"] == {"value": "file"}
+
     def test_preload_logs_which_overrides_are_not_read_from_files(
         self, tmp_path: Path, caplog: pytest.LogCaptureFixture
     ) -> None:

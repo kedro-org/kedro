@@ -254,7 +254,7 @@ class TestKedroSession:
         result = session._get_config_loader()
 
         assert isinstance(result, OmegaConfigLoader)
-        assert result.__class__.__name__ == "OmegaConfigLoader"
+        assert result.__class__.__name__ == "LazyOmegaConfigLoader"
         assert result.env == "my_fake_env"
 
     @pytest.mark.usefixtures("mock_settings_custom_context_class")
@@ -335,7 +335,7 @@ class TestKedroSession:
         ]
         assert result.config_patterns["spark"] == ["spark/*"]
         mocker.patch(
-            "kedro.config.OmegaConfigLoader.__getitem__",
+            "kedro.config.LazyOmegaConfigLoader.__getitem__",
             return_value=["spark/*"],
         )
         assert result["spark"] == ["spark/*"]
@@ -775,7 +775,10 @@ class TestKedroSession:
                 pass
 
         pipelines_ret = _PipelinesDict(
-            {_FAKE_PIPELINE_NAME: filter_mock, "__default__": filter_mock}
+            {
+                _FAKE_PIPELINE_NAME: filter_mock,
+                "__default__": filter_mock,
+            }
         )
         mocker.patch("kedro.framework.session.session.pipelines", pipelines_ret)
         mocker.patch(

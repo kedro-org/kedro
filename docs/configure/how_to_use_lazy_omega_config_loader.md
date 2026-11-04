@@ -51,7 +51,9 @@ Use `preload()` before serving repeated requests. It reads and merges the config
 
 !!! warning "`preload()` refreshes files, not your overrides"
 
-    Calling `preload()` again re-reads every file, but it does not reset the loader. Values that you assigned yourself, such as `loader["globals"] = ...`, are kept and keep replacing the matching files.
+    Calling `preload()` again re-reads every file, but it does not reset the loader. Values that you assigned yourself, such as `loader["globals"] = ...`, are kept and keep replacing the matching files. `preload()` logs, at `INFO` level, the keys whose values it keeps instead of reading them from files.
+
+    To make `preload()` read a key from the files again, delete your override with `del loader[key]` and call `preload()`.
 
     For example, with `bucket: "prod-bucket"` in `conf/base/globals.yml` and `path: "s3://${globals:bucket}"` in `conf/base/parameters.yml`:
 
@@ -60,7 +62,7 @@ Use `preload()` before serving repeated requests. It reads and merges the config
     loader.preload()
     loader["parameters"]  # {"path": "s3://test-bucket"}
 
-    del loader["globals"]  # drop the override
+    del loader["globals"]  # drop the override, so that the files are used again
     loader.preload()
     loader["parameters"]  # {"path": "s3://prod-bucket"}
     ```

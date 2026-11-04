@@ -564,12 +564,6 @@ class _ProjectLogging(UserDict):
 
         return cls
 
-    def _validate_logging_class(self, class_path: str) -> type[Any]:
-        """Validate that a class referenced in logging configuration is a legitimate
-        logging class (i.e. a subclass of logging.Handler, logging.Formatter, or
-        logging.Filter)."""
-        return self._resolve_logging_class(class_path)
-
     def _validate_logging_config(
         self,
         config: Any,
@@ -585,7 +579,7 @@ class _ProjectLogging(UserDict):
                 class_path = config["class"]
                 # Formatters use stdlib's _resolve(), so validate the full module
                 # path and logging class before stdlib imports or instantiates it.
-                resolved_class = self._validate_logging_class(class_path)
+                resolved_class = self._resolve_logging_class(class_path)
                 if resolved_logging_classes is not None:
                     resolved_logging_classes[class_path] = resolved_class
                 if issubclass(resolved_class, logging.handlers.QueueHandler):

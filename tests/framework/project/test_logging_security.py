@@ -1,5 +1,6 @@
 """Logging configuration must be rejected before untrusted code executes."""
 
+import importlib
 import logging
 import os
 import queue
@@ -71,6 +72,23 @@ def logging_probe(tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(tmp_path))
     yield module_name, marker
     sys.modules.pop(module_name, None)
+
+
+@pytest.fixture
+def write_module(tmp_path, monkeypatch):
+    """Write importable modules for one test, and forget them on teardown so a later
+    test imports the file it wrote rather than a cached copy."""
+    monkeypatch.syspath_prepend(str(tmp_path))
+    written = []
+
+    def write(name, source):
+        (tmp_path / f"{name}.py").write_text(textwrap.dedent(source), encoding="utf-8")
+        importlib.invalidate_caches()
+        written.append(name)
+
+    yield write
+    for name in written:
+        sys.modules.pop(name, None)
 
 
 @pytest.mark.parametrize(
@@ -190,7 +208,7 @@ def test_class_references_must_be_explicit_names(class_path, replacement, mocker
     importer = mocker.patch("kedro.framework.project.importlib.import_module")
 
     with pytest.raises(ValueError, match="fully qualified") as error:
-        logging_instance._validate_logging_class(class_path)
+        logging_instance._resolve_logging_class(class_path)
 
     importer.assert_not_called()
     assert "#supported-logging-references" in str(error.value)
@@ -402,20 +420,21 @@ def test_trusted_external_stream_and_handler(logging_probe, monkeypatch, capsys)
     assert marker.read_text() == "imported\nhandler\n"
 
 
-def test_formatter_via_trusted_ext_reference_still_gated(tmp_path, monkeypatch):
+def test_formatter_via_trusted_ext_reference_still_gated(
+    tmp_path, monkeypatch, write_module
+):
     """A formatter 'class' reached indirectly via a trusted ``ext://`` reference is
     still gated by the allowlist, so the untrusted module is never imported."""
     marker = tmp_path / "untrusted_formatter_imported.txt"
-    (tmp_path / "trusted_formatter_cfg.py").write_text(
+    write_module(
+        "trusted_formatter_cfg",
         'FORMATTER = {"class": "untrusted_formatter_mod.Formatter", '
         '"format": "%(message)s"}\n',
-        encoding="utf-8",
     )
-    (tmp_path / "untrusted_formatter_mod.py").write_text(
+    write_module(
+        "untrusted_formatter_mod",
         f"from pathlib import Path\n\nPath({str(marker)!r}).write_text('imported\\n')\n",
-        encoding="utf-8",
     )
-    monkeypatch.syspath_prepend(str(tmp_path))
     monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", "trusted_formatter_cfg")
 
     with pytest.raises(ValueError) as error:
@@ -468,16 +487,20 @@ def test_queue_factories_limited_to_standard_queues(
 
 
 @pytest.mark.parametrize(
-    ("listener", "reason"),
+    ("listener", "reason", "imports_probe"),
     [
-        ("logging.disable", "subclass of logging.handlers.QueueListener"),
-        ("logging.StreamHandler", "subclass of logging.handlers.QueueListener"),
-        ("{probe}.queue_factory", "subclass of logging.handlers.QueueListener"),
-        ("logging.handlers.logging.handlers.QueueListener", "Cannot import module"),
+        ("logging.disable", "subclass of logging.handlers.QueueListener", False),
+        ("logging.StreamHandler", "subclass of logging.handlers.QueueListener", False),
+        ("{probe}.queue_factory", "subclass of logging.handlers.QueueListener", True),
+        (
+            "logging.handlers.logging.handlers.QueueListener",
+            "Cannot import module",
+            False,
+        ),
     ],
 )
 def test_listeners_must_be_queue_listener_classes(
-    listener, reason, logging_probe, monkeypatch, undo_logging_disable
+    listener, reason, imports_probe, logging_probe, monkeypatch, undo_logging_disable
 ):
     """Listener names must resolve to QueueListener subclasses, never other callables."""
     module_name, marker = logging_probe
@@ -492,8 +515,11 @@ def test_listeners_must_be_queue_listener_classes(
         _ProjectLogging().configure({"version": 1, "handlers": {"queued": handler}})
 
     assert logging.root.manager.disable == logging.NOTSET
-    # Resolving a trusted listener name may import its module, but calls nothing.
-    assert not marker.exists() or marker.read_text() == "imported\n"
+    # Resolving a trusted listener name imports its module, but calls nothing.
+    if imports_probe:
+        assert marker.read_text() == "imported\n"
+    else:
+        assert not marker.exists()
 
 
 @pytest.mark.parametrize(
@@ -505,33 +531,30 @@ def test_listeners_must_be_queue_listener_classes(
     ],
 )
 def test_queue_handler_via_trusted_ext_reference_still_gated(
-    handler_name, reason, tmp_path, monkeypatch, undo_logging_disable
+    handler_name, reason, monkeypatch, write_module, undo_logging_disable
 ):
     """A QueueHandler config reached via a trusted ``ext://`` reference is rechecked
     before stdlib calls its queue factory or listener."""
-    (tmp_path / "trusted_handler_cfg.py").write_text(
-        textwrap.dedent(
-            """
-            import logging.handlers
+    write_module(
+        "trusted_handler_cfg",
+        """
+        import logging.handlers
 
-            QUEUE_FACTORY = {
-                "class": "logging.handlers.QueueHandler",
-                "queue": "logging.disable",
-            }
-            CLASS_OBJECT = {
-                "class": logging.handlers.QueueHandler,
-                "queue": "logging.disable",
-            }
-            LISTENER = {
-                "class": "logging.handlers.QueueHandler",
-                "queue": "queue.Queue",
-                "listener": "logging.disable",
-            }
-            """
-        ),
-        encoding="utf-8",
+        QUEUE_FACTORY = {
+            "class": "logging.handlers.QueueHandler",
+            "queue": "logging.disable",
+        }
+        CLASS_OBJECT = {
+            "class": logging.handlers.QueueHandler,
+            "queue": "logging.disable",
+        }
+        LISTENER = {
+            "class": "logging.handlers.QueueHandler",
+            "queue": "queue.Queue",
+            "listener": "logging.disable",
+        }
+        """,
     )
-    monkeypatch.syspath_prepend(str(tmp_path))
     monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", "trusted_handler_cfg")
 
     with pytest.raises(ValueError) as error:
@@ -558,30 +581,27 @@ def test_queue_handler_via_trusted_ext_reference_still_gated(
     ],
 )
 def test_factories_via_trusted_ext_reference_rejected(
-    section, name, tmp_path, monkeypatch, undo_logging_disable
+    section, name, monkeypatch, write_module, undo_logging_disable
 ):
     """A '()' factory in a config reached via a trusted ``ext://`` reference is
     rejected before stdlib calls it."""
-    (tmp_path / "trusted_factory_cfg.py").write_text(
-        textwrap.dedent(
-            """
-            HANDLER = {"()": "logging.disable"}
-            FORMATTER = {"()": "logging.disable"}
-            FILTER = {"()": "logging.disable"}
-            QUEUE = {
-                "class": "logging.handlers.QueueHandler",
-                "queue": {"()": "logging.disable"},
-            }
-            LISTENER = {
-                "class": "logging.handlers.QueueHandler",
-                "queue": "queue.Queue",
-                "listener": {"()": "logging.disable"},
-            }
-            """
-        ),
-        encoding="utf-8",
+    write_module(
+        "trusted_factory_cfg",
+        """
+        HANDLER = {"()": "logging.disable"}
+        FORMATTER = {"()": "logging.disable"}
+        FILTER = {"()": "logging.disable"}
+        QUEUE = {
+            "class": "logging.handlers.QueueHandler",
+            "queue": {"()": "logging.disable"},
+        }
+        LISTENER = {
+            "class": "logging.handlers.QueueHandler",
+            "queue": "queue.Queue",
+            "listener": {"()": "logging.disable"},
+        }
+        """,
     )
-    monkeypatch.syspath_prepend(str(tmp_path))
     monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", "trusted_factory_cfg")
 
     with pytest.raises(ValueError) as error:

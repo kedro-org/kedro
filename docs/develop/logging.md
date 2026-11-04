@@ -201,7 +201,7 @@ Kedro applies the logging module allowlist to logging classes, external `ext://`
 
 The exact standard-library references `sys.stdout` and `sys.stderr` are also supported. For example, `ext://sys.stdout` continues to direct log messages to the screen. This exception does not permit other objects from `sys` unless you explicitly allow the module.
 
-On Python 3.12 and later, a `QueueHandler`'s `queue` factory must be `queue.Queue` or `queue.SimpleQueue`, even if other modules are allowed, and its `listener` must be a `logging.handlers.QueueListener` subclass. To use a different queue, create it in a trusted module and reference the queue object with `ext://`, for example `queue: ext://your_project.logging.LOG_QUEUE`.
+A `QueueHandler`'s `queue` factory must be `queue.Queue` or `queue.SimpleQueue`, even if other modules are allowed, and its `listener` must be a `logging.handlers.QueueListener` subclass. Kedro checks this on every Python version, although the standard library only uses these keys from Python 3.12. To use a different queue, create it in a trusted module and reference the queue object with `ext://`, for example `queue: ext://your_project.logging.LOG_QUEUE`.
 
 Kedro rejects `cfg://` configuration navigation as an additional safeguard. Write class names explicitly and use handler and formatter identifiers for connections: `handlers` and a `MemoryHandler`'s `target` name handlers, while `formatter` names a formatter.
 

@@ -417,13 +417,13 @@ def test_validate_safe_config():
         "kedro.logging.RichHandler",
     ],
 )
-def test_validate_logging_class_allows_legitimate_classes(class_path):
+def test_resolve_logging_class_allows_legitimate_classes(class_path):
     """Legitimate logging classes must pass validation without error."""
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
     # Should not raise
-    logging_instance._validate_logging_class(class_path)
+    logging_instance._resolve_logging_class(class_path)
 
 
 @pytest.mark.parametrize(
@@ -435,45 +435,43 @@ def test_validate_logging_class_allows_legitimate_classes(class_path):
         "builtins.exec",
     ],
 )
-def test_validate_logging_class_blocks_non_logging_classes(class_path):
+def test_resolve_logging_class_blocks_non_logging_classes(class_path):
     """Non-logging classes (e.g. subprocess.Popen) must be rejected as not allowlisted."""
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
     with pytest.raises(ValueError, match="is not permitted"):
-        logging_instance._validate_logging_class(class_path)
+        logging_instance._resolve_logging_class(class_path)
 
 
-def test_validate_logging_class_blocks_nonexistent_class():
+def test_resolve_logging_class_blocks_nonexistent_class():
     """A class that doesn't exist in its module must be rejected."""
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
     with pytest.raises(ValueError, match="not found in module"):
-        logging_instance._validate_logging_class("logging.NonExistentHandler")
+        logging_instance._resolve_logging_class("logging.NonExistentHandler")
 
 
-def test_validate_logging_class_blocks_nonexistent_module():
+def test_resolve_logging_class_blocks_nonexistent_module():
     """A class from a non-allowlisted module must be rejected before import is attempted."""
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
     with pytest.raises(ValueError, match="is not permitted"):
-        logging_instance._validate_logging_class("totally.fake.module.Handler")
+        logging_instance._resolve_logging_class("totally.fake.module.Handler")
 
 
-def test_validate_logging_class_blocks_unimportable_allowlisted_module():
+def test_resolve_logging_class_blocks_unimportable_allowlisted_module():
     """An allowlisted but nonexistent module must still fail with a clear import error."""
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
     with pytest.raises(ValueError, match="Cannot import module"):
-        logging_instance._validate_logging_class(
-            "logging.nonexistent_submodule.Handler"
-        )
+        logging_instance._resolve_logging_class("logging.nonexistent_submodule.Handler")
 
 
-def test_validate_logging_class_blocks_import_before_validation(tmp_path, monkeypatch):
+def test_resolve_logging_class_blocks_import_before_validation(tmp_path, monkeypatch):
     """Regression test: an attacker-named module must never be imported to validate it."""
     from kedro.framework.project import _ProjectLogging
 
@@ -483,21 +481,21 @@ def test_validate_logging_class_blocks_import_before_validation(tmp_path, monkey
 
     logging_instance = _ProjectLogging()
     with pytest.raises(ValueError, match="is not permitted"):
-        logging_instance._validate_logging_class("kedro_test_marker_module.NotAHandler")
+        logging_instance._resolve_logging_class("kedro_test_marker_module.NotAHandler")
 
     assert "kedro_test_marker_module" not in sys.modules
 
 
-def test_validate_logging_class_rejects_bare_names():
+def test_resolve_logging_class_rejects_bare_names():
     """Bare names must not bypass the module check and reach stdlib imports."""
     from kedro.framework.project import _ProjectLogging
 
     logging_instance = _ProjectLogging()
     with pytest.raises(ValueError, match="fully qualified"):
-        logging_instance._validate_logging_class("StreamHandler")
+        logging_instance._resolve_logging_class("StreamHandler")
 
 
-def test_validate_logging_class_allowlist_env_var(monkeypatch):
+def test_resolve_logging_class_allowlist_env_var(monkeypatch):
     """KEDRO_LOGGING_MODULE_ALLOWLIST opts a module in on top of the defaults."""
     from kedro.framework.project import _ProjectLogging
 
@@ -505,14 +503,14 @@ def test_validate_logging_class_allowlist_env_var(monkeypatch):
 
     logging_instance = _ProjectLogging()
     with pytest.raises(ValueError, match="is not permitted"):
-        logging_instance._validate_logging_class(class_path)
+        logging_instance._resolve_logging_class(class_path)
 
     monkeypatch.setenv("KEDRO_LOGGING_MODULE_ALLOWLIST", __name__)
     logging_instance = _ProjectLogging()
-    assert logging_instance._validate_logging_class(class_path) is KeepOnlyFilter
+    assert logging_instance._resolve_logging_class(class_path) is KeepOnlyFilter
 
 
-def test_validate_logging_class_covers_custom_formatter(monkeypatch):
+def test_resolve_logging_class_covers_custom_formatter(monkeypatch):
     """Formatters must go through the same allowlist + issubclass check as handlers."""
     from kedro.framework.project import _ProjectLogging
 

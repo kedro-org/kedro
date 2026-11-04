@@ -366,7 +366,9 @@ class TestKedroContext:
         indirect=True,
     )
     def test_params_missing(self, mocker, runtime_params, dummy_context):
-        mock_config_loader = mocker.patch("kedro.config.OmegaConfigLoader.__getitem__")
+        mock_config_loader = mocker.patch(
+            "kedro.config.LazyOmegaConfigLoader.__getitem__"
+        )
         mock_config_loader.side_effect = MissingConfigException("nope")
         runtime_params = runtime_params or {}
 

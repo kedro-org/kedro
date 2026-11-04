@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import threading
+import warnings
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
@@ -20,6 +21,7 @@ from kedro.config import (
     MissingConfigException,
     OmegaConfigLoader,
 )
+from kedro.utils import KedroExperimentalWarning
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -49,9 +51,25 @@ def _loader(
 
 
 class TestLazyOmegaConfigLoader:
-    def test_loader_is_marked_experimental(self) -> None:
-        assert LazyOmegaConfigLoader.__kedro_experimental__ is True
-        assert LazyOmegaConfigLoader.__doc__.startswith('!!! warning "Experimental"')
+    def test_key_access_is_not_experimental_in_environment_scope(
+        self, tmp_path: Path
+    ) -> None:
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"value": 1})
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            result = _loader(tmp_path, interpolation_scope="environment")["parameters"]
+
+        assert result == {"value": 1}
+        assert not any(
+            issubclass(warning.category, KedroExperimentalWarning) for warning in caught
+        )
+
+    def test_public_methods_are_marked_experimental(self) -> None:
+        assert LazyOmegaConfigLoader.preload.__kedro_experimental__ is True
+        assert LazyOmegaConfigLoader.with_runtime_params.__kedro_experimental__ is True
+        assert (
+            LazyOmegaConfigLoader.get_unresolved_config.__kedro_experimental__ is True
+        )
 
     def test_invalid_interpolation_scope_raises(self, tmp_path: Path) -> None:
         with pytest.raises(ValueError, match="interpolation_scope"):
@@ -810,7 +828,7 @@ class TestLazyOmegaConfigLoader:
             tmp_path / "base" / "parameters.yml",
             {"value": "${runtime_params:value,1}"},
         )
-        config = _loader(tmp_path)._get_unresolved_config("parameters")
+        config = _loader(tmp_path).get_unresolved_config("parameters")
 
         assert OmegaConf.to_container(config, resolve=False) == {
             "value": "${runtime_params:value,1}"
@@ -825,4 +843,4 @@ class TestLazyOmegaConfigLoader:
         loader["parameters"] = [1, 2]
 
         with pytest.raises(TypeError, match="mapping values"):
-            loader._get_unresolved_config("parameters")
+            loader.get_unresolved_config("parameters")

@@ -192,8 +192,10 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         self._ensure_globals()
         for key in tuple(self.config_patterns):
             try:
+                # cache the raw config on the first call
                 raw_config = self._get_raw_config(key)
                 if self.interpolation_scope == "merged":
+                    # cache the merged config on the first call
                     self._get_merged_config(key, raw_config)
             except MissingConfigException:
                 pass

@@ -127,6 +127,8 @@ kedro run --params=param_key1=value1,param_key2=2.0
 Values provided in the CLI take precedence and overwrite parameters specified in configuration files. By default, runtime parameters merge destructively, meaning that any configuration for that key **besides the runtime value** is discarded.
 [This section describes how to change the merging strategy](how_to_configure_project.md#how-to-change-the-merge-strategy-used-by-omegaconfigloader).
 
+`OmegaConfigLoader` performs this merge itself. `config_loader["parameters"]` returns the runtime parameters together with the values from your configuration files, including keys that are not defined in any file. The `runtime_params` resolver reads the same values.
+
 For example, if you have the following parameters in your `base` and `local` environments:
 
 ```yaml

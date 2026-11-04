@@ -68,6 +68,7 @@ nav = [
         {"Configuration" = "configure/how_to_configure_project.md"},
         {"Parameters and credentials" = "configure/how_to_use_parameters_and_credentials.md"},
         {"Templating" = "configure/how_to_use_templating.md"},
+        {"Use LazyOmegaConfigLoader" = "configure/how_to_use_lazy_omega_config_loader.md"},
         {"Config loader migration" = "configure/config_loader_migration.md"}
       ]}
     ]},

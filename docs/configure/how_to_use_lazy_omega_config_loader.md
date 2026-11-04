@@ -8,9 +8,7 @@ This guide shows how to configure `LazyOmegaConfigLoader`, preload configuration
 
     The loader itself is not experimental, but these public methods are and may change in a future Kedro release: `preload()`, `with_runtime_params()` and `get_unresolved_config()`. Using them emits a `KedroExperimentalWarning`; reading keys such as `loader["parameters"]` does not.
 
-!!! warning "Different results from `OmegaConfigLoader`"
-
-    The default interpolation scope, `"merged"`, can produce different results from `OmegaConfigLoader`. See [Interpolation scope](#interpolation-scope).
+By default, the loader resolves interpolations like `OmegaConfigLoader` does. To resolve them after merging the environments instead, [switch to the `"merged"` interpolation scope](#switch-to-the-merged-interpolation-scope).
 
 ## Configure the loader
 
@@ -23,18 +21,29 @@ CONFIG_LOADER_CLASS = LazyOmegaConfigLoader
 CONFIG_LOADER_ARGS = {
     "base_env": "base",
     "default_run_env": "local",
-    "interpolation_scope": "merged",
 }
 ```
 
 `LazyOmegaConfigLoader` accepts the same file patterns, merge strategies, custom resolvers, and runtime-parameter type-selection option as `OmegaConfigLoader`. It adds `interpolation_scope`, which controls when interpolation is resolved:
 
-| Value           | Behaviour                                                                                            |
-| --------------- | ---------------------------------------------------------------------------------------------------- |
-| `"merged"`      | Merge the raw configuration from the environments, then resolve interpolations. This is the default. |
-| `"environment"` | Resolve each environment before merging, matching `OmegaConfigLoader`.                               |
+| Value           | Behaviour                                                                           |
+| --------------- | ----------------------------------------------------------------------------------- |
+| `"environment"` | Resolve each environment before merging, matching `OmegaConfigLoader`. The default. |
+| `"merged"`      | Merge the raw configuration from the environments, then resolve interpolations.     |
 
-See [Interpolation scope](#interpolation-scope) before choosing a value.
+### Switch to the `"merged"` interpolation scope
+
+Add `interpolation_scope` to `CONFIG_LOADER_ARGS`:
+
+```python
+CONFIG_LOADER_ARGS = {
+    "base_env": "base",
+    "default_run_env": "local",
+    "interpolation_scope": "merged",
+}
+```
+
+This can produce different results from `OmegaConfigLoader`. See [Interpolation scope](#interpolation-scope) before choosing it.
 
 ## Preload and resolve per run
 
@@ -75,7 +84,6 @@ loader = LazyOmegaConfigLoader(
     env="local",
     base_env="base",
     default_run_env="local",
-    interpolation_scope="merged",
 )
 loader.preload()
 
@@ -100,7 +108,7 @@ Each `with_runtime_params()` call returns a per-run view with its own runtime pa
 
 ## Interpolation scope
 
-Lazy resolution and environment merge order are independent. `"environment"` preserves existing results; `"merged"` resolves interpolations against the combined environments.
+Lazy resolution and environment merge order are independent. `"environment"`, the default, preserves existing results; `"merged"` resolves interpolations against the combined environments.
 
 For example, given these files:
 

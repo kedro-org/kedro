@@ -177,35 +177,62 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
 
     @experimental
     def preload(self) -> None:
-        """Parse configured files and check duplicates before repeated use.
+        """Read, validate and merge the configured files into a new cached snapshot.
 
-        This method is optional: ``__getitem__`` loads an uncached key on demand.
-        Preloading reads raw files and validates their syntax and duplicate keys. With
-        the ``"merged"`` scope it also merges the environments, so merge errors such as
-        an unsupported merge strategy surface here. It resolves globals and credentials
-        eagerly, but leaves parameters and catalog interpolation resolution until those
-        keys are requested.
+        Every call re-reads the files and replaces the previous snapshot, so call it
+        again to pick up changes on disk. Key access and ``with_runtime_params()`` only
+        reuse the snapshot; if no snapshot exists yet, ``__getitem__`` loads an uncached
+        key on demand.
+
+        Preloading validates syntax and duplicate keys. With the ``"merged"`` scope it
+        also merges the environments, so merge errors such as an unsupported merge
+        strategy surface here. It resolves globals and credentials eagerly, but leaves
+        parameters and catalog interpolation resolution until those keys are requested.
+
+        The snapshot is replaced only if loading succeeds; on error the previous one
+        is kept. Views from ``with_runtime_params()`` keep the snapshot they were
+        created from. Explicit values assigned to the loader are kept.
 
         Missing environment directories are cached as missing. Accessing a key with no
         matching configuration still raises ``MissingConfigException``.
         """
-        self._ensure_globals()
-        for key in tuple(self.config_patterns):
+        fresh = copy.copy(self)
+        fresh._raw_config_cache = {}
+        fresh._merged_config_cache = {}
+        fresh._resolved_static_config = {}
+        fresh._globals_oc = None
+        if "globals" in self.data:
+            fresh._resolved_static_config["globals"] = copy.deepcopy(self._globals)
+        else:
+            fresh._globals = {}
+            fresh._globals_loaded = False
+        fresh._ensure_globals()
+        for key in tuple(fresh.config_patterns):
             try:
-                # cache the raw config on the first call
-                raw_config = self._get_raw_config(key)
-                if self.interpolation_scope == "merged":
-                    # cache the merged config on the first call
-                    self._get_merged_config(key, raw_config)
+                raw_config = fresh._get_raw_config(key)
+                if fresh.interpolation_scope == "merged":
+                    fresh._get_merged_config(key, raw_config)
             except MissingConfigException:
                 pass
 
-        if "credentials" in self.config_patterns and "credentials" not in self.data:
+        if "credentials" in fresh.config_patterns and "credentials" not in self.data:
             try:
-                credentials = self._resolve_config("credentials", runtime_params={})
+                credentials = fresh._resolve_config("credentials", runtime_params={})
             except MissingConfigException:
                 credentials = {}
-            self._resolved_static_config["credentials"] = credentials
+            fresh._resolved_static_config["credentials"] = credentials
+
+        with (
+            self._globals_lock,
+            self._raw_config_lock,
+            self._merged_config_lock,
+        ):
+            self._raw_config_cache = fresh._raw_config_cache
+            self._merged_config_cache = fresh._merged_config_cache
+            self._resolved_static_config = fresh._resolved_static_config
+            self._globals = fresh._globals
+            self._globals_loaded = fresh._globals_loaded
+            self._globals_oc = None
 
     @experimental
     def with_runtime_params(

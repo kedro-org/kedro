@@ -821,6 +821,68 @@ class TestLazyOmegaConfigLoader:
         loader["parameters"] = {"value": "${runtime_params:value}"}
         assert loader["parameters"] == {"value": "${runtime_params:value}"}
 
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_second_preload_rereads_files(self, tmp_path: Path, scope: str) -> None:
+        filepath = tmp_path / "base" / "parameters.yml"
+        _write_yaml(filepath, {"value": 1})
+        _write_yaml(tmp_path / "base" / "globals.yml", {"g": 1})
+        _write_yaml(tmp_path / "base" / "credentials.yml", {"token": 1})
+        loader = _loader(tmp_path, interpolation_scope=scope)
+        loader.preload()
+
+        _write_yaml(filepath, {"value": 2})
+        _write_yaml(tmp_path / "base" / "globals.yml", {"g": 2})
+        _write_yaml(tmp_path / "base" / "credentials.yml", {"token": 2})
+        assert loader["parameters"] == {"value": 1}
+        loader.preload()
+
+        assert loader["parameters"] == {"value": 2}
+        assert loader["globals"] == {"g": 2}
+        assert loader["credentials"] == {"token": 2}
+        assert loader.with_runtime_params({})["parameters"] == {"value": 2}
+
+    def test_failed_preload_keeps_previous_snapshot(self, tmp_path: Path) -> None:
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"value": 1})
+        loader = _loader(tmp_path)
+        loader.preload()
+
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"value": 2})
+        _write_yaml(tmp_path / "base" / "parameters_extra.yml", {"value": 3})
+        with pytest.raises(ValueError, match="Duplicate"):
+            loader.preload()
+
+        assert loader["parameters"] == {"value": 1}
+
+    def test_views_keep_the_snapshot_they_were_created_from(
+        self, tmp_path: Path
+    ) -> None:
+        filepath = tmp_path / "base" / "parameters.yml"
+        _write_yaml(filepath, {"value": 1})
+        loader = _loader(tmp_path)
+        loader.preload()
+        old_view = loader.with_runtime_params({})
+
+        _write_yaml(filepath, {"value": 2})
+        loader.preload()
+        new_view = loader.with_runtime_params({})
+
+        assert old_view["parameters"] == {"value": 1}
+        assert new_view["parameters"] == {"value": 2}
+
+    def test_preload_keeps_explicit_overrides(self, tmp_path: Path) -> None:
+        _write_yaml(tmp_path / "base" / "globals.yml", {"g": "file"})
+        _write_yaml(tmp_path / "base" / "credentials.yml", {"token": "file"})
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"value": "${globals:g}"})
+        loader = _loader(tmp_path)
+        loader["globals"] = {"g": "override"}
+        loader["credentials"] = {"token": "override"}
+
+        loader.preload()
+
+        assert loader["globals"] == {"g": "override"}
+        assert loader["credentials"] == {"token": "override"}
+        assert loader["parameters"] == {"value": "override"}
+
     def test_unresolved_config_is_read_only_and_keeps_interpolations(
         self, tmp_path: Path
     ) -> None:

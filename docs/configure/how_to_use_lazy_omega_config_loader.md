@@ -1,14 +1,20 @@
-# Use the experimental `LazyOmegaConfigLoader`
+# Use the `LazyOmegaConfigLoader`
 
-This guide shows how to opt in to `LazyOmegaConfigLoader`, preload configuration, and resolve it with different runtime parameters. It assumes that you are familiar with [Kedro configuration](configuration_basics.md).
+This guide shows how to configure `LazyOmegaConfigLoader`, preload configuration, and resolve it with different runtime parameters. It assumes that you are familiar with [Kedro configuration](configuration_basics.md).
 
-!!! warning "Experimental"
+`LazyOmegaConfigLoader` is the default `CONFIG_LOADER_CLASS`. It caches the raw configuration files so that the same configuration can be resolved repeatedly with different runtime parameters.
 
-    `LazyOmegaConfigLoader` is experimental and may change in a future Kedro release. Its default interpolation scope, `"merged"`, can produce different results from `OmegaConfigLoader`.
+!!! warning "Experimental methods"
+
+    The loader itself is not experimental, but these public methods are and may change in a future Kedro release: `preload()`, `with_runtime_params()` and `get_unresolved_config()`. Using them emits a `KedroExperimentalWarning`; reading keys such as `loader["parameters"]` does not.
+
+!!! warning "Different results from `OmegaConfigLoader`"
+
+    The default interpolation scope, `"merged"`, can produce different results from `OmegaConfigLoader`. See [Interpolation scope](#interpolation-scope).
 
 ## Configure the loader
 
-Set `CONFIG_LOADER_CLASS` in your project's `src/<package_name>/settings.py`:
+To change its options, or to use another loader such as `OmegaConfigLoader`, set `CONFIG_LOADER_CLASS` and `CONFIG_LOADER_ARGS` in your project's `src/<package_name>/settings.py`:
 
 ```python
 from kedro.config import LazyOmegaConfigLoader
@@ -32,7 +38,23 @@ See [Interpolation scope](#interpolation-scope) before choosing a value.
 
 ## Preload and resolve per run
 
-Use `preload()` before serving repeated requests. It reads the configured raw files once, so later calls reuse the snapshot even if files change on disk.
+Use `preload()` before serving repeated requests. It reads and merges the configured files into a snapshot. Key access and `with_runtime_params()` reuse that snapshot even if files change on disk; call `preload()` again to read the files anew.
+
+!!! warning "`preload()` refreshes files, not your overrides"
+
+    Calling `preload()` again re-reads every file, but it does not reset the loader. Values that you assigned yourself, such as `loader["globals"] = ...`, are kept and keep replacing the matching files.
+
+    For example, with `bucket: "prod-bucket"` in `conf/base/globals.yml` and `path: "s3://${globals:bucket}"` in `conf/base/parameters.yml`:
+
+    ```python
+    loader["globals"] = {"bucket": "test-bucket"}
+    loader.preload()
+    loader["parameters"]  # {"path": "s3://test-bucket"}
+
+    del loader["globals"]  # drop the override
+    loader.preload()
+    loader["parameters"]  # {"path": "s3://prod-bucket"}
+    ```
 
 Start with this `conf/base/parameters.yml`:
 
@@ -70,7 +92,7 @@ As with `OmegaConfigLoader`, the runtime parameters are also merged into `parame
 
 Each `with_runtime_params()` call returns a per-run view with its own runtime parameters and explicit configuration overrides. The views share the loader's raw configuration snapshot. Resolving one view does not change the results of another.
 
-`__getitem__` returns a resolved Python dictionary, as it does with `OmegaConfigLoader`. `_get_unresolved_config(key)` is a private method used to inspect the read-only, merged `DictConfig`; it is not a supported public API.
+`__getitem__` returns a resolved Python dictionary, as it does with `OmegaConfigLoader`. The experimental `get_unresolved_config(key)` method returns the read-only, merged `DictConfig` for a key without resolving its interpolations.
 
 !!! note
 
@@ -106,6 +128,6 @@ For example, with `x: {a: 1}` in `conf/base/parameters.yml`, `y: 2` in `conf/loc
 
 ## Configuration lifetime
 
-The loader keeps its raw configuration snapshot for its lifetime. `preload()` makes file and parse work happen before repeated run-time resolution. Changes to YAML files after preloading are not picked up; create a new loader to read an updated configuration.
+The loader keeps its configuration snapshot until `preload()` is called again. Each `preload()` call re-reads the files and replaces the snapshot; if reading fails, the previous snapshot is kept. Changes to YAML files after preloading are not picked up by key access or by `with_runtime_params()`. Views created before a new `preload()` keep the snapshot they were created from.
 
 Credentials are resolved as static configuration, not separately for each run. Pass values that change between runs through `with_runtime_params()` and the `runtime_params` resolver in parameters or catalog configuration.

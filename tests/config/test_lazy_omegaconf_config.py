@@ -121,6 +121,38 @@ class TestLazyOmegaConfigLoader:
 
         assert actual == expected == {"param1": "base", "param2": "local"}
 
+    def test_default_interpolation_scope_matches_omega_config_loader(
+        self, tmp_path: Path
+    ) -> None:
+        _write_yaml(
+            tmp_path / "base" / "parameters.yml",
+            {"param1": "${param2}", "param2": "base"},
+        )
+        _write_yaml(tmp_path / "local" / "parameters.yml", {"param2": "local"})
+
+        loader = LazyOmegaConfigLoader(
+            tmp_path, base_env="base", default_run_env="local"
+        )
+
+        assert loader.interpolation_scope == "environment"
+        assert loader["parameters"] == {"param1": "base", "param2": "local"}
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_replacing_config_patterns_keeps_globals(
+        self, tmp_path: Path, scope: str
+    ) -> None:
+        _write_yaml(tmp_path / "base" / "globals.yml", {"bucket": "prod"})
+        _write_yaml(
+            tmp_path / "base" / "catalog.yml", {"ds": {"path": "${globals:bucket}"}}
+        )
+        loader = _loader(tmp_path, interpolation_scope=scope)
+
+        loader.config_patterns = {"catalog": ["catalog*"]}
+
+        assert loader["catalog"] == {"ds": {"path": "prod"}}
+        assert loader["globals"] == {"bucket": "prod"}
+        assert "globals" not in loader.config_patterns
+
     def test_interpolation_scope_merged_resolves_after_environment_merge(
         self, tmp_path: Path
     ) -> None:
@@ -882,6 +914,27 @@ class TestLazyOmegaConfigLoader:
         assert loader["globals"] == {"g": "override"}
         assert loader["credentials"] == {"token": "override"}
         assert loader["parameters"] == {"value": "override"}
+
+    def test_preload_logs_which_overrides_are_not_read_from_files(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        loader = _loader(tmp_path)
+        loader["globals"] = {"g": "override"}
+        loader["credentials"] = {"token": "override"}
+
+        with caplog.at_level("INFO", logger="kedro.config.lazy_omegaconf_config"):
+            loader.preload()
+
+        assert "'credentials', 'globals'" in caplog.text
+        assert "not read from configuration files" in caplog.text
+
+    def test_preload_without_overrides_does_not_log(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        with caplog.at_level("INFO", logger="kedro.config.lazy_omegaconf_config"):
+            _loader(tmp_path).preload()
+
+        assert "not read from configuration files" not in caplog.text
 
     def test_unresolved_config_is_read_only_and_keeps_interpolations(
         self, tmp_path: Path

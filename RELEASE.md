@@ -3,7 +3,7 @@
 ## Major features and improvements
 
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
-- Added `LazyOmegaConfigLoader`, which caches raw configuration for repeated resolution with per-run parameters, and made it the default `CONFIG_LOADER_CLASS`. It supports `environment` and `merged` interpolation scopes. Its `preload()`, `with_runtime_params()` and `get_unresolved_config()` methods are experimental.
+- Added `LazyOmegaConfigLoader`, which caches raw configuration for repeated resolution with per-run parameters, and made it the default `CONFIG_LOADER_CLASS`. It resolves interpolations per environment like `OmegaConfigLoader` by default, and supports a `merged` interpolation scope. Its `preload()`, `with_runtime_params()` and `get_unresolved_config()` methods are experimental.
 
 ## Bug fixes and other changes
 

@@ -39,9 +39,9 @@ class _RawConfig:
 class LazyOmegaConfigLoader(OmegaConfigLoader):
     """An OmegaConf loader that caches raw config for repeated resolution.
 
-    ``interpolation_scope="environment"`` resolves each environment before merging,
-    matching ``OmegaConfigLoader``. ``interpolation_scope="merged"`` merges raw
-    environments first and then resolves the result.
+    ``interpolation_scope="environment"`` (the default) resolves each environment
+    before merging, matching ``OmegaConfigLoader``. ``interpolation_scope="merged"``
+    merges raw environments first and then resolves the result.
 
         This class intentionally subclasses ``OmegaConfigLoader`` to reuse its raw-file
         loading, validation, resolver and merge helpers while avoiding its eager globals
@@ -78,7 +78,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         merge_strategy: dict[str, str] | None = None,
         ignore_hidden: bool = True,
         restrict_runtime_params_type_selection: bool = False,
-        interpolation_scope: str = "merged",
+        interpolation_scope: str = "environment",
     ):
         if isinstance(conf_source, Path):
             conf_source = str(conf_source)
@@ -109,6 +109,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             "globals": ["globals.yml"],
         }
         self.config_patterns.update(config_patterns or {})
+        self._globals_patterns = list(self.config_patterns["globals"])
         self._custom_resolvers = custom_resolvers
         self._oc_env_custom_resolver = (
             custom_resolvers.get("oc.env") if custom_resolvers else None
@@ -169,7 +170,16 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             if self._globals_loaded:
                 return
             try:
-                self._globals = self._resolve_config("globals", runtime_params={})
+                loader = self
+                if "globals" not in self.config_patterns:
+                    # ``OmegaConfigLoader`` loads globals in its constructor, so replacing
+                    # ``config_patterns`` afterwards must not drop them.
+                    loader = copy.copy(self)
+                    loader.config_patterns = {
+                        **self.config_patterns,
+                        "globals": self._globals_patterns,
+                    }
+                self._globals = loader._resolve_config("globals", runtime_params={})
             except MissingConfigException:
                 self._globals = {}
             self._globals_loaded = True
@@ -197,6 +207,12 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         matching configuration still raises ``MissingConfigException``.
         """
         fresh = copy.copy(self)
+        if self.data:
+            _logger.info(
+                "preload() keeps the values explicitly set on the loader for %s; "
+                "they are not read from configuration files.",
+                ", ".join(f"'{key}'" for key in sorted(self.data)),
+            )
         fresh._raw_config_cache = {}
         fresh._merged_config_cache = {}
         fresh._resolved_static_config = {}

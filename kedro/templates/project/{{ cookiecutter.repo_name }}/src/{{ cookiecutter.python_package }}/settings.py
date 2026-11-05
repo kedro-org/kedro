@@ -35,7 +35,6 @@ https://docs.kedro.org/en/stable/configure/configuration_basics/#configuration""
 CONFIG_LOADER_ARGS = {
     "base_env": "base",
     "default_run_env": "local",
-    # "interpolation_scope": "merged",  # LazyOmegaConfigLoader only: resolve interpolations after merging environments
     # "config_patterns": {
     #     "spark" : ["spark*/"],
     #     "parameters": ["parameters*", "parameters*/**", "**/parameters*"],

@@ -1,8 +1,12 @@
 # Use the `LazyOmegaConfigLoader`
 
-This guide shows how to configure `LazyOmegaConfigLoader`, preload configuration, and resolve it with different runtime parameters. It assumes that you are familiar with [Kedro configuration](configuration_basics.md).
+This guide shows how to opt in to `LazyOmegaConfigLoader`, preload configuration, and resolve it with different runtime parameters. It assumes that you are familiar with [Kedro configuration](configuration_basics.md).
 
-`LazyOmegaConfigLoader` is the default `CONFIG_LOADER_CLASS`. It caches the raw configuration files so that the same configuration can be resolved repeatedly with different runtime parameters.
+`LazyOmegaConfigLoader` is an opt-in alternative to `OmegaConfigLoader`, which remains the default `CONFIG_LOADER_CLASS`. It caches the raw configuration files so that the same configuration can be resolved repeatedly with different runtime parameters.
+
+!!! tip "Recommended with `KedroServiceSession`"
+
+    `LazyOmegaConfigLoader` is designed for long-lived processes such as `KedroServiceSession`. If you change how your project uses `KedroServiceSession` to rely on it, also set `CONFIG_LOADER_CLASS` in `settings.py`, as shown in [Configure the loader](#configure-the-loader). Projects that do not need it can keep the default.
 
 !!! warning "Experimental methods"
 
@@ -12,7 +16,7 @@ By default, the loader resolves interpolations like `OmegaConfigLoader` does. To
 
 ## Configure the loader
 
-To change its options, or to use another loader such as `OmegaConfigLoader`, set `CONFIG_LOADER_CLASS` and `CONFIG_LOADER_ARGS` in your project's `src/<package_name>/settings.py`:
+To opt in, set `CONFIG_LOADER_CLASS` and `CONFIG_LOADER_ARGS` in your project's `src/<package_name>/settings.py`:
 
 ```python
 from kedro.config import LazyOmegaConfigLoader
@@ -24,7 +28,9 @@ CONFIG_LOADER_ARGS = {
 }
 ```
 
-`LazyOmegaConfigLoader` accepts the same file patterns, merge strategies, custom resolvers, and runtime-parameter type-selection option as `OmegaConfigLoader`. It adds `interpolation_scope`, which controls when interpolation is resolved:
+`LazyOmegaConfigLoader` accepts the same file patterns, merge strategies, custom resolvers, and runtime-parameter type-selection option as `OmegaConfigLoader`. To go back to the default loader, remove these settings or set `CONFIG_LOADER_CLASS = OmegaConfigLoader`.
+
+It adds `interpolation_scope`, which controls when interpolation is resolved:
 
 | Value           | Behaviour                                                                           |
 | --------------- | ----------------------------------------------------------------------------------- |

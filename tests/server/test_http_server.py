@@ -5,10 +5,22 @@ from fastapi.testclient import TestClient
 
 from kedro.server.http_server import create_http_server
 from kedro.server.models import RunSuccess
+from kedro.utils import KedroExperimentalWarning
 
 
 class TestHTTPServerFactory:
     """Tests for HTTP server factory creation and health endpoint."""
+
+    def test_create_http_server_emits_experimental_warning(
+        self, monkeypatch, make_http_server
+    ):
+        monkeypatch.setattr(
+            create_http_server, "__kedro_experimental_warned__", False, raising=False
+        )
+        with pytest.warns(
+            KedroExperimentalWarning, match="create_http_server is experimental"
+        ):
+            make_http_server()
 
     def test_create_http_server_resolves_env_from_argument(
         self, monkeypatch, mocker, tmp_path

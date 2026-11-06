@@ -20,6 +20,7 @@
 - Fixed the `runner` entry in the `run_params` passed to hooks: it now carries the runner name, instead of `'None'` for a default run or the `repr` of the runner instance, which included a memory address. Applies to both `KedroSession` and `KedroServiceSession`.
 - Fixed `az://` and `abfs://container@account` paths losing the container name.
 - Fixed `OmegaConfigLoader` ignoring `config_loader["globals"]` set after a `${globals:}` interpolation was resolved.
+- Added `@experimental` tag to `KedroServiceSession` and the HTTP server (`create_http_server`) to clarify their experimental status.
 
 ## Documentation changes
 

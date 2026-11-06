@@ -2,8 +2,8 @@
 
 ## Major features and improvements
 
+- Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple. A resolver that is already registered is skipped unless `replace=True` is passed.
 - Added the option to allow data to be injected at run time when using the `KedroServiceSession`.
-- Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple.
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.
 - Added node groups to the project snapshot. Each `PipelineSnapshot` has a `groups` list of `GroupSnapshot` entries with the group's nodes, dependencies, inputs and outputs, also returned by `GET /snapshot`. `get_project_snapshot` takes a `group_by` argument to choose the grouping strategy, `GET /snapshot` takes it as a query parameter, and each `PipelineSnapshot` records it in `group_by`.
 - Added `kedro.inspection.validate_deployment_grouping` to check a node grouping before deployment. It reports datasets kept in memory that are passed between groups, cycles between groups, and datasets passed between groups on local disk.
@@ -25,6 +25,10 @@
 
 ## Breaking changes to the API
 
+- **Security hardening**: Logging configuration now applies `KEDRO_LOGGING_MODULE_ALLOWLIST` to `class`, `ext://`, and `QueueHandler` `listener` references. Bare names, private objects, attribute chains, and `cfg://` are no longer supported. A `QueueHandler` `queue` factory must be `queue.Queue` or `queue.SimpleQueue`, and a `listener` must be a `QueueListener` subclass. Use fully qualified names and allowlist trusted custom modules; `sys.stdout` and `sys.stderr` remain allowed by default. These checks reduce risk, but logging configuration must still come from a trusted source. See the [logging documentation](https://docs.kedro.org/en/stable/develop/logging/#supported-logging-references) for migration guidance.
+
+Thanks to [leetomo2528](https://github.com/leetomo2528), and to [Hongwei Li](https://github.com/3rdn4Li), [Junmin Zhu](https://github.com/wzunknown), [Zhun Wang](https://github.com/1chig0), [Jiacheng Zhong](https://github.com/superboy-zjc), [Han Dai](https://github.com/DennyDai), [Suyue Guo](https://github.com/SuyueGuo), [Songyang Peng](https://github.com/alexps9) and [Ziyue Pan](https://github.com/ziyue-pan), for independently and responsibly reporting this issue.
+
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:
@@ -33,6 +37,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [Charan Rathore](https://github.com/charan-rathore)
 - [inchang-ing](https://github.com/inchang-ing)
 - [Max Gorbuk](https://github.com/mkzung)
+- [Shahzeb Ali](https://github.com/Shahzeb-DataEngineer)
 
 # Release 1.7.0
 

@@ -34,6 +34,18 @@ def _write_json(filepath: Path, config: dict):
     filepath.write_text(json_str)
 
 
+@pytest.fixture
+def _clear_replace_test_resolvers():
+    # The resolvers below live in OmegaConf's process-global registry, so
+    # clear them after each test: otherwise a re-run in the same process
+    # would see the first registration skipped and pass even if that
+    # registration were broken.
+    yield
+    for _name in ("replaceable_greet", "keepable_greet"):
+        if OmegaConf.has_resolver(_name):
+            OmegaConf.clear_resolver(_name)
+
+
 def _write_dummy_ini(filepath: Path):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     config = configparser.ConfigParser()
@@ -909,6 +921,46 @@ class TestOmegaConfigLoader:
         # cached result, while the uncached one runs again for every interpolation
         assert params["cached1"] == params["cached2"]
         assert params["uncached1"] != params["uncached2"]
+
+    def test_custom_resolvers_replace_existing(
+        self, tmp_path, _clear_replace_test_resolvers
+    ):
+        # A second loader in the same process can replace an already-registered
+        # resolver by passing `replace=True` in the `(callable, kwargs)` tuple.
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        _write_yaml(base_params, {"greeting": "${replaceable_greet:world}"})
+        OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={"replaceable_greet": lambda x: f"old {x}"},
+            base_env=_BASE_ENV,
+        )
+        conf = OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={
+                "replaceable_greet": (lambda x: f"new {x}", {"replace": True})
+            },
+            base_env=_BASE_ENV,
+        )
+        assert conf["parameters"]["greeting"] == "new world"
+
+    def test_custom_resolvers_skip_registered_without_replace(
+        self, tmp_path, _clear_replace_test_resolvers
+    ):
+        # Without `replace=True` an already-registered resolver keeps its
+        # original implementation, matching previous behaviour.
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        _write_yaml(base_params, {"greeting": "${keepable_greet:world}"})
+        OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={"keepable_greet": lambda x: f"old {x}"},
+            base_env=_BASE_ENV,
+        )
+        conf = OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={"keepable_greet": lambda x: f"new {x}"},
+            base_env=_BASE_ENV,
+        )
+        assert conf["parameters"]["greeting"] == "old world"
 
     def test_globals(self, tmp_path):
         globals_params = tmp_path / _BASE_ENV / "globals.yml"

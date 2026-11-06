@@ -19,6 +19,7 @@ from kedro.framework.session.abstract_session import KedroSessionError
 from kedro.framework.session.service_session import _inject_runtime_datasets
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ThreadRunner
+from kedro.utils import KedroExperimentalWarning
 
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
@@ -60,6 +61,15 @@ class FakeException(Exception):
 
 
 class TestKedroServiceSession:
+    def test_create_emits_experimental_warning(self, fake_project, monkeypatch):
+        monkeypatch.setattr(
+            KedroServiceSession, "__kedro_experimental_warned__", False, raising=False
+        )
+        with pytest.warns(
+            KedroExperimentalWarning, match="KedroServiceSession is experimental"
+        ):
+            KedroServiceSession.create(project_path=fake_project)
+
     @pytest.mark.parametrize("env", [None, "test_env"])
     def test_create_session(self, fake_project, env):
         session = KedroServiceSession.create(

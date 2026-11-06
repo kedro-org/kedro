@@ -22,7 +22,7 @@ from kedro.io.core import generate_timestamp
 from kedro.io.data_catalog import SharedMemoryDataCatalog
 from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
-from kedro.utils import find_kedro_project, get_close_matches
+from kedro.utils import experimental, find_kedro_project, get_close_matches
 
 from ._serving_config import _ConfigCache, _ServingConfigLoader, build_config_cache
 from .abstract_session import AbstractSession, KedroSessionError
@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from kedro.io import CatalogProtocol
 
 
+@experimental
 class KedroServiceSession(AbstractSession):
     """``KedroServiceSession`` is the object that is responsible for managing the lifecycle
     of multiple Kedro runs. Use `KedroServiceSession.create()` as

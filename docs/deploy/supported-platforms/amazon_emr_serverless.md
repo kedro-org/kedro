@@ -17,7 +17,7 @@ This guide deploys a Kedro pipeline as an EMR Serverless Spark job backed by a c
 The approach in brief:
 
 1. **Package the project** with `kedro package`. You get a wheel and a `conf-<package_name>.tar.gz` archive. The wheel does not include `conf/`.
-2. **Build a custom Docker image** that installs Python >=3.10, your Kedro wheel, and the config archive. EMR base images ship with Python below Kedro's minimum, so a custom image is required.
+2. **Build a custom Docker image** that installs Python >=3.11, your Kedro wheel, and the config archive. EMR base images ship with Python below Kedro's minimum, so a custom image is required.
 3. **Push the image to ECR** and create an EMR Serverless application that references it.
 4. **Submit a Spark job** with an S3-hosted entrypoint script. Pass Kedro CLI flags (`--env`, `--conf-source`, `--pipelines`, `--runner`) as `entryPointArguments`.
 
@@ -60,7 +60,7 @@ AWS also documents a [virtual-environment and venv-pack workflow](https://docs.a
 
 #### Choose EMR 7.x or 6.x
 
-Use **EMR 7.x** for all new deployments. EMR base images ship with Python below Kedro's minimum (>=3.10), so you build a **custom Docker image** that installs Python >=3.10 and your Kedro project.
+Use **EMR 7.x** for all new deployments. EMR base images ship with Python below Kedro's minimum (>=3.11), so you build a **custom Docker image** that installs Python >=3.11 and your Kedro project.
 
 |                             | **EMR 7.x (recommended)**                               | **EMR 6.x (legacy)**                                                                                                                         |
 | --------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -119,7 +119,7 @@ These apply to the **step-by-step guide** below. This guide builds and deploys f
 
 | You need                                                                                                              | Used for                                                                                    |
 | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| A **Kedro project** (`requires-python = ">=3.10"` in `pyproject.toml`) and Python **>=3.10** locally                  | Packaging the project, local test runs, and matching the Python version in the custom image |
+| A **Kedro project** (`requires-python = ">=3.11"` in `pyproject.toml`) and Python **>=3.11** locally                  | Packaging the project, local test runs, and matching the Python version in the custom image |
 | [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI)               | Building the custom EMR container image                                                     |
 | [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region | Creating S3 and ECR resources, uploading data, pushing the image, and submitting jobs       |
 | An AWS account with permissions for EMR Serverless, S3, ECR, and IAM                                                  | Creating and running the deployed resources                                                 |

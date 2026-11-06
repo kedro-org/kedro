@@ -96,7 +96,7 @@ These apply to the **step-by-step guide** below. This guide builds and deploys f
 
 | You need                                                                                                              | Used for                                                                                       |
 | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| A **Kedro project** (`requires-python = ">=3.10"` in `pyproject.toml`) and Python **>=3.10** locally                  | Packaging the project, local test runs, and running `AWSBatchRunner` on your driver machine    |
+| A **Kedro project** (`requires-python = ">=3.11"` in `pyproject.toml`) and Python **>=3.11** locally                  | Packaging the project, local test runs, and running `AWSBatchRunner` on your driver machine    |
 | [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI)               | Building the Batch container image                                                             |
 | [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region | Creating S3 and Batch resources, uploading data, pushing the image to ECR, and submitting jobs |
 | An AWS account with permissions for Batch, S3, ECR, IAM, and EC2 (for the Batch compute environment)                  | Creating and running the deployed resources                                                    |

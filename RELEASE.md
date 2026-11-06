@@ -21,6 +21,8 @@
 
 ## Breaking changes to the API
 
+- Dropped support for Python 3.10, which has reached end of regular support. Kedro now requires Python 3.11 or later.
+
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:

@@ -2,16 +2,11 @@
 This file contains the shared helper functions for starter tests.
 """
 
-import sys
+import tomllib
 from pathlib import Path
 from urllib.parse import urlparse
 
 import yaml
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 from kedro import __version__ as version
 from kedro.framework.cli.starters import (

@@ -21,6 +21,7 @@
 - Fixed `az://` and `abfs://container@account` paths losing the container name.
 - Fixed `OmegaConfigLoader` ignoring `config_loader["globals"]` set after a `${globals:}` interpolation was resolved.
 - Added `@experimental` tag to `KedroServiceSession` and the HTTP server (`create_http_server`) to clarify their experimental status.
+- Fixed CLI error messages being replaced by `NoneType: None` and the "Kedro project not found" hint being skipped with Click 8.5.
 
 ## Documentation changes
 

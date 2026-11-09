@@ -4,6 +4,8 @@
 
 ## Bug fixes and other changes
 
+- Fixed the interrupted namespace warning not being raised when the interrupting node's namespace starts with the same characters as the interrupted one, such as `ns1` interrupted by `ns10`.
+
 ## Documentation changes
 
 ## Community contributions

@@ -2,6 +2,16 @@
 
 ## Major features and improvements
 
+## Bug fixes and other changes
+
+## Documentation changes
+
+## Community contributions
+
+# Release 1.8.0
+
+## Major features and improvements
+
 - Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple. A resolver that is already registered is skipped unless `replace=True` is passed.
 - Added the option to allow data to be injected at run time when using the `KedroServiceSession`.
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.
@@ -23,11 +33,9 @@
 - Added `@experimental` tag to `KedroServiceSession` and the HTTP server (`create_http_server`) to clarify their experimental status.
 - Fixed CLI error messages being replaced by `NoneType: None` and the "Kedro project not found" hint being skipped with Click 8.5.
 
-## Documentation changes
+## Security hardening
 
-## Breaking changes to the API
-
-- **Security hardening**: Logging configuration now applies `KEDRO_LOGGING_MODULE_ALLOWLIST` to `class`, `ext://`, and `QueueHandler` `listener` references. Bare names, private objects, attribute chains, and `cfg://` are no longer supported. A `QueueHandler` `queue` factory must be `queue.Queue` or `queue.SimpleQueue`, and a `listener` must be a `QueueListener` subclass. Use fully qualified names and allowlist trusted custom modules; `sys.stdout` and `sys.stderr` remain allowed by default. These checks reduce risk, but logging configuration must still come from a trusted source. See the [logging documentation](https://docs.kedro.org/en/stable/develop/logging/#supported-logging-references) for migration guidance.
+- Logging configuration now applies `KEDRO_LOGGING_MODULE_ALLOWLIST` to `class`, `ext://`, and `QueueHandler` `listener` references. Bare names, private objects, attribute chains, and `cfg://` are no longer supported. A `QueueHandler` `queue` factory must be `queue.Queue` or `queue.SimpleQueue`, and a `listener` must be a `QueueListener` subclass. Use fully qualified names and allowlist trusted custom modules; `sys.stdout` and `sys.stderr` remain allowed by default. These checks reduce risk, but logging configuration must still come from a trusted source. See the [logging documentation](https://docs.kedro.org/en/stable/develop/logging/#supported-logging-references) for migration guidance.
 
 Thanks to [leetomo2528](https://github.com/leetomo2528), and to [Hongwei Li](https://github.com/3rdn4Li), [Junmin Zhu](https://github.com/wzunknown), [Zhun Wang](https://github.com/1chig0), [Jiacheng Zhong](https://github.com/superboy-zjc), [Han Dai](https://github.com/DennyDai), [Suyue Guo](https://github.com/SuyueGuo), [Songyang Peng](https://github.com/alexps9) and [Ziyue Pan](https://github.com/ziyue-pan), for independently and responsibly reporting this issue.
 
@@ -40,6 +48,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - [inchang-ing](https://github.com/inchang-ing)
 - [Max Gorbuk](https://github.com/mkzung)
 - [Shahzeb Ali](https://github.com/Shahzeb-DataEngineer)
+- [Krish Singh](https://github.com/KRISH-SINGH-10)
 
 # Release 1.7.0
 

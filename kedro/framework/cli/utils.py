@@ -238,9 +238,17 @@ class KedroCliError(click.exceptions.ClickException):
 
     def show(self, file: IO | None = None) -> None:
         if self.VERBOSE_ERROR:
-            click.secho(traceback.format_exc(), nl=False, fg="yellow")
+            click.secho(
+                "".join(
+                    traceback.format_exception(
+                        type(self), self, self.__traceback__
+                    )
+                ),
+                nl=False,
+                fg="yellow",
+            )
         elif self.VERBOSE_EXISTS:
-            etype, value, tb = sys.exc_info()
+            etype, value, tb = type(self), self, self.__traceback__
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
             cookiecutter_exception = ""
             for ex_line in traceback.format_exception(etype, value, tb):
@@ -252,7 +260,7 @@ class KedroCliError(click.exceptions.ClickException):
                 fg="yellow",
             )
         else:
-            etype, value, _ = sys.exc_info()
+            etype, value = type(self), self
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
             click.secho(
                 f"{formatted_exception}",

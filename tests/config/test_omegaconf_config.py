@@ -34,6 +34,18 @@ def _write_json(filepath: Path, config: dict):
     filepath.write_text(json_str)
 
 
+@pytest.fixture
+def _clear_replace_test_resolvers():
+    # The resolvers below live in OmegaConf's process-global registry, so
+    # clear them after each test: otherwise a re-run in the same process
+    # would see the first registration skipped and pass even if that
+    # registration were broken.
+    yield
+    for _name in ("replaceable_greet", "keepable_greet"):
+        if OmegaConf.has_resolver(_name):
+            OmegaConf.clear_resolver(_name)
+
+
 def _write_dummy_ini(filepath: Path):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     config = configparser.ConfigParser()
@@ -697,7 +709,7 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(
             tmp_path, base_env=_BASE_ENV, default_run_env=_DEFAULT_RUN_ENV
         )
-        OmegaConf.register_new_resolver("oc.env", oc.env)
+        OmegaConf.register_resolver("oc.env", oc.env)
         os.environ["TEST_USERNAME"] = "test_user"
         os.environ["TEST_KEY"] = "test_key"
         assert conf["credentials"]["user"]["name"] == "test_user"
@@ -895,7 +907,7 @@ class TestOmegaConfigLoader:
 
         custom_resolvers = {
             # A `(callable, kwargs)` tuple passes the kwargs on to
-            # `OmegaConf.register_new_resolver()`, so `use_cache` applies
+            # `OmegaConf.register_resolver()`, so `use_cache` applies
             "count_cached": (count_calls, {"use_cache": True}),
             "count_uncached": count_calls,
         }
@@ -909,6 +921,46 @@ class TestOmegaConfigLoader:
         # cached result, while the uncached one runs again for every interpolation
         assert params["cached1"] == params["cached2"]
         assert params["uncached1"] != params["uncached2"]
+
+    def test_custom_resolvers_replace_existing(
+        self, tmp_path, _clear_replace_test_resolvers
+    ):
+        # A second loader in the same process can replace an already-registered
+        # resolver by passing `replace=True` in the `(callable, kwargs)` tuple.
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        _write_yaml(base_params, {"greeting": "${replaceable_greet:world}"})
+        OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={"replaceable_greet": lambda x: f"old {x}"},
+            base_env=_BASE_ENV,
+        )
+        conf = OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={
+                "replaceable_greet": (lambda x: f"new {x}", {"replace": True})
+            },
+            base_env=_BASE_ENV,
+        )
+        assert conf["parameters"]["greeting"] == "new world"
+
+    def test_custom_resolvers_skip_registered_without_replace(
+        self, tmp_path, _clear_replace_test_resolvers
+    ):
+        # Without `replace=True` an already-registered resolver keeps its
+        # original implementation, matching previous behaviour.
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        _write_yaml(base_params, {"greeting": "${keepable_greet:world}"})
+        OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={"keepable_greet": lambda x: f"old {x}"},
+            base_env=_BASE_ENV,
+        )
+        conf = OmegaConfigLoader(
+            tmp_path,
+            custom_resolvers={"keepable_greet": lambda x: f"new {x}"},
+            base_env=_BASE_ENV,
+        )
+        assert conf["parameters"]["greeting"] == "old world"
 
     def test_globals(self, tmp_path):
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
@@ -1579,6 +1631,17 @@ class TestOmegaConfigLoader:
         }
         assert conf["parameters"]["my_global"] == 89
         assert conf["parameters"]["my_second_global"] == 24
+
+    def test_override_globals_after_resolving(self, tmp_path):
+        """Overwritten globals are used after a globals interpolation has been resolved"""
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        _write_yaml(base_params, {"my_global": "${globals:x}"})
+        _write_yaml(base_globals, {"x": 45})
+        conf = OmegaConfigLoader(tmp_path, base_env=_BASE_ENV, default_run_env="")
+        assert conf["parameters"]["my_global"] == 45
+        conf["globals"] = {"x": 89}
+        assert conf["parameters"]["my_global"] == 89
 
     def test_init_filesystem_http_protocol(self, mocker, tmp_path):
         """Test initialising filesystem with HTTP protocol."""

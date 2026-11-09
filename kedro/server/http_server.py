@@ -36,7 +36,7 @@ from kedro.server.utils import (
     KEDRO_SERVER_ENV,
     _resolve_project_path,
 )
-from kedro.utils import _is_module_allowed, load_obj
+from kedro.utils import _is_module_allowed, experimental, load_obj
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -69,6 +69,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             app.state.session.close()
 
 
+@experimental
 def create_http_server(
     project_path: str | Path | None = None,
     env: str | None = None,
@@ -313,6 +314,7 @@ def _execute_pipeline(
             namespaces=request.namespaces,
             only_missing_outputs=request.only_missing_outputs,
             runtime_params=request.params,
+            runtime_datasets=request.runtime_datasets,
         )
 
         duration_ms = (time.perf_counter() - start_time) * 1000

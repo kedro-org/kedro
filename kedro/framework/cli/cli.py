@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import importlib
 import sys
-import traceback
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -131,6 +130,7 @@ class KedroCLI(CommandCollection):
 
     def __init__(self, project_path: Path):
         self._metadata = None  # running in package mode
+        self._command_not_found = False
         if is_kedro_project(project_path):
             self._metadata = bootstrap_project(project_path)
         self._cli_hook_manager = get_cli_hook_manager()
@@ -139,6 +139,22 @@ class KedroCLI(CommandCollection):
             ("Global commands", self.global_groups),
             ("Project specific commands", self.project_groups),
         )
+
+    def resolve_command(
+        self, ctx: click.Context, args: list[str]
+    ) -> tuple[str | None, click.Command | None, list[str]]:
+        """Record unknown commands so ``main`` can hint at a missing project.
+
+        Click's ``standalone_mode`` converts the error to ``SystemExit`` with no
+        traceback context (Click >= 8.5), so it can't be detected from there.
+        ``NoSuchCommand`` subclasses ``UsageError`` from Click 8.4 onwards.
+        """
+        try:
+            return super().resolve_command(ctx, args)
+        except click.UsageError as exc:
+            if "No such command" in exc.message:
+                self._command_not_found = True
+            raise
 
     def main(
         self,
@@ -176,17 +192,7 @@ class KedroCLI(CommandCollection):
             )
 
             # When CLI is run outside of a project, project_groups are not registered.
-            # Click <8.4 raises ``UsageError``; Click >=8.4 raises the ``NoSuchCommand``
-            # subclass (pallets/click#3228).
-            catch_exceptions = (
-                "click.exceptions.UsageError: No such command",
-                "click.exceptions.NoSuchCommand: No such command",
-            )
-            formatted_tb = traceback.format_exc()
-            if (
-                any(exc_str in formatted_tb for exc_str in catch_exceptions)
-                and not self.project_groups
-            ):
+            if self._command_not_found and not self.project_groups:
                 warn = click.style(
                     "\nKedro project not found in this directory. ",
                     fg=ORANGE,  # type: ignore[arg-type]

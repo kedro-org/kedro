@@ -12,7 +12,7 @@ import re
 import sys
 import warnings
 from collections import namedtuple
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import wraps
 from glob import iglob
 from inspect import getcallargs, isabstract
@@ -26,12 +26,11 @@ from typing import (  # noqa: UP035
     List,
     Literal,
     Protocol,
+    Self,
     TypeVar,
     runtime_checkable,
 )
 from urllib.parse import urlsplit, urlunsplit
-
-from typing_extensions import Self
 
 # These are re-exported for backward compatibility
 from kedro.utils import (  # noqa: F401
@@ -594,7 +593,7 @@ def generate_timestamp() -> str:
         String representation of the current timestamp.
 
     """
-    current_ts = datetime.now(tz=timezone.utc).strftime(VERSION_FORMAT)
+    current_ts = datetime.now(tz=UTC).strftime(VERSION_FORMAT)
     return current_ts[:-4] + current_ts[-1:]  # Don't keep microseconds
 
 

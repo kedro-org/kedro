@@ -6,6 +6,10 @@
 
 ## Documentation changes
 
+## Breaking changes to the API
+
+- Dropped support for Python 3.10, which has reached end of regular support. Kedro now requires Python 3.11 or later.
+
 ## Community contributions
 
 # Release 1.8.0
@@ -38,8 +42,6 @@
 - Logging configuration now applies `KEDRO_LOGGING_MODULE_ALLOWLIST` to `class`, `ext://`, and `QueueHandler` `listener` references. Bare names, private objects, attribute chains, and `cfg://` are no longer supported. A `QueueHandler` `queue` factory must be `queue.Queue` or `queue.SimpleQueue`, and a `listener` must be a `QueueListener` subclass. Use fully qualified names and allowlist trusted custom modules; `sys.stdout` and `sys.stderr` remain allowed by default. These checks reduce risk, but logging configuration must still come from a trusted source. See the [logging documentation](https://docs.kedro.org/en/stable/develop/logging/#supported-logging-references) for migration guidance.
 
 Thanks to [leetomo2528](https://github.com/leetomo2528), and to [Hongwei Li](https://github.com/3rdn4Li), [Junmin Zhu](https://github.com/wzunknown), [Zhun Wang](https://github.com/1chig0), [Jiacheng Zhong](https://github.com/superboy-zjc), [Han Dai](https://github.com/DennyDai), [Suyue Guo](https://github.com/SuyueGuo), [Songyang Peng](https://github.com/alexps9) and [Ziyue Pan](https://github.com/ziyue-pan), for independently and responsibly reporting this issue.
-
-- Dropped support for Python 3.10, which has reached end of regular support. Kedro now requires Python 3.11 or later.
 
 ## Community contributions
 

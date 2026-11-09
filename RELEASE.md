@@ -2,13 +2,11 @@
 
 ## Major features and improvements
 
+- Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
+
 ## Bug fixes and other changes
 
 ## Documentation changes
-
-## Breaking changes to the API
-
-- Dropped support for Python 3.10, which has reached end of regular support. Kedro now requires Python 3.11 or later.
 
 ## Community contributions
 

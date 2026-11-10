@@ -96,7 +96,7 @@ These apply to the **step-by-step guide** below. This guide builds and deploys f
 
 | You need                                                                                                                       | Used for                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| A **Kedro project** (`requires-python = ">=3.10"` in `pyproject.toml`) and Python **>=3.10** locally                           | Packaging the project, local test runs, and the CDK script that reads your pipeline        |
+| A **Kedro project** (`requires-python = ">=3.11"` in `pyproject.toml`) and Python **>=3.11** locally                           | Packaging the project, local test runs, and the CDK script that reads your pipeline        |
 | [Docker](https://docs.docker.com/get-docker/) (Podman also works if you have a `docker`-compatible CLI)                        | Building the Lambda container image                                                        |
 | [Node.js](https://nodejs.org/) and the [CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/cli.html) (`npm install -g aws-cdk`) | Deploying Lambda functions and the Step Functions state machine with `deploy.py`           |
 | [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) configured for your target region          | Uploading data to S3, pushing the image to ECR, starting executions, and verifying outputs |

@@ -4,6 +4,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 from time import sleep, time
 
@@ -13,11 +14,6 @@ import tomli_w
 import yaml
 from behave import given, then, when
 from packaging.requirements import Requirement
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 import kedro
 from features.steps import util

@@ -53,6 +53,21 @@ def test_pipeline_with_interrupted_namespace():
         )
 
 
+def test_pipeline_with_namespace_interrupted_by_namespace_sharing_its_prefix():
+    nodes = [
+        node(identity, "A", "B", name="node1", namespace="ns1"),
+        node(identity, "B", "C", name="node2", namespace="ns10"),
+        node(identity, "C", "D", name="node3", namespace="ns1"),
+    ]
+
+    with pytest.warns(UserWarning) as warns:
+        Pipeline(nodes)
+
+    assert [str(w.message) for w in warns] == [
+        "Namespace 'ns1' is interrupted by nodes ['ns10.node2'] and thus invalid."
+    ]
+
+
 def test_pipeline_with_continuous_namespace():
     # Create a pipeline with continuous namespace
     nodes = [

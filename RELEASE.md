@@ -6,6 +6,8 @@
 
 ## Bug fixes and other changes
 
+- Fixed the error raised when a node's dict outputs do not match the keys returned by its function: the node's declared keys and the returned keys were swapped in the message.
+
 ## Documentation changes
 
 ## Community contributions

@@ -114,12 +114,17 @@ class TestNodeRunInvalidOutput:
             node(one_in_one_out, "ds1", {"a": "ds"}).run({"ds1": mocked_dataset})
 
     def test_miss_matching_output_keys(self, mocked_dataset):
-        pattern = r"The node's output keys {'ret'} do not match "
-        pattern += r"with the returned output's keys"
+        pattern = r"do not match with the returned output's keys {'ret'}\."
         with pytest.raises(ValueError, match=pattern):
             node(one_in_dict_out, "ds1", {"ret": "B", "ans": "C"}).run(
                 {"ds1": mocked_dataset}
             )
+
+    def test_miss_matching_output_keys_message_order(self, mocked_dataset):
+        pattern = r"The node's output keys {'ans'} do not match "
+        pattern += r"with the returned output's keys {'ret'}\."
+        with pytest.raises(ValueError, match=pattern):
+            node(one_in_dict_out, "ds1", {"ans": "C"}).run({"ds1": mocked_dataset})
 
     def test_node_not_list_output(self, mocked_dataset):
         pattern = r"The node definition contains a list of outputs "

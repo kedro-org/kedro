@@ -74,7 +74,7 @@ Use **EMR 7.x** for all new deployments. EMR base images ship with Python below 
 
 !!! warning "Legacy: EMR 6.x"
 
-    EMR 6.x defaults to Python ~3.7 and is in [end of support or end of life](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-standard-support.html). We do **not** recommend it for new deployments. See [Legacy: EMR 6.x](#legacy-emr-6x) if you cannot use EMR 7.x.
+    EMR 6.x defaults to Python ~3.7 and is in [end of support or end of life](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-standard-support.html). Its Spark 3.3 runtime only works with Python 3.10 or earlier, and Kedro 1.8.0 is the last release that supports Python 3.10, so **EMR 6.x only works with Kedro 1.8.0 or earlier**. We do **not** recommend it for new deployments. See [Legacy: EMR 6.x](#legacy-emr-6x) if you cannot use EMR 7.x.
 
 Keep the EMR release label aligned everywhere: Dockerfile `FROM` line, EMR Serverless application release, `validate-image -r` flag, and job submission must all match (for example `emr-7.13.0`).
 
@@ -580,7 +580,7 @@ ______________________________________________________________________
 
 !!! warning
 
-    This section is for teams that cannot migrate to EMR 7.x. EMR 6.x is built on Amazon Linux 2 and ships with Python ~3.7 by default. Custom images require EMR **6.9.0** or later.
+    This section is legacy, kept only for teams that cannot migrate to EMR 7.x. EMR 6.x ships Spark 3.3, which only works with Python 3.10 or earlier. Kedro 1.8.0 is the last release that supports Python 3.10, so pin `kedro==1.8.*` in your EMR 6.x image; later releases won't install. EMR 6.x is built on Amazon Linux 2 and ships with Python ~3.7 by default. Custom images require EMR **6.9.0** or later.
 
 Follow [Steps 1–4](#step-1-prepare-your-kedro-project) as for EMR 7.x, then apply the differences below for Steps 5–9.
 

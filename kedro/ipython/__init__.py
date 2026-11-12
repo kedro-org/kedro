@@ -12,6 +12,7 @@ import logging
 import os
 import re
 import sys
+import tokenize
 import typing
 import warnings
 from collections import OrderedDict
@@ -426,6 +427,13 @@ def _find_node(node_name: str, pipelines: _ProjectPipelines) -> Node:
     )
 
 
+def _read_source(python_file: str) -> str:
+    """Read a source file the way Python does: as UTF-8 unless the file declares
+    another encoding (PEP 263), not with the platform's default encoding."""
+    with tokenize.open(python_file) as file:
+        return file.read()
+
+
 def _prepare_imports(node_func: Callable) -> str:
     """Prepare the import statements for loading a node."""
     python_file = inspect.getsourcefile(node_func)
@@ -434,31 +442,30 @@ def _prepare_imports(node_func: Callable) -> str:
     # Confirm source file was found
     if python_file:
         import_statement = []
-        with open(python_file) as file:
-            # Handle multiline imports, i.e.
-            # from lib import (
-            # a,
-            # b,
-            # c
-            # )
-            # This will not work with all edge cases but good enough with common cases that
-            # are formatted automatically by black, ruff etc.
-            inside_bracket = False
-            # Parse any line start with from or import statement
+        # Handle multiline imports, i.e.
+        # from lib import (
+        # a,
+        # b,
+        # c
+        # )
+        # This will not work with all edge cases but good enough with common cases that
+        # are formatted automatically by black, ruff etc.
+        inside_bracket = False
+        # Parse any line start with from or import statement
 
-            for _ in file.readlines():
-                line = _.strip()
-                if not inside_bracket:
-                    # The common case
-                    if line.startswith("from") or line.startswith("import"):
-                        import_statement.append(line)
-                        if line.endswith("("):
-                            inside_bracket = True
-                # Inside multi-lines import, append everything.
-                else:
+        for _ in _read_source(python_file).splitlines():
+            line = _.strip()
+            if not inside_bracket:
+                # The common case
+                if line.startswith("from") or line.startswith("import"):
                     import_statement.append(line)
-                    if line.endswith(")"):
-                        inside_bracket = False
+                    if line.endswith("("):
+                        inside_bracket = True
+            # Inside multi-lines import, append everything.
+            else:
+                import_statement.append(line)
+                if line.endswith(")"):
+                    inside_bracket = False
 
         clean_imports = "\n".join(import_statement).strip()
         return clean_imports
@@ -526,7 +533,7 @@ def _prepare_function_body(func: Callable) -> str:
         return fallback_body
 
     try:
-        module_source = Path(python_file).read_text()
+        module_source = _read_source(python_file)
         module_tree = ast.parse(module_source)
         symbols = _build_module_symbol_table(module_tree)
         # Root AST node for the selected Kedro node function.

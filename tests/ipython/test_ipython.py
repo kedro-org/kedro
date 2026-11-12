@@ -1,4 +1,5 @@
 import ast
+import importlib.util
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,45 @@ from .conftest import (
     dummy_multiline_import_function,
     dummy_nested_function,
 )
+
+# Sources for the encoding tests of %load_node. The UTF-8 text has bytes that
+# cp1252, the default encoding on many Windows machines, can't decode.
+UTF8_SOURCE = (
+    "# 数据管道 (data pipeline)\n"
+    "import logging  # noqa\n"
+    "\n"
+    'GREETING = "数据"\n'
+    "\n"
+    "\n"
+    "def dummy():\n"
+    "    return GREETING\n"
+)
+LATIN1_SOURCE = (
+    "# -*- coding: latin-1 -*-\n"
+    "# Café\n"
+    "import logging  # noqa\n"
+    "\n"
+    'GREETING = "Café"\n'
+    "\n"
+    "\n"
+    "def dummy():\n"
+    "    return GREETING\n"
+)
+ENCODED_SOURCES = [
+    pytest.param(UTF8_SOURCE.encode(), 'GREETING = "数据"', id="utf-8"),
+    pytest.param(
+        LATIN1_SOURCE.encode("latin-1"), 'GREETING = "Café"', id="declared-latin-1"
+    ),
+]
+
+
+def _load_module_from_bytes(tmp_path, source):
+    module_path = tmp_path / "encoded_module.py"
+    module_path.write_bytes(source)
+    spec = importlib.util.spec_from_file_location("encoded_module", module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 class TestLoadKedroObjects:
@@ -522,6 +562,27 @@ ERROR,
 
         assert f"Could not find {dummy_function.__name__}" in str(excinfo.value)
 
+    @pytest.mark.parametrize("source, constant", ENCODED_SOURCES)
+    def test_prepare_imports_reads_source_with_its_encoding(
+        self, tmp_path, source, constant
+    ):
+        """The source file is read as Python reads it, not with the default encoding."""
+        module = _load_module_from_bytes(tmp_path, source)
+
+        assert _prepare_imports(module.dummy) == "import logging  # noqa"
+
+    @pytest.mark.parametrize("source, constant", ENCODED_SOURCES)
+    def test_prepare_function_body_reads_source_with_its_encoding(
+        self, tmp_path, source, constant
+    ):
+        """Same-module constants come through unchanged, without the AST fallback."""
+        module = _load_module_from_bytes(tmp_path, source)
+
+        function_body = _prepare_function_body(module.dummy)
+
+        assert constant in function_body
+        assert "def dummy():" in function_body
+
     def test_prepare_node_inputs(
         self,
         dummy_node,
@@ -596,7 +657,7 @@ ERROR,
     def test_prepare_function_body_fallback_when_ast_parse_fails(
         self, mocker, dummy_function_definition, caplog
     ):
-        mocker.patch("kedro.ipython.Path.read_text", side_effect=OSError("boom"))
+        mocker.patch("kedro.ipython._read_source", side_effect=OSError("boom"))
 
         result = _prepare_function_body(dummy_function)
 

@@ -6,9 +6,15 @@
 
 ## Bug fixes and other changes
 
+- Fixed `%load_node` failing, or reading text incorrectly, on Windows when the node's source file contains non-ASCII characters. The file is now read as Python reads it: as UTF-8, unless it declares another encoding.
+
 ## Documentation changes
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Darshanpawar7](https://github.com/Darshanpawar7)
 
 # Release 1.8.0
 

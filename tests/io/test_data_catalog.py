@@ -1,7 +1,7 @@
 import logging
 import re
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -722,7 +722,7 @@ class TestDataCatalog:
             correct_config["catalog"]["boats"]["versioned"] = True
 
             # Decompose `generate_timestamp` to keep `current_ts` reference.
-            current_ts = datetime.now(tz=timezone.utc)
+            current_ts = datetime.now(tz=UTC)
             fmt = (
                 "{d.year:04d}-{d.month:02d}-{d.day:02d}T{d.hour:02d}"
                 ".{d.minute:02d}.{d.second:02d}.{ms:03d}Z"

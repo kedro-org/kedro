@@ -237,10 +237,17 @@ class KedroCliError(click.exceptions.ClickException):
     COOKIECUTTER_EXCEPTIONS_PREFIX = "cookiecutter.exceptions"
 
     def show(self, file: IO | None = None) -> None:
+        # Format ``self`` rather than relying on ``sys.exc_info()``: Click >= 8.5
+        # calls ``show()`` after its ``except`` block has exited, when there is no
+        # active exception to inspect.
+        etype, value, tb = type(self), self, self.__traceback__
         if self.VERBOSE_ERROR:
-            click.secho(traceback.format_exc(), nl=False, fg="yellow")
+            click.secho(
+                "".join(traceback.format_exception(etype, value, tb)),
+                nl=False,
+                fg="yellow",
+            )
         elif self.VERBOSE_EXISTS:
-            etype, value, tb = sys.exc_info()
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
             cookiecutter_exception = ""
             for ex_line in traceback.format_exception(etype, value, tb):
@@ -252,7 +259,6 @@ class KedroCliError(click.exceptions.ClickException):
                 fg="yellow",
             )
         else:
-            etype, value, _ = sys.exc_info()
             formatted_exception = "".join(traceback.format_exception_only(etype, value))
             click.secho(
                 f"{formatted_exception}",

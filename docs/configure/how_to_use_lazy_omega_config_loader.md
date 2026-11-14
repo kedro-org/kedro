@@ -8,9 +8,9 @@ This guide shows how to opt in to `LazyOmegaConfigLoader`, preload configuration
 
     `LazyOmegaConfigLoader` is designed for long-lived processes such as `KedroServiceSession`. If you change how your project uses `KedroServiceSession` to rely on it, also set `CONFIG_LOADER_CLASS` in `settings.py`, as shown in [Configure the loader](#configure-the-loader). Projects that do not need it can keep the default.
 
-!!! warning "Experimental methods"
+!!! warning "Experimental"
 
-    The loader itself is not experimental, but these public methods are and may change in a future Kedro release: `preload()`, `with_runtime_params()` and `get_unresolved_config()`. Using them emits a `KedroExperimentalWarning`; reading keys such as `loader["parameters"]` does not.
+    `LazyOmegaConfigLoader` and its public methods are experimental and may change or be removed in a future Kedro release. Instantiating the loader emits a `KedroExperimentalWarning` once per process.
 
 By default, the loader resolves interpolations like `OmegaConfigLoader` does. To resolve them after merging the environments instead, [switch to the `"merged"` interpolation scope](#switch-to-the-merged-interpolation-scope).
 
@@ -108,7 +108,7 @@ As with `OmegaConfigLoader`, the runtime parameters are also merged into `parame
 
 Each `with_runtime_params()` call returns a per-run view with its own runtime parameters and explicit configuration overrides. The views share the loader's raw configuration snapshot. Resolving one view does not change the results of another.
 
-`__getitem__` returns a resolved Python dictionary, as it does with `OmegaConfigLoader`. The experimental `get_unresolved_config(key)` method returns the read-only, merged `DictConfig` for a key without resolving its interpolations.
+`__getitem__` returns a resolved Python dictionary, as it does with `OmegaConfigLoader`. The `get_unresolved_config(key)` method returns the read-only, merged `DictConfig` for a key without resolving its interpolations.
 
 !!! note
 

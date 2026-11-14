@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 
-- Added the opt-in `LazyOmegaConfigLoader`, which caches raw configuration for repeated resolution with per-run parameters. `OmegaConfigLoader` remains the default `CONFIG_LOADER_CLASS`. It resolves interpolations per environment like `OmegaConfigLoader` by default, and supports a `merged` interpolation scope. Its `preload()`, `with_runtime_params()` and `get_unresolved_config()` methods are experimental.
+- Added the opt-in, experimental `LazyOmegaConfigLoader`, which caches raw configuration on first access for repeated resolution with per-run parameters. `OmegaConfigLoader` remains the default `CONFIG_LOADER_CLASS`. The new loader resolves interpolations per environment like `OmegaConfigLoader` by default, and supports a `merged` interpolation scope. Its public methods include `preload()` to refresh the snapshot, `with_runtime_params()` to create a per-run view, and `get_unresolved_config()` to inspect unresolved configuration.
 - Added the option to allow data to be injected at run time when using the `KedroServiceSession`.
 - Added support for passing keyword arguments such as `use_cache` or `replace` to `OmegaConf.register_new_resolver()` when registering custom resolvers with `OmegaConfigLoader`: a resolver in `CONFIG_LOADER_ARGS["custom_resolvers"]` can now be given as a `(callable, kwargs)` tuple.
 - Added pre-loading of raw configuration in serving mode to improve request handling performance.

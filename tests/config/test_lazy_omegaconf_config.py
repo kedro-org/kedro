@@ -51,24 +51,30 @@ def _loader(
 
 
 class TestLazyOmegaConfigLoader:
-    def test_key_access_is_not_experimental_in_environment_scope(
-        self, tmp_path: Path
+    def test_class_warns_once_on_instantiation(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         _write_yaml(tmp_path / "base" / "parameters.yml", {"value": 1})
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            result = _loader(tmp_path, interpolation_scope="environment")["parameters"]
-
-        assert result == {"value": 1}
-        assert not any(
-            issubclass(warning.category, KedroExperimentalWarning) for warning in caught
+        monkeypatch.setattr(
+            LazyOmegaConfigLoader, "__kedro_experimental_warned__", False, raising=False
         )
 
-    def test_public_methods_are_marked_experimental(self) -> None:
-        assert LazyOmegaConfigLoader.preload.__kedro_experimental__ is True
-        assert LazyOmegaConfigLoader.with_runtime_params.__kedro_experimental__ is True
-        assert (
-            LazyOmegaConfigLoader.get_unresolved_config.__kedro_experimental__ is True
+        with pytest.warns(
+            KedroExperimentalWarning, match="LazyOmegaConfigLoader is experimental"
+        ) as caught:
+            loader = _loader(tmp_path, interpolation_scope="environment")
+        assert len(caught) == 1
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            assert loader["parameters"] == {"value": 1}
+            loader.preload()
+            loader.with_runtime_params()
+            loader.get_unresolved_config("parameters")
+            _loader(tmp_path)
+
+        assert not any(
+            issubclass(warning.category, KedroExperimentalWarning) for warning in caught
         )
 
     def test_invalid_interpolation_scope_raises(self, tmp_path: Path) -> None:

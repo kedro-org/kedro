@@ -12,6 +12,7 @@ import logging
 import os
 import re
 import sys
+import tokenize
 import typing
 import warnings
 from collections import OrderedDict
@@ -434,7 +435,8 @@ def _prepare_imports(node_func: Callable) -> str:
     # Confirm source file was found
     if python_file:
         import_statement = []
-        with open(python_file) as file:
+        # Source files are UTF-8 unless they declare otherwise (PEP 263), not the platform encoding
+        with tokenize.open(python_file) as file:
             # Handle multiline imports, i.e.
             # from lib import (
             # a,
@@ -526,7 +528,8 @@ def _prepare_function_body(func: Callable) -> str:
         return fallback_body
 
     try:
-        module_source = Path(python_file).read_text()
+        with tokenize.open(python_file) as source_file:
+            module_source = source_file.read()
         module_tree = ast.parse(module_source)
         symbols = _build_module_symbol_table(module_tree)
         # Root AST node for the selected Kedro node function.

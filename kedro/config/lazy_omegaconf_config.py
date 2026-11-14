@@ -36,6 +36,7 @@ class _RawConfig:
     processed_files: set[Path]
 
 
+@experimental
 class LazyOmegaConfigLoader(OmegaConfigLoader):
     """An OmegaConf loader that caches raw config for repeated resolution.
 
@@ -185,7 +186,6 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             self._globals_loaded = True
             self._resolved_static_config["globals"] = copy.deepcopy(self._globals)
 
-    @experimental
     def preload(self) -> None:
         """Read, validate and merge the configured files into a new cached snapshot.
 
@@ -250,7 +250,6 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             self._globals_loaded = fresh._globals_loaded
             self._globals_oc = None
 
-    @experimental
     def with_runtime_params(
         self,
         runtime_params: dict[str, Any] | None = None,
@@ -275,7 +274,6 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             )
         return view
 
-    @experimental
     def get_unresolved_config(self, key: str) -> DictConfig:
         """Return a read-only raw config merged across the selected environments."""
         if key in self.data:

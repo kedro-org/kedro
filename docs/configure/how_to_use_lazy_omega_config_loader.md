@@ -12,8 +12,6 @@ This guide shows how to opt in to `LazyOmegaConfigLoader`, preload configuration
 
     `LazyOmegaConfigLoader` and its public methods are experimental and may change or be removed in a future Kedro release. Instantiating the loader emits a `KedroExperimentalWarning` once per process.
 
-By default, the loader resolves interpolations like `OmegaConfigLoader` does. To resolve them after merging the environments instead, [switch to the `"merged"` interpolation scope](#switch-to-the-merged-interpolation-scope).
-
 ## Configure the loader
 
 To opt in, set `CONFIG_LOADER_CLASS` and `CONFIG_LOADER_ARGS` in your project's `src/<package_name>/settings.py`:
@@ -30,30 +28,38 @@ CONFIG_LOADER_ARGS = {
 
 `LazyOmegaConfigLoader` accepts the same file patterns, merge strategies, custom resolvers, and runtime-parameter type-selection option as `OmegaConfigLoader`. To go back to the default loader, remove these settings or set `CONFIG_LOADER_CLASS = OmegaConfigLoader`.
 
-It adds `interpolation_scope`, which controls when interpolation is resolved:
+## Read configuration
 
-| Value           | Behaviour                                                                           |
-| --------------- | ----------------------------------------------------------------------------------- |
-| `"environment"` | Resolve each environment before merging, matching `OmegaConfigLoader`. The default. |
-| `"merged"`      | Merge the raw configuration from the environments, then resolve interpolations.     |
+Access a configuration key as you would with `OmegaConfigLoader`. For example,
+given `conf/base/parameters.yml`:
 
-### Switch to the `"merged"` interpolation scope
-
-Add `interpolation_scope` to `CONFIG_LOADER_ARGS`:
-
-```python
-CONFIG_LOADER_ARGS = {
-    "base_env": "base",
-    "default_run_env": "local",
-    "interpolation_scope": "merged",
-}
+```yaml
+learning_rate: 0.1
 ```
 
-This can produce different results from `OmegaConfigLoader`. See [Interpolation scope](#interpolation-scope) before choosing it.
+Read the parameters with:
+
+```python
+from kedro.config import LazyOmegaConfigLoader
+
+loader = LazyOmegaConfigLoader("conf", base_env="base", default_run_env="local")
+loader["parameters"]
+# {"learning_rate": 0.1}
+```
+
+The loader reads and caches the raw files for a key on first access, then
+resolves them into a Python dictionary. Later accesses reuse the cached files
+instead of reading them again. Unlike `OmegaConfigLoader`, the loader doesn't
+pick up file changes on subsequent accesses. Call `preload()` or create a new
+loader to read the files again. Ensure that the configured environment
+directories exist, even if they contain no matching files.
 
 ## Preload and resolve per run
 
-Use `preload()` before serving repeated requests. It reads and merges the configured files into a snapshot. Key access and `with_runtime_params()` reuse that snapshot even if files change on disk; call `preload()` again to read the files anew.
+Use `preload()` before serving repeated requests. It reads and caches the
+configured files in a snapshot. It also resolves globals and credentials. Key
+access and `with_runtime_params()` reuse that snapshot even if files change on
+disk; call `preload()` again to read the files anew.
 
 !!! warning "`preload()` refreshes files, not your overrides"
 
@@ -108,15 +114,71 @@ As with `OmegaConfigLoader`, the runtime parameters are also merged into `parame
 
 Each `with_runtime_params()` call returns a per-run view with its own runtime parameters and explicit configuration overrides. The views share the loader's raw configuration snapshot. Resolving one view does not change the results of another.
 
-`__getitem__` returns a resolved Python dictionary, as it does with `OmegaConfigLoader`. The `get_unresolved_config(key)` method returns the read-only, merged `DictConfig` for a key without resolving its interpolations.
-
 !!! note
 
     The per-run view resolves configuration only. It does not create a `KedroContext`, catalog, or run a pipeline. Integration with `KedroServiceSession` is a separate step.
 
+## Inspect unresolved configuration
+
+Use `get_unresolved_config(key)` to inspect a read-only, merged `DictConfig`
+without resolving its interpolations. For example, given these files:
+
+```yaml
+# conf/base/parameters.yml
+lr: 0.1
+next_lr: "${lr}"
+run: "${runtime_params:run_id, none}"
+```
+
+```yaml
+# conf/local/parameters.yml
+lr: 0.2
+```
+
+Inspect the raw merge and compare it with normal key access:
+
+```python
+from kedro.config import LazyOmegaConfigLoader
+from omegaconf import OmegaConf
+
+loader = LazyOmegaConfigLoader("conf", base_env="base", default_run_env="local")
+raw = loader.get_unresolved_config("parameters")
+OmegaConf.to_container(raw, resolve=False)
+# {"lr": 0.2, "next_lr": "${lr}", "run": "${runtime_params:run_id, none}"}
+
+loader["parameters"]
+# {"lr": 0.2, "next_lr": 0.1, "run": "none"}
+
+raw.lr = 1  # raises ReadonlyConfigError
+```
+
+The raw merge contains the local `lr` value, but normal key access resolves
+`next_lr` within the base environment before merging. See
+[Interpolation scope](#interpolation-scope) for details.
+
+## Configuration lifetime
+
+The loader keeps its configuration snapshot until `preload()` is called again. Each `preload()` call re-reads the files and replaces the snapshot; if reading fails, the previous snapshot is kept. Changes to YAML files after preloading are not picked up by key access or by `with_runtime_params()`. Views created before a new `preload()` keep the snapshot they were created from.
+
+Credentials are resolved as static configuration, not separately for each run. Pass values that change between runs through `with_runtime_params()` and the `runtime_params` resolver in parameters or catalog configuration.
+
 ## Interpolation scope
 
 Lazy resolution and environment merge order are independent. `"environment"`, the default, preserves existing results; `"merged"` resolves interpolations against the combined environments.
+
+| Value           | Behaviour                                                                           |
+| --------------- | ----------------------------------------------------------------------------------- |
+| `"environment"` | Resolve each environment before merging, matching `OmegaConfigLoader`. The default. |
+| `"merged"`      | Merge the raw configuration from the environments, then resolve interpolations.     |
+
+!!! warning "Keep the default unless you need different results"
+
+    Keep the default `"environment"` scope unless you have a clear reason to
+    change it. The `"merged"` scope can change configuration results. It can
+    also be slower for a single cold CLI run because it does more merging up
+    front. For repeated runs with different runtime parameters, it may be
+    faster because the merged configuration can be reused. Measure your own
+    workload before changing the scope for performance.
 
 For example, given these files:
 
@@ -131,7 +193,27 @@ param2: "base"
 param2: "local"
 ```
 
-`OmegaConfigLoader` and `LazyOmegaConfigLoader(interpolation_scope="environment")` return `param1: "base"`. `LazyOmegaConfigLoader(interpolation_scope="merged")` returns `param1: "local"`.
+Compare the two scopes:
+
+```python
+from kedro.config import LazyOmegaConfigLoader
+
+environment = LazyOmegaConfigLoader(
+    "conf", base_env="base", default_run_env="local",
+)
+merged = LazyOmegaConfigLoader(
+    "conf", base_env="base", default_run_env="local", interpolation_scope="merged",
+)
+
+environment["parameters"]
+# {"param1": "base", "param2": "local"}
+merged["parameters"]
+# {"param1": "local", "param2": "local"}
+```
+
+The default resolves `param1` in the base environment before applying the
+local override, as `OmegaConfigLoader` does. The `"merged"` scope resolves
+`param1` after the override.
 
 Both scopes merge `runtime_params` into `parameters`. The `"merged"` scope does so after merging environments, which can preserve base keys that the default destructive strategy replaces in `OmegaConfigLoader`.
 
@@ -142,8 +224,14 @@ For example, with `x: {a: 1}` in `conf/base/parameters.yml`, `y: 2` in `conf/loc
 | `"environment"` | `{x: {b: 5}, y: 2}`       |
 | `"merged"`      | `{x: {a: 1, b: 5}, y: 2}` |
 
-## Configuration lifetime
+### Switch to the `"merged"` interpolation scope
 
-The loader keeps its configuration snapshot until `preload()` is called again. Each `preload()` call re-reads the files and replaces the snapshot; if reading fails, the previous snapshot is kept. Changes to YAML files after preloading are not picked up by key access or by `with_runtime_params()`. Views created before a new `preload()` keep the snapshot they were created from.
+To select the `"merged"` scope, add it to `CONFIG_LOADER_ARGS`:
 
-Credentials are resolved as static configuration, not separately for each run. Pass values that change between runs through `with_runtime_params()` and the `runtime_params` resolver in parameters or catalog configuration.
+```python
+CONFIG_LOADER_ARGS = {
+    "base_env": "base",
+    "default_run_env": "local",
+    "interpolation_scope": "merged",
+}
+```

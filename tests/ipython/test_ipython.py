@@ -16,6 +16,7 @@ from kedro.ipython import (
     _load_node,
     _normalise_reload_kedro_params,
     _prepare_function_body,
+    _prepare_function_call,
     _prepare_imports,
     _prepare_node_inputs,
     _resolve_function_node,
@@ -26,7 +27,7 @@ from kedro.ipython import (
     magic_load_node,
     reload_kedro,
 )
-from kedro.pipeline import pipeline
+from kedro.pipeline import node, pipeline
 
 from .conftest import (
     dummy_function,
@@ -568,6 +569,57 @@ ERROR,
         )
         result = _prepare_node_inputs(node_bound_arguments)
         assert result == expected
+
+    @staticmethod
+    def _generate(a_node):
+        bound = _get_node_bound_arguments(a_node)
+        inputs_cell = _format_node_inputs_text(_prepare_node_inputs(bound))
+        call = _prepare_function_call(a_node.func, bound)
+        return inputs_cell, call
+
+    def test_dict_inputs_bound_by_name_with_skipped_parameter(self):
+        def train(data, config=None, seed=0):
+            return data
+
+        a_node = node(train, {"data": "raw", "seed": "params:seed"}, "out")
+        inputs_cell, call = self._generate(a_node)
+
+        assert 'data = catalog.load("raw")' in inputs_cell
+        assert 'seed = catalog.load("params:seed")' in inputs_cell
+        assert "config" not in inputs_cell
+        assert call == "train(data, seed=seed)"
+
+    def test_dict_inputs_with_keyword_only_argument(self):
+        def report(data, *, title):
+            return data
+
+        a_node = node(report, {"data": "raw", "title": "params:title"}, "out")
+        inputs_cell, call = self._generate(a_node)
+
+        assert 'title = catalog.load("params:title")' in inputs_cell
+        assert call == "report(data, title=title)"
+
+    def test_dict_inputs_with_var_keyword_argument(self):
+        def report(data, **kwargs):
+            return data
+
+        a_node = node(report, {"data": "raw", "title": "params:title"}, "out")
+        inputs_cell, call = self._generate(a_node)
+
+        assert 'title = catalog.load("params:title")' in inputs_cell
+        assert call == "report(data, title=title)"
+
+    def test_list_inputs_remain_positional(self):
+        def train(data, config, seed=0):
+            return data
+
+        a_node = node(train, ["raw", "params:config", "params:seed"], "out")
+        inputs_cell, call = self._generate(a_node)
+
+        assert 'data = catalog.load("raw")' in inputs_cell
+        assert 'config = catalog.load("params:config")' in inputs_cell
+        assert 'seed = catalog.load("params:seed")' in inputs_cell
+        assert call == "train(data, config, seed)"
 
     def test_prepare_function_body(self, dummy_function_definition):
         result = _prepare_function_body(dummy_function)

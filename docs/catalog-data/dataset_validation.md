@@ -85,6 +85,8 @@ For Pandera schemas, `options` takes the keyword arguments of Kedro's `PanderaVa
 
     Adopting validation on an existing project? Start with `severity: warn`. Failures are logged instead of raised, so you can see what would break before you enforce anything.
 
+    On a failed validation, the original data is passed through unchanged, including discarding any coercion (for example, a Pandera schema with `coerce = True`). The node receives the input as it was, so its dtypes reflect the data, not the schema.
+
 ## Switching validation off
 
 You can switch validation off at three levels, from narrowest to broadest:

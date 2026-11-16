@@ -32,6 +32,15 @@ class CompaniesSchema(pa.DataFrameModel):
         strict = False
 
 
+class CoercingSchema(pa.DataFrameModel):
+    """Schema with coercion enabled, as in the #5818 repro."""
+
+    id: int = pa.Field(ge=0)
+
+    class Config:
+        coerce = True
+
+
 class CountingValidator:
     """Counts validate calls; pass-through."""
 
@@ -231,6 +240,33 @@ class TestModeAndEnablementGating:
 
         pd.testing.assert_frame_equal(loaded, invalid_df)
         assert "Validation failed for dataset 'companies' on load" in caplog.text
+        assert "Passing through the original data unchanged" in caplog.text
+
+    def test_severity_warn_coercing_schema_passes_original_data(self, caplog):
+        # Regression test for #5818: with severity warn and a coercing
+        # schema, a failed validation passes the original frame on, so
+        # the node sees the input dtypes, not the schema dtypes.
+        catalog = DataCatalog.from_config(
+            {
+                "w": {
+                    "type": "MemoryDataset",
+                    "validator": {
+                        "class": f"{_MODULE}.CoercingSchema",
+                        "severity": "warn",
+                    },
+                },
+            }
+        )
+
+        catalog.save("w", pd.DataFrame({"id": ["1", "2"]}))
+        assert catalog.load("w")["id"].dtype == "int64"
+
+        with caplog.at_level(logging.WARNING, logger="kedro.io.data_catalog"):
+            catalog.save("w", pd.DataFrame({"id": ["1", "-2"]}))
+
+        loaded = catalog.load("w")
+        pd.testing.assert_frame_equal(loaded, pd.DataFrame({"id": ["1", "-2"]}))
+        assert "Passing through the original data unchanged" in caplog.text
 
     def test_severity_warn_on_save_writes_and_logs(self, csv_path, invalid_df, caplog):
         catalog = make_catalog(

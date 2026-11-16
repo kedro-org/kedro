@@ -1335,7 +1335,11 @@ class DataCatalog(CatalogProtocol):
             if exc.validator is None:
                 exc.validator = spec.class_path
             if spec.severity == "warn":
-                self._logger.warning(str(exc))
+                self._logger.warning(
+                    "%s Passing through the original data unchanged; "
+                    "any coercion is discarded.",
+                    exc,
+                )
                 return data
             raise
         except Exception as exc:
@@ -1347,7 +1351,11 @@ class DataCatalog(CatalogProtocol):
             )
             wrapped.__cause__ = exc
             if spec.severity == "warn":
-                self._logger.warning(str(wrapped))
+                self._logger.warning(
+                    "%s Passing through the original data unchanged; "
+                    "any coercion is discarded.",
+                    wrapped,
+                )
                 return data
             raise wrapped from exc
 

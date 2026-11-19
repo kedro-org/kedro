@@ -62,12 +62,14 @@ nav = [
       {"Concepts" = [
         {"Configuration" = "configure/configuration_basics.md"},
         {"Parameters and credentials" = "configure/parameters_and_credentials.md"},
-        {"Templating" = "configure/templating.md"}
+        {"Templating" = "configure/templating.md"},
+        {"Caching configuration" = "configure/caching_configuration.md"}
       ]},
       {"How-to Guides" = [
         {"Configuration" = "configure/how_to_configure_project.md"},
         {"Parameters and credentials" = "configure/how_to_use_parameters_and_credentials.md"},
         {"Templating" = "configure/how_to_use_templating.md"},
+        {"Caching configuration" = "configure/how_to_cache_configuration.md"},
         {"Config loader migration" = "configure/config_loader_migration.md"}
       ]}
     ]},

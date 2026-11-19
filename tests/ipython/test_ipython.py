@@ -1,4 +1,5 @@
 import ast
+import importlib.util
 from pathlib import Path
 
 import pytest
@@ -514,6 +515,25 @@ ERROR,
         result = _prepare_imports(dummy_multiline_import_function)
         assert result == func_imports
 
+    def test_prepare_imports_and_body_honour_source_encoding(self, tmp_path):
+        # A PEP 263 cookie must be followed instead of the platform encoding.
+        source = (
+            "# -*- coding: latin-1 -*-\n"
+            "import logging  # caf\xe9\n"
+            "\n"
+            "\n"
+            "def latin_node(value):\n"
+            "    return value  # caf\xe9\n"
+        )
+        module_file = tmp_path / "latin_nodes.py"
+        module_file.write_bytes(source.encode("latin-1"))
+        spec = importlib.util.spec_from_file_location("latin_nodes", module_file)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        assert _prepare_imports(module.latin_node) == "import logging  # café"
+        assert "return value" in _prepare_function_body(module.latin_node)
+
     def test_prepare_imports_func_not_found(self, mocker):
         mocker.patch("inspect.getsourcefile", return_value=None)
 
@@ -596,7 +616,7 @@ ERROR,
     def test_prepare_function_body_fallback_when_ast_parse_fails(
         self, mocker, dummy_function_definition, caplog
     ):
-        mocker.patch("kedro.ipython.Path.read_text", side_effect=OSError("boom"))
+        mocker.patch("kedro.ipython.tokenize.open", side_effect=OSError("boom"))
 
         result = _prepare_function_body(dummy_function)
 

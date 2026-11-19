@@ -6,6 +6,8 @@
 
 ## Bug fixes and other changes
 
+- Fixed `%load_node` reading the node's source file with the platform encoding. It now reads it as UTF-8, or the encoding declared in the file (PEP 263).
+
 ## Documentation changes
 
 ## Community contributions

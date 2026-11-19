@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
+
 ## Bug fixes and other changes
 
 - Fixed the interrupted namespace warning not being raised when the interrupting node's namespace starts with the same characters as the interrupted one, such as `ns1` interrupted by `ns10`.

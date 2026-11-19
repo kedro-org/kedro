@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
+
 ## Bug fixes and other changes
 
 - Fixed the error raised when a node's dict outputs do not match the keys returned by its function: the node's declared keys and the returned keys were swapped in the message.

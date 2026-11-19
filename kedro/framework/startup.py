@@ -4,13 +4,9 @@ from __future__ import annotations
 
 import os
 import sys
+import tomllib
 from pathlib import Path
 from typing import NamedTuple
-
-if sys.version_info >= (3, 11):  # pragma: no cover
-    import tomllib
-else:  # pragma: no cover
-    import tomli as tomllib
 
 from kedro import __version__ as kedro_version
 from kedro.framework.project import configure_project

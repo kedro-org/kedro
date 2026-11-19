@@ -70,7 +70,7 @@ You can then review the [spaceflights tutorial](https://docs.kedro.org/en/stable
 For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://docs.kedro.org/projects/kedro-viz/).
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/kedro-org/kedro-viz/main/.github/img/banner.png" alt>
+    <img src="https://raw.githubusercontent.com/kedro-org/kedro-viz/main/.github/img/banner.gif" alt>
     <em>A pipeline visualisation generated using Kedro-Viz</em>
 </p>
 

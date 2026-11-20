@@ -41,6 +41,8 @@
 
 Thanks to [leetomo2528](https://github.com/leetomo2528), and to [Hongwei Li](https://github.com/3rdn4Li), [Junmin Zhu](https://github.com/wzunknown), [Zhun Wang](https://github.com/1chig0), [Jiacheng Zhong](https://github.com/superboy-zjc), [Han Dai](https://github.com/DennyDai), [Suyue Guo](https://github.com/SuyueGuo), [Songyang Peng](https://github.com/alexps9) and [Ziyue Pan](https://github.com/ziyue-pan), for independently and responsibly reporting this issue.
 
+- Newly generated projects now use PEP 735 dependency groups for development tools. Existing projects are not migrated. For new projects, `pip install ".[dev]"` no longer installs the development tools: use `pip install . --group dev` (pip 25.1 or newer), or `uv sync`, which installs the `dev` group by default.
+
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:

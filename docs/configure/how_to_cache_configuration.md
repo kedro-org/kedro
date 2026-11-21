@@ -13,11 +13,7 @@ For the caching model and concurrency limitations, see [Caching configuration](c
 - [Configuration lifetime](#configuration-lifetime)
 - [Interpolation scope](#interpolation-scope)
 
-!!! tip "Recommended with `KedroServiceSession`"
-
-    `LazyOmegaConfigLoader` is designed for long-lived processes such as `KedroServiceSession`. If you change how your project uses `KedroServiceSession` to rely on it, also set `CONFIG_LOADER_CLASS` in `settings.py`, as shown in [Configure the loader](#configure-the-loader). Projects that do not need it can keep the default.
-
-!!! warning "Experimental"
+!!! warning "Experimental status"
 
     `LazyOmegaConfigLoader` and its public methods are experimental and may change or be removed in a future Kedro release. Instantiating the loader emits a `KedroExperimentalWarning` once per process.
 

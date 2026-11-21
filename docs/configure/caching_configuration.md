@@ -3,7 +3,7 @@
 Caching configuration separates reading files from resolving their values.
 `LazyOmegaConfigLoader` reads and caches raw configuration, then resolves it
 repeatedly with different runtime parameters. This avoids repeated file reads
-and parsing in long-lived processes.
+and parsing in long-lived processes (e.g. `KedroServiceSession` but also direct use of Kedro `ConfigLoader` inside another application like Streamlit or FastAPI).
 
 `LazyOmegaConfigLoader` is an opt-in alternative to `OmegaConfigLoader`,
 which remains the default configuration loader.

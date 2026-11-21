@@ -242,24 +242,32 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             self._resolved_static_config["globals"] = copy.deepcopy(self._globals)
 
     def preload(self) -> None:
-        """Read, validate and merge the configured files into a new cached snapshot.
+        """Read and validate configured files and then caches them.
 
-        Every call re-reads the files and replaces the previous snapshot, so call it
-        again to pick up changes on disk. Key access and ``with_runtime_params()`` only
-        reuse the snapshot; if no snapshot exists yet, ``__getitem__`` loads an uncached
-        key on demand.
+        Every preload() call re-reads the files and replaces the previous cache snapshot,
+        so call it again to pick up changes on disk. Further key access after
+        preload() will always reuse the cached configuration.
 
-        Preloading validates syntax and duplicate keys. With the ``"merged"`` scope it
-        also merges the environments, so merge errors such as an unsupported merge
-        strategy surface here. It resolves globals and credentials eagerly, but leaves
-        parameters and catalog interpolation resolution until those keys are requested.
+        Preloading validates syntax and duplicate keys. It eagerly merges and
+        resolves globals and credentials unless explicitly overridden.
+        For other keys, it merges environments only with the ``"merged"`` scope.
+        The default ``"environment"`` scope defers those merges until key access.
+        Interpolation resolution for parameters and catalog remains deferred
+        until those keys are requested.
 
-        The snapshot is replaced only if loading succeeds; on error the previous one
+        The cache snapshot is replaced only if loading succeeds; on error the previous one
         is kept. Views from ``with_runtime_params()`` keep the snapshot they were
         created from. Explicit values assigned to the loader are kept.
 
         Missing environment directories are cached as missing. Accessing a key with no
         matching configuration still raises ``MissingConfigException``.
+
+        Raises:
+            ParserError: If a configuration file contains invalid YAML or JSON syntax.
+            ValueError: If files in the same environment contain duplicate keys,
+                or an unsupported merge strategy is used during preloading.
+            InterpolationResolutionError: If globals or credentials interpolations
+                cannot be resolved.
         """
         fresh = copy.copy(self)
         if self.data:
@@ -311,13 +319,18 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         *,
         restrict_runtime_params_type_selection: bool | None = None,
     ) -> LazyOmegaConfigLoader:
-        """Return a per-run view sharing this loader's raw configuration snapshot.
+        """Return a shallow copy of this loader with replacement runtime parameters.
+
+        The returned view reuses the cached configuration files but resolves interpolations using its own runtime parameters.
 
         Args:
             runtime_params: Parameters for the view, replacing this loader's
                 runtime parameters. Defaults to an empty dictionary.
-            restrict_runtime_params_type_selection: Override the view's catalog
-                type-selection restriction. None keeps this loader's setting.
+            restrict_runtime_params_type_selection: When True, reject catalog
+                dataset types selected through the ``runtime_params`` resolver.
+                None keeps this loader's setting. Callers supplying runtime
+                parameters from an untrusted source, such as an HTTP request
+                body, must set this to True.
 
         Returns:
             A loader view with separate runtime-resolution state. Later
@@ -348,6 +361,15 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         this merged copy can differ from normal key access.
         Credential environment-variable interpolations already resolve during
         file loading.
+
+        Use this method for inspection only, not direct resolution.
+        Inspect with ``OmegaConf.to_container(config, resolve=False)``.
+        For resolved configuration, use ``loader[key]`` instead.
+        Read-only prevents modification, not interpolation resolution.
+        Resolving this copy, including accessing interpolated values, uses
+        process-global resolvers outside the loader's lock and resolver scope.
+        If ``oc.env`` is registered globally, this can bypass the loader's
+        credentials-only safeguard for the built-in resolver.
 
         Args:
             key: Configuration key, such as ``"catalog"`` or ``"parameters"``.

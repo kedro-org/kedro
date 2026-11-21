@@ -34,7 +34,7 @@ def _write_yaml(filepath: Path, config: dict[str, Any]) -> None:
 
 def _loader(
     root: Path,
-    interpolation_scope: str = "merged",
+    interpolation_scope: str = "environment",
     runtime_params: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> LazyOmegaConfigLoader:
@@ -168,7 +168,7 @@ class TestLazyOmegaConfigLoader:
         )
         _write_yaml(tmp_path / "local" / "parameters.yml", {"param2": "local"})
 
-        assert _loader(tmp_path)["parameters"] == {
+        assert _loader(tmp_path, interpolation_scope="merged")["parameters"] == {
             "param1": "local",
             "param2": "local",
         }
@@ -331,6 +331,42 @@ class TestLazyOmegaConfigLoader:
 
         with pytest.raises(UnsupportedInterpolationType):
             loader["catalog"]
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    @pytest.mark.parametrize("key", ["credentials", "parameters"])
+    @pytest.mark.parametrize("registered", [False, True])
+    def test_oc_env_is_restored_after_failed_resolution(
+        self, tmp_path: Path, scope: str, key: str, registered: bool
+    ) -> None:
+        _write_yaml(tmp_path / "base" / f"{key}.yml", {"value": "${oc.env:FAIL}"})
+        original_resolver = OmegaConf._get_resolver("oc.env")
+
+        def fail_resolver(variable: str) -> str:
+            raise ValueError("resolver failed")
+
+        try:
+            if registered:
+                OmegaConf.register_resolver(
+                    "oc.env", lambda variable: "previous", replace=True
+                )
+            else:
+                OmegaConf.clear_resolver("oc.env")
+            previous_resolver = OmegaConf._get_resolver("oc.env")
+            loader = _loader(
+                tmp_path,
+                interpolation_scope=scope,
+                custom_resolvers={"oc.env": fail_resolver},
+            )
+
+            with pytest.raises(InterpolationResolutionError, match="resolver failed"):
+                loader[key]
+
+            assert OmegaConf._get_resolver("oc.env") is previous_resolver
+        finally:
+            if original_resolver is None:
+                OmegaConf.clear_resolver("oc.env")
+            else:
+                BaseContainer._resolvers["oc.env"] = original_resolver
 
     def test_run_view_can_add_config_patterns(self, tmp_path: Path) -> None:
         _write_yaml(tmp_path / "base" / "spark.yml", {"spark.executor": "2g"})
@@ -684,7 +720,7 @@ class TestLazyOmegaConfigLoader:
     ) -> None:
         _write_yaml(tmp_path / "base" / "catalog.yml", {"a": {"type": "A"}})
         _write_yaml(tmp_path / "local" / "catalog.yml", {"b": {"type": "B"}})
-        loader = _loader(tmp_path)
+        loader = _loader(tmp_path, interpolation_scope="merged")
         merge = mocker.spy(loader, "_merge_raw_environments")
         loader.preload()
         merges_after_preload = merge.call_count
@@ -698,7 +734,7 @@ class TestLazyOmegaConfigLoader:
     def test_merged_cache_follows_merge_strategy_changes(self, tmp_path: Path) -> None:
         _write_yaml(tmp_path / "base" / "parameters.yml", {"x": {"a": 1}})
         _write_yaml(tmp_path / "local" / "parameters.yml", {"x": {"b": 2}})
-        loader = _loader(tmp_path)
+        loader = _loader(tmp_path, interpolation_scope="merged")
 
         assert loader["parameters"] == {"x": {"b": 2}}
         loader.merge_strategy = {"parameters": "soft"}
@@ -709,7 +745,11 @@ class TestLazyOmegaConfigLoader:
     ) -> None:
         _write_yaml(tmp_path / "base" / "parameters.yml", {"value": 1})
         _write_yaml(tmp_path / "local" / "parameters.yml", {"value": 2})
-        loader = _loader(tmp_path, merge_strategy={"parameters": "invalid"})
+        loader = _loader(
+            tmp_path,
+            interpolation_scope="merged",
+            merge_strategy={"parameters": "invalid"},
+        )
 
         with pytest.raises(ValueError, match="Merging strategy invalid not supported"):
             loader.preload()
@@ -738,8 +778,9 @@ class TestLazyOmegaConfigLoader:
 
         assert first != second
 
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
     def test_concurrent_resolution_with_absolute_interpolations(
-        self, tmp_path: Path
+        self, tmp_path: Path, scope: str
     ) -> None:
         _write_yaml(
             tmp_path / "base" / "catalog.yml",
@@ -754,7 +795,7 @@ class TestLazyOmegaConfigLoader:
                 },
             },
         )
-        loader = _loader(tmp_path)
+        loader = _loader(tmp_path, interpolation_scope=scope)
         loader.preload()
 
         def resolve(index: int) -> bool:
@@ -800,14 +841,15 @@ class TestLazyOmegaConfigLoader:
         ):
             loader["parameters"]
 
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
     def test_concurrent_run_views_do_not_cross_contaminate(
-        self, tmp_path: Path
+        self, tmp_path: Path, scope: str
     ) -> None:
         _write_yaml(
             tmp_path / "base" / "parameters.yml",
             {"value": "${runtime_params:value}"},
         )
-        loader = _loader(tmp_path)
+        loader = _loader(tmp_path, interpolation_scope=scope)
         loader.preload()
 
         def resolve(value: int) -> bool:
@@ -817,9 +859,10 @@ class TestLazyOmegaConfigLoader:
         with ThreadPoolExecutor(max_workers=8) as executor:
             assert all(executor.map(resolve, range(80)))
 
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
     @pytest.mark.parametrize("first_run", ["original", "temporary"])
     def test_same_loader_waits_before_capturing_runtime_state(
-        self, tmp_path: Path, mocker, first_run: str
+        self, tmp_path: Path, mocker, first_run: str, scope: str
     ) -> None:
         """A waiting call must not capture another call's temporary state."""
         _write_yaml(
@@ -843,6 +886,7 @@ class TestLazyOmegaConfigLoader:
 
         loader = _loader(
             tmp_path,
+            interpolation_scope=scope,
             runtime_params={"run": "original"},
             custom_resolvers={"pause_same_loader": pause_resolution},
         )
@@ -984,6 +1028,82 @@ class TestLazyOmegaConfigLoader:
 
         loader["parameters"] = {"value": "${runtime_params:value}"}
         assert loader["parameters"] == {"value": "${runtime_params:value}"}
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_preload_during_resolution_preserves_run_snapshot(
+        self, tmp_path: Path, mocker, scope: str
+    ) -> None:
+        filepath = tmp_path / "base" / "catalog.yml"
+
+        def write_catalog(version: str) -> None:
+            _write_yaml(
+                filepath,
+                {
+                    "dataset": {
+                        "a_pause": "${pause_preload_resolution:}",
+                        "run": "${runtime_params:run}",
+                        "version": version,
+                    }
+                },
+            )
+
+        paused = threading.Event()
+        waiting = threading.Event()
+        resume = threading.Event()
+
+        def pause_resolution() -> str:
+            paused.set()
+            if not resume.wait(timeout=10):
+                raise TimeoutError("Resolution was not resumed")
+            return "resumed"
+
+        write_catalog("old")
+        loader = _loader(
+            tmp_path,
+            interpolation_scope=scope,
+            custom_resolvers={"pause_preload_resolution": pause_resolution},
+        )
+        try:
+            loader.preload()
+            old_view = loader.with_runtime_params({"run": "old"})
+            lock = threading.Lock()
+
+            class TrackedLock:
+                def __enter__(self) -> None:
+                    if paused.is_set():
+                        waiting.set()
+                    lock.acquire()
+
+                def __exit__(self, *args: Any) -> None:
+                    lock.release()
+
+            mocker.patch(
+                "kedro.config.lazy_omegaconf_config._RESOLVE_LOCK", TrackedLock()
+            )
+
+            # Start preload only after the old view is resolving, and wait until
+            # preload reaches the lock before allowing that resolution to finish.
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                resolving = executor.submit(lambda: old_view["catalog"])
+                try:
+                    assert paused.wait(timeout=10)
+                    write_catalog("new")
+                    preloading = executor.submit(loader.preload)
+                    assert waiting.wait(timeout=10)
+                finally:
+                    resume.set()
+                assert resolving.result(timeout=10)["dataset"] == {
+                    "a_pause": "resumed",
+                    "run": "old",
+                    "version": "old",
+                }
+                preloading.result(timeout=10)
+
+            assert old_view["catalog"]["dataset"]["version"] == "old"
+            new_view = loader.with_runtime_params({"run": "new"})
+            assert new_view["catalog"]["dataset"]["version"] == "new"
+        finally:
+            OmegaConf.clear_resolver("pause_preload_resolution")
 
     @pytest.mark.parametrize("scope", ["environment", "merged"])
     def test_second_preload_rereads_files(self, tmp_path: Path, scope: str) -> None:

@@ -90,7 +90,7 @@ b = LazyOmegaConfigLoader(
     custom_resolvers={"example_greeting": lambda: "Bonjour"},
 )
 
-print(b["parameters"]["message"])  # Hello: B's resolver was skipped
+print(b["parameters"]["message"])  # Hello: B's resolver was silently skipped
 ```
 
 If B instead registers its resolver with `replace=True`, A's subsequent

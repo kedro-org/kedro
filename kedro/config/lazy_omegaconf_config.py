@@ -43,8 +43,8 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
     """Cache configuration files for deferred, repeated interpolation resolution.
 
     Read files on first key access and reuse their contents until ``preload()``
-    refreshes the cache. Create per-run views with ``with_runtime_params()``.
-    Each view uses its own runtime parameters.
+    refreshes the cache. Create loader copies with ``with_runtime_params()``.
+    Each loader copy uses replacement runtime parameters and shares the caches.
 
     This loader uses these terms:
 
@@ -274,7 +274,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         until those keys are requested.
 
         The cache is replaced only if loading succeeds; on error the previous one
-        is kept. Views from ``with_runtime_params()`` keep using the previous cache.
+        is kept. Loader copies from ``with_runtime_params()`` keep using the previous cache.
         Explicit values assigned to the loader are kept.
 
         Missing environment directories are cached as missing. Accessing a key with no
@@ -339,11 +339,13 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
     ) -> LazyOmegaConfigLoader:
         """Return a shallow copy of this loader with replacement runtime parameters.
 
-        The returned view reuses the cached configuration files but resolves
-        interpolations using its own runtime parameters.
+        The returned loader copy shares the configuration caches but keeps
+        separate runtime-resolution state. File patterns are deep-copied and
+        the explicit override mapping is shallow-copied; nested override values
+        can remain shared.
 
         Args:
-            runtime_params: Parameters for the view, replacing this loader's
+            runtime_params: Parameters for the loader copy, replacing this loader's
                 runtime parameters. Defaults to an empty dictionary.
             restrict_runtime_params_type_selection: When True, reject catalog
                 dataset types selected through the ``runtime_params`` resolver.
@@ -352,8 +354,8 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                 body, must set this to True.
 
         Returns:
-            A loader view with separate runtime-resolution state. Later
-            ``preload()`` calls on the original loader do not refresh this view.
+            A loader copy with replacement runtime parameters. Later
+            ``preload()`` calls on the original loader do not refresh this copy.
         """
         view = copy.copy(self)
         view.data = self.data.copy()

@@ -115,16 +115,17 @@ second_parameters = second_run["parameters"]
 # {"report_label": "Report for customer-002", "customer_id": "customer-002"}
 ```
 
-As with `OmegaConfigLoader`, the runtime parameters are also merged into `parameters`: `customer_id` appears in the result, and a runtime value replaces a YAML key with the same name. `KedroContext` reads runtime parameters from this result. The values stay available on the view as `first_run.runtime_params`.
+As with `OmegaConfigLoader`, the runtime parameters are also merged into `parameters`: `customer_id` appears in the result, and a runtime value replaces a YAML key with the same name. `KedroContext` reads runtime parameters from this result. The values stay available on the loader copy as `first_run.runtime_params`.
 
-Each `with_runtime_params()` call returns a view with its own runtime parameters.
-The views share the loader's raw configuration cache, so they don't reread
-the files for each run. Each view also gets a shallow copy of the loader's
-explicit override mapping; nested values can remain shared.
+Each `with_runtime_params()` call returns a loader copy with replacement runtime
+parameters and separate runtime-resolution state. The copies share the loader's
+configuration caches, so they don't reread the files for each run. Nested
+explicit override values can remain shared; see
+[how the loader is copied](caching_configuration.md#repeated-runs).
 
 !!! note
 
-    The per-run view resolves configuration. It does not create a `KedroContext`, catalog, or run a pipeline. Integration with `KedroServiceSession` is a separate step.
+    The loader copy resolves configuration. It does not create a `KedroContext`, catalog, or run a pipeline. Integration with `KedroServiceSession` is a separate step.
 
 ## Inspect unresolved configuration
 
@@ -177,10 +178,10 @@ the result, and `loader[key]` to resolve configuration through the loader.
 The loader keeps its cached configuration until `preload()` is called again.
 Each `preload()` call re-reads the files and replaces the cache; if reading
 fails, the previous cache is kept. Key access and `with_runtime_params()`
-reuse cached keys even if their YAML files change. Views created before a new
+reuse cached keys even if their YAML files change. Loader copies created before a new
 `preload()` keep using the previous cache.
 
-Preloaded credentials are cached and reused across views, rather than resolved
+Preloaded credentials are cached and reused across loader copies, rather than resolved
 separately for each run. Pass values that change between runs through
 `with_runtime_params()` and the `runtime_params` resolver in parameters or
 catalog configuration.

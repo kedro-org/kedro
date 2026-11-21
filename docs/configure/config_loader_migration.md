@@ -313,7 +313,7 @@ You can also construct a new loader. `preload()` keeps explicit
 overrides, such as `loader["parameters"] = {...}`. Delete an override
 before preloading if the files should supply that key again.
 
-### 3. Create a view for each set of runtime parameters
+### 3. Create a loader copy for each set of runtime parameters
 
 For repeated resolutions, reuse the files rather than constructing a new
 loader for each run:
@@ -321,14 +321,14 @@ loader for each run:
 ```python
 loader.preload()
 for customer_id in ("customer-001", "customer-002"):
-    view = loader.with_runtime_params({"customer_id": customer_id})
-    parameters = view["parameters"]
+    loader_copy = loader.with_runtime_params({"customer_id": customer_id})
+    parameters = loader_copy["parameters"]
 ```
 
 Constructor-time `runtime_params` still work. The new method is useful
 when reusing a cache; it isn't required for ordinary CLI usage.
 Don't mutate a shared loader's runtime parameters during concurrent
-resolutions. Use per-run views instead.
+resolutions. Use a loader copy for each run instead.
 
 ### 4. Check error handling and dictionary updates
 

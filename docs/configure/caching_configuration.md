@@ -38,28 +38,31 @@ Edits on disk don't affect later reads of a cached key.
 start, avoiding different keys first reading files at different times.
 
 Calling `preload()` again replaces the cache if loading succeeds.
-Existing per-run views keep using the previous cache. Explicit overrides
+Existing loader copies keep using the previous cache. Explicit overrides
 assigned to the loader remain in place.
 
 The loader resolves globals when first needed and caches the result.
 `preload()` also resolves and caches credentials, so credentials don't vary
-between its per-run views.
+between its loader copies.
 Neither globals nor preloaded credentials are intended for per-run values.
 
 ## Repeated runs
 
-`with_runtime_params()` creates a per-run view that shares the raw configuration cache
-but has its own runtime parameters and resolver state. Each view returns
-configuration resolved for that run without reading the same files again.
+`with_runtime_params()` returns a **loader copy**: a shallow copy of the loader
+with replacement runtime parameters. It shares the configuration caches but
+keeps separate runtime-resolution state. Some attributes are copied separately:
+file patterns are deep-copied, while the explicit override mapping is
+shallow-copied, so nested override values can remain shared.
 
-The view resolves configuration; it doesn't create a context, a data catalog,
-or a pipeline run. Framework integration is a separate step.
+Each loader copy returns configuration resolved for that run without reading
+the same files again. It doesn't create a context, a data catalog, or a pipeline
+run. Framework integration is a separate step.
 
 ## Thread safety and resolver isolation
 
 OmegaConf's resolver registry is process-global. The lazy loader uses a
 shared lock when reading or resolving configuration to protect its resolver
-operations. Per-run views keep separate runtime-parameter state.
+operations. Loader copies keep separate runtime-parameter state.
 
 The lock protects runtime-parameter resolver operations during concurrent
 lazy-loader resolutions. It doesn't make arbitrary OmegaConf usage thread-safe.
@@ -121,7 +124,7 @@ The lock covers custom resolver execution, so slow resolvers can serialise
 requests.
 
 Don't mutate a shared loader's settings, overrides, or runtime parameters
-while requests are resolving. Create separate per-run views instead.
+while requests are resolving. Create a loader copy for each run instead.
 
 By default, the lazy loader restricts `oc.env` to credentials. It temporarily
 selects the configured resolver during its own operations, then restores the

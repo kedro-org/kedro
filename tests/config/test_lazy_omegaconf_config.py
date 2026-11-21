@@ -482,17 +482,36 @@ class TestLazyOmegaConfigLoader:
         with pytest.raises(ValueError, match="Merging strategy invalid not supported"):
             loader["parameters"]
 
-    def test_runtime_params_are_not_supported_in_globals(self, tmp_path: Path) -> None:
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_runtime_params_are_not_supported_in_globals(
+        self, tmp_path: Path, scope: str
+    ) -> None:
         _write_yaml(
             tmp_path / "base" / "globals.yml",
             {"value": "${runtime_params:value}"},
         )
-        loader = _loader(tmp_path)
+        loader = _loader(tmp_path, interpolation_scope=scope)
 
         with pytest.raises(
             UnsupportedInterpolationType, match="not supported for globals"
         ):
             loader["globals"]
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_unknown_resolver_error_is_preserved(
+        self, tmp_path: Path, scope: str
+    ) -> None:
+        _write_yaml(
+            tmp_path / "base" / "parameters.yml",
+            {"value": "${lazy_unknown_resolver:value}"},
+        )
+        loader = _loader(tmp_path, interpolation_scope=scope)
+
+        with pytest.raises(
+            UnsupportedInterpolationType,
+            match="Unsupported interpolation type lazy_unknown_resolver",
+        ):
+            loader["parameters"]
 
     @pytest.mark.parametrize(
         ("scope", "expected"),

@@ -95,7 +95,7 @@ class TestLazyOmegaConfigLoader:
     def test_constructor_does_not_replace_global_runtime_resolver(
         self, tmp_path: Path, mocker
     ) -> None:
-        register = mocker.spy(OmegaConf, "register_new_resolver")
+        register = mocker.spy(OmegaConf, "register_resolver")
         loader = _loader(
             tmp_path,
             custom_resolvers={
@@ -303,7 +303,7 @@ class TestLazyOmegaConfigLoader:
         def previous_resolver(variable: str) -> str:
             return "previous-value"
 
-        OmegaConf.register_new_resolver("oc.env", previous_resolver, replace=True)
+        OmegaConf.register_resolver("oc.env", previous_resolver, replace=True)
         registered_resolver = OmegaConf._get_resolver("oc.env")
         loader = _loader(
             tmp_path,

@@ -618,18 +618,18 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         previous_resolver = OmegaConf._get_resolver("oc.env")
         try:
             if resolver is None and allow_builtin:
-                OmegaConf.register_new_resolver("oc.env", oc.env, replace=True)
+                OmegaConf.register_resolver("oc.env", oc.env, replace=True)
             elif resolver is None:
                 OmegaConf.clear_resolver("oc.env")
             elif isinstance(resolver, tuple):
                 resolver_fn, resolver_kwargs = resolver
                 kwargs = dict(resolver_kwargs)
                 kwargs.pop("replace", None)
-                OmegaConf.register_new_resolver(
+                OmegaConf.register_resolver(
                     "oc.env", resolver_fn, replace=True, **kwargs
                 )
             else:
-                OmegaConf.register_new_resolver("oc.env", resolver, replace=True)
+                OmegaConf.register_resolver("oc.env", resolver, replace=True)
             yield
         finally:
             if previous_resolver is None:

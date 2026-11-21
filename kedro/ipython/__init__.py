@@ -349,9 +349,19 @@ class _NodeBoundArguments(inspect.BoundArguments):
                 # If the argument is *args, use the dataset name instead
                 for arg in dataset_name:
                     inputs_params_dict[arg] = arg
+            elif param == self._find_var_keyword_arg():
+                # If the argument is **kwargs, the dict keys are the variable names
+                inputs_params_dict.update(dataset_name)
             else:
                 inputs_params_dict[param] = dataset_name
         return inputs_params_dict
+
+    def _find_var_keyword_arg(self) -> str | None:
+        """Find the name of the VAR_KEYWORD argument (**kwargs), if any."""
+        for k, v in self.signature.parameters.items():
+            if v.kind == inspect.Parameter.VAR_KEYWORD:
+                return k
+        return None
 
     def _find_var_positional_arg(self) -> str | None:
         """Find the name of the VAR_POSITIONAL argument( *args), if any."""
@@ -468,7 +478,9 @@ def _prepare_imports(node_func: Callable) -> str:
 
 def _get_node_bound_arguments(node: Node) -> _NodeBoundArguments:
     node_func = node.func
-    node_inputs = node.inputs
+    # Use the declared inputs (not ``node.inputs``): for dict inputs the latter is a
+    # list that has already lost the argument names.
+    node_inputs = node._inputs
 
     args, kwargs = Node._process_inputs_for_bind(node_inputs)
     signature = inspect.signature(node_func)
@@ -702,14 +714,26 @@ def _prepare_function_call(
 ) -> str:
     """Prepare the text for the function call."""
     func_name = node_func.__name__
-    args = node_bound_arguments.input_params_dict
-    kwargs = node_bound_arguments.kwargs
+    arguments = node_bound_arguments.arguments
 
-    # Construct the statement of func_name(a=1,b=2,c=3)
-    args_str_literal = [f"{node_input}" for node_input in args] if args else []
-    kwargs_str_literal = [
-        f"{node_input}={dataset_name}" for node_input, dataset_name in kwargs.items()
-    ]
-    func_params = ", ".join(args_str_literal + kwargs_str_literal)
+    # Positional parameters are passed by position up to the first gap, the rest
+    # (and keyword only parameters / **kwargs) by keyword, e.g. func(a, b, c=c).
+    call_args: list[str] = []
+    positional_ok = True
+    for name, param in node_bound_arguments.signature.parameters.items():
+        if name not in arguments:
+            if param.kind in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD):
+                positional_ok = False
+            continue
+        value = arguments[name]
+        if param.kind == param.VAR_POSITIONAL:
+            call_args.extend(value)
+        elif param.kind == param.VAR_KEYWORD:
+            call_args.extend(f"{key}={key}" for key in value)
+        elif param.kind == param.KEYWORD_ONLY or not positional_ok:
+            call_args.append(f"{name}={name}")
+        else:
+            call_args.append(name)
+    func_params = ", ".join(call_args)
     body = f"""{func_name}({func_params})"""
     return body

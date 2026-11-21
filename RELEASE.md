@@ -6,9 +6,15 @@
 
 ## Bug fixes and other changes
 
+- Fixed the error raised when a node's dict outputs do not match the keys returned by its function: the node's declared keys and the returned keys were swapped in the message.
+
 ## Documentation changes
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [anubhavlal07](https://github.com/anubhavlal07)
 
 # Release 1.8.0
 

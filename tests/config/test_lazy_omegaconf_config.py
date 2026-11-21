@@ -817,6 +817,73 @@ class TestLazyOmegaConfigLoader:
         with ThreadPoolExecutor(max_workers=8) as executor:
             assert all(executor.map(resolve, range(80)))
 
+    @pytest.mark.parametrize("first_run", ["original", "temporary"])
+    def test_same_loader_waits_before_capturing_runtime_state(
+        self, tmp_path: Path, mocker, first_run: str
+    ) -> None:
+        """A waiting call must not capture another call's temporary state."""
+        _write_yaml(
+            tmp_path / "base" / "catalog.yml",
+            {
+                "dataset": {
+                    "a_run": "${runtime_params:run}",
+                    "b_pause": "${pause_same_loader:}",
+                }
+            },
+        )
+        paused = threading.Event()
+        waiting = threading.Event()
+        resume = threading.Event()
+
+        def pause_resolution() -> str:
+            paused.set()
+            if not resume.wait(timeout=10):
+                raise TimeoutError("Resolution was not resumed")
+            return "resumed"
+
+        loader = _loader(
+            tmp_path,
+            runtime_params={"run": "original"},
+            custom_resolvers={"pause_same_loader": pause_resolution},
+        )
+        try:
+            loader.preload()
+            lock = threading.Lock()
+
+            class TrackedLock:
+                def __enter__(self) -> None:
+                    if paused.is_set():
+                        waiting.set()
+                    lock.acquire()
+
+                def __exit__(self, *args: Any) -> None:
+                    lock.release()
+
+            mocker.patch(
+                "kedro.config.lazy_omegaconf_config._RESOLVE_LOCK", TrackedLock()
+            )
+
+            # Pause the first call after it has resolved its temporary parameter.
+            # Wait until the second call reaches the lock before letting it finish.
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                first = executor.submit(
+                    loader._resolve_config, "catalog", {"run": first_run}
+                )
+                try:
+                    assert paused.wait(timeout=10)
+                    second = executor.submit(lambda: loader["catalog"])
+                    assert waiting.wait(timeout=10)
+                finally:
+                    resume.set()
+                assert first.result(timeout=10)["dataset"]["a_run"] == first_run
+                assert second.result(timeout=10)["dataset"]["a_run"] == "original"
+
+            assert loader.runtime_params == {"run": "original"}
+            assert loader._runtime_params_oc is None
+            assert loader._runtime_params_hits == set()
+        finally:
+            OmegaConf.clear_resolver("pause_same_loader")
+
     @pytest.mark.parametrize("scope", ["environment", "merged"])
     def test_override_access_during_resolution_keeps_run_resolver(
         self, tmp_path: Path, scope: str

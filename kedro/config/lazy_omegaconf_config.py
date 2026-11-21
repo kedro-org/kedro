@@ -467,20 +467,20 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             if self.interpolation_scope == "merged"
             else None
         )
-        params = (
-            self.runtime_params
-            if runtime_params is _UNSET
-            else cast("dict[str, Any] | None", runtime_params)
-        )
-        previous = (
-            self.runtime_params,
-            self._runtime_params_oc,
-            self._runtime_params_hits,
-        )
         with (
             _RESOLVE_LOCK,
             self._oc_env_resolver_scope(allow_builtin=key == "credentials"),
         ):
+            params = (
+                self.runtime_params
+                if runtime_params is _UNSET
+                else cast("dict[str, Any] | None", runtime_params)
+            )
+            previous = (
+                self.runtime_params,
+                self._runtime_params_oc,
+                self._runtime_params_hits,
+            )
             self.runtime_params = params or {}
             self._runtime_params_oc = None
             self._runtime_params_hits = set()

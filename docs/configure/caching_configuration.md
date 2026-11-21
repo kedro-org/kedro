@@ -58,11 +58,64 @@ OmegaConf's resolver registry is process-global. The lazy loader uses a
 shared lock when reading or resolving configuration to protect its resolver
 operations. Per-run views keep separate runtime-parameter state.
 
-This protects concurrent resolutions through lazy loaders; it doesn't make
-arbitrary OmegaConf usage thread-safe. Code using `OmegaConfigLoader`
-directly, or registering resolvers outside the lock, can still interfere.
-The lock also covers custom resolver execution, so slow resolvers can
-serialise requests.
+The lock protects runtime-parameter resolver operations during concurrent
+lazy-loader resolutions. It doesn't make arbitrary OmegaConf usage thread-safe.
+Code using `OmegaConfigLoader` directly, or registering resolvers outside the
+lock, can still interfere.
+
+Custom resolvers other than `globals`, `runtime_params`, and `oc.env` are
+registered process-wide during loader construction, outside the lock. Even
+when all loaders are created before runs start, their custom resolvers aren't
+isolated: if a name is already registered, a later loader skips its resolver
+unless it specifies `replace=True`. Replacing a resolver can affect other
+loaders. Use distinct resolver names or share the same implementation.
+
+For example, consider this `conf/base/parameters.yml`:
+
+```yaml
+message: ${example_greeting:}
+```
+
+In a process without an existing `example_greeting` resolver:
+
+```python
+from kedro.config import LazyOmegaConfigLoader
+
+a = LazyOmegaConfigLoader(
+    "conf", base_env="base", default_run_env="base",
+    custom_resolvers={"example_greeting": lambda: "Hello"},
+)
+b = LazyOmegaConfigLoader(
+    "conf", base_env="base", default_run_env="base",
+    custom_resolvers={"example_greeting": lambda: "Bonjour"},
+)
+
+print(b["parameters"]["message"])  # Hello: B's resolver was skipped
+```
+
+If B instead registers its resolver with `replace=True`, A's subsequent
+resolutions can use B's resolver:
+
+```python
+b = LazyOmegaConfigLoader(
+    "conf",
+    base_env="base",
+    default_run_env="base",
+    custom_resolvers={"example_greeting": (lambda: "Bonjour", {"replace": True})},
+)
+print(a["parameters"]["message"])  # Bonjour
+```
+
+!!! warning "Avoid changing resolvers directly during runs"
+
+    Changing the global resolver registry during a run can cause an ongoing
+    resolution to use a different resolver or fail. For example, a Hook or
+    node could register, replace, or remove a resolver through OmegaConf
+    outside the loader's lock. Strongly avoid these changes during runs;
+    configure resolvers before starting concurrent work instead.
+
+The lock covers custom resolver execution, so slow resolvers can serialise
+requests.
 
 Don't mutate a shared loader's settings, overrides, or runtime parameters
 while requests are resolving. Create separate per-run views instead.

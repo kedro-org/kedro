@@ -115,10 +115,16 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                 Defaults to the configuration root. Kedro projects normally
                 configure ``"local"``.
             custom_resolvers: Resolver names mapped to callables or
-                ``(callable, kwargs)`` tuples. Existing registrations are skipped
-                unless ``replace=True``. The ``oc.env`` resolver is scoped to
-                loading and resolution; globals and runtime parameters use the
-                loader's own resolvers.
+                ``(callable, kwargs)`` tuples. Except for reserved resolvers,
+                these are registered process-wide during construction, outside
+                the resolution lock. A resolver whose name is already registered
+                is skipped unless ``replace=True``. Replacing it can affect
+                other loaders, even if they were created before runs started.
+                Strongly avoid registering or replacing global resolvers during
+                runs, including through OmegaConf in Hooks or nodes; doing so
+                can interfere with an ongoing resolution. The ``oc.env``
+                resolver is scoped to loading and resolution; globals and
+                runtime parameters use the loader's own resolvers.
             merge_strategy: Per-key merge strategies: ``"soft"`` or
                 ``"destructive"``. Defaults to ``"destructive"``.
             ignore_hidden: Ignore hidden files and directories. Defaults to True.

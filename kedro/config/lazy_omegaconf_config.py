@@ -46,6 +46,15 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
     the cache. Create per-run views (i.e. copies of the LazyOmegaConfigLoader instance
     with its runtime parameters overridden) with ``with_runtime_params()``.
 
+    Vocabulary prevision regarding configuration states in this loader:
+
+    - **Raw configuration** is the parsed ``DictConfig`` objects, one per file,
+      grouped by environment and not yet merged. Credential environment-variable
+      interpolations are already resolved during file loading.
+    - **unresolved configuration** is one ``DictConfig`` merging the
+      files and environments, with remaining interpolations unresolved unless
+      an explicit value was assigned for the key (e.g. loader["parameters"] = {"region": "manual"})
+
     ``interpolation_scope="environment"`` resolves each environment before merging,
     matching ``OmegaConfigLoader``. ``interpolation_scope="merged"`` merges first,
     then resolves, making preload() slower but each per-run access faster.

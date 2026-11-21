@@ -336,7 +336,10 @@ Globals errors now surface on first configuration access or `preload()`,
 rather than during construction. Move error handling around those calls
 if it previously guarded only the constructor. Preloading validates file
 syntax and duplicate keys, but doesn't resolve catalog or parameter
-interpolations.
+interpolations. With `interpolation_scope="merged"`, it also merges their
+environments and can raise merge errors, such as a `ValueError` for an
+unsupported merge strategy. With the default `"environment"` scope, those
+merges occur on key access instead.
 
 The lazy loader returns copies of explicitly assigned dictionaries.
 Don't rely on mutating a returned dictionary to update the loader:

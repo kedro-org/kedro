@@ -62,8 +62,8 @@ environment directories exist, even if they contain no matching files.
 ## Preload and resolve per run
 
 Use `preload()` before serving repeated requests. It reads and caches the
-configured files in a snapshot. It also resolves globals and credentials. Key
-access and `with_runtime_params()` reuse that snapshot even if files change on
+configured files. It also resolves globals and credentials. Key
+access and `with_runtime_params()` reuse the cache even if files change on
 disk; call `preload()` again to read the files anew.
 
 !!! warning "`preload()` refreshes files, not your overrides"
@@ -118,7 +118,7 @@ second_parameters = second_run["parameters"]
 As with `OmegaConfigLoader`, the runtime parameters are also merged into `parameters`: `customer_id` appears in the result, and a runtime value replaces a YAML key with the same name. `KedroContext` reads runtime parameters from this result. The values stay available on the view as `first_run.runtime_params`.
 
 Each `with_runtime_params()` call returns a view with its own runtime parameters.
-The views share the loader's raw configuration snapshot, so they don't reread
+The views share the loader's raw configuration cache, so they don't reread
 the files for each run. Each view also gets a shallow copy of the loader's
 explicit override mapping; nested values can remain shared.
 
@@ -175,10 +175,10 @@ the result, and `loader[key]` to resolve configuration through the loader.
 ## Configuration lifetime
 
 The loader keeps its cached configuration until `preload()` is called again.
-Each `preload()` call re-reads the files and replaces the snapshot; if reading
-fails, the previous snapshot is kept. Key access and `with_runtime_params()`
+Each `preload()` call re-reads the files and replaces the cache; if reading
+fails, the previous cache is kept. Key access and `with_runtime_params()`
 reuse cached keys even if their YAML files change. Views created before a new
-`preload()` keep their existing snapshot.
+`preload()` keep using the previous cache.
 
 Preloaded credentials are cached and reused across views, rather than resolved
 separately for each run. Pass values that change between runs through

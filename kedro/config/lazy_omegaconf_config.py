@@ -263,7 +263,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         """Read and validate configured files, then cache them.
 
         Every ``preload()`` call re-reads the files and replaces the previous
-        cache snapshot. Call it again to pick up changes on disk. Key access
+        cache. Call it again to pick up changes on disk. Key access
         reuses cached files.
 
         Preloading validates syntax and duplicate keys. It eagerly merges and
@@ -273,9 +273,9 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         Interpolation resolution for parameters and catalog remains deferred
         until those keys are requested.
 
-        The cache snapshot is replaced only if loading succeeds; on error the previous one
-        is kept. Views from ``with_runtime_params()`` keep the snapshot they were
-        created from. Explicit values assigned to the loader are kept.
+        The cache is replaced only if loading succeeds; on error the previous one
+        is kept. Views from ``with_runtime_params()`` keep using the previous cache.
+        Explicit values assigned to the loader are kept.
 
         Missing environment directories are cached as missing. Accessing a key with no
         matching configuration still raises ``MissingConfigException``.
@@ -526,7 +526,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
 
     @staticmethod
     def _copy_raw_config(raw_config: _RawConfig) -> _RawConfig:
-        """Copy per-file configs and file tracking to keep the snapshot unchanged."""
+        """Copy per-file configs and file tracking to keep the cache unchanged."""
         return _RawConfig(
             base_configs=copy.deepcopy(raw_config.base_configs),
             env_configs=copy.deepcopy(raw_config.env_configs),

@@ -31,14 +31,14 @@ This suits repeated access with changing runtime parameters. For a single
 CLI run, cache setup adds overhead without the same opportunity for reuse.
 Keep `OmegaConfigLoader` if you don't need caching.
 
-## Configuration snapshots
+## Configuration cache
 
-Cached files form a snapshot: edits on disk don't affect later reads
-of a cached key. `preload()` reads the configured files before requests
+Edits on disk don't affect later reads of a cached key.
+`preload()` reads the configured files before requests
 start, avoiding different keys first reading files at different times.
 
-Calling `preload()` again replaces the snapshot if loading succeeds.
-Existing per-run views keep their previous snapshot. Explicit overrides
+Calling `preload()` again replaces the cache if loading succeeds.
+Existing per-run views keep using the previous cache. Explicit overrides
 assigned to the loader remain in place.
 
 The loader resolves globals when first needed and caches the result.
@@ -48,7 +48,7 @@ Neither globals nor preloaded credentials are intended for per-run values.
 
 ## Repeated runs
 
-`with_runtime_params()` creates a per-run view that shares the raw snapshot
+`with_runtime_params()` creates a per-run view that shares the raw configuration cache
 but has its own runtime parameters and resolver state. Each view returns
 configuration resolved for that run without reading the same files again.
 

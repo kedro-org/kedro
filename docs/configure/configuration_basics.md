@@ -6,7 +6,7 @@ Kedro makes use of a configuration loader to load any project configuration file
 
 For repeated access in long-lived processes, the opt-in `LazyOmegaConfigLoader`
 reuses parsed files. See [Caching configuration](caching_configuration.md)
-for its snapshot model and thread-safety limitations.
+for its caching model and thread-safety limitations.
 
 !!! note
 

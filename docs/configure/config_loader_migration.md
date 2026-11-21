@@ -300,7 +300,7 @@ plugins, Hooks, or notebooks use the loader directly.
 ### 2. Refresh cached files explicitly
 
 If code edits files and then reads the same key from the same loader,
-refresh the snapshot first:
+refresh the cache first:
 
 ```python
 parameters = loader["parameters"]
@@ -326,7 +326,7 @@ for customer_id in ("customer-001", "customer-002"):
 ```
 
 Constructor-time `runtime_params` still work. The new method is useful
-when reusing a snapshot; it isn't required for ordinary CLI usage.
+when reusing a cache; it isn't required for ordinary CLI usage.
 Don't mutate a shared loader's runtime parameters during concurrent
 resolutions. Use per-run views instead.
 

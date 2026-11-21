@@ -621,6 +621,18 @@ ERROR,
         assert 'seed = catalog.load("params:seed")' in inputs_cell
         assert call == "train(data, config, seed)"
 
+    def test_list_inputs_with_var_positional_argument(self):
+        def combine(first, *rest):
+            return first
+
+        a_node = node(combine, ["a", "b", "c"], "out")
+        inputs_cell, call = self._generate(a_node)
+
+        assert 'first = catalog.load("a")' in inputs_cell
+        assert 'b = catalog.load("b")' in inputs_cell
+        assert 'c = catalog.load("c")' in inputs_cell
+        assert call == "combine(first, b, c)"
+
     def test_prepare_function_body(self, dummy_function_definition):
         result = _prepare_function_body(dummy_function)
         assert result == dummy_function_definition

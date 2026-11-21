@@ -291,7 +291,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         if self.data:
             _logger.info(
                 "preload() keeps the values explicitly set on the loader for %s; "
-                "they override the ones configuration files.",
+                "they override values from configuration files.",
                 ", ".join(f"'{key}'" for key in sorted(self.data)),
             )
         fresh._raw_config_cache = {}

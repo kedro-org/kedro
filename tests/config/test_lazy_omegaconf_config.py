@@ -1182,7 +1182,7 @@ class TestLazyOmegaConfigLoader:
 
         assert loader["parameters"] == {"value": "file"}
 
-    def test_preload_logs_which_overrides_are_not_read_from_files(
+    def test_preload_logs_which_explicit_overrides_are_kept(
         self, tmp_path: Path, caplog: pytest.LogCaptureFixture
     ) -> None:
         loader = _loader(tmp_path)
@@ -1193,7 +1193,7 @@ class TestLazyOmegaConfigLoader:
             loader.preload()
 
         assert "'credentials', 'globals'" in caplog.text
-        assert "not read from configuration files" in caplog.text
+        assert "they override values from configuration files" in caplog.text
 
     def test_preload_without_overrides_does_not_log(
         self, tmp_path: Path, caplog: pytest.LogCaptureFixture
@@ -1201,7 +1201,7 @@ class TestLazyOmegaConfigLoader:
         with caplog.at_level("INFO", logger="kedro.config.lazy_omegaconf_config"):
             _loader(tmp_path).preload()
 
-        assert "not read from configuration files" not in caplog.text
+        assert not caplog.records
 
     def test_unresolved_config_is_read_only_and_keeps_interpolations(
         self, tmp_path: Path

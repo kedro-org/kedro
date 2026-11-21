@@ -817,6 +817,65 @@ class TestLazyOmegaConfigLoader:
         with ThreadPoolExecutor(max_workers=8) as executor:
             assert all(executor.map(resolve, range(80)))
 
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_override_access_during_resolution_keeps_run_resolver(
+        self, tmp_path: Path, scope: str
+    ) -> None:
+        """Reading an override must not replace another run's active resolver.
+
+        OmegaConf's resolver registry is process-global. Previously,
+        LazyOmegaConfigLoader.__getitem__ delegated explicit override reads to
+        OmegaConfigLoader.__getitem__, which registered the reading view's
+        runtime_params resolver without taking the lazy loader's resolution lock.
+
+        A pauses during catalog resolution with its resolver registered. B then
+        reads an explicit override before A resumes. Previously, B's read replaced
+        A's resolver, so A's remaining runtime_params interpolation returned "B".
+        The views' runtime parameter dictionaries were never shared or modified.
+        """
+        _write_yaml(
+            tmp_path / "base" / "catalog.yml",
+            {
+                "dataset": {
+                    "a_pause": "${pause_during_resolution:}",
+                    "b_run": "${runtime_params:run}",
+                }
+            },
+        )
+        paused = threading.Event()
+        resume = threading.Event()
+
+        def pause_resolution() -> str:
+            paused.set()
+            if not resume.wait(timeout=10):
+                raise TimeoutError("Resolution was not resumed")
+            return "resumed"
+
+        loader = _loader(
+            tmp_path,
+            interpolation_scope=scope,
+            custom_resolvers={"pause_during_resolution": pause_resolution},
+        )
+        try:
+            view_a = loader.with_runtime_params({"run": "A"})
+            view_b = loader.with_runtime_params({"run": "B"})
+            view_b["parameters"] = {"marker": "override"}
+
+            # Pause A while it holds the resolver lock, then read B's override
+            # on another thread before A resolves its runtime parameter.
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                result = executor.submit(lambda: view_a["catalog"])
+                try:
+                    assert paused.wait(timeout=10)
+                    assert view_b["parameters"] == {"marker": "override"}
+                finally:
+                    resume.set()
+                assert result.result(timeout=10) == {
+                    "dataset": {"a_pause": "resumed", "b_run": "A"}
+                }
+        finally:
+            OmegaConf.clear_resolver("pause_during_resolution")
+
     def test_catalog_type_guard_uses_each_run_runtime_params(
         self, tmp_path: Path
     ) -> None:

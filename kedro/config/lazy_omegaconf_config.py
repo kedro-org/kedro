@@ -215,7 +215,9 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                 are missing.
         """
         if key in self.data:
-            return copy.deepcopy(super().__getitem__(key))  # type: ignore[no-any-return]
+            # The inherited lookup replaces the global runtime resolver. Locking it
+            # would deadlock when an override is read from within locked resolution.
+            return copy.deepcopy(self.data[key])  # type: ignore[no-any-return]
         if key == "globals":
             self._ensure_globals()
         if key in self._resolved_static_config:

@@ -42,22 +42,23 @@ class _RawConfig:
 class LazyOmegaConfigLoader(OmegaConfigLoader):
     """Cache configuration files for deferred, repeated interpolation resolution.
 
-    Read files on first key access and reuse them until ``preload()`` refreshes
-    the cache. Create per-run views (i.e. copies of the LazyOmegaConfigLoader instance
-    with its runtime parameters overridden) with ``with_runtime_params()``.
+    Read files on first key access and reuse their contents until ``preload()``
+    refreshes the cache. Create per-run views with ``with_runtime_params()``.
+    Each view uses its own runtime parameters.
 
-    Vocabulary prevision regarding configuration states in this loader:
+    This loader uses these terms:
 
-    - **Raw configuration** is the parsed ``DictConfig`` objects, one per file,
-      grouped by environment and not yet merged. Credential environment-variable
-      interpolations are already resolved during file loading.
-    - **unresolved configuration** is one ``DictConfig`` merging the
-      files and environments, with remaining interpolations unresolved unless
-      an explicit value was assigned for the key (e.g. loader["parameters"] = {"region": "manual"})
+    - **Raw configuration** consists of parsed ``DictConfig`` objects, one per
+      file, grouped by environment and not yet merged. Interpolations in
+      credential files are resolved during file loading.
+    - **Unresolved configuration** is a ``DictConfig`` that combines files and
+      environments without resolving remaining interpolations.
+      ``get_unresolved_config()`` returns an explicitly assigned override instead
+      when one exists for the key.
 
     ``interpolation_scope="environment"`` resolves each environment before merging,
     matching ``OmegaConfigLoader``. ``interpolation_scope="merged"`` merges first,
-    then resolves, making preload() slower but each per-run access faster.
+    then resolves. It can add preload overhead but reduce repeated merge work.
 
     This class subclasses ``OmegaConfigLoader`` to reuse its loading, validation,
     resolver, and merge helpers. Globals loading and resolution are deferred until
@@ -259,11 +260,11 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             self._resolved_static_config["globals"] = copy.deepcopy(self._globals)
 
     def preload(self) -> None:
-        """Read and validate configured files and then caches them.
+        """Read and validate configured files, then cache them.
 
-        Every preload() call re-reads the files and replaces the previous cache snapshot,
-        so call it again to pick up changes on disk. Further key access after
-        preload() will always reuse the cached configuration.
+        Every ``preload()`` call re-reads the files and replaces the previous
+        cache snapshot. Call it again to pick up changes on disk. Key access
+        reuses cached files.
 
         Preloading validates syntax and duplicate keys. It eagerly merges and
         resolves globals and credentials unless explicitly overridden.
@@ -290,7 +291,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         if self.data:
             _logger.info(
                 "preload() keeps the values explicitly set on the loader for %s; "
-                "they are not read from configuration files.",
+                "they override the ones configuration files.",
                 ", ".join(f"'{key}'" for key in sorted(self.data)),
             )
         fresh._raw_config_cache = {}
@@ -338,7 +339,8 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
     ) -> LazyOmegaConfigLoader:
         """Return a shallow copy of this loader with replacement runtime parameters.
 
-        The returned view reuses the cached configuration files but resolves interpolations using its own runtime parameters.
+        The returned view reuses the cached configuration files but resolves
+        interpolations using its own runtime parameters.
 
         Args:
             runtime_params: Parameters for the view, replacing this loader's
@@ -376,8 +378,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         Merge the selected environments, or copy an explicit override.
         Do not apply runtime parameters. Under ``"environment"`` scope, resolving
         this merged copy can differ from normal key access.
-        Credential environment-variable interpolations already resolve during
-        file loading.
+        Interpolations in credential files are resolved during file loading.
 
         Use this method for inspection only, not direct resolution.
         Inspect with ``OmegaConf.to_container(config, resolve=False)``.

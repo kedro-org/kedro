@@ -52,12 +52,12 @@ loader["parameters"]
 # {"learning_rate": 0.1}
 ```
 
-The loader reads and caches the raw files for a key on first access, then
-resolves them into a Python dictionary. Later accesses reuse the cached files
-instead of reading them again. Unlike `OmegaConfigLoader`, the loader doesn't
-pick up file changes on subsequent accesses. Call `preload()` or create a new
-loader to read the files again. Ensure that the configured environment
-directories exist, even if they contain no matching files.
+The loader reads and caches the parsed configuration for a key on first
+access, then resolves it into a Python dictionary. Later accesses reuse the
+cached configuration without rereading the files. Unlike `OmegaConfigLoader`,
+the loader doesn't pick up file changes on later accesses. Call `preload()`
+or create a new loader to read the files again. Ensure that the configured
+environment directories exist, even if they contain no matching files.
 
 ## Preload and resolve per run
 
@@ -68,9 +68,9 @@ disk; call `preload()` again to read the files anew.
 
 !!! warning "`preload()` refreshes files, not your overrides"
 
-    Calling `preload()` again re-reads every file, but it does not reset the loader. Values that you assigned yourself, such as `loader["globals"] = ...`, are kept and keep replacing the matching files. `preload()` logs, at `INFO` level, the keys whose values it keeps instead of reading them from files.
+    Calling `preload()` again re-reads the configured files, but it doesn't reset the loader. Values you assigned, such as `loader["globals"] = ...`, still take precedence over values from files. The loader still reads and validates files for overridden keys, so an invalid file can cause preloading to fail.
 
-    To make `preload()` read a key from the files again, delete your override with `del loader[key]` and call `preload()`.
+    To use the file values again, delete the override with `del loader[key]` and call `preload()`.
 
     For example, with `bucket: "prod-bucket"` in `conf/base/globals.yml` and `path: "s3://${globals:bucket}"` in `conf/base/parameters.yml`:
 
@@ -117,16 +117,22 @@ second_parameters = second_run["parameters"]
 
 As with `OmegaConfigLoader`, the runtime parameters are also merged into `parameters`: `customer_id` appears in the result, and a runtime value replaces a YAML key with the same name. `KedroContext` reads runtime parameters from this result. The values stay available on the view as `first_run.runtime_params`.
 
-Each `with_runtime_params()` call returns a per-run view with its own runtime parameters and explicit configuration overrides. The views share the loader's raw configuration snapshot. Resolving one view does not change the results of another.
+Each `with_runtime_params()` call returns a view with its own runtime parameters.
+The views share the loader's raw configuration snapshot, so they don't reread
+the files for each run. Each view also gets a shallow copy of the loader's
+explicit override mapping; nested values can remain shared.
 
 !!! note
 
-    The per-run view resolves configuration only. It does not create a `KedroContext`, catalog, or run a pipeline. Integration with `KedroServiceSession` is a separate step.
+    The per-run view resolves configuration. It does not create a `KedroContext`, catalog, or run a pipeline. Integration with `KedroServiceSession` is a separate step.
 
 ## Inspect unresolved configuration
 
 Use `get_unresolved_config(key)` to inspect a read-only, merged `DictConfig`
-without resolving its interpolations. For example, given these files:
+without resolving its remaining interpolations. If you assigned an explicit
+override to the key, the method returns a copy of that value instead.
+Interpolations in credential files are resolved during file loading.
+For example, given these files:
 
 ```yaml
 # conf/base/parameters.yml
@@ -161,11 +167,23 @@ The raw merge contains the local `lr` value, but normal key access resolves
 `next_lr` within the base environment before merging. See
 [Interpolation scope](#interpolation-scope) for details.
 
+Use this method for inspection, not for resolving configuration. Read-only
+doesn't prevent interpolation resolution, which can happen when you access
+individual values. Use `OmegaConf.to_container(raw, resolve=False)` to inspect
+the result, and `loader[key]` to resolve configuration through the loader.
+
 ## Configuration lifetime
 
-The loader keeps its configuration snapshot until `preload()` is called again. Each `preload()` call re-reads the files and replaces the snapshot; if reading fails, the previous snapshot is kept. Changes to YAML files after preloading are not picked up by key access or by `with_runtime_params()`. Views created before a new `preload()` keep the snapshot they were created from.
+The loader keeps its cached configuration until `preload()` is called again.
+Each `preload()` call re-reads the files and replaces the snapshot; if reading
+fails, the previous snapshot is kept. Key access and `with_runtime_params()`
+reuse cached keys even if their YAML files change. Views created before a new
+`preload()` keep their existing snapshot.
 
-Credentials are resolved as static configuration, not separately for each run. Pass values that change between runs through `with_runtime_params()` and the `runtime_params` resolver in parameters or catalog configuration.
+Preloaded credentials are cached and reused across views, rather than resolved
+separately for each run. Pass values that change between runs through
+`with_runtime_params()` and the `runtime_params` resolver in parameters or
+catalog configuration.
 
 ## Interpolation scope
 

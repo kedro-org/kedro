@@ -1,9 +1,11 @@
 # Caching configuration
 
 Caching configuration separates reading files from resolving their values.
-`LazyOmegaConfigLoader` reads and caches raw configuration, then resolves it
-repeatedly with different runtime parameters. This avoids repeated file reads
-and parsing in long-lived processes (e.g. `KedroServiceSession` but also direct use of Kedro `ConfigLoader` inside another application like Streamlit or FastAPI).
+`LazyOmegaConfigLoader` reads and caches configuration files, then resolves
+their contents with different runtime parameters. This avoids reading and
+parsing the same files for each run. It's useful in long-lived applications,
+such as services or applications that use a loader directly with Streamlit
+or FastAPI.
 
 `LazyOmegaConfigLoader` is an opt-in alternative to `OmegaConfigLoader`,
 which remains the default configuration loader.
@@ -21,8 +23,8 @@ evaluates interpolations such as `${runtime_params:customer_id}` and returns
 a Python dictionary.
 
 `OmegaConfigLoader` repeats file discovery, reading, parsing, and resolution
-on each key access. `LazyOmegaConfigLoader` caches the raw files for a key
-on first access. Later accesses reuse those files while resolving values.
+on each key access. `LazyOmegaConfigLoader` caches the parsed configuration
+for a key on first access. Later accesses reuse it while resolving values.
 The cache stores raw configuration, not a single result shared by every run.
 
 This suits repeated access with changing runtime parameters. For a single
@@ -31,16 +33,17 @@ Keep `OmegaConfigLoader` if you don't need caching.
 
 ## Configuration snapshots
 
-Cached files form a snapshot: edits on disk don't affect subsequent reads
+Cached files form a snapshot: edits on disk don't affect later reads
 of a cached key. `preload()` reads the configured files before requests
 start, avoiding different keys first reading files at different times.
 
 Calling `preload()` again replaces the snapshot if loading succeeds.
-Existing per-run views retain their previous snapshot. Explicit overrides
+Existing per-run views keep their previous snapshot. Explicit overrides
 assigned to the loader remain in place.
 
-Globals are resolved once when first needed. `preload()` also resolves and
-caches credentials, so credentials don't vary between its per-run views.
+The loader resolves globals when first needed and caches the result.
+`preload()` also resolves and caches credentials, so credentials don't vary
+between its per-run views.
 Neither globals nor preloaded credentials are intended for per-run values.
 
 ## Repeated runs
@@ -49,8 +52,8 @@ Neither globals nor preloaded credentials are intended for per-run values.
 but has its own runtime parameters and resolver state. Each view returns
 configuration resolved for that run without reading the same files again.
 
-The view resolves configuration only. It doesn't create a context, a data
-catalog, or a pipeline run. Framework integration is a separate step.
+The view resolves configuration; it doesn't create a context, a data catalog,
+or a pipeline run. Framework integration is a separate step.
 
 ## Thread safety and resolver isolation
 
@@ -93,7 +96,7 @@ b = LazyOmegaConfigLoader(
 print(b["parameters"]["message"])  # Hello: B's resolver was silently skipped
 ```
 
-If B instead registers its resolver with `replace=True`, A's subsequent
+If B instead registers its resolver with `replace=True`, A's later
 resolutions can use B's resolver:
 
 ```python
@@ -120,9 +123,9 @@ requests.
 Don't mutate a shared loader's settings, overrides, or runtime parameters
 while requests are resolving. Create separate per-run views instead.
 
-By default, `oc.env` is available only for credentials. The lazy loader
-temporarily selects the configured resolver during its own operations,
-then restores the previous global `oc.env` resolver.
+By default, the lazy loader restricts `oc.env` to credentials. It temporarily
+selects the configured resolver during its own operations, then restores the
+previous global `oc.env` resolver.
 
 ## Further reading
 

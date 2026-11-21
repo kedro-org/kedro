@@ -309,7 +309,7 @@ loader.preload()
 updated_parameters = loader["parameters"]
 ```
 
-Alternatively, construct a new loader. `preload()` keeps explicit
+You can also construct a new loader. `preload()` keeps explicit
 overrides, such as `loader["parameters"] = {...}`. Delete an override
 before preloading if the files should supply that key again.
 
@@ -333,8 +333,8 @@ resolutions. Use per-run views instead.
 ### 4. Check error handling and dictionary updates
 
 Globals errors now surface on first configuration access or `preload()`,
-rather than during construction. Move error handling around those calls
-if it previously guarded only the constructor. Preloading validates file
+rather than during construction. If your error handling guarded the
+constructor but not these calls, update it accordingly. Preloading validates file
 syntax and duplicate keys, but doesn't resolve catalog or parameter
 interpolations. With `interpolation_scope="merged"`, it also merges their
 environments and can raise merge errors, such as a `ValueError` for an
@@ -342,7 +342,7 @@ unsupported merge strategy. With the default `"environment"` scope, those
 merges occur on key access instead.
 
 The lazy loader returns copies of explicitly assigned dictionaries.
-Don't rely on mutating a returned dictionary to update the loader:
+To update the loader, assign the changed dictionary back to it:
 
 ```python
 parameters = loader["parameters"]
@@ -352,7 +352,8 @@ loader["parameters"] = parameters
 
 This assignment creates an explicit override, not a file update.
 Use [`get_unresolved_config()`](how_to_cache_configuration.md#inspect-unresolved-configuration)
-to inspect raw configuration. Its result is a read-only copy.
+to inspect the merged configuration before resolution, or an assigned override.
+Its result is a read-only copy.
 
 ### 5. Check custom loaders and resolver usage
 

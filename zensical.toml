@@ -154,6 +154,7 @@ nav = [
           {"Overview" = "api/config/kedro.config.md"},
           {"AbstractConfigLoader" = "api/config/kedro.config.AbstractConfigLoader.md"},
           {"OmegaConfigLoader" = "api/config/kedro.config.OmegaConfigLoader.md"},
+          {"LazyOmegaConfigLoader" = "api/config/kedro.config.LazyOmegaConfigLoader.md"},
           {"MissingConfigException" = "api/config/kedro.config.MissingConfigException.md"}
         ]},
         {"kedro.framework" = [

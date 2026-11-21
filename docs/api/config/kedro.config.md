@@ -10,4 +10,5 @@
 | ------------------------------------------------------------------------------- | --------- | ----------------------------------------- |
 | [`kedro.config.AbstractConfigLoader`](kedro.config.AbstractConfigLoader.md)     | Class     | Abstract base class for config loaders.   |
 | [`kedro.config.OmegaConfigLoader`](kedro.config.OmegaConfigLoader.md)           | Class     | Config loader that uses OmegaConf.        |
+| [`kedro.config.LazyOmegaConfigLoader`](kedro.config.LazyOmegaConfigLoader.md)   | Class     | Experimental loader that caches config.   |
 | [`kedro.config.MissingConfigException`](kedro.config.MissingConfigException.md) | Exception | Raised when a required config is missing. |

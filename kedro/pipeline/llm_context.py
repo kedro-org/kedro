@@ -89,6 +89,35 @@ def _get_tool_name(obj: object) -> str:
     return type(obj).__name__
 
 
+def _tool_argument_name(dataset_name: str) -> str:
+    """Return the builder argument name for a tool input.
+
+    The `params:` prefix is dropped and, for a dotted name such as
+    `params:retrieval.top_k` or `rag.docs`, only the last segment is kept,
+    since a dotted name cannot be a Python argument name.
+    """
+    return dataset_name.removeprefix("params:").rsplit(".", 1)[-1]
+
+
+def _tool_arguments(tool_config: _ToolConfig) -> dict[str, str]:
+    """Map each builder argument name of a tool to the input it is loaded from.
+
+    Raises:
+        ValueError: If two inputs of the tool resolve to the same argument name.
+    """
+    arguments: dict[str, str] = {}
+    for inp in tool_config.inputs:
+        arg = _tool_argument_name(inp)
+        if arg in arguments and arguments[arg] != inp:
+            raise ValueError(
+                f"Tool inputs '{arguments[arg]}' and '{inp}' of "
+                f"'{getattr(tool_config.func, '__name__', tool_config.func)}' "
+                f"both resolve to the builder argument '{arg}'."
+            )
+        arguments[arg] = inp
+    return arguments
+
+
 def _normalize_outputs(outputs: str | list[str] | dict[str, str]) -> str:
     """Return a deterministic string representation of node outputs."""
     if isinstance(outputs, str):
@@ -167,10 +196,10 @@ class LLMContextNode(Node):
             inputs[p] = p
 
         # Add tool inputs (datasets + params)
-        if tools:
-            for t in tools:
-                for inp in t.inputs:
-                    inputs[inp] = inp
+        tool_arguments = [(t, _tool_arguments(t)) for t in tools or []]
+        for _, arguments in tool_arguments:
+            for inp in arguments.values():
+                inputs[inp] = inp
 
         def construct_context(llm: object, **kwargs: dict[str, Any]) -> LLMContext:
             """Node execution function.
@@ -183,13 +212,10 @@ class LLMContextNode(Node):
 
             # Build tools
             built_tools = {}
-            if tools:
-                for t in tools:
-                    tool_inputs = {
-                        inp.replace("params:", ""): kwargs[inp] for inp in t.inputs
-                    }
-                    built_tool = t.func(**tool_inputs)
-                    built_tools[_get_tool_name(built_tool)] = built_tool
+            for t, arguments in tool_arguments:
+                tool_inputs = {arg: kwargs[inp] for arg, inp in arguments.items()}
+                built_tool = t.func(**tool_inputs)
+                built_tools[_get_tool_name(built_tool)] = built_tool
 
             return LLMContext(
                 context_id=name or f"llm_context_node__{_normalize_outputs(outputs)}",

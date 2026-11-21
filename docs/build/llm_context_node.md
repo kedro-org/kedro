@@ -160,6 +160,9 @@ llm_context_node(
 )
 ```
 
+Each tool input is passed to the builder as a keyword argument named after the input, without the `params:` prefix.
+For a dotted name, such as `params:retrieval.max_matches`, the last segment (`max_matches`) is used.
+
 Tool instantiation is intentionally lightweight and deterministic.
 All declared tool inputs are validated and loaded by Kedro before execution.
 Tool objects are instantiated at node runtime and tool names are automatically

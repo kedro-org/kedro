@@ -6,9 +6,10 @@ import os
 import textwrap
 import uuid
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from kedro import __version__ as kedro_version
+from kedro.config.lazy_omegaconf_config import LazyOmegaConfigLoader
 from kedro.config.omegaconf_config import OmegaConfigLoader
 from kedro.framework import project as kedro_project
 from kedro.framework.hooks import _create_hook_manager
@@ -86,6 +87,7 @@ class KedroServiceSession(AbstractSession):
         )
         self._serving_mode = False
         self._config_cache: _ConfigCache | None = None
+        self._shared_config_loader: LazyOmegaConfigLoader | None = None
 
     @classmethod
     def create(
@@ -97,6 +99,11 @@ class KedroServiceSession(AbstractSession):
         serving_mode: bool = False,
     ) -> KedroServiceSession:
         """Create a new instance of the session.
+
+        If ``CONFIG_LOADER_CLASS`` is ``LazyOmegaConfigLoader`` (or a subclass),
+        the session creates one loader and preloads its configuration files.
+        Each run then resolves configuration with a loader copy from
+        ``with_runtime_params()``, so files are read only once per session.
 
         Args:
             session_id: Optional ID for this session; defaults to a UUID.
@@ -124,9 +131,22 @@ class KedroServiceSession(AbstractSession):
             conf_source=conf_source,
             env=env,
         )
+        session._preload_shared_config_loader()
         if serving_mode:
             session._enable_serving_mode()
         return session
+
+    def _preload_shared_config_loader(self) -> None:
+        """Create the session's ``LazyOmegaConfigLoader`` and preload its files.
+
+        Other loaders don't cache configuration, so a new one is created for each run.
+        """
+        if not issubclass(settings.CONFIG_LOADER_CLASS, LazyOmegaConfigLoader):
+            return
+        self._logger.info("Preloading configuration for session %s", self.session_id)
+        config_loader = cast("LazyOmegaConfigLoader", self._new_config_loader())
+        config_loader.preload()
+        self._shared_config_loader = config_loader
 
     def _enable_serving_mode(self) -> None:
         """Preload all pipelines and config, then switch the session into serving mode.
@@ -137,8 +157,10 @@ class KedroServiceSession(AbstractSession):
         against an empty pipeline registry.
         """
         self._validate_config_loader_class()
+        self._warn_if_type_selection_restriction_is_overridden()
         self._preload_pipelines()
-        self._preload_config()
+        if self._shared_config_loader is None:
+            self._preload_config()
         self._serving_mode = True
 
     def _validate_config_loader_class(self) -> None:
@@ -151,6 +173,17 @@ class KedroServiceSession(AbstractSession):
             raise KedroSessionError(
                 "Serving mode requires `CONFIG_LOADER_CLASS` to be "
                 f"`OmegaConfigLoader` (or a subclass). Got `{config_loader_class.__name__}`."
+            )
+
+    def _warn_if_type_selection_restriction_is_overridden(self) -> None:
+        """Warn that serving mode ignores a disabled type-selection restriction."""
+        if (
+            settings.CONFIG_LOADER_ARGS.get("restrict_runtime_params_type_selection")
+            is False
+        ):
+            self._logger.warning(
+                "Serving mode overrides `restrict_runtime_params_type_selection` "
+                "from `CONFIG_LOADER_ARGS` to True."
             )
 
     def _preload_pipelines(self) -> None:
@@ -178,11 +211,6 @@ class KedroServiceSession(AbstractSession):
         )
         config_loader_class = settings.CONFIG_LOADER_CLASS
         config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
-        if config_loader_args.get("restrict_runtime_params_type_selection") is False:
-            self._logger.warning(
-                "Serving mode overrides `restrict_runtime_params_type_selection` "
-                "from `CONFIG_LOADER_ARGS` to True."
-            )
         config_loader_args["restrict_runtime_params_type_selection"] = True
         persistent_loader = config_loader_class(
             conf_source=self._conf_source,
@@ -219,10 +247,19 @@ class KedroServiceSession(AbstractSession):
         weakenable by project config for an untrusted caller. See
         https://github.com/kedro-org/kedro/issues/5706.
 
-        In serving mode the returned loader is a ``_ServingConfigLoader``
-        reading from the session-scoped cache -- see ``_serving_config`` for
-        the locking.
+        With ``LazyOmegaConfigLoader`` (or a subclass), the returned loader is a
+        copy of the session's preloaded loader, in every mode. It shares the
+        cached files and resolves them with ``runtime_params``. With other
+        loaders, serving mode returns a ``_ServingConfigLoader`` reading from the
+        session-scoped cache -- see ``_serving_config`` for the locking.
         """
+        if self._shared_config_loader is not None:
+            return self._shared_config_loader.with_runtime_params(
+                runtime_params,
+                restrict_runtime_params_type_selection=(
+                    True if self._serving_mode else None
+                ),
+            )
         if self._serving_mode:
             if self._config_cache is None:
                 raise RuntimeError(
@@ -231,6 +268,12 @@ class KedroServiceSession(AbstractSession):
             return _ServingConfigLoader(
                 cache=self._config_cache, runtime_params=runtime_params
             )
+        return self._new_config_loader(runtime_params)
+
+    def _new_config_loader(
+        self, runtime_params: dict[str, Any] | None = None
+    ) -> AbstractConfigLoader:
+        """Create a loader from ``CONFIG_LOADER_CLASS`` and ``CONFIG_LOADER_ARGS``."""
         config_loader_class = settings.CONFIG_LOADER_CLASS
         config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
         return config_loader_class(  # type: ignore[no-any-return]

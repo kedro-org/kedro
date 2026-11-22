@@ -4,9 +4,12 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pytest
+from omegaconf.errors import InterpolationResolutionError
+from yaml.parser import ParserError
 
 from kedro import __version__ as kedro_version
 from kedro.config.abstract_config import AbstractConfigLoader
+from kedro.config.lazy_omegaconf_config import LazyOmegaConfigLoader
 from kedro.config.omegaconf_config import OmegaConfigLoader
 from kedro.framework.context.context import KedroContext
 from kedro.framework.project import (
@@ -20,6 +23,7 @@ from kedro.framework.session.service_session import _inject_runtime_datasets
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ThreadRunner
 from kedro.utils import KedroExperimentalWarning
+from tests.framework.session.conftest import _write_yaml
 
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
@@ -1009,6 +1013,132 @@ class TestKedroServiceSession:
             results = [future.result() for future in as_completed(futures)]
 
         assert len(results) == num_threads
+
+
+@pytest.mark.usefixtures("mock_settings_lazy_config_loader_class")
+class TestLazyConfigLoader:
+    """With `LazyOmegaConfigLoader`, the session preloads one loader at creation
+    and gives each run a copy of it."""
+
+    @pytest.fixture(autouse=True)
+    def project_pipelines(self, mocker):
+        return mocker.patch("kedro.framework.session.service_session.pipelines")
+
+    @pytest.fixture
+    def conf(self, fake_project):
+        conf = fake_project / "conf"
+        _write_yaml(
+            conf / "base" / "parameters.yml",
+            {"model": {"name": "${runtime_params:model_name, default}"}},
+        )
+        _write_yaml(
+            conf / "base" / "catalog.yml",
+            {
+                "cars": {
+                    "type": "${runtime_params:dataset_type, pandas.CSVDataset}",
+                    "filepath": "${runtime_params:filepath, cars.csv}",
+                }
+            },
+        )
+        return conf
+
+    @pytest.mark.parametrize("serving_mode", [False, True])
+    def test_create_preloads_one_shared_loader(
+        self, fake_project, conf, mocker, serving_mode
+    ):
+        preload = mocker.spy(LazyOmegaConfigLoader, "preload")
+
+        session = KedroServiceSession.create(
+            project_path=fake_project, serving_mode=serving_mode
+        )
+
+        assert preload.call_count == 1
+        assert isinstance(session._shared_config_loader, LazyOmegaConfigLoader)
+        assert session._config_cache is None
+
+    @pytest.mark.parametrize("serving_mode, restricted", [(False, False), (True, True)])
+    def test_each_run_gets_its_own_loader_copy(
+        self, fake_project, conf, serving_mode, restricted
+    ):
+        session = KedroServiceSession.create(
+            project_path=fake_project, serving_mode=serving_mode
+        )
+
+        first = session.load_context(runtime_params={"model_name": "first"})
+        second = session.load_context(runtime_params={"model_name": "second"})
+
+        assert isinstance(first.config_loader, LazyOmegaConfigLoader)
+        assert first.config_loader is not session._shared_config_loader
+        assert first.config_loader["parameters"]["model"]["name"] == "first"
+        assert second.config_loader["parameters"]["model"]["name"] == "second"
+        assert first.config_loader.restrict_runtime_params_type_selection is restricted
+
+    def test_files_changed_after_create_are_ignored(self, fake_project, conf):
+        session = KedroServiceSession.create(project_path=fake_project)
+        _write_yaml(conf / "base" / "parameters.yml", {"model": {"name": "changed"}})
+
+        parameters = session.load_context().config_loader["parameters"]
+
+        assert parameters["model"]["name"] == "default"
+
+    def test_config_pattern_changes_stay_in_their_run(self, fake_project, conf):
+        _write_yaml(conf / "base" / "spark.yml", {"executor": "2g"})
+        session = KedroServiceSession.create(project_path=fake_project)
+
+        run_loader = session.load_context().config_loader
+        run_loader.config_patterns["spark"] = ["spark*"]
+
+        assert run_loader["spark"] == {"executor": "2g"}
+        assert "spark" not in session.load_context().config_loader.config_patterns
+
+    def test_invalid_yaml_fails_create(self, fake_project, conf):
+        (conf / "base" / "parameters.yml").write_text("model: [unclosed")
+
+        with pytest.raises(ParserError, match="Invalid YAML"):
+            KedroServiceSession.create(project_path=fake_project)
+
+    def test_serving_mode_forces_type_selection_restriction(
+        self, fake_project, conf, mocker, caplog
+    ):
+        mocker.patch(
+            "kedro.framework.session.service_session.settings.CONFIG_LOADER_ARGS",
+            {
+                "base_env": "base",
+                "default_run_env": "local",
+                "restrict_runtime_params_type_selection": False,
+            },
+        )
+
+        with caplog.at_level(logging.WARNING):
+            session = KedroServiceSession.create(
+                project_path=fake_project, serving_mode=True
+            )
+
+        assert session._get_config_loader().restrict_runtime_params_type_selection
+        assert "overrides `restrict_runtime_params_type_selection`" in caplog.text
+        assert "not supported in credentials" not in caplog.text
+
+    def test_concurrent_serving_runs_resolve_their_own_runtime_params(
+        self, fake_project, conf
+    ):
+        session = KedroServiceSession.create(
+            project_path=fake_project, serving_mode=True
+        )
+
+        def resolve_catalog(i: int) -> bool:
+            malicious = i % 3 == 0
+            runtime_params = {"filepath": f"cars_{i}.csv"}
+            if malicious:
+                runtime_params["dataset_type"] = "pickle.PickleDataset"
+            config_loader = session.load_context(runtime_params).config_loader
+            try:
+                catalog = config_loader["catalog"]
+            except InterpolationResolutionError:
+                return malicious
+            return not malicious and catalog["cars"]["filepath"] == f"cars_{i}.csv"
+
+        with ThreadPoolExecutor(max_workers=16) as executor:
+            assert all(executor.map(resolve_catalog, range(120)))
 
 
 class TestRuntimeDatasets:

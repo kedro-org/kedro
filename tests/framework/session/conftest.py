@@ -15,7 +15,7 @@ import yaml
 from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
-from kedro.config import AbstractConfigLoader
+from kedro.config import AbstractConfigLoader, LazyOmegaConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
@@ -485,6 +485,16 @@ def mock_settings_custom_config_loader_class(mocker):
     class MockSettings(_ProjectSettings):
         _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
             "CONFIG_LOADER_CLASS", default=lambda *_: MyConfigLoader
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_lazy_config_loader_class(mocker):
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
+            "CONFIG_LOADER_CLASS", default=lambda *_: LazyOmegaConfigLoader
         )
 
     return _mock_imported_settings_paths(mocker, MockSettings())

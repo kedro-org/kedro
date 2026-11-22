@@ -424,6 +424,18 @@ class TestLazyOmegaConfigLoader:
 
         assert loaders["a"]["credentials"] == {"db": {"user": "a"}}
 
+    @pytest.mark.parametrize("key", ["credentials", "globals"])
+    def test_cached_credentials_and_globals_are_returned_as_copies(
+        self, tmp_path: Path, key: str
+    ) -> None:
+        _write_yaml(tmp_path / "base" / f"{key}.yml", {"db": {"user": "kedro"}})
+        loader = _loader(tmp_path)
+        loader.preload()
+
+        loader[key]["db"]["user"] = "mutated"
+
+        assert loader.with_runtime_params()[key] == {"db": {"user": "kedro"}}
+
     def test_missing_config_key_raises_missing_config_exception(
         self, tmp_path: Path
     ) -> None:
@@ -1039,6 +1051,87 @@ class TestLazyOmegaConfigLoader:
                 }
         finally:
             OmegaConf.clear_resolver("pause_during_resolution")
+
+    @pytest.mark.parametrize("scope", ["environment", "merged"])
+    def test_concurrent_loaders_keep_their_own_resolvers(
+        self, tmp_path: Path, mocker, scope: str
+    ) -> None:
+        """OmegaConf's resolver registry is process-global, so another loader must
+        not replace the resolvers of a loader that is resolving.
+
+        A pauses while it holds the resolver lock. B, with different globals and
+        runtime parameters, waits for the lock, then registers its own resolvers.
+        """
+        for name in ("a", "b"):
+            _write_yaml(tmp_path / name / "base" / "globals.yml", {"owner": name})
+            _write_yaml(
+                tmp_path / name / "base" / "catalog.yml",
+                {
+                    "dataset": {
+                        "a_pause": "${pause_other_loader:}" if name == "a" else "none",
+                        "b_owner": "${globals:owner}",
+                        "c_run": "${runtime_params:run}",
+                    }
+                },
+            )
+        paused = threading.Event()
+        waiting = threading.Event()
+        resume = threading.Event()
+
+        def pause_resolution() -> str:
+            paused.set()
+            if not resume.wait(timeout=10):
+                raise TimeoutError("Resolution was not resumed")
+            return "resumed"
+
+        loader_a = _loader(
+            tmp_path / "a",
+            interpolation_scope=scope,
+            custom_resolvers={"pause_other_loader": pause_resolution},
+        )
+        loader_b = _loader(tmp_path / "b", interpolation_scope=scope)
+        try:
+            loader_a.preload()
+            loader_b.preload()
+            lock = threading.Lock()
+
+            class TrackedLock:
+                def __enter__(self) -> None:
+                    if paused.is_set():
+                        waiting.set()
+                    lock.acquire()
+
+                def __exit__(self, *args: Any) -> None:
+                    lock.release()
+
+            mocker.patch(
+                "kedro.config.lazy_omegaconf_config._RESOLVE_LOCK", TrackedLock()
+            )
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                first = executor.submit(
+                    lambda: loader_a.with_runtime_params({"run": "A"})["catalog"]
+                )
+                try:
+                    assert paused.wait(timeout=10)
+                    second = executor.submit(
+                        lambda: loader_b.with_runtime_params({"run": "B"})["catalog"]
+                    )
+                    assert waiting.wait(timeout=10)
+                finally:
+                    resume.set()
+                assert first.result(timeout=10)["dataset"] == {
+                    "a_pause": "resumed",
+                    "b_owner": "a",
+                    "c_run": "A",
+                }
+                assert second.result(timeout=10)["dataset"] == {
+                    "a_pause": "none",
+                    "b_owner": "b",
+                    "c_run": "B",
+                }
+        finally:
+            OmegaConf.clear_resolver("pause_other_loader")
 
     def test_catalog_type_guard_uses_each_run_runtime_params(
         self, tmp_path: Path

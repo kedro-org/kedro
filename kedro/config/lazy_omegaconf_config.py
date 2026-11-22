@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 import logging
 import threading
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -50,7 +50,8 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
 
     - **Raw configuration** consists of parsed ``DictConfig`` objects, one per
       file, grouped by environment and not yet merged. Interpolations in
-      credential files are resolved during file loading.
+      credential files are resolved during file loading, with the runtime
+      parameters passed to the constructor. Loader copies don't change them.
     - **Unresolved configuration** is a ``DictConfig`` that combines files and
       environments without resolving remaining interpolations.
       ``get_unresolved_config()`` returns an explicitly assigned override instead
@@ -63,7 +64,8 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
     This class subclasses ``OmegaConfigLoader`` to reuse its loading, validation,
     resolver, and merge helpers. Globals loading and resolution are deferred until
     first configuration access or ``preload()``. The globals and runtime-parameter
-    resolvers are registered during locked resolution rather than construction.
+    resolvers are registered during locked resolution and credential reads rather
+    than construction.
     Construction leaves any existing registrations of these resolvers unchanged.
 
     It currently relies on these inherited private methods:
@@ -71,10 +73,10 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
     - ``_initialise_filesystem_and_protocol`` and ``_register_new_resolvers`` during
       initialisation.
     - ``_read_raw_config`` for environment paths, file discovery, hidden-file handling,
-      duplicate checks, and credential environment-variable resolution.
+      duplicate checks, and credential interpolation resolution.
     - ``_resolve_from_raw_config`` for the ``"environment"`` interpolation scope.
     - ``_register_globals_resolver`` and ``_register_runtime_params_resolver`` during
-      each locked resolution.
+      each locked resolution and credential read.
     - ``_guard_runtime_params_in_catalog_type`` for catalog type-selection protection.
     - ``_merge_configs`` when a custom merge strategy is configured.
 
@@ -107,6 +109,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                 Defaults to ``default_run_env`` when omitted.
             runtime_params: Parameters merged into ``parameters`` and available to
                 the ``runtime_params`` resolver. Defaults to an empty dictionary.
+                Credentials always use these values, including in loader copies.
             config_patterns: Glob patterns for each configuration key. Supplied
                 entries override the default catalog, parameters, credentials,
                 and globals patterns.
@@ -193,6 +196,9 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             env=env,
             runtime_params=runtime_params,
         )
+        # Loader copies share cached credentials, so credentials never use a copy's
+        # runtime parameters.
+        self._credentials_runtime_params = self.runtime_params
         self._raw_config_cache: dict[
             tuple[Any, ...], _RawConfig | MissingConfigException
         ] = {}
@@ -342,7 +348,8 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
         The returned loader copy shares the configuration caches but keeps
         separate runtime-resolution state. File patterns are deep-copied and
         the explicit override mapping is shallow-copied; nested override values
-        can remain shared.
+        can remain shared. Credentials keep using the runtime parameters passed
+        to the original loader's constructor.
 
         Args:
             runtime_params: Parameters for the loader copy, replacing this loader's
@@ -439,7 +446,14 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
             return self._merged_config_cache[cache_key]
 
     def _get_raw_config(self, key: str) -> _RawConfig:
-        """Read and cache per-file configs, including missing-directory errors."""
+        """Read and cache per-file configs, including missing-directory errors.
+
+        Credential interpolations are resolved while reading, with this loader's
+        globals and the runtime parameters passed to its constructor.
+        """
+        is_credentials = key == "credentials"
+        if is_credentials:
+            self._ensure_globals()
         patterns = tuple(self.config_patterns.get(key, ()))
         run_env = self.env or self.default_run_env
         cache_key = (key, patterns, self.base_env, run_env)
@@ -448,7 +462,10 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                 try:
                     with (
                         _RESOLVE_LOCK,
-                        self._oc_env_resolver_scope(allow_builtin=key == "credentials"),
+                        self._oc_env_resolver_scope(allow_builtin=is_credentials),
+                        self._runtime_params_scope(self._credentials_runtime_params)
+                        if is_credentials
+                        else nullcontext(),
                     ):
                         self._raw_config_cache[cache_key] = _RawConfig(
                             *self._read_raw_config(key)
@@ -485,17 +502,7 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                 if runtime_params is _UNSET
                 else cast("dict[str, Any] | None", runtime_params)
             )
-            previous = (
-                self.runtime_params,
-                self._runtime_params_oc,
-                self._runtime_params_hits,
-            )
-            self.runtime_params = params or {}
-            self._runtime_params_oc = None
-            self._runtime_params_hits = set()
-            self._register_globals_resolver()
-            self._register_runtime_params_resolver()
-            try:
+            with self._runtime_params_scope(params):
                 try:
                     if merged_config is None:
                         # The inherited resolver merges in place, so it gets a copy.
@@ -518,13 +525,34 @@ class LazyOmegaConfigLoader(OmegaConfigLoader):
                             "or provide a default in the interpolation."
                         ) from exc
                     raise
-            finally:
-                self._register_runtime_params_resolver()
-                (
-                    self.runtime_params,
-                    self._runtime_params_oc,
-                    self._runtime_params_hits,
-                ) = previous
+
+    @contextmanager
+    def _runtime_params_scope(
+        self, runtime_params: dict[str, Any] | None
+    ) -> Iterator[None]:
+        """Bind this loader's resolvers to ``runtime_params``, then restore its state.
+
+        Call while holding ``_RESOLVE_LOCK``.
+        """
+        previous = (
+            self.runtime_params,
+            self._runtime_params_oc,
+            self._runtime_params_hits,
+        )
+        self.runtime_params = runtime_params or {}
+        self._runtime_params_oc = None
+        self._runtime_params_hits = set()
+        self._register_globals_resolver()
+        self._register_runtime_params_resolver()
+        try:
+            yield
+        finally:
+            self._register_runtime_params_resolver()
+            (
+                self.runtime_params,
+                self._runtime_params_oc,
+                self._runtime_params_hits,
+            ) = previous
 
     @staticmethod
     def _copy_raw_config(raw_config: _RawConfig) -> _RawConfig:

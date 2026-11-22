@@ -42,9 +42,11 @@ Existing loader copies keep using the previous cache. Explicit overrides
 assigned to the loader remain in place.
 
 The loader resolves globals when first needed and caches the result.
-`preload()` also resolves and caches credentials, so credentials don't vary
-between its loader copies.
-Neither globals nor preloaded credentials are intended for per-run values.
+Credentials are resolved when their files are first read, with the runtime
+parameters passed to the loader's constructor. Loader copies reuse them, so
+credentials don't vary between runs.
+Neither globals nor credentials are intended for per-run values; see
+[how credentials are cached](how_to_cache_configuration.md#configuration-lifetime).
 
 ## Repeated runs
 

@@ -330,6 +330,10 @@ when reusing a cache; it isn't required for ordinary CLI usage.
 Don't mutate a shared loader's runtime parameters during concurrent
 resolutions. Use a loader copy for each run instead.
 
+!!! warning "Loader copies don't change credentials"
+
+    Credentials are resolved once, with constructor-time runtime parameters, and every loader copy reuses them. If your credentials use `${runtime_params:...}`, see [how credentials are cached](how_to_cache_configuration.md#configuration-lifetime).
+
 ### 4. Check error handling and dictionary updates
 
 Globals errors now surface on first configuration access or `preload()`,

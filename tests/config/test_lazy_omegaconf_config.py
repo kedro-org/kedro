@@ -390,6 +390,40 @@ class TestLazyOmegaConfigLoader:
             "database": {"user": "kedro-user"}
         }
 
+    def test_credentials_use_the_original_loader_runtime_params(
+        self, tmp_path: Path
+    ) -> None:
+        _write_yaml(
+            tmp_path / "base" / "credentials.yml",
+            {"db": {"user": "${runtime_params:user, default_user}"}},
+        )
+        _write_yaml(tmp_path / "base" / "parameters.yml", {"value": 1})
+        loader = _loader(tmp_path, runtime_params={"user": "original"})
+        first = loader.with_runtime_params({"user": "first"})
+        second = loader.with_runtime_params({"user": "second"})
+        first["parameters"]
+
+        assert first["credentials"] == {"db": {"user": "original"}}
+        assert second["credentials"] == {"db": {"user": "original"}}
+        assert loader["credentials"] == {"db": {"user": "original"}}
+
+    def test_credentials_use_their_loader_globals_after_another_loader_resolves(
+        self, tmp_path: Path
+    ) -> None:
+        loaders = {}
+        for name in ("a", "b"):
+            root = tmp_path / name
+            _write_yaml(root / "base" / "globals.yml", {"owner": name})
+            _write_yaml(root / "base" / "parameters.yml", {"value": 1})
+            _write_yaml(
+                root / "base" / "credentials.yml", {"db": {"user": "${globals:owner}"}}
+            )
+            loaders[name] = _loader(root)
+        loaders["a"]["parameters"]
+        loaders["b"]["parameters"]
+
+        assert loaders["a"]["credentials"] == {"db": {"user": "a"}}
+
     def test_missing_config_key_raises_missing_config_exception(
         self, tmp_path: Path
     ) -> None:

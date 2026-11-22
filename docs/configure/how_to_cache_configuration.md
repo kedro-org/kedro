@@ -181,10 +181,23 @@ fails, the previous cache is kept. Key access and `with_runtime_params()`
 reuse cached keys even if their YAML files change. Loader copies created before a new
 `preload()` keep using the previous cache.
 
-Preloaded credentials are cached and reused across loader copies, rather than resolved
-separately for each run. Pass values that change between runs through
-`with_runtime_params()` and the `runtime_params` resolver in parameters or
-catalog configuration.
+!!! warning "Credentials aren't resolved for each run"
+
+    The loader resolves credentials once, when it first reads their files, with the runtime parameters passed to its constructor. Every loader copy reuses these credentials: `with_runtime_params()` doesn't change them, even when a credentials file uses `${runtime_params:...}`.
+
+    ```yaml
+    # conf/base/credentials.yml
+    db:
+      user: ${runtime_params:db_user, default_user}
+    ```
+
+    ```python
+    loader = LazyOmegaConfigLoader("conf", base_env="base", default_run_env="local")
+    loader.with_runtime_params({"db_user": "alice"})["credentials"]
+    # {'db': {'user': 'default_user'}}
+    ```
+
+    An `OmegaConfigLoader` created with `runtime_params={"db_user": "alice"}` returns `alice` instead. Don't rely on runtime parameters to change credentials between runs. Pass values that change between runs through `with_runtime_params()` and the `runtime_params` resolver in parameters or catalog configuration.
 
 ## Interpolation scope
 

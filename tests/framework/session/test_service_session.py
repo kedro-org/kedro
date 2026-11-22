@@ -1,9 +1,11 @@
 import logging
 import re
+import threading
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pytest
+from omegaconf import OmegaConf
 from omegaconf.errors import InterpolationResolutionError
 from yaml.parser import ParserError
 
@@ -15,15 +17,17 @@ from kedro.framework.context.context import KedroContext
 from kedro.framework.project import (
     LOGGING,
     ValidationError,
+    _HasSharedParentClassValidator,
     _ProjectSettings,
 )
 from kedro.framework.session import KedroServiceSession
+from kedro.framework.session import service_session as service_session_module
 from kedro.framework.session.abstract_session import KedroSessionError
 from kedro.framework.session.service_session import _inject_runtime_datasets
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ThreadRunner
 from kedro.utils import KedroExperimentalWarning
-from tests.framework.session.conftest import _write_yaml
+from tests.framework.session.conftest import _mock_imported_settings_paths, _write_yaml
 
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
@@ -62,6 +66,10 @@ def fake_run_id(mocker):
 
 class FakeException(Exception):
     """Fake exception class for testing purposes"""
+
+
+class CustomConfigLoader(AbstractConfigLoader):
+    """A loader that isn't an `OmegaConfigLoader`, for testing only."""
 
 
 class TestKedroServiceSession:
@@ -119,18 +127,24 @@ class TestKedroServiceSession:
         """Serving mode -- what `http_server.py` enables for every `POST /run`
         request -- forces the config loader to restrict `runtime_params`-driven
         catalog `type` selection, regardless of `CONFIG_LOADER_ARGS`. See
-        kedro-org/kedro#5706."""
+        kedro-org/kedro#5706. Without a lazy loader, each run gets a new
+        loader, so credentials resolve with that run's `runtime_params`."""
+        _write_yaml(
+            fake_project / "conf" / "base" / "credentials.yml",
+            {"db": {"user": "${runtime_params:user, default}"}},
+        )
         session = KedroServiceSession.create(
             project_path=fake_project, serving_mode=True
         )
-        config_loader = session._get_config_loader()
-        assert config_loader.restrict_runtime_params_type_selection is True
 
-        # The cache is built on enabling serving mode; without it, fail loudly
-        # rather than fall back to an unrestricted loader.
-        session._config_cache = None
-        with pytest.raises(RuntimeError, match="config cache was not built"):
-            session._get_config_loader()
+        first = session._get_config_loader({"user": "first"})
+        second = session._get_config_loader({"user": "second"})
+
+        assert type(first) is OmegaConfigLoader
+        assert first is not second
+        assert first.restrict_runtime_params_type_selection is True
+        assert first["credentials"] == {"db": {"user": "first"}}
+        assert second["credentials"] == {"db": {"user": "second"}}
 
     @pytest.mark.usefixtures("mock_settings_config_loader_args")
     def test_get_config_loader_untrusted_overrides_config_loader_args(
@@ -899,38 +913,84 @@ class TestKedroServiceSession:
         mock_pipelines.set_requested.assert_called_once_with(None)
         mock_pipelines.__iter__.assert_called()
 
-    def test_serving_mode_warns_runtime_params_not_supported_in_credentials(
-        self, fake_project, mocker, caplog
+    @pytest.mark.parametrize(
+        "config_loader_class, serving_mode, warns, warns_about_type_selection",
+        [
+            (LazyOmegaConfigLoader, True, False, False),
+            (OmegaConfigLoader, True, True, False),
+            (CustomConfigLoader, True, True, True),
+            (OmegaConfigLoader, False, False, False),
+        ],
+    )
+    def test_warns_when_serving_without_a_lazy_config_loader(
+        self,
+        fake_project,
+        mocker,
+        caplog,
+        config_loader_class,
+        serving_mode,
+        warns,
+        warns_about_type_selection,
     ):
-        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
+        """Only sessions declared as serving concurrent runs warn: single runs,
+        such as `kedro run`, don't need to."""
+
+        class MockSettings(_ProjectSettings):
+            _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
+                "CONFIG_LOADER_CLASS", default=lambda *_: config_loader_class
+            )
+
+        _mock_imported_settings_paths(mocker, MockSettings())
         mocker.patch("kedro.framework.session.service_session.pipelines")
 
         with caplog.at_level(logging.WARNING):
-            KedroServiceSession.create(project_path=fake_project, serving_mode=True)
+            KedroServiceSession.create(
+                project_path=fake_project, serving_mode=serving_mode
+            )
 
-        assert (
-            "`runtime_params` are not supported in credentials in serving mode; "
-            "credentials are loaded once at startup and do not vary per request."
-            in caplog.text
+        messages = [
+            record.getMessage()
+            for record in caplog.records
+            if "not `LazyOmegaConfigLoader`" in record.getMessage()
+        ]
+        assert len(messages) == int(warns)
+        if warns:
+            assert f"`{config_loader_class.__name__}`" in messages[0]
+            assert ("reject dataset types" in messages[0]) is warns_about_type_selection
+
+    def test_serving_mode_accepts_any_config_loader_class(self, fake_project, mocker):
+        """Serving mode only passes the type-selection restriction to an
+        `OmegaConfigLoader`, so a loader whose constructor doesn't accept it
+        still works."""
+
+        class StrictConfigLoader(AbstractConfigLoader):
+            def __init__(
+                self,
+                conf_source,
+                env=None,
+                runtime_params=None,
+                base_env=None,
+                default_run_env=None,
+            ):
+                super().__init__(
+                    conf_source=conf_source, env=env, runtime_params=runtime_params
+                )
+
+        class MockSettings(_ProjectSettings):
+            _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
+                "CONFIG_LOADER_CLASS", default=lambda *_: StrictConfigLoader
+            )
+
+        _mock_imported_settings_paths(mocker, MockSettings())
+        mocker.patch("kedro.framework.session.service_session.pipelines")
+
+        session = KedroServiceSession.create(
+            project_path=fake_project, serving_mode=True
         )
 
-    @pytest.mark.usefixtures("mock_settings_custom_config_loader_class")
-    def test_serving_mode_rejects_non_omega_config_loader_class(
-        self, fake_project, mocker
-    ):
-        """Serving mode's config cache uses OmegaConfigLoader internal functions so a
-        project-supplied loader that isn't OmegaConfigLoader (or a subclass)
-        must be rejected up front with a clear error"""
-        mocker.patch("kedro.framework.session.service_session._create_hook_manager")
-        mock_pipelines = mocker.patch(
-            "kedro.framework.session.service_session.pipelines"
+        assert isinstance(
+            session._get_config_loader({"user": "first"}), StrictConfigLoader
         )
-
-        with pytest.raises(KedroSessionError, match="OmegaConfigLoader"):
-            KedroServiceSession.create(project_path=fake_project, serving_mode=True)
-
-        # Validation must happen before any preloading work starts.
-        mock_pipelines.set_requested.assert_not_called()
 
     @pytest.mark.usefixtures("mock_settings_custom_config_loader_class")
     def test_cli_mode_allows_non_omega_config_loader_class(self, fake_project):
@@ -1054,7 +1114,6 @@ class TestLazyConfigLoader:
 
         assert preload.call_count == 1
         assert isinstance(session._shared_config_loader, LazyOmegaConfigLoader)
-        assert session._config_cache is None
 
     @pytest.mark.parametrize("serving_mode, restricted", [(False, False), (True, True)])
     def test_each_run_gets_its_own_loader_copy(
@@ -1096,6 +1155,23 @@ class TestLazyConfigLoader:
 
         with pytest.raises(ParserError, match="Invalid YAML"):
             KedroServiceSession.create(project_path=fake_project)
+
+    def test_runs_do_not_take_the_config_loading_lock(
+        self, fake_project, conf, mock_runner, mocker, project_pipelines
+    ):
+        project_pipelines.__getitem__.side_effect = {
+            "__default__": _pipeline_with_inputs("cars")
+        }.__getitem__
+        lock = mocker.patch.object(service_session_module, "_CONFIG_LOADING_LOCK")
+        session = KedroServiceSession.create(
+            project_path=fake_project, serving_mode=True
+        )
+
+        session.run(runner=mock_runner, runtime_params={"model_name": "first"})
+
+        lock.__enter__.assert_not_called()
+        catalog = mock_runner.run.call_args.args[1]
+        assert catalog.load("params:model") == {"name": "first"}
 
     def test_serving_mode_forces_type_selection_restriction(
         self, fake_project, conf, mocker, caplog
@@ -1139,6 +1215,86 @@ class TestLazyConfigLoader:
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             assert all(executor.map(resolve_catalog, range(120)))
+
+
+class TestConfigLoadingLock:
+    """Loaders other than `LazyOmegaConfigLoader` replace OmegaConf's
+    process-global `runtime_params` resolver while resolving, so concurrent
+    runs must load their configuration one at a time."""
+
+    def test_concurrent_runs_load_configuration_one_at_a_time(
+        self, fake_project, mock_runner, mocker, request
+    ):
+        first_resolving = threading.Event()
+        second_waiting = threading.Event()
+
+        def pause():
+            if threading.current_thread().name == "first":
+                first_resolving.set()
+                # Without the lock, the second run would now replace the
+                # `runtime_params` resolver used by the rest of this resolution.
+                if not second_waiting.wait(timeout=10):
+                    raise RuntimeError("The second run never reached the lock.")
+            return "paused"
+
+        OmegaConf.register_new_resolver("pause", pause, replace=True)
+        request.addfinalizer(lambda: OmegaConf.clear_resolver("pause"))
+        project_pipelines = mocker.patch(
+            "kedro.framework.session.service_session.pipelines"
+        )
+        project_pipelines.__getitem__.side_effect = {
+            "__default__": _pipeline_with_inputs("cars")
+        }.__getitem__
+
+        real_lock = service_session_module._CONFIG_LOADING_LOCK
+
+        class SignallingLock:
+            def __enter__(self):
+                if threading.current_thread().name == "second":
+                    second_waiting.set()
+                return real_lock.__enter__()
+
+            def __exit__(self, *exc_info):
+                return real_lock.__exit__(*exc_info)
+
+        mocker.patch.object(
+            service_session_module, "_CONFIG_LOADING_LOCK", SignallingLock()
+        )
+
+        conf = fake_project / "conf"
+        _write_yaml(conf / "base" / "catalog.yml", {"cars": {"type": "MemoryDataset"}})
+        # Keys are resolved in order, so `b_label` is resolved after the pause.
+        _write_yaml(
+            conf / "base" / "parameters.yml",
+            {"a_paused": "${pause:}", "b_label": "${runtime_params:label}"},
+        )
+        session = KedroServiceSession.create(
+            project_path=fake_project, serving_mode=True
+        )
+        errors = []
+
+        def run(label):
+            try:
+                session.run(
+                    run_id=label, runner=mock_runner, runtime_params={"label": label}
+                )
+            except Exception as exc:
+                errors.append(exc)
+
+        first = threading.Thread(target=run, args=("first",), name="first")
+        second = threading.Thread(target=run, args=("second",), name="second")
+        first.start()
+        assert first_resolving.wait(timeout=10), errors
+        second.start()
+        first.join()
+        second.join()
+
+        assert errors == []
+        labels = {
+            call.kwargs["run_id"]: call.args[1].load("params:b_label")
+            for call in mock_runner.run.call_args_list
+        }
+        assert labels == {"first": "first", "second": "second"}
 
 
 class TestRuntimeDatasets:

@@ -4,7 +4,9 @@ import logging
 import logging.config
 import os
 import textwrap
+import threading
 import uuid
+from contextlib import nullcontext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
@@ -25,15 +27,20 @@ from kedro.pipeline.pipeline import Pipeline
 from kedro.runner import AbstractRunner, ParallelRunner, SequentialRunner
 from kedro.utils import experimental, find_kedro_project, get_close_matches
 
-from ._serving_config import _ConfigCache, _ServingConfigLoader, build_config_cache
 from .abstract_session import AbstractSession, KedroSessionError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from contextlib import AbstractContextManager
 
     from kedro.config import AbstractConfigLoader
     from kedro.framework.context import KedroContext
     from kedro.io import CatalogProtocol
+
+# Process-wide because OmegaConf's resolver registry is process-global: loaders
+# other than ``LazyOmegaConfigLoader`` replace the ``runtime_params`` resolver
+# without locking, so concurrent runs must not load their configuration at once.
+_CONFIG_LOADING_LOCK = threading.RLock()
 
 
 @experimental
@@ -86,7 +93,6 @@ class KedroServiceSession(AbstractSession):
             self._project_path / settings.CONF_SOURCE
         )
         self._serving_mode = False
-        self._config_cache: _ConfigCache | None = None
         self._shared_config_loader: LazyOmegaConfigLoader | None = None
 
     @classmethod
@@ -104,6 +110,8 @@ class KedroServiceSession(AbstractSession):
         the session creates one loader and preloads its configuration files.
         Each run then resolves configuration with a loader copy from
         ``with_runtime_params()``, so files are read only once per session.
+        Other loaders are created for each run, and concurrent runs load their
+        configuration one at a time.
 
         Args:
             session_id: Optional ID for this session; defaults to a UUID.
@@ -112,16 +120,14 @@ class KedroServiceSession(AbstractSession):
             conf_source: Optional path to the configuration source directory.
             serving_mode: When ``True``, all pipelines are preloaded eagerly at
                 session creation time, making pipeline lookups safe across
-                concurrent ``run()`` calls. Leave ``False`` (the default) for
-                CLI use. Requires ``CONFIG_LOADER_CLASS`` to be
-                ``OmegaConfigLoader`` (or a subclass).
+                concurrent ``run()`` calls, and ``runtime_params`` are treated
+                as untrusted. Leave ``False`` (the default) for CLI use. If
+                ``CONFIG_LOADER_CLASS`` isn't ``LazyOmegaConfigLoader``, the
+                session logs a warning about the safety and performance
+                implications of concurrent runs.
 
         Returns:
             A new ``KedroServiceSession`` instance ready for use.
-
-        Raises:
-            KedroSessionError: If ``serving_mode=True`` and
-                ``CONFIG_LOADER_CLASS`` isn't ``OmegaConfigLoader`` (or a subclass).
         """
         validate_settings()
         env = env or os.getenv("KEDRO_ENV")
@@ -149,35 +155,52 @@ class KedroServiceSession(AbstractSession):
         self._shared_config_loader = config_loader
 
     def _enable_serving_mode(self) -> None:
-        """Preload all pipelines and config, then switch the session into serving mode.
+        """Preload all pipelines, then switch the session into serving mode.
 
         The flag is set *after* a successful preload so that a failure during
         loading leaves the session in normal CLI mode rather than in an
         inconsistent state where ``run()`` would skip ``set_requested()``
         against an empty pipeline registry.
         """
-        self._validate_config_loader_class()
         self._warn_if_type_selection_restriction_is_overridden()
+        self._warn_if_config_loader_is_not_lazy()
         self._preload_pipelines()
-        if self._shared_config_loader is None:
-            self._preload_config()
         self._serving_mode = True
 
-    def _validate_config_loader_class(self) -> None:
-        """Serving mode requires ``OmegaConfigLoader`` (or a subclass): a
-        custom loader can't be cached the same way, and has no way to
-        enforce the untrusted-``runtime_params`` guard
-        (``restrict_runtime_params_type_selection``)."""
+    def _warn_if_config_loader_is_not_lazy(self) -> None:
+        """Explain the safety and performance cost of concurrent runs without
+        ``LazyOmegaConfigLoader``, the only loader that isolates them on its own."""
         config_loader_class = settings.CONFIG_LOADER_CLASS
+        if issubclass(config_loader_class, LazyOmegaConfigLoader):
+            return
+        name = config_loader_class.__name__
+        message = (
+            f"`CONFIG_LOADER_CLASS` is `{name}`, not `LazyOmegaConfigLoader`. "
+            "With concurrent `run()` calls:\n"
+            "- Safety: Kedro loads each run's configuration while holding a "
+            "process-wide lock, so runtime parameters stay isolated during run "
+            "setup. Configuration resolved elsewhere at the same time, for "
+            "example by hooks after the catalog is created, by nodes, or by "
+            "another config loader such as the one `GET /snapshot` creates in the "
+            "HTTP server, isn't protected: one run's runtime parameters can then "
+            "leak into another run.\n"
+            "- Performance: every run rereads the configuration files, and "
+            "concurrent runs set up one at a time.\n"
+        )
         if not issubclass(config_loader_class, OmegaConfigLoader):
-            raise KedroSessionError(
-                "Serving mode requires `CONFIG_LOADER_CLASS` to be "
-                f"`OmegaConfigLoader` (or a subclass). Got `{config_loader_class.__name__}`."
+            message += (
+                f"- Security: Kedro can't make `{name}` reject dataset types "
+                "selected through runtime parameters.\n"
             )
+        message += (
+            "To cache configuration and resolve runs concurrently, set "
+            "`CONFIG_LOADER_CLASS = LazyOmegaConfigLoader` in `settings.py`."
+        )
+        self._logger.warning(message)
 
     def _warn_if_type_selection_restriction_is_overridden(self) -> None:
         """Warn that serving mode ignores a disabled type-selection restriction."""
-        if (
+        if issubclass(settings.CONFIG_LOADER_CLASS, OmegaConfigLoader) and (
             settings.CONFIG_LOADER_ARGS.get("restrict_runtime_params_type_selection")
             is False
         ):
@@ -200,29 +223,6 @@ class KedroServiceSession(AbstractSession):
         )
         pipelines.set_requested(None)
         list(pipelines)
-
-    def _preload_config(self) -> None:
-        """Build the session-scoped config cache once, before requests start.
-
-        See ``_serving_config`` for how ``_ServingConfigLoader`` uses it.
-        """
-        self._logger.info(
-            "Serving mode: preloading config cache for session %s", self.session_id
-        )
-        config_loader_class = settings.CONFIG_LOADER_CLASS
-        config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
-        config_loader_args["restrict_runtime_params_type_selection"] = True
-        persistent_loader = config_loader_class(
-            conf_source=self._conf_source,
-            env=self.env,
-            runtime_params=None,
-            **config_loader_args,
-        )
-        self._logger.warning(
-            "`runtime_params` are not supported in credentials in serving mode; "
-            "credentials are loaded once at startup and do not vary per request."
-        )
-        self._config_cache = build_config_cache(persistent_loader)
 
     @property
     def _logger(self) -> logging.Logger:
@@ -249,9 +249,10 @@ class KedroServiceSession(AbstractSession):
 
         With ``LazyOmegaConfigLoader`` (or a subclass), the returned loader is a
         copy of the session's preloaded loader, in every mode. It shares the
-        cached files and resolves them with ``runtime_params``. With other
-        loaders, serving mode returns a ``_ServingConfigLoader`` reading from the
-        session-scoped cache -- see ``_serving_config`` for the locking.
+        cached files and resolves them with ``runtime_params``. Other loaders
+        are created for each call. In serving mode, only ``OmegaConfigLoader``
+        subclasses receive the restriction: Kedro can't enforce it for other
+        loaders.
         """
         if self._shared_config_loader is not None:
             return self._shared_config_loader.with_runtime_params(
@@ -260,28 +261,35 @@ class KedroServiceSession(AbstractSession):
                     True if self._serving_mode else None
                 ),
             )
-        if self._serving_mode:
-            if self._config_cache is None:
-                raise RuntimeError(
-                    "Serving mode is enabled but the config cache was not built."
-                )
-            return _ServingConfigLoader(
-                cache=self._config_cache, runtime_params=runtime_params
-            )
-        return self._new_config_loader(runtime_params)
+        return self._new_config_loader(
+            runtime_params, restrict_type_selection=self._serving_mode
+        )
 
     def _new_config_loader(
-        self, runtime_params: dict[str, Any] | None = None
+        self,
+        runtime_params: dict[str, Any] | None = None,
+        *,
+        restrict_type_selection: bool = False,
     ) -> AbstractConfigLoader:
         """Create a loader from ``CONFIG_LOADER_CLASS`` and ``CONFIG_LOADER_ARGS``."""
         config_loader_class = settings.CONFIG_LOADER_CLASS
         config_loader_args = dict(settings.CONFIG_LOADER_ARGS)
+        if restrict_type_selection and issubclass(
+            config_loader_class, OmegaConfigLoader
+        ):
+            config_loader_args["restrict_runtime_params_type_selection"] = True
         return config_loader_class(  # type: ignore[no-any-return]
             conf_source=self._conf_source,
             env=self.env,
             runtime_params=runtime_params,
             **config_loader_args,
         )
+
+    def _config_loading_scope(self) -> AbstractContextManager[Any]:
+        """Serialise run setup unless the loader isolates its own resolvers."""
+        if self._shared_config_loader is None:
+            return _CONFIG_LOADING_LOCK
+        return nullcontext()
 
     def load_context(
         self,
@@ -384,66 +392,69 @@ class KedroServiceSession(AbstractSession):
         # to avoid mutating shared singleton state across concurrent requests.
         if not self._serving_mode:
             pipelines.set_requested(pipeline_names or None)
-        context = self.load_context(runtime_params)
-        pipeline_names = pipeline_names or ["__default__"]
-        combined_pipeline = Pipeline([])
-        for name in pipeline_names:
-            try:
-                combined_pipeline += pipelines[name]
-            except KeyError as exc:
-                if not self._serving_mode:
-                    # Reset to None so keys() loads all pipelines for suggestions.
-                    pipelines.set_requested(None)
-                matches = get_close_matches(name, pipelines.keys())
-                if matches:
-                    suggestion = (
-                        "Did you mean one of these instead?\n"
-                        + textwrap.indent("\n".join(matches), " " * 4)
-                    )
-                else:
-                    suggestion = ""
-                raise ValueError(
-                    f"Failed to find the pipeline named '{name}'. "
-                    f"It needs to be generated and returned "
-                    f"by the 'register_pipelines' function. "
-                    f"{suggestion}"
-                ) from exc
+        # Loaders other than LazyOmegaConfigLoader resolve configuration with
+        # process-global resolvers, so run setup is serialised for them.
+        with self._config_loading_scope():
+            context = self.load_context(runtime_params)
+            pipeline_names = pipeline_names or ["__default__"]
+            combined_pipeline = Pipeline([])
+            for name in pipeline_names:
+                try:
+                    combined_pipeline += pipelines[name]
+                except KeyError as exc:
+                    if not self._serving_mode:
+                        # Reset to None so keys() loads all pipelines for suggestions.
+                        pipelines.set_requested(None)
+                    matches = get_close_matches(name, pipelines.keys())
+                    if matches:
+                        suggestion = (
+                            "Did you mean one of these instead?\n"
+                            + textwrap.indent("\n".join(matches), " " * 4)
+                        )
+                    else:
+                        suggestion = ""
+                    raise ValueError(
+                        f"Failed to find the pipeline named '{name}'. "
+                        f"It needs to be generated and returned "
+                        f"by the 'register_pipelines' function. "
+                        f"{suggestion}"
+                    ) from exc
 
-        filtered_pipeline = combined_pipeline.filter(
-            tags=tags,
-            from_nodes=from_nodes,
-            to_nodes=to_nodes,
-            node_names=node_names,
-            from_inputs=from_inputs,
-            to_outputs=to_outputs,
-            node_namespaces=namespaces,
-        )
-        if runtime_datasets:
-            _check_runtime_dataset_names(runtime_datasets, filtered_pipeline)
+            filtered_pipeline = combined_pipeline.filter(
+                tags=tags,
+                from_nodes=from_nodes,
+                to_nodes=to_nodes,
+                node_names=node_names,
+                from_inputs=from_inputs,
+                to_outputs=to_outputs,
+                node_namespaces=namespaces,
+            )
+            if runtime_datasets:
+                _check_runtime_dataset_names(runtime_datasets, filtered_pipeline)
 
-        runner = runner or SequentialRunner()
-        if not isinstance(runner, AbstractRunner):
-            raise KedroSessionError(
-                "KedroServiceSession expect an instance of Runner instead of a class."
-                "Have you forgotten the `()` at the end of the statement?"
+            runner = runner or SequentialRunner()
+            if not isinstance(runner, AbstractRunner):
+                raise KedroSessionError(
+                    "KedroServiceSession expect an instance of Runner instead of a class."
+                    "Have you forgotten the `()` at the end of the statement?"
+                )
+
+            catalog_class = (
+                SharedMemoryDataCatalog
+                if isinstance(runner, ParallelRunner)
+                else settings.DATA_CATALOG_CLASS
             )
 
-        catalog_class = (
-            SharedMemoryDataCatalog
-            if isinstance(runner, ParallelRunner)
-            else settings.DATA_CATALOG_CLASS
-        )
+            # Scope validation to the requested pipelines; `__default__` falls
+            # back to validating every registered pipeline.
+            if "__default__" not in pipeline_names:
+                context._pipelines_to_validate = list(pipeline_names)
 
-        # Scope validation to the requested pipelines; `__default__` falls
-        # back to validating every registered pipeline.
-        if "__default__" not in pipeline_names:
-            context._pipelines_to_validate = list(pipeline_names)
-
-        catalog = context._get_catalog(
-            catalog_class=catalog_class,
-            save_version=save_version,
-            load_versions=load_versions,
-        )
+            catalog = context._get_catalog(
+                catalog_class=catalog_class,
+                save_version=save_version,
+                load_versions=load_versions,
+            )
 
         if runtime_datasets:
             _inject_runtime_datasets(catalog, runtime_datasets)

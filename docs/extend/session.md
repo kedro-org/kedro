@@ -103,7 +103,7 @@ You can provide the following optional arguments in `KedroServiceSession.create(
 - `project_path`: Path to the project root directory
 - `env`: Environment for the `KedroContext`
 - `conf_source`: Optional argument to specify the configuration source for the `KedroContext`
-- `serving_mode`: A Boolean value, `False` by default. Set to `True` when the session will handle concurrent `run()` calls; preloads all pipelines and configuration eagerly during `create()` to avoid race conditions.
+- `serving_mode`: A Boolean value, `False` by default. Set to `True` when the session will handle concurrent `run()` calls. It preloads all pipelines during `create()` and enables the runtime-parameter dataset type restriction for supported loaders.
 
 The main differences in the `create()` method between `KedroSession` and `KedroServiceSession` are:
 
@@ -146,6 +146,46 @@ class MyServiceSession(KedroServiceSession):
         # e.g. add custom logging or metrics around every run
         return super().run(*args, **kwargs)
 ```
+
+## Use `LazyOmegaConfigLoader` with `KedroServiceSession`
+
+`KedroServiceSession` loads configuration with the project's `CONFIG_LOADER_CLASS`. We strongly recommend using the experimental [`LazyOmegaConfigLoader`](../configure/caching_configuration.md) with `KedroServiceSession`. It matters most for concurrent runs, such as those of the [HTTP server](./serving.md). It's opt-in: `OmegaConfigLoader` remains the default. Other loaders work, but Kedro can't guarantee that concurrent runs don't interfere with each other.
+
+### Set the loader in `settings.py`
+
+```python
+# src/<project_name>/settings.py
+from kedro.config import LazyOmegaConfigLoader
+
+CONFIG_LOADER_CLASS = LazyOmegaConfigLoader
+CONFIG_LOADER_ARGS = {
+    "base_env": "base",
+    "default_run_env": "local",
+}
+```
+
+Keep any other arguments that your project already sets in `CONFIG_LOADER_ARGS`: the lazy loader accepts the same arguments as `OmegaConfigLoader`. If you keep another loader, `KedroServiceSession.create(serving_mode=True)` logs a warning that recommends this change.
+
+Your session code doesn't change: create and run the session as in [Create a `KedroServiceSession`](#create-a-kedroservicesession). The loader changes how and when the session reads and resolves configuration.
+
+### What changes for your runs
+
+|                                  | `LazyOmegaConfigLoader` (recommended)                                                                                                                            | Other loaders                                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `create()`                       | Reads, validates, and caches all configuration files, including those a run doesn't use. Configuration errors make `create()` fail.                              | Reads no configuration.                                                                            |
+| Each `run()`                     | Resolves the cached configuration with the run's runtime parameters.                                                                                             | Creates a new loader, which reads the files again.                                                 |
+| Concurrent runs                  | Resolve their configuration at the same time.                                                                                                                    | Set up one at a time, from context creation to catalog creation. Nodes still run at the same time. |
+| File changes                     | Ignored until you create a new session.                                                                                                                          | `OmegaConfigLoader` picks them up in the next run.                                                 |
+| Credentials                      | Resolved when the session is created, then reused by every run; see [configuration lifetime](../configure/how_to_cache_configuration.md#configuration-lifetime). | `OmegaConfigLoader` resolves them for each run.                                                    |
+| Warning with `serving_mode=True` | None.                                                                                                                                                            | Recommends switching to `LazyOmegaConfigLoader`.                                                   |
+
+With other loaders, Kedro tries to limit interference between concurrent runs, but can't guarantee isolation. A process-wide lock covers run setup, not the rest of the run. Configuration resolved elsewhere at the same time, for example by the HTTP server's `GET /snapshot` endpoint, can still leak runtime parameters between runs. Kedro also can't force loaders that don't subclass `OmegaConfigLoader` to reject dataset types selected through runtime parameters; see [dataset type security](./serving.md#dataset-type-security).
+
+!!! warning "Concurrent runs are hard to isolate"
+
+    OmegaConf keeps resolvers such as `runtime_params` in one registry for the whole Python process. If two runs resolve configuration at the same time, one run can use the other's runtime parameters. Kedro protects the configuration that it loads while setting up each run. It can't protect configuration that your code resolves while runs are in progress, for example in Hooks, in nodes, or with a config loader that you create yourself.
+
+    For concurrent runs, use `LazyOmegaConfigLoader` and avoid customising how configuration is loaded. If your code must resolve configuration, make sure it's thread-safe. See [thread safety and resolver isolation](../configure/caching_configuration.md#thread-safety-and-resolver-isolation) for details.
 
 ## `bootstrap_project` and `configure_project`
 

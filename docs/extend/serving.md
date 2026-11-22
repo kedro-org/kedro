@@ -269,13 +269,30 @@ The server creates this session with `serving_mode=True` (see [Create a `KedroSe
 
     `env` and `conf_source` are not accepted per-request. Set them at server startup through the `--env` and `--conf-source` options instead.
 
-#### Config caching
+#### Configuration loading
 
-Serving mode also preloads and caches the project configuration once, on the first `/run` request, and every subsequent request reuses it (see [Serving mode and configuration](./session.md#serving-mode-and-configuration)). Three consequences:
+We strongly recommend `LazyOmegaConfigLoader` for the server. Set it in your project's settings, keep your existing `CONFIG_LOADER_ARGS`, then start or restart the server:
 
-- Configuration is read once, so edits to files under `conf/` while the server is running are not picked up. Restart the server to apply them.
-- The project's `CONFIG_LOADER_CLASS` must be `OmegaConfigLoader` (or a subclass); otherwise the first `/run` request fails with an error instead of running the pipeline.
-- `credentials.yml` cannot use `${runtime_params:...}` — the server logs a warning about this on the first request. `catalog.yml` and `parameters.yml` are unaffected; `params` in the request body still applies to them per request as usual.
+```python
+# src/<package_name>/settings.py
+from kedro.config import LazyOmegaConfigLoader
+
+CONFIG_LOADER_CLASS = LazyOmegaConfigLoader
+```
+
+Without this change, the first `/run` request logs a warning that recommends it. The loader changes how the server handles `/run` requests:
+
+|                              | `LazyOmegaConfigLoader` (recommended)                                                                                                                            | `OmegaConfigLoader` (default)                               |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| First `/run` request         | Reads, validates, and caches all configuration files.                                                                                                            | Logs a warning that recommends `LazyOmegaConfigLoader`.     |
+| Each `/run` request          | Resolves the cached files with the request's `params`.                                                                                                           | Reads the configuration files again.                        |
+| Concurrent `/run` requests   | Resolve their configuration at the same time.                                                                                                                    | Set up one at a time. Pipelines still run at the same time. |
+| Edits to files under `conf/` | Restart the server to apply them.                                                                                                                                | Apply to the next request.                                  |
+| Credentials                  | Resolved on the first `/run` request, without request `params`; see [configuration lifetime](../configure/how_to_cache_configuration.md#configuration-lifetime). | Resolved for each request, with its `params`.               |
+
+`GET /snapshot` creates its own loader for each request, so it reads the current files even when `/run` uses cached configuration. With `OmegaConfigLoader`, a `GET /snapshot` request that runs at the same time as a `/run` request can interfere with that run's configuration.
+
+Custom loaders that don't subclass `OmegaConfigLoader` also work, but Kedro can't apply [dataset type security](#dataset-type-security) to them. For more on concurrent runs, see [Use `LazyOmegaConfigLoader` with `KedroServiceSession`](./session.md#use-lazyomegaconfigloader-with-kedroservicesession).
 
 #### Runner security
 
@@ -289,6 +306,8 @@ RUNNER_MODULE_ALLOWLIST = ["external_lib.runners"]
 #### Dataset type security
 
 A catalog entry's `type` field selects which dataset class Kedro imports and instantiates, so the HTTP server's `params` must never be able to choose it. The server rejects a catalog `type` that resolves through the [`runtime_params` resolver](../configure/how_to_use_templating.md#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader) to a request-supplied value, at any nesting depth, and returns an `InterpolationResolutionError`.
+
+The server applies this check when `CONFIG_LOADER_CLASS` is `OmegaConfigLoader`, `LazyOmegaConfigLoader`, or a subclass. With another custom loader, the first `/run` request logs a warning: make sure your loader rejects these types itself.
 
 This restriction applies only to requests served over HTTP. Using `runtime_params` to select a catalog dataset's `type` remains supported for trusted, non-server use, such as `kedro run --params`.
 

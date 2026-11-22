@@ -2,6 +2,8 @@
 
 ## Major features and improvements
 
+- Added the experimental, opt-in `LazyOmegaConfigLoader`. It caches parsed configuration for repeated resolution with different runtime parameters. By default, the new loader resolves interpolations per environment; it also supports a `merged` scope. Use `preload()` to refresh the cache, `with_runtime_params()` to create a loader copy for each run, and `get_unresolved_config()` to inspect merged configuration without resolving its remaining interpolations. `OmegaConfigLoader` remains the default.
+- Updated `KedroServiceSession` to preload `LazyOmegaConfigLoader` when configured and use a loader copy for each run. Other loaders are created per run, with run setup serialised; serving mode warns about concurrency and performance. The default `OmegaConfigLoader` now rereads configuration between runs instead of using the former serving cache.
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 
 ## Bug fixes and other changes

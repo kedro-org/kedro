@@ -58,7 +58,9 @@ shallow-copied, so nested override values can remain shared.
 
 Each loader copy returns configuration resolved for that run without reading
 the same files again. It doesn't create a context, a data catalog, or a pipeline
-run. Framework integration is a separate step.
+run. If your project uses `KedroServiceSession`, the session preloads the
+configured lazy loader and creates a copy for each run. See
+[use `LazyOmegaConfigLoader` with `KedroServiceSession`](../extend/session.md#use-lazyomegaconfigloader-with-kedroservicesession).
 
 ## Thread safety and resolver isolation
 
@@ -136,3 +138,4 @@ previous global `oc.env` resolver.
 
 - [How to cache configuration](how_to_cache_configuration.md)
 - [Migrate from `OmegaConfigLoader`](config_loader_migration.md#omegaconfigloader-to-lazyomegaconfigloader)
+- [Use `LazyOmegaConfigLoader` with `KedroServiceSession`](../extend/session.md#use-lazyomegaconfigloader-with-kedroservicesession)

@@ -125,7 +125,7 @@ explicit override values can remain shared; see
 
 !!! note
 
-    The loader copy resolves configuration. It does not create a `KedroContext`, catalog, or run a pipeline. Integration with `KedroServiceSession` is a separate step.
+    The loader copy resolves configuration. It does not create a `KedroContext`, catalog, or run a pipeline. `KedroServiceSession` preloads the configured lazy loader and creates a copy for each run; see [use `LazyOmegaConfigLoader` with `KedroServiceSession`](../extend/session.md#use-lazyomegaconfigloader-with-kedroservicesession).
 
 ## Inspect unresolved configuration
 

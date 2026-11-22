@@ -296,6 +296,9 @@ A new loader reads the files for each CLI run.
 
 This isn't complete behavioural parity. Review the changes below if
 plugins, Hooks, or notebooks use the loader directly.
+If you use `KedroServiceSession`, also review its
+[configuration behaviour](../extend/session.md#use-lazyomegaconfigloader-with-kedroservicesession):
+the session preloads configuration during creation and shares it across runs.
 
 ### 2. Refresh cached files explicitly
 

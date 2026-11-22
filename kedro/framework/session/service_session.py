@@ -110,8 +110,9 @@ class KedroServiceSession(AbstractSession):
         the session creates one loader and preloads its configuration files.
         Each run then resolves configuration with a loader copy from
         ``with_runtime_params()``, so files are read only once per session.
-        Other loaders are created for each run, and concurrent runs load their
-        configuration one at a time.
+        Other loaders are created for each run, and their concurrent run setup
+        is serialised. This lock does not protect unrelated configuration
+        operations.
 
         Args:
             session_id: Optional ID for this session; defaults to a UUID.
@@ -145,7 +146,7 @@ class KedroServiceSession(AbstractSession):
     def _preload_shared_config_loader(self) -> None:
         """Create the session's ``LazyOmegaConfigLoader`` and preload its files.
 
-        Other loaders don't cache configuration, so a new one is created for each run.
+        A new instance of any other loader is created for each run.
         """
         if not issubclass(settings.CONFIG_LOADER_CLASS, LazyOmegaConfigLoader):
             return
@@ -240,12 +241,10 @@ class KedroServiceSession(AbstractSession):
         Args:
             runtime_params: Extra parameters passed to a Kedro run.
 
-        In serving mode, ``runtime_params`` originates from an untrusted caller
-        (an HTTP request body), so the config loader is forced to reject a
-        catalog dataset `type` driven by `runtime_params`, regardless of what a
-        project's own `CONFIG_LOADER_ARGS` says -- that restriction must not be
-        weakenable by project config for an untrusted caller. See
-        https://github.com/kedro-org/kedro/issues/5706.
+        In serving mode, ``runtime_params`` can originate from an untrusted
+        caller. OmegaConfigLoader subclasses are forced to reject catalog
+        dataset types selected through runtime parameters, regardless of
+        ``CONFIG_LOADER_ARGS``. See https://github.com/kedro-org/kedro/issues/5706.
 
         With ``LazyOmegaConfigLoader`` (or a subclass), the returned loader is a
         copy of the session's preloaded loader, in every mode. It shares the

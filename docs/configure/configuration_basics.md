@@ -4,6 +4,10 @@ This section contains detailed information about Kedro project configuration, wh
 
 Kedro makes use of a configuration loader to load any project configuration files, which you can access through [kedro.config.OmegaConfigLoader][].
 
+For repeated access in long-lived processes, the opt-in `LazyOmegaConfigLoader`
+reuses parsed files. See [Caching configuration](caching_configuration.md)
+for its caching model and thread-safety limitations.
+
 !!! note
 
     `ConfigLoader` and `TemplatedConfigLoader` have been removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.

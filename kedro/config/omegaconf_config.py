@@ -121,7 +121,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 This can be a local filesystem path or a remote URL with protocol
                 (e.g., s3://, gs://, etc.)
             env: Environment that will take precedence over base.
-            runtime_params: Extra parameters passed to a Kedro run.
+            runtime_params: Extra parameters passed to a Kedro run. They are merged into
+                `parameters`, overriding existing keys with the same name, and are also
+                available to the `runtime_params` resolver.
             config_patterns: Regex patterns that specify the naming convention for configuration
                 files so they can be loaded. Can be customised by supplying config_patterns as
                 in `CONFIG_LOADER_ARGS` in `settings.py`.

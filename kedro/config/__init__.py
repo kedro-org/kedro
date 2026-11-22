@@ -7,11 +7,13 @@ from .abstract_config import (
     BadConfigException,
     MissingConfigException,
 )
+from .lazy_omegaconf_config import LazyOmegaConfigLoader
 from .omegaconf_config import OmegaConfigLoader
 
 __all__ = [
     "AbstractConfigLoader",
     "BadConfigException",
+    "LazyOmegaConfigLoader",
     "MissingConfigException",
     "OmegaConfigLoader",
 ]

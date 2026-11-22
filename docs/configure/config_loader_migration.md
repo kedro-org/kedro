@@ -1,7 +1,14 @@
 # Migration guide for config loaders
 
 The `ConfigLoader` and `TemplatedConfigLoader` classes have been deprecated since Kedro `0.18.12` and were removed in Kedro `0.19.0`. To use that release or later, you must adopt the [kedro.config.OmegaConfigLoader][].
-This migration guide outlines the primary distinctions between the old loaders and the `OmegaConfigLoader`, providing step-by-step instructions on updating your code base to use the new class effectively.
+This guide covers those migrations and the optional switch from
+`OmegaConfigLoader` to the experimental `LazyOmegaConfigLoader`.
+
+## On this page
+
+- [`ConfigLoader` to `OmegaConfigLoader`](#configloader-to-omegaconfigloader)
+- [`TemplatedConfigLoader` to `OmegaConfigLoader`](#templatedconfigloader-to-omegaconfigloader)
+- [`OmegaConfigLoader` to `LazyOmegaConfigLoader`](#omegaconfigloader-to-lazyomegaconfigloader)
 
 ## `ConfigLoader` to `OmegaConfigLoader`
 
@@ -260,3 +267,116 @@ The following example shows how you can rewrite your Jinja2 configuration to wor
 For error and exception handling, most errors are the same. Those you need to be aware of that are different between the original `TemplatedConfigLoader` and `OmegaConfigLoader` are as follows:
 
 - For missing template values `OmegaConfigLoader` throws `omegaconf.errors.InterpolationKeyError`.
+
+## `OmegaConfigLoader` to `LazyOmegaConfigLoader`
+
+Migration is optional: `OmegaConfigLoader` remains the default.
+`LazyOmegaConfigLoader` is experimental and emits a warning on first
+instantiation. See [Caching configuration](caching_configuration.md)
+before deciding whether your project benefits from it.
+
+### 1. Opt in through project settings
+
+Set the loader in `src/<package_name>/settings.py`:
+
+```python
+from kedro.config import LazyOmegaConfigLoader
+
+CONFIG_LOADER_CLASS = LazyOmegaConfigLoader
+CONFIG_LOADER_ARGS = {
+    "base_env": "base",
+    "default_run_env": "local",
+}
+```
+
+Keep your existing loader arguments and leave `interpolation_scope` at its
+default, `"environment"`. Existing YAML, key access, and CLI commands such
+as `kedro run --params` need no changes for ordinary single-run usage.
+A new loader reads the files for each CLI run.
+
+This isn't complete behavioural parity. Review the changes below if
+plugins, Hooks, or notebooks use the loader directly.
+
+### 2. Refresh cached files explicitly
+
+If code edits files and then reads the same key from the same loader,
+refresh the cache first:
+
+```python
+parameters = loader["parameters"]
+# Edit the parameter files.
+loader.preload()
+updated_parameters = loader["parameters"]
+```
+
+You can also construct a new loader. `preload()` keeps explicit
+overrides, such as `loader["parameters"] = {...}`. Delete an override
+before preloading if the files should supply that key again.
+
+### 3. Create a loader copy for each set of runtime parameters
+
+For repeated resolutions, reuse the files rather than constructing a new
+loader for each run:
+
+```python
+loader.preload()
+for customer_id in ("customer-001", "customer-002"):
+    loader_copy = loader.with_runtime_params({"customer_id": customer_id})
+    parameters = loader_copy["parameters"]
+```
+
+Constructor-time `runtime_params` still work. The new method is useful
+when reusing a cache; it isn't required for ordinary CLI usage.
+Don't mutate a shared loader's runtime parameters during concurrent
+resolutions. Use a loader copy for each run instead.
+
+!!! warning "Loader copies don't change credentials"
+
+    Credentials are resolved once, with constructor-time runtime parameters, and every loader copy reuses them. If your credentials use `${runtime_params:...}`, see [how credentials are cached](how_to_cache_configuration.md#configuration-lifetime).
+
+### 4. Check error handling and dictionary updates
+
+Globals errors now surface on first configuration access or `preload()`,
+rather than during construction. If your error handling guarded the
+constructor but not these calls, update it accordingly. Preloading validates file
+syntax and duplicate keys, but doesn't resolve catalog or parameter
+interpolations. With `interpolation_scope="merged"`, it also merges their
+environments and can raise merge errors, such as a `ValueError` for an
+unsupported merge strategy. With the default `"environment"` scope, those
+merges occur on key access instead.
+
+The lazy loader returns copies of explicitly assigned dictionaries.
+To update the loader, assign the changed dictionary back to it:
+
+```python
+parameters = loader["parameters"]
+parameters["learning_rate"] = 0.2
+loader["parameters"] = parameters
+```
+
+This assignment creates an explicit override, not a file update.
+Use [`get_unresolved_config()`](how_to_cache_configuration.md#inspect-unresolved-configuration)
+to inspect the merged configuration before resolution, or an assigned override.
+Its result is a read-only copy.
+
+### 5. Check custom loaders and resolver usage
+
+The lazy loader subclasses `OmegaConfigLoader`, but doesn't call its
+constructor. It also uses separate cached read and resolution paths.
+Review custom subclasses that override private loading methods before
+switching their base class.
+
+Configure custom resolvers through `custom_resolvers`. Don't rely on
+constructing a loader to register `globals`, `runtime_params`, or
+`oc.env` for unrelated OmegaConf operations.
+
+The lazy loader restricts `oc.env` to credentials by default, even if
+another caller registers it globally. Explicitly configure it if other
+configuration requires it, following the
+[custom resolver guidance](how_to_use_templating.md#how-to-use-resolvers-in-the-omegaconfigloader).
+Mixing direct OmegaConf operations or non-lazy loaders with concurrent
+lazy resolutions can still interfere with the global resolver registry.
+
+Keep the default interpolation scope when migrating. Review the
+[scope examples and performance trade-offs](how_to_cache_configuration.md#interpolation-scope)
+before selecting `"merged"`, which can change resolved values.

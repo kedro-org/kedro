@@ -9,6 +9,8 @@
 
 ## Documentation changes
 
+- Made the documentation easier for AI agents to use: added `llms.txt`, a "Kedro for LLMs" cheatsheet page, and pointers to both from the README, the docs home page, and every page's `<head>`.
+
 ## Community contributions
 
 # Release 1.8.0

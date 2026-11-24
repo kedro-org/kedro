@@ -10,6 +10,11 @@
   {% endif %}
 {% endblock %}
 
+{% block extrahead %}
+  {{ super() }}
+  <link rel="describedby" title="llms.txt" type="text/plain" href="{{ 'llms.txt' | url }}" />
+{% endblock %}
+
 {% block footer %}
 <div class="main-page-footer-container">
     <div class="main-page-footer-top">

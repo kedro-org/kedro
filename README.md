@@ -76,6 +76,12 @@ For new and intermediate Kedro users, there's a comprehensive section on [how to
 
 Additional documentation explains [how to work with Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/), and there are a set of advanced user guides for advanced for key Kedro features. We also recommend the [API reference documentation](/kedro) for further information.
 
+## For AI agents and LLMs
+
+If you are an AI agent or LLM working with Kedro, start with the [Kedro for LLMs cheatsheet](https://docs.kedro.org/en/stable/getting-started/kedro_for_llms/) and use [llms.txt](https://docs.kedro.org/en/stable/llms.txt) as the machine-readable index of the documentation.
+
+To fetch any documentation page as Markdown, send `Accept: text/markdown, text/html;q=0.9`. Keep the HTML fallback: pages over 2 MB return HTTP 406 instead of Markdown when it is missing.
+
 ## Why does Kedro exist?
 
 Kedro is built upon our collective best-practice (and mistakes) trying to deliver real-world ML applications that have vast amounts of raw unvetted data. We developed Kedro to achieve the following:

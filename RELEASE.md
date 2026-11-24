@@ -7,6 +7,8 @@
 
 ## Bug fixes and other changes
 
+- Fixed `%load_node` binding the inputs of a node declared with a dict of inputs by position instead of by argument name, which loaded datasets into the wrong variables or failed for keyword only arguments and `**kwargs`.
+
 ## Documentation changes
 
 ## Community contributions

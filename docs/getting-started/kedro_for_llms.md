@@ -12,15 +12,11 @@ This page is a single-file cheatsheet for LLMs and coding agents. It covers what
 
 <!-- vale Kedro.headings = YES -->
 
-Use [`llms.txt`](https://docs.kedro.org/en/stable/llms.txt) as the machine-readable index of these docs. It lists every documentation page with a one-line description.
+Use [`llms.txt`](../llms.txt) as the machine-readable index of these docs. It lists every documentation page with a one-line description. Then fetch documentation in one of these forms:
 
-To fetch any page as Markdown instead of HTML, send this request header:
-
-```text
-Accept: text/markdown, text/html;q=0.9
-```
-
-Keep the `text/html` fallback. Read the Docs converts pages to Markdown on request, and pages over 2 MB return HTTP 406 instead of Markdown when the fallback is missing.
+- **Markdown copy of a page:** take the URL of the page you fetched, remove the trailing `/`, and append `.md`. For example, `.../build/nodes/` becomes `.../build/nodes.md`. Every page also links its Markdown copy in its `<head>`, with `rel="alternate"` and `type="text/markdown"`. Build the URL from the page you are on, not from its `rel="canonical"` link: the canonical link always points to the `stable` version.
+- **Content negotiation:** send `Accept: text/markdown, text/html;q=0.9` with a request for any page. Keep the `text/html` fallback: pages over 2 MB return HTTP 406 instead of Markdown when it is missing.
+- **Everything in one file:** fetch [`llms-full.txt`](../llms-full.txt) for all narrative documentation in one request. It leaves out the API reference; `llms.txt` links each API page.
 
 ## Project layout
 
@@ -197,4 +193,4 @@ In a notebook, run `%load_ext kedro.ipython` from the project directory instead.
 - [Kedro concepts](kedro_concepts.md): nodes, pipelines, the Data Catalog, and project structure.
 - [Spaceflights tutorial](../tutorials/spaceflights_tutorial.md): a complete project, built step by step.
 - [Kedro API reference](../api/index.md): generated reference for every public module.
-- [`llms.txt`](https://docs.kedro.org/en/stable/llms.txt): the machine-readable index of these docs.
+- [`llms.txt`](../llms.txt): the machine-readable index of these docs.

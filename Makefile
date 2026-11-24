@@ -33,6 +33,23 @@ serve-docs: install-docs-requirements
 
 build-docs: install-docs-requirements
 	zensical build --clean
+	$(MAKE) agent-markdown
+
+# Post-build step that makes the docs easier for AI agents to read. Run after `zensical build`.
+# Writes a Markdown copy of every page and llms-full.txt into site/, checks docs/llms.txt
+# against the build and the nav, then stamps the Read the Docs version into the links
+# (a no-op outside Read the Docs).
+agent-markdown:
+	python tools/emit_agent_markdown.py --site-dir=site \
+		--exclude=index.html \
+		--canary=api/io/kedro.io.DataCatalog/index.html \
+		--bundle=llms-full.txt \
+		--bundle-exclude-prefix=api \
+		--url-placeholder=https://docs.kedro.org/en/stable/ \
+		--agent-docs="Index: https://docs.kedro.org/en/stable/llms.txt; full documentation: https://docs.kedro.org/en/stable/llms-full.txt"
+	python tools/check_llms_txt.py
+	python tools/stamp_llms_txt.py --placeholder=https://docs.kedro.org/en/stable/ \
+		--site-dir=site --filename=llms.txt --filename=llms-full.txt
 
 show-docs:
 	open site/index.html

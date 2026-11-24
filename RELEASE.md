@@ -9,7 +9,7 @@
 
 ## Documentation changes
 
-- Made the documentation easier for AI agents to use: added `llms.txt`, a "Kedro for LLMs" cheatsheet page, and pointers to both from the README, the docs home page, and every page's `<head>`.
+- Made the documentation easier for AI agents to use: added `llms.txt`, a "Kedro for LLMs" cheatsheet page, a Markdown copy of every page (append `.md` to a page URL), and an `llms-full.txt` bundle of the narrative documentation. The README, the docs home page, and every page's `<head>` point to them, and the docs build checks `llms.txt` against the site navigation.
 
 ## Community contributions
 

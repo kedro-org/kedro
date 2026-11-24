@@ -4,198 +4,198 @@
 
 A Kedro project is made of nodes (plain Python functions) connected into pipelines through named datasets. The Data Catalog, configured in `conf/base/catalog.yml`, maps those dataset names to storage. Parameters live in `conf/base/parameters.yml` and reach nodes as `params:<name>` inputs. The `kedro` CLI creates, runs, and packages projects.
 
-Start with the [Kedro for LLMs cheatsheet](https://docs.kedro.org/en/stable/getting-started/kedro_for_llms/). To fetch any page below as Markdown, send `Accept: text/markdown, text/html;q=0.9`. Keep the HTML fallback: pages over 2 MB return HTTP 406 instead of Markdown when it is missing.
+Start with the [Kedro for LLMs cheatsheet](https://docs.kedro.org/en/stable/getting-started/kedro_for_llms.md). Every link below points to a Markdown copy of the page. To fetch any other page as Markdown, remove the trailing `/` from its URL and append `.md`, or send `Accept: text/markdown, text/html;q=0.9`. The [full documentation bundle](https://docs.kedro.org/en/stable/llms-full.txt) has all narrative documentation in one file, without the API reference.
 
 ## Agent quick start
 
-- [Kedro for LLMs](https://docs.kedro.org/en/stable/getting-started/kedro_for_llms/): Single-page cheatsheet with project layout, a minimal pipeline, core API and CLI indices, Data Catalog rules, and common errors with fixes
+- [Kedro for LLMs](https://docs.kedro.org/en/stable/getting-started/kedro_for_llms.md): Single-page cheatsheet with project layout, a minimal pipeline, core API and CLI indices, Data Catalog rules, and common errors with fixes
 
 ## Get started
 
-- [Installation](https://docs.kedro.org/en/stable/getting-started/install/): Covers installation prerequisites, Python support policy, quickstart steps, verification methods and alternative setup options
-- [Kedro concepts](https://docs.kedro.org/en/stable/getting-started/kedro_concepts/): Introduces basic Kedro elements including nodes, pipelines, the Data Catalog and project directory structure
-- [FAQs](https://docs.kedro.org/en/stable/getting-started/faq/): Technical FAQs on installing Kedro, notebooks, project development, configuration, Data Catalog and pipelines
-- [Video course](https://docs.kedro.org/en/stable/getting-started/course/): YouTube video course introducing Kedro pipeline building through the spaceflights tutorial
-- [Build a pipeline visually](https://docs.kedro.org/en/stable/getting-started/pipeline_builder/): Browser-based drag-and-drop tool for designing Kedro pipelines without installation
+- [Installation](https://docs.kedro.org/en/stable/getting-started/install.md): Covers installation prerequisites, Python support policy, quickstart steps, verification methods and alternative setup options
+- [Kedro concepts](https://docs.kedro.org/en/stable/getting-started/kedro_concepts.md): Introduces basic Kedro elements including nodes, pipelines, the Data Catalog and project directory structure
+- [FAQs](https://docs.kedro.org/en/stable/getting-started/faq.md): Technical FAQs on installing Kedro, notebooks, project development, configuration, Data Catalog and pipelines
+- [Video course](https://docs.kedro.org/en/stable/getting-started/course.md): YouTube video course introducing Kedro pipeline building through the spaceflights tutorial
+- [Build a pipeline visually](https://docs.kedro.org/en/stable/getting-started/pipeline_builder.md): Browser-based drag-and-drop tool for designing Kedro pipelines without installation
 
 ## Tutorials
 
-- [Spaceflight tutorial](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial/): Overview and steps of the 30-minute spaceflights tutorial, which builds nodes and pipelines for a price-prediction model
-- [Spaceflight tutorial template](https://docs.kedro.org/en/stable/tutorials/tutorial_template/): Creates the spaceflights project with kedro new and the spaceflights-pandas starter, then installs its dependencies
-- [Set up data](https://docs.kedro.org/en/stable/tutorials/set_up_data/): Adds datasets to the data folder and registers them in Kedro's Data Catalog
-- [Create a pipeline](https://docs.kedro.org/en/stable/tutorials/create_a_pipeline/): Builds a data processing pipeline that prepares data and creates a model input table
-- [Add another pipeline](https://docs.kedro.org/en/stable/tutorials/add_another_pipeline/): Adds a data science pipeline using scikit-learn LinearRegression with parameters and model registration
-- [Settings](https://docs.kedro.org/en/stable/tutorials/settings/): Explains settings.py application settings, such as Hooks registration and library components, and project metadata in pyproject.toml
-- [Test a project](https://docs.kedro.org/en/stable/tutorials/test_a_project/): Covers unit testing for nodes, integration testing for pipelines and testing best practices
-- [FAQs (Kedro Spaceflights tutorial)](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial_faqs/): Resolves common errors encountered during the Kedro spaceflights tutorial
-- [Notebook tutorial](https://docs.kedro.org/en/stable/tutorials/notebooks_tutorial/): Explores Kedro projects in Jupyter notebooks using line magics and the ipython extension
+- [Spaceflight tutorial](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial.md): Overview and steps of the 30-minute spaceflights tutorial, which builds nodes and pipelines for a price-prediction model
+- [Spaceflight tutorial template](https://docs.kedro.org/en/stable/tutorials/tutorial_template.md): Creates the spaceflights project with kedro new and the spaceflights-pandas starter, then installs its dependencies
+- [Set up data](https://docs.kedro.org/en/stable/tutorials/set_up_data.md): Adds datasets to the data folder and registers them in Kedro's Data Catalog
+- [Create a pipeline](https://docs.kedro.org/en/stable/tutorials/create_a_pipeline.md): Builds a data processing pipeline that prepares data and creates a model input table
+- [Add another pipeline](https://docs.kedro.org/en/stable/tutorials/add_another_pipeline.md): Adds a data science pipeline using scikit-learn LinearRegression with parameters and model registration
+- [Settings](https://docs.kedro.org/en/stable/tutorials/settings.md): Explains settings.py application settings, such as Hooks registration and library components, and project metadata in pyproject.toml
+- [Test a project](https://docs.kedro.org/en/stable/tutorials/test_a_project.md): Covers unit testing for nodes, integration testing for pipelines and testing best practices
+- [FAQs (Kedro Spaceflights tutorial)](https://docs.kedro.org/en/stable/tutorials/spaceflights_tutorial_faqs.md): Resolves common errors encountered during the Kedro spaceflights tutorial
+- [Notebook tutorial](https://docs.kedro.org/en/stable/tutorials/notebooks_tutorial.md): Explores Kedro projects in Jupyter notebooks using line magics and the ipython extension
 
 ## Create projects
 
-- [Create a Kedro project](https://docs.kedro.org/en/stable/create/new_project/): Creates a basic Kedro project using kedro new and explains next steps
-- [Create a minimal Kedro project](https://docs.kedro.org/en/stable/create/minimal_kedro_project/): Builds a minimal Kedro project from scratch explaining essential components step-by-step
-- [Customise a new project](https://docs.kedro.org/en/stable/create/customise_project/): Customises a new Kedro project with tools and starters for specific requirements
-- [Project tools](https://docs.kedro.org/en/stable/create/new_project_tools/): Customises new projects by specifying tools via CLI inputs or YAML configuration
-- [Kedro starters](https://docs.kedro.org/en/stable/create/starters/): Explains how to use, version and create custom Kedro project starters
+- [Create a Kedro project](https://docs.kedro.org/en/stable/create/new_project.md): Creates a basic Kedro project using kedro new and explains next steps
+- [Create a minimal Kedro project](https://docs.kedro.org/en/stable/create/minimal_kedro_project.md): Builds a minimal Kedro project from scratch explaining essential components step-by-step
+- [Customise a new project](https://docs.kedro.org/en/stable/create/customise_project.md): Customises a new Kedro project with tools and starters for specific requirements
+- [Project tools](https://docs.kedro.org/en/stable/create/new_project_tools.md): Customises new projects by specifying tools via CLI inputs or YAML configuration
+- [Kedro starters](https://docs.kedro.org/en/stable/create/starters.md): Explains how to use, version and create custom Kedro project starters
 
 ## Configuration
 
-- [Configuration (Concepts)](https://docs.kedro.org/en/stable/configure/configuration_basics/): Details Kedro project configuration using OmegaConfigLoader, sources, environments and loading
-- [Parameters and credentials (Concepts)](https://docs.kedro.org/en/stable/configure/parameters_and_credentials/): Explains how parameters and credentials work conceptually in Kedro projects
-- [Templating (Concepts)](https://docs.kedro.org/en/stable/configure/templating/): Covers variable interpolation, globals, runtime parameters and resolvers for Kedro configuration
-- [Configuration (How-to Guides)](https://docs.kedro.org/en/stable/configure/how_to_configure_project/): Configures projects for different scenarios including remote storage and runtime source changes
-- [Parameters and credentials (How-to Guides)](https://docs.kedro.org/en/stable/configure/how_to_use_parameters_and_credentials/): Shows how to use parameters in pipelines, validate them and load credentials via code or environment variables
-- [Templating (How-to Guides)](https://docs.kedro.org/en/stable/configure/how_to_use_templating/): Applies templating to parameters, catalog files and other configuration using OmegaConfigLoader
-- [Config loader migration](https://docs.kedro.org/en/stable/configure/config_loader_migration/): Migrates deprecated ConfigLoader and TemplatedConfigLoader to the OmegaConfigLoader class
+- [Configuration (Concepts)](https://docs.kedro.org/en/stable/configure/configuration_basics.md): Details Kedro project configuration using OmegaConfigLoader, sources, environments and loading
+- [Parameters and credentials (Concepts)](https://docs.kedro.org/en/stable/configure/parameters_and_credentials.md): Explains how parameters and credentials work conceptually in Kedro projects
+- [Templating (Concepts)](https://docs.kedro.org/en/stable/configure/templating.md): Covers variable interpolation, globals, runtime parameters and resolvers for Kedro configuration
+- [Configuration (How-to Guides)](https://docs.kedro.org/en/stable/configure/how_to_configure_project.md): Configures projects for different scenarios including remote storage and runtime source changes
+- [Parameters and credentials (How-to Guides)](https://docs.kedro.org/en/stable/configure/how_to_use_parameters_and_credentials.md): Shows how to use parameters in pipelines, validate them and load credentials via code or environment variables
+- [Templating (How-to Guides)](https://docs.kedro.org/en/stable/configure/how_to_use_templating.md): Applies templating to parameters, catalog files and other configuration using OmegaConfigLoader
+- [Config loader migration](https://docs.kedro.org/en/stable/configure/config_loader_migration.md): Migrates deprecated ConfigLoader and TemplatedConfigLoader to the OmegaConfigLoader class
 
 ## Data Catalog
 
-- [Introduction](https://docs.kedro.org/en/stable/catalog-data/introduction/): Introduces the Data Catalog as a registry of data sources with concepts and guides
-- [Data Catalog (Concepts)](https://docs.kedro.org/en/stable/catalog-data/data_catalog/): Explains catalog.yml basics, additional dataset settings such as load_args and credentials, and how the catalog maps dataset names to storage
-- [Dataset factories (Concepts)](https://docs.kedro.org/en/stable/catalog-data/kedro_dataset_factories/): Explains dataset factory patterns, resolution order and pipeline-aware catalog commands
-- [Partitioned and incremental datasets](https://docs.kedro.org/en/stable/catalog-data/partitioned_and_incremental_datasets/): Explains PartitionedDataset and IncrementalDataset concepts including partition IDs and checkpoints
-- [Lazy loading](https://docs.kedro.org/en/stable/catalog-data/lazy_loading/): Explains how the DataCatalog defers dataset instantiation until a dataset is first used
-- [Configure the Data Catalog](https://docs.kedro.org/en/stable/catalog-data/how_to_configure_the_data_catalog/): Configures Data Catalog entries with load arguments, credentials, versioning and environment overrides
-- [Use dataset factories](https://docs.kedro.org/en/stable/catalog-data/how_to_use_dataset_factories/): Applies dataset factory patterns for generalising datasets by type, namespace and layer
-- [Use partitioned and incremental datasets](https://docs.kedro.org/en/stable/catalog-data/how_to_use_partitioned_and_incremental_datasets/): Configures and uses PartitionedDataset and IncrementalDataset with partitions, lazy saving and checkpoints
-- [Access the Data Catalog in code](https://docs.kedro.org/en/stable/catalog-data/how_to_access_the_data_catalog_in_code/): Accesses, configures and manipulates the Data Catalog programmatically in Python code
-- [Validate datasets](https://docs.kedro.org/en/stable/catalog-data/dataset_validation/): Validates catalog entries using Pandera, custom validators and on-demand checks
-- [Data Catalog YAML examples](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples/): YAML examples for loading and saving text, CSV, pickle and Excel files locally and remotely
+- [Introduction](https://docs.kedro.org/en/stable/catalog-data/introduction.md): Introduces the Data Catalog as a registry of data sources with concepts and guides
+- [Data Catalog (Concepts)](https://docs.kedro.org/en/stable/catalog-data/data_catalog.md): Explains catalog.yml basics, additional dataset settings such as load_args and credentials, and how the catalog maps dataset names to storage
+- [Dataset factories (Concepts)](https://docs.kedro.org/en/stable/catalog-data/kedro_dataset_factories.md): Explains dataset factory patterns, resolution order and pipeline-aware catalog commands
+- [Partitioned and incremental datasets](https://docs.kedro.org/en/stable/catalog-data/partitioned_and_incremental_datasets.md): Explains PartitionedDataset and IncrementalDataset concepts including partition IDs and checkpoints
+- [Lazy loading](https://docs.kedro.org/en/stable/catalog-data/lazy_loading.md): Explains how the DataCatalog defers dataset instantiation until a dataset is first used
+- [Configure the Data Catalog](https://docs.kedro.org/en/stable/catalog-data/how_to_configure_the_data_catalog.md): Configures Data Catalog entries with load arguments, credentials, versioning and environment overrides
+- [Use dataset factories](https://docs.kedro.org/en/stable/catalog-data/how_to_use_dataset_factories.md): Applies dataset factory patterns for generalising datasets by type, namespace and layer
+- [Use partitioned and incremental datasets](https://docs.kedro.org/en/stable/catalog-data/how_to_use_partitioned_and_incremental_datasets.md): Configures and uses PartitionedDataset and IncrementalDataset with partitions, lazy saving and checkpoints
+- [Access the Data Catalog in code](https://docs.kedro.org/en/stable/catalog-data/how_to_access_the_data_catalog_in_code.md): Accesses, configures and manipulates the Data Catalog programmatically in Python code
+- [Validate datasets](https://docs.kedro.org/en/stable/catalog-data/dataset_validation.md): Validates catalog entries using Pandera, custom validators and on-demand checks
+- [Data Catalog YAML examples](https://docs.kedro.org/en/stable/catalog-data/data_catalog_yaml_examples.md): YAML examples for loading and saving text, CSV, pickle and Excel files locally and remotely
 
 ## Nodes and pipelines
 
-- [Nodes](https://docs.kedro.org/en/stable/build/nodes/): Creates nodes with args, kwargs, tags, generators and preview functions
-- [Pipeline object](https://docs.kedro.org/en/stable/build/pipeline_introduction/): Builds pipelines, merges multiple pipelines, tags them and inspects inputs and outputs
-- [Run a pipeline](https://docs.kedro.org/en/stable/build/run_a_pipeline/): Executes pipelines using runners, custom runners, asynchronous IO and programmatic execution
-- [Modular pipelines](https://docs.kedro.org/en/stable/build/modular_pipelines/): Creates pipelines with kedro pipeline create, structures pipeline code, uses custom pipeline templates and pipeline-specific dependencies
-- [Namespaces](https://docs.kedro.org/en/stable/build/namespaces/): Groups and isolates nodes using namespaces to enable pipeline reuse with different inputs
-- [Pipeline registry](https://docs.kedro.org/en/stable/build/pipeline_registry/): Defines pipeline registries with autodiscovery and selective loading in Kedro projects
-- [Slice a pipeline](https://docs.kedro.org/en/stable/build/slice_a_pipeline/): Runs subsets of pipelines by inputs, nodes, tags or final nodes and recreates outputs
-- [LLM context node](https://docs.kedro.org/en/stable/build/llm_context_node/): Constructs LLMContext datasets inside pipelines for downstream LLM execution and orchestration
+- [Nodes](https://docs.kedro.org/en/stable/build/nodes.md): Creates nodes with args, kwargs, tags, generators and preview functions
+- [Pipeline object](https://docs.kedro.org/en/stable/build/pipeline_introduction.md): Builds pipelines, merges multiple pipelines, tags them and inspects inputs and outputs
+- [Run a pipeline](https://docs.kedro.org/en/stable/build/run_a_pipeline.md): Executes pipelines using runners, custom runners, asynchronous IO and programmatic execution
+- [Modular pipelines](https://docs.kedro.org/en/stable/build/modular_pipelines.md): Creates pipelines with kedro pipeline create, structures pipeline code, uses custom pipeline templates and pipeline-specific dependencies
+- [Namespaces](https://docs.kedro.org/en/stable/build/namespaces.md): Groups and isolates nodes using namespaces to enable pipeline reuse with different inputs
+- [Pipeline registry](https://docs.kedro.org/en/stable/build/pipeline_registry.md): Defines pipeline registries with autodiscovery and selective loading in Kedro projects
+- [Slice a pipeline](https://docs.kedro.org/en/stable/build/slice_a_pipeline.md): Runs subsets of pipelines by inputs, nodes, tags or final nodes and recreates outputs
+- [LLM context node](https://docs.kedro.org/en/stable/build/llm_context_node.md): Constructs LLMContext datasets inside pipelines for downstream LLM execution and orchestration
 
 ## Development
 
-- [Dependency management](https://docs.kedro.org/en/stable/develop/dependencies/): Declares and installs project-specific dependencies and sets up reproducible environments
-- [Logging](https://docs.kedro.org/en/stable/develop/logging/): Configures default and advanced logging, custom filters and the rich handler in Kedro
-- [Automated testing](https://docs.kedro.org/en/stable/develop/automated_testing/): Sets up automated testing with pytest and adds coverage reports using pytest-cov
-- [Formatting and linting](https://docs.kedro.org/en/stable/develop/linting/): Sets up Python formatting tools and automated linting with pre-commit hooks
-- [Inspect a project](https://docs.kedro.org/en/stable/inspect/inspect-project/): Reads project structure via the inspection API without running nodes or loading data
-- [Vibe coding with MCP](https://docs.kedro.org/en/stable/develop/vibe_coding_with_mcp/): Installs and uses an MCP server for AI coding assistants in Kedro projects
-- [Vibe coding with skills](https://docs.kedro.org/en/stable/develop/vibe_coding_with_skills/): Installs kedro-skills to provide AI assistants with Kedro conventions and contextual guidance
+- [Dependency management](https://docs.kedro.org/en/stable/develop/dependencies.md): Declares and installs project-specific dependencies and sets up reproducible environments
+- [Logging](https://docs.kedro.org/en/stable/develop/logging.md): Configures default and advanced logging, custom filters and the rich handler in Kedro
+- [Automated testing](https://docs.kedro.org/en/stable/develop/automated_testing.md): Sets up automated testing with pytest and adds coverage reports using pytest-cov
+- [Formatting and linting](https://docs.kedro.org/en/stable/develop/linting.md): Sets up Python formatting tools and automated linting with pre-commit hooks
+- [Inspect a project](https://docs.kedro.org/en/stable/inspect/inspect-project.md): Reads project structure via the inspection API without running nodes or loading data
+- [Vibe coding with MCP](https://docs.kedro.org/en/stable/develop/vibe_coding_with_mcp.md): Installs and uses an MCP server for AI coding assistants in Kedro projects
+- [Vibe coding with skills](https://docs.kedro.org/en/stable/develop/vibe_coding_with_skills.md): Installs kedro-skills to provide AI assistants with Kedro conventions and contextual guidance
 
 ## Deployment
 
-- [Overview](https://docs.kedro.org/en/stable/deploy/): Provides guides for different Kedro deployment methods and effective node grouping
-- [How to package your project](https://docs.kedro.org/en/stable/deploy/package_a_project/): Builds project documentation and packages a Kedro project as a Python wheel with kedro package
-- [How to group your nodes effectively](https://docs.kedro.org/en/stable/deploy/nodes_grouping/): Groups nodes by pipelines, tags and namespaces for deployment maintainability and control
-- [Single-machine deployment](https://docs.kedro.org/en/stable/deploy/single_machine/): Deploys Kedro on a single production server using containers, packages or CLI
-- [Distributed deployment](https://docs.kedro.org/en/stable/deploy/distributed/): Deploys Kedro in distributed systems by containerising pipelines and converting platform primitives
-- [Apache Airflow](https://docs.kedro.org/en/stable/deploy/supported-platforms/airflow/): Runs Kedro pipelines on Apache Airflow with Astronomer, MWAA or Kubernetes clusters
-- [Amazon SageMaker](https://docs.kedro.org/en/stable/deploy/supported-platforms/amazon_sagemaker/): Deploys Kedro pipelines on Amazon SageMaker using the kedro-sagemaker plugin
-- [Amazon EMR Serverless](https://docs.kedro.org/en/stable/deploy/supported-platforms/amazon_emr_serverless/): Deploys Kedro as Spark jobs on Amazon EMR Serverless with custom Docker images
-- [AWS Step Functions](https://docs.kedro.org/en/stable/deploy/supported-platforms/aws_step_functions/): Deploys Kedro pipelines on AWS Step Functions using Lambda and CDK scripts
-- [Azure ML pipelines](https://docs.kedro.org/en/stable/deploy/supported-platforms/azure/): Deploys Kedro pipelines to Azure ML using the kedro-azureml plugin
-- [Dagster](https://docs.kedro.org/en/stable/deploy/supported-platforms/dagster/): Orchestrates Kedro pipelines in Dagster using the kedro-dagster plugin
-- [Dask](https://docs.kedro.org/en/stable/deploy/supported-platforms/dask/): Distributes Kedro pipeline execution across Dask clusters for parallel computing
-- [Databricks](https://docs.kedro.org/en/stable/deploy/supported-platforms/databricks/): Runs Kedro on Databricks via Git folders, Databricks Connect or the kedro-databricks plugin
-- [Kubeflow Pipelines](https://docs.kedro.org/en/stable/deploy/supported-platforms/kubeflow/): Deploys Kedro pipelines on Kubeflow using the kedro-kubeflow plugin
-- [Prefect](https://docs.kedro.org/en/stable/deploy/supported-platforms/prefect/): Runs Kedro pipelines using Prefect 2.0 with a self-hosted Prefect Server
-- [VertexAI](https://docs.kedro.org/en/stable/deploy/supported-platforms/vertexai/): Runs Kedro pipelines on Vertex AI using the kedro-vertexai plugin
-- [Argo Workflows](https://docs.kedro.org/en/stable/deploy/supported-platforms/argo/): Runs Kedro pipelines on Argo Workflows with container-native orchestration on Kubernetes
-- [AWS Batch](https://docs.kedro.org/en/stable/deploy/supported-platforms/aws_batch/): Deploys Kedro namespaces as AWS Batch jobs with custom runners and container images
+- [Overview](https://docs.kedro.org/en/stable/deploy.md): Provides guides for different Kedro deployment methods and effective node grouping
+- [How to package your project](https://docs.kedro.org/en/stable/deploy/package_a_project.md): Builds project documentation and packages a Kedro project as a Python wheel with kedro package
+- [How to group your nodes effectively](https://docs.kedro.org/en/stable/deploy/nodes_grouping.md): Groups nodes by pipelines, tags and namespaces for deployment maintainability and control
+- [Single-machine deployment](https://docs.kedro.org/en/stable/deploy/single_machine.md): Deploys Kedro on a single production server using containers, packages or CLI
+- [Distributed deployment](https://docs.kedro.org/en/stable/deploy/distributed.md): Deploys Kedro in distributed systems by containerising pipelines and converting platform primitives
+- [Apache Airflow](https://docs.kedro.org/en/stable/deploy/supported-platforms/airflow.md): Runs Kedro pipelines on Apache Airflow with Astronomer, MWAA or Kubernetes clusters
+- [Amazon SageMaker](https://docs.kedro.org/en/stable/deploy/supported-platforms/amazon_sagemaker.md): Deploys Kedro pipelines on Amazon SageMaker using the kedro-sagemaker plugin
+- [Amazon EMR Serverless](https://docs.kedro.org/en/stable/deploy/supported-platforms/amazon_emr_serverless.md): Deploys Kedro as Spark jobs on Amazon EMR Serverless with custom Docker images
+- [AWS Step Functions](https://docs.kedro.org/en/stable/deploy/supported-platforms/aws_step_functions.md): Deploys Kedro pipelines on AWS Step Functions using Lambda and CDK scripts
+- [Azure ML pipelines](https://docs.kedro.org/en/stable/deploy/supported-platforms/azure.md): Deploys Kedro pipelines to Azure ML using the kedro-azureml plugin
+- [Dagster](https://docs.kedro.org/en/stable/deploy/supported-platforms/dagster.md): Orchestrates Kedro pipelines in Dagster using the kedro-dagster plugin
+- [Dask](https://docs.kedro.org/en/stable/deploy/supported-platforms/dask.md): Distributes Kedro pipeline execution across Dask clusters for parallel computing
+- [Databricks](https://docs.kedro.org/en/stable/deploy/supported-platforms/databricks.md): Runs Kedro on Databricks via Git folders, Databricks Connect or the kedro-databricks plugin
+- [Kubeflow Pipelines](https://docs.kedro.org/en/stable/deploy/supported-platforms/kubeflow.md): Deploys Kedro pipelines on Kubeflow using the kedro-kubeflow plugin
+- [Prefect](https://docs.kedro.org/en/stable/deploy/supported-platforms/prefect.md): Runs Kedro pipelines using Prefect 2.0 with a self-hosted Prefect Server
+- [VertexAI](https://docs.kedro.org/en/stable/deploy/supported-platforms/vertexai.md): Runs Kedro pipelines on Vertex AI using the kedro-vertexai plugin
+- [Argo Workflows](https://docs.kedro.org/en/stable/deploy/supported-platforms/argo.md): Runs Kedro pipelines on Argo Workflows with container-native orchestration on Kubernetes
+- [AWS Batch](https://docs.kedro.org/en/stable/deploy/supported-platforms/aws_batch.md): Deploys Kedro namespaces as AWS Batch jobs with custom runners and container images
 
 ## Extend a project
 
-- [Use cases](https://docs.kedro.org/en/stable/extend/common_use_cases/): Chooses the right extension mechanism: Hooks, custom datasets, CLI commands, or custom starters
-- [Custom datasets](https://docs.kedro.org/en/stable/extend/how_to_create_a_custom_dataset/): Creates custom datasets by implementing load, save and describe methods using fsspec
-- [Introduction (Hooks)](https://docs.kedro.org/en/stable/extend/hooks/introduction/): Introduces Kedro Hooks covering specifications, implementations and execution order
-- [Common use cases (Hooks)](https://docs.kedro.org/en/stable/extend/hooks/common_use_cases/): Extends node behaviour, customises dataset IO, loads credentials and debugs pipelines using Hooks
-- [Examples (Hooks)](https://docs.kedro.org/en/stable/extend/hooks/examples/): Tracks memory, validates data, adds observability and changes node inputs using Hooks
-- [Kedro sessions](https://docs.kedro.org/en/stable/extend/session/): Manages Kedro run lifecycles with KedroSession, KedroServiceSession and project bootstrapping
-- [Serving over HTTP](https://docs.kedro.org/en/stable/extend/serving/): Starts an HTTP server to trigger pipeline runs and inspect metadata via REST endpoints
-- [Custom plugins](https://docs.kedro.org/en/stable/extend/plugins/): Creates Kedro plugins with click commands, project context and lazy loading support
-- [Custom starters](https://docs.kedro.org/en/stable/extend/create_a_starter/): Creates custom Kedro starters using cookiecutter with project variables and aliases
+- [Use cases](https://docs.kedro.org/en/stable/extend/common_use_cases.md): Chooses the right extension mechanism: Hooks, custom datasets, CLI commands, or custom starters
+- [Custom datasets](https://docs.kedro.org/en/stable/extend/how_to_create_a_custom_dataset.md): Creates custom datasets by implementing load, save and describe methods using fsspec
+- [Introduction (Hooks)](https://docs.kedro.org/en/stable/extend/hooks/introduction.md): Introduces Kedro Hooks covering specifications, implementations and execution order
+- [Common use cases (Hooks)](https://docs.kedro.org/en/stable/extend/hooks/common_use_cases.md): Extends node behaviour, customises dataset IO, loads credentials and debugs pipelines using Hooks
+- [Examples (Hooks)](https://docs.kedro.org/en/stable/extend/hooks/examples.md): Tracks memory, validates data, adds observability and changes node inputs using Hooks
+- [Kedro sessions](https://docs.kedro.org/en/stable/extend/session.md): Manages Kedro run lifecycles with KedroSession, KedroServiceSession and project bootstrapping
+- [Serving over HTTP](https://docs.kedro.org/en/stable/extend/serving.md): Starts an HTTP server to trigger pipeline runs and inspect metadata via REST endpoints
+- [Custom plugins](https://docs.kedro.org/en/stable/extend/plugins.md): Creates Kedro plugins with click commands, project context and lazy loading support
+- [Custom starters](https://docs.kedro.org/en/stable/extend/create_a_starter.md): Creates custom Kedro starters using cookiecutter with project variables and aliases
 
 ## API and CLI reference
 
-- [Kedro API overview](https://docs.kedro.org/en/stable/api/): Index of the public modules in the Kedro API reference
-- [`kedro.config`](https://docs.kedro.org/en/stable/api/config/kedro.config/): `kedro.config` API reference
-- [AbstractConfigLoader](https://docs.kedro.org/en/stable/api/config/kedro.config.AbstractConfigLoader/): `kedro.config.AbstractConfigLoader` API reference
-- [OmegaConfigLoader](https://docs.kedro.org/en/stable/api/config/kedro.config.OmegaConfigLoader/): `kedro.config.OmegaConfigLoader` API reference
-- [MissingConfigException](https://docs.kedro.org/en/stable/api/config/kedro.config.MissingConfigException/): `kedro.config.MissingConfigException` API reference
-- [`kedro.framework`](https://docs.kedro.org/en/stable/api/framework/kedro.framework/): `kedro.framework` API reference
-- [CLI](https://docs.kedro.org/en/stable/api/framework/kedro.framework.cli/): `kedro.framework.cli` API reference
-- [Context](https://docs.kedro.org/en/stable/api/framework/kedro.framework.context/): `kedro.framework.context` API reference
-- [Hooks](https://docs.kedro.org/en/stable/api/framework/kedro.framework.hooks/): `kedro.framework.hooks` API reference
-- [Project](https://docs.kedro.org/en/stable/api/framework/kedro.framework.project/): `kedro.framework.project` API reference
-- [Session](https://docs.kedro.org/en/stable/api/framework/kedro.framework.session/): `kedro.framework.session` API reference
-- [Startup](https://docs.kedro.org/en/stable/api/framework/kedro.framework.startup/): `kedro.framework.startup` API reference
-- [`kedro.io`](https://docs.kedro.org/en/stable/api/io/kedro.io/): `kedro.io` API reference
-- [DataCatalog](https://docs.kedro.org/en/stable/api/io/kedro.io.DataCatalog/): `kedro.io.DataCatalog` API reference
-- [CatalogProtocol](https://docs.kedro.org/en/stable/api/io/kedro.io.CatalogProtocol/): `kedro.io.CatalogProtocol` API reference
-- [SharedMemoryDataCatalog](https://docs.kedro.org/en/stable/api/io/kedro.io.SharedMemoryDataCatalog/): `kedro.io.SharedMemoryDataCatalog` API reference
-- [SharedMemoryCatalogProtocol](https://docs.kedro.org/en/stable/api/io/kedro.io.SharedMemoryCatalogProtocol/): `kedro.io.SharedMemoryCatalogProtocol` API reference
-- [CatalogConfigResolver](https://docs.kedro.org/en/stable/api/io/kedro.io.CatalogConfigResolver/): `kedro.io.CatalogConfigResolver` API reference
-- [AbstractDataset](https://docs.kedro.org/en/stable/api/io/kedro.io.AbstractDataset/): `kedro.io.AbstractDataset` API reference
-- [AbstractVersionedDataset](https://docs.kedro.org/en/stable/api/io/kedro.io.AbstractVersionedDataset/): `kedro.io.AbstractVersionedDataset` API reference
-- [CachedDataset](https://docs.kedro.org/en/stable/api/io/kedro.io.CachedDataset/): `kedro.io.CachedDataset` API reference
-- [MemoryDataset](https://docs.kedro.org/en/stable/api/io/kedro.io.MemoryDataset/): `kedro.io.MemoryDataset` API reference
-- [Version](https://docs.kedro.org/en/stable/api/io/kedro.io.Version/): `kedro.io.Version` API reference
-- [DatasetAlreadyExistsError](https://docs.kedro.org/en/stable/api/io/kedro.io.DatasetAlreadyExistsError/): `kedro.io.DatasetAlreadyExistsError` API reference
-- [DatasetError](https://docs.kedro.org/en/stable/api/io/kedro.io.DatasetError/): `kedro.io.DatasetError` API reference
-- [DatasetNotFoundError](https://docs.kedro.org/en/stable/api/io/kedro.io.DatasetNotFoundError/): `kedro.io.DatasetNotFoundError` API reference
-- [`kedro.ipython`](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython/): `kedro.ipython` API reference
-- [load_ipython_extension](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython.load_ipython_extension/): `kedro.ipython.load_ipython_extension` API reference
-- [magic_load_node](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython.magic_load_node/): `kedro.ipython.magic_load_node` API reference
-- [magic_reload_kedro](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython.magic_reload_kedro/): `kedro.ipython.magic_reload_kedro` API reference
-- [reload_kedro](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython.reload_kedro/): `kedro.ipython.reload_kedro` API reference
-- [kedro.logging](https://docs.kedro.org/en/stable/api/kedro.logging/): `kedro.logging` API reference
-- [`kedro.pipeline`](https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline/): `kedro.pipeline` API reference
-- [Node](https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline.node/): `kedro.pipeline.node` API reference
-- [Pipeline](https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline.Pipeline/): `kedro.pipeline.Pipeline` API reference
-- [LLM context node](https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline.llm_context/): `kedro.pipeline.llm_context` API reference
-- [`kedro.runner`](https://docs.kedro.org/en/stable/api/runner/kedro.runner/): `kedro.runner` API reference
-- [AbstractRunner](https://docs.kedro.org/en/stable/api/runner/kedro.runner.AbstractRunner/): `kedro.runner.AbstractRunner` API reference
-- [SequentialRunner](https://docs.kedro.org/en/stable/api/runner/kedro.runner.SequentialRunner/): `kedro.runner.SequentialRunner` API reference
-- [ParallelRunner](https://docs.kedro.org/en/stable/api/runner/kedro.runner.ParallelRunner/): `kedro.runner.ParallelRunner` API reference
-- [ThreadRunner](https://docs.kedro.org/en/stable/api/runner/kedro.runner.ThreadRunner/): `kedro.runner.ThreadRunner` API reference
-- [`kedro.inspection`](https://docs.kedro.org/en/stable/api/inspection/kedro.inspection/): `kedro.inspection` API reference
-- [`kedro.inspection.models`](https://docs.kedro.org/en/stable/api/inspection/kedro.inspection.models/): `kedro.inspection.models` API reference
-- [`kedro.server`](https://docs.kedro.org/en/stable/api/server/kedro.server/): `kedro.server` API reference
-- [`kedro.server.models`](https://docs.kedro.org/en/stable/api/server/kedro.server.models/): `kedro.server.models` API reference
-- [kedro.utils](https://docs.kedro.org/en/stable/api/kedro.utils/): `kedro.utils` API reference
-- [kedro.load_ipython_extension](https://docs.kedro.org/en/stable/api/kedro.load_ipython_extension/): `kedro.load_ipython_extension` API reference
-- [kedro.KedroDeprecationWarning](https://docs.kedro.org/en/stable/api/kedro.KedroDeprecationWarning/): `kedro.KedroDeprecationWarning` API reference
-- [kedro.KedroPythonVersionWarning](https://docs.kedro.org/en/stable/api/kedro.KedroPythonVersionWarning/): `kedro.KedroPythonVersionWarning` API reference
-- [Kedro CLI](https://docs.kedro.org/en/stable/getting-started/commands_reference/): Reference for Kedro CLI commands, autocompletion, Python invocation and custom overrides
+- [Kedro API overview](https://docs.kedro.org/en/stable/api.md): Index of the public modules in the Kedro API reference
+- [`kedro.config`](https://docs.kedro.org/en/stable/api/config/kedro.config.md): `kedro.config` API reference
+- [AbstractConfigLoader](https://docs.kedro.org/en/stable/api/config/kedro.config.AbstractConfigLoader.md): `kedro.config.AbstractConfigLoader` API reference
+- [OmegaConfigLoader](https://docs.kedro.org/en/stable/api/config/kedro.config.OmegaConfigLoader.md): `kedro.config.OmegaConfigLoader` API reference
+- [MissingConfigException](https://docs.kedro.org/en/stable/api/config/kedro.config.MissingConfigException.md): `kedro.config.MissingConfigException` API reference
+- [`kedro.framework`](https://docs.kedro.org/en/stable/api/framework/kedro.framework.md): `kedro.framework` API reference
+- [CLI](https://docs.kedro.org/en/stable/api/framework/kedro.framework.cli.md): `kedro.framework.cli` API reference
+- [Context](https://docs.kedro.org/en/stable/api/framework/kedro.framework.context.md): `kedro.framework.context` API reference
+- [Hooks](https://docs.kedro.org/en/stable/api/framework/kedro.framework.hooks.md): `kedro.framework.hooks` API reference
+- [Project](https://docs.kedro.org/en/stable/api/framework/kedro.framework.project.md): `kedro.framework.project` API reference
+- [Session](https://docs.kedro.org/en/stable/api/framework/kedro.framework.session.md): `kedro.framework.session` API reference
+- [Startup](https://docs.kedro.org/en/stable/api/framework/kedro.framework.startup.md): `kedro.framework.startup` API reference
+- [`kedro.io`](https://docs.kedro.org/en/stable/api/io/kedro.io.md): `kedro.io` API reference
+- [DataCatalog](https://docs.kedro.org/en/stable/api/io/kedro.io.DataCatalog.md): `kedro.io.DataCatalog` API reference
+- [CatalogProtocol](https://docs.kedro.org/en/stable/api/io/kedro.io.CatalogProtocol.md): `kedro.io.CatalogProtocol` API reference
+- [SharedMemoryDataCatalog](https://docs.kedro.org/en/stable/api/io/kedro.io.SharedMemoryDataCatalog.md): `kedro.io.SharedMemoryDataCatalog` API reference
+- [SharedMemoryCatalogProtocol](https://docs.kedro.org/en/stable/api/io/kedro.io.SharedMemoryCatalogProtocol.md): `kedro.io.SharedMemoryCatalogProtocol` API reference
+- [CatalogConfigResolver](https://docs.kedro.org/en/stable/api/io/kedro.io.CatalogConfigResolver.md): `kedro.io.CatalogConfigResolver` API reference
+- [AbstractDataset](https://docs.kedro.org/en/stable/api/io/kedro.io.AbstractDataset.md): `kedro.io.AbstractDataset` API reference
+- [AbstractVersionedDataset](https://docs.kedro.org/en/stable/api/io/kedro.io.AbstractVersionedDataset.md): `kedro.io.AbstractVersionedDataset` API reference
+- [CachedDataset](https://docs.kedro.org/en/stable/api/io/kedro.io.CachedDataset.md): `kedro.io.CachedDataset` API reference
+- [MemoryDataset](https://docs.kedro.org/en/stable/api/io/kedro.io.MemoryDataset.md): `kedro.io.MemoryDataset` API reference
+- [Version](https://docs.kedro.org/en/stable/api/io/kedro.io.Version.md): `kedro.io.Version` API reference
+- [DatasetAlreadyExistsError](https://docs.kedro.org/en/stable/api/io/kedro.io.DatasetAlreadyExistsError.md): `kedro.io.DatasetAlreadyExistsError` API reference
+- [DatasetError](https://docs.kedro.org/en/stable/api/io/kedro.io.DatasetError.md): `kedro.io.DatasetError` API reference
+- [DatasetNotFoundError](https://docs.kedro.org/en/stable/api/io/kedro.io.DatasetNotFoundError.md): `kedro.io.DatasetNotFoundError` API reference
+- [`kedro.ipython`](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython.md): `kedro.ipython` API reference
+- [load_ipython_extension](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython.load_ipython_extension.md): `kedro.ipython.load_ipython_extension` API reference
+- [magic_load_node](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython.magic_load_node.md): `kedro.ipython.magic_load_node` API reference
+- [magic_reload_kedro](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython.magic_reload_kedro.md): `kedro.ipython.magic_reload_kedro` API reference
+- [reload_kedro](https://docs.kedro.org/en/stable/api/ipython/kedro.ipython.reload_kedro.md): `kedro.ipython.reload_kedro` API reference
+- [kedro.logging](https://docs.kedro.org/en/stable/api/kedro.logging.md): `kedro.logging` API reference
+- [`kedro.pipeline`](https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline.md): `kedro.pipeline` API reference
+- [Node](https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline.node.md): `kedro.pipeline.node` API reference
+- [Pipeline](https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline.Pipeline.md): `kedro.pipeline.Pipeline` API reference
+- [LLM context node](https://docs.kedro.org/en/stable/api/pipeline/kedro.pipeline.llm_context.md): `kedro.pipeline.llm_context` API reference
+- [`kedro.runner`](https://docs.kedro.org/en/stable/api/runner/kedro.runner.md): `kedro.runner` API reference
+- [AbstractRunner](https://docs.kedro.org/en/stable/api/runner/kedro.runner.AbstractRunner.md): `kedro.runner.AbstractRunner` API reference
+- [SequentialRunner](https://docs.kedro.org/en/stable/api/runner/kedro.runner.SequentialRunner.md): `kedro.runner.SequentialRunner` API reference
+- [ParallelRunner](https://docs.kedro.org/en/stable/api/runner/kedro.runner.ParallelRunner.md): `kedro.runner.ParallelRunner` API reference
+- [ThreadRunner](https://docs.kedro.org/en/stable/api/runner/kedro.runner.ThreadRunner.md): `kedro.runner.ThreadRunner` API reference
+- [`kedro.inspection`](https://docs.kedro.org/en/stable/api/inspection/kedro.inspection.md): `kedro.inspection` API reference
+- [`kedro.inspection.models`](https://docs.kedro.org/en/stable/api/inspection/kedro.inspection.models.md): `kedro.inspection.models` API reference
+- [`kedro.server`](https://docs.kedro.org/en/stable/api/server/kedro.server.md): `kedro.server` API reference
+- [`kedro.server.models`](https://docs.kedro.org/en/stable/api/server/kedro.server.models.md): `kedro.server.models` API reference
+- [kedro.utils](https://docs.kedro.org/en/stable/api/kedro.utils.md): `kedro.utils` API reference
+- [kedro.load_ipython_extension](https://docs.kedro.org/en/stable/api/kedro.load_ipython_extension.md): `kedro.load_ipython_extension` API reference
+- [kedro.KedroDeprecationWarning](https://docs.kedro.org/en/stable/api/kedro.KedroDeprecationWarning.md): `kedro.KedroDeprecationWarning` API reference
+- [kedro.KedroPythonVersionWarning](https://docs.kedro.org/en/stable/api/kedro.KedroPythonVersionWarning.md): `kedro.KedroPythonVersionWarning` API reference
+- [Kedro CLI](https://docs.kedro.org/en/stable/getting-started/commands_reference.md): Reference for Kedro CLI commands, autocompletion, Python invocation and custom overrides
 
 ## Integrations and plugins
 
-- [Introduction (IPython and Jupyter)](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/): Adds Kedro to existing notebook projects or notebooks to existing Kedro projects
-- [Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks/): Explores Kedro projects in Jupyter notebooks using line magics and the ipython extension
-- [How to add Kedro to Jupyter Notebook](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook/): Incrementally adds Kedro features to a notebook using YAML configuration and refactoring
-- [PySpark](https://docs.kedro.org/en/stable/integrations-and-plugins/pyspark_integration/): Best practices for PySpark pipelines using built-in datasets, Delta Lake and ThreadRunner
-- [MLflow](https://docs.kedro.org/en/stable/integrations-and-plugins/mlflow/): Integrates MLflow for tracking experiments, packaging runs and deploying models in Kedro
-- [DVC](https://docs.kedro.org/en/stable/integrations-and-plugins/dvc/): Versions datasets and pipelines using DVC with .dvc files and advanced workflows
-- [Delta Lake](https://docs.kedro.org/en/stable/integrations-and-plugins/deltalake_versioning/): Uses Delta tables in Kedro catalogs with interactive inspection and Spark integration
-- [Iceberg](https://docs.kedro.org/en/stable/integrations-and-plugins/iceberg_versioning/): Defines custom datasets for Apache Iceberg tables and inspects them interactively
-- [Great Expectations](https://docs.kedro.org/en/stable/integrations-and-plugins/great_expectations/): Integrates Great Expectations for data quality validation and profiling in Kedro
-- [Pandera](https://docs.kedro.org/en/stable/integrations-and-plugins/pandera/): Validates data schemas using Pandera with checks for pandas, PySpark and Polars
+- [Introduction (IPython and Jupyter)](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython.md): Adds Kedro to existing notebook projects or notebooks to existing Kedro projects
+- [Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/kedro_and_notebooks.md): Explores Kedro projects in Jupyter notebooks using line magics and the ipython extension
+- [How to add Kedro to Jupyter Notebook](https://docs.kedro.org/en/stable/integrations-and-plugins/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md): Incrementally adds Kedro features to a notebook using YAML configuration and refactoring
+- [PySpark](https://docs.kedro.org/en/stable/integrations-and-plugins/pyspark_integration.md): Best practices for PySpark pipelines using built-in datasets, Delta Lake and ThreadRunner
+- [MLflow](https://docs.kedro.org/en/stable/integrations-and-plugins/mlflow.md): Integrates MLflow for tracking experiments, packaging runs and deploying models in Kedro
+- [DVC](https://docs.kedro.org/en/stable/integrations-and-plugins/dvc.md): Versions datasets and pipelines using DVC with .dvc files and advanced workflows
+- [Delta Lake](https://docs.kedro.org/en/stable/integrations-and-plugins/deltalake_versioning.md): Uses Delta tables in Kedro catalogs with interactive inspection and Spark integration
+- [Iceberg](https://docs.kedro.org/en/stable/integrations-and-plugins/iceberg_versioning.md): Defines custom datasets for Apache Iceberg tables and inspects them interactively
+- [Great Expectations](https://docs.kedro.org/en/stable/integrations-and-plugins/great_expectations.md): Integrates Great Expectations for data quality validation and profiling in Kedro
+- [Pandera](https://docs.kedro.org/en/stable/integrations-and-plugins/pandera.md): Validates data schemas using Pandera with checks for pandas, PySpark and Polars
 
 ## IDE support
 
-- [Visual Studio Code & Cursor](https://docs.kedro.org/en/stable/ide/set_up_vscode/): Sets up VS Code or Cursor with the Kedro extension, LSP validation and Kedro-Viz
-- [PyCharm](https://docs.kedro.org/en/stable/ide/set_up_pycharm/): Configures PyCharm run configurations, remote interpreters and catalog validation schemas
+- [Visual Studio Code & Cursor](https://docs.kedro.org/en/stable/ide/set_up_vscode.md): Sets up VS Code or Cursor with the Kedro extension, LSP validation and Kedro-Viz
+- [PyCharm](https://docs.kedro.org/en/stable/ide/set_up_pycharm.md): Configures PyCharm run configurations, remote interpreters and catalog validation schemas
 
 ## About
 
-- [Kedro architecture](https://docs.kedro.org/en/stable/getting-started/architecture_overview/): Overview of Kedro architecture covering projects, framework, starters, library and extensions
-- [Kedro security model](https://docs.kedro.org/en/stable/about/security_model/): Describes Kedro's security model, user responsibilities and vulnerability reporting procedures
-- [Glossary](https://docs.kedro.org/en/stable/getting-started/glossary/): Defines key Kedro terms including Data Catalog, KedroContext, KedroSession and modular pipelines
-- [Kedro's Technical Steering Committee](https://docs.kedro.org/en/stable/about/technical_steering_committee/): Outlines Kedro TSC roles, responsibilities and processes for maintainers, committers and advisors
-- [Experimental APIs](https://docs.kedro.org/en/stable/about/experimental/): Explains the @experimental decorator for early-stage APIs and migration expectations
-- [Migration guide](https://docs.kedro.org/en/stable/about/migration/): Migrates Kedro projects from 0.18.* to 0.19.* and from 0.19.* to 1.*
-- [Kedro telemetry](https://docs.kedro.org/en/stable/about/telemetry/): Describes anonymised telemetry collection, data fields and consent withdrawal options
+- [Kedro architecture](https://docs.kedro.org/en/stable/getting-started/architecture_overview.md): Overview of Kedro architecture covering projects, framework, starters, library and extensions
+- [Kedro security model](https://docs.kedro.org/en/stable/about/security_model.md): Describes Kedro's security model, user responsibilities and vulnerability reporting procedures
+- [Glossary](https://docs.kedro.org/en/stable/getting-started/glossary.md): Defines key Kedro terms including Data Catalog, KedroContext, KedroSession and modular pipelines
+- [Kedro's Technical Steering Committee](https://docs.kedro.org/en/stable/about/technical_steering_committee.md): Outlines Kedro TSC roles, responsibilities and processes for maintainers, committers and advisors
+- [Experimental APIs](https://docs.kedro.org/en/stable/about/experimental.md): Explains the @experimental decorator for early-stage APIs and migration expectations
+- [Migration guide](https://docs.kedro.org/en/stable/about/migration.md): Migrates Kedro projects from 0.18.* to 0.19.* and from 0.19.* to 1.*
+- [Kedro telemetry](https://docs.kedro.org/en/stable/about/telemetry.md): Describes anonymised telemetry collection, data fields and consent withdrawal options
 
 ## Related projects
 

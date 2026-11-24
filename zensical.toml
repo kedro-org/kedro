@@ -335,6 +335,9 @@ title = "Contents"
 generic = true
 
 [project.markdown_extensions.pymdownx.highlight]
+# Adds a `language-<lexer>` class to code blocks, so tools/emit_agent_markdown.py
+# can keep the language on the fenced code blocks in the Markdown copies.
+pygments_lang_class = true
 
 [project.markdown_extensions.pymdownx.superfences]
 

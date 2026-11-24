@@ -80,7 +80,11 @@ Additional documentation explains [how to work with Kedro and Jupyter notebooks]
 
 If you are an AI agent or LLM working with Kedro, start with the [Kedro for LLMs cheatsheet](https://docs.kedro.org/en/stable/getting-started/kedro_for_llms/) and use [llms.txt](https://docs.kedro.org/en/stable/llms.txt) as the machine-readable index of the documentation.
 
-To fetch any documentation page as Markdown, send `Accept: text/markdown, text/html;q=0.9`. Keep the HTML fallback: pages over 2 MB return HTTP 406 instead of Markdown when it is missing.
+Detailed documentation is available in these forms:
+
+- **Markdown copy of a page:** remove the trailing `/` from any documentation URL and append `.md`. No request header is needed.
+- **Content negotiation:** send `Accept: text/markdown, text/html;q=0.9`. Keep the HTML fallback: pages over 2 MB return HTTP 406 instead of Markdown when it is missing.
+- **Everything in one file:** fetch [llms-full.txt](https://docs.kedro.org/en/stable/llms-full.txt) for all narrative documentation in one request, without the API reference.
 
 ## Why does Kedro exist?
 

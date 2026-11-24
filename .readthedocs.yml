@@ -16,6 +16,9 @@ build:
     - pip install uv
     - uv pip install --system .[docs]
     - zensical build --clean
+    # Write Markdown copies of every page and llms-full.txt for AI agents, check
+    # docs/llms.txt, and stamp this build's version into the llms*.txt links.
+    - make agent-markdown
     # Publish the Zensical site to the Read the Docs output directory.
     - mkdir --parents $READTHEDOCS_OUTPUT/html
     - cp --recursive site/. $READTHEDOCS_OUTPUT/html

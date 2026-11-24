@@ -1,3 +1,5 @@
+# DEPRECATED: dependencies are declared in pyproject.toml, which is the source of truth.
+# This file will be removed in a future release. Use `uv sync`, or `pip install -e .`.
 ipython>=8.10
 jupyterlab>=3.0
 notebook

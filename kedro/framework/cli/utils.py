@@ -332,7 +332,7 @@ def _check_module_importable(module_name: str) -> None:
     except ImportError as exc:
         raise KedroCliError(
             f"Module '{module_name}' not found. Make sure to install required project "
-            f"dependencies by running the 'pip install -r requirements.txt' command first."
+            f"dependencies first (for example, by running 'uv sync' or 'pip install -e .')."
         ) from exc
 
 

@@ -222,3 +222,46 @@ def test_llm_context_node_sets_namespace():
     )
 
     assert node_obj.namespace == "llm_nodes"
+
+
+def build_search_tool(docs, top_k):
+    """Tool builder taking a document store and a nested parameter."""
+    return DummyTool(docs[:top_k])
+
+
+@pytest.mark.parametrize(
+    "docs_input, top_k_input",
+    [
+        ("docs", "params:retrieval.top_k"),
+        ("rag.docs", "params:rag.retrieval.top_k"),
+    ],
+)
+def test_tool_inputs_with_dotted_names_are_passed_by_last_segment(
+    docs_input, top_k_input
+):
+    """A dotted tool input is passed to the builder under its last name segment."""
+    node_obj = llm_context_node(
+        outputs="context",
+        llm="llm",
+        prompts=[],
+        tools=[tool(build_search_tool, docs_input, top_k_input)],
+    )
+
+    context = node_obj.func(
+        llm="dummy_llm", **{docs_input: ["a", "b", "c"], top_k_input: 2}
+    )
+
+    assert context.tools["DummyTool"].value == ["a", "b"]
+
+
+def test_tool_inputs_with_same_argument_name_raise():
+    """Two inputs of one tool that resolve to the same argument name are rejected."""
+    with pytest.raises(ValueError, match=r"argument 'top_k'"):
+        llm_context_node(
+            outputs="context",
+            llm="llm",
+            prompts=[],
+            tools=[
+                tool(build_search_tool, "params:a.top_k", "params:b.top_k"),
+            ],
+        )

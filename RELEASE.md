@@ -7,9 +7,15 @@
 
 ## Bug fixes and other changes
 
+- Fixed `LLMContextNode` failing with `TypeError` when a tool input is a nested parameter, such as `params:retrieval.top_k`, or another dotted name. The builder now receives the input under the last segment of its name (`top_k`).
+
 ## Documentation changes
 
 ## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Shizoqua](https://github.com/Shizoqua)
 
 # Release 1.8.0
 

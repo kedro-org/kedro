@@ -2,14 +2,28 @@
 
 ## Major features and improvements
 
-- Add official support for Python 3.15.
-- Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
-
 ## Bug fixes and other changes
 
 ## Documentation changes
 
 ## Community contributions
+
+# Release 1.9.0
+
+## Major features and improvements
+
+- Add official support for Python 3.15.
+- Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
+
+## Documentation changes
+
+- Fixed the Kedro-Viz banner link in the README.
+
+## Community contributions
+
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+- [Deniz Erdogan](https://github.com/erdogan-deniz)
 
 # Release 1.8.0
 

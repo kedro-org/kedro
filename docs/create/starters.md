@@ -1,3 +1,7 @@
+---
+description: "Explains how to use, version, and create custom Kedro project starters."
+---
+
 # Kedro starters
 
 A Kedro starter contains code in the form of a [Cookiecutter](https://cookiecutter.readthedocs.io/) template for a Kedro project. Using a starter is like using a pre-defined layout when creating a presentation or document.

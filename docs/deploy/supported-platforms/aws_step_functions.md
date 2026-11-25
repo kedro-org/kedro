@@ -1,3 +1,7 @@
+---
+description: "Deploys Kedro pipelines on AWS Step Functions using Lambda and CDK scripts."
+---
+
 # AWS Step Functions
 
 [AWS Step Functions](https://aws.amazon.com/step-functions/) orchestrates [AWS Lambda](https://aws.amazon.com/lambda/) functions into a state machine. The sections below show how to deploy a Kedro project so each **pipeline-level namespace** runs as one Lambda function, with datasets stored on Amazon S3.

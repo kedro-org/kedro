@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.inspection`: `get_project_snapshot`, which describes a project without running it, and checks that node groupings can deploy as separate tasks."
+---
+
 # kedro.inspection
 
 ::: kedro.inspection

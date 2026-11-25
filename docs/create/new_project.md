@@ -1,3 +1,7 @@
+---
+description: "Creates a basic Kedro project using `kedro new` and explains next steps."
+---
+
 # Create a new Kedro project
 
 There are several ways to create a new Kedro project. This page explains the flow to create a basic project using `kedro new` to output a project directory containing the basic files and subdirectories that make up a Kedro project. Please note that users need [`Git`](https://git-scm.com/) installed for the `kedro new` flow.

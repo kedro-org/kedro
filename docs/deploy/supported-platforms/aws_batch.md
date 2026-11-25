@@ -1,3 +1,7 @@
+---
+description: "Deploys Kedro namespaces as AWS Batch jobs with custom runners and container images."
+---
+
 # AWS Batch
 
 [AWS Batch](https://aws.amazon.com/batch/) runs containerised batch jobs at scale. Each job runs in an isolated Docker container. The sections below show how to deploy a Kedro project so each **pipeline-level namespace** runs as one Batch job, with datasets stored on Amazon S3.

@@ -1,3 +1,7 @@
+---
+description: "Overview of Kedro architecture covering projects, framework, starters, library, and extensions."
+---
+
 # Kedro architecture overview
 
 There are different ways to use Kedro in your work. You can:

@@ -1,3 +1,7 @@
+---
+description: "Creates Kedro plugins with click commands, project context and lazy loading support."
+---
+
 # Kedro plugins
 
 Kedro plugins allow you to create new features for Kedro and inject additional commands into the CLI. Plugins are developed as separate Python packages that exist outside of any Kedro project.

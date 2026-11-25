@@ -1,3 +1,7 @@
+---
+description: "Versions datasets and pipelines using DVC with .dvc files and advanced workflows."
+---
+
 # Data and pipeline versioning with Kedro and DVC
 
 This document explains how to use [DVC](https://dvc.org/) to version datasets and pipelines in your Kedro project. DVC is a tool to develop reproducible machine learning projects. It can be installed on Visual Studio Code, any system terminal, and used as a Python library.

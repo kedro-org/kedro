@@ -1,3 +1,7 @@
+---
+description: "Configures and uses PartitionedDataset and IncrementalDataset with partitions, lazy saving and checkpoints."
+---
+
 # How to use partitioned and incremental datasets
 
 This guide shows how to configure and use `PartitionedDataset` and `IncrementalDataset`. For the concepts behind partition IDs, credentials, lazy saving, and checkpoints, see the [concept page](partitioned_and_incremental_datasets.md).

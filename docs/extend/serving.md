@@ -1,3 +1,7 @@
+---
+description: "Starts an HTTP server to trigger pipeline runs and inspect metadata through REST endpoints."
+---
+
 # Serving Kedro pipelines over HTTP
 
 Kedro includes a built-in HTTP server that lets external systems interact with a Kedro project over REST — triggering pipeline runs, inspecting project metadata, and more. It is backed by [`KedroServiceSession`](./session.md#create-a-kedroservicesession), which keeps the session alive across multiple requests.

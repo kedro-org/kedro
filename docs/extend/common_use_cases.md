@@ -1,3 +1,7 @@
+---
+description: "Chooses the right extension mechanism: Hooks, custom datasets, CLI commands, or custom starters."
+---
+
 # Common use cases
 
 Kedro provides several built-in mechanisms that let you extend its behaviour. This document explains how to choose which mechanism to use for common scenarios.

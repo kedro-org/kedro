@@ -1,3 +1,7 @@
+---
+description: "Validates catalog entries using Pandera, custom validators and on-demand checks."
+---
+
 # Dataset validation
 
 Kedro can check the data behind a catalog entry every time it is loaded or saved. You declare a validator on the dataset in `catalog.yml`, and the `DataCatalog` enforces it wherever you use the catalog: in pipeline runs, in notebooks, in `kedro ipython`, and in CI. Invalid inputs are rejected before a node sees them, and invalid outputs are rejected before they reach storage.

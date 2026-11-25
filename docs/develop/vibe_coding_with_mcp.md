@@ -1,3 +1,7 @@
+---
+description: "Installs and uses an MCP server for AI coding assistants in Kedro projects."
+---
+
 # Vibe coding with Kedro-MCP
 
 If you want to increase the efficiency of your AI coding assistants when working with Kedro, we’ve prepared a dedicated MCP (Model Context Protocol) server.

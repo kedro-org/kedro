@@ -1,3 +1,7 @@
+---
+description: "Applies templating to parameters, catalog files and other configuration using OmegaConfigLoader."
+---
+
 # How to work with templating
 
 This guide shows you how to work with templating in your Kedro project.

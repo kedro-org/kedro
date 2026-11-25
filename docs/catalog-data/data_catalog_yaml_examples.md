@@ -1,3 +1,7 @@
+---
+description: "YAML examples for loading and saving text, CSV, pickle, and Excel files locally and remotely."
+---
+
 # Data Catalog YAML examples
 
 This page contains a set of examples to help you structure your YAML configuration file in `conf/base/catalog.yml` or `conf/local/catalog.yml`.

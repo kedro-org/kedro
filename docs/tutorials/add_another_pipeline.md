@@ -1,3 +1,7 @@
+---
+description: "Adds a data science pipeline using scikit-learn LinearRegression with parameters and model registration."
+---
+
 # Create a data science pipeline
 
 This section explains the following:

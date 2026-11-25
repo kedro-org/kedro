@@ -1,3 +1,7 @@
+---
+description: "Reference for using Kedro in Jupyter notebooks: the `kedro.ipython` extension, the `catalog`, `context`, `pipelines`, and `session` variables, line magics, and debugging."
+---
+
 # Use a Jupyter notebook for Kedro project experiments
 
 This page explains how to use a Jupyter notebook to explore elements of a Kedro project. It shows how to use `kedro jupyter notebook` to set up a notebook that has access to the `catalog`, `context`, `pipelines` and `session` variables of the Kedro project so you can query them.

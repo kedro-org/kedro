@@ -1,3 +1,7 @@
+---
+description: "Deploys Kedro on a single production server using containers, packages, or the CLI."
+---
+
 # Single-machine deployment
 
 This topic explains how to deploy Kedro on a production server. You can use three alternative methods to deploy your Kedro pipelines:

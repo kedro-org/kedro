@@ -1,3 +1,7 @@
+---
+description: "Accesses, configures, and manipulates the Data Catalog programmatically in Python code."
+---
+
 # How to access the Data Catalog in code
 
 You can define a Data Catalog in two ways. Most projects rely on a YAML configuration file as [illustrated in the Data Catalog introduction](./data_catalog.md). You can also access the Data Catalog programmatically through [kedro.io.DataCatalog][]. The API lets you configure data sources in code and use the IO module within notebooks.

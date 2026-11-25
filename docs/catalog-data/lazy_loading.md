@@ -1,3 +1,7 @@
+---
+description: "Explains how the DataCatalog defers dataset instantiation until a dataset is first used."
+---
+
 # Lazy loading
 
 From Kedro version **`0.19.10`** `DataCatalog` introduces a helper class called `_LazyDataset` to improve performance and optimise dataset loading.

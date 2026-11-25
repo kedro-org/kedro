@@ -1,3 +1,7 @@
+---
+description: "Customises a new Kedro project with tools and starters for specific requirements."
+---
+
 # Customise a new project
 
 As you saw from the [First steps](./new_project.md) section, after you have [set up Kedro](../getting-started/install.md), you can create a new project with `kedro new`. You can then customise the code added to that project for its tooling and example code requirements.

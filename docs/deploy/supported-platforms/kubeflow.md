@@ -1,3 +1,7 @@
+---
+description: "Deploys Kedro pipelines on Kubeflow using the kedro-kubeflow plugin."
+---
+
 # Kubeflow Pipelines
 
 ## Why would you use Kubeflow Pipelines?

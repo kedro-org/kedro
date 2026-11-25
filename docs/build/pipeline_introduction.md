@@ -1,3 +1,7 @@
+---
+description: "Builds pipelines, merges multiple pipelines, tags them and inspects inputs and outputs."
+---
+
 # Pipeline objects
 
 The [Nodes](./nodes.md) guide introduced nodes as building blocks that represent tasks, and can be combined in a pipeline to build your workflow. A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline resolves dependencies to determine the node execution order, and does *not* necessarily run the nodes in the order in which they are passed in.

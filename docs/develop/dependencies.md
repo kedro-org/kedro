@@ -1,3 +1,7 @@
+---
+description: "Declares and installs project-specific dependencies and sets up reproducible environments."
+---
+
 # Dependencies
 
 Both `pip install kedro` and `conda install -c conda-forge kedro` install the core Kedro module, which includes the CLI tool, project template, pipeline abstraction, framework, and support for configuration.

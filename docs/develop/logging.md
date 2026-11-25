@@ -1,3 +1,7 @@
+---
+description: "Configures default and advanced logging, custom filters and the rich handler in Kedro."
+---
+
 # Logging
 
 Kedro uses [Python's `logging` library](https://docs.python.org/3/library/logging.html). Configuration is provided as a dictionary according to the [Python logging configuration schema](https://docs.python.org/3/library/logging.config.html#logging-config-dictschema) in Kedro's default logging configuration, as described below.

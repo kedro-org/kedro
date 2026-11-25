@@ -1,3 +1,7 @@
+---
+description: "Links to Kedro's debugging guides for notebooks and IPython, VS Code, PyCharm, and Hooks that start a debugger when a pipeline run fails."
+---
+
 # Debugging
 
 !!! note

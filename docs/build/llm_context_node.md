@@ -1,3 +1,7 @@
+---
+description: "Constructs `LLMContext` datasets inside pipelines for downstream LLM execution and orchestration."
+---
+
 <!-- vale Kedro.headings = NO -->
 
 # LLM context nodes

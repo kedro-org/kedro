@@ -1,3 +1,7 @@
+---
+description: "Sets up Python formatting tools and automated linting with pre-commit hooks."
+---
+
 # Code formatting and linting
 
 ## Introduction

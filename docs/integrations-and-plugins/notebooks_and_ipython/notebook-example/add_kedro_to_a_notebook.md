@@ -1,4 +1,5 @@
 ---
+description: "Incrementally adds Kedro features to a notebook using YAML configuration and refactoring."
 jupyter:
   jupytext:
     formats: md,ipynb

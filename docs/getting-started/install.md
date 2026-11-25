@@ -1,3 +1,7 @@
+---
+description: "Covers installation prerequisites, Python support policy, quickstart steps, verification methods and alternative setup options."
+---
+
 # Set up Kedro
 
 ## Installation prerequisites

@@ -1,3 +1,7 @@
+---
+description: "API reference index for `kedro.pipeline`, the module for defining nodes and pipelines."
+---
+
 # kedro.pipeline
 
 ::: kedro.pipeline

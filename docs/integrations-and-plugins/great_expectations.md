@@ -1,3 +1,7 @@
+---
+description: "Integrates Great Expectations for data quality validation and profiling in Kedro."
+---
+
 # How to validate data in your Kedro workflow using Great Expectations
 
 [Great Expectations](https://docs.greatexpectations.io/docs/home/) (GE) is an open-source data quality framework that helps you validate, document, and profile your data.

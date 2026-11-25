@@ -1,3 +1,7 @@
+---
+description: "Describes anonymised telemetry collection, data fields and consent withdrawal options."
+---
+
 # Anonymous telemetry
 
 To help the [Kedro Project maintainers](../about/technical_steering_committee.md) improve the software,

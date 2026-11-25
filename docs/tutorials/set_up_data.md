@@ -1,3 +1,7 @@
+---
+description: "Adds datasets to the data folder and registers them in Kedro's Data Catalog."
+---
+
 # Set up the data
 
 This section shows how to add datasets to the project's `data` folder. It also reviews how those datasets are registered in [Kedro's Data Catalog](../catalog-data/data_catalog.md), which is the registry of all data sources available for use by the project.

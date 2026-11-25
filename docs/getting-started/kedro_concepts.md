@@ -1,3 +1,7 @@
+---
+description: "Introduces basic Kedro elements including nodes, pipelines, the Data Catalog and project directory structure."
+---
+
 # Kedro concepts
 
 This page introduces the most basic elements of Kedro. You can find further information about these and more advanced Kedro concepts in the [Kedro glossary](../getting-started/glossary.md).

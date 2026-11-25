@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.framework.project`: project settings, pipeline discovery with `find_pipelines`, and logging and project configuration."
+---
+
 ::: kedro.framework.project
     options:
       docstring_style: google

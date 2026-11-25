@@ -1,3 +1,7 @@
+---
+description: "Tutorial on exploring the spaceflights project in a Jupyter notebook with the Kedro IPython extension and line magics."
+---
+
 # Use a Jupyter notebook for Kedro project experiments
 
 This page explains how to use a Jupyter notebook to explore elements of a Kedro project. It shows how to use `kedro jupyter notebook` to set up a notebook that has access to the `catalog`, `context`, `pipelines` and `session` variables of the Kedro project so you can query them.

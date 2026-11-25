@@ -1,3 +1,7 @@
+---
+description: "Explains PartitionedDataset and IncrementalDataset concepts including partition IDs and checkpoints."
+---
+
 # Partitioned and incremental datasets
 
 This page explains what `PartitionedDataset` and `IncrementalDataset` are, the model behind partition IDs, credentials, and checkpoints, and when each dataset type is the right choice. For step-by-step recipes covering YAML configuration, lazy saving, checkpoint customisation, and confirmation, see [how to use partitioned and incremental datasets](how_to_use_partitioned_and_incremental_datasets.md).

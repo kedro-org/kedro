@@ -1,3 +1,7 @@
+---
+description: "Technical FAQs on installing Kedro, notebooks, project development, configuration, Data Catalog and pipelines."
+---
+
 # Frequently asked questions
 
 This is a growing set of technical FAQs. The [product FAQs on the Kedro website](https://kedro.org/#faq) explain how Kedro can answer the typical use cases and requirements of data scientists, data engineers, machine learning engineers and product owners.

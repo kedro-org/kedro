@@ -1,3 +1,7 @@
+---
+description: "Tracks memory, validates data, adds observability and changes node inputs using Hooks."
+---
+
 # Hooks examples
 
 ## Add memory consumption tracking

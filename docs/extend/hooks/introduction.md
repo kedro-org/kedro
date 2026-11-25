@@ -1,3 +1,7 @@
+---
+description: "Introduces Kedro Hooks covering specifications, implementations, and execution order."
+---
+
 # Introduction to Hooks
 
 ## Concepts

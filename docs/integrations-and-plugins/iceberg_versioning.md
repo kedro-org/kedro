@@ -1,3 +1,7 @@
+---
+description: "Defines custom datasets for Apache Iceberg tables and inspects them interactively."
+---
+
 # Data versioning with Iceberg
 
 [Apache Iceberg](https://iceberg.apache.org/) is an open table format for analytic datasets.

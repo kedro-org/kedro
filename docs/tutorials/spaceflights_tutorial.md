@@ -1,3 +1,7 @@
+---
+description: "Overview and steps of the 30-minute spaceflights tutorial, which builds nodes and pipelines for a price-prediction model."
+---
+
 # Next steps: spaceflights tutorial
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.

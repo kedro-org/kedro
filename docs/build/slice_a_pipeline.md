@@ -1,3 +1,7 @@
+---
+description: "Runs subsets of pipelines by inputs, nodes, tags, or final nodes, and recreates outputs."
+---
+
 # Slice a pipeline
 
 Sometimes it is desirable to run a subset, or a 'slice' of a pipeline's nodes. There are two primary ways to achieve this:

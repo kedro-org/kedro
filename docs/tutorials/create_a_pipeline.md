@@ -1,3 +1,7 @@
+---
+description: "Builds a data processing pipeline that prepares data and creates a model input table."
+---
+
 # Create a data processing pipeline
 
 This section explains the following:

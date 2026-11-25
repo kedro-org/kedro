@@ -1,3 +1,7 @@
+---
+description: "Shows how to use parameters in pipelines, validate them, and load credentials from code or environment variables."
+---
+
 # How to work with parameters and credentials
 
 This guide shows you how to work with parameters and credentials in your Kedro project.

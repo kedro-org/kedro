@@ -1,3 +1,7 @@
+---
+description: "Runs Kedro pipelines on Argo Workflows with container-native orchestration on Kubernetes."
+---
+
 # Argo Workflows (outdated documentation that needs review)
 
 !!! warning

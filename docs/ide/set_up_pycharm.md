@@ -1,3 +1,7 @@
+---
+description: "Configures PyCharm run configurations, remote interpreters and catalog validation schemas."
+---
+
 # Set up PyCharm
 
 This section provides a short guide on how to configure [PyCharm](https://www.jetbrains.com/pycharm/) as a development environment for working on Kedro projects.

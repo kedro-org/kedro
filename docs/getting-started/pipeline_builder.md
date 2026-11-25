@@ -1,3 +1,7 @@
+---
+description: "Browser-based drag-and-drop tool for designing Kedro pipelines without installation."
+---
+
 # Kedro Pipeline Builder
 
 [Kedro Pipeline Builder](https://demo.kedro.org/kedro-builder/) is a browser-based, drag-and-drop tool for designing a Kedro pipeline. It shows how nodes, datasets, and the data catalog fit together before you write the full implementation. You don't need to install Kedro to use the hosted tool.

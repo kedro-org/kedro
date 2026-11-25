@@ -1,3 +1,7 @@
+---
+description: "YouTube video course introducing Kedro pipeline building through the spaceflights tutorial."
+---
+
 # Learn Kedro with hands-on video
 
 If you like to learn from video, you can follow our [hands-on course "Introduction to Kedro: Building Maintainable Data Pipelines" on YouTube](https://www.youtube.com/playlist?list=PL-JJgymPjK5LddZXbIzp9LWurkLGgB-nY).

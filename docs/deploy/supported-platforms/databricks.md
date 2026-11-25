@@ -1,3 +1,7 @@
+---
+description: "Runs Kedro on Databricks with Git folders, Databricks Connect, or the `kedro-databricks` plugin."
+---
+
 # Deploying Kedro on Databricks
 
 [Databricks](https://docs.databricks.com/) is a managed Spark platform that is commonly used to run large-scale data processing workloads in production. Kedro integrates naturally with Databricks. There is no single “correct” way to work with it, and the best setup depends on where your code lives and how you prefer to develop.

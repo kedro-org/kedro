@@ -1,3 +1,7 @@
+---
+description: "Best practices for PySpark pipelines using built-in datasets, Delta Lake and ThreadRunner."
+---
+
 # PySpark integration
 
 This page outlines some best practices when building a Kedro pipeline with [`PySpark`](https://spark.apache.org/docs/latest/api/python/index.html). It assumes a basic understanding of both Kedro and `PySpark`.

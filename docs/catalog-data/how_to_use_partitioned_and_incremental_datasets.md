@@ -252,6 +252,54 @@ Pipeline(
 
 For the rules that govern when confirmation takes effect, see [the confirmation step](partitioned_and_incremental_datasets.md#the-confirmation-step).
 
+## How to use an incremental dataset in several independent nodes
+
+An `IncrementalDataset` holds a single checkpoint, and each dataset can be confirmed by only one node. If two nodes both set `confirms="my_partitioned_dataset"`, Kedro raises a `ConfirmNotUniqueError`. Sharing one checkpoint would also let whichever node runs first move it past partitions the other node has not yet processed.
+
+To let nodes process the same partitions independently, give each node its own catalog entry with the same `path` and a separate checkpoint file. A [dataset factory](how_to_use_dataset_factories.md) avoids repeating the configuration:
+
+```yaml
+# conf/base/catalog.yml
+"partitions_for_{consumer}":
+  type: partitions.IncrementalDataset
+  path: s3://my-bucket-name/path/to/folder
+  dataset: pandas.CSVDataset
+  filename_suffix: ".csv"
+  checkpoint:
+    filepath: s3://my-bucket-name/path/to/folder/CHECKPOINT_{consumer}
+```
+
+Each node then reads and confirms its own entry:
+
+```python
+from kedro.pipeline import Node, Pipeline
+
+Pipeline(
+    [
+        Node(
+            tokenize,
+            inputs="partitions_for_tokenize",
+            outputs="tokens",
+            confirms="partitions_for_tokenize",
+        ),
+        Node(
+            extract_features,
+            inputs="partitions_for_extract",
+            outputs="features",
+            confirms="partitions_for_extract",
+        ),
+    ]
+)
+```
+
+Running `tokenize` writes only `CHECKPOINT_tokenize`, so `extract_features` still loads every partition the next time it runs.
+
+!!! warning
+
+    Set `filename_suffix` so that the checkpoint files are not mistaken for data. Each dataset only excludes its own checkpoint file when it lists partitions, so without a suffix filter the other node's checkpoint file is returned as a partition.
+
+A consumer that you add later has no checkpoint, so it loads all existing partitions on its first run. To start it from a known position, set [`force_checkpoint`](#how-to-configure-incremental-dataset-checkpoints) for that run.
+
 ## How to configure incremental dataset checkpoints
 
 `IncrementalDataset` does not require explicit configuration of the checkpoint unless you need to deviate from the defaults. To override the checkpoint configuration, add a `checkpoint` key containing the valid dataset configuration. This is useful when the pipeline has read access to the location of partitions but no write permissions (or when write operations are undesirable). The `checkpoint` key also supports partial config updates, where a subset of checkpoint attributes is overwritten while the defaults are kept for the rest:

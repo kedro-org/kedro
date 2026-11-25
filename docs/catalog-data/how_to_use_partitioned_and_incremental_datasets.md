@@ -254,9 +254,11 @@ For the rules that govern when confirmation takes effect, see [the confirmation 
 
 ## How to use an incremental dataset in several independent nodes
 
-An `IncrementalDataset` holds a single checkpoint, and each dataset can be confirmed by only one node. If two nodes both set `confirms="my_partitioned_dataset"`, Kedro raises a `ConfirmNotUniqueError`. Sharing one checkpoint would also let whichever node runs first move it past partitions the other node has not yet processed.
+To let several nodes process the same partitions independently, give each node its own catalog entry with the same `path` and a separate checkpoint file. A [dataset factory](how_to_use_dataset_factories.md) avoids repeating the configuration.
 
-To let nodes process the same partitions independently, give each node its own catalog entry with the same `path` and a separate checkpoint file. A [dataset factory](how_to_use_dataset_factories.md) avoids repeating the configuration:
+An `IncrementalDataset` has one checkpoint, and one node can confirm it. If two nodes both set `confirms="my_partitioned_dataset"`, Kedro raises a `ConfirmNotUniqueError`. A shared checkpoint would also let the first node to run move it past partitions the other node hasn't processed.
+
+Define one entry per consumer:
 
 ```yaml
 # conf/base/catalog.yml
@@ -292,11 +294,11 @@ Pipeline(
 )
 ```
 
-Running `tokenize` writes only `CHECKPOINT_tokenize`, so `extract_features` still loads every partition the next time it runs.
+Running `tokenize` writes `CHECKPOINT_tokenize` and doesn't change the checkpoint for `extract_features`, so that node still loads every partition the next time it runs.
 
 !!! warning
 
-    Set `filename_suffix` so that the checkpoint files are not mistaken for data. Each dataset only excludes its own checkpoint file when it lists partitions, so without a suffix filter the other node's checkpoint file is returned as a partition.
+    Set `filename_suffix` so that the checkpoint files are not mistaken for data. Each dataset excludes just its own checkpoint file when it lists partitions, so without a suffix filter the other node's checkpoint file is returned as a partition.
 
 A consumer that you add later has no checkpoint, so it loads all existing partitions on its first run. To start it from a known position, set [`force_checkpoint`](#how-to-configure-incremental-dataset-checkpoints) for that run.
 

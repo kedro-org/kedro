@@ -2,11 +2,13 @@
 
 ## Major features and improvements
 
+- Add official support for Python 3.15.
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
 
 ## Bug fixes and other changes
 
 - Fixed the error raised when a node's dict outputs do not match the keys returned by its function: the node's declared keys and the returned keys were swapped in the message.
+- Fixed the interrupted namespace warning not being raised when the interrupting node's namespace starts with the same characters as the interrupted one, such as `ns1` interrupted by `ns10`.
 
 ## Documentation changes
 

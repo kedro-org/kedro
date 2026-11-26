@@ -1,3 +1,7 @@
+---
+description: "Explains dataset factory patterns, resolution order and pipeline-aware catalog commands."
+---
+
 # Kedro dataset factories
 
 You can load multiple datasets with similar configuration using dataset factories, introduced in Kedro `0.18.12`. This page explains what dataset factories are and how Kedro resolves them. For step-by-step recipes, see [how to use dataset factories](how_to_use_dataset_factories.md).

@@ -1,3 +1,7 @@
+---
+description: "Migrates deprecated ConfigLoader and TemplatedConfigLoader to the OmegaConfigLoader class."
+---
+
 # Migration guide for config loaders
 
 The `ConfigLoader` and `TemplatedConfigLoader` classes have been deprecated since Kedro `0.18.12` and were removed in Kedro `0.19.0`. To use that release or later, you must adopt the [kedro.config.OmegaConfigLoader][].

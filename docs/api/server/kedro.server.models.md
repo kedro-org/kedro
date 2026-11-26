@@ -1,3 +1,7 @@
+---
+description: "API reference for the Pydantic request and response models of the Kedro HTTP server."
+---
+
 # kedro.server.models
 
 ::: kedro.server.models

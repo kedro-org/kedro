@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.ipython`, the IPython extension that loads Kedro variables into notebooks and IPython sessions."
+---
+
 ::: kedro.ipython
     options:
       docstring_style: google

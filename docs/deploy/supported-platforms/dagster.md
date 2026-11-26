@@ -1,3 +1,7 @@
+---
+description: "Orchestrates Kedro pipelines in Dagster using the kedro-dagster plugin."
+---
+
 # Dagster
 
 ## Why would you use Dagster?

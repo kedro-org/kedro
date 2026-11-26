@@ -1,3 +1,7 @@
+---
+description: "Configures projects for different scenarios including remote storage and runtime source changes."
+---
+
 # How to configure your project
 
 This guide shows you how to configure your Kedro project for different scenarios.

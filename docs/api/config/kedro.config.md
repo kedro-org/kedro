@@ -1,3 +1,7 @@
+---
+description: "API reference for the `kedro.config` module, which loads Kedro project configuration from files."
+---
+
 # kedro.config
 
 ::: kedro.config

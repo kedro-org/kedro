@@ -1,3 +1,7 @@
+---
+description: "Builds a minimal Kedro project from scratch explaining essential components step-by-step."
+---
+
 # Create a minimal Kedro project
 
 This documentation aims to explain the essential components of a minimal Kedro project. While most users typically start with a [project template](./new_project.md) or adapt an existing Python project, this guide begins with a blank project and gradually introduces the necessary elements. This will help you understand the core concepts and how to customise them to suit your specific needs.

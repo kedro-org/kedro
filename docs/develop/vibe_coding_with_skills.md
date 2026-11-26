@@ -1,3 +1,7 @@
+---
+description: "Installs kedro-skills to provide AI assistants with Kedro conventions and contextual guidance."
+---
+
 # Vibe coding with skills
 
 If you want your AI coding assistant to understand Kedro conventions out of the box

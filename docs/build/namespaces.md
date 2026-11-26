@@ -1,3 +1,7 @@
+---
+description: "Groups and isolates nodes using namespaces to enable pipeline reuse with different inputs."
+---
+
 # Reuse pipelines and group nodes with namespaces
 
 In this section, we introduce namespaces - a powerful tool for grouping and isolating nodes. Namespaces are useful in two key scenarios:

@@ -1,3 +1,7 @@
+---
+description: "API reference index for `kedro.io`, the module with the Data Catalog, dataset base classes and dataset errors."
+---
+
 # kedro.io
 
 ::: kedro.io

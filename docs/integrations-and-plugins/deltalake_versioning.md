@@ -1,3 +1,7 @@
+---
+description: "Uses Delta tables in Kedro catalogs with interactive inspection and Spark integration."
+---
+
 # Data versioning with Delta Lake
 
 [Delta Lake](https://delta.io/) is an open-source storage layer that brings reliability to data lakes by adding a transactional storage layer on top of the data stored in cloud storage. It allows for ACID transactions, data versioning, and rollback capabilities. Delta table is the default table format in Databricks, and it can be used outside of it as well. It is typically used for data lakes, where data is ingested either incrementally or in batch.

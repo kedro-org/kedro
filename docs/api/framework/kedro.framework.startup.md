@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.framework.startup`: `bootstrap_project` and the project metadata read from `pyproject.toml`."
+---
+
 ::: kedro.framework.startup
     options:
       docstring_style: google

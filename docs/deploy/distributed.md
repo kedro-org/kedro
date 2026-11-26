@@ -1,3 +1,7 @@
+---
+description: "Deploys Kedro in distributed systems by containerising pipelines and converting platform primitives."
+---
+
 # Distributed deployment
 
 This topic explains how to deploy Kedro in a distributed system.

@@ -1,3 +1,7 @@
+---
+description: "Sets up VS Code or Cursor with the Kedro extension, LSP validation and Kedro-Viz."
+---
+
 # Set up Visual Studio Code and Cursor
 
 Open a new project directory in VS Code and install the Python plugin under **Tools and languages**. These steps apply to Cursor as well, since Cursor supports VS Code extensions:

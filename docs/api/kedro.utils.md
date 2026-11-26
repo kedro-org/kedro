@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.utils`: finding the project root, loading objects by path, and marking features as experimental."
+---
+
 # kedro.utils
 
 ::: kedro.utils

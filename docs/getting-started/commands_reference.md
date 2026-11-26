@@ -1,3 +1,7 @@
+---
+description: "Reference for Kedro CLI commands, autocompletion, Python invocation and custom overrides."
+---
+
 # Kedro's command line interface
 
 Kedro's command line interface (CLI) lets you run Kedro commands through a terminal shell, such as the terminal app on macOS or cmd.exe and PowerShell on Windows. Use the CLI to set up a new Kedro project and to run it.

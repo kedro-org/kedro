@@ -1,3 +1,7 @@
+---
+description: "API reference for the dataclasses in a Kedro inspection snapshot: project, metadata, pipelines, node groups, nodes, and datasets."
+---
+
 # kedro.inspection.models
 
 ::: kedro.inspection.models

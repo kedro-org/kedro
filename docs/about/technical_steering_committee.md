@@ -1,3 +1,7 @@
+---
+description: "Outlines Kedro TSC roles, responsibilities, and processes for maintainers, committers, and advisors."
+---
+
 # Kedro's Technical Steering Committee
 
 Kedro is a graduate-stage project within [LF AI & Data](https://lfaidata.foundation/).

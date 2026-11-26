@@ -1,3 +1,7 @@
+---
+description: "Resolves common errors encountered during the Kedro spaceflights tutorial."
+---
+
 # Spaceflights tutorial frequently asked questions
 
 !!! note

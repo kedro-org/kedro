@@ -1,3 +1,7 @@
+---
+description: "Builds project documentation and packages a Kedro project as a Python wheel with `kedro package`."
+---
+
 # Package an entire Kedro project
 
 This section explains how to build project documentation, and how to bundle a Kedro project into a Python package.

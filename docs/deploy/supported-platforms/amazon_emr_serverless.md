@@ -1,3 +1,7 @@
+---
+description: "Deploys Kedro as Spark jobs on Amazon EMR Serverless with custom Docker images."
+---
+
 # Amazon EMR Serverless
 
 [Amazon EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html) runs Apache Spark jobs without you managing clusters. EMR allocates resources per job and releases them when the job finishes. The sections below show how to deploy a Kedro project as a Spark job on EMR Serverless, with datasets stored on Amazon S3.

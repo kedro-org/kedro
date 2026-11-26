@@ -1,3 +1,7 @@
+---
+description: "Creates nodes with `args`, `kwargs`, tags, generators, and preview functions."
+---
+
 # Nodes
 
 In this section, we introduce the concept of a node, for which the relevant API documentation is [node][kedro.pipeline.node].

@@ -1,3 +1,7 @@
+---
+description: "Customises new projects by specifying tools through CLI inputs or YAML configuration."
+---
+
 # Tools to customise a new Kedro project
 
 There are several ways to customise your new project with the tools and example code:

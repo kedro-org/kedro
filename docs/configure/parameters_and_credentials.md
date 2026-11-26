@@ -1,3 +1,7 @@
+---
+description: "Explains how parameters and credentials work conceptually in Kedro projects."
+---
+
 # Parameters and credentials
 
 This page explains what parameters and credentials are in Kedro, and how they work conceptually.

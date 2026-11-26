@@ -1,3 +1,7 @@
+---
+description: "Covers variable interpolation, globals, runtime parameters and resolvers for Kedro configuration."
+---
+
 <!-- vale Kedro.headings = NO -->
 
 # Templating with OmegaConfigLoader

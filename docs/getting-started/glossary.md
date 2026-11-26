@@ -1,3 +1,7 @@
+---
+description: "Defines key Kedro terms including Data Catalog, `KedroContext`, `KedroSession`, and modular pipelines."
+---
+
 # Kedro glossary
 
 ## Data Catalog

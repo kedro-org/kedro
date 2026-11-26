@@ -1,3 +1,7 @@
+---
+description: "Runs Kedro pipelines on Apache Airflow with Astronomer, MWAA, or Kubernetes clusters."
+---
+
 # Apache Airflow
 
 Apache Airflow is a popular open-source workflow management platform. It is a suitable engine to orchestrate and execute a pipeline authored with Kedro, because workflows in Airflow are modelled and organised as [DAGs](https://en.wikipedia.org/wiki/Directed_acyclic_graph).

@@ -1,3 +1,7 @@
+---
+description: "Manages Kedro run lifecycles with `KedroSession`, `KedroServiceSession`, and project bootstrapping."
+---
+
 # Lifecycle management with `KedroSession` and `KedroServiceSession`
 
 ## Overview

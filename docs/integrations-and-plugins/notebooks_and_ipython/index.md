@@ -1,3 +1,7 @@
+---
+description: "Adds Kedro to existing notebook projects or notebooks to existing Kedro projects."
+---
+
 # Kedro for notebook users
 
 If you are familiar with notebooks, you probably find their liberal development environment perfect for exploratory data analysis and experimentation.

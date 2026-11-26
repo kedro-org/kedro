@@ -1,3 +1,7 @@
+---
+description: "Creates pipelines with `kedro pipeline create`, structures pipeline code, and uses custom pipeline templates and pipeline-specific dependencies."
+---
+
 # Modular pipelines
 
 In most typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend you **separate your code into different pipelines (modules)** that are logically isolated and can be reused. Each pipeline should ideally be organised in its own folder, promoting copying and reuse within and between projects. In short: one pipeline, one folder.

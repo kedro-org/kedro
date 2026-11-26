@@ -1,3 +1,7 @@
+---
+description: "Covers unit testing for nodes, integration testing for pipelines and testing best practices."
+---
+
 # Test a Kedro project
 
 It is important to test our Kedro projects to validate and verify that our nodes and pipelines behave as we expect them to. In this section we look at some example tests for the spaceflights project.

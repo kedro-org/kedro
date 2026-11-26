@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.server`, an optional, experimental HTTP server for triggering Kedro pipeline runs."
+---
+
 # kedro.server
 
 ::: kedro.server

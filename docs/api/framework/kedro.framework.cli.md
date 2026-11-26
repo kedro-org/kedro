@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.framework.cli`: the Kedro CLI entry point, built-in command groups, CLI hooks and Click utilities."
+---
+
 ::: kedro.framework.cli
     options:
       docstring_style: google

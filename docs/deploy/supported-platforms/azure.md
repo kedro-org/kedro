@@ -1,3 +1,7 @@
+---
+description: "Deploys Kedro pipelines to Azure ML using the kedro-azureml plugin."
+---
+
 # Azure ML pipelines
 
 ## `kedro-azureml` plugin

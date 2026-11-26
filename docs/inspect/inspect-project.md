@@ -1,3 +1,7 @@
+---
+description: "Reads project structure through the inspection API without running nodes or loading data."
+---
+
 # Inspect a Kedro project
 
 The inspection API lets you read the structure of a Kedro project without running it. It returns a [ProjectSnapshot][kedro.inspection.models.ProjectSnapshot] that captures:

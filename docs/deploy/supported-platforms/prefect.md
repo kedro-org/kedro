@@ -1,3 +1,7 @@
+---
+description: "Runs Kedro pipelines using Prefect 2.0 with a self-hosted Prefect Server."
+---
+
 # Prefect
 
 This page explains how to run your Kedro pipeline using [Prefect 2.0](https://www.prefect.io/opensource), an open-source workflow management system.

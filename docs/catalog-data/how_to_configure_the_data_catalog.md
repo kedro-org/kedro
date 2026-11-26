@@ -1,3 +1,7 @@
+---
+description: "Configures Data Catalog entries with load arguments, credentials, versioning, and environment overrides."
+---
+
 # How to configure the Data Catalog
 
 This guide shows how to configure the most common settings on a Data Catalog entry. It covers load and save arguments, filesystem arguments, credentials, dataset versioning, and how to override entries across configuration environments.

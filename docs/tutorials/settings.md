@@ -1,3 +1,7 @@
+---
+description: "Explains settings.py application settings, such as Hooks registration and library components, and project metadata in pyproject.toml."
+---
+
 # Project settings
 
 ## Application settings

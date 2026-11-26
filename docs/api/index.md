@@ -1,3 +1,7 @@
+---
+description: "Index of the public modules in the Kedro API reference."
+---
+
 Kedro is a framework that makes it easy to build robust and scalable data pipelines by providing uniform project templates, data abstraction, configuration and pipeline assembly.
 
 ## Modules

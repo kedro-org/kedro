@@ -1,3 +1,7 @@
+---
+description: "Runs Kedro pipelines on Vertex AI using the kedro-vertexai plugin."
+---
+
 # VertexAI
 
 Vertex AI pipelines is a Google Cloud Platform service that aims to deliver Kubeflow Pipelines functionality in a fully managed fashion.

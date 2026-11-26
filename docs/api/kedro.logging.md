@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.logging`, including `RichHandler`, the default logging handler that adds rich formatting and tracebacks."
+---
+
 # kedro.logging
 
 ::: kedro.logging

@@ -1,3 +1,7 @@
+---
+description: "Deploys Kedro pipelines on Amazon SageMaker using the kedro-sagemaker plugin."
+---
+
 # Amazon SageMaker integration
 
 Amazon SageMaker provides the components used for machine learning in a single tool set that supports both classical machine learning libraries like [`scikit-learn`](https://scikit-learn.org/) or [`XGBoost`](https://xgboost.readthedocs.io/), and deep learning frameworks such as [`TensorFlow`](https://www.tensorflow.org/) or [`PyTorch`](https://pytorch.org/).

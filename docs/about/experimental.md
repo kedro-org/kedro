@@ -1,3 +1,7 @@
+---
+description: "Explains the @experimental decorator for early-stage APIs and migration expectations."
+---
+
 # Experimental APIs in Kedro
 
 Kedro provides an `@experimental` decorator that allows the core team and plugin authors to introduce new,

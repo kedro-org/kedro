@@ -1,3 +1,7 @@
+---
+description: "Describes Kedro's security model, user responsibilities and vulnerability reporting procedures."
+---
+
 # Kedro security model
 
 This document describes Kedro's security model from the perspective of Kedro users. It is intended to help users understand Kedro's trust assumptions and make informed decisions about how to develop and deploy Kedro projects.

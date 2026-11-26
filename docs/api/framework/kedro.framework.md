@@ -1,3 +1,7 @@
+---
+description: "API reference index for `kedro.framework`, the modules for the CLI, context, hooks, project settings, sessions, and startup."
+---
+
 ::: kedro.framework
     options:
       docstring_style: google

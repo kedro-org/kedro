@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.framework.hooks`: the hook manager, the hook markers and the specifications of every hook in a Kedro run."
+---
+
 ::: kedro.framework.hooks
     options:
       docstring_style: google

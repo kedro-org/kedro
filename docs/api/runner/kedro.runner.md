@@ -1,3 +1,7 @@
+---
+description: "API reference index for `kedro.runner`, the module with the runners that execute pipelines."
+---
+
 # kedro.runner
 
 ::: kedro.runner

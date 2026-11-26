@@ -1,3 +1,7 @@
+---
+description: "Integrates MLflow for tracking experiments, packaging runs and deploying models in Kedro."
+---
+
 # How to add MLflow to your Kedro workflow
 
 [MLflow](https://mlflow.org/) is an open-source platform for managing the end-to-end machine learning lifecycle.

@@ -1,3 +1,7 @@
+---
+description: "Migrates Kedro projects from 0.18.* to 0.19.* and from 0.19.* to 1.*."
+---
+
 # Migration guide
 
 [See the release notes on GitHub](https://github.com/kedro-org/kedro/releases/) for comprehensive information about the content of each Kedro release.

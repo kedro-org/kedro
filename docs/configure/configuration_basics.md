@@ -1,3 +1,7 @@
+---
+description: "Details Kedro project configuration using `OmegaConfigLoader`, configuration sources, environments, and loading."
+---
+
 # Configuration
 
 This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters_and_credentials.md#parameters), [credentials](./parameters_and_credentials.md#credentials), the [Data Catalog](../catalog-data/data_catalog.md), and [logging information](../develop/logging.md).

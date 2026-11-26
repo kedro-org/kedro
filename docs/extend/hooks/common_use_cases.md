@@ -1,3 +1,7 @@
+---
+description: "Extends node behaviour, customises dataset IO, loads credentials and debugs pipelines using Hooks."
+---
+
 # Common use cases
 
 ## Use Hooks to extend a node's behaviour

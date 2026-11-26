@@ -1,3 +1,7 @@
+---
+description: "Validates data schemas using Pandera with checks for pandas, PySpark, and Polars."
+---
+
 # How to validate data using Pandera in your Kedro workflow
 
 [Pandera](https://pandera.readthedocs.io/) is an open-source data validation library that enables schema validation with expressive and flexible checks. It supports pandas, PySpark, Polars, Dask, Modin, and other dataframe libraries. It helps ensure data quality by validating types, ranges, business rules, and statistical properties of your datasets.

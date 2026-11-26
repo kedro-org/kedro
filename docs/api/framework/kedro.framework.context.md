@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.framework.context`: `KedroContext`, which holds a project's configuration, catalog, and parameters, and its errors."
+---
+
 ::: kedro.framework.context
     options:
       docstring_style: google

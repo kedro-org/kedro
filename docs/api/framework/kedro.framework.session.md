@@ -1,3 +1,7 @@
+---
+description: "API reference for `kedro.framework.session`: `KedroSession`, which manages the lifecycle of a Kedro run, plus session stores and errors."
+---
+
 ::: kedro.framework.session
     options:
       docstring_style: google

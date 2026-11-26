@@ -1,3 +1,7 @@
+---
+description: "Creates the spaceflights project with `kedro new` and the `spaceflights-pandas` starter, then installs its dependencies."
+---
+
 # Set up the spaceflights project
 
 This section shows how to create a new project with `kedro new` using the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas) and install project dependencies (with `pip install -r requirements.txt`).

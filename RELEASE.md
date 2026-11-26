@@ -12,6 +12,8 @@
 
 ## Documentation changes
 
+- Added a one-sentence `description:` to the frontmatter of every documentation page, so each page has its own meta description for search engines and AI agents.
+
 ## Community contributions
 
 Many thanks to the following Kedroids for contributing PRs to this release:

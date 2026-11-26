@@ -351,7 +351,7 @@ class Pipeline:
                     and not curr_namespace.startswith(last_namespace + ".")
                 ):
                     for prefix in parent.namespace_prefixes:
-                        if not curr_namespace.startswith(prefix):
+                        if not (curr_namespace + ".").startswith(prefix + "."):
                             visited[prefix].add(node)
 
             # Now we have created the visited namespaces for the current node

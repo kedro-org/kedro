@@ -54,8 +54,11 @@ uv run kedro run
 Have a look at the file `tests/test_run.py` for instructions on how to write your tests. You can run your tests as follows:
 
 ```
+uv sync --extra dev
 uv run pytest
 ```
+
+(or `pip install -e ".[dev]"` followed by `pytest` if you use pip). Test tools such as `pytest` are in the `dev` optional dependencies, which `uv sync` doesn't install by default.
 
 You can configure the coverage threshold in your project's `pyproject.toml` file under the `[tool.coverage.report]` section.
 

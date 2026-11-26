@@ -59,5 +59,3 @@ To pin the project dependencies and the transitive dependencies to specific vers
 To update specific packages, run `uv lock --upgrade-package <package>`.
 
 If you need a `requirements.txt` for tooling that expects one, generate it with `uv export --format requirements-txt`.
-
-

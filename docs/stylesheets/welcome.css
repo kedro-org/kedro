@@ -172,6 +172,14 @@
   padding: 0 16px;
 }
 
+.agent-notice {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 16px;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
 .bg-section {
   background-color: #f9f9fa;
   margin: -1rem -1rem 4rem -1rem;

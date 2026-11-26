@@ -34,6 +34,7 @@ nav = [
       {"Installation" = "getting-started/install.md"},
       {"Kedro concepts" = "getting-started/kedro_concepts.md"},
       {"Cheatsheet" = "getting-started/cheatsheet.md"},
+      {"Kedro for LLMs" = "getting-started/kedro_for_llms.md"},
       {"FAQs" = "getting-started/faq.md"},
       {"Video course" = "getting-started/course.md"},
       {"Build a pipeline visually" = "getting-started/pipeline_builder.md"}
@@ -334,6 +335,9 @@ title = "Contents"
 generic = true
 
 [project.markdown_extensions.pymdownx.highlight]
+# Adds a `language-<lexer>` class to code blocks, so tools/emit_agent_markdown.py
+# can keep the language on the fenced code blocks in the Markdown copies.
+pygments_lang_class = true
 
 [project.markdown_extensions.pymdownx.superfences]
 

@@ -10,6 +10,15 @@
   {% endif %}
 {% endblock %}
 
+{% block extrahead %}
+  {{ super() }}
+  <link rel="describedby" title="llms.txt" type="text/plain" href="{{ 'llms.txt' | url }}" />
+  {#- tools/emit_agent_markdown.py writes this Markdown copy after the build. It skips the home page and 404 page. -#}
+  {% if page and page.url and page.title %}
+  <link rel="alternate" type="text/markdown" title="{{ page.title | striptags }} as Markdown" href="{{ (page.url ~ 'index.md') | url }}" />
+  {% endif %}
+{% endblock %}
+
 {% block footer %}
 <div class="main-page-footer-container">
     <div class="main-page-footer-top">

@@ -47,6 +47,11 @@ jobs:
         run: |
           zensical build --clean
 
+      - name: Generate and check Markdown for AI agents
+        # Fails if docs/llms.txt is out of date with the nav or the build.
+        run: |
+          make agent-markdown
+
       - name: Serve docs locally in background
         run: |
           cd site
@@ -57,11 +62,13 @@ jobs:
       - name: Check docs.kedro.org links in Python files against local build
         uses: lycheeverse/lychee-action@v2
         with:
+          # tests/tools uses made-up docs URLs as test data for the llms.txt tooling.
           args: >
             --extensions py,yml
             --verbose
             --no-progress
             --remap "https://docs.kedro.org/en/stable/ http://localhost:8000/"
+            --exclude-path "tests/tools"
             .
 
       - name: Stop docs server

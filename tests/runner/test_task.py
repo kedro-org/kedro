@@ -15,7 +15,7 @@ def generate_one():
 class TestTask:
     @pytest.fixture(autouse=True)
     def mock_logging(self, mocker):
-        return mocker.patch("logging.config.dictConfig")
+        return mocker.patch("kedro.framework.project.configure_logging")
 
     @pytest.fixture
     def mock_configure_project(self, mocker):

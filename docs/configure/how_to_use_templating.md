@@ -235,6 +235,19 @@ CONFIG_LOADER_ARGS = {
 }
 ```
 
+Resolvers live in `OmegaConf`'s process-wide registry, so if a resolver with the same name is already
+registered, for example after `%reload_kedro` or when several loaders are created in tests, the earlier
+one is kept and the new one is skipped. To replace it, give the new resolver as a `(callable, kwargs)`
+tuple with `replace=True`:
+
+```python
+CONFIG_LOADER_ARGS = {
+    "custom_resolvers": {
+        "today": (date_today, {"replace": True}),
+    }
+}
+```
+
 For example, you can use the `add` or the `today` resolver defined above in your `parameters.yml` like this:
 
 ```yaml

@@ -627,8 +627,8 @@ class Node:
             if set(keys) != set(result.keys()):
                 raise ValueError(
                     f"Failed to save outputs of node {self!s}.\n"
-                    f"The node's output keys {set(result.keys())} "
-                    f"do not match with the returned output's keys {set(keys)}."
+                    f"The node's output keys {set(keys)} "
+                    f"do not match with the returned output's keys {set(result.keys())}."
                 )
             if iterator:
                 exploded = map(lambda x: tuple(x[k] for k in keys), iterator)  # type: ignore[index]

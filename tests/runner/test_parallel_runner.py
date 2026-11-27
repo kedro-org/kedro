@@ -447,8 +447,6 @@ class TestSuggestResumeScenario:
 
 class TestMultiprocessingGetExecutorContextSelection:
     def test_get_executor_default(self, mocker):
-        if sys.platform == "win32" and sys.version_info < (3, 11):
-            pytest.skip("fork context is not available on Windows")
         mocker.patch.dict(os.environ, {}, clear=True)
         runner = ParallelRunner()
         executor = runner._get_executor(2)
@@ -468,8 +466,6 @@ class TestMultiprocessingGetExecutorContextSelection:
         assert executor._mp_context.get_start_method() == context
 
     def test_get_executor_invalid_context(self, mocker):
-        if sys.platform == "win32" and sys.version_info < (3, 11):
-            pytest.skip("fork context is not available on Windows")
         mocker.patch.dict(os.environ, {"KEDRO_MP_CONTEXT": "invalid"})
         runner = ParallelRunner()
         executor = runner._get_executor(2)

@@ -1,16 +1,11 @@
 """Development dependency groups for current and older starter layouts."""
 
-import sys
+import tomllib
 
 import pytest
 import tomli_w
 
 from kedro.templates.project.hooks import utils
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 
 @pytest.mark.parametrize("layout", ["legacy", "groups", "both"])

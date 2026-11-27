@@ -9,6 +9,7 @@
 
 - Fixed the error raised when a node's dict outputs do not match the keys returned by its function: the node's declared keys and the returned keys were swapped in the message.
 - Fixed the interrupted namespace warning not being raised when the interrupting node's namespace starts with the same characters as the interrupted one, such as `ns1` interrupted by `ns10`.
+- Fixed `%load_node` failing, or reading text incorrectly, on Windows when the node's source file contains non-ASCII characters. The file is now read as Python reads it: as UTF-8, unless it declares another encoding.
 
 ## Documentation changes
 
@@ -19,6 +20,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [anubhavlal07](https://github.com/anubhavlal07)
+- [Darshanpawar7](https://github.com/Darshanpawar7)
 - [goanpeca](https://github.com/goanpeca)
 
 # Release 1.8.0

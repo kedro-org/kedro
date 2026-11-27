@@ -84,6 +84,8 @@ motorbikes:
     na_values: ['#NA', NA]
 ```
 
+`s3://` paths are handled by `s3fs`, which targets Amazon S3 by default. To use another S3-compatible object store, such as Backblaze B2, Cloudflare R2, or MinIO, set `client_kwargs.endpoint_url` in the credentials entry. The [MinIO example](#load-data-from-minio-s3-compatible-storage) below shows the syntax.
+
 ## Load/save a pickle file from/to a local file system
 
 ```yaml

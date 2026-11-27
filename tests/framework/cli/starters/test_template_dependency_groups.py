@@ -23,6 +23,8 @@ else:
         ["Documentation"],
         ["Logging"],
         ["Linting", "Testing"],
+        ["PySpark"],
+        ["Linting", "Testing", "Documentation"],
     ],
 )
 @pytest.mark.parametrize("example_pipeline", ["True", "False"])
@@ -50,11 +52,11 @@ def test_dev_dependencies_are_never_published_as_extras(
     extras = result["project"]["optional-dependencies"]
     assert extras == {"other": ["requests"]}
     if "Linting" in tools or "Testing" in tools:
-        expected = (
-            ["ruff", "pytest"]
-            if layout == "both"
-            else (["pytest", "ruff"] if layout == "legacy" else ["ruff"])
-        )
+        expected = {
+            "legacy": ["pytest", "ruff"],
+            "groups": ["ruff"],
+            "both": ["ruff", "pytest"],  # existing group entries first, then old extra
+        }[layout]
         assert result["dependency-groups"]["dev"] == expected
     else:
         assert "dependency-groups" not in result
@@ -78,3 +80,18 @@ def test_migration_removes_an_empty_extra_table_and_preserves_other_groups(
         "dev": ["pytest"],
         "benchmark": ["pytest-benchmark"],
     }
+
+
+def test_pyproject_is_untouched_without_a_legacy_dev_extra(tmp_path, monkeypatch):
+    monkeypatch.setattr(utils, "current_dir", tmp_path)
+    project = tmp_path / "pyproject.toml"
+    original = (
+        "# keep this comment\n"
+        '[project]\nname = "demo"\n\n'
+        '[dependency-groups]\ndev = ["pytest"]\n'
+    )
+    project.write_text(original)
+
+    utils._migrate_dev_extra(project)
+
+    assert project.read_text() == original

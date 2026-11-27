@@ -177,7 +177,9 @@ The Kedro linting tool adds [`ruff`](https://docs.astral.sh/ruff/) to the `dev` 
 uv sync
 ```
 
-You can also run `pip install . --group dev` with pip 25.1 or newer.
+!!! note
+
+    To install with pip instead, run `pip install . --group dev`. This requires pip 25.1 or newer.
 
 The linting tool will configure `ruff` with the following settings by default:
 
@@ -215,7 +217,9 @@ This tool introduces the `tests` directory to the new project's structure, conta
 uv sync
 ```
 
-You can also run `pip install . --group dev` with pip 25.1 or newer.
+!!! note
+
+    To install with pip instead, run `pip install . --group dev`. This requires pip 25.1 or newer.
 
 The tool leverages `pytest` with the following configuration:
 

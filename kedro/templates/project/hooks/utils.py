@@ -106,7 +106,17 @@ def _remove_from_toml(file_path: Path, sections_to_remove: list) -> None:
 
 
 def _migrate_dev_extra(file_path: Path) -> None:
-    """Keep older starters' development tools out of published extras."""
+    """Move the legacy ``dev`` extra into the ``dev`` dependency group.
+
+    Older starters declare development tools in
+    ``[project.optional-dependencies].dev``. This moves those requirements into
+    ``[dependency-groups].dev``, keeping existing group entries first and skipping
+    duplicates. The file is only rewritten when the legacy extra is present, which
+    drops comments, as ``tomli_w`` does elsewhere in this file.
+
+    Args:
+        file_path (Path): The path to the ``pyproject.toml`` file.
+    """
     with open(file_path, "rb") as file:
         data = tomllib.load(file)
     legacy = data.get("project", {}).get("optional-dependencies", {}).get("dev")

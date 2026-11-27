@@ -234,6 +234,9 @@ def _assert_requirements_ok(
 
     tools_list = _parse_tools_input(tools)
 
+    # The dev tools must never be published as an optional dependency.
+    assert "dev" not in pyproject_config["project"].get("optional-dependencies", {})
+
     if "1" not in tools_list and "2" not in tools_list:
         assert "dependency-groups" not in pyproject_config
 
@@ -277,7 +280,6 @@ def _assert_requirements_ok(
             "pytest-mock>=1.7.1, <2.0" in pyproject_config["dependency-groups"]["dev"]
         )
         assert "pytest~=7.2" in pyproject_config["dependency-groups"]["dev"]
-        assert "dev" not in pyproject_config["project"].get("optional-dependencies", {})
 
     if "4" in tools_list:
         expected = {

@@ -9,6 +9,7 @@
 
 - Fixed the error raised when a node's dict outputs do not match the keys returned by its function: the node's declared keys and the returned keys were swapped in the message.
 - Fixed the interrupted namespace warning not being raised when the interrupting node's namespace starts with the same characters as the interrupted one, such as `ns1` interrupted by `ns10`.
+- Changed newly generated projects to use [PEP 735](https://peps.python.org/pep-0735/) dependency groups for development tools. Install them with `uv sync` or `pip install . --group dev` (pip 25.1 or newer) instead of `pip install ".[dev]"`. Existing projects, and projects created with `kedro new --starter`, are not migrated.
 
 ## Documentation changes
 
@@ -51,8 +52,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 - Logging configuration now applies `KEDRO_LOGGING_MODULE_ALLOWLIST` to `class`, `ext://`, and `QueueHandler` `listener` references. Bare names, private objects, attribute chains, and `cfg://` are no longer supported. A `QueueHandler` `queue` factory must be `queue.Queue` or `queue.SimpleQueue`, and a `listener` must be a `QueueListener` subclass. Use fully qualified names and allowlist trusted custom modules; `sys.stdout` and `sys.stderr` remain allowed by default. These checks reduce risk, but logging configuration must still come from a trusted source. See the [logging documentation](https://docs.kedro.org/en/stable/develop/logging/#supported-logging-references) for migration guidance.
 
 Thanks to [leetomo2528](https://github.com/leetomo2528), and to [Hongwei Li](https://github.com/3rdn4Li), [Junmin Zhu](https://github.com/wzunknown), [Zhun Wang](https://github.com/1chig0), [Jiacheng Zhong](https://github.com/superboy-zjc), [Han Dai](https://github.com/DennyDai), [Suyue Guo](https://github.com/SuyueGuo), [Songyang Peng](https://github.com/alexps9) and [Ziyue Pan](https://github.com/ziyue-pan), for independently and responsibly reporting this issue.
-
-- Newly generated projects, including those created from starters that still declare a `dev` extra, now use PEP 735 dependency groups for development tools. Existing projects are not migrated. `pip install ".[dev]"` no longer installs the development tools in new projects: use `pip install . --group dev` (pip 25.1 or newer), or `uv sync`, which installs the `dev` group by default.
 
 ## Community contributions
 

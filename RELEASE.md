@@ -21,6 +21,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 - [anubhavlal07](https://github.com/anubhavlal07)
 - [goanpeca](https://github.com/goanpeca)
+- [Charan Rathore](https://github.com/charan-rathore)
 
 # Release 1.8.0
 

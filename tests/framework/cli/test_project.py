@@ -61,7 +61,7 @@ class TestIpythonCommand:
         assert result.exit_code
         error = (
             "Module 'IPython' not found. Make sure to install required project "
-            "dependencies by running the 'pip install -r requirements.txt' command first."
+            "dependencies first (for example, by running 'uv sync' or 'pip install -e .')."
         )
         assert error in result.output
 

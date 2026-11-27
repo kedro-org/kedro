@@ -4,6 +4,7 @@
 
 - Add official support for Python 3.15.
 - Dropped support for Python 3.10 (EOL Oct 2026). Minimum supported version is now 3.11.
+- Made the project template and CLI error messages uv-first: `pyproject.toml` is now documented as the source of truth for dependencies, and `requirements.txt` in new projects is marked as deprecated.
 
 ## Bug fixes and other changes
 

@@ -6,19 +6,27 @@ When you create a project, you then introduce additional dependencies for the ta
 
 ## Declare project-specific dependencies
 
-When you create a new Kedro project, Kedro generates a `requirements.txt` file in the root directory of the project. The file contains the core dependencies and those related to the tools you choose to include in the project. Specifying the project's exact dependencies in a `requirements.txt` file makes it easier to run the project in the future, and avoids version conflicts downstream.
+When you create a new Kedro project, the project's dependencies are declared in the `[project].dependencies` section of `pyproject.toml`, which is the source of truth. The generated `requirements.txt` is deprecated and will be removed in a future release.
+
+To add a dependency, run `uv add <package>`, or edit `pyproject.toml` directly.
 
 ## Install project-specific dependencies
 
 When someone clones your project, they can install the project-specific dependencies by navigating to the root directory of the project and running the following command:
 
 ```bash
-pip install -r requirements.txt
+uv sync
+```
+
+If you use `pip` instead, run:
+
+```bash
+pip install -e .
 ```
 
 ### Install dependencies related to the Data Catalog
 
-The [Data Catalog](../catalog-data/data_catalog.md) is your way of interacting with different data types in Kedro. You can use [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) to interact with the data used in your projects. Depending on the datasets that you use in your Data Catalog, you might need to include additional dependencies in your `requirements.txt`. The modular dependencies in this category include `pandas`, `numpy`, `pyspark`, `matplotlib`, `pillow`, `dask`, and more.
+The [Data Catalog](../catalog-data/data_catalog.md) is your way of interacting with different data types in Kedro. You can use [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) to interact with the data used in your projects. Depending on the datasets that you use in your Data Catalog, you might need to include additional dependencies in your `pyproject.toml`. The modular dependencies in this category include `pandas`, `numpy`, `pyspark`, `matplotlib`, `pillow`, `dask`, and more.
 
 #### Install dependencies at a group-level
 
@@ -46,23 +54,8 @@ For example, your workflow might require the `pandas.ExcelDataset`, so to instal
 
 ## Reproducible environments
 
-To ensure that the project dependencies and the transitive dependencies are pinned to specific versions, use [`pip-tools`](https://pypi.org/project/pip-tools/) to compile `requirements.txt` file into a `requirements.lock` file.
-To install `pip-tools` in your virtual environment, run the following command:
+To pin the project dependencies and the transitive dependencies to specific versions, use [`uv`](https://docs.astral.sh/uv/). Running `uv sync` (or `uv lock`) creates a cross-platform `uv.lock` file. Commit `uv.lock` to your repository so that everyone gets the same environment.
 
-```bash
-pip install pip-tools
-```
+To update specific packages, run `uv lock --upgrade-package <package>`.
 
-To add or remove dependencies to a project, edit the `requirements.txt` file, then run the following:
-
-```bash
-pip-compile <project_root>/requirements.txt --output-file <project_root>/requirements.lock
-```
-
-This will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in the `requirements.txt` file into a `requirements.lock` that specifies a list of pinned project dependencies(those with a strict version). You can also use this command with additional CLI arguments such as `--generate-hashes`
-to use `pip`'s Hash Checking Mode or `--upgrade-package` to update specific packages to the latest or specific versions.
-[Check out the `pip-tools` documentation](https://pypi.org/project/pip-tools/) for more information.
-
-!!! note
-
-    The `requirements.txt` file contains "source" requirements, while `requirements.lock` contains the compiled version of those and requires no manual updates. If you need to update the dependencies, update the `requirements.txt` file and re-run the `pip-compile` command.
+If you need a `requirements.txt` for tooling that expects one, generate it with `uv export --format requirements-txt`.

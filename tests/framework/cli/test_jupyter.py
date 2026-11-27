@@ -44,7 +44,7 @@ class TestJupyterSetupCommand:
         assert result.exit_code
         error = (
             "Module 'notebook' not found. Make sure to install required project "
-            "dependencies by running the 'pip install -r requirements.txt' command first."
+            "dependencies first (for example, by running 'uv sync' or 'pip install -e .')."
         )
         assert error in result.output
 
@@ -94,7 +94,7 @@ class TestJupyterNotebookCommand:
         assert result.exit_code
         error = (
             "Module 'notebook' not found. Make sure to install required project "
-            "dependencies by running the 'pip install -r requirements.txt' command first."
+            "dependencies first (for example, by running 'uv sync' or 'pip install -e .')."
         )
         assert error in result.output
 
@@ -144,7 +144,7 @@ class TestJupyterLabCommand:
         assert result.exit_code
         error = (
             "Module 'jupyterlab' not found. Make sure to install required project "
-            "dependencies by running the 'pip install -r requirements.txt' command first."
+            "dependencies first (for example, by running 'uv sync' or 'pip install -e .')."
         )
         assert error in result.output
 

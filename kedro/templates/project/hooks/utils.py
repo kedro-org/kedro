@@ -8,13 +8,9 @@ import tomllib
 current_dir = Path.cwd()
 
 # Requirements for linting tools
-lint_requirements = "ruff~=0.1.8\n"  # For requirements.txt
 lint_pyproject_requirements = ["tool.ruff", "tool.ruff.format", "tool.ruff.lint"]  # For pyproject.toml
 
 # Requirements and configurations for testing tools and coverage reporting
-test_requirements = (  # For requirements.txt
-    "pytest-cov>=3,<7\npytest-mock>=1.7.1, <2.0\npytest~=7.2"
-)
 test_pyproject_requirements = [  # For pyproject.toml
     "tool.pytest.ini_options",
     "tool.coverage.report",

@@ -31,8 +31,8 @@ from kedro.utils import load_obj
 if TYPE_CHECKING:
     from kedro.framework.startup import ProjectMetadata
 
-NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
-requirements.txt and run 'pip install -r requirements.txt'."""
+NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please add {module} to your project dependencies
+in pyproject.toml (for example, 'uv add {module}') and install them."""
 LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
 unformatted imports, and unblackened Python code without modifying the files."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""

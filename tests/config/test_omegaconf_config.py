@@ -16,6 +16,7 @@ from omegaconf.errors import InterpolationResolutionError, UnsupportedInterpolat
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 
+from kedro import __version__
 from kedro.config import MissingConfigException, OmegaConfigLoader
 
 _DEFAULT_RUN_ENV = "local"
@@ -1670,7 +1671,10 @@ class TestOmegaConfigLoader:
         # Test with S3 URL
         config_loader = OmegaConfigLoader("s3://mybucket/configs")
 
-        mock_fs.assert_called_once_with(protocol="s3")
+        mock_fs.assert_called_once_with(
+            protocol="s3",
+            config_kwargs={"user_agent_extra": f"kedro/{__version__}"},
+        )
 
         assert config_loader._protocol == "s3"
 
@@ -1948,7 +1952,10 @@ class TestRemotePathHandling:
         with pytest.raises(MissingConfigException):
             conf["catalog"]
 
-        mock_fs.assert_called_with(protocol="s3")
+        mock_fs.assert_called_with(
+            protocol="s3",
+            config_kwargs={"user_agent_extra": f"kedro/{__version__}"},
+        )
         assert conf._protocol == "s3"
         assert conf._remote_root_path == "bucket/path"
 

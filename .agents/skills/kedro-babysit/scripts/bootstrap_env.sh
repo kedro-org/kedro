@@ -30,9 +30,9 @@ set -euo pipefail
 # --------------------------------------------------------------------------
 # Argument parsing
 # --------------------------------------------------------------------------
-# Kedro supports Python 3.11-3.14 (see pyproject.toml `requires-python`).
+# Kedro supports Python 3.11-3.15 (see pyproject.toml `requires-python`).
 SUPPORTED_PY_MIN=11        # i.e. 3.11
-SUPPORTED_PY_MAX=14        # i.e. 3.14
+SUPPORTED_PY_MAX=15        # i.e. 3.15
 DEFAULT_PY_VERSION="3.11"  # Fallback only; matches the lint job in all-checks.yml.
 
 # [test]-extra binaries the skill's targeted-fix recipes invoke. Probed via

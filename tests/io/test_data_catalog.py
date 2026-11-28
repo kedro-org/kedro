@@ -457,6 +457,51 @@ class TestDataCatalog:
             # Save version is not None and  set to default
             assert catalog._save_version
 
+        def test_to_config_preserves_dataset_factory_patterns(self, tmp_path):
+            """Test dumping catalog config preserves dataset factory and catch-all patterns."""
+            config = {
+                "{name}_csv": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": f"{tmp_path}/{{name}}.csv",
+                    "credentials": "pattern_creds",
+                },
+                "{default}": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": f"{tmp_path}/fallback.csv",
+                },
+            }
+            creds = {"pattern_creds": {"key": "secret"}}
+            catalog = DataCatalog.from_config(config, credentials=creds)
+            assert isinstance(catalog.get("cars_csv"), CSVDataset)
+
+            config_out, creds_out, load_versions, save_version = catalog.to_config()
+
+            assert "{name}_csv" in config_out
+            assert "{default}" in config_out
+            assert config_out["{name}_csv"]["credentials"] == "{name}_csv_credentials"
+            assert creds_out["{name}_csv_credentials"] == {"key": "secret"}
+
+            rebuilt = DataCatalog.from_config(
+                config_out, creds_out, load_versions, save_version
+            )
+            boats_ds = rebuilt.get("boats_csv")
+            assert isinstance(boats_ds, CSVDataset)
+            assert str(tmp_path / "boats.csv") in str(boats_ds._filepath)
+            assert isinstance(rebuilt.get("anything_else"), CSVDataset)
+
+        def test_to_config_omits_default_runtime_pattern(self, tmp_path):
+            """Default runtime pattern must not be serialized into config output."""
+            config = {
+                "{name}_csv": {
+                    "type": "pandas.CSVDataset",
+                    "filepath": f"{tmp_path}/{{name}}.csv",
+                }
+            }
+            catalog = DataCatalog.from_config(config)
+            config_out, _, _, _ = catalog.to_config()
+            assert list(config_out) == ["{name}_csv"]
+            assert "{default}" not in config_out
+
     class TestDataCatalogFromConfig:
         def test_from_correct_config(self, data_catalog_from_config, dummy_dataframe):
             """Test populating the data catalog from config"""

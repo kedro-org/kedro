@@ -938,6 +938,16 @@ class DataCatalog(CatalogProtocol):
             if ds_name in catalog:
                 catalog[ds_name][VALIDATOR_KEY] = spec.to_config()
 
+        for pattern, pattern_config in (
+            *self._config_resolver._dataset_patterns.items(),
+            *self._config_resolver._user_catch_all_pattern.items(),
+        ):
+            unresolved_config, unresolved_credentials = (
+                self._config_resolver._unresolve_credentials(pattern, pattern_config)
+            )
+            catalog[pattern] = unresolved_config
+            credentials.update(unresolved_credentials)
+
         return catalog, credentials, load_versions, self._save_version
 
     @staticmethod

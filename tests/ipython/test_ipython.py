@@ -1,4 +1,5 @@
 import ast
+import importlib.util
 from pathlib import Path
 
 import pytest
@@ -514,6 +515,42 @@ ERROR,
         result = _prepare_imports(dummy_multiline_import_function)
         assert result == func_imports
 
+    @pytest.fixture(
+        params=[
+            # plain UTF-8, no cookie: fails on Windows code pages without the fix
+            ("utf-8", "", "\u2192 \u4f60\u597d"),
+            # a PEP 263 cookie must be followed
+            ("latin-1", "# -*- coding: latin-1 -*-\n", "caf\xe9"),
+        ],
+        ids=["utf-8", "latin-1-cookie"],
+    )
+    def non_ascii_node(self, request, tmp_path):
+        encoding, cookie, text = request.param
+        source = (
+            f"{cookie}"
+            f"import logging  # {text}\n"
+            "\n"
+            "\n"
+            "def non_ascii_node(value):\n"
+            f'    return value + "{text}"\n'
+        )
+        module_file = tmp_path / "non_ascii_nodes.py"
+        module_file.write_bytes(source.encode(encoding))
+        spec = importlib.util.spec_from_file_location("non_ascii_nodes", module_file)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.non_ascii_node, text
+
+    def test_prepare_imports_reads_source_encoding(self, non_ascii_node):
+        func, text = non_ascii_node
+        assert _prepare_imports(func) == f"import logging  # {text}"
+
+    def test_prepare_function_body_reads_source_encoding(self, non_ascii_node, caplog):
+        func, text = non_ascii_node
+        result = _prepare_function_body(func)
+        assert f'return value + "{text}"' in result
+        assert "Falling back" not in caplog.text
+
     def test_prepare_imports_func_not_found(self, mocker):
         mocker.patch("inspect.getsourcefile", return_value=None)
 
@@ -596,7 +633,7 @@ ERROR,
     def test_prepare_function_body_fallback_when_ast_parse_fails(
         self, mocker, dummy_function_definition, caplog
     ):
-        mocker.patch("kedro.ipython.Path.read_text", side_effect=OSError("boom"))
+        mocker.patch("kedro.ipython.tokenize.open", side_effect=OSError("boom"))
 
         result = _prepare_function_body(dummy_function)
 

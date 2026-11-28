@@ -515,24 +515,41 @@ ERROR,
         result = _prepare_imports(dummy_multiline_import_function)
         assert result == func_imports
 
-    def test_prepare_imports_and_body_honour_source_encoding(self, tmp_path):
-        # A PEP 263 cookie must be followed instead of the platform encoding.
+    @pytest.fixture(
+        params=[
+            # plain UTF-8, no cookie: fails on Windows code pages without the fix
+            ("utf-8", "", "\u2192 \u4f60\u597d"),
+            # a PEP 263 cookie must be followed
+            ("latin-1", "# -*- coding: latin-1 -*-\n", "caf\xe9"),
+        ],
+        ids=["utf-8", "latin-1-cookie"],
+    )
+    def non_ascii_node(self, request, tmp_path):
+        encoding, cookie, text = request.param
         source = (
-            "# -*- coding: latin-1 -*-\n"
-            "import logging  # caf\xe9\n"
+            f"{cookie}"
+            f"import logging  # {text}\n"
             "\n"
             "\n"
-            "def latin_node(value):\n"
-            "    return value  # caf\xe9\n"
+            "def non_ascii_node(value):\n"
+            f'    return value + "{text}"\n'
         )
-        module_file = tmp_path / "latin_nodes.py"
-        module_file.write_bytes(source.encode("latin-1"))
-        spec = importlib.util.spec_from_file_location("latin_nodes", module_file)
+        module_file = tmp_path / "non_ascii_nodes.py"
+        module_file.write_bytes(source.encode(encoding))
+        spec = importlib.util.spec_from_file_location("non_ascii_nodes", module_file)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+        return module.non_ascii_node, text
 
-        assert _prepare_imports(module.latin_node) == "import logging  # café"
-        assert "return value" in _prepare_function_body(module.latin_node)
+    def test_prepare_imports_reads_source_encoding(self, non_ascii_node):
+        func, text = non_ascii_node
+        assert _prepare_imports(func) == f"import logging  # {text}"
+
+    def test_prepare_function_body_reads_source_encoding(self, non_ascii_node, caplog):
+        func, text = non_ascii_node
+        result = _prepare_function_body(func)
+        assert f'return value + "{text}"' in result
+        assert "Falling back" not in caplog.text
 
     def test_prepare_imports_func_not_found(self, mocker):
         mocker.patch("inspect.getsourcefile", return_value=None)
